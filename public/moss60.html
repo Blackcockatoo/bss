@@ -1,0 +1,2347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MOSS60 — Unified Cryptographic Suite</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    :root {
+      --bg-deep: #0a0a1a;
+      --bg-primary: #0f0c29;
+      --bg-secondary: #1a1a3e;
+      --bg-tertiary: #24243e;
+      --gold: #ffd700;
+      --gold-dim: rgba(255, 215, 0, 0.3);
+      --gold-glow: rgba(255, 215, 0, 0.6);
+      --coral: #ff6b6b;
+      --cyan: #4ecdc4;
+      --blue: #88d8ff;
+      --purple: #667eea;
+      --magenta: #764ba2;
+      --text-primary: #ffd700;
+      --text-secondary: #88d8ff;
+      --text-muted: rgba(136, 216, 255, 0.7);
+      --border-primary: rgba(255, 215, 0, 0.4);
+      --border-secondary: rgba(136, 216, 255, 0.3);
+      --panel-bg: rgba(0, 0, 0, 0.6);
+      --panel-bg-solid: rgba(10, 10, 26, 0.95);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+    
+    body {
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(118, 75, 162, 0.15) 0%, transparent 50%),
+        linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-tertiary) 100%);
+      color: var(--text-primary);
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    /* ===== LAYOUT ===== */
+    .app-container {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    header {
+      background: var(--panel-bg-solid);
+      border-bottom: 1px solid var(--border-primary);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(20px);
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      position: relative;
+    }
+
+    .logo-icon svg {
+      width: 100%;
+      height: 100%;
+      animation: logo-rotate 20s linear infinite;
+    }
+
+    @keyframes logo-rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 8px;
+      background: linear-gradient(90deg, var(--gold), var(--coral), var(--cyan), var(--gold));
+      background-size: 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gradient-shift 4s ease infinite;
+    }
+
+    @keyframes gradient-shift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .header-subtitle {
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: var(--text-secondary);
+      opacity: 0.8;
+      margin-top: 2px;
+    }
+
+    /* ===== NAVIGATION ===== */
+    nav {
+      display: flex;
+      gap: 4px;
+    }
+
+    .nav-btn {
+      padding: 10px 20px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 2px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-btn::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 0;
+      height: 2px;
+      background: var(--gold);
+      transform: translateX(-50%);
+      transition: width 0.3s ease;
+    }
+
+    .nav-btn:hover {
+      color: var(--text-primary);
+      background: rgba(255, 215, 0, 0.05);
+    }
+
+    .nav-btn:hover::before {
+      width: 60%;
+    }
+
+    .nav-btn.active {
+      color: var(--gold);
+      background: rgba(255, 215, 0, 0.1);
+      border-color: var(--border-primary);
+    }
+
+    .nav-btn.active::before {
+      width: 80%;
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    main {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 0;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      background: var(--panel-bg-solid);
+      border-right: 1px solid var(--border-primary);
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .canvas-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ===== SECTIONS ===== */
+    .section {
+      margin-bottom: 24px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 215, 0, 0.15);
+    }
+
+    .section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+
+    .section-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      margin-bottom: 16px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 3px;
+      height: 14px;
+      background: var(--gold);
+      border-radius: 2px;
+    }
+
+    /* ===== FORM ELEMENTS ===== */
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 12px 14px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border-primary);
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      transition: all 0.3s ease;
+    }
+
+    input[type="text"]:focus, textarea:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+    }
+
+    input[type="text"]::placeholder {
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px 20px;
+      background: linear-gradient(135deg, var(--purple) 0%, var(--magenta) 100%);
+      border: none;
+      color: #fff;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      position: relative;
+      overflow: hidden;
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    button:hover::before {
+      left: 100%;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, var(--gold) 0%, #ffed4e 100%);
+      color: var(--bg-deep);
+    }
+
+    button.primary:hover {
+      box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+    }
+
+    button.secondary {
+      background: transparent;
+      border: 1px solid var(--border-primary);
+      color: var(--text-primary);
+    }
+
+    button.secondary:hover {
+      background: rgba(255, 215, 0, 0.1);
+      box-shadow: none;
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    /* ===== CONTROLS ===== */
+    .control-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      margin-bottom: 8px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+    }
+
+    .value-display {
+      color: var(--gold);
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      background: linear-gradient(90deg, rgba(255,215,0,0.2), rgba(255,215,0,0.4));
+      outline: none;
+      border-radius: 3px;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      background: radial-gradient(circle, var(--gold), var(--coral));
+      cursor: pointer;
+      border-radius: 50%;
+      box-shadow: 0 0 15px var(--gold-glow);
+      transition: all 0.2s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      box-shadow: 0 0 25px var(--gold);
+    }
+
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border-primary);
+      color: var(--text-primary);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    select option {
+      background: var(--bg-deep);
+    }
+
+    /* ===== CHECKBOX ===== */
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      display: none;
+    }
+
+    .checkbox-custom {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border-primary);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .checkbox-group:hover .checkbox-custom {
+      border-color: var(--gold);
+    }
+
+    .checkbox-group input:checked + .checkbox-custom {
+      background: var(--gold);
+      border-color: var(--gold);
+    }
+
+    .checkbox-group input:checked + .checkbox-custom::after {
+      content: '✓';
+      color: var(--bg-deep);
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .checkbox-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      letter-spacing: 1px;
+    }
+
+    /* ===== TABS ===== */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 16px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 4px;
+      border-radius: 6px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px 8px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+    }
+
+    .tab:hover {
+      color: var(--text-primary);
+      background: rgba(255, 215, 0, 0.05);
+    }
+
+    .tab.active {
+      color: var(--bg-deep);
+      background: var(--gold);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* ===== CANVAS ===== */
+    .canvas-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    canvas#main-canvas {
+      border: 2px solid var(--gold);
+      border-radius: 8px;
+      background: var(--bg-deep);
+      box-shadow: 
+        0 0 60px rgba(255, 215, 0, 0.3),
+        0 0 120px rgba(102, 126, 234, 0.2),
+        inset 0 0 60px rgba(0, 0, 0, 0.5);
+    }
+
+    canvas#overlay-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      border-radius: 8px;
+    }
+
+    /* ===== HASH DISPLAY ===== */
+    .hash-display {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-align: center;
+      padding: 16px 20px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid var(--border-primary);
+      border-radius: 6px;
+      margin-top: 20px;
+      text-shadow: 0 0 20px var(--gold-glow);
+      word-break: break-all;
+      max-width: 800px;
+    }
+
+    /* ===== INFO BOX ===== */
+    .info-box {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 6px;
+      border-left: 3px solid var(--blue);
+    }
+
+    /* ===== STATUS INDICATORS ===== */
+    .status-bar {
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 6px;
+      font-size: 11px;
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--cyan);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.9); }
+    }
+
+    .status-dot.active {
+      background: var(--gold);
+    }
+
+    /* ===== TOOLBAR ===== */
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .toolbar button {
+      flex: 1;
+      padding: 10px;
+      font-size: 10px;
+    }
+
+    /* ===== MODE PANELS ===== */
+    .mode-panel {
+      display: none;
+    }
+
+    .mode-panel.active {
+      display: block;
+    }
+
+    /* ===== MESSAGING UI ===== */
+    .messaging-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .party-box {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-secondary);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .party-box.alice {
+      border-color: var(--gold-dim);
+    }
+
+    .party-box.bob {
+      border-color: rgba(78, 205, 196, 0.4);
+    }
+
+    .party-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .party-box.alice .party-title {
+      color: var(--gold);
+    }
+
+    .party-box.bob .party-title {
+      color: var(--cyan);
+    }
+
+    .message-log {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 12px;
+      padding: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 4px;
+    }
+
+    .message-entry {
+      padding: 8px;
+      margin-bottom: 8px;
+      background: rgba(255, 215, 0, 0.05);
+      border-radius: 4px;
+      border-left: 3px solid var(--gold);
+      font-size: 11px;
+    }
+
+    .message-entry.sent {
+      border-left-color: var(--coral);
+    }
+
+    .message-entry.received {
+      border-left-color: var(--cyan);
+    }
+
+    .message-header {
+      font-size: 9px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    /* ===== CHAKRA GRID ===== */
+    .chakra-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .chakra-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 8px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .chakra-item:hover {
+      background: rgba(255, 215, 0, 0.1);
+    }
+
+    .chakra-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid currentColor;
+      transition: all 0.2s ease;
+    }
+
+    .chakra-item.active .chakra-dot {
+      background: currentColor;
+      box-shadow: 0 0 10px currentColor;
+    }
+
+    .chakra-name {
+      font-size: 9px;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+    }
+
+    /* ===== COHERENCE METER ===== */
+    .coherence-container {
+      margin-top: 16px;
+    }
+
+    .coherence-bar {
+      height: 6px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .coherence-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--gold), var(--coral));
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--gold-dim);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--gold-glow);
+    }
+
+    /* ===== FULLSCREEN ===== */
+    .fullscreen-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid var(--border-primary);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 10;
+    }
+
+    .fullscreen-btn:hover {
+      background: rgba(255, 215, 0, 0.2);
+      transform: scale(1.05);
+    }
+
+    .fullscreen-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: var(--gold);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- HEADER -->
+    <header>
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 100 100">
+            <defs>
+              <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#ffd700"/>
+                <stop offset="50%" style="stop-color:#ff6b6b"/>
+                <stop offset="100%" style="stop-color:#4ecdc4"/>
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="45" fill="none" stroke="url(#logo-gradient)" stroke-width="2"/>
+            <path d="M50 10 L50 90 M10 50 L90 50" stroke="url(#logo-gradient)" stroke-width="1" opacity="0.5"/>
+            <circle cx="50" cy="50" r="30" fill="none" stroke="url(#logo-gradient)" stroke-width="1.5"/>
+            <circle cx="50" cy="50" r="15" fill="none" stroke="url(#logo-gradient)" stroke-width="1"/>
+          </svg>
+        </div>
+        <div>
+          <h1>MOSS60</h1>
+          <div class="header-subtitle">UNIFIED CRYPTOGRAPHIC SUITE</div>
+        </div>
+      </div>
+      
+      <nav>
+        <button class="nav-btn active" onclick="switchMode('glyph')">GLYPH</button>
+        <button class="nav-btn" onclick="switchMode('consciousness')">CONSCIOUSNESS</button>
+        <button class="nav-btn" onclick="switchMode('serpent')">SERPENT</button>
+        <button class="nav-btn" onclick="switchMode('reality')">REALITY</button>
+        <button class="nav-btn" onclick="switchMode('ratchet')">RATCHET</button>
+      </nav>
+    </header>
+
+    <!-- MAIN -->
+    <main>
+      <!-- SIDEBAR -->
+      <div class="sidebar">
+        <!-- GLYPH MODE -->
+        <div class="mode-panel active" id="glyph-panel">
+          <div class="section">
+            <div class="section-title">MESSAGE INPUT</div>
+            <input type="text" id="msg" placeholder="Enter message to sign..." value="Blue Snake Studios">
+            <input type="text" id="hidden-msg" placeholder="Hidden steganographic message (optional)">
+            <label class="checkbox-group">
+              <input type="checkbox" id="deterministic" checked>
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Deterministic Mode</span>
+            </label>
+            <button class="primary" onclick="generateGlyph()">GENERATE GLYPH</button>
+          </div>
+
+          <div class="section">
+            <div class="section-title">VISUAL PARAMETERS</div>
+            <div class="control-group">
+              <label>Line Weight <span class="value-display" id="weightVal">2</span></label>
+              <input type="range" id="lineWeight" min="1" max="6" value="2" oninput="updateParam('weight')">
+            </div>
+            <div class="control-group">
+              <label>Prime Glow <span class="value-display" id="glowVal">15</span></label>
+              <input type="range" id="primeGlow" min="0" max="40" value="15" oninput="updateParam('glow')">
+            </div>
+            <div class="control-group">
+              <label>Color Scheme</label>
+              <select id="colorScheme" onchange="updateDisplay()">
+                <option value="spectral">Spectral (Default)</option>
+                <option value="golden">Golden Monochrome</option>
+                <option value="cyberpunk">Cyberpunk</option>
+                <option value="consciousness">Consciousness</option>
+                <option value="fire">Elemental Fire</option>
+                <option value="ocean">Deep Ocean</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">EXPORT</div>
+            <div class="button-row">
+              <button class="secondary" onclick="exportPNG()">PNG</button>
+              <button class="secondary" onclick="exportSVG()">SVG</button>
+            </div>
+          </div>
+
+          <div class="info-box">
+            <strong>MOSS60 Glyph</strong> generates unique cryptographic signatures using base-60 mathematics, triangular number sequences, and prime-position highlighting. Each message produces a visually distinct, verifiable pattern.
+          </div>
+        </div>
+
+        <!-- CONSCIOUSNESS MODE -->
+        <div class="mode-panel" id="consciousness-panel">
+          <div class="section">
+            <div class="section-title">CONSCIOUSNESS ENGINE</div>
+            <input type="text" id="mantra" placeholder="Mantra or intention..." value="OM">
+            <div class="control-group">
+              <label>Base Frequency <span class="value-display" id="freqVal">432 Hz</span></label>
+              <input type="range" id="baseFreq" min="100" max="963" value="432" oninput="updateFrequency()">
+            </div>
+            <div class="control-group">
+              <label>Binaural Beat <span class="value-display" id="beatVal">7.83 Hz</span></label>
+              <input type="range" id="binauralBeat" min="0.5" max="40" step="0.1" value="7.83" oninput="updateBinaural()">
+            </div>
+            <label class="checkbox-group">
+              <input type="checkbox" id="schumann" checked>
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Schumann Resonance Lock</span>
+            </label>
+            <label class="checkbox-group">
+              <input type="checkbox" id="goldenTiming">
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Golden Ratio Timing (φ)</span>
+            </label>
+          </div>
+
+          <div class="section">
+            <div class="section-title">CONSCIOUSNESS MODE</div>
+            <select id="consciousnessMode" onchange="updateConsciousnessMode()">
+              <option value="neutral">Neutral</option>
+              <option value="meditation">Meditation (Blue)</option>
+              <option value="healing">Healing (Green)</option>
+              <option value="creativity">Creativity (Rainbow)</option>
+              <option value="focus">Focus (Gold)</option>
+            </select>
+          </div>
+
+          <div class="section">
+            <div class="section-title">SACRED GEOMETRY</div>
+            <select id="sacredGeometry" onchange="updateSacredGeometry()">
+              <option value="none">None</option>
+              <option value="flower">Flower of Life</option>
+              <option value="metatron">Metatron's Cube</option>
+              <option value="sri-yantra">Sri Yantra</option>
+              <option value="torus">Torus Field</option>
+              <option value="vesica">Vesica Piscis</option>
+            </select>
+          </div>
+
+          <div class="section">
+            <div class="section-title">CHAKRA ACTIVATION</div>
+            <div class="chakra-grid">
+              <div class="chakra-item" style="color: #ff0000" onclick="toggleChakra(this, 'root')">
+                <span class="chakra-dot"></span>
+                <span class="chakra-name">ROOT</span>
+              </div>
+              <div class="chakra-item" style="color: #ff7f00" onclick="toggleChakra(this, 'sacral')">
+                <span class="chakra-dot"></span>
+                <span class="chakra-name">SACRAL</span>
+              </div>
+              <div class="chakra-item" style="color: #ffff00" onclick="toggleChakra(this, 'solar')">
+                <span class="chakra-dot"></span>
+                <span class="chakra-name">SOLAR</span>
+              </div>
+              <div class="chakra-item" style="color: #00ff00" onclick="toggleChakra(this, 'heart')">
+                <span class="chakra-dot"></span>
+                <span class="chakra-name">HEART</span>
+              </div>
+              <div class="chakra-item" style="color: #0000ff" onclick="toggleChakra(this, 'throat')">
+                <span class="chakra-dot"></span>
+                <span class="chakra-name">THROAT</span>
+              </div>
+              <div class="chakra-item" style="color: #4b0082" onclick="toggleChakra(this, 'third-eye')">
+                <span class="chakra-dot"></span>
+                <span class="chakra-name">3RD EYE</span>
+              </div>
+              <div class="chakra-item" style="color: #9400d3" onclick="toggleChakra(this, 'crown')">
+                <span class="chakra-dot"></span>
+                <span class="chakra-name">CROWN</span>
+              </div>
+              <div class="chakra-item" style="color: #ffffff" onclick="toggleAllChakras()">
+                <span class="chakra-dot"></span>
+                <span class="chakra-name">ALL</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="coherence-container">
+            <label>Coherence Level</label>
+            <div class="coherence-bar">
+              <div class="coherence-fill" id="coherenceMeter" style="width: 50%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SERPENT MODE -->
+        <div class="mode-panel" id="serpent-panel">
+          <div class="section">
+            <div class="section-title">SERPENT PROTOCOL</div>
+            <div class="messaging-grid">
+              <div class="party-box alice">
+                <div class="party-title">ALICE</div>
+                <input type="text" id="alice-id" placeholder="Alice identity" value="alice@moss60">
+                <button onclick="generateAliceKeys()">GENERATE KEYS</button>
+                <div class="key-display" id="alice-public">Not initialized</div>
+              </div>
+              <div class="party-box bob">
+                <div class="party-title">BOB</div>
+                <input type="text" id="bob-id" placeholder="Bob identity" value="bob@moss60">
+                <button onclick="generateBobKeys()">GENERATE KEYS</button>
+                <div class="key-display" id="bob-public">Not initialized</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <button class="primary" onclick="performSerpentHandshake()">ESTABLISH SECURE CHANNEL</button>
+            <div class="status-bar">
+              <div class="status-item">
+                <span class="status-dot" id="connection-dot"></span>
+                <span id="connection-status">Disconnected</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">SECURE MESSAGING</div>
+            <div class="messaging-grid">
+              <div>
+                <input type="text" id="alice-message" placeholder="Alice's message...">
+                <button onclick="aliceSend()">ALICE → BOB</button>
+              </div>
+              <div>
+                <input type="text" id="bob-message" placeholder="Bob's message...">
+                <button onclick="bobSend()">BOB → ALICE</button>
+              </div>
+            </div>
+            <div class="message-log" id="serpent-log"></div>
+          </div>
+        </div>
+
+        <!-- REALITY MODE -->
+        <div class="mode-panel" id="reality-panel">
+          <div class="section">
+            <div class="section-title">3D PROJECTION</div>
+            <select id="projection" onchange="updateProjection()">
+              <option value="flat">Flat (2D)</option>
+              <option value="sphere">Spherical</option>
+              <option value="torus">Toroidal</option>
+              <option value="hyperbolic">Hyperbolic</option>
+              <option value="klein">Klein Bottle</option>
+              <option value="mobius">Möbius Strip</option>
+            </select>
+          </div>
+
+          <div class="section">
+            <div class="section-title">3D ROTATION</div>
+            <div class="control-group">
+              <label>X Axis <span class="value-display" id="rotXVal">0°</span></label>
+              <input type="range" id="rotX" min="0" max="360" value="0" oninput="update3DRotation()">
+            </div>
+            <div class="control-group">
+              <label>Y Axis <span class="value-display" id="rotYVal">0°</span></label>
+              <input type="range" id="rotY" min="0" max="360" value="0" oninput="update3DRotation()">
+            </div>
+            <div class="control-group">
+              <label>4D Phase <span class="value-display" id="phase4DVal">0.00</span></label>
+              <input type="range" id="phase4D" min="0" max="6.28" step="0.01" value="0" oninput="update4DPhase()">
+            </div>
+          </div>
+
+          <div class="section">
+          <div class="section">
+            <div class="section-title">REALITY MODE</div>
+            <select id="realityMode" onchange="updateRealityMode()">
+              <option value="normal">Normal</option>
+              <option value="quantum">Quantum Superposition</option>
+              <option value="fractal">Fractal Recursion</option>
+              <option value="holographic">Holographic</option>
+            </select>
+            <div class="control-group" id="fractal-depth-group" style="display: none; margin-top: 12px;">
+              <label>Fractal Depth <span class="value-display" id="fractalVal">3</span></label>
+              <input type="range" id="fractalDepth" min="1" max="5" value="3" oninput="updateFractalDepth()">
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">SECURITY FEATURES</div>
+            <label class="checkbox-group">
+              <input type="checkbox" id="holographicWatermark" checked>
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Holographic Watermark</span>
+            </label>
+            <label class="checkbox-group">
+              <input type="checkbox" id="antiScreenshot">
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Anti-Screenshot Mode</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- RATCHET MODE -->
+        <div class="mode-panel" id="ratchet-panel">
+          <div class="section">
+            <div class="section-title">DOUBLE RATCHET PROTOCOL</div>
+            <div class="info-box" style="margin-bottom: 16px;">
+              Implements forward secrecy and post-compromise security. Keys are ratcheted every 3 messages.
+            </div>
+            <button class="primary" onclick="initRatchetDemo()">INITIALIZE DEMO</button>
+          </div>
+
+          <div class="section">
+            <div class="section-title">ALICE STATE</div>
+            <div class="status-bar" style="flex-direction: column; gap: 8px;">
+              <div class="status-item" style="justify-content: space-between; width: 100%;">
+                <span>Root Key:</span>
+                <span class="value-display" id="alice-rk">—</span>
+              </div>
+              <div class="status-item" style="justify-content: space-between; width: 100%;">
+                <span>Chain Key (Send):</span>
+                <span class="value-display" id="alice-cks">—</span>
+              </div>
+              <div class="status-item" style="justify-content: space-between; width: 100%;">
+                <span>Messages Sent:</span>
+                <span class="value-display" id="alice-sent">0</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">BOB STATE</div>
+            <div class="status-bar" style="flex-direction: column; gap: 8px;">
+              <div class="status-item" style="justify-content: space-between; width: 100%;">
+                <span>Root Key:</span>
+                <span class="value-display" id="bob-rk">—</span>
+              </div>
+              <div class="status-item" style="justify-content: space-between; width: 100%;">
+                <span>Chain Key (Recv):</span>
+                <span class="value-display" id="bob-ckr">—</span>
+              </div>
+              <div class="status-item" style="justify-content: space-between; width: 100%;">
+                <span>Messages Received:</span>
+                <span class="value-display" id="bob-recv">0</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <input type="text" id="ratchet-message" placeholder="Message to send...">
+            <div class="button-row">
+              <button onclick="ratchetSendAlice()">ALICE SEND</button>
+              <button onclick="ratchetSendBob()">BOB SEND</button>
+            </div>
+            <button class="secondary" onclick="simulateCompromise()">SIMULATE COMPROMISE</button>
+          </div>
+
+          <div class="message-log" id="ratchet-log"></div>
+        </div>
+      </div>
+
+      <!-- CANVAS AREA -->
+      <div class="canvas-area">
+        <button class="fullscreen-btn" onclick="toggleFullscreen()">
+          <svg viewBox="0 0 24 24">
+            <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+          </svg>
+        </button>
+        
+        <div class="canvas-container">
+          <canvas id="main-canvas" width="700" height="700"></canvas>
+          <canvas id="overlay-canvas" width="700" height="700"></canvas>
+        </div>
+        
+        <div class="hash-display" id="hash-display">AWAITING INPUT</div>
+        
+        <div class="toolbar">
+          <button class="secondary" onclick="toggleAnimation()">
+            <span id="anim-btn-text">PAUSE</span>
+          </button>
+          <button class="secondary" onclick="resetView()">RESET</button>
+          <button class="secondary" onclick="randomize()">RANDOMIZE</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // ========================================
+    // MOSS60 UNIFIED CRYPTOGRAPHIC SUITE
+    // ========================================
+
+    // ===== CONSTANTS =====
+    const PHI = (1 + Math.sqrt(5)) / 2;
+    const R = "113031491493585389543778774590997079619617525721567332336510".split('').map(Number);
+    const K = "011235831459437077415617853819099875279651673033695493257291".split('').map(Number);
+    const B = "012776329785893036118967145479098334781325217074992143965631".split('').map(Number);
+    const primes = new Set([2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59]);
+    const lucas = [2, 1, 3, 4, 7, 11, 18, 29, 47, 76, 123, 199];
+
+    // ===== STATE =====
+    let currentMode = 'glyph';
+    let currentHash = '';
+    let animationFrame = null;
+    let animationTime = 0;
+    let isAnimating = true;
+
+    // Glyph state
+    let lineWeight = 2;
+    let primeGlow = 15;
+    let colorScheme = 'spectral';
+
+    // Consciousness state
+    let consciousnessMode = 'neutral';
+    let sacredGeometry = 'none';
+    let activeChakras = new Set();
+    let coherenceLevel = 0.5;
+
+    // 3D state
+    let projection3D = 'flat';
+    let rotationX = 0;
+    let rotationY = 0;
+    let phase4D = 0;
+    let realityMode = 'normal';
+
+    // Serpent state
+    let aliceHandshake = null;
+    let bobHandshake = null;
+    let serpentConnected = false;
+
+    // Ratchet state
+    let aliceRatchet = null;
+    let bobRatchet = null;
+
+    // ===== CRYPTOGRAPHIC PRIMITIVES =====
+    function moss60Hash(input) {
+      let x = 0;
+      for (let i = 0; i < input.length; i++) {
+        const c = input.charCodeAt(i);
+        const j = i % 60;
+        x ^= c;
+        x = ((x << 5) | (x >>> 27)) + R[j];
+        x ^= K[j] << 3;
+        x = ((x << 7) | (x >>> 25)) + B[j];
+        x = (x * 31) & 0x7FFFFFFF;
+      }
+      return x.toString(16).padStart(8, '0');
+    }
+
+    function extendedHash(input, iterations = 8) {
+      let result = '';
+      for (let i = 0; i < iterations; i++) {
+        result += moss60Hash(input + i);
+      }
+      return result;
+    }
+
+    function generateKeyPair(seed) {
+      const privateSpiral = [];
+      const hash = extendedHash(seed, 8);
+      
+      for (let i = 0; i < 60; i++) {
+        const hexPair = hash.substr((i * 2) % hash.length, 2);
+        privateSpiral.push(parseInt(hexPair, 16) % 60);
+      }
+      
+      const publicHash = extendedHash(privateSpiral.join(','), 8);
+      
+      return {
+        private: privateSpiral,
+        public: publicHash
+      };
+    }
+
+    function computeSharedSecret(myPrivate, theirPublic) {
+      const combined = myPrivate.map((val, i) => {
+        const theirVal = parseInt(theirPublic.substr((i * 2) % theirPublic.length, 2), 16);
+        if (primes.has(i)) {
+          return Math.floor((val * PHI + theirVal) % 60);
+        }
+        return (val + theirVal) % 60;
+      });
+      return combined;
+    }
+
+    // ===== HANDSHAKE CLASS =====
+    class Moss60Handshake {
+      constructor(identity) {
+        this.identity = identity;
+        const keys = generateKeyPair(identity + Date.now());
+        this.privateSpiral = keys.private;
+        this.publicHash = keys.public;
+        this.sharedSecret = null;
+        this.encryptionKey = null;
+        this.decryptionKey = null;
+        this.messageCount = 0;
+      }
+
+      computeSharedSecret(theirPublic) {
+        this.sharedSecret = computeSharedSecret(this.privateSpiral, theirPublic);
+        this.deriveKeys();
+      }
+
+      deriveKeys() {
+        const keyMaterial = extendedHash(this.sharedSecret.join(','), 16);
+        this.encryptionKey = keyMaterial.substring(0, 32).split('').map(c => c.charCodeAt(0));
+        this.decryptionKey = keyMaterial.substring(32, 64).split('').map(c => c.charCodeAt(0));
+      }
+
+      encrypt(plaintext) {
+        const bytes = new TextEncoder().encode(plaintext);
+        const evolved = this.evolveKey(Array.from(bytes), this.messageCount);
+        const encrypted = evolved.map((byte, i) => byte ^ this.encryptionKey[i % this.encryptionKey.length]);
+        this.messageCount++;
+        return btoa(String.fromCharCode(...encrypted));
+      }
+
+      decrypt(ciphertext) {
+        const encrypted = atob(ciphertext).split('').map(c => c.charCodeAt(0));
+        const decrypted = encrypted.map((byte, i) => byte ^ this.decryptionKey[i % this.decryptionKey.length]);
+        const devolved = this.devolveKey(decrypted, this.messageCount);
+        this.messageCount++;
+        return new TextDecoder().decode(new Uint8Array(devolved));
+      }
+
+      evolveKey(data, count) {
+        const lucasValue = lucas[count % lucas.length];
+        return data.map((byte, i) => (byte + lucasValue + i) % 256);
+      }
+
+      devolveKey(data, count) {
+        const lucasValue = lucas[count % lucas.length];
+        return data.map((byte, i) => (byte - lucasValue - i + 256) % 256);
+      }
+    }
+
+    // ===== DOUBLE RATCHET CLASS =====
+    class Moss60DoubleRatchet {
+      constructor(identity) {
+        this.identity = identity;
+        this.rootKey = null;
+        this.chainKeySend = null;
+        this.chainKeyReceive = null;
+        this.dhPrivate = null;
+        this.dhPublic = null;
+        this.dhRemotePublic = null;
+        this.messagesSent = 0;
+        this.messagesReceived = 0;
+        this.ratchetCount = 0;
+        this.otherParty = null;
+      }
+
+      async initialize() {
+        const keys = generateKeyPair(this.identity + Date.now() + Math.random());
+        this.dhPrivate = keys.private;
+        this.dhPublic = keys.public;
+      }
+
+      async performHandshake(other) {
+        this.otherParty = other;
+        other.otherParty = this;
+        
+        this.dhRemotePublic = other.dhPublic;
+        other.dhRemotePublic = this.dhPublic;
+        
+        const sharedSecret = computeSharedSecret(this.dhPrivate, this.dhRemotePublic);
+        const secretHash = extendedHash(sharedSecret.join(','), 16);
+        
+        this.rootKey = secretHash.substring(0, 16);
+        this.chainKeySend = secretHash.substring(16, 32);
+        this.chainKeyReceive = secretHash.substring(32, 48);
+        
+        other.rootKey = secretHash.substring(0, 16);
+        other.chainKeyReceive = secretHash.substring(16, 32);
+        other.chainKeySend = secretHash.substring(32, 48);
+      }
+
+      async performRootRatchet() {
+        const keys = generateKeyPair(this.identity + Date.now() + Math.random());
+        this.dhPrivate = keys.private;
+        this.dhPublic = keys.public;
+        
+        const sharedSecret = computeSharedSecret(this.dhPrivate, this.dhRemotePublic);
+        const newKeys = extendedHash(this.rootKey + sharedSecret.join(','), 8);
+        
+        this.rootKey = newKeys.substring(0, 16);
+        this.chainKeySend = newKeys.substring(16, 32);
+        this.messagesSent = 0;
+        this.ratchetCount++;
+        
+        return this.dhPublic;
+      }
+
+      symmetricRatchet(chainKey) {
+        const messageKey = moss60Hash(chainKey + 'message');
+        const newChainKey = moss60Hash(chainKey + 'chain');
+        return { messageKey, newChainKey };
+      }
+
+      async sendMessage(message) {
+        let newDHPublic = null;
+        if (this.messagesSent % 3 === 0) {
+          newDHPublic = await this.performRootRatchet();
+        }
+        
+        const { messageKey, newChainKey } = this.symmetricRatchet(this.chainKeySend);
+        this.chainKeySend = newChainKey;
+        
+        // Simple XOR encryption
+        const encrypted = this.xorEncrypt(message, messageKey);
+        
+        const packet = {
+          from: this.identity,
+          dhPublic: newDHPublic,
+          messageNumber: this.messagesSent,
+          ciphertext: encrypted
+        };
+        
+        this.messagesSent++;
+        
+        if (this.otherParty) {
+          this.otherParty.receiveMessage(packet);
+        }
+        
+        return packet;
+      }
+
+      receiveMessage(packet) {
+        if (packet.dhPublic) {
+          this.dhRemotePublic = packet.dhPublic;
+          const sharedSecret = computeSharedSecret(this.dhPrivate, this.dhRemotePublic);
+          const newKeys = extendedHash(this.rootKey + sharedSecret.join(','), 8);
+          this.rootKey = newKeys.substring(0, 16);
+          this.chainKeyReceive = newKeys.substring(16, 32);
+          this.messagesReceived = 0;
+        }
+        
+        const { messageKey, newChainKey } = this.symmetricRatchet(this.chainKeyReceive);
+        this.chainKeyReceive = newChainKey;
+        
+        const decrypted = this.xorDecrypt(packet.ciphertext, messageKey);
+        this.messagesReceived++;
+        
+        return decrypted;
+      }
+
+      xorEncrypt(text, key) {
+        const keyHash = extendedHash(key, 16);
+        let result = '';
+        for (let i = 0; i < text.length; i++) {
+          const keyByte = parseInt(keyHash.substr((i * 2) % keyHash.length, 2), 16);
+          result += String.fromCharCode(text.charCodeAt(i) ^ keyByte);
+        }
+        return btoa(result);
+      }
+
+      xorDecrypt(ciphertext, key) {
+        const keyHash = extendedHash(key, 16);
+        const decoded = atob(ciphertext);
+        let result = '';
+        for (let i = 0; i < decoded.length; i++) {
+          const keyByte = parseInt(keyHash.substr((i * 2) % keyHash.length, 2), 16);
+          result += String.fromCharCode(decoded.charCodeAt(i) ^ keyByte);
+        }
+        return result;
+      }
+    }
+
+    // ===== RENDERING =====
+    function render() {
+      const canvas = document.getElementById('main-canvas');
+      const ctx = canvas.getContext('2d');
+      const overlay = document.getElementById('overlay-canvas');
+      const overlayCtx = overlay.getContext('2d');
+      
+      const cx = 350, cy = 350;
+      const baseR = 280;
+      
+      // Clear with trail effect based on mode
+      if (currentMode === 'consciousness') {
+        ctx.fillStyle = 'rgba(10, 10, 26, 0.15)';
+      } else {
+        ctx.fillStyle = 'rgba(10, 10, 26, 0.3)';
+      }
+      ctx.fillRect(0, 0, 700, 700);
+      
+      overlayCtx.clearRect(0, 0, 700, 700);
+      
+      // Generate points
+      let points = generatePoints(cx, cy, baseR);
+      
+      // Apply 3D projection if needed
+      if (projection3D !== 'flat') {
+        points = applyProjection(points, cx, cy);
+      }
+      
+      // Apply reality mode effects
+      if (realityMode === 'quantum') {
+        drawQuantumSuperposition(ctx, points, cx, cy);
+      } else if (realityMode === 'fractal') {
+        drawFractal(ctx, points, cx, cy);
+      } else if (realityMode === 'holographic') {
+        drawHolographic(ctx, points, cx, cy);
+      }
+      
+      // Draw main spiral
+      drawSpiral(ctx, points);
+      
+      // Draw sacred geometry overlay
+      if (sacredGeometry !== 'none') {
+        drawSacredGeometry(overlayCtx, cx, cy, sacredGeometry);
+      }
+      
+      // Draw chakra points
+      if (activeChakras.size > 0) {
+        drawChakras(ctx, points);
+      }
+      
+      // Draw holographic watermark
+      if (document.getElementById('holographicWatermark')?.checked) {
+        drawHolographicWatermark(ctx, cx, cy);
+      }
+      
+      // Draw center hash
+      ctx.save();
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = 'rgba(255, 215, 0, 0.8)';
+      ctx.fillStyle = '#ffd700';
+      ctx.font = 'bold 18px Orbitron';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(currentHash.toUpperCase().substring(0, 8), cx, cy);
+      ctx.restore();
+      
+      // Update consciousness level
+      if (currentMode === 'consciousness') {
+        coherenceLevel = Math.sin(animationTime * 0.001) * 0.3 + 0.5;
+        document.getElementById('coherenceMeter').style.width = (coherenceLevel * 100) + '%';
+      }
+      
+      animationTime += 16;
+      
+      if (isAnimating) {
+        animationFrame = requestAnimationFrame(render);
+      }
+    }
+
+    function generatePoints(cx, cy, baseR) {
+      const points = [];
+      
+      for (let i = 0; i < 60; i++) {
+        const angle = (i / 60) * Math.PI * 2 - Math.PI / 2;
+        const digitVal = R[i] + K[i] + B[i];
+        let rMod = 0.95 + 0.1 * (digitVal / 27);
+        
+        // Consciousness mode distortion
+        if (currentMode === 'consciousness') {
+          const consciousnessDistortion = Math.sin(animationTime * 0.001 + i * 0.2) * 15 * coherenceLevel;
+          rMod += consciousnessDistortion / baseR;
+        }
+        
+        const r = baseR * rMod;
+        
+        points.push({
+          x: cx + r * Math.cos(angle),
+          y: cy + r * Math.sin(angle),
+          radius: r,
+          angle: angle,
+          isPrime: primes.has(i),
+          index: i
+        });
+      }
+      
+      return points;
+    }
+
+    function applyProjection(points, cx, cy) {
+      const radX = rotationX * Math.PI / 180;
+      const radY = rotationY * Math.PI / 180;
+      
+      return points.map(p => {
+        let x = p.x - cx;
+        let y = p.y - cy;
+        let z = 0;
+        
+        switch (projection3D) {
+          case 'sphere':
+            const phi = p.angle;
+            const theta = (p.radius / 280) * Math.PI / 2;
+            x = 200 * Math.sin(theta) * Math.cos(phi + animationTime * 0.001);
+            y = 200 * Math.sin(theta) * Math.sin(phi + animationTime * 0.001);
+            z = 200 * Math.cos(theta);
+            break;
+            
+          case 'torus':
+            const R_torus = 150;
+            const r_torus = 80;
+            const u = p.angle + animationTime * 0.001;
+            const v = (p.index / 60) * Math.PI * 2;
+            x = (R_torus + r_torus * Math.cos(v)) * Math.cos(u);
+            y = (R_torus + r_torus * Math.cos(v)) * Math.sin(u);
+            z = r_torus * Math.sin(v);
+            break;
+            
+          case 'hyperbolic':
+            const hr = p.radius * 0.8;
+            const scale = 1 / (1 + (hr / 300) * (hr / 300));
+            x = x * scale;
+            y = y * scale;
+            break;
+            
+          case 'klein':
+            const ku = p.angle + animationTime * 0.001;
+            const kv = (p.index / 60) * Math.PI * 2;
+            if (kv < Math.PI) {
+              x = 120 * (1 + Math.cos(kv)) * Math.cos(ku);
+              y = 120 * (1 + Math.cos(kv)) * Math.sin(ku);
+            } else {
+              x = 120 * Math.cos(ku) - 40 * Math.cos(kv - Math.PI);
+              y = 120 * Math.sin(ku);
+            }
+            z = 60 * Math.sin(kv);
+            break;
+            
+          case 'mobius':
+            const mu = p.angle + animationTime * 0.001;
+            const mv = ((p.index / 60) - 0.5) * 100;
+            x = (150 + mv * Math.cos(mu / 2)) * Math.cos(mu);
+            y = (150 + mv * Math.cos(mu / 2)) * Math.sin(mu);
+            z = mv * Math.sin(mu / 2);
+            break;
+        }
+        
+        // Apply 3D rotation
+        const cosX = Math.cos(radX), sinX = Math.sin(radX);
+        const cosY = Math.cos(radY), sinY = Math.sin(radY);
+        
+        const y1 = y * cosX - z * sinX;
+        const z1 = y * sinX + z * cosX;
+        const x1 = x * cosY + z1 * sinY;
+        const z2 = -x * sinY + z1 * cosY;
+        
+        // Perspective projection
+        const perspective = 500 / (500 + z2);
+        
+        return {
+          ...p,
+          x: cx + x1 * perspective,
+          y: cy + y1 * perspective,
+          z: z2,
+          scale: perspective
+        };
+      });
+    }
+
+    function drawSpiral(ctx, points) {
+      // Generate triangular spiral path
+      const path = [];
+      let pos = 1;
+      path.push(pos);
+      for (let i = 1; i <= 60; i++) {
+        pos = (pos + i) % 60;
+        path.push(pos);
+      }
+      
+      // Draw connections
+      for (let i = 0; i < path.length - 1; i++) {
+        const p1 = points[path[i]];
+        const p2 = points[path[i + 1]];
+        
+        if (!p1 || !p2) continue;
+        
+        const color = getColor(i, p1.isPrime || p2.isPrime);
+        const weight = lineWeight + (p1.isPrime || p2.isPrime ? 1.5 : 0);
+        const scale = (p1.scale || 1) * (p2.scale || 1);
+        
+        ctx.strokeStyle = color;
+        ctx.lineWidth = weight * Math.sqrt(scale);
+        ctx.globalAlpha = 0.7 * scale;
+        
+        if (p1.isPrime || p2.isPrime) {
+          ctx.shadowBlur = primeGlow;
+          ctx.shadowColor = color;
+        } else {
+          ctx.shadowBlur = 3;
+          ctx.shadowColor = color;
+        }
+        
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+      }
+      
+      // Draw vertices
+      points.forEach(p => {
+        const scale = p.scale || 1;
+        ctx.fillStyle = p.isPrime ? '#ffd700' : '#88d8ff';
+        ctx.globalAlpha = scale;
+        ctx.shadowBlur = p.isPrime ? primeGlow : 5;
+        ctx.shadowColor = ctx.fillStyle;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, (p.isPrime ? 5 : 3) * scale, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
+    }
+
+    function getColor(index, isPrime) {
+      switch (colorScheme) {
+        case 'golden':
+          return isPrime ? '#ffd700' : 'rgba(255, 215, 0, 0.6)';
+          
+        case 'cyberpunk':
+          return isPrime ? '#ff00ff' : `hsl(${280 + index * 2}, 100%, 50%)`;
+          
+        case 'consciousness':
+          switch (consciousnessMode) {
+            case 'meditation':
+              return `hsl(${240 + index * 2}, 70%, 60%)`;
+            case 'healing':
+              return `hsl(${120 + index * 3}, 80%, 55%)`;
+            case 'creativity':
+              return `hsl(${(index * 15) % 360}, 90%, 60%)`;
+            case 'focus':
+              return `hsl(${45 + index}, 90%, 55%)`;
+            default:
+              return `hsl(${(index * 6) % 360}, 70%, 50%)`;
+          }
+          
+        case 'fire':
+          return `hsl(${15 + index * 0.8}, 100%, ${50 + (isPrime ? 15 : 0)}%)`;
+          
+        case 'ocean':
+          return `hsl(${200 + index * 1.5}, 80%, ${45 + (isPrime ? 20 : 0)}%)`;
+          
+        default: // spectral
+          return `hsl(${(index * 6) % 360}, 80%, ${55 + (isPrime ? 10 : 0)}%)`;
+      }
+    }
+
+    function drawQuantumSuperposition(ctx, points, cx, cy) {
+      ctx.globalAlpha = 0.25;
+      for (let q = 0; q < 3; q++) {
+        const offset = q * Math.PI * 2 / 3;
+        const shiftedPoints = points.map(p => ({
+          ...p,
+          x: p.x + Math.sin(animationTime * 0.001 + offset) * 25,
+          y: p.y + Math.cos(animationTime * 0.001 + offset) * 25
+        }));
+        drawSpiral(ctx, shiftedPoints);
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    function drawFractal(ctx, points, cx, cy) {
+      const depth = parseInt(document.getElementById('fractalDepth')?.value || 3);
+      drawFractalLayer(ctx, points, depth, 1, cx, cy);
+    }
+
+    function drawFractalLayer(ctx, points, depth, scale, cx, cy) {
+      if (depth <= 0 || scale < 0.1) return;
+      
+      ctx.save();
+      ctx.globalAlpha = scale * 0.7;
+      drawSpiral(ctx, points);
+      ctx.restore();
+      
+      // Recurse at prime positions
+      points.filter(p => p.isPrime).slice(0, 5).forEach(p => {
+        const newScale = scale * 0.4;
+        const offset = { x: (p.x - cx) * 0.3, y: (p.y - cy) * 0.3 };
+        const newPoints = points.map(pt => ({
+          ...pt,
+          x: cx + offset.x + (pt.x - cx) * newScale,
+          y: cy + offset.y + (pt.y - cy) * newScale,
+          scale: (pt.scale || 1) * newScale
+        }));
+        drawFractalLayer(ctx, newPoints, depth - 1, newScale, cx + offset.x, cy + offset.y);
+      });
+    }
+
+    function drawHolographic(ctx, points, cx, cy) {
+      // Multiple phase-shifted copies
+      for (let i = 0; i < 5; i++) {
+        ctx.globalAlpha = 0.15;
+        const phase = i * Math.PI / 5 + animationTime * 0.0005;
+        const shiftedPoints = points.map(p => ({
+          ...p,
+          x: cx + (p.x - cx) * (1 + Math.sin(phase) * 0.1),
+          y: cy + (p.y - cy) * (1 + Math.cos(phase) * 0.1)
+        }));
+        drawSpiral(ctx, shiftedPoints);
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    function drawSacredGeometry(ctx, cx, cy, type) {
+      ctx.strokeStyle = 'rgba(136, 216, 255, 0.3)';
+      ctx.lineWidth = 1;
+      
+      const rotation = animationTime * 0.0002;
+      
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(rotation);
+      ctx.translate(-cx, -cy);
+      
+      switch (type) {
+        case 'flower':
+          drawFlowerOfLife(ctx, cx, cy);
+          break;
+        case 'metatron':
+          drawMetatronsCube(ctx, cx, cy);
+          break;
+        case 'sri-yantra':
+          drawSriYantra(ctx, cx, cy);
+          break;
+        case 'torus':
+          drawTorusField(ctx, cx, cy);
+          break;
+        case 'vesica':
+          drawVesicaPiscis(ctx, cx, cy);
+          break;
+      }
+      
+      ctx.restore();
+    }
+
+    function drawFlowerOfLife(ctx, cx, cy) {
+      const radius = 60;
+      
+      // Central circle
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.stroke();
+      
+      // 6 surrounding circles
+      for (let i = 0; i < 6; i++) {
+        const angle = i * Math.PI / 3;
+        ctx.beginPath();
+        ctx.arc(cx + radius * Math.cos(angle), cy + radius * Math.sin(angle), radius, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      
+      // Outer ring
+      for (let i = 0; i < 6; i++) {
+        const angle = i * Math.PI / 3 + Math.PI / 6;
+        ctx.beginPath();
+        ctx.arc(cx + radius * 1.73 * Math.cos(angle), cy + radius * 1.73 * Math.sin(angle), radius, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
+
+    function drawMetatronsCube(ctx, cx, cy) {
+      const radius = 150;
+      const points = [];
+      
+      // 13 points
+      points.push({ x: cx, y: cy });
+      for (let i = 0; i < 6; i++) {
+        const angle = i * Math.PI / 3 - Math.PI / 2;
+        points.push({ x: cx + radius * 0.5 * Math.cos(angle), y: cy + radius * 0.5 * Math.sin(angle) });
+        points.push({ x: cx + radius * Math.cos(angle), y: cy + radius * Math.sin(angle) });
+      }
+      
+      // Connect all points
+      for (let i = 0; i < points.length; i++) {
+        for (let j = i + 1; j < points.length; j++) {
+          ctx.beginPath();
+          ctx.moveTo(points[i].x, points[i].y);
+          ctx.lineTo(points[j].x, points[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    function drawSriYantra(ctx, cx, cy) {
+      const triangles = [
+        { size: 180, up: true },
+        { size: 150, up: false },
+        { size: 120, up: true },
+        { size: 100, up: false },
+        { size: 80, up: true },
+        { size: 60, up: false },
+        { size: 45, up: true },
+        { size: 30, up: false },
+        { size: 15, up: true }
+      ];
+      
+      triangles.forEach(t => {
+        ctx.beginPath();
+        for (let i = 0; i < 3; i++) {
+          const angle = (t.up ? -Math.PI / 2 : Math.PI / 2) + i * Math.PI * 2 / 3;
+          const x = cx + t.size * Math.cos(angle);
+          const y = cy + t.size * Math.sin(angle);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      });
+    }
+
+    function drawTorusField(ctx, cx, cy) {
+      for (let i = 0; i < 12; i++) {
+        const angle = i * Math.PI / 6;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, 150, 80, angle, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
+
+    function drawVesicaPiscis(ctx, cx, cy) {
+      const radius = 120;
+      ctx.beginPath();
+      ctx.arc(cx - radius / 2, cy, radius, -Math.PI / 3, Math.PI / 3);
+      ctx.arc(cx + radius / 2, cy, radius, Math.PI * 2 / 3, Math.PI * 4 / 3);
+      ctx.stroke();
+    }
+
+    function drawChakras(ctx, points) {
+      const chakraMap = {
+        'root': { index: 1, color: '#ff0000' },
+        'sacral': { index: 9, color: '#ff7f00' },
+        'solar': { index: 17, color: '#ffff00' },
+        'heart': { index: 25, color: '#00ff00' },
+        'throat': { index: 33, color: '#0000ff' },
+        'third-eye': { index: 41, color: '#4b0082' },
+        'crown': { index: 49, color: '#9400d3' }
+      };
+      
+      activeChakras.forEach(chakraName => {
+        const chakra = chakraMap[chakraName];
+        if (!chakra) return;
+        
+        const p = points[chakra.index];
+        if (!p) return;
+        
+        const pulse = Math.sin(animationTime * 0.003 + chakra.index) * 4;
+        
+        ctx.fillStyle = chakra.color;
+        ctx.shadowBlur = 25;
+        ctx.shadowColor = chakra.color;
+        ctx.globalAlpha = 0.8;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 10 + pulse, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = 0;
+      });
+    }
+
+    function drawHolographicWatermark(ctx, cx, cy) {
+      const time = animationTime * 0.001;
+      ctx.save();
+      
+      ctx.globalAlpha = 0.1;
+      ctx.strokeStyle = '#ffd700';
+      ctx.lineWidth = 0.5;
+      
+      // Rotating concentric patterns
+      for (let i = 0; i < 5; i++) {
+        const r = 50 + i * 60;
+        const rot = time * (i % 2 === 0 ? 1 : -1) * 0.5;
+        
+        ctx.beginPath();
+        for (let j = 0; j < 60; j++) {
+          const angle = (j / 60) * Math.PI * 2 + rot;
+          const mod = 1 + Math.sin(j * 6 + time * 2) * 0.1;
+          const x = cx + r * mod * Math.cos(angle);
+          const y = cy + r * mod * Math.sin(angle);
+          if (j === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      }
+      
+      ctx.restore();
+    }
+
+    // ===== UI FUNCTIONS =====
+    function switchMode(mode) {
+      currentMode = mode;
+      
+      // Update nav buttons
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelector(`.nav-btn[onclick="switchMode('${mode}')"]`).classList.add('active');
+      
+      // Update panels
+      document.querySelectorAll('.mode-panel').forEach(panel => panel.classList.remove('active'));
+      document.getElementById(mode + '-panel').classList.add('active');
+      
+      // Mode-specific setup
+      if (mode === 'consciousness') {
+        colorScheme = 'consciousness';
+      } else if (mode === 'glyph') {
+        colorScheme = document.getElementById('colorScheme').value;
+      }
+    }
+
+    function generateGlyph() {
+      const msg = document.getElementById('msg').value;
+      const hidden = document.getElementById('hidden-msg').value;
+      const deterministic = document.getElementById('deterministic').checked;
+      
+      const seed = deterministic ? msg : msg + Date.now();
+      currentHash = hidden ? extendedHash(seed + hidden) : extendedHash(seed);
+      
+      document.getElementById('hash-display').textContent = currentHash.toUpperCase().substring(0, 32) + '...';
+      
+      if (!animationFrame) {
+        render();
+      }
+    }
+
+    function updateParam(type) {
+      switch (type) {
+        case 'weight':
+          lineWeight = parseInt(document.getElementById('lineWeight').value);
+          document.getElementById('weightVal').textContent = lineWeight;
+          break;
+        case 'glow':
+          primeGlow = parseInt(document.getElementById('primeGlow').value);
+          document.getElementById('glowVal').textContent = primeGlow;
+          break;
+      }
+    }
+
+    function updateDisplay() {
+      colorScheme = document.getElementById('colorScheme').value;
+    }
+
+    function updateFrequency() {
+      const freq = document.getElementById('baseFreq').value;
+      document.getElementById('freqVal').textContent = freq + ' Hz';
+    }
+
+    function updateBinaural() {
+      const beat = document.getElementById('binauralBeat').value;
+      document.getElementById('beatVal').textContent = beat + ' Hz';
+    }
+
+    function updateConsciousnessMode() {
+      consciousnessMode = document.getElementById('consciousnessMode').value;
+    }
+
+    function updateSacredGeometry() {
+      sacredGeometry = document.getElementById('sacredGeometry').value;
+    }
+
+    function toggleChakra(el, name) {
+      if (activeChakras.has(name)) {
+        activeChakras.delete(name);
+        el.classList.remove('active');
+      } else {
+        activeChakras.add(name);
+        el.classList.add('active');
+      }
+    }
+
+    function toggleAllChakras() {
+      const all = ['root', 'sacral', 'solar', 'heart', 'throat', 'third-eye', 'crown'];
+      const allActive = all.every(c => activeChakras.has(c));
+      
+      document.querySelectorAll('.chakra-item').forEach((el, i) => {
+        if (i < 7) {
+          if (allActive) {
+            activeChakras.delete(all[i]);
+            el.classList.remove('active');
+          } else {
+            activeChakras.add(all[i]);
+            el.classList.add('active');
+          }
+        }
+      });
+    }
+
+    function updateProjection() {
+      projection3D = document.getElementById('projection').value;
+    }
+
+    function update3DRotation() {
+      rotationX = parseInt(document.getElementById('rotX').value);
+      rotationY = parseInt(document.getElementById('rotY').value);
+      document.getElementById('rotXVal').textContent = rotationX + '°';
+      document.getElementById('rotYVal').textContent = rotationY + '°';
+    }
+
+    function update4DPhase() {
+      phase4D = parseFloat(document.getElementById('phase4D').value);
+      document.getElementById('phase4DVal').textContent = phase4D.toFixed(2);
+    }
+
+    function updateRealityMode() {
+      realityMode = document.getElementById('realityMode').value;
+      document.getElementById('fractal-depth-group').style.display = 
+        realityMode === 'fractal' ? 'block' : 'none';
+    }
+
+    function updateFractalDepth() {
+      document.getElementById('fractalVal').textContent = document.getElementById('fractalDepth').value;
+    }
+
+    // ===== SERPENT FUNCTIONS =====
+    function generateAliceKeys() {
+      const identity = document.getElementById('alice-id').value;
+      aliceHandshake = new Moss60Handshake(identity);
+      document.getElementById('alice-public').textContent = aliceHandshake.publicHash.substring(0, 24) + '...';
+    }
+
+    function generateBobKeys() {
+      const identity = document.getElementById('bob-id').value;
+      bobHandshake = new Moss60Handshake(identity);
+      document.getElementById('bob-public').textContent = bobHandshake.publicHash.substring(0, 24) + '...';
+    }
+
+    function performSerpentHandshake() {
+      if (!aliceHandshake || !bobHandshake) {
+        alert('Generate keys for both parties first!');
+        return;
+      }
+      
+      aliceHandshake.computeSharedSecret(bobHandshake.publicHash);
+      bobHandshake.computeSharedSecret(aliceHandshake.publicHash);
+      
+      serpentConnected = true;
+      document.getElementById('connection-dot').classList.add('active');
+      document.getElementById('connection-status').textContent = 'Secure Channel Active';
+    }
+
+    function aliceSend() {
+      if (!serpentConnected) {
+        alert('Establish connection first!');
+        return;
+      }
+      
+      const msg = document.getElementById('alice-message').value;
+      if (!msg) return;
+      
+      const encrypted = aliceHandshake.encrypt(msg);
+      const decrypted = bobHandshake.decrypt(encrypted);
+      
+      addSerpentLog('Alice', msg, encrypted);
+      document.getElementById('alice-message').value = '';
+    }
+
+    function bobSend() {
+      if (!serpentConnected) {
+        alert('Establish connection first!');
+        return;
+      }
+      
+      const msg = document.getElementById('bob-message').value;
+      if (!msg) return;
+      
+      const encrypted = bobHandshake.encrypt(msg);
+      const decrypted = aliceHandshake.decrypt(encrypted);
+      
+      addSerpentLog('Bob', msg, encrypted);
+      document.getElementById('bob-message').value = '';
+    }
+
+    function addSerpentLog(sender, plaintext, ciphertext) {
+      const log = document.getElementById('serpent-log');
+      const entry = document.createElement('div');
+      entry.className = 'message-entry ' + (sender === 'Alice' ? 'sent' : 'received');
+      entry.innerHTML = `
+        <div class="message-header">${sender} — ${new Date().toLocaleTimeString()}</div>
+        <div>${plaintext}</div>
+        <div style="font-size: 9px; color: var(--text-muted); margin-top: 4px;">
+          Encrypted: ${ciphertext.substring(0, 20)}...
+        </div>
+      `;
+      log.insertBefore(entry, log.firstChild);
+    }
+
+    // ===== RATCHET FUNCTIONS =====
+    async function initRatchetDemo() {
+      aliceRatchet = new Moss60DoubleRatchet('Alice');
+      bobRatchet = new Moss60DoubleRatchet('Bob');
+      
+      await aliceRatchet.initialize();
+      await bobRatchet.initialize();
+      await aliceRatchet.performHandshake(bobRatchet);
+      
+      updateRatchetDisplay();
+      addRatchetLog('System', 'Double Ratchet initialized with forward secrecy');
+    }
+
+    async function ratchetSendAlice() {
+      if (!aliceRatchet) {
+        alert('Initialize demo first!');
+        return;
+      }
+      
+      const msg = document.getElementById('ratchet-message').value || 'Test message from Alice';
+      await aliceRatchet.sendMessage(msg);
+      
+      updateRatchetDisplay();
+      addRatchetLog('Alice → Bob', msg);
+      document.getElementById('ratchet-message').value = '';
+    }
+
+    async function ratchetSendBob() {
+      if (!bobRatchet) {
+        alert('Initialize demo first!');
+        return;
+      }
+      
+      const msg = document.getElementById('ratchet-message').value || 'Test message from Bob';
+      await bobRatchet.sendMessage(msg);
+      
+      updateRatchetDisplay();
+      addRatchetLog('Bob → Alice', msg);
+      document.getElementById('ratchet-message').value = '';
+    }
+
+    function simulateCompromise() {
+      if (!aliceRatchet) {
+        alert('Initialize demo first!');
+        return;
+      }
+      
+      addRatchetLog('⚠️ COMPROMISE', 'Current state exposed! Send messages to recover...');
+      
+      // After 3 messages, keys will be completely refreshed
+      setTimeout(() => {
+        addRatchetLog('System', 'Continue sending messages to restore security');
+      }, 1000);
+    }
+
+    function updateRatchetDisplay() {
+      if (!aliceRatchet || !bobRatchet) return;
+      
+      document.getElementById('alice-rk').textContent = 
+        aliceRatchet.rootKey ? aliceRatchet.rootKey.substring(0, 8) + '...' : '—';
+      document.getElementById('alice-cks').textContent = 
+        aliceRatchet.chainKeySend ? aliceRatchet.chainKeySend.substring(0, 8) + '...' : '—';
+      document.getElementById('alice-sent').textContent = aliceRatchet.messagesSent;
+      
+      document.getElementById('bob-rk').textContent = 
+        bobRatchet.rootKey ? bobRatchet.rootKey.substring(0, 8) + '...' : '—';
+      document.getElementById('bob-ckr').textContent = 
+        bobRatchet.chainKeyReceive ? bobRatchet.chainKeyReceive.substring(0, 8) + '...' : '—';
+      document.getElementById('bob-recv').textContent = bobRatchet.messagesReceived;
+    }
+
+    function addRatchetLog(label, content) {
+      const log = document.getElementById('ratchet-log');
+      const entry = document.createElement('div');
+      entry.className = 'message-entry';
+      entry.innerHTML = `
+        <div class="message-header">${label}</div>
+        <div>${content}</div>
+      `;
+      log.insertBefore(entry, log.firstChild);
+    }
+
+    // ===== UTILITY FUNCTIONS =====
+    function toggleAnimation() {
+      isAnimating = !isAnimating;
+      document.getElementById('anim-btn-text').textContent = isAnimating ? 'PAUSE' : 'PLAY';
+      if (isAnimating) render();
+    }
+
+    function resetView() {
+      rotationX = 0;
+      rotationY = 0;
+      phase4D = 0;
+      projection3D = 'flat';
+      
+      document.getElementById('rotX').value = 0;
+      document.getElementById('rotY').value = 0;
+      document.getElementById('phase4D').value = 0;
+      document.getElementById('projection').value = 'flat';
+      
+      update3DRotation();
+      update4DPhase();
+    }
+
+    function randomize() {
+      const randomMsg = 'MOSS60-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+      document.getElementById('msg').value = randomMsg;
+      generateGlyph();
+    }
+
+    function toggleFullscreen() {
+      const canvas = document.getElementById('main-canvas');
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        canvas.requestFullscreen();
+      }
+    }
+
+    function exportPNG() {
+      const canvas = document.getElementById('main-canvas');
+      const link = document.createElement('a');
+      link.download = 'moss60-glyph-' + currentHash.substring(0, 8) + '.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    function exportSVG() {
+      // Generate SVG representation
+      const cx = 350, cy = 350, baseR = 280;
+      const points = generatePoints(cx, cy, baseR);
+      
+      let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="700" height="700" viewBox="0 0 700 700">
+        <rect width="700" height="700" fill="#0a0a1a"/>
+        <defs>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>`;
+      
+      // Generate path
+      const path = [];
+      let pos = 1;
+      path.push(pos);
+      for (let i = 1; i <= 60; i++) {
+        pos = (pos + i) % 60;
+        path.push(pos);
+      }
+      
+      // Draw lines
+      for (let i = 0; i < path.length - 1; i++) {
+        const p1 = points[path[i]];
+        const p2 = points[path[i + 1]];
+        const color = getColor(i, p1.isPrime || p2.isPrime);
+        svg += `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" 
+          stroke="${color}" stroke-width="${lineWeight}" opacity="0.7" filter="url(#glow)"/>`;
+      }
+      
+      // Draw points
+      points.forEach(p => {
+        const fill = p.isPrime ? '#ffd700' : '#88d8ff';
+        const r = p.isPrime ? 5 : 3;
+        svg += `<circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${fill}" filter="url(#glow)"/>`;
+      });
+      
+      // Center text
+      svg += `<text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle" 
+        fill="#ffd700" font-family="Orbitron, sans-serif" font-size="18" font-weight="bold">
+        ${currentHash.toUpperCase().substring(0, 8)}</text>`;
+      
+      svg += '</svg>';
+      
+      const blob = new Blob([svg], { type: 'image/svg+xml' });
+      const link = document.createElement('a');
+      link.download = 'moss60-glyph-' + currentHash.substring(0, 8) + '.svg';
+      link.href = URL.createObjectURL(blob);
+      link.click();
+    }
+
+    // ===== KEYBOARD SHORTCUTS =====
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      
+      switch (e.key) {
+        case ' ':
+          e.preventDefault();
+          toggleAnimation();
+          break;
+        case 'r':
+          randomize();
+          break;
+        case 'f':
+          toggleFullscreen();
+          break;
+        case '1':
+          switchMode('glyph');
+          break;
+        case '2':
+          switchMode('consciousness');
+          break;
+        case '3':
+          switchMode('serpent');
+          break;
+        case '4':
+          switchMode('reality');
+          break;
+        case '5':
+          switchMode('ratchet');
+          break;
+      }
+    });
+
+    // ===== INITIALIZE =====
+    generateGlyph();
+  </script>
+</body>
+</html>
