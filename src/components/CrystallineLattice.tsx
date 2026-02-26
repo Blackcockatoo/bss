@@ -404,7 +404,7 @@ export function CrystallineLattice({ dna }: CrystallineLatticeProps) {
         }
       }
 
-      drawLattice(ctx, stateRef.current, time, showBP, showStress, shells);
+      drawLattice(ctx, state, time, showBP, showStress, shells);
       rafRef.current = requestAnimationFrame(loop);
     };
 
