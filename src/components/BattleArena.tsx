@@ -6,6 +6,7 @@ import { Button } from './ui/button';
 import { Swords, ShieldHalf, ChevronLeft, Zap } from 'lucide-react';
 import {
   OPPONENTS,
+  OPPONENT_LORE,
   OPPONENT_TYPES,
   TYPE_COLORS,
   derivePlayerType,
@@ -14,6 +15,7 @@ import {
   getPlayerMoves,
   getOpponentMoveset,
   executeTurn,
+  getArenaChapter,
   type BattleMove,
   type ConsciousnessType,
   type StatusCondition,
@@ -83,6 +85,7 @@ export function BattleArena() {
   const [battleLog, setBattleLog]   = useState<string[]>([]);
   const [resultMsg, setResultMsg]   = useState('');
   const [resolving, setResolving]   = useState(false);
+  const chapter = getArenaChapter(battle.wins);
 
   const logRef = useRef<HTMLDivElement>(null);
 
@@ -114,7 +117,12 @@ export function BattleArena() {
     setOpponentStatus(null);
     setPlayerMoves(getPlayerMoves(pType));
     setOpponentMoves(getOpponentMoveset(opponentName));
-    setBattleLog([`A wild ${opponentName} appeared!`, `Go, Your Pet! [${pType}]`]);
+    const lore = OPPONENT_LORE[opponentName];
+    setBattleLog([
+      `${chapter}`,
+      lore ? `${lore.title}: ${lore.legend}` : `A wild ${opponentName} appeared!`,
+      `Go, Your Pet! [${pType}]`,
+    ]);
     setPhase('battling');
   }
 
@@ -192,6 +200,7 @@ export function BattleArena() {
               Consciousness Arena
             </h2>
             <p className="text-xs text-zinc-500 mt-0.5">Turn-based duels — type match-ups, moves and status conditions.</p>
+            <p className="text-[11px] text-indigo-300/80 mt-1">{chapter}</p>
           </div>
           <div className="text-xs text-zinc-400 text-right space-y-0.5">
             <p>W <span className="text-emerald-300 font-semibold">{battle.wins}</span> / L <span className="text-rose-300 font-semibold">{battle.losses}</span></p>
@@ -231,6 +240,7 @@ export function BattleArena() {
         <div className="grid grid-cols-2 gap-2">
           {OPPONENTS.map(name => {
             const t = OPPONENT_TYPES[name] ?? 'Echo';
+            const lore = OPPONENT_LORE[name];
             return (
               <button
                 key={name}
@@ -239,6 +249,11 @@ export function BattleArena() {
               >
                 <p className="text-sm font-semibold text-white mb-1">{name}</p>
                 <TypeBadge type={t} />
+                {lore && (
+                  <p className="text-[10px] text-zinc-400 mt-2 leading-snug">
+                    <span className="text-zinc-300">{lore.title}:</span> {lore.legend}
+                  </p>
+                )}
               </button>
             );
           })}
