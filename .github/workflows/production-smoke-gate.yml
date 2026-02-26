@@ -1,0 +1,67 @@
+name: Production Smoke Gate
+
+on:
+  workflow_dispatch:
+    inputs:
+      smoke_confirmation:
+        description: "Set to confirmed after /digital-dna smoke runbook passes"
+        required: true
+        type: choice
+        options:
+          - pending
+          - confirmed
+      smoke_owner:
+        description: "Owner responsible for smoke verification (name or handle)"
+        required: true
+        type: string
+
+jobs:
+  quality-gate:
+    name: Lint + Build Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+  digital-dna-smoke-confirmation:
+    name: Verify /digital-dna Smoke Confirmation
+    runs-on: ubuntu-latest
+    needs: quality-gate
+    steps:
+      - name: Validate smoke confirmation + owner assignment
+        run: |
+          if [ "${{ github.event.inputs.smoke_confirmation }}" != "confirmed" ]; then
+            echo "Smoke confirmation is not set to confirmed."
+            exit 1
+          fi
+
+          if [ -z "${{ github.event.inputs.smoke_owner }}" ]; then
+            echo "smoke_owner is required."
+            exit 1
+          fi
+
+          echo "Smoke check confirmed by: ${{ github.event.inputs.smoke_owner }}"
+          echo "Runbook: docs/deployment/digital-dna-smoke.md"
+
+  production-promotion-ready:
+    name: Production Promotion Ready
+    runs-on: ubuntu-latest
+    needs: digital-dna-smoke-confirmation
+    steps:
+      - name: Promotion gate passed
+        run: echo "All deployment gates passed for /digital-dna."

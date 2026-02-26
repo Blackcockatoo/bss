@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ALCHEMEST • Practical Seed Studio</title>
+    <style>
+      :root {
+        --bg: #0a0f18;
+        --panel: #10192a;
+        --panel-soft: #0d1523;
+        --ink: #e7eefb;
+        --muted: #9bb0cc;
+        --gold: #e7c76a;
+        --rose: #f39bbf;
+        --verdant: #6edb9f;
+        --hl: #00e8d1;
+        --accent: #8fa4ff;
+        --line: #7dd3fc4d;
+        --border: #ffffff29;
+        --radius: 12px;
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        height: 100%;
+        margin: 0;
+        color: var(--ink);
+        background: radial-gradient(900px 600px at 50% -20%, #1c2d4b 0%, var(--bg) 60%);
+        font: 14px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        grid-template-rows: auto 1fr auto;
+        height: 100vh;
+      }
+      .topbar, .footer {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border);
+        background: #0c1422d9;
+        backdrop-filter: blur(8px);
+      }
+      .footer {
+        border-bottom: 0;
+        border-top: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .brand { font-weight: 700; letter-spacing: .3px; color: var(--gold); }
+      .brand::before { content: "🜂 "; }
+      .btn, .select, .input {
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--panel);
+        color: var(--ink);
+        padding: 8px 10px;
+        font: inherit;
+      }
+      .btn { cursor: pointer; }
+      .btn:hover { border-color: var(--accent); }
+      .btn.primary { background: linear-gradient(135deg, #6f7ef7, #4e57dd); border: 0; }
+      .btn:focus-visible, .select:focus-visible, .input:focus-visible {
+        outline: 2px solid var(--hl);
+        outline-offset: 2px;
+      }
+      .stage {
+        position: relative;
+        overflow: hidden;
+      }
+      #scene {
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+        background: radial-gradient(900px 600px at 50% 30%, #101b2b 0%, #0a0f18 70%);
+      }
+      .side {
+        border-left: 1px solid var(--border);
+        background: var(--panel-soft);
+        padding: 14px;
+        overflow: auto;
+      }
+      .section {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 10px;
+        margin-bottom: 10px;
+      }
+      .section h3 {
+        margin: 0 0 8px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--hl);
+      }
+      .row { display: flex; gap: 8px; margin-top: 8px; }
+      .row > * { flex: 1; }
+      .console {
+        height: 112px;
+        overflow: auto;
+        background: #0b101b;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .line.ok { color: var(--verdant); }
+      .line.err { color: var(--rose); }
+      .line.info { color: var(--accent); }
+      .overlay {
+        position: absolute;
+        inset: 0;
+        display: none;
+        place-items: center;
+        background: #0008;
+      }
+      .overlay.show { display: grid; }
+      .card {
+        width: min(520px, 92vw);
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 16px;
+      }
+      .card h2 { margin-top: 0; color: var(--gold); }
+      .card p { color: var(--muted); line-height: 1.5; }
+      .card ul { color: var(--muted); }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 2px 8px;
+        margin-right: 5px;
+        color: var(--muted);
+      }
+      @media (max-width: 920px) {
+        .layout { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto auto; }
+        .side { border-left: 0; border-top: 1px solid var(--border); max-height: 46vh; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <header class="topbar">
+        <div class="brand">ALCHEMEST • Practical Studio</div>
+        <div class="row" style="max-width:700px; margin:0;">
+          <input id="cmd" class="input" aria-label="Incantation command" placeholder="Try: HELP, WEAVE HEXAGON, ROTATE 30, RESET" />
+          <button id="run" class="btn">Cast</button>
+          <button id="help" class="btn" aria-haspopup="dialog">Help</button>
+        </div>
+      </header>
+
+      <main class="stage" aria-label="Geometry workspace">
+        <svg id="scene" viewBox="-520 -520 1040 1040" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Seed of life canvas">
+          <g id="ring"></g>
+          <g id="chords"></g>
+          <g id="measure"></g>
+        </svg>
+        <div id="onboard" class="overlay show" role="dialog" aria-modal="true" aria-label="Onboarding">
+          <div class="card">
+            <h2>Welcome to ALCHEMEST</h2>
+            <p>A practical geometry + pattern studio. Start with presets, draw your own chords, then export.</p>
+            <ul>
+              <li><strong>Move:</strong> drag canvas to rotate.</li>
+              <li><strong>Measure:</strong> click two nodes to inspect angular distance.</li>
+              <li><strong>Save:</strong> project JSON (state) + SVG export (artwork).</li>
+            </ul>
+            <button id="start" class="btn primary">Enter Studio</button>
+          </div>
+        </div>
+      </main>
+
+      <aside class="side">
+        <div class="section">
+          <h3>Practical Controls</h3>
+          <label for="count">Rim positions</label>
+          <select id="count" class="select" aria-label="Rim positions">
+            <option>60</option><option>108</option><option selected>324</option>
+          </select>
+          <div class="row">
+            <button id="weaveHex" class="btn">Weave Hexagon</button>
+            <button id="clearChords" class="btn">Clear Chords</button>
+          </div>
+          <div class="row">
+            <button id="measureMode" class="btn">Measure Mode</button>
+            <button id="reset" class="btn">Reset Workspace</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Project</h3>
+          <div class="row">
+            <button id="saveJson" class="btn">Save JSON</button>
+            <label class="btn" for="loadJson" style="text-align:center;">Load JSON</label>
+            <input id="loadJson" type="file" accept="application/json" style="display:none" />
+          </div>
+          <div class="row">
+            <button id="saveSvg" class="btn primary">Export SVG</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Status</h3>
+          <span class="chip" id="modeChip">Mode: rotate</span>
+          <span class="chip" id="nodesChip">Nodes: 324</span>
+          <span class="chip" id="rotChip">Rotation: 0°</span>
+        </div>
+
+        <div class="section">
+          <h3>Console</h3>
+          <div id="console" class="console"></div>
+        </div>
+      </aside>
+
+      <footer class="footer">
+        <span>Touch + keyboard friendly • Accessible focus + labels</span>
+        <span id="hint">Tip: press <strong>H</strong> for help.</span>
+      </footer>
+    </div>
+
+    <script>
+      const $ = id => document.getElementById(id);
+      const scene = $('scene');
+      const ringLayer = $('ring');
+      const chordLayer = $('chords');
+      const measureLayer = $('measure');
+
+      const state = {
+        count: 324,
+        rotation: 0,
+        nodes: [],
+        chords: [],
+        mode: 'rotate',
+        measureStart: null,
+      };
+
+      function log(msg, cls='info') {
+        const line = document.createElement('div');
+        line.className = `line ${cls}`;
+        line.textContent = msg;
+        $('console').appendChild(line);
+        $('console').scrollTop = $('console').scrollHeight;
+      }
+
+      function polar(r, deg){
+        const rad = deg * Math.PI / 180;
+        return [r*Math.cos(rad), r*Math.sin(rad)];
+      }
+
+      function updateStatus() {
+        $('modeChip').textContent = `Mode: ${state.mode}`;
+        $('nodesChip').textContent = `Nodes: ${state.count}`;
+        $('rotChip').textContent = `Rotation: ${state.rotation.toFixed(1)}°`;
+      }
+
+      function drawRing() {
+        ringLayer.innerHTML = '';
+        const r = 360;
+        const base = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        base.setAttribute('r', r);
+        base.setAttribute('fill', 'none');
+        base.setAttribute('stroke', '#e7c76a');
+        base.setAttribute('stroke-width', '1.2');
+        ringLayer.appendChild(base);
+
+        state.nodes = [];
+        for (let i=0;i<state.count;i++) {
+          const angle = i / state.count * 360 - 90;
+          const [x,y] = polar(r, angle);
+          const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          dot.setAttribute('cx', x); dot.setAttribute('cy', y); dot.setAttribute('r', '2');
+          dot.setAttribute('fill', '#e7c76a');
+          ringLayer.appendChild(dot);
+          state.nodes.push({x,y,angle,index:i});
+        }
+      }
+
+      function addChord(i,j,color='#f39bbf') {
+        const a = state.nodes[i], b = state.nodes[j];
+        if (!a || !b) return;
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', a.x); line.setAttribute('y1', a.y);
+        line.setAttribute('x2', b.x); line.setAttribute('y2', b.y);
+        line.setAttribute('stroke', color);
+        line.setAttribute('stroke-opacity', '.9');
+        line.setAttribute('stroke-width', '1.8');
+        chordLayer.appendChild(line);
+        state.chords.push([i,j]);
+      }
+
+      function weaveHexagon() {
+        chordLayer.innerHTML='';
+        state.chords=[];
+        const n = state.count;
+        const step = Math.round(n/6);
+        for (let s=0;s<6;s++) {
+          for (let k=0;k<6;k++) {
+            addChord((s+k*step)%n, (s+((k+1)%6)*step)%n);
+          }
+        }
+        log('Hexagon weave created.', 'ok');
+      }
+
+      function exportSvg() {
+        const text = new XMLSerializer().serializeToString(scene.cloneNode(true));
+        const blob = new Blob([text], { type:'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'alchemest-practical.svg'; a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 500);
+        log('SVG exported.', 'ok');
+      }
+
+      function saveProjectJson() {
+        const project = JSON.stringify({
+          count: state.count,
+          rotation: state.rotation,
+          chords: state.chords,
+        }, null, 2);
+        const blob = new Blob([project], {type:'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'alchemest-project.json'; a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 500);
+        log('Project JSON saved.', 'ok');
+      }
+
+      async function loadProjectJson(file) {
+        try {
+          const text = await file.text();
+          const p = JSON.parse(text);
+          state.count = Number(p.count) || 324;
+          state.rotation = Number(p.rotation) || 0;
+          $('count').value = String(state.count);
+          drawRing();
+          chordLayer.innerHTML='';
+          state.chords=[];
+          (p.chords || []).forEach(([i,j]) => addChord(i,j));
+          applyRotation();
+          log('Project JSON loaded.', 'ok');
+          updateStatus();
+        } catch {
+          log('Invalid JSON project file.', 'err');
+        }
+      }
+
+      function resetWorkspace() {
+        state.rotation = 0;
+        state.mode = 'rotate';
+        state.measureStart = null;
+        state.count = 324;
+        $('count').value = '324';
+        chordLayer.innerHTML='';
+        measureLayer.innerHTML='';
+        state.chords=[];
+        drawRing();
+        applyRotation();
+        updateStatus();
+        log('Workspace reset.', 'ok');
+      }
+
+      function nearestNode(x,y,max=44) {
+        let idx = null, dist=max;
+        state.nodes.forEach((n,i)=>{
+          const d = Math.hypot(n.x-x,n.y-y);
+          if (d < dist) { dist=d; idx=i; }
+        });
+        return idx;
+      }
+
+      function svgPoint(e) {
+        const rect = scene.getBoundingClientRect();
+        return [
+          (e.clientX - rect.left) * 1040 / rect.width - 520,
+          (e.clientY - rect.top) * 1040 / rect.height - 520,
+        ];
+      }
+
+      function measure(a,b) {
+        measureLayer.innerHTML='';
+        const n1=state.nodes[a], n2=state.nodes[b];
+        if (!n1 || !n2) return;
+        const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+        line.setAttribute('x1',n1.x); line.setAttribute('y1',n1.y);
+        line.setAttribute('x2',n2.x); line.setAttribute('y2',n2.y);
+        line.setAttribute('stroke','#00e8d1'); line.setAttribute('stroke-dasharray','5,5'); line.setAttribute('stroke-width','2');
+        measureLayer.appendChild(line);
+        const steps = Math.abs(b-a);
+        const deg = steps/state.count*360;
+        log(`Measure ${a}→${b}: ${deg.toFixed(1)}° (${steps} steps).`, 'info');
+      }
+
+      function applyRotation() {
+        ringLayer.style.transform = `rotate(${state.rotation}deg)`;
+        chordLayer.style.transform = `rotate(${state.rotation}deg)`;
+        measureLayer.style.transform = `rotate(${state.rotation}deg)`;
+      }
+
+      let dragging = false, lastA = 0;
+      scene.addEventListener('pointerdown', (e)=> {
+        const [x,y]=svgPoint(e);
+        if (state.mode === 'measure') {
+          const idx = nearestNode(x,y);
+          if (idx === null) return;
+          if (state.measureStart == null) { state.measureStart = idx; log(`Measure start ${idx}`, 'info'); }
+          else { measure(state.measureStart, idx); state.measureStart = null; }
+          return;
+        }
+        dragging = true;
+        scene.setPointerCapture(e.pointerId);
+        const r = scene.getBoundingClientRect();
+        lastA = Math.atan2(e.clientY-(r.top+r.height/2), e.clientX-(r.left+r.width/2));
+      });
+
+      scene.addEventListener('pointermove', (e)=> {
+        if (!dragging || state.mode !== 'rotate') return;
+        const r = scene.getBoundingClientRect();
+        const a = Math.atan2(e.clientY-(r.top+r.height/2), e.clientX-(r.left+r.width/2));
+        state.rotation += (a - lastA) * 180 / Math.PI;
+        lastA = a;
+        applyRotation();
+        updateStatus();
+      });
+
+      scene.addEventListener('pointerup', (e)=> {
+        dragging = false;
+        try { scene.releasePointerCapture(e.pointerId); } catch {}
+      });
+
+      function cast(cmd) {
+        const t = cmd.trim().toUpperCase();
+        if (!t) return;
+        if (t === 'HELP') $('onboard').classList.add('show');
+        else if (t === 'WEAVE HEXAGON') weaveHexagon();
+        else if (t.startsWith('ROTATE ')) {
+          state.rotation += Number(t.split(' ')[1]) || 0;
+          applyRotation();
+          updateStatus();
+        }
+        else if (t === 'RESET') resetWorkspace();
+        else log(`Unknown command: ${cmd}`, 'err');
+      }
+
+      $('count').addEventListener('change', (e)=> { state.count = Number(e.target.value); drawRing(); updateStatus(); });
+      $('weaveHex').addEventListener('click', weaveHexagon);
+      $('clearChords').addEventListener('click', ()=> { chordLayer.innerHTML=''; state.chords=[]; log('Chords cleared.'); });
+      $('measureMode').addEventListener('click', ()=> { state.mode = state.mode === 'measure' ? 'rotate' : 'measure'; updateStatus(); });
+      $('reset').addEventListener('click', resetWorkspace);
+      $('saveSvg').addEventListener('click', exportSvg);
+      $('saveJson').addEventListener('click', saveProjectJson);
+      $('loadJson').addEventListener('change', (e)=> {
+        const file = e.target.files?.[0];
+        if (file) loadProjectJson(file);
+      });
+      $('run').addEventListener('click', ()=> cast($('cmd').value));
+      $('cmd').addEventListener('keydown', (e)=> { if (e.key === 'Enter') { cast($('cmd').value); $('cmd').value=''; } });
+      $('help').addEventListener('click', ()=> $('onboard').classList.add('show'));
+      $('start').addEventListener('click', ()=> $('onboard').classList.remove('show'));
+
+      window.addEventListener('keydown', (e)=> {
+        if (e.key.toLowerCase() === 'h') $('onboard').classList.add('show');
+        if (e.key.toLowerCase() === 'm') { state.mode = state.mode === 'measure' ? 'rotate' : 'measure'; updateStatus(); }
+      });
+
+      drawRing();
+      updateStatus();
+      log('ALCHEMEST practical studio ready.', 'ok');
+    </script>
+  </body>
+</html>

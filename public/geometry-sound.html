@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sacred Geometry &amp; Sonic Consciousness</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600&display=swap');
+:root{
+  --bg:#0a0a1a;--bg2:#12122a;--accent:#c9a84c;--accent2:#7b5ea7;
+  --glow:rgba(201,168,76,0.3);--text:#e8e0d0;--text2:#9990a0;
+  --fire:#e84040;--water:#4090e8;--earth:#606068;
+  --r:16;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif}
+canvas{display:block}
+
+/* Stars background */
+#stars-bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+
+/* Main container */
+#app{position:relative;z-index:1;width:100%;height:100%;display:flex;flex-direction:column}
+
+/* Header */
+#header{
+  text-align:center;padding:12px 0 6px;
+  background:linear-gradient(180deg,rgba(10,10,26,0.95),transparent);
+  position:relative;z-index:10;
+}
+#header h1{font-family:'Cinzel',serif;font-size:1.4rem;letter-spacing:3px;color:var(--accent);text-shadow:0 0 20px var(--glow)}
+#header p{font-size:0.75rem;color:var(--text2);margin-top:2px;letter-spacing:1px}
+#pet-identity{margin-top:8px;font-size:0.72rem;letter-spacing:0.6px;color:#f0dfb0;text-transform:uppercase}
+#pet-identity strong{color:var(--accent)}
+
+/* Mode selector */
+#mode-bar{
+  display:flex;justify-content:center;gap:8px;padding:8px 16px;
+  background:rgba(18,18,42,0.8);border-bottom:1px solid rgba(201,168,76,0.15);
+  position:relative;z-index:10;flex-wrap:wrap;
+}
+.mode-btn{
+  padding:8px 16px;border:1px solid rgba(201,168,76,0.3);border-radius:20px;
+  background:transparent;color:var(--text);cursor:pointer;font-size:0.8rem;
+  font-family:'Inter',sans-serif;transition:all 0.3s;letter-spacing:0.5px;
+}
+.mode-btn:hover{background:rgba(201,168,76,0.15);border-color:var(--accent)}
+.mode-btn.active{background:rgba(201,168,76,0.2);border-color:var(--accent);color:var(--accent);box-shadow:0 0 12px var(--glow)}
+
+/* Canvas area */
+#canvas-area{flex:1;position:relative;overflow:hidden}
+.mode-canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:none}
+.mode-canvas.active{display:block}
+
+/* Info panel */
+#info-toggle{
+  position:absolute;top:8px;right:8px;z-index:20;
+  background:rgba(18,18,42,0.8);border:1px solid rgba(201,168,76,0.3);
+  border-radius:50%;width:32px;height:32px;color:var(--accent);cursor:pointer;
+  font-size:0.9rem;display:flex;align-items:center;justify-content:center;
+  transition:all 0.3s;
+}
+#info-toggle:hover{background:rgba(201,168,76,0.2)}
+#info-panel{
+  position:absolute;top:48px;right:8px;z-index:20;
+  background:rgba(10,10,26,0.95);border:1px solid rgba(201,168,76,0.2);
+  border-radius:12px;padding:16px;width:280px;max-height:60vh;overflow-y:auto;
+  display:none;font-size:0.75rem;line-height:1.5;color:var(--text2);
+}
+#info-panel.show{display:block}
+#info-panel h3{color:var(--accent);font-family:'Cinzel',serif;margin-bottom:8px;font-size:0.85rem}
+#info-panel p{margin-bottom:8px}
+
+/* Bottom controls */
+#bottom-bar{
+  display:flex;align-items:center;justify-content:center;gap:16px;
+  padding:10px 16px;
+  background:linear-gradient(0deg,rgba(10,10,26,0.95),rgba(18,18,42,0.9));
+  border-top:1px solid rgba(201,168,76,0.15);
+  position:relative;z-index:10;flex-wrap:wrap;
+}
+.ctrl-group{display:flex;align-items:center;gap:6px}
+.ctrl-label{font-size:0.65rem;color:var(--text2);text-transform:uppercase;letter-spacing:1px}
+.dna-dot{
+  width:24px;height:24px;border-radius:50%;cursor:pointer;
+  border:2px solid transparent;transition:all 0.3s;
+}
+.dna-dot.fire{background:radial-gradient(circle,#ff6b6b,#c0392b)}
+.dna-dot.water{background:radial-gradient(circle,#74b9ff,#2980b9)}
+.dna-dot.earth{background:radial-gradient(circle,#95a5a6,#2d3436)}
+.dna-dot.active{border-color:var(--accent);box-shadow:0 0 10px var(--glow);transform:scale(1.15)}
+.ctrl-val{font-family:'Cinzel',serif;font-size:1rem;color:var(--accent);min-width:28px;text-align:center}
+input[type=range]{
+  -webkit-appearance:none;width:80px;height:4px;border-radius:2px;
+  background:rgba(201,168,76,0.2);outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:14px;height:14px;border-radius:50%;
+  background:var(--accent);cursor:pointer;box-shadow:0 0 6px var(--glow);
+}
+#play-btn{
+  width:36px;height:36px;border-radius:50%;border:2px solid var(--accent);
+  background:rgba(201,168,76,0.1);color:var(--accent);cursor:pointer;
+  font-size:1rem;display:flex;align-items:center;justify-content:center;
+  transition:all 0.3s;
+}
+#play-btn:hover{background:rgba(201,168,76,0.3);transform:scale(1.1)}
+#play-btn.playing{background:var(--accent);color:var(--bg)}
+#remix-btn{
+  padding:8px 12px;border-radius:999px;border:1px solid rgba(201,168,76,0.35);
+  background:rgba(201,168,76,0.08);color:var(--accent);font-size:0.72rem;
+  letter-spacing:0.6px;cursor:pointer;transition:all 0.3s;display:none;
+}
+#remix-btn.show{display:inline-flex;align-items:center}
+#remix-btn:disabled{opacity:0.35;cursor:not-allowed}
+
+/* Journey overlay */
+#journey-overlay{
+  position:absolute;top:0;left:0;width:100%;height:100%;z-index:30;
+  background:rgba(10,10,26,0.97);display:flex;align-items:center;justify-content:center;
+}
+#journey-overlay.hidden{display:none}
+#journey-box{
+  text-align:center;max-width:420px;padding:40px;
+}
+#journey-box h2{font-family:'Cinzel',serif;font-size:1.5rem;color:var(--accent);margin-bottom:8px}
+#journey-box p{color:var(--text2);font-size:0.85rem;margin-bottom:24px;line-height:1.5}
+.journey-btns{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+.journey-btn{
+  padding:14px 24px;border:1px solid rgba(201,168,76,0.3);border-radius:12px;
+  background:rgba(18,18,42,0.8);color:var(--text);cursor:pointer;
+  font-size:0.9rem;font-family:'Inter',sans-serif;transition:all 0.3s;
+  min-width:140px;
+}
+.journey-btn:hover{background:rgba(201,168,76,0.15);border-color:var(--accent);transform:translateY(-2px)}
+.journey-btn .emoji{font-size:1.4rem;display:block;margin-bottom:6px}
+.journey-slider-wrap{margin:16px auto;max-width:280px}
+.journey-slider-wrap label{display:block;font-size:0.75rem;color:var(--text2);margin-bottom:8px}
+.journey-slider-wrap input[type=range]{width:100%}
+.journey-val{font-family:'Cinzel',serif;font-size:1.8rem;color:var(--accent);margin:8px 0}
+#journey-step{font-size:0.7rem;color:var(--text2);margin-bottom:16px}
+
+/* Scroll bar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(201,168,76,0.3);border-radius:2px}
+
+/* Sound init overlay */
+#sound-init{
+  position:fixed;top:0;left:0;width:100%;height:100%;z-index:100;
+  background:rgba(10,10,26,0.98);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+}
+#sound-init.hidden{display:none}
+#sound-init-inner{text-align:center}
+#sound-init-inner h2{font-family:'Cinzel',serif;font-size:1.8rem;color:var(--accent);margin-bottom:12px}
+#sound-init-inner p{color:var(--text2);font-size:0.9rem}
+#sound-init-inner .pulse-ring{
+  width:80px;height:80px;border-radius:50%;border:2px solid var(--accent);
+  margin:24px auto;display:flex;align-items:center;justify-content:center;
+  animation:pulse-glow 2s ease-in-out infinite;font-size:2rem;
+}
+@keyframes pulse-glow{
+  0%,100%{box-shadow:0 0 10px var(--glow);transform:scale(1)}
+  50%{box-shadow:0 0 30px var(--glow);transform:scale(1.05)}
+}
+</style>
+</head>
+<body>
+
+<!-- Sound initialization overlay -->
+<div id="sound-init">
+  <div id="sound-init-inner">
+    <h2>Sacred Geometry &amp; Sonic Consciousness</h2>
+    <div class="pulse-ring">&#9775;</div>
+    <p>Touch anywhere to awaken</p>
+  </div>
+</div>
+
+<!-- Star background canvas -->
+<canvas id="stars-bg"></canvas>
+
+<div id="app">
+  <!-- Header -->
+  <div id="header">
+    <h1>Sacred Geometry &amp; Sonic Consciousness</h1>
+    <p>Experience the DNA of creation through light and sound</p>
+    <div id="pet-identity">Meta Pet resonance stream</div>
+  </div>
+
+  <!-- Mode selector -->
+  <div id="mode-bar">
+    <button class="mode-btn active" data-mode="helix">DNA Helix</button>
+    <button class="mode-btn" data-mode="mandala">Sacred Mandala</button>
+    <button class="mode-btn" data-mode="particles">Particle Field</button>
+    <button class="mode-btn" data-mode="temple">Sound Temple</button>
+    <button class="mode-btn" data-mode="journey">Guided Journey</button>
+  </div>
+
+  <!-- Canvas area -->
+  <div id="canvas-area">
+    <canvas id="helix-canvas" class="mode-canvas active"></canvas>
+    <canvas id="mandala-canvas" class="mode-canvas"></canvas>
+    <canvas id="particles-canvas" class="mode-canvas"></canvas>
+    <canvas id="temple-canvas" class="mode-canvas"></canvas>
+    <div id="journey-overlay" class="hidden">
+      <div id="journey-box"></div>
+    </div>
+
+    <!-- Info toggle -->
+    <button id="info-toggle">i</button>
+    <div id="info-panel">
+      <h3>About This Mode</h3>
+      <p id="info-text">Explore the DNA of creation through sacred geometry and sound. Each mode offers a unique way to experience the underlying mathematical structure.</p>
+    </div>
+  </div>
+
+  <!-- Bottom control bar -->
+  <div id="bottom-bar">
+    <div class="ctrl-group">
+      <span class="ctrl-label">DNA</span>
+      <div class="dna-dot fire active" data-dna="fire" title="Fire (Red)"></div>
+      <div class="dna-dot water" data-dna="water" title="Water (Blue)"></div>
+      <div class="dna-dot earth" data-dna="earth" title="Earth (Black)"></div>
+    </div>
+    <div class="ctrl-group">
+      <span class="ctrl-label">Harmony</span>
+      <span class="ctrl-val" id="harmony-val">7</span>
+      <input type="range" id="harmony-slider" min="3" max="12" value="7" step="1">
+    </div>
+    <div class="ctrl-group">
+      <span class="ctrl-label">Awareness</span>
+      <span class="ctrl-val" id="awareness-val">60%</span>
+      <input type="range" id="awareness-slider" min="0" max="100" value="60" step="5">
+    </div>
+    <button id="play-btn" title="Play sequence">&#9654;</button>
+    <button id="remix-btn" title="Unlock controls after first run">Remix</button>
+    <div class="ctrl-group">
+      <span class="ctrl-label">Tempo</span>
+      <span class="ctrl-val" id="tempo-val">120</span>
+      <input type="range" id="tempo-slider" min="60" max="180" value="120" step="5">
+    </div>
+  </div>
+</div>
+
+<!-- THREE.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- Tone.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+<script>
+// ===== MOSS60 SEEDS =====
+const SEEDS = {
+  fire:  '113031491493585389543778774590997079619617525721567332336510',
+  water: '012776329785893036118967145479098334781325217074992143965631',
+  earth: '011235831459437077415617853819099875279651673033695493257291'
+};
+
+// ===== PET CONTEXT + MUSICAL MAPPING =====
+const urlParams = new URLSearchParams(window.location.search);
+const petContext = {
+  petId: urlParams.get('petId') || 'metapet-primary',
+  petName: urlParams.get('petName') || 'Meta Pet',
+  petType: urlParams.get('petType') || 'geometric',
+  seed: urlParams.get('seed') || 'origin-seed',
+  elementProfile: urlParams.get('elementProfile') || 'fire',
+  resonanceIndex: Math.max(0, Math.min(100, Number(urlParams.get('resonanceIndex') || 60))),
+};
+
+const HARMONIC_SETS = {
+  fire: [1, 6/5, 4/3, 3/2, 5/3, 2],
+  water: [1, 9/8, 4/3, 3/2, 16/9, 2],
+  earth: [1, 5/4, 3/2, 7/4, 15/8, 2],
+};
+
+const PALETTE_PRESETS = {
+  fire: ['#6f2a1f', '#94311f', '#ba4b28', '#d05e34', '#e57f3f', '#f2a648', '#f5c968', '#f8d980', '#f5e9aa', '#fdf4d2'],
+  water: ['#1f3c70', '#285691', '#326db1', '#3d84cb', '#4f99db', '#64afe8', '#7dc2ef', '#98d5f5', '#b6e4fa', '#d7f2ff'],
+  earth: ['#3b3328', '#4e4230', '#605238', '#73633f', '#87764a', '#9a8854', '#ae9b61', '#c3af72', '#d9c58b', '#eee0b1'],
+};
+
+const GEOMETRY_PRESETS = {
+  fire: { mode: 'helix', harmony: 10, awareness: 72 },
+  water: { mode: 'mandala', harmony: 7, awareness: 80 },
+  earth: { mode: 'particles', harmony: 5, awareness: 68 },
+};
+
+const baseFrequency = 180 + petContext.resonanceIndex * 3.2;
+const harmonicSet = HARMONIC_SETS[petContext.elementProfile] || HARMONIC_SETS.fire;
+const noteFreqs = Array.from({ length: 10 }, (_, idx) => {
+  const ratio = harmonicSet[idx % harmonicSet.length];
+  const octave = Math.floor(idx / harmonicSet.length);
+  return +(baseFrequency * ratio * Math.pow(2, octave * 0.5)).toFixed(2);
+});
+
+const NOTE_FREQS = noteFreqs;
+const NOTE_NAMES = NOTE_FREQS.map((_, idx) => `R${idx}`);
+const DIGIT_COLORS = PALETTE_PRESETS[petContext.elementProfile] || PALETTE_PRESETS.fire;
+const DIGIT_COLORS_RGB = DIGIT_COLORS.map(hex => {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return {r,g,b};
+});
+
+// ===== SESSION PROFILE =====
+function decodeSessionProfile() {
+  const params = new URLSearchParams(window.location.search);
+  const encoded = params.get('session');
+  if (!encoded) return null;
+  try {
+    const normalized = encoded.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
+    return JSON.parse(atob(padded));
+  } catch (error) {
+    console.warn('Failed to decode session profile', error);
+    return null;
+  }
+}
+
+const sessionProfile = decodeSessionProfile();
+
+// ===== STATE =====
+const state = {
+  dna: petContext.elementProfile in SEEDS ? petContext.elementProfile : 'fire',
+  harmony: Math.max(3, Math.min(12, GEOMETRY_PRESETS[petContext.elementProfile]?.harmony ?? 7)),
+  awareness: Math.max(0, Math.min(100, Math.round((GEOMETRY_PRESETS[petContext.elementProfile]?.awareness ?? 60) + (petContext.resonanceIndex - 60) * 0.2))),
+  tempo: 120,
+  mode: GEOMETRY_PRESETS[petContext.elementProfile]?.mode || 'helix',
+  audioReady: false,
+  playing: false,
+  mouseX: 0,
+  mouseY: 0,
+  mouseDown: false,
+  controlsLocked: Boolean(sessionProfile?.lockFirstRun),
+  canRemix: false,
+  firstPlaybackComplete: false,
+};
+
+function getDigits() {
+  return SEEDS[state.dna].split('').map(Number);
+}
+
+// ===== SOUND ENGINE (Tone.js) =====
+let synth, reverb;
+
+async function initAudio() {
+  await Tone.start();
+  reverb = new Tone.Reverb({ decay: 4, wet: 0.3 }).toDestination();
+  synth = new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: 'sine' },
+    envelope: { attack: 0.1, decay: 0.2, sustain: 0.3, release: 1.0 }
+  }).connect(reverb);
+  synth.volume.value = -8;
+  state.audioReady = true;
+}
+
+function playNote(digit) {
+  if (!state.audioReady || !synth) return;
+  const freq = NOTE_FREQS[digit];
+  synth.triggerAttackRelease(freq, '8n');
+}
+
+function playSequence() {
+  if (!state.audioReady || state.playing) return;
+  state.playing = true;
+  document.getElementById('play-btn').classList.add('playing');
+  const digits = getDigits();
+  const interval = 60 / state.tempo;
+  let i = 0;
+  const timer = setInterval(() => {
+    if (i >= digits.length) {
+      clearInterval(timer);
+      state.playing = false;
+      document.getElementById('play-btn').classList.remove('playing');
+      if (state.controlsLocked) {
+        state.firstPlaybackComplete = true;
+        state.canRemix = true;
+        syncRemixButton();
+      }
+      return;
+    }
+    playNote(digits[i]);
+    // Notify active mode for visual feedback
+    if (state.mode === 'temple') templeHighlight(i);
+    i++;
+  }, interval * 1000);
+}
+
+// ===== STAR BACKGROUND =====
+function initStars() {
+  const c = document.getElementById('stars-bg');
+  const ctx = c.getContext('2d');
+  function resize() {
+    c.width = window.innerWidth;
+    c.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const stars = Array.from({length: 200}, () => ({
+    x: Math.random() * c.width,
+    y: Math.random() * c.height,
+    r: Math.random() * 1.2 + 0.3,
+    a: Math.random(),
+    sp: Math.random() * 0.005 + 0.002
+  }));
+
+  function draw() {
+    ctx.clearRect(0, 0, c.width, c.height);
+    for (const s of stars) {
+      s.a += s.sp;
+      const alpha = 0.3 + 0.4 * Math.sin(s.a);
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(201,168,76,${alpha})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ===== DNA HELIX EXPLORER (THREE.js) =====
+let helixScene, helixCamera, helixRenderer, helixSpheres = [], helixRaycaster, helixMouse;
+let helixAnimId;
+
+function initHelix() {
+  const container = document.getElementById('canvas-area');
+  const w = container.clientWidth;
+  const h = container.clientHeight;
+
+  helixScene = new THREE.Scene();
+  helixCamera = new THREE.PerspectiveCamera(60, w / h, 0.1, 1000);
+  helixCamera.position.set(0, 0, 30);
+
+  helixRenderer = new THREE.WebGLRenderer({
+    canvas: document.getElementById('helix-canvas'),
+    alpha: true,
+    antialias: true
+  });
+  helixRenderer.setSize(w, h);
+  helixRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  helixRaycaster = new THREE.Raycaster();
+  helixMouse = new THREE.Vector2(-999, -999);
+
+  // Ambient light
+  helixScene.add(new THREE.AmbientLight(0xc9a84c, 0.3));
+  const pointLight = new THREE.PointLight(0xc9a84c, 1.5, 60);
+  pointLight.position.set(0, 0, 20);
+  helixScene.add(pointLight);
+
+  buildHelix();
+  animateHelix();
+}
+
+function buildHelix() {
+  // Clear existing
+  for (const s of helixSpheres) {
+    helixScene.remove(s.mesh);
+    if (s.line) helixScene.remove(s.line);
+  }
+  helixSpheres = [];
+
+  const digits = getDigits();
+  const arms = state.harmony;
+  const totalPerArm = Math.floor(digits.length / arms);
+
+  for (let arm = 0; arm < arms; arm++) {
+    const armOffset = (arm / arms) * Math.PI * 2;
+    for (let i = 0; i < totalPerArm; i++) {
+      const idx = arm * totalPerArm + i;
+      if (idx >= digits.length) break;
+      const digit = digits[idx];
+
+      const t = i / totalPerArm;
+      const angle = t * Math.PI * 4 + armOffset;
+      const radius = 6 + Math.sin(t * Math.PI) * 3;
+      const y = (t - 0.5) * 24;
+      const x = Math.cos(angle) * radius;
+      const z = Math.sin(angle) * radius;
+
+      const col = DIGIT_COLORS_RGB[digit];
+      const geo = new THREE.SphereGeometry(0.35 + digit * 0.03, 16, 16);
+      const mat = new THREE.MeshPhongMaterial({
+        color: new THREE.Color(col.r/255, col.g/255, col.b/255),
+        emissive: new THREE.Color(col.r/510, col.g/510, col.b/510),
+        shininess: 80,
+        transparent: true,
+        opacity: 0.9
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(x, y, z);
+      mesh.userData = { digit, idx, arm, baseEmissive: mat.emissive.clone() };
+      helixScene.add(mesh);
+
+      // Connection lines between adjacent spheres in same arm
+      let line = null;
+      if (i > 0) {
+        const prev = helixSpheres[helixSpheres.length - 1];
+        if (prev && prev.arm === arm) {
+          const lineGeo = new THREE.BufferGeometry().setFromPoints([
+            prev.mesh.position, mesh.position
+          ]);
+          const lineMat = new THREE.LineBasicMaterial({
+            color: 0xc9a84c,
+            transparent: true,
+            opacity: 0.15
+          });
+          line = new THREE.Line(lineGeo, lineMat);
+          helixScene.add(line);
+        }
+      }
+
+      helixSpheres.push({ mesh, line, digit, idx, arm, baseScale: 1 });
+    }
+  }
+}
+
+let helixTime = 0;
+function animateHelix() {
+  helixAnimId = requestAnimationFrame(animateHelix);
+  helixTime += 0.005;
+
+  // Breathing effect
+  const breathe = 1 + Math.sin(helixTime * 2) * 0.05;
+
+  // Rotate entire scene slowly
+  helixScene.rotation.y = helixTime * 0.3;
+
+  // Raycasting for hover
+  helixRaycaster.setFromCamera(helixMouse, helixCamera);
+  const meshes = helixSpheres.map(s => s.mesh);
+  const intersects = helixRaycaster.intersectObjects(meshes);
+
+  for (const s of helixSpheres) {
+    const scale = breathe * s.baseScale;
+    s.mesh.scale.set(scale, scale, scale);
+    s.mesh.material.emissive.copy(s.mesh.userData.baseEmissive);
+  }
+
+  if (intersects.length > 0) {
+    const hit = intersects[0].object;
+    hit.scale.set(breathe * 1.8, breathe * 1.8, breathe * 1.8);
+    hit.material.emissive.set(0xc9a84c);
+    // Play note on hover (throttled)
+    if (!hit.userData._lastPlay || Date.now() - hit.userData._lastPlay > 300) {
+      playNote(hit.userData.digit);
+      hit.userData._lastPlay = Date.now();
+    }
+  }
+
+  helixRenderer.render(helixScene, helixCamera);
+}
+
+// ===== SACRED MANDALA PAINTER (Canvas 2D) =====
+let mandalaCtx, mandalaW, mandalaH;
+let paintTrails = [];
+
+function initMandala() {
+  const c = document.getElementById('mandala-canvas');
+  const container = document.getElementById('canvas-area');
+  c.width = container.clientWidth;
+  c.height = container.clientHeight;
+  mandalaCtx = c.getContext('2d');
+  mandalaW = c.width;
+  mandalaH = c.height;
+  paintTrails = [];
+  animateMandala();
+}
+
+let mandalaTime = 0;
+function animateMandala() {
+  if (state.mode !== 'mandala') return;
+  requestAnimationFrame(animateMandala);
+  mandalaTime += 0.01;
+
+  const ctx = mandalaCtx;
+  const cx = mandalaW / 2;
+  const cy = mandalaH / 2;
+  const maxR = Math.min(cx, cy) - 20;
+  const digits = getDigits();
+  const arms = state.harmony;
+
+  // Background
+  ctx.fillStyle = 'rgba(10,10,26,0.08)';
+  ctx.fillRect(0, 0, mandalaW, mandalaH);
+
+  // Draw every 4th frame fully to avoid flicker
+  if (Math.floor(mandalaTime * 100) % 4 === 0) {
+    ctx.fillStyle = 'rgba(10,10,26,0.95)';
+    ctx.fillRect(0, 0, mandalaW, mandalaH);
+
+    // Draw rings
+    const rings = 7;
+    const dotsPerRing = Math.floor(digits.length / rings);
+    for (let ring = 0; ring < rings; ring++) {
+      const ringR = maxR * ((ring + 1) / (rings + 1));
+      const breathe = 1 + Math.sin(mandalaTime + ring * 0.5) * 0.02;
+
+      for (let d = 0; d < dotsPerRing; d++) {
+        const idx = ring * dotsPerRing + d;
+        if (idx >= digits.length) break;
+        const digit = digits[idx];
+
+        const angle = (d / dotsPerRing) * Math.PI * 2 + mandalaTime * 0.2 + ring * 0.1;
+        const r = ringR * breathe;
+        const x = cx + Math.cos(angle) * r;
+        const y = cy + Math.sin(angle) * r;
+        const dotR = 2.5 + digit * 0.4;
+
+        const col = DIGIT_COLORS[digit];
+        ctx.beginPath();
+        ctx.arc(x, y, dotR, 0, Math.PI * 2);
+        ctx.fillStyle = col;
+        ctx.fill();
+
+        // Glow
+        ctx.beginPath();
+        ctx.arc(x, y, dotR + 3, 0, Math.PI * 2);
+        const grad = ctx.createRadialGradient(x, y, dotR, x, y, dotR + 6);
+        grad.addColorStop(0, col + '40');
+        grad.addColorStop(1, 'transparent');
+        ctx.fillStyle = grad;
+        ctx.fill();
+      }
+    }
+
+    // Central hepta-star
+    ctx.beginPath();
+    for (let i = 0; i < arms; i++) {
+      const angle = (i / arms) * Math.PI * 2 - Math.PI / 2 + mandalaTime * 0.1;
+      const outerR = maxR * 0.12;
+      const innerR = outerR * 0.45;
+      const ox = cx + Math.cos(angle) * outerR;
+      const oy = cy + Math.sin(angle) * outerR;
+      const midAngle = angle + Math.PI / arms;
+      const ix = cx + Math.cos(midAngle) * innerR;
+      const iy = cy + Math.sin(midAngle) * innerR;
+      if (i === 0) ctx.moveTo(ox, oy);
+      else ctx.lineTo(ox, oy);
+      ctx.lineTo(ix, iy);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = `rgba(201,168,76,${0.5 + Math.sin(mandalaTime) * 0.3})`;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.fillStyle = `rgba(201,168,76,${0.08 + Math.sin(mandalaTime) * 0.05})`;
+    ctx.fill();
+
+    // Paint trails
+    for (let i = paintTrails.length - 1; i >= 0; i--) {
+      const t = paintTrails[i];
+      t.alpha -= 0.002;
+      if (t.alpha <= 0) { paintTrails.splice(i, 1); continue; }
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(201,168,76,${t.alpha})`;
+      ctx.fill();
+    }
+  }
+}
+
+function mandalaPaint(x, y) {
+  const cx = mandalaW / 2;
+  const cy = mandalaH / 2;
+  const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
+  const maxR = Math.min(cx, cy) - 20;
+  const normDist = Math.min(dist / maxR, 1);
+
+  // Play note based on distance from center
+  const noteIdx = Math.min(9, Math.floor(normDist * 10));
+  playNote(noteIdx);
+
+  // Mirror paint across symmetry
+  const angle = Math.atan2(y - cy, x - cx);
+  for (let i = 0; i < state.harmony; i++) {
+    const a = angle + (i / state.harmony) * Math.PI * 2;
+    const px = cx + Math.cos(a) * dist;
+    const py = cy + Math.sin(a) * dist;
+    paintTrails.push({ x: px, y: py, r: 4 + Math.random() * 3, alpha: 0.7 });
+  }
+}
+
+// ===== PARTICLE FIELD GUIDE (Canvas 2D) =====
+let particlesCtx, particlesW, particlesH;
+let particles = [];
+
+function initParticles() {
+  const c = document.getElementById('particles-canvas');
+  const container = document.getElementById('canvas-area');
+  c.width = container.clientWidth;
+  c.height = container.clientHeight;
+  particlesCtx = c.getContext('2d');
+  particlesW = c.width;
+  particlesH = c.height;
+
+  const digits = getDigits();
+  particles = digits.map((digit, i) => ({
+    x: Math.random() * particlesW,
+    y: Math.random() * particlesH,
+    vx: (Math.random() - 0.5) * 2,
+    vy: (Math.random() - 0.5) * 2,
+    digit,
+    r: 4 + digit * 0.8,
+    trail: [],
+  }));
+
+  animateParticles();
+}
+
+function animateParticles() {
+  if (state.mode !== 'particles') return;
+  requestAnimationFrame(animateParticles);
+
+  const ctx = particlesCtx;
+  ctx.fillStyle = 'rgba(10,10,26,0.12)';
+  ctx.fillRect(0, 0, particlesW, particlesH);
+
+  const attraction = (state.awareness / 100) * 0.08;
+  const mx = state.mouseX;
+  const my = state.mouseY;
+
+  for (const p of particles) {
+    // Attract to mouse
+    const dx = mx - p.x;
+    const dy = my - p.y;
+    const dist = Math.sqrt(dx * dx + dy * dy) + 1;
+    if (dist < 300) {
+      p.vx += (dx / dist) * attraction;
+      p.vy += (dy / dist) * attraction;
+    }
+
+    // Damping
+    p.vx *= 0.98;
+    p.vy *= 0.98;
+
+    // Update position
+    p.x += p.vx;
+    p.y += p.vy;
+
+    // Bounce off edges
+    if (p.x < 0) { p.x = 0; p.vx *= -0.8; }
+    if (p.x > particlesW) { p.x = particlesW; p.vx *= -0.8; }
+    if (p.y < 0) { p.y = 0; p.vy *= -0.8; }
+    if (p.y > particlesH) { p.y = particlesH; p.vy *= -0.8; }
+
+    // Trail
+    p.trail.push({ x: p.x, y: p.y });
+    if (p.trail.length > 15) p.trail.shift();
+
+    // Draw trail
+    if (p.trail.length > 1) {
+      ctx.beginPath();
+      ctx.moveTo(p.trail[0].x, p.trail[0].y);
+      for (let i = 1; i < p.trail.length; i++) {
+        ctx.lineTo(p.trail[i].x, p.trail[i].y);
+      }
+      ctx.strokeStyle = DIGIT_COLORS[p.digit] + '30';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    // Draw particle
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    const col = DIGIT_COLORS_RGB[p.digit];
+    const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 2.5);
+    glow.addColorStop(0, `rgba(${col.r},${col.g},${col.b},0.9)`);
+    glow.addColorStop(0.5, `rgba(${col.r},${col.g},${col.b},0.3)`);
+    glow.addColorStop(1, 'transparent');
+    ctx.fillStyle = glow;
+    ctx.fill();
+
+    // Connections to nearby particles
+    for (const q of particles) {
+      if (q === p) continue;
+      const d = Math.sqrt((p.x - q.x) ** 2 + (p.y - q.y) ** 2);
+      if (d < 60 + state.awareness * 0.5) {
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(q.x, q.y);
+        const alpha = Math.max(0, 0.15 - d * 0.002);
+        ctx.strokeStyle = `rgba(201,168,76,${alpha})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  }
+}
+
+// ===== SOUND TEMPLE (Canvas 2D) =====
+let templeCtx, templeW, templeH;
+let templeHighlightIdx = -1;
+
+function initTemple() {
+  const c = document.getElementById('temple-canvas');
+  const container = document.getElementById('canvas-area');
+  c.width = container.clientWidth;
+  c.height = container.clientHeight;
+  templeCtx = c.getContext('2d');
+  templeW = c.width;
+  templeH = c.height;
+  animateTemple();
+}
+
+function templeHighlight(idx) {
+  templeHighlightIdx = idx;
+  setTimeout(() => { if (templeHighlightIdx === idx) templeHighlightIdx = -1; }, 200);
+}
+
+let templeTime = 0;
+function animateTemple() {
+  if (state.mode !== 'temple') return;
+  requestAnimationFrame(animateTemple);
+  templeTime += 0.02;
+
+  const ctx = templeCtx;
+  const digits = getDigits();
+  const cols = 10;
+  const rows = Math.ceil(digits.length / cols);
+  const margin = 40;
+  const barW = (templeW - margin * 2) / cols - 4;
+  const maxBarH = (templeH - margin * 2) / rows - 8;
+
+  ctx.fillStyle = 'rgba(10,10,26,0.3)';
+  ctx.fillRect(0, 0, templeW, templeH);
+
+  for (let i = 0; i < digits.length; i++) {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    const digit = digits[i];
+
+    const x = margin + col * (barW + 4);
+    const baseY = margin + row * (maxBarH + 8) + maxBarH;
+    const barH = (digit + 1) / 10 * maxBarH;
+
+    const isHighlighted = i === templeHighlightIdx;
+    const breathe = 1 + Math.sin(templeTime + i * 0.2) * 0.03;
+    const h = barH * breathe;
+
+    // Bar
+    const color = DIGIT_COLORS_RGB[digit];
+    const brightness = isHighlighted ? 1.5 : 1;
+    const r = Math.min(255, color.r * brightness);
+    const g = Math.min(255, color.g * brightness);
+    const b = Math.min(255, color.b * brightness);
+
+    // Glow for highlighted
+    if (isHighlighted) {
+      ctx.shadowColor = DIGIT_COLORS[digit];
+      ctx.shadowBlur = 20;
+    }
+
+    const grad = ctx.createLinearGradient(x, baseY, x, baseY - h);
+    grad.addColorStop(0, `rgba(${r},${g},${b},0.9)`);
+    grad.addColorStop(1, `rgba(${r},${g},${b},0.5)`);
+    ctx.fillStyle = grad;
+
+    const cornerR = 3;
+    ctx.beginPath();
+    ctx.moveTo(x + cornerR, baseY);
+    ctx.lineTo(x + barW - cornerR, baseY);
+    ctx.arcTo(x + barW, baseY, x + barW, baseY - cornerR, cornerR);
+    ctx.lineTo(x + barW, baseY - h + cornerR);
+    ctx.arcTo(x + barW, baseY - h, x + barW - cornerR, baseY - h, cornerR);
+    ctx.lineTo(x + cornerR, baseY - h);
+    ctx.arcTo(x, baseY - h, x, baseY - h + cornerR, cornerR);
+    ctx.lineTo(x, baseY - cornerR);
+    ctx.arcTo(x, baseY, x + cornerR, baseY, cornerR);
+    ctx.fill();
+
+    ctx.shadowBlur = 0;
+
+    // Top glow
+    ctx.beginPath();
+    ctx.arc(x + barW / 2, baseY - h, barW / 2, 0, Math.PI * 2);
+    const topGlow = ctx.createRadialGradient(x + barW / 2, baseY - h, 0, x + barW / 2, baseY - h, barW);
+    topGlow.addColorStop(0, `rgba(${r},${g},${b},${isHighlighted ? 0.6 : 0.2})`);
+    topGlow.addColorStop(1, 'transparent');
+    ctx.fillStyle = topGlow;
+    ctx.fill();
+  }
+}
+
+function templeClick(x, y) {
+  const digits = getDigits();
+  const cols = 10;
+  const rows = Math.ceil(digits.length / cols);
+  const margin = 40;
+  const barW = (templeW - margin * 2) / cols - 4;
+  const maxBarH = (templeH - margin * 2) / rows - 8;
+
+  for (let i = 0; i < digits.length; i++) {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    const bx = margin + col * (barW + 4);
+    const by = margin + row * (maxBarH + 8);
+
+    if (x >= bx && x <= bx + barW && y >= by && y <= by + maxBarH) {
+      playNote(digits[i]);
+      templeHighlight(i);
+      return;
+    }
+  }
+}
+
+// ===== GUIDED JOURNEY =====
+let journeyStep = 0;
+
+function showJourney() {
+  document.getElementById('journey-overlay').classList.remove('hidden');
+  journeyStep = 0;
+  renderJourneyStep();
+}
+
+function hideJourney() {
+  document.getElementById('journey-overlay').classList.add('hidden');
+}
+
+function renderJourneyStep() {
+  const box = document.getElementById('journey-box');
+  const steps = [
+    // Step 0: Awaken the Seed
+    {
+      title: 'Awaken the Seed',
+      desc: 'Choose the elemental energy that resonates with your spirit. Each seed contains 60 sacred digits that shape all geometry and sound.',
+      step: 'Step 1 of 5',
+      content: `
+        <div class="journey-btns">
+          <button class="journey-btn" onclick="setDNA('fire');nextJourney()">
+            <span class="emoji">&#128308;</span>Fire
+          </button>
+          <button class="journey-btn" onclick="setDNA('water');nextJourney()">
+            <span class="emoji">&#128309;</span>Water
+          </button>
+          <button class="journey-btn" onclick="setDNA('earth');nextJourney()">
+            <span class="emoji">&#11035;</span>Earth
+          </button>
+        </div>
+      `
+    },
+    // Step 1: Set the Rhythm
+    {
+      title: 'Set the Rhythm',
+      desc: 'Choose the tempo at which the sacred sequence unfolds. Slower tempos reveal meditative patterns; faster tempos ignite energy.',
+      step: 'Step 2 of 5',
+      content: `
+        <div class="journey-slider-wrap">
+          <div class="journey-val" id="j-tempo-val">${state.tempo}</div>
+          <label>Beats Per Minute</label>
+          <input type="range" min="60" max="180" value="${state.tempo}" step="5"
+            oninput="state.tempo=+this.value;document.getElementById('j-tempo-val').textContent=this.value;document.getElementById('tempo-slider').value=this.value;document.getElementById('tempo-val').textContent=this.value">
+        </div>
+        <div class="journey-btns" style="margin-top:16px">
+          <button class="journey-btn" onclick="nextJourney()">
+            <span class="emoji">&#10145;</span>Continue
+          </button>
+        </div>
+      `
+    },
+    // Step 2: Deepen Consciousness
+    {
+      title: 'Deepen Consciousness',
+      desc: 'Set your awareness level. Higher awareness strengthens the connection between your presence and the particle field.',
+      step: 'Step 3 of 5',
+      content: `
+        <div class="journey-slider-wrap">
+          <div class="journey-val" id="j-aware-val">${state.awareness}%</div>
+          <label>Awareness Level</label>
+          <input type="range" min="0" max="100" value="${state.awareness}" step="5"
+            oninput="state.awareness=+this.value;document.getElementById('j-aware-val').textContent=this.value+'%';document.getElementById('awareness-slider').value=this.value;document.getElementById('awareness-val').textContent=this.value+'%'">
+        </div>
+        <div class="journey-btns" style="margin-top:16px">
+          <button class="journey-btn" onclick="nextJourney()">
+            <span class="emoji">&#10145;</span>Continue
+          </button>
+        </div>
+      `
+    },
+    // Step 3: Choose Sacred Number
+    {
+      title: 'Choose Sacred Number',
+      desc: 'This number determines the symmetry of spirals, mandala arms, and harmonic structure. Seven is the ancient default.',
+      step: 'Step 4 of 5',
+      content: `
+        <div class="journey-btns">
+          ${[3,5,7,9,12].map(n =>
+            `<button class="journey-btn" onclick="setHarmony(${n});nextJourney()">
+              <span class="emoji">${n}</span>${n === 7 ? 'Default' : n === 3 ? 'Trinity' : n === 5 ? 'Pentad' : n === 9 ? 'Ennead' : 'Zodiac'}
+            </button>`
+          ).join('')}
+        </div>
+      `
+    },
+    // Step 4: Begin Exploration
+    {
+      title: 'Begin Exploration',
+      desc: 'Choose how you wish to experience the sacred geometry. You can switch modes anytime using the buttons above.',
+      step: 'Step 5 of 5',
+      content: `
+        <div class="journey-btns">
+          <button class="journey-btn" onclick="hideJourney();switchMode('helix')">
+            <span class="emoji">&#127744;</span>Enter the Helix
+          </button>
+          <button class="journey-btn" onclick="hideJourney();switchMode('mandala')">
+            <span class="emoji">&#128302;</span>Paint the Mandala
+          </button>
+          <button class="journey-btn" onclick="hideJourney();switchMode('particles')">
+            <span class="emoji">&#10024;</span>Guide the Particles
+          </button>
+          <button class="journey-btn" onclick="hideJourney();switchMode('temple')">
+            <span class="emoji">&#127925;</span>Hear the Song
+          </button>
+        </div>
+      `
+    },
+  ];
+
+  const s = steps[journeyStep];
+  box.innerHTML = `
+    <div id="journey-step">${s.step}</div>
+    <h2>${s.title}</h2>
+    <p>${s.desc}</p>
+    ${s.content}
+  `;
+}
+
+function nextJourney() {
+  journeyStep++;
+  renderJourneyStep();
+}
+
+function setDNA(type, force = false) {
+  if (state.controlsLocked && !force) return;
+  state.dna = type;
+  document.querySelectorAll('.dna-dot').forEach(d => d.classList.toggle('active', d.dataset.dna === type));
+  rebuildActiveMode();
+}
+
+function setHarmony(val, force = false) {
+  if (state.controlsLocked && !force) return;
+  state.harmony = val;
+  document.getElementById('harmony-slider').value = val;
+  document.getElementById('harmony-val').textContent = val;
+  rebuildActiveMode();
+}
+
+function rebuildActiveMode() {
+  if (state.mode === 'helix') buildHelix();
+  if (state.mode === 'particles') {
+    const digits = getDigits();
+    particles = digits.map((digit) => ({
+      x: Math.random() * particlesW,
+      y: Math.random() * particlesH,
+      vx: (Math.random() - 0.5) * 2,
+      vy: (Math.random() - 0.5) * 2,
+      digit,
+      r: 4 + digit * 0.8,
+      trail: [],
+    }));
+  }
+}
+
+function syncRemixButton() {
+  const remixBtn = document.getElementById('remix-btn');
+  remixBtn.classList.toggle('show', Boolean(sessionProfile?.lockFirstRun));
+  remixBtn.disabled = !state.canRemix || state.playing;
+}
+
+function setControlsLocked(locked) {
+  state.controlsLocked = locked;
+  const lockables = [
+    ...document.querySelectorAll('.mode-btn'),
+    ...document.querySelectorAll('.dna-dot'),
+    document.getElementById('harmony-slider'),
+    document.getElementById('awareness-slider'),
+    document.getElementById('tempo-slider'),
+  ];
+  lockables.forEach(el => {
+    if (!el) return;
+    el.toggleAttribute('disabled', locked);
+    el.style.pointerEvents = locked ? 'none' : '';
+    el.style.opacity = locked ? '0.45' : '';
+  });
+  syncRemixButton();
+}
+
+function applySessionProfile() {
+  if (!sessionProfile) return;
+  if (sessionProfile.dna) setDNA(sessionProfile.dna, true);
+  if (typeof sessionProfile.harmony === 'number') setHarmony(sessionProfile.harmony, true);
+  if (typeof sessionProfile.awareness === 'number') {
+    state.awareness = Math.max(0, Math.min(100, sessionProfile.awareness));
+    document.getElementById('awareness-slider').value = state.awareness;
+    document.getElementById('awareness-val').textContent = `${state.awareness}%`;
+  }
+  if (typeof sessionProfile.tempo === 'number') {
+    state.tempo = Math.max(60, Math.min(180, sessionProfile.tempo));
+    document.getElementById('tempo-slider').value = state.tempo;
+    document.getElementById('tempo-val').textContent = state.tempo;
+  }
+  if (sessionProfile.mode) switchMode(sessionProfile.mode, true);
+  if (sessionProfile.lockFirstRun) setControlsLocked(true);
+}
+
+// ===== MODE SWITCHING =====
+function switchMode(mode, force = false) {
+  if (state.controlsLocked && state.firstPlaybackComplete === false && !force) return;
+  state.mode = mode;
+
+  // Update buttons
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+
+  // Update canvases
+  document.querySelectorAll('.mode-canvas').forEach(c => c.classList.remove('active'));
+
+  if (mode === 'journey') {
+    showJourney();
+    return;
+  }
+
+  hideJourney();
+
+  const canvasMap = { helix: 'helix-canvas', mandala: 'mandala-canvas', particles: 'particles-canvas', temple: 'temple-canvas' };
+  const c = document.getElementById(canvasMap[mode]);
+  if (c) c.classList.add('active');
+
+  // Restart animation loops
+  if (mode === 'mandala') { initMandala(); }
+  if (mode === 'particles') { initParticles(); }
+  if (mode === 'temple') { initTemple(); }
+
+  // Update info text
+  const infos = {
+    helix: 'Rotating DNA double helix in 3D space. Each sphere represents a digit from the seed sequence, colored by value. Hover over spheres to hear their musical note. The number of spiral arms equals the Harmony value.',
+    mandala: 'Sacred circular mandala with 7 rings of colored dots. Click and drag to paint golden energy across the surface. Your strokes are mirrored across the Harmony symmetry axes. Distance from center determines the musical note.',
+    particles: '60 glowing particles floating in space, each representing one digit. Move your cursor to attract them with magnetic force. The Awareness slider controls attraction strength. Connections appear between nearby particles.',
+    temple: '60 sound bars arranged in a grid. Each bar height represents a digit value. Click any bar to hear its note, or press Play to hear the full 60-note melody. Colors pulse during playback.'
+  };
+  document.getElementById('info-text').textContent = infos[mode] || '';
+}
+
+// ===== EVENT HANDLERS =====
+function setupEvents() {
+  // Mode buttons
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchMode(btn.dataset.mode));
+  });
+
+  // DNA dots
+  document.querySelectorAll('.dna-dot').forEach(dot => {
+    dot.addEventListener('click', () => setDNA(dot.dataset.dna));
+  });
+
+  // Sliders
+  document.getElementById('harmony-slider').addEventListener('input', function() {
+    if (state.controlsLocked) return;
+    state.harmony = +this.value;
+    document.getElementById('harmony-val').textContent = this.value;
+    rebuildActiveMode();
+  });
+  document.getElementById('awareness-slider').addEventListener('input', function() {
+    if (state.controlsLocked) return;
+    state.awareness = +this.value;
+    document.getElementById('awareness-val').textContent = this.value + '%';
+  });
+  document.getElementById('tempo-slider').addEventListener('input', function() {
+    if (state.controlsLocked) return;
+    state.tempo = +this.value;
+    document.getElementById('tempo-val').textContent = this.value;
+  });
+
+  // Play button
+  document.getElementById('play-btn').addEventListener('click', playSequence);
+  document.getElementById('remix-btn').addEventListener('click', () => {
+    if (!state.canRemix) return;
+    setControlsLocked(false);
+  });
+
+  // Info toggle
+  document.getElementById('info-toggle').addEventListener('click', () => {
+    document.getElementById('info-panel').classList.toggle('show');
+  });
+
+  // Mouse tracking for helix raycasting
+  const canvasArea = document.getElementById('canvas-area');
+  canvasArea.addEventListener('mousemove', (e) => {
+    const rect = canvasArea.getBoundingClientRect();
+    state.mouseX = e.clientX - rect.left;
+    state.mouseY = e.clientY - rect.top;
+
+    // Helix raycasting coords
+    if (helixMouse) {
+      helixMouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      helixMouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    }
+
+    // Mandala painting
+    if (state.mode === 'mandala' && state.mouseDown) {
+      mandalaPaint(state.mouseX, state.mouseY);
+    }
+  });
+
+  canvasArea.addEventListener('mousedown', (e) => {
+    state.mouseDown = true;
+    const rect = canvasArea.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    if (state.mode === 'mandala') mandalaPaint(mx, my);
+    if (state.mode === 'temple') templeClick(mx, my);
+  });
+
+  canvasArea.addEventListener('mouseup', () => { state.mouseDown = false; });
+  canvasArea.addEventListener('mouseleave', () => { state.mouseDown = false; });
+
+  // Touch support
+  canvasArea.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    state.mouseDown = true;
+    const touch = e.touches[0];
+    const rect = canvasArea.getBoundingClientRect();
+    state.mouseX = touch.clientX - rect.left;
+    state.mouseY = touch.clientY - rect.top;
+
+    if (state.mode === 'mandala') mandalaPaint(state.mouseX, state.mouseY);
+    if (state.mode === 'temple') templeClick(state.mouseX, state.mouseY);
+  }, { passive: false });
+
+  canvasArea.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = canvasArea.getBoundingClientRect();
+    state.mouseX = touch.clientX - rect.left;
+    state.mouseY = touch.clientY - rect.top;
+
+    if (helixMouse) {
+      helixMouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+      helixMouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+    }
+
+    if (state.mode === 'mandala') mandalaPaint(state.mouseX, state.mouseY);
+  }, { passive: false });
+
+  canvasArea.addEventListener('touchend', () => { state.mouseDown = false; });
+
+  // Resize
+  window.addEventListener('resize', () => {
+    const container = document.getElementById('canvas-area');
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+
+    if (helixRenderer) {
+      helixRenderer.setSize(w, h);
+      helixCamera.aspect = w / h;
+      helixCamera.updateProjectionMatrix();
+    }
+
+    if (state.mode === 'mandala') initMandala();
+    if (state.mode === 'particles') initParticles();
+    if (state.mode === 'temple') initTemple();
+  });
+
+  // Sound init overlay
+  document.getElementById('sound-init').addEventListener('click', async () => {
+    await initAudio();
+    document.getElementById('sound-init').classList.add('hidden');
+  });
+
+  // Also handle touch for sound init
+  document.getElementById('sound-init').addEventListener('touchstart', async (e) => {
+    e.preventDefault();
+    await initAudio();
+    document.getElementById('sound-init').classList.add('hidden');
+  }, { passive: false });
+}
+
+// ===== CURSOR HIDING FOR PARTICLES =====
+function updateCursor() {
+  const canvasArea = document.getElementById('canvas-area');
+  if (state.mode === 'particles') {
+    canvasArea.style.cursor = 'none';
+  } else if (state.mode === 'mandala') {
+    canvasArea.style.cursor = 'crosshair';
+  } else {
+    canvasArea.style.cursor = 'default';
+  }
+}
+
+// Override switchMode to also update cursor
+const _origSwitch = switchMode;
+switchMode = function(mode, force = false) {
+  _origSwitch(mode, force);
+  updateCursor();
+};
+
+
+function applyPetIdentity() {
+  const identity = document.getElementById('pet-identity');
+  identity.innerHTML = `<strong>${petContext.petName}</strong> · ${petContext.petType} · generated from DNA signature`;
+
+  const accent = DIGIT_COLORS[6] || '#c9a84c';
+  const accent2 = DIGIT_COLORS[3] || '#7b5ea7';
+  document.documentElement.style.setProperty('--accent', accent);
+  document.documentElement.style.setProperty('--accent2', accent2);
+  document.documentElement.style.setProperty('--glow', `${accent}66`);
+
+  document.getElementById('harmony-slider').value = String(state.harmony);
+  document.getElementById('harmony-val').textContent = String(state.harmony);
+  document.getElementById('awareness-slider').value = String(state.awareness);
+  document.getElementById('awareness-val').textContent = `${state.awareness}%`;
+  document.querySelectorAll('.dna-dot').forEach(d => d.classList.toggle('active', d.dataset.dna === state.dna));
+}
+
+// ===== INIT =====
+function init() {
+  initStars();
+  initHelix();
+  applyPetIdentity();
+  setupEvents();
+  switchMode(state.mode);
+  updateCursor();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
