@@ -104,119 +104,6 @@ interface ProjectedNode {
   idx: number;
 }
 
-const PHI = (1 + Math.sqrt(5)) / 2;
-
-type PolyWire = { vertices: Vec3[]; edges: Array<[number, number]> };
-
-function buildPolyEdges(vertices: Vec3[]): Array<[number, number]> {
-  const distances: number[] = [];
-  for (let i = 0; i < vertices.length; i++) {
-    for (let j = i + 1; j < vertices.length; j++) {
-      const dx = vertices[i].x - vertices[j].x;
-      const dy = vertices[i].y - vertices[j].y;
-      const dz = vertices[i].z - vertices[j].z;
-      distances.push(Math.hypot(dx, dy, dz));
-    }
-  }
-
-  const unique = [...new Set(distances.map(d => d.toFixed(6)))].map(Number).sort((a, b) => a - b);
-  const edgeLen = unique[0] ?? 0;
-  const threshold = edgeLen * 1.06;
-
-  const edges: Array<[number, number]> = [];
-  for (let i = 0; i < vertices.length; i++) {
-    for (let j = i + 1; j < vertices.length; j++) {
-      const dx = vertices[i].x - vertices[j].x;
-      const dy = vertices[i].y - vertices[j].y;
-      const dz = vertices[i].z - vertices[j].z;
-      const d = Math.hypot(dx, dy, dz);
-      if (d <= threshold) edges.push([i, j]);
-    }
-  }
-
-  return edges;
-}
-
-const ICOSAHEDRON: PolyWire = (() => {
-  const verts: Vec3[] = [
-    { x: -1, y: PHI, z: 0 },
-    { x: 1, y: PHI, z: 0 },
-    { x: -1, y: -PHI, z: 0 },
-    { x: 1, y: -PHI, z: 0 },
-    { x: 0, y: -1, z: PHI },
-    { x: 0, y: 1, z: PHI },
-    { x: 0, y: -1, z: -PHI },
-    { x: 0, y: 1, z: -PHI },
-    { x: PHI, y: 0, z: -1 },
-    { x: PHI, y: 0, z: 1 },
-    { x: -PHI, y: 0, z: -1 },
-    { x: -PHI, y: 0, z: 1 },
-  ];
-  return { vertices: verts, edges: buildPolyEdges(verts) };
-})();
-
-const DODECAHEDRON: PolyWire = (() => {
-  const invPhi = 1 / PHI;
-  const verts: Vec3[] = [
-    { x: -1, y: -1, z: -1 }, { x: -1, y: -1, z: 1 }, { x: -1, y: 1, z: -1 }, { x: -1, y: 1, z: 1 },
-    { x: 1, y: -1, z: -1 }, { x: 1, y: -1, z: 1 }, { x: 1, y: 1, z: -1 }, { x: 1, y: 1, z: 1 },
-    { x: 0, y: -invPhi, z: -PHI }, { x: 0, y: -invPhi, z: PHI }, { x: 0, y: invPhi, z: -PHI }, { x: 0, y: invPhi, z: PHI },
-    { x: -invPhi, y: -PHI, z: 0 }, { x: -invPhi, y: PHI, z: 0 }, { x: invPhi, y: -PHI, z: 0 }, { x: invPhi, y: PHI, z: 0 },
-    { x: -PHI, y: 0, z: -invPhi }, { x: PHI, y: 0, z: -invPhi }, { x: -PHI, y: 0, z: invPhi }, { x: PHI, y: 0, z: invPhi },
-  ];
-  return { vertices: verts, edges: buildPolyEdges(verts) };
-})();
-
-function drawDualPlatonicOscillation(
-  ctx: CanvasRenderingContext2D,
-  time: number,
-  colors: { shell: string; nodeGlow: string },
-  projectVec: (v: Vec3) => { sx: number; sy: number; depth: number },
-) {
-  const pulse = 0.78 + 0.16 * Math.sin(time * 0.0024);
-  const dualPulse = 1.18 + 0.16 * Math.sin(time * 0.0024 + Math.PI);
-
-  const spinA = time * 0.0009;
-  const spinB = -time * 0.00072 + 0.8;
-
-  const icoVerts = ICOSAHEDRON.vertices.map(v => {
-    let p = { x: v.x * pulse, y: v.y * pulse, z: v.z * pulse };
-    p = rotateY(p, spinA);
-    p = rotateX(p, spinA * 0.73);
-    return projectVec(p);
-  });
-
-  const dodeVerts = DODECAHEDRON.vertices.map(v => {
-    let p = { x: v.x * dualPulse, y: v.y * dualPulse, z: v.z * dualPulse };
-    p = rotateY(p, spinB);
-    p = rotateX(p, spinB * 0.69);
-    return projectVec(p);
-  });
-
-  ctx.save();
-  ctx.lineWidth = 1;
-  ctx.strokeStyle = colors.shell;
-  ctx.globalAlpha = 0.2 + 0.08 * Math.sin(time * 0.0036);
-  ctx.shadowColor = colors.shell;
-  ctx.shadowBlur = 6;
-  for (const [a, b] of ICOSAHEDRON.edges) {
-    ctx.beginPath();
-    ctx.moveTo(icoVerts[a].sx, icoVerts[a].sy);
-    ctx.lineTo(icoVerts[b].sx, icoVerts[b].sy);
-    ctx.stroke();
-  }
-
-  ctx.strokeStyle = colors.nodeGlow;
-  ctx.globalAlpha = 0.22 + 0.08 * Math.sin(time * 0.0036 + Math.PI * 0.5);
-  for (const [a, b] of DODECAHEDRON.edges) {
-    ctx.beginPath();
-    ctx.moveTo(dodeVerts[a].sx, dodeVerts[a].sy);
-    ctx.lineTo(dodeVerts[b].sx, dodeVerts[b].sy);
-    ctx.stroke();
-  }
-  ctx.restore();
-}
-
 function drawLattice(
   ctx: CanvasRenderingContext2D,
   state: LatticeState,
@@ -276,10 +163,6 @@ function drawLattice(
     p = rotateX(p, rx);
     return project(p, cx, cy, FOV, VIEW_DIST);
   };
-
-  if (type === 'icosahedral') {
-    drawDualPlatonicOscillation(ctx, time, colors, proj);
-  }
 
   if (showBlueprint) {
     ctx.strokeStyle = colors.blueprint;
@@ -521,7 +404,7 @@ export function CrystallineLattice({ dna }: CrystallineLatticeProps) {
         }
       }
 
-      drawLattice(ctx, state, time, showBP, showStress, shells);
+      drawLattice(ctx, stateRef.current, time, showBP, showStress, shells);
       rafRef.current = requestAnimationFrame(loop);
     };
 
@@ -681,7 +564,7 @@ export function CrystallineLattice({ dna }: CrystallineLatticeProps) {
       <p className="text-[10px] text-zinc-600 text-center leading-relaxed">
         {LATTICE_LABELS[latticeType]} lattice · DNA → blueprint scaffold → intelligent growth
         <br />
-        Stress propagation prevents collapse · nested icosahedron↔dodecahedron dual oscillation
+        Stress propagation prevents collapse · Platonic sub-shells emerge from structure
         {dnaActive && <><br />Each genome crystallises a unique lattice — the DNA holds the being</>}
       </p>
     </div>
