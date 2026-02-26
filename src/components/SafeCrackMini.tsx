@@ -173,6 +173,8 @@ export function SafeCrackMini({
   const [wobbleAnimation, setWobbleAnimation] = useState(false);
   const [successParticles, setSuccessParticles] = useState<{ id: number; x: number; y: number }[]>([]);
   const [nearMissGlow, setNearMissGlow] = useState(false);
+  const [sessionStreak, setSessionStreak] = useState(0);
+  const [bestSessionStreak, setBestSessionStreak] = useState(0);
 
   // Initialize RNG and game state
   useEffect(() => {
@@ -363,6 +365,7 @@ export function SafeCrackMini({
             setTimeout(() => setWobbleAnimation(false), 500);
             if (nextStrikes >= MAX_STRIKES) {
               onGameOver?.(false, 0, nextStrikes);
+              setSessionStreak(0);
               return { ...prev, state: 'FAIL', strikes: nextStrikes };
             }
             return {
@@ -395,6 +398,11 @@ export function SafeCrackMini({
                   : 0;
               const score = calculateScore(prev.band, avgDistance, totalTime);
               onGameOver?.(true, score, prev.strikes);
+              setSessionStreak(current => {
+                const next = current + 1;
+                setBestSessionStreak(best => Math.max(best, next));
+                return next;
+              });
               return { ...prev, state: 'UNLOCK' };
             } else {
               // Advance to next step
@@ -423,6 +431,7 @@ export function SafeCrackMini({
             if (nextStrikes >= MAX_STRIKES) {
               triggerHaptic('error');
               onGameOver?.(false, 0, nextStrikes);
+              setSessionStreak(0);
               return { ...prev, state: 'FAIL', strikes: nextStrikes };
             }
             return {
@@ -659,7 +668,7 @@ export function SafeCrackMini({
       <header className="px-4 py-2 flex items-center justify-between text-xs sm:text-sm border-b border-slate-800/80 bg-slate-950/70 backdrop-blur">
         <div className="flex flex-col">
           <span className="font-semibold tracking-wide uppercase text-[10px] text-slate-400">
-            Safe Crack Challenge
+            Auralia Vault Lockpick
           </span>
           <span className="text-slate-200">
             Operator: <span className="font-semibold text-amber-300">{petName}</span>
@@ -667,7 +676,7 @@ export function SafeCrackMini({
         </div>
         <div className="flex gap-4">
           <div className="flex flex-col items-end">
-            <span className="text-[11px] uppercase tracking-wide text-slate-400">Band</span>
+            <span className="text-[11px] uppercase tracking-wide text-slate-400">Heat</span>
             <span className={`font-mono text-base ${
               gameState.band === 'COOL' ? 'text-blue-300' :
               gameState.band === 'NEUTRAL' ? 'text-yellow-300' :
@@ -683,6 +692,10 @@ export function SafeCrackMini({
           <div className="flex flex-col items-end">
             <span className="text-[11px] uppercase tracking-wide text-slate-400">Strikes</span>
             <span className="font-mono text-base text-red-400">{gameState.strikes}/{MAX_STRIKES}</span>
+          </div>
+          <div className="flex flex-col items-end">
+            <span className="text-[11px] uppercase tracking-wide text-slate-400">Streak</span>
+            <span className="font-mono text-base text-cyan-300">{sessionStreak} / {bestSessionStreak}</span>
           </div>
         </div>
       </header>
@@ -859,15 +872,15 @@ export function SafeCrackMini({
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70">
                 <div className="px-4 py-3 rounded-xl border border-green-700 bg-slate-900/90 text-center">
                   <div className="text-xs uppercase tracking-wide text-green-400">Success</div>
-                  <div className="mt-1 text-lg font-semibold text-green-300">Safe Unlocked!</div>
+                  <div className="mt-1 text-lg font-semibold text-green-300">Vault Opened!</div>
                   <div className="mt-2 text-xs text-slate-400">
-                    Combo: {gameState.combo.n1} → {gameState.combo.n2} → {gameState.combo.n3}
+                    Cipher: {gameState.combo.n1} → {gameState.combo.n2} → {gameState.combo.n3}
                   </div>
                   <button
                     onClick={resetGame}
                     className="mt-3 px-4 py-2 bg-green-500 text-slate-900 rounded-lg font-semibold text-sm active:bg-green-400"
                   >
-                    Play Again
+                    Chain Next Vault
                   </button>
                 </div>
               </div>
@@ -877,7 +890,7 @@ export function SafeCrackMini({
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70">
                 <div className="px-4 py-3 rounded-xl border border-red-700 bg-slate-900/90 text-center">
                   <div className="text-xs uppercase tracking-wide text-red-400">Failed</div>
-                  <div className="mt-1 text-lg font-semibold text-red-300">Lock Jammed</div>
+                  <div className="mt-1 text-lg font-semibold text-red-300">Tumblers Seized</div>
                   <div className="mt-2 text-xs text-slate-400">
                     Too many strikes: {gameState.strikes}/{MAX_STRIKES}
                   </div>
@@ -896,7 +909,7 @@ export function SafeCrackMini({
         {/* Sidebar - hidden on mobile */}
         <aside className="hidden sm:flex w-32 flex-col gap-3 text-xs">
           <div className="rounded-xl border border-slate-800/80 bg-slate-950/70 px-3 py-2">
-            <div className="text-[10px] uppercase tracking-wide text-slate-500 mb-1">Instructions</div>
+            <div className="text-[10px] uppercase tracking-wide text-slate-500 mb-1">Lockpick Flow</div>
             <div className="space-y-1 text-[11px]">
               <div>Step {gameState.step}: Rotate {requiredDirection === 'R' ? '→ CW' : '← CCW'}</div>
               <div className="text-slate-400">Must cross 0</div>
@@ -918,6 +931,7 @@ export function SafeCrackMini({
             <div>Drag — spin dial</div>
             <div>Space/Enter — commit</div>
             <div>Esc — exit</div>
+            <div className="text-cyan-300">Chain clears to build streak.</div>
           </div>
         </aside>
 
@@ -959,7 +973,7 @@ export function SafeCrackMini({
                   : 'bg-amber-600/90 border-amber-500 text-slate-900 active:bg-amber-500'
               }`}
             >
-              {gameState.readyToCommit ? 'COMMIT' : 'TRY'}
+              {gameState.readyToCommit ? 'SET PIN' : 'PROBE'}
             </button>
             <button
               onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); nudgeRight(); }}

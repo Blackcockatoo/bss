@@ -96,13 +96,25 @@ export function playVimanaGame(
  */
 export function generateMeditationPattern(genomeSeed: number, length: number = 6): number[] {
   const pattern: number[] = [];
-  let seed = genomeSeed;
-  
+  let state = (genomeSeed ^ 0x9e3779b9) >>> 0;
+
   for (let i = 0; i < length; i++) {
-    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-    pattern.push(seed % 4); // 0-3 for four directions
+    // xorshift32: better bit distribution than taking low bits from an LCG
+    state ^= state << 13;
+    state ^= state >>> 17;
+    state ^= state << 5;
+    const direction = ((state >>> 8) ^ state) & 0x3;
+
+    // Avoid repetitive patterns like ↑↑↑ by limiting long runs
+    const prev = pattern[pattern.length - 1];
+    const prevPrev = pattern[pattern.length - 2];
+    if (pattern.length >= 2 && direction === prev && direction === prevPrev) {
+      pattern.push((direction + 1 + (state & 0x1)) % 4);
+    } else {
+      pattern.push(direction);
+    }
   }
-  
+
   return pattern;
 }
 

@@ -32,6 +32,48 @@ export const OPPONENTS = [
   'Starlight Owl',
 ];
 
+export const OPPONENT_LORE: Record<string, { title: string; legend: string }> = {
+  'Echo Wisp': {
+    title: 'Whisper of the First Bell',
+    legend: 'A drifting spark born from the arena\'s first resonance test. It copies careless moves, but bows to focused rhythm.',
+  },
+  'Prism Lurker': {
+    title: 'Shards Beneath the Glass',
+    legend: 'It hides in refracted light and strikes from mirrored angles. Duelists say its eyes remember every failed attempt.',
+  },
+  'Dream Stag': {
+    title: 'Guardian of Quiet Sleep',
+    legend: 'This antlered sentinel appears when minds are overclocked. Only calm intent can pass through its moonlit charge.',
+  },
+  'Aurora Fox': {
+    title: 'Courier of Dawnfire',
+    legend: 'Swift and playful, the fox carries messages between vaults. It tests whether your power can stay graceful at speed.',
+  },
+  'Nebula Serpent': {
+    title: 'Coil of the Star Current',
+    legend: 'A cosmic serpent that rides ion trails. One blink late and you are fighting the afterimage, not the strike.',
+  },
+  'Crystal Phoenix': {
+    title: 'The Reforged Flame',
+    legend: 'Forged in fractures and reborn in lattice fire, it punishes hesitation and rewards precise sequencing.',
+  },
+  'Void Walker': {
+    title: 'Footsteps Between Frames',
+    legend: 'A traveler from silent layers where echoes vanish. It teaches that timing without intention is just noise.',
+  },
+  'Starlight Owl': {
+    title: 'Archivist of the Zenith',
+    legend: 'The owl records every arena duel in constellations. Beat it, and your pattern joins the sky-map.',
+  },
+};
+
+export function getArenaChapter(wins: number): string {
+  if (wins < 5) return 'Chapter I · Calibration of Sparks';
+  if (wins < 15) return 'Chapter II · Mirrors of Intent';
+  if (wins < 30) return 'Chapter III · Fracture Constellations';
+  return 'Chapter IV · Crown of Resonance';
+}
+
 /**
  * Calculate battle outcome based on vitals and shield
  */
