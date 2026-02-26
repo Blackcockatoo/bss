@@ -25,6 +25,7 @@ import {
 } from '@/lib/qr-messaging/crypto';
 import { Download, RefreshCw, Lock, Unlock, Key, Orbit, Layers, ShieldCheck, BookOpen } from 'lucide-react';
 import { CrystallineNetwork } from './CrystallineNetwork';
+import { CrystallineLattice } from './CrystallineLattice';
 import { trackEvent } from '@/lib/analytics';
 import {
   createMoss60VerifiablePayload,
@@ -900,6 +901,16 @@ export function Moss60Hub() {
             </p>
           </div>
           <CrystallineNetwork dna={DNA_R.join('')} />
+          <div className="rounded-lg border border-slate-700/50 bg-slate-900/30 p-3 mt-4">
+            <p className="text-xs font-semibold text-zinc-200 mb-1">3D crystal lattice scaffold</p>
+            <p className="text-[11px] text-zinc-400 leading-relaxed">
+              The DNA blueprint generates a 3-dimensional lattice structure — a scaffold that holds
+              the crystalline network in physical space. Watch it grow intelligently from a single seed,
+              choosing each new node by structural support and DNA affinity. Platonic sub-shells
+              (tetrahedra, octahedra) emerge as the geometry self-organises.
+            </p>
+          </div>
+          <CrystallineLattice dna={DNA_R.join('')} />
         </TabsContent>
 
         {/* ── Security Learning ── */}
