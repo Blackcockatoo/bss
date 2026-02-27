@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { genomeQuestChapters, type QuestInteraction } from "../../content/genomeQuest/schema";
 import { questRepository } from "../../repositories/questRepository";
 
 export type QuestCheckpoint = {
@@ -15,10 +16,18 @@ export type QuestState = {
   currentChapterId: string;
   completedObjectiveIds: string[];
   rewardIds: string[];
+  interactionCounts: Record<QuestInteraction, number>;
   checkpoints: QuestCheckpoint[];
   createdAt: string;
   updatedAt: string;
   roomVersion: number;
+};
+
+const emptyInteractionCounts: Record<QuestInteraction, number> = {
+  open_node: 0,
+  run_lasso: 0,
+  sonify_compare: 0,
+  save_scenario: 0,
 };
 
 function defaultQuest(userId: string): QuestState {
@@ -28,6 +37,7 @@ function defaultQuest(userId: string): QuestState {
     currentChapterId: "behavior-basics",
     completedObjectiveIds: [],
     rewardIds: [],
+    interactionCounts: { ...emptyInteractionCounts },
     checkpoints: [],
     createdAt: now,
     updatedAt: now,
@@ -35,15 +45,19 @@ function defaultQuest(userId: string): QuestState {
   };
 }
 
-const emptyInteractionCounts: Record<QuestInteraction, number> = {
-  open_node: 0,
-  run_lasso: 0,
-  sonify_compare: 0,
-  save_scenario: 0,
-};
-
 export function resumeQuest(userId: string): QuestState {
-  return questRepository.findByUserId(userId) ?? defaultQuest(userId);
+  const existing = questRepository.findByUserId(userId);
+  if (!existing) {
+    return defaultQuest(userId);
+  }
+
+  return {
+    ...existing,
+    interactionCounts: {
+      ...emptyInteractionCounts,
+      ...(existing.interactionCounts ?? {}),
+    },
+  };
 }
 
 export function recordQuestInteraction(userId: string, interaction: QuestInteraction): QuestState {
@@ -70,10 +84,11 @@ export function recordQuestInteraction(userId: string, interaction: QuestInterac
     interactionCounts,
     completedObjectiveIds,
     rewardIds,
+    roomVersion: current.roomVersion + 1,
+    updatedAt: new Date().toISOString(),
   };
 
-  questStore.set(userId, next);
-  return next;
+  return questRepository.save(next);
 }
 
 export function updateQuestProgress(
@@ -85,6 +100,10 @@ export function updateQuestProgress(
     ...current,
     ...patch,
     userId,
+    interactionCounts: {
+      ...emptyInteractionCounts,
+      ...(patch.interactionCounts ?? current.interactionCounts),
+    },
     roomVersion: current.roomVersion + 1,
     updatedAt: new Date().toISOString(),
   };
