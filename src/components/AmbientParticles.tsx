@@ -136,6 +136,10 @@ export function AmbientParticles({ enabled = true }: { enabled?: boolean }) {
 
   useEffect(() => {
     if (!enabled) return;
+    // Respect the OS/browser "prefer reduced motion" setting.
+    // Mirrors the same check used in src/lib/haptics.ts.
+    // WCAG 2.2 SC 2.2.2: users must be able to pause/stop non-essential motion.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');

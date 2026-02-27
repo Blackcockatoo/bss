@@ -13,6 +13,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://bss-l8cw.vercel.app"),
   title: "Meta-Pet",
   description: "Your digital companion with genome-based evolution",
   manifest: "/manifest.json",
@@ -24,6 +25,18 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "Meta-Pet",
+  },
+  openGraph: {
+    title: "Meta-Pet",
+    description: "Your digital companion with genome-based evolution",
+    url: "https://bss-l8cw.vercel.app",
+    siteName: "Jewble // Meta-Pet",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Meta-Pet",
+    description: "Your digital companion with genome-based evolution",
   },
 };
 

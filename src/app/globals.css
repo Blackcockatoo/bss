@@ -99,3 +99,20 @@
     transform: rotate(5deg);
   }
 }
+
+/* -----------------------------------------------------------------------
+   Accessibility: respect the OS/browser "reduce motion" preference.
+   Blanket-suppresses all CSS animations and transitions so users who
+   need it (vestibular disorders, epilepsy, preference) get a static UI.
+   WCAG 2.2 SC 2.2.2 (Pause, Stop, Hide).
+   ----------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
