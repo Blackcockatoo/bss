@@ -26,14 +26,18 @@ export function projectFutures(petId: string, env: EnvironmentChoice): FutureBra
     {
       id: `${normalizedPetId}-balanced-growth`,
       label: "Balanced Growth Arc",
-      confidence: Math.min(0.95, 0.72 + modifier),
+      confidence: Math.min(0.95, 0.72 + modifier + stageModifier),
       divergenceSummary: "Stable emotional profile with moderate athletic gain.",
+      branchDrivers,
+      confidenceSignals,
     },
     {
       id: `${normalizedPetId}-performance-arc`,
       label: "Performance Arc",
-      confidence: Math.min(0.92, 0.64 + modifier / 2),
+      confidence: Math.min(0.92, 0.64 + modifier / 2 + stageModifier),
       divergenceSummary: "Higher agility trajectory, mild attention volatility risk.",
+      branchDrivers,
+      confidenceSignals,
     },
   ];
 }
