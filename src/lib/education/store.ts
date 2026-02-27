@@ -10,6 +10,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { generateMeditationPattern, validatePattern } from '@/lib/minigames';
+import { PLAN_LIMITS, UNLIMITED } from '@/lib/pricing/plans';
 import {
   EducationQueueState,
   QueuedLesson,
@@ -27,6 +28,30 @@ import {
   EDU_ACHIEVEMENTS_CATALOG,
   QuickFireChallenge,
 } from './types';
+
+function getAnalyticsRetentionDays(): number {
+  try {
+    const raw = window.localStorage.getItem('metapet-auth');
+    if (!raw) return PLAN_LIMITS.free.analyticsRetentionDays;
+    const parsed = JSON.parse(raw) as { state?: { currentUser?: { subscription?: { planId?: 'free' | 'pro' } } } };
+    const planId = parsed?.state?.currentUser?.subscription?.planId ?? 'free';
+    return PLAN_LIMITS[planId].analyticsRetentionDays;
+  } catch {
+    return PLAN_LIMITS.free.analyticsRetentionDays;
+  }
+}
+
+function getCurrentPlanLimits() {
+  try {
+    const raw = window.localStorage.getItem('metapet-auth');
+    if (!raw) return PLAN_LIMITS.free;
+    const parsed = JSON.parse(raw) as { state?: { currentUser?: { subscription?: { planId?: 'free' | 'pro' } } } };
+    const planId = parsed?.state?.currentUser?.subscription?.planId ?? 'free';
+    return PLAN_LIMITS[planId];
+  } catch {
+    return PLAN_LIMITS.free;
+  }
+}
 
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
@@ -87,6 +112,13 @@ export const useEducationStore = create<EducationStore>()(
       // ---------- Queue management ----------
 
       addLesson: (lesson) => set((state) => {
+        const lessonLimit = typeof window === 'undefined'
+          ? PLAN_LIMITS.free.maxLessonsInQueue
+          : getCurrentPlanLimits().maxLessonsInQueue;
+        if (lessonLimit !== UNLIMITED && state.queue.length >= lessonLimit) {
+          return state;
+        }
+
         const newLesson: QueuedLesson = {
           ...lesson,
           id: generateId(),
@@ -236,18 +268,27 @@ export const useEducationStore = create<EducationStore>()(
 
       getQueueAnalytics: () => {
         const state = get();
-        const completed = state.lessonProgress.filter((p) => p.status === 'completed');
-        const active = state.lessonProgress.filter((p) => p.status === 'active');
+        const retentionDays = typeof window === 'undefined' ? PLAN_LIMITS.free.analyticsRetentionDays : getAnalyticsRetentionDays();
+        const retentionMs = retentionDays * 24 * 60 * 60 * 1000;
+        const cutoff = Date.now() - retentionMs;
+
+        const retainedProgress = state.lessonProgress.filter((progress) => {
+          const timestamp = progress.completedAt ?? progress.startedAt ?? 0;
+          return timestamp >= cutoff;
+        });
+
+        const completed = retainedProgress.filter((p) => p.status === 'completed');
+        const active = retainedProgress.filter((p) => p.status === 'active');
         const totalTime = completed.reduce((sum, p) => sum + p.timeSpentMs, 0);
-        const uniqueStudents = new Set(state.lessonProgress.map((p) => p.studentAlias));
+        const uniqueStudents = new Set(retainedProgress.map((p) => p.studentAlias));
 
         return {
           totalLessons: state.queue.length,
           completedLessons: completed.length,
           activeLessons: active.length,
-          completionRate: state.lessonProgress.length === 0
+          completionRate: retainedProgress.length === 0
             ? 0
-            : completed.length / state.lessonProgress.length,
+            : completed.length / retainedProgress.length,
           totalStudentsTracked: uniqueStudents.size,
           averageTimePerLessonMs: completed.length === 0 ? 0 : totalTime / completed.length,
           totalDnaInteractions: state.lessonProgress.reduce((sum, p) => sum + p.dnaInteractions, 0),

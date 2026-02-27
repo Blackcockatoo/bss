@@ -8,6 +8,8 @@ import type { DnaMode, FocusArea } from '@/lib/education';
 import { DNA_MODE_LABELS, FOCUS_AREA_LABELS } from '@/lib/education';
 import { EducationQueuePanel } from '@/components/EducationQueuePanel';
 import { StudentDNACard } from '@/components/StudentDNACard';
+import { useQuota } from '@/lib/pricing/hooks';
+import { UpgradePrompt } from '@/components/UpgradePrompt';
 
 type Student = {
   id: string;
@@ -77,10 +79,13 @@ export function ClassroomManager() {
   const [newDnaMode, setNewDnaMode] = useState<DnaMode>(null);
   const [newStandardsRef, setNewStandardsRef] = useState('');
   const [showQueue, setShowQueue] = useState(false);
+  const [upgradeMessage, setUpgradeMessage] = useState<string | null>(null);
 
   const addLessonToQueue = useEducationStore((s) => s.addLesson);
   const lessonProgress = useEducationStore((s) => s.lessonProgress);
   const queue = useEducationStore((s) => s.queue);
+  const studentQuota = useQuota('students', students.length);
+  const assignmentQuota = useQuota('assignments', assignments.length);
 
   useEffect(() => {
     setStudents(safeParse<Student[]>(window.localStorage.getItem(ROSTER_STORAGE_KEY), []));
@@ -143,6 +148,10 @@ export function ClassroomManager() {
   const handleAddStudent = () => {
     const alias = sanitizeAlias(newAlias);
     if (!alias) return;
+    if (studentQuota.atLimit) {
+      setUpgradeMessage("You've reached the Free plan limit of 25 students in this class. Upgrade to Pro for unlimited students.");
+      return;
+    }
     const student: Student = {
       id: createId(),
       alias,
@@ -177,6 +186,10 @@ export function ClassroomManager() {
   const handleAddAssignment = () => {
     const title = sanitizeTitle(newTitle);
     if (!title) return;
+    if (assignmentQuota.atLimit) {
+      setUpgradeMessage("You've reached the Free plan limit of 10 assignments. Upgrade to Pro for unlimited assignments.");
+      return;
+    }
     const assignment: Assignment = {
       id: createId(),
       title,
@@ -244,6 +257,7 @@ export function ClassroomManager() {
 
   return (
     <div className="space-y-6">
+      {upgradeMessage && <UpgradePrompt message={upgradeMessage} />}
       <div className="grid gap-4 md:grid-cols-2">
         <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-4 space-y-4">
           <div className="flex items-center gap-2 text-sm font-semibold text-zinc-200">
