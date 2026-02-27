@@ -1,36 +1,57 @@
-export type ExplanationTone = "story" | "practical" | "technical";
+import type {
+  ExplanationRequest,
+  ExplanationResponse,
+  SimulationResult,
+} from "../../../../shared/contracts/genomeResonance";
 
-export type ExplanationInput = {
-  petId: string;
-  viewStateKey: string;
-  tone: ExplanationTone;
-  evidence: Array<{ signal: string; confidence: number; implication: string; limitation: string }>;
+type EvidenceItem = {
+  signal: string;
+  confidence: number;
+  implication: string;
+  limitation: string;
 };
 
-export type ExplanationOutput = {
-  petId: string;
-  viewStateKey: string;
-  tone: ExplanationTone;
-  generatedAt: string;
-  blocks: Array<{
-    title: string;
-    message: string;
-    sourceSignals: string[];
-    confidence: number;
-    guardrail: string;
-  }>;
-};
+const cache = new Map<string, ExplanationResponse>();
 
-const cache = new Map<string, ExplanationOutput>();
+function toEvidence(selectedTraitId: string | undefined, simulation: SimulationResult[]): EvidenceItem[] {
+  const focusResult =
+    simulation.find((item) => item.traitId === selectedTraitId) ??
+    simulation[0];
 
-export function buildExplanation(input: ExplanationInput): ExplanationOutput {
+  if (!focusResult) {
+    return [];
+  }
+
+  return [
+    {
+      signal: selectedTraitId ?? focusResult.traitId,
+      confidence: Math.max(0.3, Math.min(0.95, focusResult.feasibility)),
+      implication: `an estimated shift of ${focusResult.estimate.toFixed(2)} with likely range ${focusResult.lowerBound.toFixed(2)} to ${focusResult.upperBound.toFixed(2)}`,
+      limitation: focusResult.tradeoffWarning ?? "Simulation reflects probabilistic trend, not destiny.",
+    },
+    ...simulation
+      .filter((item) => item !== focusResult)
+      .slice(0, 2)
+      .map((item) => ({
+        signal: item.traitId,
+        confidence: Math.max(0.25, Math.min(0.9, item.feasibility - 0.05)),
+        implication: `secondary response estimate ${item.estimate.toFixed(2)}`,
+        limitation: item.tradeoffWarning ?? "Secondary effects can vary by environment and training.",
+      })),
+  ];
+}
+
+export function buildExplanation(input: ExplanationRequest): ExplanationResponse {
   const key = `${input.petId}:${input.viewStateKey}:${input.tone}`;
   const cached = cache.get(key);
   if (cached) {
     return cached;
   }
 
-  const blocks = input.evidence.map((item, index) => ({
+  const evidence = toEvidence(input.selectedTraitId, input.simulation);
+
+  const blocks = evidence.map((item, index) => ({
+    id: `insight-${index + 1}`,
     title: `Insight ${index + 1}`,
     message:
       input.tone === "story"
@@ -43,7 +64,7 @@ export function buildExplanation(input: ExplanationInput): ExplanationOutput {
     guardrail: item.limitation,
   }));
 
-  const output: ExplanationOutput = {
+  const output: ExplanationResponse = {
     petId: input.petId,
     viewStateKey: input.viewStateKey,
     tone: input.tone,

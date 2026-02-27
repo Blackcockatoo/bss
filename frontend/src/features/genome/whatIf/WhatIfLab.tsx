@@ -1,20 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type { SimulationResult } from "../../../../../shared/contracts/genomeResonance";
 
 export type TraitControl = {
   id: string;
   label: string;
   baseline: number;
-};
-
-export type SimulationResult = {
-  traitId: string;
-  estimate: number;
-  lowerBound: number;
-  upperBound: number;
-  tradeoffWarning?: string;
-  feasibility: number;
 };
 
 type Scenario = {
@@ -25,35 +17,56 @@ type Scenario = {
 type Props = {
   controls: TraitControl[];
   onSimulate: (deltas: Record<string, number>) => Promise<SimulationResult[]>;
+  onResults?: (results: SimulationResult[]) => void;
 };
 
-export function WhatIfLab({ controls, onSimulate }: Props) {
+export function WhatIfLab({ controls, onSimulate, onResults }: Props) {
   const baseline = useMemo(
     () => controls.reduce<Record<string, number>>((acc, c) => ({ ...acc, [c.id]: c.baseline }), {}),
     [controls],
   );
   const [values, setValues] = useState<Record<string, number>>(baseline);
   const [results, setResults] = useState<SimulationResult[]>([]);
-  const [saved, setSaved] = useState<Scenario[]>([]);
+  const [saved, setSaved] = useState<SavedScenario[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    listSavedScenarios().then(setSaved).catch(() => setError("Failed to load saved scenarios."));
+  }, []);
 
   async function run() {
     const deltas = Object.fromEntries(
       Object.entries(values).map(([id, value]) => [id, value - baseline[id]]),
     );
-    setResults(await onSimulate(deltas));
+    const nextResults = await onSimulate(deltas);
+    setResults(nextResults);
+    onResults?.(nextResults);
   }
 
   function reset() {
     setValues(baseline);
     setResults([]);
+    onResults?.([]);
   }
 
-  function saveScenario() {
-    const scenario: Scenario = { name: `Scenario ${saved.length + 1}`, controls: values };
-    const next = [...saved, scenario];
-    setSaved(next);
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem("genome-whatif-scenarios", JSON.stringify(next));
+  async function persistScenario() {
+    setError(null);
+    const optimistic: SavedScenario = {
+      id: `optimistic-${saved.length + 1}`,
+      name: `Scenario ${saved.length + 1}`,
+      controls: values,
+      sharedToken: "pending",
+      updatedAt: new Date().toISOString(),
+    };
+    const previous = saved;
+    setSaved([...previous, optimistic]);
+
+    try {
+      const persisted = await saveScenario(optimistic.name, values);
+      setSaved([...previous, persisted]);
+    } catch {
+      setSaved(previous);
+      setError("Scenario save failed and was rolled back.");
     }
   }
 
@@ -82,7 +95,7 @@ export function WhatIfLab({ controls, onSimulate }: Props) {
       <div className="mt-3 flex gap-2 text-xs">
         <button className="rounded bg-indigo-500 px-3 py-1 text-white" onClick={run} type="button">Simulate</button>
         <button className="rounded border px-3 py-1" onClick={reset} type="button">Reset baseline</button>
-        <button className="rounded border px-3 py-1" onClick={saveScenario} type="button">Save/share scenario</button>
+        <button className="rounded border px-3 py-1" onClick={persistScenario} type="button">Save/share scenario</button>
       </div>
 
       <ul className="mt-4 space-y-2 text-xs">
@@ -98,6 +111,11 @@ export function WhatIfLab({ controls, onSimulate }: Props) {
           </li>
         ))}
       </ul>
+      <p className="mt-3 text-xs text-slate-500">Saved scenarios: {saved.length}</p>
+      {saved.at(-1)?.sharedToken && saved.at(-1)?.sharedToken !== "pending" ? (
+        <p className="mt-1 text-xs text-slate-500">Share token: {saved.at(-1)?.sharedToken}</p>
+      ) : null}
+      {error ? <p className="mt-1 text-xs text-rose-400">{error}</p> : null}
     </section>
   );
 }

@@ -1,20 +1,12 @@
-export type TraitDeltaInput = Record<string, number>;
+import type { SimulationRequest, SimulationResult } from "../../../../shared/contracts/genomeResonance";
 
 export type InteractionGraph = Record<string, Record<string, number>>;
 
-export type InterventionOutput = {
-  traitId: string;
-  predictedShift: number;
-  confidenceInterval: { lower: number; upper: number };
-  tradeoffAlert?: string;
-  feasibilityScore: number;
-};
-
 export function runTraitIntervention(
-  deltas: TraitDeltaInput,
+  request: SimulationRequest,
   graph: InteractionGraph,
-): InterventionOutput[] {
-  return Object.entries(deltas).map(([traitId, delta]) => {
+): SimulationResult[] {
+  return Object.entries(request.deltas).map(([traitId, delta]) => {
     const neighborhood = graph[traitId] ?? {};
     const propagated = Object.values(neighborhood).reduce((sum, value) => sum + delta * value, delta);
     const uncertainty = Math.min(0.4, Math.abs(propagated) * 0.25);
@@ -24,15 +16,13 @@ export function runTraitIntervention(
 
     return {
       traitId,
-      predictedShift: propagated,
-      confidenceInterval: {
-        lower: propagated - uncertainty,
-        upper: propagated + uncertainty,
-      },
-      tradeoffAlert: biggestConflict
+      estimate: propagated,
+      lowerBound: propagated - uncertainty,
+      upperBound: propagated + uncertainty,
+      tradeoffWarning: biggestConflict
         ? `Boosting ${traitId} may suppress ${biggestConflict[0]}.`
         : undefined,
-      feasibilityScore: feasibility,
+      feasibility,
     };
   });
 }

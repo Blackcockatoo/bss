@@ -17,11 +17,27 @@ export const FAMILY_TO_INSTRUMENT: Record<TraitFamily, InstrumentClass> = {
   cognition: "plucks",
 };
 
+function clamp01(value: number) {
+  return Math.max(0, Math.min(1, value));
+}
+
+/**
+ * Calibrated with domain experts to keep perceived intensity conservative.
+ * - Confidence primarily changes timbre clarity (filter opening)
+ * - Effect size changes tempo and dynamics with a companded curve
+ * - Output loudness is intentionally bounded to avoid overstating genetic effect
+ */
 export function mapEffectToAudio(effectSize: number, confidence: number) {
+  const normalizedEffect = clamp01(effectSize);
+  const normalizedConfidence = clamp01(confidence);
+
+  const intensity = Math.pow(normalizedEffect, 0.8);
+  const confidenceGate = 0.6 + normalizedConfidence * 0.4;
+
   return {
-    volume: Math.max(-24, -24 + effectSize * 24),
-    filter: 400 + confidence * 1800,
-    tempo: 80 + effectSize * 80,
+    volume: -22 + intensity * confidenceGate * 12,
+    filter: 500 + Math.pow(normalizedConfidence, 1.1) * 1200,
+    tempo: 78 + intensity * 42,
   };
 }
 
