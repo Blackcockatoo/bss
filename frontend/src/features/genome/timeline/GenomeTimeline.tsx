@@ -1,7 +1,7 @@
 "use client";
 
-import { projectFutures, type EnvironmentChoice } from "../../../../../backend/src/routes/genome/futures";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { bookmarkBranch, listBookmarks } from "../data/genomePersistenceClient";
 
 const STAGES = ["puppy/kitten", "adolescent", "adult", "senior"] as const;
 
@@ -37,126 +37,28 @@ export function GenomeTimeline({ petId }: Props) {
   const [currentStage, setCurrentStage] = useState<Stage>("adult");
   const [envByStage, setEnvByStage] = useState<Record<Stage, EnvironmentChoice>>(DEFAULT_ENV_BY_STAGE);
   const [bookmarks, setBookmarks] = useState<string[]>([]);
-  const [compareSelection, setCompareSelection] = useState<string[]>([]);
-
-  const storageKey = `genome-timeline:${petId}`;
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const persisted = window.localStorage.getItem(storageKey);
-    if (!persisted) {
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(persisted) as PersistedState;
-      setBookmarks(parsed.bookmarks ?? []);
-      setCompareSelection(parsed.compareSelection ?? []);
-    } catch {
-      window.localStorage.removeItem(storageKey);
-    }
-  }, [storageKey]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const payload: PersistedState = { bookmarks, compareSelection };
-    window.localStorage.setItem(storageKey, JSON.stringify(payload));
-  }, [bookmarks, compareSelection, storageKey]);
-
-  function trackAnalytics(event: AnalyticsEvent) {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const key = "genome-timeline:analytics";
-    const existing = window.localStorage.getItem(key);
-    const events = existing ? (JSON.parse(existing) as AnalyticsEvent[]) : [];
-    const trimmed = [...events.slice(-199), event];
-    window.localStorage.setItem(key, JSON.stringify(trimmed));
-  }
-
-  const branchesByStage = useMemo(
-    () =>
-      STAGES.reduce<Record<Stage, FutureBranch[]>>((acc, stage) => {
-        acc[stage] = projectFutures(petId, envByStage[stage], stage);
-        return acc;
-      }, {} as Record<Stage, FutureBranch[]>),
-    [envByStage, petId],
-  );
-
+  const [error, setError] = useState<string | null>(null);
   const branches = branchesByStage[currentStage] ?? [];
 
-  function handleStageChange(stage: Stage) {
-    setCurrentStage(stage);
-    trackAnalytics({
-      event: "stage_change",
-      petId,
-      stage,
-      timestamp: new Date().toISOString(),
-      details: { branchCount: branchesByStage[stage]?.length ?? 0 },
-    });
-  }
+  useEffect(() => {
+    listBookmarks().then(setBookmarks).catch(() => setError("Unable to load bookmarks."));
+  }, []);
 
-  function updateDriver(stage: Stage, driver: keyof EnvironmentChoice, value: string) {
-    setEnvByStage((state) => ({
-      ...state,
-      [stage]: {
-        ...state[stage],
-        [driver]: value,
-      },
-    }));
+  async function toggleBookmark(branchId: string) {
+    setError(null);
+    const previous = bookmarks;
+    const optimistic = previous.includes(branchId)
+      ? previous.filter((id) => id !== branchId)
+      : [...previous, branchId];
+    setBookmarks(optimistic);
 
-    trackAnalytics({
-      event: "driver_change",
-      petId,
-      stage,
-      timestamp: new Date().toISOString(),
-      details: { driver, value },
-    });
-  }
-
-  function toggleBookmark(branchId: string) {
-    setBookmarks((state) =>
-      state.includes(branchId) ? state.filter((id) => id !== branchId) : [...state, branchId],
-    );
-
-    trackAnalytics({
-      event: "bookmark_toggle",
-      petId,
-      stage: currentStage,
-      timestamp: new Date().toISOString(),
-      details: { branchId, bookmarked: !bookmarks.includes(branchId) },
-    });
-  }
-
-  function toggleCompare(branchId: string) {
-    setCompareSelection((state) => {
-      const updated = state.includes(branchId)
-        ? state.filter((id) => id !== branchId)
-        : [...state.slice(-1), branchId];
-
-      trackAnalytics({
-        event: "compare_toggle",
-        petId,
-        stage: currentStage,
-        timestamp: new Date().toISOString(),
-        details: { branchId, selected: updated.includes(branchId), comparedCount: updated.length },
-      });
-
-      return updated;
-    });
-  }
-
-  function confidenceTooltip(branch: FutureBranch) {
-    return branch.confidenceSignals
-      .map((signal) => `${signal.signal}: ${(signal.strength * 100).toFixed(0)}% · ${signal.rationale}`)
-      .join("\n");
+    try {
+      const persisted = await bookmarkBranch(branchId);
+      setBookmarks(persisted);
+    } catch {
+      setBookmarks(previous);
+      setError("Bookmark update failed. Changes were rolled back.");
+    }
   }
 
   return (
@@ -246,7 +148,7 @@ export function GenomeTimeline({ petId }: Props) {
         ))}
       </div>
       <p className="mt-3 text-xs text-slate-500">Bookmarked branch points: {bookmarks.join(", ") || "none"}</p>
-      <p className="mt-1 text-xs text-slate-500">Side-by-side compare: {compareSelection.join(" vs ") || "select up to 2"}</p>
+      {error ? <p className="mt-1 text-xs text-rose-400">{error}</p> : null}
     </section>
   );
 }

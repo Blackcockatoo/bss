@@ -1,35 +1,79 @@
+import { randomUUID } from "node:crypto";
+import { questRepository } from "../../repositories/questRepository";
+
+export type QuestCheckpoint = {
+  id: string;
+  chapterId: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  roomVersion: number;
+};
+
 export type QuestState = {
   userId: string;
   currentChapterId: string;
   completedObjectiveIds: string[];
   rewardIds: string[];
+  checkpoints: QuestCheckpoint[];
+  createdAt: string;
+  updatedAt: string;
+  roomVersion: number;
 };
 
-const questStore = new Map<string, QuestState>();
+function defaultQuest(userId: string): QuestState {
+  const now = new Date().toISOString();
+  return {
+    userId,
+    currentChapterId: "behavior-basics",
+    completedObjectiveIds: [],
+    rewardIds: [],
+    checkpoints: [],
+    createdAt: now,
+    updatedAt: now,
+    roomVersion: 1,
+  };
+}
 
 export function resumeQuest(userId: string): QuestState {
-  return (
-    questStore.get(userId) ?? {
-      userId,
-      currentChapterId: "behavior-basics",
-      completedObjectiveIds: [],
-      rewardIds: [],
-    }
-  );
+  return questRepository.findByUserId(userId) ?? defaultQuest(userId);
 }
 
 export function updateQuestProgress(
   userId: string,
-  patch: Partial<Omit<QuestState, "userId">>,
+  patch: Partial<Omit<QuestState, "userId" | "checkpoints" | "createdAt" | "updatedAt" | "roomVersion">>,
 ): QuestState {
   const current = resumeQuest(userId);
   const next: QuestState = {
     ...current,
     ...patch,
     userId,
+    roomVersion: current.roomVersion + 1,
+    updatedAt: new Date().toISOString(),
   };
-  questStore.set(userId, next);
-  return next;
+  return questRepository.save(next);
+}
+
+export function createQuestCheckpoint(userId: string, createdBy: string, chapterId?: string): QuestCheckpoint {
+  const current = resumeQuest(userId);
+  const now = new Date().toISOString();
+  const checkpoint: QuestCheckpoint = {
+    id: randomUUID(),
+    chapterId: chapterId ?? current.currentChapterId,
+    createdBy,
+    createdAt: now,
+    updatedAt: now,
+    roomVersion: current.roomVersion,
+  };
+
+  const next: QuestState = {
+    ...current,
+    checkpoints: [...current.checkpoints, checkpoint],
+    roomVersion: current.roomVersion + 1,
+    updatedAt: now,
+  };
+  questRepository.save(next);
+  return checkpoint;
 }
 
 export function getQuestRewards(userId: string): string[] {
