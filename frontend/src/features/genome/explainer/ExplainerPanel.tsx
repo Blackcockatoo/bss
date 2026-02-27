@@ -1,17 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import type { ExplanationBlock, ExplanationTone } from "../../../../../shared/contracts/genomeResonance";
 
-export type ToneMode = "story" | "practical" | "technical";
-
-export type ExplanationBlock = {
-  id: string;
-  title: string;
-  message: string;
-  sourceSignals: string[];
-  confidence: number;
-  guardrail: string;
-};
+export type ToneMode = ExplanationTone;
 
 type Props = {
   blocks: ExplanationBlock[];

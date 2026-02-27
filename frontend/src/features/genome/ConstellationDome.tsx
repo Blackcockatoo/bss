@@ -13,9 +13,10 @@ type Props = {
   nodes: GenomeNode[];
   edges: GenomeEdge[];
   onLassoSelect?: (nodeIds: string[]) => Promise<void> | void;
+  onNodeSelect?: (nodeId: string) => void;
 };
 
-export function ConstellationDome({ nodes, edges, onLassoSelect }: Props) {
+export function ConstellationDome({ nodes, edges, onLassoSelect, onNodeSelect }: Props) {
   const [selected, setSelected] = useState<string | null>(null);
   const [stage, setStage] = useState<DevelopmentStage>("adult");
   const graph = useMemo(() => transformToConstellationGraph(nodes, edges, stage), [nodes, edges, stage]);
@@ -44,7 +45,10 @@ export function ConstellationDome({ nodes, edges, onLassoSelect }: Props) {
               <button
                 className="rounded border px-2 py-1 text-left text-xs"
                 key={node.id}
-                onClick={() => setSelected(node.id)}
+                onClick={() => {
+                  setSelected(node.id);
+                  onNodeSelect?.(node.id);
+                }}
                 style={{ borderColor: node.color }}
                 type="button"
               >
