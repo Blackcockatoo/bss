@@ -49,6 +49,7 @@
   "exclude": [
     "node_modules",
     "archive",
-    "premium_addon_library"
+    "premium_addon_library",
+    "time-calculator-compass"
   ]
 }
