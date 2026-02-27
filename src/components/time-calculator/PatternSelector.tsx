@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface PatternSelectorProps {
   currentPattern: 'timeCompass' | 'nodePattern' | 'circlePattern';
   onPatternChange: (pattern: 'timeCompass' | 'nodePattern' | 'circlePattern') => void;
@@ -7,63 +5,67 @@ interface PatternSelectorProps {
   onColorChange: (color: 'red' | 'blue' | 'black') => void;
 }
 
-const PatternSelector: React.FC<PatternSelectorProps> = ({
+const PATTERN_LABELS = {
+  timeCompass: 'Time Compass',
+  nodePattern: 'Node Pattern',
+  circlePattern: 'Circle Pattern'
+} as const;
+
+const COLOR_LABELS = {
+  red: 'Red',
+  blue: 'Blue',
+  black: 'Black'
+} as const;
+
+export default function PatternSelector({
   currentPattern,
   onPatternChange,
   currentColor,
   onColorChange
-}) => {
+}: PatternSelectorProps) {
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center justify-center">
-      <div className="bg-gray-800 p-4 rounded-lg">
-        <h3 className="text-lg font-semibold mb-2">Pattern Type</h3>
+    <div className="flex flex-col gap-4 rounded-xl border border-zinc-700 bg-zinc-950/70 p-4 sm:flex-row sm:items-center sm:justify-between">
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-semibold text-zinc-200">Pattern Type</legend>
         <div className="flex flex-wrap gap-2">
-          <button
-            className={`px-4 py-2 rounded-md ${currentPattern === 'timeCompass' ? 'bg-blue-600' : 'bg-gray-700'}`}
-            onClick={() => onPatternChange('timeCompass')}
-          >
-            Time Compass
-          </button>
-          <button
-            className={`px-4 py-2 rounded-md ${currentPattern === 'nodePattern' ? 'bg-blue-600' : 'bg-gray-700'}`}
-            onClick={() => onPatternChange('nodePattern')}
-          >
-            Node Pattern
-          </button>
-          <button
-            className={`px-4 py-2 rounded-md ${currentPattern === 'circlePattern' ? 'bg-blue-600' : 'bg-gray-700'}`}
-            onClick={() => onPatternChange('circlePattern')}
-          >
-            Circle Pattern
-          </button>
+          {(Object.keys(PATTERN_LABELS) as Array<keyof typeof PATTERN_LABELS>).map(pattern => (
+            <button
+              key={pattern}
+              type="button"
+              className={`rounded-md px-3 py-2 text-sm transition ${
+                currentPattern === pattern ? 'bg-cyan-600 text-white' : 'bg-zinc-800 text-zinc-200 hover:bg-zinc-700'
+              }`}
+              onClick={() => onPatternChange(pattern)}
+            >
+              {PATTERN_LABELS[pattern]}
+            </button>
+          ))}
         </div>
-      </div>
+      </fieldset>
 
-      <div className="bg-gray-800 p-4 rounded-lg">
-        <h3 className="text-lg font-semibold mb-2">Color</h3>
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-semibold text-zinc-200">Color Palette</legend>
         <div className="flex flex-wrap gap-2">
-          <button
-            className={`px-4 py-2 rounded-md ${currentColor === 'red' ? 'bg-red-600' : 'bg-gray-700'}`}
-            onClick={() => onColorChange('red')}
-          >
-            Red
-          </button>
-          <button
-            className={`px-4 py-2 rounded-md ${currentColor === 'blue' ? 'bg-blue-600' : 'bg-gray-700'}`}
-            onClick={() => onColorChange('blue')}
-          >
-            Blue
-          </button>
-          <button
-            className={`px-4 py-2 rounded-md ${currentColor === 'black' ? 'bg-gray-950 border border-gray-700' : 'bg-gray-700'}`}
-            onClick={() => onColorChange('black')}
-          >
-            Black
-          </button>
+          {(Object.keys(COLOR_LABELS) as Array<keyof typeof COLOR_LABELS>).map(color => (
+            <button
+              key={color}
+              type="button"
+              className={`rounded-md border px-3 py-2 text-sm transition ${
+                currentColor === color
+                  ? color === 'red'
+                    ? 'border-red-400 bg-red-600 text-white'
+                    : color === 'blue'
+                      ? 'border-blue-400 bg-blue-600 text-white'
+                      : 'border-zinc-500 bg-zinc-950 text-white'
+                  : 'border-zinc-700 bg-zinc-800 text-zinc-200 hover:bg-zinc-700'
+              }`}
+              onClick={() => onColorChange(color)}
+            >
+              {COLOR_LABELS[color]}
+            </button>
+          ))}
         </div>
-      </div>
+      </fieldset>
     </div>
   );
-};
-
-export default PatternSelector;
+}
