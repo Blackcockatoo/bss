@@ -69,14 +69,7 @@ export default function GenomeResonancePage() {
           { traitId: "resilience", family: "health", effectSize: 0.68, confidence: 0.8, interactionStrength: 0.7 },
         ]}
       />
-      <GenomeTimeline
-        branchesByStage={{
-          adult: [
-            { id: "b1", label: "Balanced Arc", confidence: 0.8, divergenceSummary: "Balanced mood and athletics." },
-            { id: "b2", label: "Performance Arc", confidence: 0.73, divergenceSummary: "Improved speed; slight focus volatility." },
-          ],
-        }}
-      />
+      <GenomeTimeline petId="pet-a" />
       <ResonanceArena signatures={[{ petId: "pet-a", behavior: 0.8, health: 0.66, athletic: 0.74 }]} />
       <ExplainerPanel
         blocks={[
