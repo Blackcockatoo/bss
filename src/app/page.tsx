@@ -65,6 +65,7 @@ import {
   GraduationCap,
   Lock,
   Orbit,
+  Compass,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -1929,6 +1930,27 @@ export default function Home() {
                   className="px-4 py-2 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-200 text-sm font-medium hover:bg-amber-500/30 hover:border-amber-400 transition-colors touch-manipulation"
                 >
                   Generate My Pet Resonance
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Steering Wheel — Central Navigator */}
+          <div className="bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 rounded-2xl border border-cyan-500/20 p-4">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center gap-3">
+                <Compass className="w-6 h-6 text-cyan-400" />
+                <div>
+                  <h2 className="text-lg font-bold text-white">Steering Wheel</h2>
+                  <p className="text-xs text-zinc-400">Navigate the Hepta MOSS60 system with the compass</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Link
+                  href="/compass"
+                  className="px-4 py-2 rounded-xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-200 text-sm font-medium hover:bg-cyan-500/30 hover:border-cyan-400 transition-colors touch-manipulation"
+                >
+                  Open Compass
                 </Link>
               </div>
             </div>
