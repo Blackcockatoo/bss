@@ -113,16 +113,7 @@ export default function GenomeResonancePage() {
         onResults={setLastSimulation}
         onSimulate={runSimulation}
       />
-      <SonificationCompareMode
-        petA={[
-          { traitId: "sociality", family: "behavior", effectSize: 0.8, confidence: 0.9, interactionStrength: 0.5 },
-          { traitId: "agility", family: "athletic", effectSize: 0.7, confidence: 0.82, interactionStrength: 0.3 },
-        ]}
-        petB={[
-          { traitId: "focus", family: "cognition", effectSize: 0.6, confidence: 0.76, interactionStrength: 0.4 },
-          { traitId: "resilience", family: "health", effectSize: 0.68, confidence: 0.8, interactionStrength: 0.7 },
-        ]}
-      />
+      <SonificationCompareMode petAId="pet-a" petBId="pet-b" />
       <GenomeTimeline
         branchesByStage={{
           adult: [
