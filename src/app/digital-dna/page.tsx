@@ -11,9 +11,16 @@ import Link from 'next/link';
 const DigitalDNAHub = dynamic(() => import('@/components/DigitalDNAHub'), {
   ssr: false,
   loading: () => (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center gap-4">
+    // role="status" + aria-live="polite" ensure screen readers announce this
+    // loading state without interrupting other content (WCAG perceivable principle).
+    <div
+      role="status"
+      aria-live="polite"
+      aria-label="Loading Digital DNA"
+      className="min-h-screen bg-slate-950 flex flex-col items-center justify-center gap-4"
+    >
       {/* Pulsing DNA icon while the bundle loads */}
-      <div className="text-6xl animate-pulse select-none">🧬</div>
+      <div className="text-6xl animate-pulse select-none" aria-hidden="true">🧬</div>
       <p className="text-amber-300 text-xl font-semibold tracking-wide animate-pulse">
         Loading Digital DNA…
       </p>
