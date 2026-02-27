@@ -1,17 +1,24 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { QuickNav } from "@/components/QuickNav";
 import LegalNotice from "@/components/LegalNotice";
+import { AuthDialog } from "@/components/AuthDialog";
+import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/lib/auth/store";
+import { PlanBadge } from "@/components/PlanBadge";
 
 export default function ClientBody({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Remove any extension-added classes during hydration
+  const [authOpen, setAuthOpen] = useState(false);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const currentUser = useAuthStore((state) => state.currentUser);
+  const logout = useAuthStore((state) => state.logout);
+
   useEffect(() => {
-    // This runs only on the client after hydration
     document.body.className = "antialiased";
   }, []);
 
@@ -33,11 +40,36 @@ export default function ClientBody({
 
   return (
     <div className="antialiased min-h-screen pb-[calc(6rem+env(safe-area-inset-bottom))] flex flex-col">
+      <div className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/90 px-4 py-3 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3">
+          <div className="text-sm text-zinc-200">Meta-Pet</div>
+          <div className="flex items-center gap-2">
+            <PlanBadge />
+            {isAuthenticated && currentUser ? (
+              <>
+                <span className="text-xs text-zinc-400">{currentUser.displayName}</span>
+                <Button variant="ghost" onClick={logout} className="h-8 text-zinc-300">Logout</Button>
+              </>
+            ) : (
+              <Button onClick={() => setAuthOpen(true)} className="h-8 bg-cyan-400 text-slate-950 hover:bg-cyan-300">
+                Login / Register
+              </Button>
+            )}
+          </div>
+        </div>
+        {!isAuthenticated && (
+          <p className="mx-auto mt-2 w-full max-w-6xl text-xs text-zinc-400">
+            Sign in to unlock subscription features like advanced analytics, exports, and upcoming Pro tools.
+          </p>
+        )}
+      </div>
+
       <div className="flex-1">{children}</div>
       <footer className="px-4 pb-6 pt-4 text-center">
         <LegalNotice />
       </footer>
       <QuickNav />
+      <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
     </div>
   );
 }

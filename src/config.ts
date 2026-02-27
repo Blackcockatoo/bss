@@ -6,4 +6,5 @@ export const FEATURES = {
   TICK: true,
   BACKGROUND_PAUSE: true,
   LOW_POWER_TICK_MS: 2000,
+  PRICING: true,
 };
