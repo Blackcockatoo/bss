@@ -1,18 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { bookmarkBranch, listBookmarks } from "../data/genomePersistenceClient";
 
 const STAGES = ["puppy/kitten", "adolescent", "adult", "senior"] as const;
+const DRIVERS = ["diet", "activity", "enrichment"] as const;
 
 type Stage = (typeof STAGES)[number];
+type DriverName = (typeof DRIVERS)[number];
+type EnvironmentValue = "low" | "medium" | "high" | "standard" | "balanced" | "high-protein";
+
+type EnvironmentChoice = Record<DriverName, EnvironmentValue>;
 
 type FutureBranch = ReturnType<typeof projectFutures>[number];
-
-type PersistedState = {
-  bookmarks: string[];
-  compareSelection: string[];
-};
 
 type AnalyticsEvent = {
   event: "stage_change" | "driver_change" | "bookmark_toggle" | "compare_toggle";
@@ -23,7 +23,8 @@ type AnalyticsEvent = {
 };
 
 type Props = {
-  petId: string;
+  petId?: string;
+  branchesByStage?: Partial<Record<Stage, Array<Pick<FutureBranch, "id" | "label" | "confidence" | "divergenceSummary">>>>;
 };
 
 const DEFAULT_ENV_BY_STAGE: Record<Stage, EnvironmentChoice> = {
@@ -33,16 +34,122 @@ const DEFAULT_ENV_BY_STAGE: Record<Stage, EnvironmentChoice> = {
   senior: { diet: "standard", activity: "low", enrichment: "medium" },
 };
 
-export function GenomeTimeline({ petId }: Props) {
+function scoreValue(value: EnvironmentValue) {
+  if (value === "high" || value === "high-protein") return 1;
+  if (value === "medium" || value === "balanced") return 0.7;
+  return 0.45;
+}
+
+function projectFutures(stage: Stage, choice: EnvironmentChoice) {
+  const activityScore = scoreValue(choice.activity);
+  const dietScore = scoreValue(choice.diet);
+  const enrichmentScore = scoreValue(choice.enrichment);
+
+  const resilience = Math.min(0.99, 0.35 + activityScore * 0.2 + enrichmentScore * 0.25 + dietScore * 0.15);
+  const weight = Math.min(0.99, 0.2 + dietScore * 0.45 + activityScore * 0.2 + enrichmentScore * 0.1);
+  const cognition = Math.min(0.99, 0.25 + enrichmentScore * 0.45 + activityScore * 0.2 + dietScore * 0.1);
+
+  return [
+    {
+      id: `${stage}-resilience`,
+      label: "Resilience-leaning trajectory",
+      confidence: resilience,
+      divergenceSummary: "Projected immune and stress response remains comparatively stable.",
+      branchDrivers: [
+        { driver: "diet", selectedValue: choice.diet, provenanceLabel: "nutrition model" },
+        { driver: "enrichment", selectedValue: choice.enrichment, provenanceLabel: "home telemetry" },
+      ],
+    },
+    {
+      id: `${stage}-weight`,
+      label: "Weight-management branch",
+      confidence: weight,
+      divergenceSummary: "Body composition trends suggest periodic intervention checkpoints.",
+      branchDrivers: [
+        { driver: "diet", selectedValue: choice.diet, provenanceLabel: "nutrition model" },
+        { driver: "activity", selectedValue: choice.activity, provenanceLabel: "activity tracker" },
+      ],
+    },
+    {
+      id: `${stage}-cognition`,
+      label: "Cognitive vitality path",
+      confidence: cognition,
+      divergenceSummary: "Behavioral and enrichment signals indicate future cognition outcomes.",
+      branchDrivers: [
+        { driver: "enrichment", selectedValue: choice.enrichment, provenanceLabel: "engagement classifier" },
+        { driver: "activity", selectedValue: choice.activity, provenanceLabel: "activity tracker" },
+      ],
+    },
+  ];
+}
+
+function confidenceTooltip(branch: FutureBranch) {
+  return `${(branch.confidence * 100).toFixed(0)}% confidence based on selected drivers.`;
+}
+
+export function GenomeTimeline({ petId = "unknown-pet", branchesByStage: providedBranchesByStage }: Props) {
   const [currentStage, setCurrentStage] = useState<Stage>("adult");
   const [envByStage, setEnvByStage] = useState<Record<Stage, EnvironmentChoice>>(DEFAULT_ENV_BY_STAGE);
   const [bookmarks, setBookmarks] = useState<string[]>([]);
+  const [compareSelection, setCompareSelection] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  const branchesByStage = useMemo(
+    () =>
+      STAGES.reduce<Record<Stage, FutureBranch[]>>((acc, stage) => {
+        const projected = projectFutures(stage, envByStage[stage]);
+        const provided = providedBranchesByStage?.[stage];
+
+        acc[stage] = provided
+          ? provided.map((branch) => ({
+              ...branch,
+              branchDrivers: projected[0]?.branchDrivers ?? [],
+            }))
+          : projected;
+
+        return acc;
+      }, {} as Record<Stage, FutureBranch[]>),
+    [envByStage, providedBranchesByStage],
+  );
+
   const branches = branchesByStage[currentStage] ?? [];
 
   useEffect(() => {
     listBookmarks().then(setBookmarks).catch(() => setError("Unable to load bookmarks."));
   }, []);
+
+  function emitAnalytics(event: AnalyticsEvent) {
+    void event;
+  }
+
+  function handleStageChange(stage: Stage) {
+    setCurrentStage(stage);
+    emitAnalytics({
+      event: "stage_change",
+      petId,
+      stage,
+      timestamp: new Date().toISOString(),
+      details: { source: "timeline_tab" },
+    });
+  }
+
+  function updateDriver(stage: Stage, driver: DriverName, value: string) {
+    const nextValue = value as EnvironmentValue;
+    setEnvByStage((previous) => ({
+      ...previous,
+      [stage]: {
+        ...previous[stage],
+        [driver]: nextValue,
+      },
+    }));
+    emitAnalytics({
+      event: "driver_change",
+      petId,
+      stage,
+      timestamp: new Date().toISOString(),
+      details: { driver, value: nextValue },
+    });
+  }
 
   async function toggleBookmark(branchId: string) {
     setError(null);
@@ -55,10 +162,35 @@ export function GenomeTimeline({ petId }: Props) {
     try {
       const persisted = await bookmarkBranch(branchId);
       setBookmarks(persisted);
+      emitAnalytics({
+        event: "bookmark_toggle",
+        petId,
+        stage: currentStage,
+        timestamp: new Date().toISOString(),
+        details: { branchId, bookmarked: persisted.includes(branchId) },
+      });
     } catch {
       setBookmarks(previous);
       setError("Bookmark update failed. Changes were rolled back.");
     }
+  }
+
+  function toggleCompare(branchId: string) {
+    setCompareSelection((previous) => {
+      const next = previous.includes(branchId)
+        ? previous.filter((id) => id !== branchId)
+        : [...previous, branchId].slice(-2);
+
+      emitAnalytics({
+        event: "compare_toggle",
+        petId,
+        stage: currentStage,
+        timestamp: new Date().toISOString(),
+        details: { branchId, selected: next.includes(branchId), compareCount: next.length },
+      });
+
+      return next;
+    });
   }
 
   return (
