@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { bookmarkBranch, listBookmarks } from "../data/genomePersistenceClient";
 
 const STAGES = ["puppy/kitten", "adolescent", "adult", "senior"] as const;
 
@@ -18,12 +19,28 @@ type Props = {
 export function GenomeTimeline({ branchesByStage }: Props) {
   const [currentStage, setCurrentStage] = useState<(typeof STAGES)[number]>("adult");
   const [bookmarks, setBookmarks] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const branches = branchesByStage[currentStage] ?? [];
 
-  function toggleBookmark(branchId: string) {
-    setBookmarks((state) =>
-      state.includes(branchId) ? state.filter((id) => id !== branchId) : [...state, branchId],
-    );
+  useEffect(() => {
+    listBookmarks().then(setBookmarks).catch(() => setError("Unable to load bookmarks."));
+  }, []);
+
+  async function toggleBookmark(branchId: string) {
+    setError(null);
+    const previous = bookmarks;
+    const optimistic = previous.includes(branchId)
+      ? previous.filter((id) => id !== branchId)
+      : [...previous, branchId];
+    setBookmarks(optimistic);
+
+    try {
+      const persisted = await bookmarkBranch(branchId);
+      setBookmarks(persisted);
+    } catch {
+      setBookmarks(previous);
+      setError("Bookmark update failed. Changes were rolled back.");
+    }
   }
 
   return (
@@ -55,6 +72,7 @@ export function GenomeTimeline({ branchesByStage }: Props) {
         ))}
       </div>
       <p className="mt-3 text-xs text-slate-500">Bookmarked branch points: {bookmarks.join(", ") || "none"}</p>
+      {error ? <p className="mt-1 text-xs text-rose-400">{error}</p> : null}
     </section>
   );
 }
