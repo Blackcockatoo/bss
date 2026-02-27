@@ -12,7 +12,7 @@ import {
   getLatticeStats,
   deriveLatticeType,
 } from '../lib/lattice-math';
-import { generateFractalTree, deriveFractalConfig, type FractalTree, type FractalGrammarConfig } from '../lib/fractal-grammar';
+import { generateFractalTree, type FractalTree } from '../lib/fractal-grammar';
 import {
   initResonanceField, resonanceTick, detectStandingWaves,
   getResonanceColor, getResonanceIntensity,
@@ -372,20 +372,22 @@ export function ReactVisualizationComponent({ dna, latticeState }: ReactVisualiz
     const genome = dna || '0'.repeat(60);
 
     // Initialize fractal
-    const config = deriveFractalConfig(genome);
-    const tree = generateFractalTree(config);
+    const tree = generateFractalTree(genome);
     setFractalTree(tree);
 
     // Initialize resonance if lattice available
     if (latticeState) {
-      const resField = initResonanceField(latticeState, genome);
+      const nodeIds = latticeState.nodes.filter(n => n.alive).map(n => n.id);
+      const dnaDigits = nodeIds.map((_, i) => parseInt(genome[i % genome.length], 10) || 0);
+      const edgePairs = latticeState.edges.map(e => [e.a, e.b] as [number, number]);
+      const resField = initResonanceField(nodeIds, dnaDigits, edgePairs);
       setResonanceField(resField);
     }
 
     // Initialize memory/fingerprint
     if (latticeState) {
-      const fp = encodeCrystal(latticeState);
-      setFingerprint(fp);
+      const result = encodeCrystal(latticeState, genome);
+      setFingerprint(result.fingerprint);
     }
   }, [dna, latticeState]);
 
