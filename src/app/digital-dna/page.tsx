@@ -24,7 +24,7 @@ const DigitalDNAHub = dynamic(() => import('@/components/DigitalDNAHub'), {
       <p className="text-amber-300 text-xl font-semibold tracking-wide animate-pulse">
         Loading Digital DNA…
       </p>
-      <p className="text-slate-500 text-sm">Initialising Three.js &amp; audio engine</p>
+      <p className="text-slate-500 text-sm">Setting up your visual experience…</p>
     </div>
   ),
 });

@@ -99,33 +99,38 @@ export default function IdentityPage() {
       <div className="max-w-4xl mx-auto px-6 py-10">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-cyan-400/80">Identity Vault</p>
-            <h1 className="text-3xl font-bold">Owner Identity</h1>
+            <p className="text-xs uppercase tracking-[0.3em] text-cyan-400/80">Your Profile</p>
+            <h1 className="text-3xl font-bold">Student Profile</h1>
             <p className="text-sm text-slate-400 mt-2">
-              Keep your contact details and avatar synced across QR messaging and pet profiles.
+              Set your display name and optional photo so your teacher can identify you. Everything stays on this device.
             </p>
           </div>
-          <div className="text-xs uppercase tracking-[0.3em] text-slate-500">Quick Access</div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-6">
           <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-6">
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-wide text-zinc-500">Email</label>
+              <label htmlFor="identity-email" className="text-xs uppercase tracking-wide text-zinc-500">
+                School Email <span className="normal-case text-zinc-600">(optional)</span>
+              </label>
               <input
+                id="identity-email"
                 type="email"
                 value={form.email}
                 onChange={event => setForm(prev => ({ ...prev, email: event.target.value }))}
-                placeholder="you@metapet.com"
+                placeholder="your.name@school.edu"
                 className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
               />
-              <p className="text-xs text-slate-500">Stored locally in this browser; not transmitted.</p>
+              <p className="text-xs text-slate-500">Optional. Stored only on this device — never sent anywhere.</p>
               {emailError && <p className="text-xs text-rose-400">{emailError}</p>}
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-wide text-zinc-500">Username</label>
+              <label htmlFor="identity-username" className="text-xs uppercase tracking-wide text-zinc-500">
+                Display Name
+              </label>
               <input
+                id="identity-username"
                 type="text"
                 value={form.username}
                 onChange={event => setForm(prev => ({ ...prev, username: event.target.value }))}
@@ -184,7 +189,7 @@ export default function IdentityPage() {
             <div className="flex flex-wrap items-center gap-3">
               <Button onClick={handleSave} className="gap-2">
                 <Save className="w-4 h-4" />
-                Save Identity
+                Save Profile
               </Button>
               {saveNotice && (
                 <p className={`text-xs ${hasErrors ? 'text-rose-400' : 'text-emerald-400'}`}>
@@ -206,17 +211,16 @@ export default function IdentityPage() {
               </div>
               <div>
                 <p className="text-base font-semibold text-white">
-                  {form.username.trim() || 'Unnamed Owner'}
+                  {form.username.trim() || 'No display name yet'}
                 </p>
                 <p className="text-sm text-slate-400">
-                  {form.email.trim() || 'Add email to enable QR messaging identity'}
+                  {form.email.trim() || 'No school email set'}
                 </p>
               </div>
             </div>
             <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4 text-xs text-slate-400 space-y-2">
               <p>
-                Your QR Messaging identity will default to your email address. If you leave the email blank,
-                we will use your username instead.
+                Your display name appears on QR check-ins and pet profiles. If you skip the email, your display name is used instead.
               </p>
               <p>
                 Last updated: {profile.updatedAt ? new Date(profile.updatedAt).toLocaleString() : 'Not saved yet'}

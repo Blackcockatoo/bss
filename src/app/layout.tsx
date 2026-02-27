@@ -14,7 +14,10 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://bss-l8cw.vercel.app"),
-  title: "Meta-Pet",
+  title: {
+    default: "Meta-Pet",
+    template: "%s | Meta-Pet",
+  },
   description: "Your digital companion with genome-based evolution",
   manifest: "/manifest.json",
   icons: {

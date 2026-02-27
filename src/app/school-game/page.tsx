@@ -317,11 +317,17 @@ export default function SchoolGamePage() {
                 )}
 
                 {/* Student alias input */}
+                <div className="space-y-1">
+                  <label htmlFor="student-alias" className="text-xs text-zinc-400">
+                    Your alias (so your teacher can see your progress)
+                  </label>
+                </div>
                 <div className="flex gap-2">
                   <input
+                    id="student-alias"
                     value={studentAlias}
                     onChange={(e) => setStudentAlias(e.target.value)}
-                    placeholder="Your alias (e.g., Bluebird 4)"
+                    placeholder="e.g., Bluebird 4"
                     className="flex-1 rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                   />
                   <button
@@ -413,11 +419,11 @@ export default function SchoolGamePage() {
             {queue.length === 0 && (
               <section className="rounded-2xl border border-amber-400/20 bg-amber-500/5 p-5">
                 <p className="text-sm text-amber-200">
-                  No lessons queued yet. Ask your teacher to set up activities in the{' '}
-                  <Link href="/" className="underline text-amber-300 hover:text-amber-100">
-                    Classroom Manager
+                  No lessons queued yet. Ask your teacher to add activities from the Pet screen, or go straight to the{' '}
+                  <Link href="/digital-dna" className="underline text-amber-300 hover:text-amber-100">
+                    DNA Hub
                   </Link>
-                  , or explore the DNA Hub directly.
+                  {' '}to explore.
                 </p>
               </section>
             )}

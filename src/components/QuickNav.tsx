@@ -27,7 +27,7 @@ const NAV_ITEMS = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/pet', label: 'Pet', icon: PawPrint },
   { href: '/school-game', label: 'School', icon: BookOpen },
-  { href: '/identity', label: 'Identity', icon: UserCircle },
+  { href: '/identity', label: 'Profile', icon: UserCircle },
   { href: '/genome-explorer', label: 'Genome', icon: Dna },
 ];
 
