@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { SimulationResult } from "../../../../../shared/contracts/genomeResonance";
+import { listSavedScenarios, saveScenario, type SavedScenario } from "../data/genomePersistenceClient";
 
 export type TraitControl = {
   id: string;
