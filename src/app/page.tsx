@@ -1931,6 +1931,12 @@ export default function Home() {
                 >
                   Generate My Pet Resonance
                 </Link>
+                <Link
+                  href="/time-calculator"
+                  className="px-4 py-2 rounded-xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-200 text-sm font-medium hover:bg-cyan-500/30 hover:border-cyan-400 transition-colors touch-manipulation"
+                >
+                  MetaPet Time Calculator
+                </Link>
               </div>
             </div>
           </div>
