@@ -77,6 +77,29 @@ export const v3 = (x = 0, y = 0, z = 0): Vec3 => ({ x, y, z });
 export const v3add = (a: Vec3, b: Vec3): Vec3 => ({ x: a.x + b.x, y: a.y + b.y, z: a.z + b.z });
 export const v3scale = (a: Vec3, s: number): Vec3 => ({ x: a.x * s, y: a.y * s, z: a.z * s });
 export const v3len = (a: Vec3): number => Math.hypot(a.x, a.y, a.z);
+export const v3dist = (a: Vec3, b: Vec3): number => v3len({ x: a.x - b.x, y: a.y - b.y, z: a.z - b.z });
+export const v3norm = (a: Vec3): Vec3 => {
+  const len = v3len(a);
+  if (len === 0) return v3(0, 0, 0);
+  return v3scale(a, 1 / len);
+};
+
+export function dnaSeed(dna: string): number {
+  let hash = 2166136261;
+  for (let i = 0; i < dna.length; i++) {
+    hash ^= dna.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+export function createSeededRng(seed: string): () => number {
+  let state = dnaSeed(seed) || 1;
+  return () => {
+    state = (Math.imul(1664525, state) + 1013904223) >>> 0;
+    return state / 0x100000000;
+  };
+}
 
 export function rotateX(v: Vec3, angle: number): Vec3 {
   const c = Math.cos(angle);
