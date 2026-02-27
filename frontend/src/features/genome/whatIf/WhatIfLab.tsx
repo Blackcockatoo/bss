@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { listSavedScenarios, saveScenario, type SavedScenario } from "../data/genomePersistenceClient";
+import { useMemo, useState } from "react";
+import type { SimulationResult } from "../../../../../shared/contracts/genomeResonance";
 
 export type TraitControl = {
   id: string;
@@ -9,21 +9,18 @@ export type TraitControl = {
   baseline: number;
 };
 
-export type SimulationResult = {
-  traitId: string;
-  estimate: number;
-  lowerBound: number;
-  upperBound: number;
-  tradeoffWarning?: string;
-  feasibility: number;
+type Scenario = {
+  name: string;
+  controls: Record<string, number>;
 };
 
 type Props = {
   controls: TraitControl[];
   onSimulate: (deltas: Record<string, number>) => Promise<SimulationResult[]>;
+  onResults?: (results: SimulationResult[]) => void;
 };
 
-export function WhatIfLab({ controls, onSimulate }: Props) {
+export function WhatIfLab({ controls, onSimulate, onResults }: Props) {
   const baseline = useMemo(
     () => controls.reduce<Record<string, number>>((acc, c) => ({ ...acc, [c.id]: c.baseline }), {}),
     [controls],
@@ -41,12 +38,15 @@ export function WhatIfLab({ controls, onSimulate }: Props) {
     const deltas = Object.fromEntries(
       Object.entries(values).map(([id, value]) => [id, value - baseline[id]]),
     );
-    setResults(await onSimulate(deltas));
+    const nextResults = await onSimulate(deltas);
+    setResults(nextResults);
+    onResults?.(nextResults);
   }
 
   function reset() {
     setValues(baseline);
     setResults([]);
+    onResults?.([]);
   }
 
   async function persistScenario() {
