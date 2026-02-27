@@ -901,7 +901,6 @@ export function Moss60Hub() {
             </p>
           </div>
           <CrystallineNetwork dna={DNA_R.join('')} />
-
           <div className="rounded-lg border border-slate-700/50 bg-slate-900/30 p-3 mt-4">
             <p className="text-xs font-semibold text-zinc-200 mb-1">3D crystal lattice scaffold</p>
             <p className="text-[11px] text-zinc-400 leading-relaxed">

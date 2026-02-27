@@ -1835,21 +1835,25 @@ export default function Home() {
           >
             <div className="space-y-4">
               <div className="flex flex-col gap-2">
-                <label htmlFor="locale-select" className="text-xs uppercase tracking-wide text-zinc-400">
+                <p className="text-xs uppercase tracking-wide text-zinc-400">
                   {strings.classroom.languageLabel}
-                </label>
-                <select
-                  id="locale-select"
-                  value={locale}
-                  onChange={event => setLocale(event.target.value as Locale)}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-400 touch-manipulation"
-                >
+                </p>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
                   {SUPPORTED_LOCALES.map(option => (
-                    <option key={option} value={option}>
+                    <Button
+                      key={option}
+                      type="button"
+                      onClick={() => setLocale(option as Locale)}
+                      className={`h-auto whitespace-normal px-3 py-2 text-xs sm:text-sm ${
+                        locale === option
+                          ? 'bg-emerald-500 text-slate-950 hover:bg-emerald-400'
+                          : 'border border-slate-700 bg-slate-900/80 text-zinc-100 hover:bg-slate-800'
+                      }`}
+                    >
                       {LOCALE_LABELS[option]}
-                    </option>
+                    </Button>
                   ))}
-                </select>
+                </div>
               </div>
 
               <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-4 space-y-3">

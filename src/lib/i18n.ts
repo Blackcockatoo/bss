@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-export const SUPPORTED_LOCALES = ['en', 'es', 'fr'] as const;
+export const SUPPORTED_LOCALES = ['en', 'es', 'ja', 'hi', 'ru'] as const;
 export type Locale = (typeof SUPPORTED_LOCALES)[number];
 
 export const LOCALE_LABELS: Record<Locale, string> = {
   en: 'English',
   es: 'Español',
-  fr: 'Français',
+  ja: '日本語',
+  hi: 'हिन्दी',
+  ru: 'Русский',
 };
 
 const STORAGE_KEY = 'metapet-locale';
@@ -231,6 +233,331 @@ const UI_STRINGS = {
       skip: 'Saltar',
       checkIn: 'Registrar',
       quickMood: '¿Cómo estás?',
+    },
+  },
+  ja: {
+    core: {
+      nameLabel: 'コンパニオン名',
+      namePlaceholder: 'コンパニオンに名前をつける',
+      petType: {
+        geometric: 'ジオメトリック',
+        auralia: 'オーラリア',
+      },
+      viewCertificate: '証明書を見る',
+      actions: {
+        feed: 'えさをあげる',
+        clean: 'きれいにする',
+        play: '遊ぶ',
+        rest: '休む',
+      },
+    },
+    sections: {
+      evolution: '進化',
+      miniGames: 'ミニゲーム',
+      breedingLab: '育成ラボ',
+      alchemistStation: '錬金ステーション',
+      classroomTools: '教室ツール',
+    },
+    classroom: {
+      languageLabel: '言語',
+      lowBandwidthTitle: '低帯域モード',
+      lowBandwidthDescription: '端末や回線が限られる教室向けに、静的表示でCPU/GPU使用量を下げます。',
+      lowBandwidthOn: 'オン',
+      lowBandwidthOff: 'オフ',
+      teacherPromptsTitle: '先生向けプロンプト',
+      teacherPromptsDescription: '授業での振り返りを促す短い問いかけ。',
+      teacherPrompts: [
+        {
+          title: '観察',
+          prompt: 'ペットの気分が時間とともにどう変わるかを説明してもらう。',
+        },
+        {
+          title: '関連づけ',
+          prompt: 'お世話の行動を日常の習慣と結びつけてもらう。',
+        },
+        {
+          title: '振り返り',
+          prompt: '今日できる小さなセルフケアを話し合う。',
+        },
+      ],
+    },
+    onboarding: {
+      steps: [
+        {
+          title: 'Meta-Petへようこそ！',
+          description: '新しいデジタルコンパニオンに会いましょう。短い手順で元気に育てられます。',
+          tip: '毎日チェックしてペットをハッピーに。',
+        },
+        {
+          title: 'ペットにえさをあげよう',
+          description: '空腹が下がったら「えさ」を使いましょう。気分と成長の維持につながります。',
+          tip: '空腹が低くなりすぎる前に与えるのがコツ。',
+        },
+        {
+          title: 'リチュアルを完了',
+          description: 'リチュアルは毎日のブーストです。ステータスのバランスを保ちましょう。',
+          tip: 'リチュアルは1日1回が効果的です。',
+        },
+        {
+          title: 'ミニゲームで遊ぶ',
+          description: 'ミニゲームで楽しみながら報酬を獲得。ペットのやる気も上がります。',
+          tip: '気分や資源の強化に役立ちます。',
+        },
+        {
+          title: '保存またはエクスポート',
+          description: '進行を保存し、エクスポートで別デバイスでも安全に引き継げます。',
+          tip: 'エクスポートは進行保護に便利です。',
+        },
+      ],
+      skip: 'スキップ',
+      next: '次へ',
+      letsGo: 'はじめよう！',
+      tipLabel: 'ヒント',
+      stepCount: '/',
+      closeLabel: 'チュートリアルをスキップ',
+    },
+    wellness: {
+      reflectionTitle: 'ウェルネス振り返り',
+      dismiss: '閉じる',
+      logSelfCare: 'セルフケアを記録',
+      greeting: {
+        morning: 'おはよう',
+        afternoon: 'こんにちは',
+        evening: 'こんばんは',
+        night: '夜遅く',
+      },
+      checkInPrompt: '今の気分はどうですか？',
+      feedback: {
+        struggling: 'つらい日があるのは自然です。コンパニオンがそばにいます。',
+        low: 'ゆっくりで大丈夫。小さな一歩が大切です。',
+        neutral: '安定した一日。それで十分です。',
+        good: 'いいですね！その前向きさが伝わっています。',
+        great: 'すばらしい！コンパニオンもあなたの喜びを感じています。',
+      },
+      yourMood: 'あなたの気分',
+      petEnergy: 'ペットのエネルギー',
+      noteLabel: 'メモを追加（任意）',
+      notePlaceholder: '今日はどんな一日ですか？',
+      skip: 'スキップ',
+      checkIn: '記録する',
+      quickMood: '今の気分は？',
+    },
+  },
+  hi: {
+    core: {
+      nameLabel: 'साथी का नाम',
+      namePlaceholder: 'अपने साथी का नाम रखें',
+      petType: {
+        geometric: 'ज्यामितीय',
+        auralia: 'ऑरेलिया',
+      },
+      viewCertificate: 'प्रमाणपत्र देखें',
+      actions: {
+        feed: 'खिलाएँ',
+        clean: 'साफ करें',
+        play: 'खेलें',
+        rest: 'आराम',
+      },
+    },
+    sections: {
+      evolution: 'विकास',
+      miniGames: 'मिनी-गेम्स',
+      breedingLab: 'ब्रीडिंग लैब',
+      alchemistStation: 'एल्केमिस्ट स्टेशन',
+      classroomTools: 'कक्षा उपकरण',
+    },
+    classroom: {
+      languageLabel: 'भाषा',
+      lowBandwidthTitle: 'लो-बैंडविड्थ मोड',
+      lowBandwidthDescription: 'सीमित डिवाइस या नेटवर्क वाली कक्षाओं के लिए स्थिर दृश्य उपयोग करें।',
+      lowBandwidthOn: 'चालू',
+      lowBandwidthOff: 'बंद',
+      teacherPromptsTitle: 'शिक्षक संकेत',
+      teacherPromptsDescription: 'कक्षा चिंतन के लिए छोटे प्रश्न।',
+      teacherPrompts: [
+        {
+          title: 'देखें',
+          prompt: 'छात्रों से पूछें कि पालतू का मूड समय के साथ कैसे बदलता है।',
+        },
+        {
+          title: 'जोड़ें',
+          prompt: 'देखभाल के कार्यों को वास्तविक जीवन की दिनचर्या से जोड़ें।',
+        },
+        {
+          title: 'चिंतन',
+          prompt: 'आज का एक छोटा सेल्फ-केयर कदम चर्चा करें।',
+        },
+      ],
+    },
+    onboarding: {
+      steps: [
+        {
+          title: 'Meta-Pet में आपका स्वागत है!',
+          description: 'अपने नए डिजिटल साथी से मिलें। कुछ छोटे कदम उसे स्वस्थ रखेंगे।',
+          tip: 'रोज़ जाँच करें ताकि आपका पालतू खुश रहे।',
+        },
+        {
+          title: 'अपने पालतू को खिलाएँ',
+          description: 'भूख कम होने पर खिलाने की क्रिया करें। इससे मूड और विकास बेहतर रहता है।',
+          tip: 'बहुत कम भूख होने से पहले खिलाएँ।',
+        },
+        {
+          title: 'एक रिचुअल पूरा करें',
+          description: 'रिचुअल रोज़ का बूस्ट देता है। संतुलन के लिए एक चुनें।',
+          tip: 'रिचुअल दिन में एक बार सबसे अच्छा है।',
+        },
+        {
+          title: 'मिनी-गेम खेलें',
+          description: 'मिनी-गेम्स मज़ा और इनाम देते हैं। एक आज़माएँ।',
+          tip: 'यह मूड या संसाधनों को बढ़ा सकता है।',
+        },
+        {
+          title: 'सेव या एक्सपोर्ट',
+          description: 'प्रगति सेव करें या एक्सपोर्ट कर के अलग डिवाइस पर सुरक्षित रखें।',
+          tip: 'एक्सपोर्ट प्रगति सुरक्षित रखने में मदद करता है।',
+        },
+      ],
+      skip: 'छोड़ें',
+      next: 'अगला',
+      letsGo: 'चलें!',
+      tipLabel: 'सुझाव',
+      stepCount: 'में से',
+      closeLabel: 'ट्यूटोरियल छोड़ें',
+    },
+    wellness: {
+      reflectionTitle: 'वेलनेस चिंतन',
+      dismiss: 'बंद करें',
+      logSelfCare: 'सेल्फ-केयर दर्ज करें',
+      greeting: {
+        morning: 'सुप्रभात',
+        afternoon: 'नमस्कार',
+        evening: 'शुभ संध्या',
+        night: 'देर रात',
+      },
+      checkInPrompt: 'आप कैसा महसूस कर रहे हैं?',
+      feedback: {
+        struggling: 'कठिन दिन होना ठीक है। आपका साथी आपके साथ है।',
+        low: 'धीरे चलना ठीक है। छोटे कदम मायने रखते हैं।',
+        neutral: 'स्थिर दिन। यह बिल्कुल ठीक है।',
+        good: 'बहुत बढ़िया! आपकी सकारात्मक ऊर्जा दिखती है।',
+        great: 'शानदार! आपका साथी आपकी खुशी महसूस कर रहा है।',
+      },
+      yourMood: 'आपका मूड',
+      petEnergy: 'पालतू की ऊर्जा',
+      noteLabel: 'नोट जोड़ें (वैकल्पिक)',
+      notePlaceholder: 'आपका दिन कैसा चल रहा है?',
+      skip: 'छोड़ें',
+      checkIn: 'दर्ज करें',
+      quickMood: 'कैसा महसूस हो रहा है?',
+    },
+  },
+  ru: {
+    core: {
+      nameLabel: 'Имя питомца',
+      namePlaceholder: 'Назовите своего питомца',
+      petType: {
+        geometric: 'Геометрический',
+        auralia: 'Ауралия',
+      },
+      viewCertificate: 'Открыть сертификат',
+      actions: {
+        feed: 'Кормить',
+        clean: 'Чистить',
+        play: 'Играть',
+        rest: 'Отдых',
+      },
+    },
+    sections: {
+      evolution: 'Эволюция',
+      miniGames: 'Мини-игры',
+      breedingLab: 'Лаборатория разведения',
+      alchemistStation: 'Алхимическая станция',
+      classroomTools: 'Инструменты класса',
+    },
+    classroom: {
+      languageLabel: 'Язык',
+      lowBandwidthTitle: 'Режим низкой нагрузки',
+      lowBandwidthDescription:
+        'Переключитесь на статичную графику, чтобы снизить нагрузку в классах с ограниченными ресурсами.',
+      lowBandwidthOn: 'Вкл',
+      lowBandwidthOff: 'Выкл',
+      teacherPromptsTitle: 'Подсказки для учителя',
+      teacherPromptsDescription: 'Короткие вопросы для обсуждения в классе.',
+      teacherPrompts: [
+        {
+          title: 'Наблюдение',
+          prompt: 'Попросите учеников описать, как меняется настроение питомца.',
+        },
+        {
+          title: 'Связь',
+          prompt: 'Свяжите действия по уходу с повседневными привычками.',
+        },
+        {
+          title: 'Рефлексия',
+          prompt: 'Обсудите одно небольшое действие заботы о себе на сегодня.',
+        },
+      ],
+    },
+    onboarding: {
+      steps: [
+        {
+          title: 'Добро пожаловать в Meta-Pet!',
+          description: 'Познакомьтесь с новым цифровым спутником. Несколько шагов помогут ему развиваться.',
+          tip: 'Заходите каждый день, чтобы питомец был счастлив.',
+        },
+        {
+          title: 'Покормите питомца',
+          description: 'Используйте действие «Кормить», когда падает сытость. Это поддерживает настроение и рост.',
+          tip: 'Кормите заранее, не дожидаясь сильного голода.',
+        },
+        {
+          title: 'Завершите ритуал',
+          description: 'Ритуалы дают ежедневный бонус. Выберите один для баланса характеристик.',
+          tip: 'Лучше выполнять ритуал один раз в день.',
+        },
+        {
+          title: 'Сыграйте в мини-игру',
+          description: 'Мини-игры дают веселье и награды. Попробуйте одну прямо сейчас.',
+          tip: 'Мини-игры могут повысить настроение или ресурсы.',
+        },
+        {
+          title: 'Сохранить или экспортировать',
+          description: 'Сохраните прогресс или экспортируйте питомца для безопасности на других устройствах.',
+          tip: 'Экспорт помогает защитить прогресс.',
+        },
+      ],
+      skip: 'Пропустить',
+      next: 'Далее',
+      letsGo: 'Поехали!',
+      tipLabel: 'Совет',
+      stepCount: 'из',
+      closeLabel: 'Пропустить обучение',
+    },
+    wellness: {
+      reflectionTitle: 'Рефлексия самочувствия',
+      dismiss: 'Закрыть',
+      logSelfCare: 'Отметить заботу о себе',
+      greeting: {
+        morning: 'Доброе утро',
+        afternoon: 'Добрый день',
+        evening: 'Добрый вечер',
+        night: 'Поздняя ночь',
+      },
+      checkInPrompt: 'Как вы себя чувствуете?',
+      feedback: {
+        struggling: 'Тяжёлые дни — это нормально. Ваш питомец рядом.',
+        low: 'Можно двигаться медленно. Маленькие шаги важны.',
+        neutral: 'Спокойный день. Это абсолютно нормально.',
+        good: 'Отлично! Ваша позитивная энергия заметна.',
+        great: 'Прекрасно! Питомец чувствует вашу радость.',
+      },
+      yourMood: 'Ваше настроение',
+      petEnergy: 'Энергия питомца',
+      noteLabel: 'Добавить заметку (необязательно)',
+      notePlaceholder: 'Как проходит ваш день?',
+      skip: 'Пропустить',
+      checkIn: 'Отметить',
+      quickMood: 'Как вы?',
     },
   },
   fr: {

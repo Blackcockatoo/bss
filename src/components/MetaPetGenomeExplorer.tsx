@@ -708,6 +708,17 @@ const MetaPetGenomeExplorer: React.FC = () => {
                   ))}
                 </div>
               </div>
+
+
+              <div className="rounded-2xl border border-emerald-500/40 bg-black/40 p-6">
+                <h2 className="text-center text-xl font-semibold text-cyan-200 mb-4">
+                  Crystalline Lattice Scaffold
+                </h2>
+                <p className="text-center text-xs uppercase tracking-[0.3em] text-emerald-100/60 mb-6">
+                  DNA Blueprint → Intelligent Growth → Structural Integrity
+                </p>
+                <CrystallineLattice dna={RED60.slice(0, 60)} />
+              </div>
             </div>
           </section>
         )}
