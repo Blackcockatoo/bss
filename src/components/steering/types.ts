@@ -21,7 +21,7 @@ export const NAVIGATION_TARGETS: NavigationTarget[] = [
   { position: 7,  angle: 210, label: 'Digital DNA',  route: '/digital-dna',   icon: 'Dna' },
   { position: 8,  angle: 240, label: 'Identity',     route: '/identity',      icon: 'Fingerprint' },
   { position: 9,  angle: 270, label: 'Lineage',      route: '/lineage-demo',  icon: 'GitBranch' },
-  { position: 10, angle: 300, label: 'Network',      route: '/genome-resonance', icon: 'Network' },
+  { position: 10, angle: 300, label: 'Genome Resonance', route: '/genome-resonance', icon: 'Network' },
   { position: 11, angle: 330, label: 'QR Messaging', route: '/qr-messaging',  icon: 'QrCode' },
 ];
 

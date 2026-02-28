@@ -66,6 +66,9 @@ export function SteeringWheel() {
     onFeatureActivate: handleFeatureActivate,
   };
 
+  const selectedTarget = NAVIGATION_TARGETS[selectedFeature];
+  const showGenomeResonanceNote = mode === 'network' || selectedTarget?.route === '/genome-resonance';
+
   return (
     <div className="flex flex-col items-center gap-6 w-full max-w-2xl mx-auto">
       <div className="text-center">
@@ -88,6 +91,14 @@ export function SteeringWheel() {
       {mode === 'compass' && <CompassNav {...viewProps} />}
       {mode === 'network' && <NetworkView {...viewProps} />}
       {mode === 'geometry' && <GeometryView {...viewProps} />}
+
+      {showGenomeResonanceNote && (
+        <div className="w-full max-w-lg rounded-lg border border-cyan-500/30 bg-cyan-950/30 p-3 text-center">
+          <p className="text-xs text-cyan-200">
+            <span className="font-semibold">Genome Resonance:</span> Selecting this node opens the Genome Resonance v1 Loop page for simulation and explanation tools.
+          </p>
+        </div>
+      )}
 
       {/* Sequence info footer */}
       <div className="p-3 bg-zinc-900 rounded-lg max-w-lg text-center">
