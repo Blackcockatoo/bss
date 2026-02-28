@@ -17,7 +17,7 @@ export const NAVIGATION_TARGETS: NavigationTarget[] = [
   { position: 3,  angle: 90,  label: 'Games',      route: '/school-game',   icon: 'Gamepad2' },
   { position: 4,  angle: 120, label: 'Style',       route: '/visualizer',    icon: 'Sparkles' },
   { position: 5,  angle: 150, label: 'Rewards',     route: '/share',         icon: 'Trophy' },
-  { position: 6,  angle: 180, label: 'MOSS60',      route: '/dna-hub',       icon: 'Shield' },
+  { position: 6,  angle: 180, label: 'DNA Hub',     route: '/dna-hub',       icon: 'Shield' },
   { position: 7,  angle: 210, label: 'Digital DNA',  route: '/digital-dna',   icon: 'Dna' },
   { position: 8,  angle: 240, label: 'Identity',     route: '/identity',      icon: 'Fingerprint' },
   { position: 9,  angle: 270, label: 'Lineage',      route: '/lineage-demo',  icon: 'GitBranch' },
