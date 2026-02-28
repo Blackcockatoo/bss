@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ACHIEVEMENT_CATALOG } from '@/lib/progression/types';
 import { useStore } from '@/lib/store';
 import { Trophy, Lock } from 'lucide-react';
@@ -13,6 +13,7 @@ export function AchievementShelf() {
   const applyReward = useStore(s => s.applyReward);
   const awardedIdsRef = useRef<Set<string>>(new Set());
   const initializedRef = useRef(false);
+  const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
     const awardedIds = awardedIdsRef.current;
@@ -27,11 +28,27 @@ export function AchievementShelf() {
       const essenceDelta = newlyUnlocked.length * ESSENCE_REWARD_PER_ACHIEVEMENT;
       applyReward({ essenceDelta, source: 'achievement' });
       newlyUnlocked.forEach(entry => awardedIds.add(entry.id));
+
+      const firstName = ACHIEVEMENT_CATALOG.find(c => c.id === newlyUnlocked[0].id)?.title ?? 'Achievement';
+      const extra = newlyUnlocked.length > 1 ? ` (+${newlyUnlocked.length - 1} more)` : '';
+      setToast(`${firstName}${extra} unlocked! +${essenceDelta} Essence`);
+      const timer = setTimeout(() => setToast(null), 3500);
+      return () => clearTimeout(timer);
     }
   }, [achievements, applyReward]);
 
   return (
     <div className="space-y-4">
+      {/* Achievement unlock toast */}
+      {toast && (
+        <div className="fixed top-6 inset-x-4 z-[200] flex justify-center pointer-events-none">
+          <div className="animate-toast-in flex items-center gap-2 rounded-2xl border border-amber-500/50 bg-amber-950/95 px-4 py-3 shadow-2xl text-sm font-medium text-amber-100 max-w-sm">
+            <Trophy className="w-4 h-4 text-amber-400 shrink-0" />
+            {toast}
+          </div>
+        </div>
+      )}
+
       <h2 className="text-xl font-bold text-white flex items-center gap-2">
         <Trophy className="w-5 h-5 text-amber-300" />
         Achievements

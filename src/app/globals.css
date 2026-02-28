@@ -100,6 +100,25 @@
   }
 }
 
+/* Reward label floats upward and fades - used on action buttons */
+@keyframes float-up {
+  0%   { opacity: 1; transform: translate(-50%, 0); }
+  80%  { opacity: 0.6; }
+  100% { opacity: 0; transform: translate(-50%, -2.25rem); }
+}
+.animate-float-up {
+  animation: float-up 0.9s ease-out forwards;
+}
+
+/* Achievement toast slides down from the top */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(-0.75rem); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-toast-in {
+  animation: toast-in 0.25s ease-out forwards;
+}
+
 /* -----------------------------------------------------------------------
    Accessibility: respect the OS/browser "reduce motion" preference.
    Blanket-suppresses all CSS animations and transitions so users who

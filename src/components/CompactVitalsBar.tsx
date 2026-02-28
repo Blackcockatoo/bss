@@ -11,6 +11,8 @@ export function CompactVitalsBar() {
   const vitals = useStore(state => state.vitals);
   const essence = useStore(state => state.essence);
   const ritualProgress = useStore(state => state.ritualProgress);
+  const lastRewardSource = useStore(state => state.lastRewardSource);
+  const lastRewardAmount = useStore(state => state.lastRewardAmount);
 
   return (
     <div className="w-full bg-slate-900/60 backdrop-blur-sm border-y border-slate-800/50">
@@ -61,6 +63,15 @@ export function CompactVitalsBar() {
             <span className="text-amber-300 font-mono font-medium">{ritualProgress.nectar}</span>
           </div>
         </div>
+
+        {/* Last earned reward callout */}
+        {lastRewardAmount > 0 && lastRewardSource && (
+          <div className="mt-2 flex items-center justify-center gap-1.5 text-[10px] text-emerald-400/80">
+            <span className="font-mono font-semibold">+{Math.round(lastRewardAmount)} Essence</span>
+            <span className="text-zinc-600">·</span>
+            <span className="text-zinc-500 capitalize">{lastRewardSource}</span>
+          </div>
+        )}
       </div>
     </div>
   );
