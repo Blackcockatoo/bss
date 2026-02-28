@@ -6,12 +6,13 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   ArrowDownToLine,
   ArrowLeft,
-  BookOpen,
   Dna,
   FlaskConical,
+  Gamepad2,
   Home,
   PawPrint,
   QrCode,
+  ShoppingBag,
   UserCircle,
 } from 'lucide-react';
 
@@ -24,15 +25,16 @@ type BeforeInstallPromptEvent = Event & {
 };
 
 const NAV_ITEMS = [
-  { href: '/', label: 'Home', icon: Home },
-  { href: '/pet', label: 'Pet', icon: PawPrint },
-  { href: '/school-game', label: 'School', icon: BookOpen },
-  { href: '/identity', label: 'Identity', icon: UserCircle },
-  { href: '/genome-explorer', label: 'Genome', icon: Dna },
+  { href: '/',              label: 'Home',     icon: Home      },
+  { href: '/pet',           label: 'Pet',      icon: PawPrint  },
+  { href: '/school-game',   label: 'Games',    icon: Gamepad2  },
+  { href: '/shop',          label: 'Shop',     icon: ShoppingBag },
+  { href: '/identity',      label: 'Identity', icon: UserCircle },
 ];
 
 const LAB_ITEMS = [
-  { href: '/qr-messaging', label: 'QR (Experimental)', icon: QrCode },
+  { href: '/genome-explorer', label: 'Genome Explorer',   icon: Dna     },
+  { href: '/qr-messaging',    label: 'QR (Experimental)', icon: QrCode  },
 ];
 
 export function QuickNav() {

@@ -25,9 +25,9 @@ const PREMIUM_ADDONS: AddonTemplate[] = [
 ];
 
 const EARNABLE_ADDONS: { template: AddonTemplate; achievement: string; route: string }[] = [
-  { template: SPACE_JEWBLES_BADGE, achievement: 'Reach wave 10 in Space Jewbles', route: '/space-jewbles' },
-  { template: COSMIC_BANANA_WEAPON, achievement: 'Defeat 5+ bosses in Space Jewbles', route: '/space-jewbles' },
-  { template: MYTHIC_HUNTER_AURA, achievement: 'Collect 3+ mythic drops in Space Jewbles', route: '/space-jewbles' },
+  { template: SPACE_JEWBLES_BADGE,   achievement: 'Reach wave 10 in Space Jewbles',          route: '/school-game' },
+  { template: COSMIC_BANANA_WEAPON,  achievement: 'Defeat 5+ bosses in Space Jewbles',        route: '/school-game' },
+  { template: MYTHIC_HUNTER_AURA,   achievement: 'Collect 3+ mythic drops in Space Jewbles', route: '/school-game' },
 ];
 
 const RARITY_STYLES: Record<string, { badge: string; border: string; glow: string }> = {
@@ -95,7 +95,7 @@ function EarnableCard({ template, achievement, route }: { template: AddonTemplat
         href={route}
         className="shrink-0 rounded-lg border border-cyan-500/40 bg-cyan-950/30 px-3 py-1.5 text-xs font-medium text-cyan-400 hover:border-cyan-400/60 hover:text-cyan-300 transition-colors"
       >
-        Play →
+        Play Game →
       </Link>
     </div>
   );

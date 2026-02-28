@@ -64,6 +64,10 @@ import {
   BookOpen,
   GraduationCap,
   Lock,
+  Gamepad2,
+  ShoppingBag,
+  Trophy,
+  Swords,
   Orbit,
   Compass,
 } from 'lucide-react';
@@ -1472,6 +1476,29 @@ export default function Home() {
 
         {/* ===== VITALS BAR ===== */}
         <CompactVitalsBar />
+
+        {/* ===== QUICK ACCESS STRIP ===== */}
+        <div className="w-full overflow-x-auto scrollbar-hide border-b border-slate-800/50 bg-slate-900/40">
+          <div className="flex items-stretch gap-0 min-w-max mx-auto px-2 py-0 divide-x divide-slate-800/60">
+            {[
+              { href: '/school-game',     icon: Gamepad2,    label: 'Games',      color: 'text-purple-300',  bg: 'hover:bg-purple-500/10' },
+              { href: '/pet',             icon: Swords,       label: 'Battle',     color: 'text-red-300',     bg: 'hover:bg-red-500/10'    },
+              { href: '/shop',            icon: ShoppingBag,  label: 'Shop',       color: 'text-amber-300',   bg: 'hover:bg-amber-500/10'  },
+              { href: '/share',           icon: Trophy,       label: 'Rewards',    color: 'text-emerald-300', bg: 'hover:bg-emerald-500/10'},
+              { href: '/dna-hub',         icon: Sparkles,     label: 'DNA Hub',    color: 'text-cyan-300',    bg: 'hover:bg-cyan-500/10'   },
+              { href: '/genome-explorer', icon: Dna,          label: 'Genome',     color: 'text-pink-300',    bg: 'hover:bg-pink-500/10'   },
+            ].map(({ href, icon: Icon, label, color, bg }) => (
+              <Link
+                key={href}
+                href={href}
+                className={`flex flex-col items-center justify-center gap-1 px-4 py-3 min-w-[72px] transition-colors touch-manipulation ${bg}`}
+              >
+                <Icon className={`w-5 h-5 ${color}`} />
+                <span className={`text-[10px] font-medium ${color} opacity-90`}>{label}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
 
         {/* ===== CONTENT SECTIONS ===== */}
         <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
