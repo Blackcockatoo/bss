@@ -1,0 +1,12 @@
+{
+  "vectors": [
+    {
+      "name": "base60-hello",
+      "rawEnvelope": "{\"protocol\":\"moss60\",\"version\":\"1.0\",\"capabilities\":[\"envelope-v1\",\"qr-scan-v1\",\"qr-generate-v1\",\"encoding-base60\"],\"format\":\"base60\",\"payload\":\"MOSS60:G6JrTUbxRBZ1qUc\",\"hash\":\"430a45a6\",\"createdAt\":1700000000000}"
+    },
+    {
+      "name": "text-bss",
+      "rawEnvelope": "{\"protocol\":\"moss60\",\"version\":\"1.0\",\"capabilities\":[\"envelope-v1\",\"qr-scan-v1\",\"qr-generate-v1\",\"encoding-text\"],\"format\":\"text\",\"payload\":\"Blue Snake Studios\",\"hash\":\"403eb592\",\"createdAt\":1700000000000}"
+    }
+  ]
+}

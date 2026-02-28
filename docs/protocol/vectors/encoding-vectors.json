@@ -1,0 +1,22 @@
+{
+  "vectors": [
+    {
+      "input": "hello",
+      "base60": "9cd50x7",
+      "moss60": "MOSS60:9cd50x7",
+      "roundTrip": "hello"
+    },
+    {
+      "input": "test-message",
+      "base60": "1GcubQvUyJvPamqXs",
+      "moss60": "MOSS60:1GcubQvUyJvPamqXs",
+      "roundTrip": "test-message"
+    },
+    {
+      "input": "BSS",
+      "base60": "L7R7",
+      "moss60": "MOSS60:L7R7",
+      "roundTrip": "BSS"
+    }
+  ]
+}

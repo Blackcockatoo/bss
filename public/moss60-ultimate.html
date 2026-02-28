@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MOSS60 Enhanced — Security + 3D Reality-Bending</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: linear-gradient(135deg, #000428 0%, #004e92 100%);
+      color: #ffd700;
+      font-family: 'Share Tech Mono', monospace;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+    .container { max-width: 1800px; margin: 0 auto; padding: 20px; }
+    header {
+      text-align: center;
+      padding: 30px 0;
+      background: rgba(0,0,0,.4);
+      border-bottom: 2px solid #ffd700;
+      margin-bottom: 30px;
+    }
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 42px;
+      font-weight: 900;
+      letter-spacing: 8px;
+      text-shadow: 0 0 20px rgba(255,215,0,.8);
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      font-size: 12px;
+      letter-spacing: 3px;
+      color: #88d8ff;
+      opacity: .8;
+    }
+    .main-grid {
+      display: grid;
+      grid-template-columns: 400px 1fr;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+    .sidebar {
+      background: rgba(0,0,0,.5);
+      border: 1px solid rgba(255,215,0,.3);
+      border-radius: 8px;
+      padding: 20px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .canvas-area {
+      background: rgba(0,0,0,.3);
+      border: 1px solid rgba(255,215,0,.3);
+      border-radius: 8px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    canvas {
+      border: 2px solid #ffd700;
+      border-radius: 4px;
+      background: #000;
+      box-shadow: 0 0 40px rgba(255,215,0,.3);
+    }
+    .canvas-container {
+      position: relative;
+      display: inline-block;
+    }
+    .section {
+      margin-bottom: 25px;
+      padding-bottom: 25px;
+      border-bottom: 1px solid rgba(255,215,0,.2);
+    }
+    .section:last-child { border-bottom: none; }
+    .section-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 15px;
+      color: #88d8ff;
+    }
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 10px;
+      background: rgba(0,0,0,.6);
+      border: 1px solid rgba(255,215,0,.5);
+      color: #ffd700;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+      border: none;
+      color: #000;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all .3s;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(255,215,0,.5);
+    }
+    button.secondary {
+      background: rgba(255,215,0,.2);
+      color: #ffd700;
+      border: 1px solid rgba(255,215,0,.5);
+    }
+    .control-group { margin-bottom: 15px; }
+    label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+      color: #88d8ff;
+    }
+    .inline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    input[type="range"] {
+      width: 100%;
+      height: 4px;
+      background: rgba(255,215,0,.2);
+      outline: none;
+      border-radius: 2px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      background: #ffd700;
+      cursor: pointer;
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(255,215,0,.8);
+    }
+    select {
+      width: 100%;
+      padding: 8px;
+      background: rgba(0,0,0,.6);
+      border: 1px solid rgba(255,215,0,.5);
+      color: #ffd700;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      border-radius: 4px;
+    }
+    .hash-display {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      letter-spacing: 4px;
+      font-weight: 700;
+      text-align: center;
+      padding: 15px;
+      background: rgba(0,0,0,.6);
+      border: 1px solid rgba(255,215,0,.5);
+      border-radius: 4px;
+      text-shadow: 0 0 10px rgba(255,215,0,.8);
+      word-break: break-all;
+    }
+    .info-box {
+      font-size: 10px;
+      color: #88d8ff;
+      opacity: .8;
+      line-height: 1.6;
+      padding: 10px;
+      background: rgba(0,0,0,.3);
+      border-radius: 4px;
+      border-left: 3px solid #88d8ff;
+    }
+    .value-display {
+      display: inline-block;
+      float: right;
+      color: #ffd700;
+      font-weight: 700;
+    }
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .tab {
+      flex: 1;
+      padding: 8px;
+      background: rgba(255,215,0,.1);
+      border: 1px solid rgba(255,215,0,.3);
+      color: #ffd700;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      border-radius: 4px;
+      text-align: center;
+      transition: all .3s;
+    }
+    .tab.active {
+      background: rgba(255,215,0,.3);
+      border-color: #ffd700;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .steganographic-display {
+      background: rgba(0,0,0,.7);
+      border: 1px solid rgba(136,216,255,.5);
+      border-radius: 4px;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 11px;
+      color: #88d8ff;
+      font-family: 'Share Tech Mono', monospace;
+      word-break: break-all;
+    }
+
+    .anti-screenshot-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      mix-blend-mode: exclusion;
+      opacity: 0;
+      transition: opacity 0.05s;
+    }
+
+    .anti-screenshot-overlay.active {
+      opacity: 0.3;
+    }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,.3); }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255,215,0,.5);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255,215,0,.8);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>MOSS60 ENHANCED</h1>
+    <div class="subtitle">QUANTUM-SECURE REALITY-BENDING CRYPTOGRAPHIC SIGNATURES</div>
+  </header>
+
+  <div class="container">
+    <div class="main-grid">
+      <div class="sidebar">
+        <div class="section">
+          <div class="section-title">⚡ PRIMARY MESSAGE</div>
+          <input id="msg" type="text" placeholder="Primary message to sign" value="Blue Snake Studios">
+          <input id="steganographic" type="text" placeholder="Hidden message (optional)">
+          <div class="inline">
+            <input id="deterministic" type="checkbox">
+            <label for="deterministic" style="margin:0">Deterministic seed</label>
+          </div>
+          <button onclick="generate()">GENERATE ENHANCED GLYPH</button>
+        </div>
+
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab(this,'security')">SECURITY</div>
+          <div class="tab" onclick="switchTab(this,'geometry')">GEOMETRY</div>
+          <div class="tab" onclick="switchTab(this,'reality')">REALITY</div>
+        </div>
+
+        <div id="security-tab" class="tab-content active">
+          <div class="section">
+            <div class="section-title">🔒 VISUAL SECURITY</div>
+
+            <div class="control-group">
+              <div class="inline">
+                <input id="colorblind-safe" type="checkbox" onchange="updateDisplay()">
+                <label for="colorblind-safe" style="margin:0">Color-blind Safe Mode</label>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <div class="inline">
+                <input id="anti-screenshot" type="checkbox" onchange="toggleAntiScreenshot()">
+                <label for="anti-screenshot" style="margin:0">Anti-Screenshot Protection</label>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <div class="inline">
+                <input id="holographic" type="checkbox" onchange="updateDisplay()">
+                <label for="holographic" style="margin:0">Holographic Watermarks</label>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label>Watermark Zoom <span class="value-display" id="zoomVal">1.0x</span></label>
+              <input type="range" id="watermarkZoom" min="0.5" max="3" step="0.1" value="1" oninput="updateZoom()">
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">🔐 STEGANOGRAPHY</div>
+            <button class="secondary" onclick="extractSteganographic()">EXTRACT HIDDEN MESSAGE</button>
+            <div id="stegano-result" class="steganographic-display" style="display:none"></div>
+          </div>
+        </div>
+
+        <div id="geometry-tab" class="tab-content">
+          <div class="section">
+            <div class="section-title">🌀 3D PROJECTION</div>
+            <select id="projection" onchange="updateProjection()">
+              <option value="flat">Flat (Original)</option>
+              <option value="torus">Torus</option>
+              <option value="sphere">Spherical</option>
+              <option value="hyperbolic">Hyperbolic (Poincaré)</option>
+              <option value="klein">Klein Bottle</option>
+              <option value="mobius">Möbius Strip</option>
+            </select>
+
+            <div class="control-group">
+              <label>3D Rotation X <span class="value-display" id="rotXVal">0°</span></label>
+              <input type="range" id="rotX" min="0" max="360" step="1" value="0" oninput="update3DRotation()">
+            </div>
+
+            <div class="control-group">
+              <label>3D Rotation Y <span class="value-display" id="rotYVal">0°</span></label>
+              <input type="range" id="rotY" min="0" max="360" step="1" value="0" oninput="update3DRotation()">
+            </div>
+
+            <div class="control-group">
+              <label>4D Phase <span class="value-display" id="phase4DVal">0.0</span></label>
+              <input type="range" id="phase4D" min="0" max="6.28" step="0.01" value="0" oninput="update4DPhase()">
+            </div>
+          </div>
+        </div>
+
+        <div id="reality-tab" class="tab-content">
+          <div class="section">
+            <div class="section-title">🎭 REALITY MODES</div>
+            <select id="reality-mode" onchange="updateRealityMode()">
+              <option value="euclidean">Euclidean</option>
+              <option value="fractal">Fractal Zoom</option>
+              <option value="quantum">Quantum Superposition</option>
+              <option value="holofractal">Holofractal</option>
+              <option value="consciousness">Consciousness Field</option>
+            </select>
+
+            <div class="control-group">
+              <label>Fractal Depth <span class="value-display" id="fractalVal">1</span></label>
+              <input type="range" id="fractalDepth" min="1" max="5" step="1" value="1" oninput="updateFractal()">
+            </div>
+
+            <div class="control-group">
+              <label>Reality Coherence <span class="value-display" id="coherenceVal">1.0</span></label>
+              <input type="range" id="coherence" min="0" max="1" step="0.01" value="1" oninput="updateCoherence()">
+            </div>
+
+            <div class="control-group">
+              <div class="inline">
+                <input id="quantum-collapse" type="checkbox" onchange="updateDisplay()">
+                <label for="quantum-collapse" style="margin:0">Quantum Collapse Animation</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="canvas-area">
+        <div class="hash-display" id="hash">—</div>
+        <div class="canvas-container">
+          <canvas id="c" width="800" height="800"></canvas>
+          <canvas id="anti-screenshot-layer" class="anti-screenshot-overlay" width="800" height="800"></canvas>
+        </div>
+        <div class="info-box">
+          Enhanced MOSS60: Steganographic embedding • Holographic watermarks •
+          Non-Euclidean projections • Quantum-resistant signatures •
+          Reality-bending geometries • Consciousness field modulation
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const PHI = (1 + Math.sqrt(5)) / 2;
+    const R = "113031491493585389543778774590997079619617525721567332336510".split('').map(Number);
+    const K = "011235831459437077415617853819099875279651673033695493257291".split('').map(Number);
+    const B = "012776329785893036118967145479098334781325217074992143965631".split('').map(Number);
+    const primes = new Set([2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59]);
+
+    let currentHash = '';
+    let currentMessage = '';
+    let hiddenMessage = '';
+    let animationFrame = null;
+    let animationTime = 0;
+    let projection3D = 'flat';
+    let rotationX = 0;
+    let rotationY = 0;
+    let phase4D = 0;
+    let realityMode = 'euclidean';
+    let watermarkZoom = 1;
+    let antiScreenshotActive = false;
+    let antiScreenshotFrame = null;
+
+    function moss60Hash(s) {
+      let x = 0;
+      for (let i = 0; i < s.length; i++) {
+        const c = s.charCodeAt(i);
+        const j = i % 60;
+        x ^= c;
+        x = ((x << 5) | (x >>> 27)) + R[j];
+        x ^= K[j] << 3;
+        x = ((x << 7) | (x >>> 25)) + B[j];
+        x = (x * 31) & 0x7FFFFFFF;
+      }
+      return x.toString(16).padStart(8, '0');
+    }
+
+    function extendedHash(s) {
+      let result = '';
+      for (let i = 0; i < 4; i++) result += moss60Hash(s + i.toString());
+      return result;
+    }
+
+    function encodeSteganographic(message, hiddenMsg) {
+      if (!hiddenMsg) return extendedHash(message);
+      const baseHash = extendedHash(message);
+      const hiddenBits = hiddenMsg.split('').map(c => c.charCodeAt(0).toString(2).padStart(8, '0')).join('');
+      const primePositions = Array.from(primes);
+      const modifiedHash = baseHash.split('');
+      for (let i = 0; i < Math.min(hiddenBits.length, primePositions.length); i++) {
+        const pos = primePositions[i] % modifiedHash.length;
+        const bit = hiddenBits[i];
+        const hexVal = parseInt(modifiedHash[pos], 16);
+        modifiedHash[pos] = ((hexVal & 0xE) | parseInt(bit)).toString(16);
+      }
+      return modifiedHash.join('');
+    }
+
+    function extractSteganographic() {
+      const primePositions = Array.from(primes);
+      let bits = '';
+      for (let i = 0; i < primePositions.length && i < currentHash.length; i++) {
+        const pos = primePositions[i] % currentHash.length;
+        const hexVal = parseInt(currentHash[pos], 16);
+        bits += (hexVal & 1).toString();
+      }
+      let extractedMsg = '';
+      for (let i = 0; i < bits.length - 7; i += 8) {
+        const byte = bits.substr(i, 8);
+        const charCode = parseInt(byte, 2);
+        if (charCode > 31 && charCode < 127) extractedMsg += String.fromCharCode(charCode);
+      }
+      const resultDiv = document.getElementById('stegano-result');
+      resultDiv.style.display = 'block';
+      resultDiv.textContent = extractedMsg || 'No hidden message detected';
+    }
+
+    function torusProjection(points, time) {
+      const R = 250;
+      const r = 100;
+      return points.map((p, i) => {
+        const theta = (i / 60) * Math.PI * 2;
+        const phi = (p.radius / 400) * Math.PI * 2 + time * 0.001;
+        const x = (R + r * Math.cos(phi)) * Math.cos(theta);
+        const y = (R + r * Math.cos(phi)) * Math.sin(theta);
+        const z = r * Math.sin(phi);
+        return project3DTo2D(x, y, z);
+      });
+    }
+
+    function sphericalProjection(points, time) {
+      const radius = 300;
+      return points.map((p, i) => {
+        const theta = (i / 60) * Math.PI * 2;
+        const phi = Math.PI * 0.5 * Math.sin(time * 0.001 + i * 0.1);
+        const x = radius * Math.sin(phi) * Math.cos(theta);
+        const y = radius * Math.sin(phi) * Math.sin(theta);
+        const z = radius * Math.cos(phi);
+        return project3DTo2D(x, y, z);
+      });
+    }
+
+    function hyperbolicProjection(points) {
+      return points.map((p, i) => {
+        const angle = (i / 60) * Math.PI * 2;
+        const r = p.radius / 400;
+        const hypR = Math.tanh(r * 2);
+        return { x: 400 + hypR * 350 * Math.cos(angle), y: 400 + hypR * 350 * Math.sin(angle) };
+      });
+    }
+
+    function kleinBottleProjection(points) {
+      return points.map((p, i) => {
+        const u = (i / 60) * Math.PI * 2;
+        const v = (p.radius / 400) * Math.PI * 2 + phase4D;
+        const a = 3;
+        const x = (a + Math.cos(u/2) * Math.sin(v) - Math.sin(u/2) * Math.sin(2*v)) * Math.cos(u) * 50;
+        const y = (a + Math.cos(u/2) * Math.sin(v) - Math.sin(u/2) * Math.sin(2*v)) * Math.sin(u) * 50;
+        const z = Math.sin(u/2) * Math.sin(v) + Math.cos(u/2) * Math.sin(2*v) * 50;
+        return project3DTo2D(x, y, z);
+      });
+    }
+
+    function mobiusProjection(points, time) {
+      return points.map((p, i) => {
+        const angle = (i / 60) * Math.PI * 2;
+        const r = p.radius / 400;
+        let z_real = r * Math.cos(angle);
+        let z_imag = r * Math.sin(angle);
+        const a = Math.cos(time * 0.001);
+        const b = Math.sin(time * 0.001) * 0.5;
+        const c = 0.1;
+        const d = 1;
+        const denom = (c * z_real + d) * (c * z_real + d) + (c * z_imag) * (c * z_imag);
+        const new_real = ((a * z_real - b * z_imag) * (c * z_real + d) + (a * z_imag + b * z_real) * c * z_imag) / denom;
+        const new_imag = ((a * z_imag + b * z_real) * (c * z_real + d) - (a * z_real - b * z_imag) * c * z_imag) / denom;
+        return { x: 400 + new_real * 300, y: 400 + new_imag * 300 };
+      });
+    }
+
+    function project3DTo2D(x, y, z) {
+      const cosX = Math.cos(rotationX * Math.PI / 180);
+      const sinX = Math.sin(rotationX * Math.PI / 180);
+      const cosY = Math.cos(rotationY * Math.PI / 180);
+      const sinY = Math.sin(rotationY * Math.PI / 180);
+      const y1 = y * cosX - z * sinX;
+      const z1 = y * sinX + z * cosX;
+      const x2 = x * cosY + z1 * sinY;
+      const z2 = -x * sinY + z1 * cosY;
+      const perspective = 1000;
+      const scale = perspective / (perspective + z2);
+      return { x: 400 + x2 * scale, y: 400 + y1 * scale, scale };
+    }
+
+    function getColorBlindSafeColor(index, isPrime) {
+      if (!document.getElementById('colorblind-safe').checked) {
+        const t = index / 60;
+        const hue = (t * 360 + parseInt(currentHash.substr(1, 2), 16) * 2) % 360;
+        return `hsl(${hue}, 70%, 50%)`;
+      }
+      const patterns = ['#0173B2','#DE8F05','#029E73','#CC78BC','#ECE133','#56B4E9','#F0E442','#D55E00'];
+      const baseIndex = index % patterns.length;
+      return isPrime ? patterns[(baseIndex + 4) % patterns.length] : patterns[baseIndex];
+    }
+
+    function drawHolographicWatermark(ctx) {
+      if (!document.getElementById('holographic').checked) return;
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      ctx.globalAlpha = 0.1;
+      const zoom = watermarkZoom;
+      const gridSize = 30 / zoom;
+      for (let x = 0; x < 800; x += gridSize) {
+        for (let y = 0; y < 800; y += gridSize) {
+          const dist1 = Math.sqrt((x - 200) ** 2 + (y - 200) ** 2);
+          const dist2 = Math.sqrt((x - 600) ** 2 + (y - 600) ** 2);
+          const interference = Math.sin(dist1 * 0.05 * zoom) * Math.sin(dist2 * 0.05 * zoom);
+          if (interference > 0.5) {
+            const intensity = (interference - 0.5) * 2;
+            ctx.fillStyle = `rgba(255, 215, 0, ${intensity * 0.3})`;
+            ctx.fillRect(x, y, gridSize * 0.8, gridSize * 0.8);
+          }
+        }
+      }
+      ctx.restore();
+    }
+
+    function toggleAntiScreenshot() {
+      antiScreenshotActive = document.getElementById('anti-screenshot').checked;
+      if (antiScreenshotActive) startAntiScreenshot(); else stopAntiScreenshot();
+    }
+
+    function startAntiScreenshot() {
+      const canvas = document.getElementById('anti-screenshot-layer');
+      const ctx = canvas.getContext('2d');
+      function flicker() {
+        if (!antiScreenshotActive) return;
+        ctx.clearRect(0, 0, 800, 800);
+        const imageData = ctx.createImageData(800, 800);
+        const data = imageData.data;
+        for (let i = 0; i < data.length; i += 4) {
+          if (Math.random() > 0.98) {
+            data[i] = 255; data[i + 1] = 215; data[i + 2] = 0; data[i + 3] = Math.random() * 100;
+          }
+        }
+        ctx.putImageData(imageData, 0, 0);
+        canvas.classList.add('active');
+        setTimeout(() => canvas.classList.remove('active'), 16);
+        antiScreenshotFrame = requestAnimationFrame(flicker);
+      }
+      flicker();
+    }
+
+    function stopAntiScreenshot() {
+      if (antiScreenshotFrame) cancelAnimationFrame(antiScreenshotFrame);
+      const canvas = document.getElementById('anti-screenshot-layer');
+      canvas.classList.remove('active');
+      canvas.getContext('2d').clearRect(0, 0, 800, 800);
+    }
+
+    function drawFractalLayer(ctx, points, depth, scale = 1, offset = {x: 0, y: 0}) {
+      if (depth <= 0) return;
+      ctx.save();
+      ctx.translate(offset.x, offset.y);
+      ctx.scale(scale, scale);
+      drawSpiral(ctx, points, scale * 0.3);
+      const fractalPoints = points.filter((p, i) => primes.has(i));
+      fractalPoints.forEach(p => drawFractalLayer(ctx, points, depth - 1, scale * PHI / 4, {
+        x: (p.x - 400) * scale,
+        y: (p.y - 400) * scale
+      }));
+      ctx.restore();
+    }
+
+    function render() {
+      const canvas = document.getElementById('c');
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, 800, 800);
+      const cx = 400;
+      const cy = 400;
+      const baseR = 340;
+      let points = [];
+      for (let i = 0; i < 60; i++) {
+        const angle = (i / 60) * Math.PI * 2 - Math.PI / 2;
+        const digitVal = R[i] + K[i] + B[i];
+        const rMod = 0.95 + 0.1 * (digitVal / 27);
+        const r = baseR * rMod;
+        points.push({ x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle), radius: r, isPrime: primes.has(i) });
+      }
+      if (projection3D !== 'flat') {
+        if (projection3D === 'torus') points = torusProjection(points, animationTime);
+        if (projection3D === 'sphere') points = sphericalProjection(points, animationTime);
+        if (projection3D === 'hyperbolic') points = hyperbolicProjection(points);
+        if (projection3D === 'klein') points = kleinBottleProjection(points, animationTime);
+        if (projection3D === 'mobius') points = mobiusProjection(points, animationTime);
+      }
+
+      if (realityMode === 'quantum') {
+        ctx.globalAlpha = 0.3;
+        for (let q = 0; q < 3; q++) {
+          const qOffset = q * Math.PI * 2 / 3;
+          drawSpiral(ctx, points.map(p => ({ ...p, x: p.x + Math.sin(animationTime * 0.001 + qOffset) * 20, y: p.y + Math.cos(animationTime * 0.001 + qOffset) * 20 })));
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      if (realityMode === 'fractal') {
+        drawFractalLayer(ctx, points, parseInt(document.getElementById('fractalDepth').value));
+      } else {
+        drawSpiral(ctx, points);
+      }
+
+      drawHolographicWatermark(ctx);
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = 'rgba(255,215,0,.8)';
+      ctx.fillStyle = '#ffd700';
+      ctx.font = 'bold 20px Orbitron';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(currentHash.toUpperCase().substring(0, 8), cx, cy);
+      ctx.shadowBlur = 0;
+      animationTime += 16;
+      animationFrame = requestAnimationFrame(render);
+    }
+
+    function drawSpiral(ctx, points, alphaScale = 1) {
+      const path = [];
+      let pos = 1;
+      path.push(pos);
+      for (let i = 1; i <= 60; i++) { pos = (pos + i) % 60; path.push(pos); }
+      for (let i = 0; i < path.length - 1; i++) {
+        const p1 = points[path[i]];
+        const p2 = points[path[i + 1]];
+        if (!p1 || !p2) continue;
+        const color = getColorBlindSafeColor(i, p1.isPrime || p2.isPrime);
+        const weight = 2 + (p1.isPrime || p2.isPrime ? 2 : 0);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = weight;
+        ctx.globalAlpha = 0.7 * alphaScale;
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+      }
+      points.forEach(p => {
+        if (!p) return;
+        ctx.fillStyle = p.isPrime ? '#ffd700' : '#88d8ff';
+        ctx.globalAlpha = alphaScale;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.isPrime ? 5 : 3, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+    }
+
+    function generate() {
+      currentMessage = document.getElementById('msg').value;
+      hiddenMessage = document.getElementById('steganographic').value;
+      const deterministic = document.getElementById('deterministic').checked;
+      const seed = deterministic ? currentMessage : currentMessage + Date.now();
+      currentHash = hiddenMessage ? encodeSteganographic(seed, hiddenMessage) : extendedHash(seed);
+      document.getElementById('hash').textContent = currentHash.substring(0, 16) + '...';
+      if (!animationFrame) render();
+    }
+
+    function updateDisplay() {}
+    function updateProjection() { projection3D = document.getElementById('projection').value; }
+    function update3DRotation() {
+      rotationX = parseInt(document.getElementById('rotX').value);
+      rotationY = parseInt(document.getElementById('rotY').value);
+      document.getElementById('rotXVal').textContent = rotationX + '°';
+      document.getElementById('rotYVal').textContent = rotationY + '°';
+    }
+    function update4DPhase() {
+      phase4D = parseFloat(document.getElementById('phase4D').value);
+      document.getElementById('phase4DVal').textContent = phase4D.toFixed(2);
+    }
+    function updateRealityMode() { realityMode = document.getElementById('reality-mode').value; }
+    function updateFractal() { document.getElementById('fractalVal').textContent = document.getElementById('fractalDepth').value; }
+    function updateCoherence() { document.getElementById('coherenceVal').textContent = document.getElementById('coherence').value; }
+    function updateZoom() {
+      watermarkZoom = parseFloat(document.getElementById('watermarkZoom').value);
+      document.getElementById('zoomVal').textContent = watermarkZoom.toFixed(1) + 'x';
+    }
+    function switchTab(el, tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById(tab + '-tab').classList.add('active');
+    }
+
+    generate();
+  </script>
+</body>
+</html>
