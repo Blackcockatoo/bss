@@ -141,7 +141,15 @@ interface StatBarProps {
   color: string;
 }
 
-function StatBar({ label, value, icon, color }: StatBarProps) {
+function getHealthState(value: number): { barColor: string; statusLabel: string; statusColor: string; pulse: boolean } {
+  if (value >= 70) return { barColor: 'from-emerald-500 to-green-400',  statusLabel: 'Thriving',   statusColor: 'text-emerald-400', pulse: false };
+  if (value >= 40) return { barColor: 'from-amber-400 to-yellow-400',   statusLabel: 'Steady',     statusColor: 'text-amber-400',   pulse: false };
+  if (value >= 20) return { barColor: 'from-orange-500 to-amber-500',   statusLabel: 'Needs care', statusColor: 'text-orange-400',  pulse: false };
+  return              { barColor: 'from-red-600 to-red-400',           statusLabel: 'Critical!',  statusColor: 'text-red-400',     pulse: true  };
+}
+
+function StatBar({ label, value, icon, color: _color }: StatBarProps) {
+  const { barColor, statusLabel, statusColor, pulse } = getHealthState(value);
   return (
     <div>
       <div className="flex items-center justify-between mb-1 text-sm">
@@ -149,13 +157,18 @@ function StatBar({ label, value, icon, color }: StatBarProps) {
           {icon}
           <span>{label}</span>
         </div>
-        <span className="font-bold text-white tabular-nums">
-          {Math.round(value)}%
-        </span>
+        <div className="flex items-center gap-2">
+          <span className={`text-[10px] font-medium ${statusColor}${pulse ? ' animate-pulse' : ''}`}>
+            {statusLabel}
+          </span>
+          <span className="font-bold text-white tabular-nums">
+            {Math.round(value)}%
+          </span>
+        </div>
       </div>
       <div className="h-3 bg-zinc-800 rounded-xl overflow-hidden border border-zinc-700">
         <div
-          className={`h-full bg-gradient-to-r ${color} transition-all duration-500`}
+          className={`h-full bg-gradient-to-r ${barColor} transition-all duration-500`}
           style={{ width: `${value}%` }}
         />
       </div>

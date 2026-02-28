@@ -22,10 +22,10 @@ interface BondDashboardProps {
 }
 
 const TABS: { id: TabId; label: string; icon: string }[] = [
-  { id: 'bond', label: 'Bond', icon: '' },
-  { id: 'memory', label: 'Memory', icon: '' },
-  { id: 'wellness', label: 'Wellness', icon: '' },
-  { id: 'insights', label: 'Insights', icon: '' },
+  { id: 'bond',     label: 'Bond',     icon: '🤝' },
+  { id: 'memory',   label: 'Memory',   icon: '💭' },
+  { id: 'wellness', label: 'Wellness', icon: '🌿' },
+  { id: 'insights', label: 'Insights', icon: '💡' },
 ];
 
 export function BondDashboard({ petId, petName, className }: BondDashboardProps) {
