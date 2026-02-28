@@ -1,0 +1,24 @@
+{
+  "vectors": [
+    {
+      "input": "hello",
+      "hash": "6f556729",
+      "extended8": "77beebe577c0dbe577c2cbe577c4bbe577c6abe577c89be577ca8be577cc7be5"
+    },
+    {
+      "input": "MOSS60",
+      "hash": "16a2fa8f",
+      "extended8": "45ce9a3345ccaa3345d27a3345d08a3345c6da3345c4ea3345caba3345c8ca33"
+    },
+    {
+      "input": "BluεSnake",
+      "hash": "11a65fc8",
+      "extended8": "59f2d0ff59f0e0ff59f6b0ff59f4c0ff59fa90ff59f8a0ff59fe70ff59fc80ff"
+    },
+    {
+      "input": "",
+      "hash": "00000000",
+      "extended8": "005d0f80005eff800060ef800062df800064cf800066bf800068af80006a9f80"
+    }
+  ]
+}
