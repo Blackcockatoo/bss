@@ -72,9 +72,9 @@ export function SteeringWheel() {
   return (
     <div className="flex flex-col items-center gap-6 w-full max-w-2xl mx-auto">
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-zinc-100">Steering Wheel</h1>
+        <h1 className="text-2xl font-bold text-zinc-100">Navigator</h1>
         <p className="text-sm text-zinc-500 mt-1">
-          Navigate the Hepta MOSS60 system
+          Explore the MOSS60 universe
         </p>
       </div>
 
@@ -91,6 +91,13 @@ export function SteeringWheel() {
       {mode === 'compass' && <CompassNav {...viewProps} />}
       {mode === 'network' && <NetworkView {...viewProps} />}
       {mode === 'geometry' && <GeometryView {...viewProps} />}
+
+      {selectedTarget && (
+        <div className="w-full max-w-lg flex items-center justify-between rounded-lg border border-zinc-700/50 bg-zinc-900/60 px-4 py-2">
+          <span className="text-sm font-medium text-zinc-200">{selectedTarget.label}</span>
+          <span className="text-xs text-zinc-500 font-mono">{selectedTarget.route}</span>
+        </div>
+      )}
 
       {showGenomeResonanceNote && (
         <div className="w-full max-w-lg rounded-lg border border-cyan-500/30 bg-cyan-950/30 p-3 text-center">
