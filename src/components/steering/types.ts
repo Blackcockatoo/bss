@@ -13,8 +13,8 @@ export interface NavigationTarget {
 export const NAVIGATION_TARGETS: NavigationTarget[] = [
   { position: 0,  angle: 0,   label: 'Home',      route: '/',              icon: 'Home' },
   { position: 1,  angle: 30,  label: 'Explore',    route: '/scaffold',      icon: 'Map' },
-  { position: 2,  angle: 60,  label: 'Battle',     route: '/pet',           icon: 'Swords' },
-  { position: 3,  angle: 90,  label: 'School',     route: '/school-game',   icon: 'Gamepad2' },
+  { position: 2,  angle: 60,  label: 'Pet',        route: '/pet',           icon: 'Swords' },
+  { position: 3,  angle: 90,  label: 'Games',      route: '/school-game',   icon: 'Gamepad2' },
   { position: 4,  angle: 120, label: 'Style',       route: '/visualizer',    icon: 'Sparkles' },
   { position: 5,  angle: 150, label: 'Rewards',     route: '/share',         icon: 'Trophy' },
   { position: 6,  angle: 180, label: 'MOSS60',      route: '/dna-hub',       icon: 'Shield' },
