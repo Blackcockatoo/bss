@@ -3,13 +3,34 @@
 import { copyFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const source = resolve('moss60-ultimate.html');
 const destination = resolve('public/moss60-ultimate.html');
+const candidateSources = [
+  resolve('moss60-ultimate.html'),
+  resolve('public/moss60-enhanced.html'),
+  resolve('public/moss60.html'),
+];
 
-if (!existsSync(source)) {
-  console.warn('[prepare-moss60-production] Source file not found, skipping:', source);
+const source = candidateSources.find((candidate) => existsSync(candidate));
+
+if (!source) {
+  if (existsSync(destination)) {
+    console.log('[prepare-moss60-production] moss60-ultimate.html already present in public, skipping copy.');
+    process.exit(0);
+  }
+
+  console.warn(
+    '[prepare-moss60-production] No source file found for moss60-ultimate.html. Checked:',
+    candidateSources.join(', '),
+  );
+  process.exit(0);
+}
+
+if (source === destination) {
+  console.log('[prepare-moss60-production] moss60-ultimate.html already present in public, skipping copy.');
   process.exit(0);
 }
 
 copyFileSync(source, destination);
-console.log('[prepare-moss60-production] Copied moss60-ultimate.html to public for production builds.');
+console.log(
+  `[prepare-moss60-production] Copied ${source.split('/').pop()} to public/moss60-ultimate.html for production builds.`,
+);
