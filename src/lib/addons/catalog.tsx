@@ -676,13 +676,13 @@ export const VOID_MASK: AddonTemplate = {
 // ============================================
 
 /**
- * Space Jewbles Champion Badge - Epic accessory (Earned)
- * Awarded for reaching wave 10+ in Space Jewbles
+ * Scholar's Badge - Epic accessory (Earned)
+ * Awarded for completing your first school-game lesson (first-steps achievement)
  */
 export const SPACE_JEWBLES_BADGE: AddonTemplate = {
   id: 'space-jewbles-badge-001',
-  name: 'Jewbles Champion Badge',
-  description: 'A glowing badge awarded to those who survived wave 10 in Space Jewbles. Radiates cosmic banana energy.',
+  name: 'Scholar\'s Badge',
+  description: 'A glowing star badge awarded on the completion of your very first lesson. Every journey begins with a single step.',
   category: 'accessory',
   rarity: 'epic',
   attachment: {
@@ -721,20 +721,20 @@ export const SPACE_JEWBLES_BADGE: AddonTemplate = {
     bond: 10,
   },
   metadata: {
-    creator: 'Space Jewbles',
-    tags: ['earned', 'minigame', 'champion', 'space', 'jewbles'],
+    creator: 'Auralia Workshop',
+    tags: ['earned', 'achievement', 'first-steps', 'scholar', 'badge'],
     maxEditions: 1000,
   },
 };
 
 /**
- * Cosmic Banana Weapon - Legendary weapon (Earned)
- * Awarded for defeating 5+ bosses in Space Jewbles
+ * Cosmic Banana of Doom - Legendary weapon (Earned)
+ * Awarded for the streak-lord achievement (5 lessons in a row)
  */
 export const COSMIC_BANANA_WEAPON: AddonTemplate = {
   id: 'cosmic-banana-001',
   name: 'Cosmic Banana of Doom',
-  description: 'The ultimate banana weapon, infused with the power of defeated Space Jewbles bosses. It slips through dimensions.',
+  description: 'A legendary weapon born from pure streak energy. Earned by the dedicated who complete five lessons in a row without breaking momentum.',
   category: 'weapon',
   rarity: 'legendary',
   attachment: {
@@ -773,20 +773,20 @@ export const COSMIC_BANANA_WEAPON: AddonTemplate = {
     luck: 30,
   },
   metadata: {
-    creator: 'Space Jewbles',
-    tags: ['earned', 'minigame', 'boss', 'weapon', 'banana', 'cosmic'],
+    creator: 'Auralia Workshop',
+    tags: ['earned', 'achievement', 'streak-lord', 'weapon', 'banana', 'cosmic'],
     maxEditions: 500,
   },
 };
 
 /**
- * Mythic Hunter Aura - Mythic aura (Earned)
- * Awarded for collecting 3+ mythic drops in Space Jewbles
+ * Mythic Hunter's Aura - Mythic aura (Earned)
+ * Awarded for the reflection-sage achievement (all prompts answered for 5 lessons)
  */
 export const MYTHIC_HUNTER_AURA: AddonTemplate = {
   id: 'mythic-hunter-aura-001',
-  name: 'Mythic Hunter\'s Aura',
-  description: 'A shimmering aura that pulses with the essence of collected mythic items. Only the luckiest earn this.',
+  name: 'Reflection Sage\'s Aura',
+  description: 'A shimmering mythic aura radiating deep understanding. Only those who answer every reflection prompt across five full lessons earn this mark of wisdom.',
   category: 'aura',
   rarity: 'mythic',
   attachment: {
@@ -821,8 +821,8 @@ export const MYTHIC_HUNTER_AURA: AddonTemplate = {
     curiosity: 15,
   },
   metadata: {
-    creator: 'Space Jewbles',
-    tags: ['earned', 'minigame', 'mythic', 'hunter', 'aura', 'rare'],
+    creator: 'Auralia Workshop',
+    tags: ['earned', 'achievement', 'reflection-sage', 'mythic', 'aura', 'wisdom'],
     maxEditions: 100,
   },
 };
