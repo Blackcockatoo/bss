@@ -5,7 +5,6 @@ import "./landing.css";
 
 export default function LandingPage() {
   const cosmosRef = useRef<HTMLCanvasElement>(null);
-  const jewbleVisRef = useRef<HTMLCanvasElement>(null);
   const h7Ref = useRef<SVGPolygonElement>(null);
   const h7bRef = useRef<SVGPolygonElement>(null);
   const h7cRef = useRef<SVGPolygonElement>(null);
@@ -183,98 +182,7 @@ export default function LandingPage() {
     }
   }, []);
 
-  useEffect(() => {
-    const pc = jewbleVisRef.current;
-    if (!pc) return;
-    const pctx = pc.getContext("2d");
-    if (!pctx) return;
 
-    let pt = 0;
-    let animId: number;
-
-    function drawJewble() {
-      const w = pc!.width;
-      const h = pc!.height;
-      pctx!.clearRect(0, 0, w, h);
-      pt += 0.012;
-
-      const g = pctx!.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, 120);
-      g.addColorStop(0, "rgba(245,200,76,.05)");
-      g.addColorStop(1, "transparent");
-      pctx!.fillStyle = g;
-      pctx!.fillRect(0, 0, w, h);
-
-      for (let r = 0; r < 3; r++) {
-        pctx!.beginPath();
-        const rad = 60 + r * 28;
-        const a = pt * (r % 2 === 0 ? 1 : -1) * (r + 1) * 0.4;
-        pctx!.ellipse(w / 2, h / 2, rad, rad * 0.35, a, 0, Math.PI * 2);
-        const c =
-          r === 0
-            ? "rgba(245,200,76,.2)"
-            : r === 1
-              ? "rgba(77,214,200,.15)"
-              : "rgba(167,139,250,.12)";
-        pctx!.strokeStyle = c;
-        pctx!.lineWidth = 0.8;
-        pctx!.stroke();
-
-        const dotA = pt * (2 - r) * 0.7 + r * 1.2;
-        const dx = w / 2 + Math.cos(dotA) * rad;
-        const dy = h / 2 + Math.sin(dotA) * rad * 0.35;
-        pctx!.beginPath();
-        pctx!.arc(dx, dy, 2.5, 0, Math.PI * 2);
-        pctx!.fillStyle =
-          r === 0 ? "#f5c84c" : r === 1 ? "#4dd6c8" : "#a78bfa";
-        pctx!.fill();
-      }
-
-      const pulse = 1 + Math.sin(pt * 2) * 0.06;
-      const bodyR = 38 * pulse;
-      const bodyG = pctx!.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, bodyR);
-      bodyG.addColorStop(0, "rgba(245,200,76,.6)");
-      bodyG.addColorStop(0.5, "rgba(245,180,50,.25)");
-      bodyG.addColorStop(1, "transparent");
-      pctx!.fillStyle = bodyG;
-      pctx!.beginPath();
-      for (let i = 0; i < 7; i++) {
-        const angle =
-          (i / 7) * Math.PI * 2 - Math.PI / 2 + Math.sin(pt * 0.5) * 0.05;
-        const r2 = bodyR * (1 + Math.sin(pt * 1.5 + i * 0.9) * 0.08);
-        const x = w / 2 + r2 * Math.cos(angle);
-        const y = h / 2 + r2 * Math.sin(angle) * 0.85;
-        if (i === 0) pctx!.moveTo(x, y);
-        else pctx!.lineTo(x, y);
-      }
-      pctx!.closePath();
-      pctx!.fill();
-
-      pctx!.beginPath();
-      pctx!.arc(w / 2 + 6, h / 2 - 3, 5 + Math.sin(pt * 3) * 0.5, 0, Math.PI * 2);
-      pctx!.fillStyle = "rgba(4,8,16,.8)";
-      pctx!.fill();
-      pctx!.beginPath();
-      pctx!.arc(w / 2 + 7.5, h / 2 - 4, 1.5, 0, Math.PI * 2);
-      pctx!.fillStyle = "rgba(245,200,76,.9)";
-      pctx!.fill();
-
-      for (let i = 0; i < 7; i++) {
-        const a = (i / 7) * Math.PI * 2 + pt * 0.3;
-        const dist = 70 + Math.sin(pt + i) * 0.15;
-        const px = w / 2 + Math.cos(a) * dist;
-        const py = h / 2 + Math.sin(a) * dist * 0.6;
-        pctx!.beginPath();
-        pctx!.arc(px, py, 1.2, 0, Math.PI * 2);
-        pctx!.fillStyle = `rgba(245,200,76,${0.3 + Math.sin(pt * 2 + i) * 0.2})`;
-        pctx!.fill();
-      }
-
-      animId = requestAnimationFrame(drawJewble);
-    }
-    drawJewble();
-
-    return () => cancelAnimationFrame(animId);
-  }, []);
 
   useEffect(() => {
     const obs = new IntersectionObserver(
@@ -305,22 +213,10 @@ export default function LandingPage() {
       <div className="landing-grain" />
 
       <nav className="landing-nav">
-        <a className="logo" href="https://bluesnakestudios.com">
+        <a className="logo" href="#top">
           <svg className="logo-mark" viewBox="0 0 28 28">
-            <polygon
-              points="14,2 25,8.5 25,19.5 14,26 3,19.5 3,8.5"
-              fill="none"
-              stroke="#f5c84c"
-              strokeWidth="1.2"
-              opacity=".6"
-            />
-            <polygon
-              points="14,6 22,10.5 22,17.5 14,22 6,17.5 6,10.5"
-              fill="none"
-              stroke="#4dd6c8"
-              strokeWidth=".8"
-              opacity=".5"
-            />
+            <polygon points="14,2 25,8.5 25,19.5 14,26 3,19.5 3,8.5" fill="none" stroke="#f5c84c" strokeWidth="1.2" opacity=".6" />
+            <polygon points="14,6 22,10.5 22,17.5 14,22 6,17.5 6,10.5" fill="none" stroke="#4dd6c8" strokeWidth=".8" opacity=".5" />
             <circle cx="14" cy="14" r="3" fill="#f5c84c" opacity=".9" />
           </svg>
           <span className="logo-text">
@@ -328,44 +224,28 @@ export default function LandingPage() {
           </span>
         </a>
         <div className="nav-r">
-          <a href="#why-now">Why now</a>
-          <a href="#ecosystem">Teacher hub</a>
-          <a href="#student">Students</a>
-          <a href="#about">About</a>
-          <a
-            href="https://bss-git-main-tom-s-projects-6a215d3d.vercel.app/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="cta-nav"
-          >
-            Start free pilot →
-          </a>
+          <a href="#for-schools">For Schools</a>
+          <a href="https://teachers-meta-pet-mr-brand.vercel.app/" target="_blank" rel="noopener noreferrer">Teacher Hub</a>
+          <a href="https://stevejewble.vercel.app/" target="_blank" rel="noopener noreferrer">Student App</a>
+          <a href="#privacy">Privacy</a>
+          <a href="#pilot">Pilot</a>
+          <a className="cta-nav" href="#pilot">Start a Pilot</a>
         </div>
       </nav>
 
       <section className="hero" id="top">
-        <div className="hero-eyebrow">Built for Australian classrooms</div>
+        <div className="hero-eyebrow">For Australian classrooms</div>
         <h1>
-          A privacy-first virtual companion that teaches systems thinking — built
-          by a local parent for Australian classrooms.
+          A classroom-safe digital companion.
+          <br />
+          Offline-first. Zero accounts. Zero data collected.
         </h1>
         <p className="hero-sub">
-          <strong>180-digit base-7 genome, 15 emotional states, zero data collected.</strong>
-          <br />
-          Faster than lightning. <em>Slower than moss.</em>
+          Jewble Meta-Pet is built for Australian classrooms: a calm learning companion + teacher hub that works without student logins and without cloud collection.
         </p>
         <div className="hero-actions">
-          <a
-            className="btn btn-gold"
-            href="https://stevejewble.vercel.app/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Start a free pilot
-          </a>
-          <a className="btn btn-ghost" href="#get-involved">
-            Request a curriculum pack
-          </a>
+          <a className="btn btn-gold" href="#pilot">Start a School Pilot</a>
+          <a className="btn btn-ghost" href="https://teachers-meta-pet-mr-brand.vercel.app/" target="_blank" rel="noopener noreferrer">Watch 2-min Demo</a>
         </div>
 
         <div className="hepta-ring">
@@ -376,218 +256,42 @@ export default function LandingPage() {
                 <stop offset="100%" stopColor="#4dd6c8" stopOpacity="0" />
               </radialGradient>
             </defs>
-            <g className="hepta-outer">
-              <polygon
-                ref={h7Ref}
-                fill="none"
-                stroke="#f5c84c"
-                strokeWidth=".8"
-                opacity=".35"
-              />
-            </g>
-            <g className="hepta-mid">
-              <polygon
-                ref={h7bRef}
-                fill="none"
-                stroke="#4dd6c8"
-                strokeWidth=".6"
-                opacity=".3"
-              />
-            </g>
-            <g className="hepta-inner">
-              <polygon
-                ref={h7cRef}
-                fill="none"
-                stroke="#a78bfa"
-                strokeWidth=".5"
-                opacity=".25"
-              />
-            </g>
+            <g className="hepta-outer"><polygon ref={h7Ref} fill="none" stroke="#f5c84c" strokeWidth=".8" opacity=".35" /></g>
+            <g className="hepta-mid"><polygon ref={h7bRef} fill="none" stroke="#4dd6c8" strokeWidth=".6" opacity=".3" /></g>
+            <g className="hepta-inner"><polygon ref={h7cRef} fill="none" stroke="#a78bfa" strokeWidth=".5" opacity=".25" /></g>
             <g ref={spokesRef} opacity=".18" />
             <circle cx="110" cy="110" r="60" fill="url(#rg)" />
             <circle cx="110" cy="110" r="4" fill="#f5c84c" opacity=".9" />
             <circle cx="110" cy="110" r="8" fill="none" stroke="#f5c84c" className="pulse-ring" />
           </svg>
         </div>
+
+        <p className="lead" style={{ marginBottom: 0, maxWidth: "760px" }}>
+          Designed for schools that need safer tools under rising privacy expectations and device-policy change.
+        </p>
       </section>
 
       <div className="divider" />
 
-      <section className="section" id="why-now">
+      <section className="section" id="app-directions">
         <div className="wrap">
-          <span className="section-tag t-gold reveal">Why now for schools?</span>
-          <h2 className="reveal">Privacy and wellbeing pressures are accelerating.</h2>
-          <div className="grid-3 reveal">
-            <div className="card">
-              <div className="card-top g" />
-              <h4>Parents are demanding safer tools</h4>
-              <p>
-                Parents are actively seeking ad-free educational apps and are increasingly
-                cautious about student data use, surveillance and manipulative engagement loops.
-              </p>
-            </div>
-            <div className="card">
-              <div className="card-top t" />
-              <h4>Regulation and breach risk are real</h4>
-              <p>
-                With the Children&apos;s Online Privacy Code consultation underway and the Jan 2026
-                Department of Education breach fresh in memory, offline-first design means there
-                is no student cloud dataset to breach.
-              </p>
-            </div>
-            <div className="card">
-              <div className="card-top v" />
-              <h4>Screen-time policy is shifting</h4>
-              <p>
-                Under-16 social media restrictions and reduced screen-time guidance in Victoria
-                create demand for calm, curriculum-aligned alternatives that reward reflection
-                and collaboration.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div className="divider" />
-
-      <section className="section" id="differentiators">
-        <div className="wrap">
-          <div className="product-hero reveal">
-            <div className="product-hero-visual">
-              <canvas className="pet-canvas" ref={jewbleVisRef} width={400} height={300} />
-            </div>
-            <div className="product-hero-text">
-              <div className="pill pill-gold">
-                <span className="pill-dot" />
-                What Jewble is
-              </div>
-              <h3>A private companion with verifiable identity</h3>
-              <p>
-                Jewble combines mathematically unique identity, emotional modelling and cryptographic
-                proof with an offline-first runtime. Students get meaningful interaction; schools get
-                privacy by architecture.
-              </p>
-              <div className="stat-row">
-                <div className="stat-item">
-                  <div className="n" style={{ color: "var(--gold)" }}>180</div>
-                  <div className="l">Digit base-7 genome</div>
-                </div>
-                <div className="stat-item">
-                  <div className="n" style={{ color: "var(--teal)" }}>15</div>
-                  <div className="l">Emotion states</div>
-                </div>
-                <div className="stat-item">
-                  <div className="n" style={{ color: "var(--violet)" }}>0</div>
-                  <div className="l">Data collected</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid-3 reveal" style={{ marginTop: "20px" }}>
-            <div className="card"><div className="card-top g" /><h4>Genomic identity</h4><p>Each companion&apos;s 180-digit base-7 genome is mathematically unrepeatable and drives personality and evolution paths.</p></div>
-            <div className="card"><div className="card-top t" /><h4>Organic consciousness</h4><p>Fifteen emotional states are shaped by genetics and lived experience, creating adaptive behaviour over time.</p></div>
-            <div className="card"><div className="card-top v" /><h4>Cryptographic self</h4><p>ECDSA P-256 signatures plus visual HeptaCode identity ensure no central authority can counterfeit a pet.</p></div>
-            <div className="card"><div className="card-top t" /><h4>Privacy by design</h4><p>Offline-first runtime, zero account model and sealed QR encryption keep student data on-device.</p></div>
-            <div className="card"><div className="card-top g" /><h4>Quadratic progression</h4><p>XP growth ∝ L² builds patience and systems thinking as students experience non-linear learning patterns.</p></div>
-            <div className="card"><div className="card-top c" /><h4>Anti-addiction mechanics</h4><p>Daily bonuses reward breaks and remove FOMO timers, supporting engagement without exploitative loops.</p></div>
-          </div>
-
-          <div className="diagram-grid reveal">
-            <div className="card">
-              <h4>Ecosystem diagram</h4>
-              <div className="ecosystem-diagram">
-                <div>Teacher Hub (The Veil)</div>
-                <span>→</span>
-                <div>Student Experience</div>
-                <span>→</span>
-                <div>Privacy Layer</div>
-              </div>
-            </div>
-            <div className="card">
-              <h4>How it interlocks</h4>
-              <p>
-                Teachers orchestrate interventions and guidance. Students run the companion entirely
-                locally. The privacy layer (offline runtime, sealed QR, no-account model) makes the
-                whole system breach-proof by design.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div className="divider" />
-
-      <section className="section" id="ecosystem">
-        <div className="wrap">
-          <span className="section-tag t-teal reveal">Ecosystem for schools</span>
-          <h2 className="reveal">The Veil brings teacher tools to the foreground.</h2>
-          <div className="grid-2 reveal">
-            <div className="card"><div className="card-top t" /><h4>Pairing &amp; Digital DNA</h4><p>Teachers pair devices via sealed QR codes while each student&apos;s digital DNA remains on their own device.</p></div>
-            <div className="card"><div className="card-top g" /><h4>Blessing Forge &amp; interventions</h4><p>Create achievement unlocks and guidance scripts that reinforce classroom values and positive behaviour.</p></div>
-            <div className="card"><div className="card-top v" /><h4>Facilitation scripts &amp; Classroom Quest</h4><p>Lesson-ready scripts plus mini-games like Math Relay, Word Forge and Science Lab Sprint. Feedback on curriculum standards and accessibility is actively invited.</p></div>
-            <div className="card"><div className="card-top c" /><h4>Constellation view</h4><p>Visual analytics help teachers monitor class progress while keeping personal data local to student devices.</p></div>
-          </div>
-          <p className="lead reveal" style={{ marginTop: "20px", marginBottom: 0 }}>
-            All materials and software remain the property of Blue Snake Studios. Schools receive a limited educational-use licence.
-          </p>
-        </div>
-      </section>
-
-      <div className="divider" />
-
-      <section className="section" id="student">
-        <div className="wrap">
-          <span className="section-tag t-violet reveal">Student experience</span>
-          <h2 className="reveal">What students see on the device.</h2>
-          <div className="grid-3 reveal">
-            <div className="card"><div className="card-top g" /><h4>Meta-Pet app</h4><p>A companion lives on the student tablet or Chromebook and evolves over weeks through care and learning.</p></div>
-            <div className="card"><div className="card-top t" /><h4>Reflection prompts &amp; vitals</h4><p>Daily journaling and emotional-state check-ins help students practise metacognition and self-regulation.</p></div>
-            <div className="card"><div className="card-top v" /><h4>Offline runtime</h4><p>Everything runs locally and nothing is sent to a server, reducing cyber risk and preserving student privacy.</p></div>
-          </div>
-        </div>
-      </section>
-
-      <div className="divider" />
-
-      <section className="section" id="evidence">
-        <div className="wrap">
-          <span className="section-tag t-gold reveal">Evidence and social proof</span>
-          <h2 className="reveal">Signals of demand are already strong.</h2>
-          <div className="grid-3 reveal">
-            <div className="card"><div className="card-top g" /><h4>+58%</h4><p>Rise in parental preference for ad-free, safe children&apos;s content.</p></div>
-            <div className="card"><div className="card-top t" /><h4>68%</h4><p>Of parents prioritise educational value when choosing children&apos;s digital experiences.</p></div>
-            <div className="card"><div className="card-top v" /><h4>47%</h4><p>Of parents report concern about children&apos;s data privacy in apps and connected services.</p></div>
-          </div>
-          <p className="lead reveal" style={{ marginTop: "20px", marginBottom: 0 }}>
-            Pilot teacher and parent quotes can be added here as soon as the first school pilots complete.
-          </p>
-        </div>
-      </section>
-
-      <div className="divider" />
-
-      <section className="section" id="get-involved">
-        <div className="wrap">
-          <span className="section-tag t-teal reveal">Get involved</span>
-          <h2 className="reveal">Start a pilot or request policy documentation.</h2>
+          <span className="section-tag t-gold reveal">App directions</span>
+          <h2 className="reveal">Where to go, step by step.</h2>
           <div className="grid-2 reveal">
             <div className="card">
               <div className="card-top g" />
-              <h4>Teachers and principals</h4>
-              <p>Start your free pilot. Setup takes about 10 minutes and requires no student accounts.</p>
-              <div style={{ marginTop: "18px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                <a className="btn btn-gold" href="https://stevejewble.vercel.app/" target="_blank" rel="noopener noreferrer">Start a free pilot</a>
-                <a className="btn btn-ghost" href="mailto:hello@bluesnakestudios.com.au?subject=Curriculum%20Pack%20Request">Request curriculum pack</a>
+              <h4>1) Open the Teacher Hub (The Veil)</h4>
+              <p>Use this first to generate pairing cards and run facilitation scripts.</p>
+              <div style={{ marginTop: "16px" }}>
+                <a className="btn btn-gold" href="https://teachers-meta-pet-mr-brand.vercel.app/" target="_blank" rel="noopener noreferrer">Open Teacher Hub</a>
               </div>
             </div>
             <div className="card">
               <div className="card-top t" />
-              <h4>District leaders and regulators</h4>
-              <p>Review the technical brief, OAIC submission and implementation notes for privacy-first classroom deployment.</p>
-              <div style={{ marginTop: "18px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                <a className="btn btn-ghost" href="mailto:hello@bluesnakestudios.com.au?subject=Technical%20Brief%20Request">See technical brief</a>
-                <a className="btn btn-ghost" href="mailto:hello@bluesnakestudios.com.au?subject=OAIC%20Submission%20Request">Read OAIC submission</a>
+              <h4>2) Open the Student Meta-Pet App</h4>
+              <p>Students scan the QR pairing card and continue learning on-device.</p>
+              <div style={{ marginTop: "16px" }}>
+                <a className="btn btn-ghost" href="https://stevejewble.vercel.app/" target="_blank" rel="noopener noreferrer">Open Student App</a>
               </div>
             </div>
           </div>
@@ -596,29 +300,127 @@ export default function LandingPage() {
 
       <div className="divider" />
 
-      <section className="section" id="about">
+      <section className="section" id="for-schools">
         <div className="wrap">
-          <span className="section-tag t-violet reveal">About Blue Snake Studios</span>
-          <h2 className="reveal">Dual timescale philosophy, rewritten for educators.</h2>
-          <p className="lead reveal">
-            We combine rigorous cryptography (<em>faster than lightning</em>) with long-term mathematical and artistic inquiry (<em>slower than moss</em>). Our founder is an Australian parent and mathematician who built Jewble for his child&apos;s classroom.
-          </p>
+          <span className="section-tag t-gold reveal">Proof bar</span>
+          <h2 className="reveal">Built to be safe by default.</h2>
+          <div className="grid-3 reveal">
+            <div className="card"><div className="card-top g" /><h4>Offline-first</h4><p>Runs without internet. No always-on services.</p></div>
+            <div className="card"><div className="card-top t" /><h4>No accounts</h4><p>No student emails, passwords, or logins.</p></div>
+            <div className="card"><div className="card-top v" /><h4>Zero data collected</h4><p>Nothing transmitted. Nothing sold. Nothing to breach.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <div className="divider" />
+
+      <section className="section" id="why-this-exists">
+        <div className="wrap">
+          <span className="section-tag t-teal reveal">Why this exists</span>
+          <h2 className="reveal">Schools are being asked to prove digital tools are safe, useful, and worth class time.</h2>
+          <p className="lead reveal" style={{ marginBottom: "20px" }}>Jewble was built to meet that bar by architecture, not policy.</p>
+          <div className="card reveal"><div className="card-top g" /><h4>If there&apos;s no central collection, there&apos;s no central breach.</h4></div>
+        </div>
+      </section>
+
+      <div className="divider" />
+
+      <section className="section" id="student-app">
+        <div className="wrap">
+          <span className="section-tag t-violet reveal">What Jewble is</span>
+          <h2 className="reveal">Jewble is two connected experiences.</h2>
+          <div className="grid-2 reveal">
+            <div className="card"><div className="card-top g" /><h4>1) The Student Companion (Meta-Pet App)</h4><p>A calm companion students care for over time, with guided reflection and classroom activities.</p></div>
+            <div className="card"><div className="card-top t" /><h4>2) The Teacher Hub (&ldquo;The Veil&rdquo;)</h4><p>A dashboard for pairing, facilitation scripts, and classroom mini-games that reinforce learning outcomes.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <div className="divider" />
+
+      <section className="section" id="how-it-works">
+        <div className="wrap">
+          <span className="section-tag t-gold reveal">How it works</span>
+          <h2 className="reveal">1–2–3 classroom rollout.</h2>
+          <div className="timeline reveal">
+            <div className="tl-item"><div className="tl-num">1</div><div className="tl-body"><h4>Teacher opens the Hub</h4><p>Generate pairing cards in minutes.</p></div></div>
+            <div className="tl-item"><div className="tl-num">2</div><div className="tl-body"><h4>Students pair by QR</h4><p>No accounts. No identity system.</p></div></div>
+            <div className="tl-item"><div className="tl-num">3</div><div className="tl-body"><h4>Learning runs locally</h4><p>Reflection prompts, classroom mini-games, and wellbeing routines live on device.</p></div></div>
+          </div>
+        </div>
+      </section>
+
+      <div className="divider" />
+
+      <section className="section" id="teacher-hub">
+        <div className="wrap">
+          <span className="section-tag t-teal reveal">The Teacher Hub (The Veil)</span>
+          <h2 className="reveal">Built for teacher control, minimal admin.</h2>
+          <div className="grid-3 reveal">
+            <div className="card"><div className="card-top g" /><h4>QR Pairing</h4><p>Fast setup without accounts.</p></div>
+            <div className="card"><div className="card-top t" /><h4>Facilitation Scripts</h4><p>Short, repeatable lesson flows.</p></div>
+            <div className="card"><div className="card-top v" /><h4>Blessings</h4><p>Positive nudges + classroom rewards.</p></div>
+            <div className="card"><div className="card-top t" /><h4>Constellation View</h4><p>Class overview at a glance.</p></div>
+            <div className="card"><div className="card-top g" /><h4>Classroom Quest mini-games</h4><p>School-friendly rounds that support current learning goals.</p></div>
+            <div className="card"><div className="card-top c" /><h4>Micro-line</h4><p>Teacher-guided. Student-owned. Device-local.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <div className="divider" />
+
+      <section className="section" id="privacy">
+        <div className="wrap">
+          <span className="section-tag t-gold reveal">Privacy by architecture</span>
+          <h2 className="reveal">Jewble eliminates common school risks.</h2>
+          <div className="grid-2 reveal">
+            <div className="card"><div className="card-top g" /><h4>No accounts</h4><p>No password resets or student identity datastore.</p></div>
+            <div className="card"><div className="card-top t" /><h4>Offline-first</h4><p>No tracking dependency and fewer attack surfaces.</p></div>
+            <div className="card"><div className="card-top v" /><h4>Zero collection by default</h4><p>No central database of student information.</p></div>
+            <div className="card"><div className="card-top c" /><h4>QR pairing</h4><p>Setup without emails or profiles.</p></div>
+          </div>
+          <p className="lead reveal" style={{ marginTop: "20px", marginBottom: 0 }}>We don&apos;t &ldquo;handle data carefully.&rdquo; We don&apos;t collect it.</p>
+        </div>
+      </section>
+
+      <div className="divider" />
+
+      <section className="section" id="pilot">
+        <div className="wrap">
+          <span className="section-tag t-violet reveal">The pilot</span>
+          <h2 className="reveal">Start with one class. One week. One teacher.</h2>
+          <div className="grid-2 reveal">
+            <div className="card"><div className="card-top g" /><h4>Pilot format</h4><p>7 sessions (30–45 minutes).</p><h4 style={{ marginTop: "14px" }}>Setup time</h4><p>~10 minutes.</p><h4 style={{ marginTop: "14px" }}>What you get</h4><p>Teacher scripts + classroom activities + simple rollout guide.</p></div>
+            <div className="card"><div className="card-top t" /><h4>What you don&apos;t need</h4><p>Accounts, student emails, cloud dashboards.</p><div style={{ marginTop: "18px", display: "flex", gap: "10px", flexWrap: "wrap" }}><a className="btn btn-gold" href="mailto:hello@bluesnakestudios.com.au?subject=Start%20School%20Pilot">Start a Pilot →</a><a className="btn btn-ghost" href="mailto:hello@bluesnakestudios.com.au?subject=Book%2012-minute%20Call">Book a 12-minute Call</a></div></div>
+          </div>
+        </div>
+      </section>
+
+      <div className="divider" />
+
+      <section className="section" id="faq">
+        <div className="wrap">
+          <span className="section-tag t-teal reveal">FAQ</span>
+          <h2 className="reveal">Short + direct.</h2>
+          <div className="grid-2 reveal">
+            <div className="card"><div className="card-top g" /><h4>Does it collect student data?</h4><p>No by default. The core experience runs locally.</p></div>
+            <div className="card"><div className="card-top t" /><h4>Do students need accounts?</h4><p>No. Pairing is via QR.</p></div>
+            <div className="card"><div className="card-top v" /><h4>Does it need internet?</h4><p>No. Offline-first.</p></div>
+            <div className="card"><div className="card-top c" /><h4>Is it curriculum-aligned?</h4><p>It&apos;s designed to reinforce classroom learning outcomes and can be mapped to your current units.</p></div>
+            <div className="card"><div className="card-top g" /><h4>What does it cost?</h4><p>School pilots are offered with a simple educational-use licence. (Pricing available after pilot.)</p></div>
+          </div>
         </div>
       </section>
 
       <footer className="landing-footer">
-        <div className="footer-logo">Blue Snake <span>Studios</span></div>
-        <div className="footer-tagline">Faster than lightning · Slower than moss</div>
+        <div className="footer-logo">Ready to pilot a safer classroom tool?</div>
+        <div className="footer-tagline">Start a free pilot with one class.</div>
         <div className="footer-links">
-          <a href="mailto:hello@bluesnakestudios.com.au">hello@bluesnakestudios.com.au</a>
-          <a href="https://stevejewble.vercel.app/" target="_blank" rel="noopener noreferrer">Jewble app</a>
-          <a href="https://teachers-meta-pet-mr-brand.vercel.app/" target="_blank" rel="noopener noreferrer">Teacher hub</a>
+          <a href="#pilot">Start Pilot</a>
+          <a href="https://teachers-meta-pet-mr-brand.vercel.app/" target="_blank" rel="noopener noreferrer">Watch Demo</a>
+          <a href="mailto:hello@bluesnakestudios.com.au">Contact</a>
         </div>
-        <p className="footer-legal">
-          © 2026 Blue Snake Studios. All Jewble branding and IP remain the property of Blue Snake Studios.
-          <br />
-          Schools receive a limited educational-use licence.
-        </p>
+        <p className="footer-legal">© 2026 Blue Snake Studios — School receives a limited educational-use licence during pilot. Blue Snake Studios retains IP.</p>
       </footer>
     </div>
   );
