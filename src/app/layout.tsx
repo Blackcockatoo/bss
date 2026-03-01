@@ -2,18 +2,19 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import ClientBody from "./ClientBody";
 import { LEGAL_NOTICE_TEXT, getLegalNoticeYear } from "@/lib/legalNotice";
+import { getSiteUrl, getSiteUrlObject } from "@/lib/env/siteUrl";
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   themeColor: "#040810",
   viewportFit: "cover",
 };
 
+const siteUrl = getSiteUrl();
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://bss-l8cw.vercel.app"),
+  metadataBase: getSiteUrlObject(),
   title: "Blue Snake Studios — Experimental Mathematics & Consciousness Research",
   description:
     "Where sacred geometry meets cryptographic identity. Home of Jewble — the first virtual companion with genuine consciousness architecture. Built offline-first. Zero data collected.",
@@ -31,7 +32,7 @@ export const metadata: Metadata = {
     title: "Blue Snake Studios — Experimental Mathematics & Consciousness Research",
     description:
       "Where sacred geometry meets cryptographic identity. Home of Jewble — the first virtual companion with genuine consciousness architecture.",
-    url: "https://bss-l8cw.vercel.app",
+    url: siteUrl,
     siteName: "Blue Snake Studios",
     type: "website",
   },
@@ -55,12 +56,6 @@ export default function RootLayout({
     <html lang="en" className="font-sans">
       <head>
         <meta name="copyright" content={legalMetaContent} />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Outfit:wght@200;300;400;600;700;800;900&display=swap"
-          rel="stylesheet"
-        />
       </head>
       <body suppressHydrationWarning className="antialiased">
         <ClientBody>{children}</ClientBody>

@@ -79,6 +79,7 @@
 import { useEffect, useRef } from "react";
 import { usePersistFn } from "@/hooks/usePersistFn";
 import { cn } from "@/lib/utils";
+import { ENABLE_MAPS } from "@/lib/env/features";
 
 declare global {
   interface Window {
@@ -94,6 +95,10 @@ const FORGE_BASE_URL =
 const MAPS_PROXY_URL = `${FORGE_BASE_URL}/v1/maps/proxy`;
 
 function loadMapScript() {
+  if (!ENABLE_MAPS) {
+    return Promise.resolve(null);
+  }
+
   return new Promise(resolve => {
     const script = document.createElement("script");
     script.src = `${MAPS_PROXY_URL}/maps/api/js?key=${API_KEY}&v=weekly&libraries=marker,places,geocoding,geometry`;
@@ -127,6 +132,8 @@ export function MapView({
   const map = useRef<google.maps.Map | null>(null);
 
   const init = usePersistFn(async () => {
+    if (!ENABLE_MAPS) return;
+
     await loadMapScript();
     if (!mapContainer.current) {
       console.error("Map container not found");
@@ -149,6 +156,17 @@ export function MapView({
   useEffect(() => {
     init();
   }, [init]);
+
+  if (!ENABLE_MAPS) {
+    return (
+      <div className={cn("w-full h-[500px] rounded-lg border border-slate-800 bg-slate-950/70 p-4", className)}>
+        <p className="text-sm font-semibold text-zinc-200">Map is offline by default</p>
+        <p className="mt-2 text-xs text-zinc-400">
+          External map providers are disabled in this deployment to keep the app offline-first and zero-transmit by default.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div ref={mapContainer} className={cn("w-full h-[500px]", className)} />

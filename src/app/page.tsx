@@ -241,7 +241,7 @@ export default function LandingPage() {
           Offline-first. Zero accounts. Zero data collected.
         </h1>
         <p className="hero-sub">
-          Jewble Meta-Pet is built for Australian classrooms: a calm learning companion + teacher hub that works without student logins and without cloud collection.
+          Jewble Meta-Pet is built for Australian classrooms: a calm learning companion + teacher hub that runs offline-first, without student logins by default, and without cloud collection by default.
         </p>
         <div className="hero-actions">
           <a className="btn btn-gold" href="#pilot">Start a School Pilot</a>

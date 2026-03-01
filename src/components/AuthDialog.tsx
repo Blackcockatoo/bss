@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/lib/auth/store';
 import type { UserRole } from '@/lib/auth/types';
+import { ENABLE_AUTH } from '@/lib/env/features';
 
 interface AuthDialogProps {
   open: boolean;
@@ -22,6 +23,10 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
 
   const login = useAuthStore((state) => state.login);
   const register = useAuthStore((state) => state.register);
+
+  if (!ENABLE_AUTH) {
+    return null;
+  }
 
   const submitLogin = async () => {
     const result = await login(email, password);
