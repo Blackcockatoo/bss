@@ -366,6 +366,7 @@ export default function LandingPage() {
             <div className="card"><div className="card-top g" /><h4>Pilot format</h4><p>7 sessions (30–45 minutes).</p><h4 style={{ marginTop: "14px" }}>Setup time</h4><p>~10 minutes.</p><h4 style={{ marginTop: "14px" }}>What you get</h4><p>Teacher scripts + classroom activities + simple rollout guide.</p></div>
             <div className="card"><div className="card-top t" /><h4>What you don&apos;t need</h4><p>Accounts, student emails, cloud dashboards.</p><div style={{ marginTop: "18px", display: "flex", gap: "10px", flexWrap: "wrap" }}><a className="btn btn-gold" href="mailto:hello@bluesnakestudios.com.au?subject=Start%20School%20Pilot">Start a Pilot →</a><a className="btn btn-ghost" href="mailto:hello@bluesnakestudios.com.au?subject=Book%2012-minute%20Call">Book a 12-minute Call</a></div></div>
           </div>
+          <p className="lead reveal" style={{ marginTop: "20px", marginBottom: 0 }}>We don&apos;t &ldquo;handle data carefully.&rdquo; We don&apos;t collect it.</p>
         </div>
       </section>
 
