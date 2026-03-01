@@ -5,7 +5,7 @@
 
 /* Body overrides when landing page is active */
 body.landing-body {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-outfit, 'Outfit', sans-serif);
   color: #dde8f5;
   background: #040810;
   overflow-x: hidden;
@@ -27,8 +27,8 @@ body.landing-body {
   --white: #dde8f5;
   --muted: #5a7090;
   --line: rgba(255, 255, 255, 0.07);
-  --ff: 'Outfit', sans-serif;
-  --mono: 'Space Mono', monospace;
+  --ff: var(--font-outfit, 'Outfit', sans-serif);
+  --mono: var(--font-mono, 'Space Mono', monospace);
 
   font-family: var(--ff);
   color: var(--white);

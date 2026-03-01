@@ -22,7 +22,7 @@ export default function ClientBody({
   const logout = useAuthStore((state) => state.logout);
 
   useEffect(() => {
-    document.body.className = "antialiased";
+    document.body.classList.add("antialiased");
   }, []);
 
   useEffect(() => {
