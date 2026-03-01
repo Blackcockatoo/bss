@@ -386,12 +386,13 @@ export function EyeRenderer({
     offset,
   } = eyeState;
 
-  // Calculate jitter offset for scared emotion using deterministic source
-  const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+  // Calculate jitter offset for scared emotion — use offset as deterministic seed
+  // so rendering stays pure (parent drives re-renders for animation)
+  const jitterSeed = (offset?.x ?? 0) * 1000 + (offset?.y ?? 0) * 317;
   const jitterOffset = jitter
     ? {
-        x: (Math.sin(now * 0.1) * 0.5) * 1.5,
-        y: (Math.cos(now * 0.13) * 0.5) * 1.5,
+        x: (Math.sin(jitterSeed * 0.1) * 0.5) * 1.5,
+        y: (Math.cos(jitterSeed * 0.13) * 0.5) * 1.5,
       }
     : { x: 0, y: 0 };
 

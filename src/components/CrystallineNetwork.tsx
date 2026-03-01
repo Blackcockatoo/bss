@@ -446,14 +446,13 @@ export function CrystallineNetwork({ dna }: CrystallineNetworkProps = {}) {
   const [crystallizing, setCrystallizing] = useState(false);
   const [pathInfo, setPathInfo]       = useState<string>('');
 
-  // Build network (memoized on DNA)
-  const { stats, dnaConnected } = useMemo(() => {
+  // Build network (memoized on DNA) — pure computation only
+  const { stats, dnaConnected, net, sim } = useMemo(() => {
     const net = buildNetwork(dna);
-    netRef.current  = net;
 
     // Golden-spiral initial positions — seeded by DNA when available
     const posRng = dna ? createSeededRng(dnaSeed(dna + ':pos')) : Math.random;
-    simRef.current = {
+    const sim: Sim = {
       nodes: Array.from({ length: N }, (_, i) => {
         const angle = i * 2 * Math.PI * PHI;
         const r     = Math.sqrt(i / N) * 125;
@@ -471,8 +470,14 @@ export function CrystallineNetwork({ dna }: CrystallineNetworkProps = {}) {
       spawnT:      0,
     };
 
-    return { stats: net.stats, dnaConnected: !!dna };
+    return { stats: net.stats, dnaConnected: !!dna, net, sim };
   }, [dna]);
+
+  // Sync memoized values to refs (outside render, inside effect)
+  useEffect(() => {
+    netRef.current = net;
+    simRef.current = sim;
+  }, [net, sim]);
 
   // RAF simulation + render loop
   useEffect(() => {

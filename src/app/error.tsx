@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 
 export default function Error({
   error,
@@ -18,11 +17,17 @@ export default function Error({
     <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 px-4 text-center">
       <h2 className="text-xl font-bold text-white">Something went wrong</h2>
       <p className="max-w-md text-sm text-zinc-400">
-        An unexpected error occurred. Please try again.
+        {error.message || 'An unexpected error occurred.'}
       </p>
-      <Button onClick={reset} className="mt-2">
+      {error.digest && (
+        <p className="text-xs text-zinc-500">Error ID: {error.digest}</p>
+      )}
+      <button
+        onClick={reset}
+        className="mt-2 rounded-md bg-cyan-400 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-cyan-300"
+      >
         Try again
-      </Button>
+      </button>
     </div>
   );
 }

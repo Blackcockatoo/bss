@@ -41,9 +41,11 @@ export function TemporalEchoTrail({
   useEffect(() => {
     // Skip animation if reduce motion is enabled
     if (reduceMotion) {
-      // Set a single static position
-      setEchoes([{ x: size / 2, y: size / 2, createdAt: Date.now() }]);
-      return;
+      // Set a single static position — deferred to avoid synchronous setState
+      const id = requestAnimationFrame(() => {
+        setEchoes([{ x: size / 2, y: size / 2, createdAt: Date.now() }]);
+      });
+      return () => cancelAnimationFrame(id);
     }
 
     const animate = (timestamp: number) => {

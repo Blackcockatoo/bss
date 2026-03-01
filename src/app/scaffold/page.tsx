@@ -226,27 +226,31 @@ export default function ScaffoldPage() {
     };
   }, [mockConfig.mockVitalsDecay, startTick, stopTick, mintNewIdentity]);
 
-  // Auto-play chime if enabled
+  // Auto-play chime if enabled — deferred to avoid synchronous setState cascade
   useEffect(() => {
     if (mockConfig.autoPlay && heptaCode && !isAudioPlaying) {
-      handlePlayChime();
+      const id = requestAnimationFrame(() => handlePlayChime());
+      return () => cancelAnimationFrame(id);
     }
   }, [handlePlayChime, heptaCode, isAudioPlaying, mockConfig.autoPlay]);
 
   useEffect(() => {
     if (!showDevMetrics || typeof window === 'undefined') return;
 
-    try {
-      const stored = window.localStorage.getItem(ANALYTICS_STORAGE_KEY);
-      setSessionMetrics(computeSessionMetrics(stored));
-    } catch {
-      setSessionMetrics({
-        totalSessions: 0,
-        averageLengthMs: null,
-        d1ReturnRate: null,
-        d7ReturnRate: null,
-      });
-    }
+    const id = requestAnimationFrame(() => {
+      try {
+        const stored = window.localStorage.getItem(ANALYTICS_STORAGE_KEY);
+        setSessionMetrics(computeSessionMetrics(stored));
+      } catch {
+        setSessionMetrics({
+          totalSessions: 0,
+          averageLengthMs: null,
+          d1ReturnRate: null,
+          d7ReturnRate: null,
+        });
+      }
+    });
+    return () => cancelAnimationFrame(id);
   }, [showDevMetrics]);
 
   /**
@@ -281,20 +285,26 @@ export default function ScaffoldPage() {
     setRitualNote('');
   }, [completeMirrorMode, ritualOutcome, ritualNote]);
 
-  const [consentRemainingMinutes, setConsentRemainingMinutes] = useState<number | null>(null);
+  const consentExpiresAt = mirrorMode.consentExpiresAt;
+  const [consentRemainingMinutes, setConsentRemainingMinutes] = useState<number | null>(() => {
+    if (!consentExpiresAt) return null;
+    const delta = consentExpiresAt - Date.now();
+    return Math.max(0, Math.ceil(delta / 60000));
+  });
   useEffect(() => {
-    if (!mirrorMode.consentExpiresAt) {
-      setConsentRemainingMinutes(null);
-      return;
+    if (!consentExpiresAt) {
+      // Use rAF to avoid synchronous setState in effect
+      const id = requestAnimationFrame(() => setConsentRemainingMinutes(null));
+      return () => cancelAnimationFrame(id);
     }
     const update = () => {
-      const delta = mirrorMode.consentExpiresAt! - Date.now();
+      const delta = consentExpiresAt - Date.now();
       setConsentRemainingMinutes(Math.max(0, Math.ceil(delta / 60000)));
     };
-    update();
+    const frameId = requestAnimationFrame(update);
     const interval = setInterval(update, 30000);
-    return () => clearInterval(interval);
-  }, [mirrorMode.consentExpiresAt]);
+    return () => { cancelAnimationFrame(frameId); clearInterval(interval); };
+  }, [consentExpiresAt]);
 
   const handleRefreshConsent = useCallback(() => {
     refreshConsent(15);

@@ -367,28 +367,31 @@ export function ReactVisualizationComponent({ dna, latticeState }: ReactVisualiz
   // Memory state
   const [fingerprint, setFingerprint] = useState<CrystalFingerprint | null>(null);
 
-  // Initialize visualizations
+  // Initialize visualizations — deferred to avoid synchronous setState cascade
   useEffect(() => {
     const genome = dna || '0'.repeat(60);
 
-    // Initialize fractal
-    const tree = generateFractalTree(genome);
-    setFractalTree(tree);
+    const id = requestAnimationFrame(() => {
+      // Initialize fractal
+      const tree = generateFractalTree(genome);
+      setFractalTree(tree);
 
-    // Initialize resonance if lattice available
-    if (latticeState) {
-      const nodeIds = latticeState.nodes.filter(n => n.alive).map(n => n.id);
-      const dnaDigits = nodeIds.map((_, i) => parseInt(genome[i % genome.length], 10) || 0);
-      const edgePairs = latticeState.edges.map(e => [e.a, e.b] as [number, number]);
-      const resField = initResonanceField(nodeIds, dnaDigits, edgePairs);
-      setResonanceField(resField);
-    }
+      // Initialize resonance if lattice available
+      if (latticeState) {
+        const nodeIds = latticeState.nodes.filter(n => n.alive).map(n => n.id);
+        const dnaDigits = nodeIds.map((_, i) => parseInt(genome[i % genome.length], 10) || 0);
+        const edgePairs = latticeState.edges.map(e => [e.a, e.b] as [number, number]);
+        const resField = initResonanceField(nodeIds, dnaDigits, edgePairs);
+        setResonanceField(resField);
+      }
 
-    // Initialize memory/fingerprint
-    if (latticeState) {
-      const result = encodeCrystal(latticeState, genome);
-      setFingerprint(result.fingerprint);
-    }
+      // Initialize memory/fingerprint
+      if (latticeState) {
+        const result = encodeCrystal(latticeState, genome);
+        setFingerprint(result.fingerprint);
+      }
+    });
+    return () => cancelAnimationFrame(id);
   }, [dna, latticeState]);
 
   // Animation loop

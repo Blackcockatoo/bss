@@ -20,12 +20,12 @@ export const EnhancedPetSprite = memo(function EnhancedPetSprite() {
   useEffect(() => {
     const age = Date.now() - lastActionAt;
     const isRecent = !!lastAction && age < ACTION_WINDOW_MS;
-    setActionActive(isRecent);
+    const id = requestAnimationFrame(() => setActionActive(isRecent));
     if (isRecent) {
       const t = setTimeout(() => setActionActive(false), ACTION_WINDOW_MS - age);
-      return () => clearTimeout(t);
+      return () => { cancelAnimationFrame(id); clearTimeout(t); };
     }
-    return;
+    return () => cancelAnimationFrame(id);
   }, [lastAction, lastActionAt]);
 
   const cockatooImages = useMemo(

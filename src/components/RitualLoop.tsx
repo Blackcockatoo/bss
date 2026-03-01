@@ -258,33 +258,36 @@ export function RitualLoop({ onRitualComplete, jewbleDigits, initialProgress, pe
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    if (initialProgress) {
-      setResonance(initialProgress.resonance);
-      setNectar(initialProgress.nectar);
-      setStreak(initialProgress.streak);
-      setLastDay(initialProgress.lastDayKey ?? null);
-      setTotalSessions(initialProgress.totalSessions);
-      setHistory(initialProgress.history ?? []);
-      setStage(deriveStage(initialProgress.history ?? [], initialProgress.streak));
-      return;
-    }
+    const id = requestAnimationFrame(() => {
+      if (initialProgress) {
+        setResonance(initialProgress.resonance);
+        setNectar(initialProgress.nectar);
+        setStreak(initialProgress.streak);
+        setLastDay(initialProgress.lastDayKey ?? null);
+        setTotalSessions(initialProgress.totalSessions);
+        setHistory(initialProgress.history ?? []);
+        setStage(deriveStage(initialProgress.history ?? [], initialProgress.streak));
+        return;
+      }
 
-    const stored = window.localStorage.getItem(storageKey);
-    if (!stored) return;
+      const stored = window.localStorage.getItem(storageKey);
+      if (!stored) return;
 
-    try {
-      const parsed = JSON.parse(stored);
-      if (!isValidRitualProgress(parsed)) return;
-      setResonance(parsed.resonance);
-      setNectar(parsed.nectar);
-      setStreak(parsed.streak);
-      setLastDay(parsed.lastDayKey ?? null);
-      setTotalSessions(parsed.totalSessions);
-      setHistory(parsed.history ?? []);
-      setStage(deriveStage(parsed.history ?? [], parsed.streak));
-    } catch (error) {
-      console.warn('Failed to hydrate ritual progress:', error);
-    }
+      try {
+        const parsed = JSON.parse(stored);
+        if (!isValidRitualProgress(parsed)) return;
+        setResonance(parsed.resonance);
+        setNectar(parsed.nectar);
+        setStreak(parsed.streak);
+        setLastDay(parsed.lastDayKey ?? null);
+        setTotalSessions(parsed.totalSessions);
+        setHistory(parsed.history ?? []);
+        setStage(deriveStage(parsed.history ?? [], parsed.streak));
+      } catch (error) {
+        console.warn('Failed to hydrate ritual progress:', error);
+      }
+    });
+    return () => cancelAnimationFrame(id);
   }, [deriveStage, initialProgress, storageKey]);
 
   const completeRitual = useCallback((yantraEnergy?: number) => {

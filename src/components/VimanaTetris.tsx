@@ -360,7 +360,8 @@ export function VimanaTetris({
   }, [spawnPiece]);
 
   useEffect(() => {
-    resetGame();
+    const id = requestAnimationFrame(() => resetGame());
+    return () => cancelAnimationFrame(id);
   }, [resetGame]);
 
   const lockPiece = useCallback(

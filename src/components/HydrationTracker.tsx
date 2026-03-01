@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo } from 'react';
 import { useWellnessStore, getTodayHydration, getDateKey } from '@/lib/wellness';
 import { triggerHaptic } from '@/lib/haptics';
 import { Button } from '@/components/ui/button';
@@ -24,7 +24,7 @@ export function HydrationTracker({ isOpen, onClose }: HydrationTrackerProps) {
   const enabledFeatures = useWellnessStore(state => state.enabledFeatures);
 
   const [quickAdd, setQuickAdd] = useState(1);
-  const nowRef = useRef(Date.now());
+  const [mountTimestamp] = useState(() => Date.now());
 
   const todayTotal = useMemo(() => getTodayHydration(hydration), [hydration]);
   const progress = Math.min((todayTotal / hydration.dailyGoal) * 100, 100);
@@ -34,14 +34,14 @@ export function HydrationTracker({ isOpen, onClose }: HydrationTrackerProps) {
   const weekData = useMemo(() => {
     const days: { date: string; total: number }[] = [];
     for (let i = 6; i >= 0; i--) {
-      const date = getDateKey(nowRef.current - i * 86400000);
+      const date = getDateKey(mountTimestamp - i * 86400000);
       const total = hydration.entries
         .filter(e => getDateKey(e.timestamp) === date)
         .reduce((sum, e) => sum + e.amount, 0);
       days.push({ date, total });
     }
     return days;
-  }, [hydration.entries]);
+  }, [hydration.entries, mountTimestamp]);
 
   const handleLogWater = () => {
     logWater(quickAdd);

@@ -48,8 +48,8 @@ export function MoodCheckIn({
   const [submitted, setSubmitted] = React.useState(false);
 
   // Check if checked in recently (within 4 hours)
-  const nowRef = useRef(Date.now());
-  const recentlyCheckedIn = lastCheckIn && nowRef.current - lastCheckIn < 4 * 60 * 60 * 1000;
+  const [mountTime] = React.useState(() => Date.now());
+  const recentlyCheckedIn = lastCheckIn && mountTime - lastCheckIn < 4 * 60 * 60 * 1000;
 
   const handleMoodSelect = (mood: UserMood) => {
     setSelectedMood(mood);

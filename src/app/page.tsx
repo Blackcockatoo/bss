@@ -295,7 +295,6 @@ function CurriculumQueueSection() {
 
   const completedCount = eduProgress.filter((p) => p.status === 'completed').length;
   const standards = eduQueue.flatMap((l) => l.standardsRef).filter(Boolean);
-  const now = Date.now();
   const progressWithTime = eduProgress.filter((p) => p.startedAt || p.completedAt);
   const lessonsWithExplanation = eduQueue.filter((lesson) =>
     lesson.prePrompt?.trim() || lesson.postPrompt?.trim() || lesson.description.trim().length >= 40
@@ -305,7 +304,8 @@ function CurriculumQueueSection() {
   const reflectionRate = progressWithTime.length === 0
     ? 0
     : eduProgress.filter((entry) => entry.postResponse && entry.postResponse.trim().length > 0).length / progressWithTime.length;
-  const recentRewards = rewardHistory.filter((entry) => now - entry.createdAt <= 7 * 24 * 60 * 60 * 1000);
+  const [mountTime] = useState(() => Date.now());
+  const recentRewards = rewardHistory.filter((entry) => mountTime - entry.createdAt <= 7 * 24 * 60 * 60 * 1000);
   const rewardMomentum = Math.min(100, recentRewards.length * 12 + eduXP.streak * 6);
   const trustScore = clamp(
     Math.round(
