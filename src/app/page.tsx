@@ -286,9 +286,47 @@ function CurriculumQueueSection() {
   const eduQueue = useEducationStore((s) => s.queue);
   const eduProgress = useEducationStore((s) => s.lessonProgress);
   const activateLesson = useEducationStore((s) => s.activateLesson);
+  const eduXP = useEducationStore((s) => s.eduXP);
+  const classEnergy = useEducationStore((s) => s.classEnergy.level);
+  const promptResponseCount = useEducationStore((s) => s.promptResponseCount);
+  const vibeReactionCount = useEducationStore((s) => s.vibeReactionCount);
+  const unlockedEduAchievements = useEducationStore((s) => s.eduAchievements.filter((entry) => entry.unlockedAt !== null));
+  const rewardHistory = useStore((s) => s.rewardHistory);
 
   const completedCount = eduProgress.filter((p) => p.status === 'completed').length;
   const standards = eduQueue.flatMap((l) => l.standardsRef).filter(Boolean);
+  const now = Date.now();
+  const progressWithTime = eduProgress.filter((p) => p.startedAt || p.completedAt);
+  const lessonsWithExplanation = eduQueue.filter((lesson) =>
+    lesson.prePrompt?.trim() || lesson.postPrompt?.trim() || lesson.description.trim().length >= 40
+  ).length;
+  const explanationCoverage = eduQueue.length === 0 ? 0 : lessonsWithExplanation / eduQueue.length;
+  const outcomeRate = progressWithTime.length === 0 ? 0 : completedCount / progressWithTime.length;
+  const reflectionRate = progressWithTime.length === 0
+    ? 0
+    : eduProgress.filter((entry) => entry.postResponse && entry.postResponse.trim().length > 0).length / progressWithTime.length;
+  const recentRewards = rewardHistory.filter((entry) => now - entry.createdAt <= 7 * 24 * 60 * 60 * 1000);
+  const rewardMomentum = Math.min(100, recentRewards.length * 12 + eduXP.streak * 6);
+  const trustScore = clamp(
+    Math.round(
+      explanationCoverage * 30 +
+      outcomeRate * 35 +
+      reflectionRate * 20 +
+      (standards.length > 0 ? 15 : 0)
+    ),
+    0,
+    100,
+  );
+  const fulfillmentScore = clamp(
+    Math.round(
+      outcomeRate * 40 +
+      (classEnergy / 100) * 25 +
+      (rewardMomentum / 100) * 20 +
+      Math.min(15, unlockedEduAchievements.length * 3)
+    ),
+    0,
+    100,
+  );
 
   if (eduQueue.length === 0) {
     return (
@@ -335,6 +373,42 @@ function CurriculumQueueSection() {
           </div>
         )}
       </div>
+
+      <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-semibold text-cyan-200">Trust & Fulfillment Snapshot</p>
+          <p className="text-[11px] text-cyan-300">Live classroom quality signals</p>
+        </div>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <div className="rounded-md border border-slate-700/70 bg-slate-950/40 p-2">
+            <p className="text-[10px] uppercase tracking-wide text-zinc-500">Explanation coverage</p>
+            <p className="text-sm font-semibold text-white">{Math.round(explanationCoverage * 100)}%</p>
+          </div>
+          <div className="rounded-md border border-slate-700/70 bg-slate-950/40 p-2">
+            <p className="text-[10px] uppercase tracking-wide text-zinc-500">Outcome completion</p>
+            <p className="text-sm font-semibold text-white">{Math.round(outcomeRate * 100)}%</p>
+          </div>
+          <div className="rounded-md border border-slate-700/70 bg-slate-950/40 p-2">
+            <p className="text-[10px] uppercase tracking-wide text-zinc-500">Reward momentum</p>
+            <p className="text-sm font-semibold text-white">{rewardMomentum}/100</p>
+          </div>
+          <div className="rounded-md border border-slate-700/70 bg-slate-950/40 p-2">
+            <p className="text-[10px] uppercase tracking-wide text-zinc-500">Reflection responses</p>
+            <p className="text-sm font-semibold text-white">{promptResponseCount}</p>
+          </div>
+        </div>
+        <div className="mt-3 rounded-md border border-emerald-500/20 bg-emerald-500/10 p-2">
+          <p className="text-xs text-zinc-200">
+            Trust score <span className="font-semibold text-emerald-200">{trustScore}</span>/100 • Fulfillment score{' '}
+            <span className="font-semibold text-emerald-200">{fulfillmentScore}</span>/100
+          </p>
+          <p className="mt-1 text-[11px] text-zinc-400">
+            Includes standards transparency, explanation prompts, progress outcomes, class energy, and reward cadence.
+            {` `}XP Level {eduXP.level}, streak {eduXP.streak}, vibe reactions {vibeReactionCount}.
+          </p>
+        </div>
+      </div>
+
       <EducationQueuePanel mode="student" onLessonActivate={activateLesson} />
     </div>
   );
