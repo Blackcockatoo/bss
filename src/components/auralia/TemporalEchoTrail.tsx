@@ -46,7 +46,7 @@ export function TemporalEchoTrail({
     }
 
     const animate = (timestamp: number) => {
-      timestampRef.current = timestamp;
+      setCurrentTime(timestamp);
 
       // Skip updates if not visible
       if (!isVisible) {
@@ -85,7 +85,6 @@ export function TemporalEchoTrail({
     };
   }, [bond, curiosity, energy, size, reduceMotion, isVisible]);
 
-  const currentTime = timestampRef.current || 0;
 
   return (
     <svg

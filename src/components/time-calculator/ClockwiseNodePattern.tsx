@@ -14,7 +14,6 @@ const NUMBER_STRINGS = {
 const ClockwiseNodePattern: React.FC<ClockwiseNodePatternProps> = ({ color }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [rotation, setRotation] = useState(0);
-  const [nodes, _setNodes] = useState<{ x: number; y: number }[]>([]);
   const [animationActive, setAnimationActive] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const [showApiKey, setShowApiKey] = useState(false);
@@ -42,7 +41,7 @@ const ClockwiseNodePattern: React.FC<ClockwiseNodePatternProps> = ({ color }) =>
   const numberString = NUMBER_STRINGS[color];
 
   // Generate nodes based on the number string
-  useEffect(() => {
+  const nodes = useMemo(() => {
     const newNodes: { x: number; y: number }[] = [];
     const centerNode = { x: 0, y: 0 };
     newNodes.push(centerNode);
