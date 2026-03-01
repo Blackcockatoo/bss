@@ -357,7 +357,7 @@ export default function LandingPage() {
         <div className="hero-actions">
           <a
             className="btn btn-gold"
-            href="https://bss-git-main-tom-s-projects-6a215d3d.vercel.app/"
+            href="https://stevejewble.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -577,8 +577,8 @@ export default function LandingPage() {
               <h4>Teachers and principals</h4>
               <p>Start your free pilot. Setup takes about 10 minutes and requires no student accounts.</p>
               <div style={{ marginTop: "18px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                <a className="btn btn-gold" href="https://bss-git-main-tom-s-projects-6a215d3d.vercel.app/" target="_blank" rel="noopener noreferrer">Start a free pilot</a>
-                <a className="btn btn-ghost" href="mailto:themossman@bluesnakestudios.com?subject=Curriculum%20Pack%20Request">Request curriculum pack</a>
+                <a className="btn btn-gold" href="https://stevejewble.vercel.app/" target="_blank" rel="noopener noreferrer">Start a free pilot</a>
+                <a className="btn btn-ghost" href="mailto:hello@bluesnakestudios.com.au?subject=Curriculum%20Pack%20Request">Request curriculum pack</a>
               </div>
             </div>
             <div className="card">
@@ -586,8 +586,8 @@ export default function LandingPage() {
               <h4>District leaders and regulators</h4>
               <p>Review the technical brief, OAIC submission and implementation notes for privacy-first classroom deployment.</p>
               <div style={{ marginTop: "18px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                <a className="btn btn-ghost" href="mailto:themossman@bluesnakestudios.com?subject=Technical%20Brief%20Request">See technical brief</a>
-                <a className="btn btn-ghost" href="mailto:themossman@bluesnakestudios.com?subject=OAIC%20Submission%20Request">Read OAIC submission</a>
+                <a className="btn btn-ghost" href="mailto:hello@bluesnakestudios.com.au?subject=Technical%20Brief%20Request">See technical brief</a>
+                <a className="btn btn-ghost" href="mailto:hello@bluesnakestudios.com.au?subject=OAIC%20Submission%20Request">Read OAIC submission</a>
               </div>
             </div>
           </div>
@@ -610,8 +610,8 @@ export default function LandingPage() {
         <div className="footer-logo">Blue Snake <span>Studios</span></div>
         <div className="footer-tagline">Faster than lightning · Slower than moss</div>
         <div className="footer-links">
-          <a href="mailto:themossman@bluesnakestudios.com">themossman@bluesnakestudios.com</a>
-          <a href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">BlueSnakeStudios.com</a>
+          <a href="mailto:hello@bluesnakestudios.com.au">hello@bluesnakestudios.com.au</a>
+          <a href="https://stevejewble.vercel.app/" target="_blank" rel="noopener noreferrer">Jewble app</a>
           <a href="https://teachers-meta-pet-mr-brand.vercel.app/" target="_blank" rel="noopener noreferrer">Teacher hub</a>
         </div>
         <p className="footer-legal">
