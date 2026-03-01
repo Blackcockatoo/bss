@@ -102,6 +102,7 @@ export default function PetPage() {
                 aria-expanded={showAdvanced}
               >
                 <span className="font-semibold">Advanced / Mechanics Lab</span>
+                <span className="sr-only"> — peek under the hood to see identity, addons, and the crypto systems that keep your companion secure</span>
                 {showAdvanced ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </Button>
 
@@ -170,8 +171,9 @@ export default function PetPage() {
                     )}
                     {showAddonPanel && <AddonInventoryPanel />}
                     {!showProfilePanel && !showAddonPanel && (
-                      <div className="rounded-lg border border-dashed border-slate-700/60 p-4 text-xs text-slate-400">
-                        Use the controls above to open the profile or addon panels.
+                      <div className="rounded-lg border border-dashed border-slate-700/60 p-4 text-xs text-slate-400 space-y-2">
+                        <p>Use the controls above to open the profile or addon panels.</p>
+                        <p className="text-slate-500">Every addon is cryptographically signed with ECDSA — the same standard used in banking and blockchain. We believe digital items should be truly owned, not rented.</p>
                       </div>
                     )}
                   </div>

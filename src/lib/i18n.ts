@@ -67,28 +67,28 @@ const UI_STRINGS = {
         {
           title: 'Welcome to Meta-Pet!',
           description:
-            'Meet your new digital companion. A few quick steps will help you keep them thriving.',
-          tip: 'Check in daily to keep your pet happy.',
+            'Meet your new digital companion — born from a unique DNA sequence that exists nowhere else. Everything about them, from colour to personality, is shaped by real genetic principles.',
+          tip: 'Check in daily to keep your pet happy and watch them grow.',
         },
         {
           title: 'Feed Your Pet',
-          description: 'Use the Feed action whenever hunger dips. Keeping them fed maintains mood and growth.',
+          description: 'Use the Feed action whenever hunger dips. Just like a living creature, consistent care builds trust and keeps their mood and growth on track.',
           tip: 'Feed before hunger gets too low to avoid penalties.',
         },
         {
           title: 'Complete a Ritual',
-          description: 'Rituals give your pet a daily boost. Pick one to keep their stats balanced.',
+          description: 'Rituals give your companion a daily boost and deepen your bond. Each one rewards essence — a currency earned through genuine engagement, never purchased.',
           tip: 'Rituals are best done once per day.',
         },
         {
           title: 'Play a Mini-Game',
-          description: 'Mini-games add fun and rewards. Try one to keep your pet engaged.',
-          tip: 'Mini-games can boost mood or resources.',
+          description: 'Every mini-game trains a real skill — pattern recognition, rhythm, memory. Your companion earns rewards, and you sharpen your instincts.',
+          tip: 'Mini-games can boost mood, resources, and even unlock achievements.',
         },
         {
-          title: 'Save or Export',
-          description: 'Save your progress or export your pet to keep them safe across devices.',
-          tip: 'Exporting helps protect your pet’s progress.',
+          title: 'Your Data, Your Device',
+          description: 'Your companion lives entirely on this device. No accounts, no cloud, no tracking. Export anytime to carry them with you. We believe privacy is a right, not a feature.',
+          tip: 'Exporting creates a cryptographically signed backup only you can verify.',
         },
       ],
       skip: 'Skip',

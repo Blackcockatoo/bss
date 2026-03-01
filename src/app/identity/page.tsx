@@ -104,6 +104,9 @@ export default function IdentityPage() {
             <p className="text-sm text-slate-400 mt-2">
               Keep your contact details and avatar synced across QR messaging and pet profiles.
             </p>
+            <p className="text-xs text-slate-600 mt-1 leading-relaxed max-w-md">
+              Your identity is stored on this device only — we never collect, transmit, or store personal data on any server. This is a core promise, not a feature toggle.
+            </p>
           </div>
           <div className="text-xs uppercase tracking-[0.3em] text-slate-500">Quick Access</div>
         </div>
@@ -220,6 +223,9 @@ export default function IdentityPage() {
               </p>
               <p>
                 Last updated: {profile.updatedAt ? new Date(profile.updatedAt).toLocaleString() : 'Not saved yet'}
+              </p>
+              <p className="text-slate-600 border-t border-slate-800 pt-2 mt-2 leading-relaxed">
+                Future vision: opt-in peer-to-peer identity verification using time-boxed consent grants — you choose who sees what, and for how long. No central authority required.
               </p>
             </div>
           </div>

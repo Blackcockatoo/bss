@@ -110,6 +110,9 @@ export default function ShopPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Meta-Pet Workshop</h1>
         <p className="mt-2 text-zinc-400">Your hub for premium addons and plan upgrades.</p>
+        <p className="mt-1 text-xs text-zinc-600 max-w-lg leading-relaxed">
+          Every addon is cryptographically signed and truly owned by you — not licensed, not rented. We&apos;re building toward a future where digital items can be gifted, traded, and carried between companions.
+        </p>
       </div>
 
       {/* Upgrade banner — free plan only */}
@@ -153,9 +156,14 @@ export default function ShopPage() {
       </section>
 
       {/* Footer note */}
-      <p className="text-center text-xs text-zinc-700">
-        Payment integration coming soon. Items are reserved and will be available at launch.
-      </p>
+      <div className="text-center space-y-2">
+        <p className="text-xs text-zinc-700">
+          Payment integration coming soon. Items are reserved and will be available at launch.
+        </p>
+        <p className="text-xs text-zinc-800 max-w-sm mx-auto leading-relaxed">
+          Our commitment: core gameplay will always be free. Premium items are cosmetic only — no pay-to-win, ever.
+        </p>
+      </div>
     </main>
   );
 }
