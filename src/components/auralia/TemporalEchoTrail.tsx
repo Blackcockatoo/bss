@@ -33,7 +33,7 @@ export function TemporalEchoTrail({
   isVisible = true,
 }: TemporalEchoTrailProps) {
   const [echoes, setEchoes] = useState<EchoPosition[]>([]);
-  const [currentTime, setCurrentTime] = useState<number>(0);
+  const timestampRef = useRef<number>(0);
   const rafRef = useRef<number>(0);
   const frameCountRef = useRef<number>(0);
 
