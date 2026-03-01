@@ -20,8 +20,11 @@ export default function CompassPage() {
       </Link>
 
       {/* Main content */}
-      <main className="flex-1 flex items-center justify-center p-4 pt-16">
+      <main className="flex-1 flex flex-col items-center justify-center p-4 pt-16 gap-6">
         <SteeringWheel />
+        <p className="text-xs text-zinc-700 max-w-xs text-center leading-relaxed">
+          The compass maps the MOSS60 system — seven directions, each linking to a pillar of your companion&apos;s world. As new features launch, new paths will appear here.
+        </p>
       </main>
     </div>
   );

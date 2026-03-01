@@ -286,9 +286,47 @@ function CurriculumQueueSection() {
   const eduQueue = useEducationStore((s) => s.queue);
   const eduProgress = useEducationStore((s) => s.lessonProgress);
   const activateLesson = useEducationStore((s) => s.activateLesson);
+  const eduXP = useEducationStore((s) => s.eduXP);
+  const classEnergy = useEducationStore((s) => s.classEnergy.level);
+  const promptResponseCount = useEducationStore((s) => s.promptResponseCount);
+  const vibeReactionCount = useEducationStore((s) => s.vibeReactionCount);
+  const unlockedEduAchievements = useEducationStore((s) => s.eduAchievements.filter((entry) => entry.unlockedAt !== null));
+  const rewardHistory = useStore((s) => s.rewardHistory);
 
   const completedCount = eduProgress.filter((p) => p.status === 'completed').length;
   const standards = eduQueue.flatMap((l) => l.standardsRef).filter(Boolean);
+  const now = Date.now();
+  const progressWithTime = eduProgress.filter((p) => p.startedAt || p.completedAt);
+  const lessonsWithExplanation = eduQueue.filter((lesson) =>
+    lesson.prePrompt?.trim() || lesson.postPrompt?.trim() || lesson.description.trim().length >= 40
+  ).length;
+  const explanationCoverage = eduQueue.length === 0 ? 0 : lessonsWithExplanation / eduQueue.length;
+  const outcomeRate = progressWithTime.length === 0 ? 0 : completedCount / progressWithTime.length;
+  const reflectionRate = progressWithTime.length === 0
+    ? 0
+    : eduProgress.filter((entry) => entry.postResponse && entry.postResponse.trim().length > 0).length / progressWithTime.length;
+  const recentRewards = rewardHistory.filter((entry) => now - entry.createdAt <= 7 * 24 * 60 * 60 * 1000);
+  const rewardMomentum = Math.min(100, recentRewards.length * 12 + eduXP.streak * 6);
+  const trustScore = clamp(
+    Math.round(
+      explanationCoverage * 30 +
+      outcomeRate * 35 +
+      reflectionRate * 20 +
+      (standards.length > 0 ? 15 : 0)
+    ),
+    0,
+    100,
+  );
+  const fulfillmentScore = clamp(
+    Math.round(
+      outcomeRate * 40 +
+      (classEnergy / 100) * 25 +
+      (rewardMomentum / 100) * 20 +
+      Math.min(15, unlockedEduAchievements.length * 3)
+    ),
+    0,
+    100,
+  );
 
   if (eduQueue.length === 0) {
     return (
@@ -335,6 +373,42 @@ function CurriculumQueueSection() {
           </div>
         )}
       </div>
+
+      <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-semibold text-cyan-200">Trust & Fulfillment Snapshot</p>
+          <p className="text-[11px] text-cyan-300">Live classroom quality signals</p>
+        </div>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <div className="rounded-md border border-slate-700/70 bg-slate-950/40 p-2">
+            <p className="text-[10px] uppercase tracking-wide text-zinc-500">Explanation coverage</p>
+            <p className="text-sm font-semibold text-white">{Math.round(explanationCoverage * 100)}%</p>
+          </div>
+          <div className="rounded-md border border-slate-700/70 bg-slate-950/40 p-2">
+            <p className="text-[10px] uppercase tracking-wide text-zinc-500">Outcome completion</p>
+            <p className="text-sm font-semibold text-white">{Math.round(outcomeRate * 100)}%</p>
+          </div>
+          <div className="rounded-md border border-slate-700/70 bg-slate-950/40 p-2">
+            <p className="text-[10px] uppercase tracking-wide text-zinc-500">Reward momentum</p>
+            <p className="text-sm font-semibold text-white">{rewardMomentum}/100</p>
+          </div>
+          <div className="rounded-md border border-slate-700/70 bg-slate-950/40 p-2">
+            <p className="text-[10px] uppercase tracking-wide text-zinc-500">Reflection responses</p>
+            <p className="text-sm font-semibold text-white">{promptResponseCount}</p>
+          </div>
+        </div>
+        <div className="mt-3 rounded-md border border-emerald-500/20 bg-emerald-500/10 p-2">
+          <p className="text-xs text-zinc-200">
+            Trust score <span className="font-semibold text-emerald-200">{trustScore}</span>/100 • Fulfillment score{' '}
+            <span className="font-semibold text-emerald-200">{fulfillmentScore}</span>/100
+          </p>
+          <p className="mt-1 text-[11px] text-zinc-400">
+            Includes standards transparency, explanation prompts, progress outcomes, class energy, and reward cadence.
+            {` `}XP Level {eduXP.level}, streak {eduXP.streak}, vibe reactions {vibeReactionCount}.
+          </p>
+        </div>
+      </div>
+
       <EducationQueuePanel mode="student" onLessonActivate={activateLesson} />
     </div>
   );
@@ -1343,7 +1417,7 @@ export default function Home() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 flex items-center justify-center">
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-4 max-w-xs">
           <div className="text-5xl animate-bounce" aria-hidden>
             <Sparkles className="w-12 h-12 text-cyan-400 mx-auto" />
           </div>
@@ -1351,6 +1425,9 @@ export default function Home() {
             <p className="text-white font-semibold">Initializing Meta-Pet...</p>
             <p className="text-zinc-400 text-sm">Generating genome sequence</p>
           </div>
+          <p className="text-zinc-600 text-xs leading-relaxed pt-2">
+            Every companion begins with a unique DNA strand — no two are alike.
+          </p>
         </div>
       </div>
     );
@@ -1509,6 +1586,9 @@ export default function Home() {
             icon={<Sparkles className="w-5 h-5 text-cyan-300" />}
             defaultOpen
           >
+            <p className="text-xs text-zinc-500 mb-3">
+              Your companion grows through four stages — each one mirrors a real branch of science, from genetics to quantum biology. Care drives change.
+            </p>
             <EvolutionPanel />
           </CollapsibleSection>
 
@@ -1519,6 +1599,9 @@ export default function Home() {
               icon={<Sparkles className="w-5 h-5 text-pink-400" />}
               defaultOpen
             >
+              <p className="text-xs text-zinc-500 mb-3">
+                Every game here trains a real skill — pattern recognition, rhythm, memory. Your companion earns rewards, and you build sharper instincts.
+              </p>
               <FeaturesDashboard />
             </CollapsibleSection>
           </div>
@@ -1605,6 +1688,9 @@ export default function Home() {
             icon={<FlaskConical className="w-5 h-5 text-pink-400" />}
           >
             <div className="space-y-4">
+              <p className="text-xs text-zinc-500">
+                Breeding follows real genetic principles — dominant and recessive traits, mutation chance, and lineage tracking. Two companions at the Speciation stage can produce offspring that inherits from both parents.
+              </p>
               {/* Breeding Mode Selection */}
               <div className="flex flex-col gap-2">
                 <label className="text-xs uppercase tracking-wide text-zinc-500">Breeding Mode</label>
@@ -1921,7 +2007,7 @@ export default function Home() {
                 <Orbit className="w-6 h-6 text-amber-400" />
                 <div>
                   <h2 className="text-lg font-bold text-white">Sacred Geometry &amp; Sound</h2>
-                  <p className="text-xs text-zinc-400">Experience DNA as living geometry, music, and light</p>
+                  <p className="text-xs text-zinc-400">Experience DNA as living geometry, music, and light — the same mathematical patterns found in nature, from sunflower spirals to seashells</p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -1948,7 +2034,7 @@ export default function Home() {
                 <Compass className="w-6 h-6 text-cyan-400" />
                 <div>
                   <h2 className="text-lg font-bold text-white">Steering Wheel</h2>
-                  <p className="text-xs text-zinc-400">Navigate the Hepta MOSS60 system with the compass</p>
+                  <p className="text-xs text-zinc-400">Navigate every corner of the Meta-Pet universe from one place — features, tools, and future expansions all radiate from here</p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -2035,6 +2121,9 @@ export default function Home() {
             title="Genome Traits"
             icon={<Dna className="w-5 h-5 text-purple-400" />}
           >
+            <p className="text-xs text-zinc-500 mb-3">
+              Three genome layers — Red60 for physical traits, Blue60 for personality, Black60 for latent potential. The same DNA always produces the same companion, just like nature.
+            </p>
             <TraitPanel />
           </CollapsibleSection>
 
@@ -2045,6 +2134,9 @@ export default function Home() {
               icon={<Shield className="w-5 h-5 text-amber-400" />}
             >
               <div className="space-y-4">
+                <p className="text-xs text-zinc-500">
+                  Your companion&apos;s cryptographic identity — signed on this device, never shared. The vault, rotation, and tail digits form a tamper-proof fingerprint that proves authenticity without revealing the underlying DNA.
+                </p>
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div className="flex items-center gap-2">
                     <span className="text-zinc-400">Vault:</span>
@@ -2081,6 +2173,9 @@ export default function Home() {
               icon={<Hash className="w-5 h-5 text-purple-400" />}
             >
               <div className="space-y-4">
+                <p className="text-xs text-zinc-500">
+                  42 base-7 digits encode your companion&apos;s identity into geometry, colour, and sound. One source, three experiences — the same data rendered as a seven-sided tag, a Seed of Life glyph, and an audible chime.
+                </p>
                 <div className="flex justify-center gap-4">
                   <HeptaTag digits={heptaCode} size={120} />
                   <SeedOfLifeGlyph digits={heptaCode} size={120} />
@@ -2106,6 +2201,9 @@ export default function Home() {
             icon={<Database className="w-5 h-5 text-emerald-400" />}
           >
             <div className="space-y-4">
+              <p className="text-xs text-zinc-500">
+                Everything lives on your device. No accounts, no cloud — your companions are saved locally with cryptographic signatures so nothing can be tampered with. Export anytime to carry them between devices.
+              </p>
               <div className="flex flex-wrap gap-3">
                 <Button
                   onClick={() => void handleCreateNewPet()}
@@ -2216,6 +2314,9 @@ export default function Home() {
             title="Digital Keys"
             icon={<Shield className="w-5 h-5 text-cyan-400" />}
           >
+            <p className="text-xs text-zinc-500 mb-3">
+              Your device holds the keys. These cryptographic pairs let you sign addons, verify exports, and prove ownership — all without a central server. This is how digital trust works without intermediaries.
+            </p>
             <DigitalKeyPanel />
           </CollapsibleSection>
 
@@ -2227,6 +2328,9 @@ export default function Home() {
             title="Achievements"
             icon={<Sparkles className="w-5 h-5 text-amber-400" />}
           >
+            <p className="text-xs text-zinc-500 mb-3">
+              Milestones earned through genuine care and curiosity. Nothing is pay-gated — every achievement can be reached through play alone.
+            </p>
             <AchievementShelf />
           </CollapsibleSection>
 
@@ -2235,12 +2339,15 @@ export default function Home() {
             title="Classroom Modes"
             icon={<Award className="w-5 h-5 text-cyan-300" />}
           >
+            <p className="text-xs text-zinc-500 mb-3">
+              Designed alongside educators. Sandbox lets students explore freely; Curriculum aligns to real standards (NGSS, ISTE). We believe learning sticks when it feels like play.
+            </p>
             <ClassroomModes />
           </CollapsibleSection>
         </div>
 
         {/* Footer Info */}
-        <div className="text-center text-zinc-600 text-xs px-4 pb-4 space-y-1">
+        <div className="text-center text-zinc-600 text-xs px-4 pb-4 space-y-3">
           <p className="flex items-center justify-center gap-2">
             <Database className={`w-3 h-3 ${persistenceActive ? 'text-green-400' : 'text-yellow-400'}`} />
             {persistenceSupported
@@ -2249,6 +2356,14 @@ export default function Home() {
                 : 'Autosave paused'
               : 'Offline unavailable'}
           </p>
+          <div className="max-w-sm mx-auto space-y-1 pt-2 border-t border-slate-800/60">
+            <p className="text-zinc-700 leading-relaxed">
+              Built with care by Blue Snake Studios. Privacy-first, offline-first, kid-safe — always. No ads, no tracking, no data harvesting.
+            </p>
+            <p className="text-zinc-800 leading-relaxed">
+              We&apos;re building toward a world where digital companions teach real science, honour real privacy, and grow with the people who care for them.
+            </p>
+          </div>
         </div>
       </div>
 

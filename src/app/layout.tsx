@@ -14,8 +14,9 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://bss-l8cw.vercel.app"),
-  title: "Meta-Pet",
-  description: "Your digital companion with genome-based evolution",
+  title: "Meta-Pet — Raise, Evolve, Discover",
+  description:
+    "A privacy-first digital companion powered by real genomics. Raise your pet, watch it evolve through care, and discover the science woven into every trait. Built offline-first by Blue Snake Studios.",
   manifest: "/manifest.json",
   icons: {
     icon: "/icon.svg",
@@ -27,16 +28,18 @@ export const metadata: Metadata = {
     title: "Meta-Pet",
   },
   openGraph: {
-    title: "Meta-Pet",
-    description: "Your digital companion with genome-based evolution",
+    title: "Meta-Pet — Raise, Evolve, Discover",
+    description:
+      "A privacy-first digital companion powered by real genomics. Raise your pet, watch it evolve through care, and discover the science woven into every trait.",
     url: "https://bss-l8cw.vercel.app",
-    siteName: "Jewble // Meta-Pet",
+    siteName: "Jewble // Meta-Pet by Blue Snake Studios",
     type: "website",
   },
   twitter: {
     card: "summary",
-    title: "Meta-Pet",
-    description: "Your digital companion with genome-based evolution",
+    title: "Meta-Pet — Raise, Evolve, Discover",
+    description:
+      "A privacy-first digital companion powered by real genomics. Raise your pet, watch it evolve through care, and discover the science woven into every trait.",
   },
 };
 
