@@ -1,0 +1,779 @@
+/* ═══════════════════════════════════════════════════════
+   Blue Snake Studios — Landing Page Styles
+   All selectors scoped under .landing to avoid conflicts
+   ═══════════════════════════════════════════════════════ */
+
+/* Body overrides when landing page is active */
+body.landing-body {
+  font-family: 'Outfit', sans-serif;
+  color: #dde8f5;
+  background: #040810;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.landing {
+  --void: #040810;
+  --deep: #070f1e;
+  --navy: #0c1829;
+  --card: #0f1f38;
+  --gold: #f5c84c;
+  --gold2: #e8a82a;
+  --gold-dim: rgba(245, 200, 76, 0.12);
+  --teal: #4dd6c8;
+  --teal-dim: rgba(77, 214, 200, 0.1);
+  --violet: #a78bfa;
+  --coral: #ff6b6b;
+  --white: #dde8f5;
+  --muted: #5a7090;
+  --line: rgba(255, 255, 255, 0.07);
+  --ff: 'Outfit', sans-serif;
+  --mono: 'Space Mono', monospace;
+
+  font-family: var(--ff);
+  color: var(--white);
+}
+
+/* ── CANVAS BG ── */
+.landing .landing-cosmos {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+/* ── GRAIN ── */
+.landing .landing-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── NAV ── */
+.landing .landing-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  backdrop-filter: blur(24px) saturate(1.3);
+  background: rgba(4, 8, 16, 0.8);
+  border-bottom: 1px solid var(--line);
+}
+
+.landing .logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.landing .logo-mark {
+  width: 28px;
+  height: 28px;
+  position: relative;
+}
+
+.landing .logo-text {
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--white);
+}
+
+.landing .logo-text span {
+  color: var(--gold);
+}
+
+.landing .nav-r {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.landing .nav-r a {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 7px 14px;
+  border-radius: 8px;
+  transition: 0.15s;
+}
+
+.landing .nav-r a:hover {
+  color: var(--white);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.landing .nav-r .cta-nav {
+  background: var(--gold-dim);
+  color: var(--gold);
+  border: 1px solid rgba(245, 200, 76, 0.25);
+  margin-left: 8px;
+}
+
+.landing .nav-r .cta-nav:hover {
+  background: var(--gold);
+  color: #050a0f;
+}
+
+/* ── HERO ── */
+.landing .hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 80px 24px 60px;
+  position: relative;
+  z-index: 2;
+}
+
+.landing .hero-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid rgba(245, 200, 76, 0.2);
+  padding: 5px 18px;
+  border-radius: 100px;
+  margin-bottom: 32px;
+  animation: landing-riseUp 0.9s ease both;
+}
+
+.landing .hero h1 {
+  font-size: clamp(48px, 9vw, 100px);
+  font-weight: 900;
+  line-height: 0.92;
+  letter-spacing: -3px;
+  margin-bottom: 22px;
+  animation: landing-riseUp 0.9s ease 0.1s both;
+}
+
+.landing .hero h1 .g {
+  background: linear-gradient(135deg, var(--gold) 0%, #ffeb9c 40%, var(--teal) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.landing .hero-sub {
+  font-size: clamp(15px, 2.2vw, 20px);
+  font-weight: 300;
+  color: var(--muted);
+  max-width: 560px;
+  line-height: 1.7;
+  margin-bottom: 40px;
+  animation: landing-riseUp 0.9s ease 0.2s both;
+}
+
+.landing .hero-sub em {
+  font-style: normal;
+  color: var(--white);
+  font-weight: 500;
+}
+
+.landing .hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  animation: landing-riseUp 0.9s ease 0.3s both;
+}
+
+/* ── HEPTA SVG ── */
+.landing .hepta-ring {
+  margin: 48px 0 16px;
+  animation: landing-riseUp 0.9s ease 0.4s both;
+}
+
+.landing .hepta-ring svg {
+  filter: drop-shadow(0 0 20px rgba(245, 200, 76, 0.2));
+}
+
+/* ── PILL / BADGE ── */
+.landing .pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px 4px 8px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.landing .pill-gold {
+  background: rgba(245, 200, 76, 0.12);
+  color: var(--gold);
+  border: 1px solid rgba(245, 200, 76, 0.2);
+}
+
+.landing .pill-teal {
+  background: rgba(77, 214, 200, 0.1);
+  color: var(--teal);
+  border: 1px solid rgba(77, 214, 200, 0.2);
+}
+
+.landing .pill-violet {
+  background: rgba(167, 139, 250, 0.1);
+  color: var(--violet);
+  border: 1px solid rgba(167, 139, 250, 0.2);
+}
+
+.landing .pill-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.8;
+}
+
+/* ── BTNS ── */
+.landing .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 26px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: 0.15s ease;
+  cursor: pointer;
+  border: none;
+  letter-spacing: 0.3px;
+}
+
+.landing .btn-gold {
+  background: var(--gold);
+  color: #040810;
+}
+
+.landing .btn-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 32px rgba(245, 200, 76, 0.28);
+}
+
+.landing .btn-ghost {
+  background: transparent;
+  color: var(--white);
+  border: 1px solid var(--line);
+}
+
+.landing .btn-ghost:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ── SECTION ── */
+.landing .wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.landing .section {
+  padding: 100px 0;
+  position: relative;
+  z-index: 2;
+}
+
+.landing .section-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.landing .t-gold {
+  color: var(--gold);
+}
+
+.landing .t-teal {
+  color: var(--teal);
+}
+
+.landing .t-violet {
+  color: var(--violet);
+}
+
+.landing .section h2 {
+  font-size: clamp(26px, 4.5vw, 48px);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -1.2px;
+  margin-bottom: 14px;
+}
+
+.landing .lead {
+  font-size: 16px;
+  font-weight: 300;
+  color: var(--muted);
+  line-height: 1.75;
+  max-width: 600px;
+  margin-bottom: 52px;
+}
+
+/* ── DIVIDER ── */
+.landing .divider {
+  height: 1px;
+  background: var(--line);
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+/* ── PRODUCT HERO CARD ── */
+.landing .product-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.landing .product-hero-visual {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.landing .product-hero-visual::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 30%, rgba(245, 200, 76, 0.08), transparent 60%),
+    radial-gradient(ellipse at 80% 70%, rgba(77, 214, 200, 0.06), transparent 60%);
+}
+
+.landing .pet-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.landing .product-hero-text h3 {
+  font-size: 36px;
+  font-weight: 900;
+  letter-spacing: -1px;
+  margin-bottom: 12px;
+}
+
+.landing .product-hero-text p {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.75;
+  margin-bottom: 24px;
+}
+
+.landing .stat-row {
+  display: flex;
+  gap: 28px;
+  margin-bottom: 32px;
+}
+
+.landing .stat-item .n {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.landing .stat-item .l {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* ── CARD GRID ── */
+.landing .grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.landing .grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.landing .card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.landing .card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.landing .card-top {
+  width: 100%;
+  height: 2px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.landing .card-top.g {
+  background: linear-gradient(90deg, var(--gold), transparent);
+}
+
+.landing .card-top.t {
+  background: linear-gradient(90deg, var(--teal), transparent);
+}
+
+.landing .card-top.v {
+  background: linear-gradient(90deg, var(--violet), transparent);
+}
+
+.landing .card-top.c {
+  background: linear-gradient(90deg, var(--coral), transparent);
+}
+
+.landing .card-ico {
+  font-size: 26px;
+  margin-bottom: 14px;
+}
+
+.landing .card h4 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 7px;
+}
+
+.landing .card p {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+/* ── LINK CARDS ── */
+.landing .link-card {
+  display: block;
+  text-decoration: none;
+  color: var(--white);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 28px;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.landing .link-card::after {
+  content: '\2192';
+  position: absolute;
+  bottom: 22px;
+  right: 24px;
+  font-size: 18px;
+  color: var(--muted);
+  transition: 0.2s;
+}
+
+.landing .link-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.landing .link-card:hover::after {
+  color: var(--gold);
+  transform: translate(4px, -2px);
+}
+
+.landing .link-card .lc-tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.landing .link-card h4 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.landing .link-card p {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.65;
+  max-width: 90%;
+}
+
+/* ── MANIFESTO ── */
+.landing .manifesto {
+  padding: 80px 32px;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.landing .manifesto-q {
+  font-size: clamp(20px, 3.5vw, 36px);
+  font-weight: 300;
+  font-style: italic;
+  color: var(--muted);
+  max-width: 720px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.landing .manifesto-q em {
+  font-style: normal;
+  color: var(--white);
+  font-weight: 600;
+}
+
+.landing .manifesto-attr {
+  margin-top: 20px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+/* ── TIMELINE ── */
+.landing .timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.landing .tl-item {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 0;
+  position: relative;
+}
+
+.landing .tl-item::before {
+  content: '';
+  position: absolute;
+  left: 39px;
+  top: 28px;
+  bottom: 0;
+  width: 1px;
+  background: var(--line);
+}
+
+.landing .tl-item:last-child::before {
+  display: none;
+}
+
+.landing .tl-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  border: 1px solid var(--line);
+  background: var(--navy);
+  color: var(--gold);
+  flex-shrink: 0;
+  margin-left: 26px;
+}
+
+.landing .tl-body {
+  padding: 4px 0 40px 16px;
+}
+
+.landing .tl-body h4 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.landing .tl-body p {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+/* ── FOOTER ── */
+.landing .landing-footer {
+  position: relative;
+  z-index: 2;
+  padding: 72px 32px 40px;
+  border-top: 1px solid var(--line);
+  text-align: center;
+}
+
+.landing .footer-logo {
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -1px;
+  margin-bottom: 6px;
+}
+
+.landing .footer-logo span {
+  color: var(--gold);
+}
+
+.landing .footer-tagline {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 36px;
+}
+
+.landing .footer-links {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+.landing .footer-links a {
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: 0.15s;
+}
+
+.landing .footer-links a:hover {
+  color: var(--white);
+}
+
+.landing .footer-legal {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.22);
+  line-height: 1.8;
+}
+
+/* ── SCROLL REVEAL ── */
+.landing .reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.landing .reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── ANIMATIONS ── */
+@keyframes landing-riseUp {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes landing-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes landing-pulse-ring {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.landing .hepta-outer {
+  animation: landing-spin 40s linear infinite;
+  transform-origin: 110px 110px;
+}
+
+.landing .hepta-mid {
+  animation: landing-spin 25s linear infinite reverse;
+  transform-origin: 110px 110px;
+}
+
+.landing .hepta-inner {
+  animation: landing-spin 15s linear infinite;
+  transform-origin: 110px 110px;
+}
+
+.landing .pulse-ring {
+  animation: landing-pulse-ring 3s ease-in-out infinite;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .landing .landing-nav {
+    padding: 0 20px;
+  }
+
+  .landing .nav-r a:not(.cta-nav) {
+    display: none;
+  }
+
+  .landing .product-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .landing .grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .landing .grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .landing .stat-row {
+    gap: 18px;
+  }
+
+  .landing .wrap {
+    padding: 0 16px;
+  }
+
+  .landing .section {
+    padding: 64px 0;
+  }
+}
