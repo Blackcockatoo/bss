@@ -8,6 +8,7 @@ import { AuthDialog } from "@/components/AuthDialog";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/lib/auth/store";
 import { PlanBadge } from "@/components/PlanBadge";
+import { ENABLE_AUTH } from "@/lib/env/features";
 
 export default function ClientBody({
   children,
@@ -52,19 +53,21 @@ export default function ClientBody({
           <div className="text-sm text-zinc-200">Meta-Pet</div>
           <div className="flex items-center gap-2">
             <PlanBadge />
-            {isAuthenticated && currentUser ? (
+            {ENABLE_AUTH && isAuthenticated && currentUser ? (
               <>
                 <span className="text-xs text-zinc-400">{currentUser.displayName}</span>
                 <Button variant="ghost" onClick={logout} className="h-8 text-zinc-300">Logout</Button>
               </>
-            ) : (
+            ) : ENABLE_AUTH ? (
               <Button onClick={() => setAuthOpen(true)} className="h-8 bg-cyan-400 text-slate-950 hover:bg-cyan-300">
                 Login / Register
               </Button>
+            ) : (
+              <span className="text-xs text-emerald-300">Zero-account mode</span>
             )}
           </div>
         </div>
-        {!isAuthenticated && (
+        {ENABLE_AUTH && !isAuthenticated && (
           <p className="mx-auto mt-2 w-full max-w-6xl text-xs text-zinc-400">
             Sign in to unlock subscription features like advanced analytics, exports, and upcoming Pro tools.
           </p>
@@ -76,7 +79,7 @@ export default function ClientBody({
         <LegalNotice />
       </footer>
       <QuickNav />
-      <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
+      {ENABLE_AUTH ? <AuthDialog open={authOpen} onOpenChange={setAuthOpen} /> : null}
     </div>
   );
 }
