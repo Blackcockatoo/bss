@@ -52,7 +52,7 @@ export default function ShareLandingPage() {
         <section className="space-y-2">
           <h1 className="text-2xl font-bold tracking-tight">Rewards &amp; Share</h1>
           <p className="text-sm text-zinc-400 leading-relaxed">
-            Everything you earn in Meta-Pet is yours — verified on-device with a cryptographic signature.
+            Everything you earn in Meta-Pet is yours &mdash; verified on-device with a cryptographic signature.
             Share a reward bundle link to prove your achievements to anyone, anywhere.
           </p>
         </section>
@@ -99,11 +99,11 @@ export default function ShareLandingPage() {
           <h2 className="text-base font-semibold text-zinc-200">Verifiable reward bundles</h2>
           <p className="text-xs text-zinc-400 leading-relaxed">
             MOSS60 reward payloads are cryptographically signed. When you share a bundle link, the
-            recipient can verify its authenticity without trusting a central server — your achievement
+            recipient can verify its authenticity without trusting a central server &mdash; your achievement
             is tamper-evident by design.
           </p>
           <p className="text-[10px] text-zinc-600 leading-relaxed">
-            This is the foundation for something bigger: a future where students can carry verifiable proof of learning between schools, districts, and platforms — without anyone owning their data.
+            This is the foundation for something bigger: a future where students can carry verifiable proof of learning between schools, districts, and platforms &mdash; without anyone owning their data.
           </p>
           <div className="flex items-center gap-3">
             <Link

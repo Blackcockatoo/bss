@@ -48,7 +48,7 @@ export default function DigitalDNAPage() {
       {/* Subtle context for explorers */}
       <div className="fixed z-40 bottom-4 right-4 max-w-[200px] opacity-60 hover:opacity-100 transition-opacity">
         <p className="text-[10px] text-zinc-600 leading-relaxed bg-slate-950/80 backdrop-blur-sm rounded-lg px-3 py-2 border border-slate-800/40">
-          You&apos;re seeing your companion&apos;s genome rendered as 3D structure and sound — the same data that determines every trait, visualised through Three.js and Tone.js. This is the science layer most users never see.
+          You&apos;re seeing your companion&apos;s genome rendered as 3D structure and sound &mdash; the same data that determines every trait, visualised through Three.js and Tone.js. This is the science layer most users never see.
         </p>
       </div>
 

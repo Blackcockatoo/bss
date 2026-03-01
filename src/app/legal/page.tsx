@@ -14,10 +14,10 @@ export default function LegalPage() {
       <section className="rounded-lg border border-slate-800/60 bg-slate-950/20 p-4 text-xs text-slate-600 space-y-2">
         <p className="font-medium text-slate-500">Our principles</p>
         <p>
-          Blue Snake Studios builds software we&apos;d trust with our own children. That means no hidden data collection, no manipulative engagement loops, and no selling user information — ever. The code is MIT-licensed because transparency earns trust.
+          Blue Snake Studios builds software we&apos;d trust with our own children. That means no hidden data collection, no manipulative engagement loops, and no selling user information &mdash; ever. The code is MIT-licensed because transparency earns trust.
         </p>
         <p>
-          We believe digital companions should teach kids about science, privacy, and ownership in ways that respect their intelligence. Every system in this app — from the genome to the cryptography — is real, not theatre.
+          We believe digital companions should teach kids about science, privacy, and ownership in ways that respect their intelligence. Every system in this app &mdash; from the genome to the cryptography &mdash; is real, not theatre.
         </p>
       </section>
     </main>

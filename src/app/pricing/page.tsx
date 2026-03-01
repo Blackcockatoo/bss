@@ -22,7 +22,7 @@ export default function PricingPage() {
       <h1 className="text-3xl font-bold">Meta-Pet Pricing</h1>
       <p className="mt-2 text-zinc-400">Privacy-first subscriptions. Billing integration coming soon.</p>
       <p className="mt-1 text-xs text-zinc-600 max-w-lg leading-relaxed">
-        The Starter plan is designed to be genuinely useful — not a stripped-down teaser. Pro unlocks scale for educators who need it. No ads, no data harvesting, no dark patterns. We earn your trust by being honest about what you get.
+        The Starter plan is designed to be genuinely useful &mdash; not a stripped-down teaser. Pro unlocks scale for educators who need it. No ads, no data harvesting, no dark patterns. We earn your trust by being honest about what you get.
       </p>
 
       <div className="mt-6 inline-flex rounded-lg border border-slate-800 bg-slate-900 p-1">

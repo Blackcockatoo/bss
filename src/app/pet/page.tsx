@@ -102,7 +102,7 @@ export default function PetPage() {
                 aria-expanded={showAdvanced}
               >
                 <span className="font-semibold">Advanced / Mechanics Lab</span>
-                <span className="sr-only"> — peek under the hood to see identity, addons, and the crypto systems that keep your companion secure</span>
+                <span className="sr-only"> &mdash; peek under the hood to see identity, addons, and the crypto systems that keep your companion secure</span>
                 {showAdvanced ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </Button>
 
@@ -156,7 +156,7 @@ export default function PetPage() {
 
                   {addonEditMode && (
                     <div className="rounded-lg border border-blue-500/50 bg-blue-600/20 px-3 py-2 text-xs text-blue-100">
-                      <span className="font-semibold">Edit Mode Active</span> — Drag addons to reposition, hover for controls.
+                      <span className="font-semibold">Edit Mode Active</span> &mdash; Drag addons to reposition, hover for controls.
                     </div>
                   )}
 
@@ -173,7 +173,7 @@ export default function PetPage() {
                     {!showProfilePanel && !showAddonPanel && (
                       <div className="rounded-lg border border-dashed border-slate-700/60 p-4 text-xs text-slate-400 space-y-2">
                         <p>Use the controls above to open the profile or addon panels.</p>
-                        <p className="text-slate-500">Every addon is cryptographically signed with ECDSA — the same standard used in banking and blockchain. We believe digital items should be truly owned, not rented.</p>
+                        <p className="text-slate-500">Every addon is cryptographically signed with ECDSA &mdash; the same standard used in banking and blockchain. We believe digital items should be truly owned, not rented.</p>
                       </div>
                     )}
                   </div>

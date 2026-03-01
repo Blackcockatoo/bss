@@ -1352,7 +1352,7 @@ export default function Home() {
             <p className="text-zinc-400 text-sm">Generating genome sequence</p>
           </div>
           <p className="text-zinc-600 text-xs leading-relaxed pt-2">
-            Every companion begins with a unique DNA strand — no two are alike.
+            Every companion begins with a unique DNA strand &mdash; no two are alike.
           </p>
         </div>
       </div>
@@ -1513,7 +1513,7 @@ export default function Home() {
             defaultOpen
           >
             <p className="text-xs text-zinc-500 mb-3">
-              Your companion grows through four stages — each one mirrors a real branch of science, from genetics to quantum biology. Care drives change.
+              Your companion grows through four stages &mdash; each one mirrors a real branch of science, from genetics to quantum biology. Care drives change.
             </p>
             <EvolutionPanel />
           </CollapsibleSection>
@@ -1526,7 +1526,7 @@ export default function Home() {
               defaultOpen
             >
               <p className="text-xs text-zinc-500 mb-3">
-                Every game here trains a real skill — pattern recognition, rhythm, memory. Your companion earns rewards, and you build sharper instincts.
+                Every game here trains a real skill &mdash; pattern recognition, rhythm, memory. Your companion earns rewards, and you build sharper instincts.
               </p>
               <FeaturesDashboard />
             </CollapsibleSection>
@@ -1615,7 +1615,7 @@ export default function Home() {
           >
             <div className="space-y-4">
               <p className="text-xs text-zinc-500">
-                Breeding follows real genetic principles — dominant and recessive traits, mutation chance, and lineage tracking. Two companions at the Speciation stage can produce offspring that inherits from both parents.
+                Breeding follows real genetic principles &mdash; dominant and recessive traits, mutation chance, and lineage tracking. Two companions at the Speciation stage can produce offspring that inherits from both parents.
               </p>
               {/* Breeding Mode Selection */}
               <div className="flex flex-col gap-2">
@@ -1933,7 +1933,7 @@ export default function Home() {
                 <Orbit className="w-6 h-6 text-amber-400" />
                 <div>
                   <h2 className="text-lg font-bold text-white">Sacred Geometry &amp; Sound</h2>
-                  <p className="text-xs text-zinc-400">Experience DNA as living geometry, music, and light — the same mathematical patterns found in nature, from sunflower spirals to seashells</p>
+                  <p className="text-xs text-zinc-400">Experience DNA as living geometry, music, and light &mdash; the same mathematical patterns found in nature, from sunflower spirals to seashells</p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -1960,7 +1960,7 @@ export default function Home() {
                 <Compass className="w-6 h-6 text-cyan-400" />
                 <div>
                   <h2 className="text-lg font-bold text-white">Steering Wheel</h2>
-                  <p className="text-xs text-zinc-400">Navigate every corner of the Meta-Pet universe from one place — features, tools, and future expansions all radiate from here</p>
+                  <p className="text-xs text-zinc-400">Navigate every corner of the Meta-Pet universe from one place &mdash; features, tools, and future expansions all radiate from here</p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -2048,7 +2048,7 @@ export default function Home() {
             icon={<Dna className="w-5 h-5 text-purple-400" />}
           >
             <p className="text-xs text-zinc-500 mb-3">
-              Three genome layers — Red60 for physical traits, Blue60 for personality, Black60 for latent potential. The same DNA always produces the same companion, just like nature.
+              Three genome layers &mdash; Red60 for physical traits, Blue60 for personality, Black60 for latent potential. The same DNA always produces the same companion, just like nature.
             </p>
             <TraitPanel />
           </CollapsibleSection>
@@ -2061,7 +2061,7 @@ export default function Home() {
             >
               <div className="space-y-4">
                 <p className="text-xs text-zinc-500">
-                  Your companion&apos;s cryptographic identity — signed on this device, never shared. The vault, rotation, and tail digits form a tamper-proof fingerprint that proves authenticity without revealing the underlying DNA.
+                  Your companion&apos;s cryptographic identity &mdash; signed on this device, never shared. The vault, rotation, and tail digits form a tamper-proof fingerprint that proves authenticity without revealing the underlying DNA.
                 </p>
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div className="flex items-center gap-2">
@@ -2100,7 +2100,7 @@ export default function Home() {
             >
               <div className="space-y-4">
                 <p className="text-xs text-zinc-500">
-                  42 base-7 digits encode your companion&apos;s identity into geometry, colour, and sound. One source, three experiences — the same data rendered as a seven-sided tag, a Seed of Life glyph, and an audible chime.
+                  42 base-7 digits encode your companion&apos;s identity into geometry, colour, and sound. One source, three experiences &mdash; the same data rendered as a seven-sided tag, a Seed of Life glyph, and an audible chime.
                 </p>
                 <div className="flex justify-center gap-4">
                   <HeptaTag digits={heptaCode} size={120} />
@@ -2128,7 +2128,7 @@ export default function Home() {
           >
             <div className="space-y-4">
               <p className="text-xs text-zinc-500">
-                Everything lives on your device. No accounts, no cloud — your companions are saved locally with cryptographic signatures so nothing can be tampered with. Export anytime to carry them between devices.
+                Everything lives on your device. No accounts, no cloud &mdash; your companions are saved locally with cryptographic signatures so nothing can be tampered with. Export anytime to carry them between devices.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button
@@ -2241,7 +2241,7 @@ export default function Home() {
             icon={<Shield className="w-5 h-5 text-cyan-400" />}
           >
             <p className="text-xs text-zinc-500 mb-3">
-              Your device holds the keys. These cryptographic pairs let you sign addons, verify exports, and prove ownership — all without a central server. This is how digital trust works without intermediaries.
+              Your device holds the keys. These cryptographic pairs let you sign addons, verify exports, and prove ownership &mdash; all without a central server. This is how digital trust works without intermediaries.
             </p>
             <DigitalKeyPanel />
           </CollapsibleSection>
@@ -2255,7 +2255,7 @@ export default function Home() {
             icon={<Sparkles className="w-5 h-5 text-amber-400" />}
           >
             <p className="text-xs text-zinc-500 mb-3">
-              Milestones earned through genuine care and curiosity. Nothing is pay-gated — every achievement can be reached through play alone.
+              Milestones earned through genuine care and curiosity. Nothing is pay-gated &mdash; every achievement can be reached through play alone.
             </p>
             <AchievementShelf />
           </CollapsibleSection>
@@ -2284,7 +2284,7 @@ export default function Home() {
           </p>
           <div className="max-w-sm mx-auto space-y-1 pt-2 border-t border-slate-800/60">
             <p className="text-zinc-700 leading-relaxed">
-              Built with care by Blue Snake Studios. Privacy-first, offline-first, kid-safe — always. No ads, no tracking, no data harvesting.
+              Built with care by Blue Snake Studios. Privacy-first, offline-first, kid-safe &mdash; always. No ads, no tracking, no data harvesting.
             </p>
             <p className="text-zinc-800 leading-relaxed">
               We&apos;re building toward a world where digital companions teach real science, honour real privacy, and grow with the people who care for them.

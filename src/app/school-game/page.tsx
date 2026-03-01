@@ -296,7 +296,7 @@ export default function SchoolGamePage() {
                 A calm, school-appropriate experience focused on teamwork, pattern literacy, and short reflection loops.
               </p>
               <p className="text-xs text-slate-600 leading-relaxed max-w-lg">
-                Every activity here maps to real curriculum standards (NGSS, ISTE). Pattern Detective builds observation skills. Team Story Builder teaches collaboration without competition. Reflection Checkpoints weave social-emotional learning into every session. No scores are shared publicly — progress belongs to the learner.
+                Every activity here maps to real curriculum standards (NGSS, ISTE). Pattern Detective builds observation skills. Team Story Builder teaches collaboration without competition. Reflection Checkpoints weave social-emotional learning into every session. No scores are shared publicly &mdash; progress belongs to the learner.
               </p>
             </header>
 

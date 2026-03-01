@@ -365,7 +365,7 @@ export const TraitPanel = memo(function TraitPanel() {
         </div>
         <p className="text-xs text-zinc-400">{activePreset.description}</p>
         <p className="text-[10px] text-zinc-600 leading-relaxed">
-          These are real Mendelian genetics concepts — the same principles Gregor Mendel discovered with pea plants in the 1860s, now applied to your companion&apos;s genome.
+          These are real Mendelian genetics concepts &mdash; the same principles Gregor Mendel discovered with pea plants in the 1860s, now applied to your companion&apos;s genome.
         </p>
 
         <div className="grid gap-3 md:grid-cols-2">

@@ -102,14 +102,14 @@ export function HUDAdvancedStats() {
   const lastRewardSource = useStore(state => state.lastRewardSource);
   const lastRewardAmount = useStore(state => state.lastRewardAmount);
 
-  const rewardSourceLabel = lastRewardSource ?? '—';
+  const rewardSourceLabel = lastRewardSource ?? '\u2014';
   const rewardAmountLabel = `+${Math.max(0, Math.round(lastRewardAmount))}`;
   const mobileRewardLabel = `Essence ${rewardAmountLabel} (${rewardSourceLabel})`;
 
   return (
     <div className="space-y-3">
       <p className="text-[10px] text-zinc-600 leading-relaxed">
-        Resonance and Nectar are earned through daily rituals. Essence is your lifetime care score — it grows with every genuine interaction and can never be bought.
+        Resonance and Nectar are earned through daily rituals. Essence is your lifetime care score &mdash; it grows with every genuine interaction and can never be bought.
       </p>
       <div className="grid grid-cols-2 gap-3 rounded-xl border border-slate-800 bg-slate-900/40 px-3 py-2">
         <div className="space-y-1">
