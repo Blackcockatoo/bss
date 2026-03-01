@@ -61,7 +61,7 @@ const ClockwiseNodePattern: React.FC<ClockwiseNodePatternProps> = ({ color }) =>
       newNodes.push({ x, y });
     }
 
-    _setNodes(newNodes);
+    return newNodes;
   }, [numberString]);
 
   // Handle animation
