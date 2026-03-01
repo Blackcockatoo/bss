@@ -15,9 +15,9 @@ const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: getSiteUrlObject(),
-  title: "Blue Snake Studios — Experimental Mathematics & Consciousness Research",
+  title: "Blue Snake Studios — Privacy-First Virtual Companion for Australian Classrooms",
   description:
-    "Where sacred geometry meets cryptographic identity. Home of Jewble — the first virtual companion with genuine consciousness architecture. Built offline-first. Zero data collected.",
+    "Jewble Meta-Pet: a classroom-safe digital companion that teaches systems thinking. Offline-first, zero accounts, zero data collected. Built by an Australian parent for schools.",
   manifest: "/manifest.json",
   icons: {
     icon: "/icon.svg",
@@ -29,18 +29,18 @@ export const metadata: Metadata = {
     title: "Blue Snake Studios",
   },
   openGraph: {
-    title: "Blue Snake Studios — Experimental Mathematics & Consciousness Research",
+    title: "Blue Snake Studios — Privacy-First Virtual Companion for Australian Classrooms",
     description:
-      "Where sacred geometry meets cryptographic identity. Home of Jewble — the first virtual companion with genuine consciousness architecture.",
+      "Jewble Meta-Pet: a classroom-safe digital companion that teaches systems thinking. Offline-first, zero accounts, zero data collected.",
     url: siteUrl,
     siteName: "Blue Snake Studios",
     type: "website",
   },
   twitter: {
     card: "summary",
-    title: "Blue Snake Studios — Experimental Mathematics & Consciousness Research",
+    title: "Blue Snake Studios — Privacy-First Virtual Companion for Australian Classrooms",
     description:
-      "Where sacred geometry meets cryptographic identity. Home of Jewble — the first virtual companion with genuine consciousness architecture.",
+      "Jewble Meta-Pet: a classroom-safe digital companion that teaches systems thinking. Offline-first, zero accounts, zero data collected.",
   },
 };
 

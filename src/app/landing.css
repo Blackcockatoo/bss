@@ -775,6 +775,72 @@ body.landing-body {
   animation: landing-pulse-ring 3s ease-in-out infinite;
 }
 
+/* ── CONTEXT LIST ── */
+.landing .context-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.landing .context-list li {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.landing .context-list li strong {
+  color: var(--white);
+  font-weight: 600;
+}
+
+.landing .context-list .cl-marker {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  margin-top: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+/* ── EVIDENCE STATS ── */
+.landing .evidence-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 32px;
+}
+
+.landing .evidence-stat {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+}
+
+.landing .evidence-stat .es-num {
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--gold), var(--teal));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.landing .evidence-stat .es-label {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
   .landing .landing-nav {
@@ -816,5 +882,13 @@ body.landing-body {
 
   .landing .section {
     padding: 64px 0;
+  }
+
+  .landing .evidence-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .landing .context-list li {
+    font-size: 13px;
   }
 }
