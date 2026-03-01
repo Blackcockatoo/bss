@@ -8,15 +8,15 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#020617",
+  themeColor: "#040810",
   viewportFit: "cover",
 };
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://bss-l8cw.vercel.app"),
-  title: "Meta-Pet — Raise, Evolve, Discover",
+  title: "Blue Snake Studios — Experimental Mathematics & Consciousness Research",
   description:
-    "A privacy-first digital companion powered by real genomics. Raise your pet, watch it evolve through care, and discover the science woven into every trait. Built offline-first by Blue Snake Studios.",
+    "Where sacred geometry meets cryptographic identity. Home of Jewble — the first virtual companion with genuine consciousness architecture. Built offline-first. Zero data collected.",
   manifest: "/manifest.json",
   icons: {
     icon: "/icon.svg",
@@ -25,21 +25,21 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Meta-Pet",
+    title: "Blue Snake Studios",
   },
   openGraph: {
-    title: "Meta-Pet — Raise, Evolve, Discover",
+    title: "Blue Snake Studios — Experimental Mathematics & Consciousness Research",
     description:
-      "A privacy-first digital companion powered by real genomics. Raise your pet, watch it evolve through care, and discover the science woven into every trait.",
+      "Where sacred geometry meets cryptographic identity. Home of Jewble — the first virtual companion with genuine consciousness architecture.",
     url: "https://bss-l8cw.vercel.app",
-    siteName: "Jewble // Meta-Pet by Blue Snake Studios",
+    siteName: "Blue Snake Studios",
     type: "website",
   },
   twitter: {
     card: "summary",
-    title: "Meta-Pet — Raise, Evolve, Discover",
+    title: "Blue Snake Studios — Experimental Mathematics & Consciousness Research",
     description:
-      "A privacy-first digital companion powered by real genomics. Raise your pet, watch it evolve through care, and discover the science woven into every trait.",
+      "Where sacred geometry meets cryptographic identity. Home of Jewble — the first virtual companion with genuine consciousness architecture.",
   },
 };
 
@@ -55,6 +55,12 @@ export default function RootLayout({
     <html lang="en" className="font-sans">
       <head>
         <meta name="copyright" content={legalMetaContent} />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Outfit:wght@200;300;400;600;700;800;900&display=swap"
+          rel="stylesheet"
+        />
       </head>
       <body suppressHydrationWarning className="antialiased">
         <ClientBody>{children}</ClientBody>

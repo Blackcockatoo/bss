@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { QuickNav } from "@/components/QuickNav";
 import LegalNotice from "@/components/LegalNotice";
 import { AuthDialog } from "@/components/AuthDialog";
@@ -13,6 +14,7 @@ export default function ClientBody({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
   const [authOpen, setAuthOpen] = useState(false);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const currentUser = useAuthStore((state) => state.currentUser);
@@ -37,6 +39,11 @@ export default function ClientBody({
 
     registerServiceWorker();
   }, []);
+
+  // Landing page renders its own chrome (nav, footer)
+  if (pathname === "/") {
+    return <>{children}</>;
+  }
 
   return (
     <div className="antialiased min-h-screen pb-[calc(6rem+env(safe-area-inset-bottom))] flex flex-col">
