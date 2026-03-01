@@ -281,10 +281,19 @@ export default function ScaffoldPage() {
     setRitualNote('');
   }, [completeMirrorMode, ritualOutcome, ritualNote]);
 
-  const consentRemainingMinutes = useMemo(() => {
-    if (!mirrorMode.consentExpiresAt) return null;
-    const delta = mirrorMode.consentExpiresAt - Date.now();
-    return Math.max(0, Math.ceil(delta / 60000));
+  const [consentRemainingMinutes, setConsentRemainingMinutes] = useState<number | null>(null);
+  useEffect(() => {
+    if (!mirrorMode.consentExpiresAt) {
+      setConsentRemainingMinutes(null);
+      return;
+    }
+    const update = () => {
+      const delta = mirrorMode.consentExpiresAt! - Date.now();
+      setConsentRemainingMinutes(Math.max(0, Math.ceil(delta / 60000)));
+    };
+    update();
+    const interval = setInterval(update, 30000);
+    return () => clearInterval(interval);
   }, [mirrorMode.consentExpiresAt]);
 
   const handleRefreshConsent = useCallback(() => {

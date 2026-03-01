@@ -543,6 +543,12 @@ export function CrystallineLattice({ dna }: CrystallineLatticeProps) {
   const [latticeType, setLatticeType] = useState<LatticeType>('fcc');
   const [fingerprint, setFingerprint] = useState<CrystalFingerprint | null>(null);
 
+  // State mirrors for ref values displayed in JSX (avoids reading refs during render)
+  const [fractalSnapshot, setFractalSnapshot] = useState<{ nodeCount: number; maxDepth: number; ruleSignature: string } | null>(null);
+  const [resFieldSnapshot, setResFieldSnapshot] = useState<{ globalEnergy: number; resonanceRatio: number; harmonicOrder: number } | null>(null);
+  const [standingWaveCount, setStandingWaveCount] = useState(0);
+  const [crystalMemory, setCrystalMemory] = useState('—');
+
   const genome = dna || '0'.repeat(60);
   const fractalConfig = deriveFractalConfig(genome);
 
@@ -554,7 +560,8 @@ export function CrystallineLattice({ dna }: CrystallineLatticeProps) {
     stateRef.current = initial;
     tickRef.current = 0;
     lastGrow.current = 0;
-    fractalRef.current = generateFractalTree(sequence);
+    const tree = generateFractalTree(sequence);
+    fractalRef.current = tree;
     resFieldRef.current = null;
     standingWavesRef.current = [];
     setFingerprint(null);
@@ -564,11 +571,15 @@ export function CrystallineLattice({ dna }: CrystallineLatticeProps) {
     setDnaActive(!!dnaStr);
     setLatticeType(deriveLatticeType(sequence));
     setGrowing(false);
+    setFractalSnapshot(tree ? { nodeCount: tree.nodes.length, maxDepth: tree.maxDepth, ruleSignature: tree.ruleSignature } : null);
+    setResFieldSnapshot(null);
+    setStandingWaveCount(0);
+    setCrystalMemory(initial ? readCrystalMemory(initial).slice(0, 24) : '—');
   }, []);
 
-  useEffect(() => {
-    initFromDna(dna);
-  }, [dna, initFromDna]);
+  // Sync lattice when the dna prop changes — intentionally sets state from effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- prop-driven initialization
+  useEffect(() => { initFromDna(dna); }, [dna, initFromDna]);
 
   useEffect(() => {
     if (mode === 'resonance' && stateRef.current) {
@@ -576,8 +587,11 @@ export function CrystallineLattice({ dna }: CrystallineLatticeProps) {
       const nodeIds = state.nodes.filter(n => n.alive).map(n => n.id);
       const dnaDigits = nodeIds.map((_, i) => parseInt(genome[i % genome.length], 10) || 0);
       const edgePairs = state.edges.map(e => [e.a, e.b] as [number, number]);
-      resFieldRef.current = initResonanceField(nodeIds, dnaDigits, edgePairs);
+      const field = initResonanceField(nodeIds, dnaDigits, edgePairs);
+      resFieldRef.current = field;
       standingWavesRef.current = [];
+      setResFieldSnapshot({ globalEnergy: field.globalEnergy, resonanceRatio: field.resonanceRatio, harmonicOrder: field.harmonicOrder });
+      setStandingWaveCount(0);
     }
   }, [mode, genome]);
 
@@ -636,6 +650,12 @@ export function CrystallineLattice({ dna }: CrystallineLatticeProps) {
             const waves = detectStandingWaves(resFieldRef.current);
             standingWavesRef.current = waves;
             drawResonance(ctx, state, resFieldRef.current, waves, time);
+            // Sync snapshot to state every ~30 frames for UI display
+            if (tickRef.current % 30 === 0) {
+              const rf = resFieldRef.current;
+              setResFieldSnapshot({ globalEnergy: rf.globalEnergy, resonanceRatio: rf.resonanceRatio, harmonicOrder: rf.harmonicOrder });
+              setStandingWaveCount(waves.length);
+            }
           }
           break;
         case 'memory':
@@ -654,8 +674,6 @@ export function CrystallineLattice({ dna }: CrystallineLatticeProps) {
   const reset = useCallback(() => initFromDna(dna), [dna, initFromDna]);
 
   const colors = LATTICE_COLORS[latticeType];
-  const resField = resFieldRef.current;
-  const crystalMemory = stateRef.current ? readCrystalMemory(stateRef.current).slice(0, 24) : '—';
 
   return (
     <Tabs value={mode} onValueChange={value => setMode(value as VisualMode)} className="space-y-3">
@@ -790,9 +808,9 @@ export function CrystallineLattice({ dna }: CrystallineLatticeProps) {
       <TabsContent value="fractal" className="mt-0">
         <div className="grid grid-cols-3 gap-1.5 text-center">
           {[
-            { label: 'Nodes', value: fractalRef.current?.nodes.length ?? 0, color: '#34d399' },
-            { label: 'Max Depth', value: fractalRef.current?.maxDepth ?? 0, color: '#22d3ee' },
-            { label: 'Rule Signature', value: fractalRef.current?.ruleSignature ?? '—', color: '#c4b5fd' },
+            { label: 'Nodes', value: fractalSnapshot?.nodeCount ?? 0, color: '#34d399' },
+            { label: 'Max Depth', value: fractalSnapshot?.maxDepth ?? 0, color: '#22d3ee' },
+            { label: 'Rule Signature', value: fractalSnapshot?.ruleSignature ?? '—', color: '#c4b5fd' },
             { label: 'Generations', value: fractalConfig.generations, color: '#86efac' },
             { label: 'Branch Angle', value: `${Math.round((fractalConfig.branchAngle * 180) / Math.PI)}°`, color: '#67e8f9' },
             { label: 'Length Decay', value: fractalConfig.lengthDecay.toFixed(2), color: '#a78bfa' },
@@ -810,10 +828,10 @@ export function CrystallineLattice({ dna }: CrystallineLatticeProps) {
       <TabsContent value="resonance" className="mt-0">
         <div className="grid grid-cols-4 gap-1.5 text-center">
           {[
-            { label: 'Global Energy', value: resField ? resField.globalEnergy.toFixed(2) : '—' },
-            { label: 'Resonance Ratio', value: resField ? `${Math.round(resField.resonanceRatio * 100)}%` : '—' },
-            { label: 'Harmonic Order', value: resField?.harmonicOrder ?? '—' },
-            { label: 'Standing Waves', value: standingWavesRef.current.length },
+            { label: 'Global Energy', value: resFieldSnapshot ? resFieldSnapshot.globalEnergy.toFixed(2) : '—' },
+            { label: 'Resonance Ratio', value: resFieldSnapshot ? `${Math.round(resFieldSnapshot.resonanceRatio * 100)}%` : '—' },
+            { label: 'Harmonic Order', value: resFieldSnapshot?.harmonicOrder ?? '—' },
+            { label: 'Standing Waves', value: standingWaveCount },
           ].map(s => (
             <div key={s.label} className="rounded-lg border border-violet-800/40 bg-violet-950/20 py-1.5 px-1">
               <p className="text-xs font-mono font-bold text-amber-300">{s.value}</p>

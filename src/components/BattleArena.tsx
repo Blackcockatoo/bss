@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useStore } from '@/lib/store';
 import { Button } from './ui/button';
 import { Swords, ShieldHalf, ChevronLeft, Zap } from 'lucide-react';
@@ -126,7 +126,7 @@ export function BattleArena() {
     setPhase('battling');
   }
 
-  function handleMoveSelect(moveIndex: number) {
+  const handleMoveSelect = useCallback((moveIndex: number) => {
     if (resolving) return;
 
     const chosenMove = playerMoves[moveIndex];
@@ -186,7 +186,7 @@ export function BattleArena() {
     }
 
     setResolving(false);
-  }
+  }, [resolving, playerMoves, opponentMoves, playerHp, playerAtk, playerDef, playerSpd, playerType, playerStatus, opponent, opponentHp, opponentAtk, opponentDef, opponentSpd, opponentType, opponentStatus, recordBattle]);
 
   // ── Idle ──────────────────────────────────────────────────────────────────
   if (phase === 'idle') {

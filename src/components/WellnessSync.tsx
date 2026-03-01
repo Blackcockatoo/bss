@@ -53,9 +53,7 @@ export function WellnessSync({ isOpen, onClose, lastAction }: WellnessSyncProps)
 
   // Show action-triggered prompt
   useEffect(() => {
-    if (lastAction && reminderMode === 'direct' && enabledFeatures.mirrorVitals) {
-      setShowPrompt(true);
-    }
+    setShowPrompt(!!lastAction && reminderMode === 'direct' && enabledFeatures.mirrorVitals);
   }, [lastAction, reminderMode, enabledFeatures.mirrorVitals]);
 
   const handleMoodSelect = (mood: UserMood) => {

@@ -18,19 +18,14 @@ export const EnhancedPetSprite = memo(function EnhancedPetSprite() {
   const [actionActive, setActionActive] = useState(false);
 
   useEffect(() => {
-    if (!lastAction) {
-      setActionActive(false);
-      return;
-    }
-
     const age = Date.now() - lastActionAt;
-    if (age < ACTION_WINDOW_MS) {
-      setActionActive(true);
+    const isRecent = !!lastAction && age < ACTION_WINDOW_MS;
+    setActionActive(isRecent);
+    if (isRecent) {
       const t = setTimeout(() => setActionActive(false), ACTION_WINDOW_MS - age);
       return () => clearTimeout(t);
-    } else {
-      setActionActive(false);
     }
+    return;
   }, [lastAction, lastActionAt]);
 
   const cockatooImages = useMemo(

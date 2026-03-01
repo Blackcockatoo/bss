@@ -55,13 +55,14 @@ const AuraliaSprite: React.FC<AuraliaSpriteProps> = ({
   const svgRef = useRef<SVGSVGElement>(null);
 
   // PRNG for consistent randomness
-  const prng = useMemo(() => {
-    let state = seed;
-    return () => {
-      state = (state * 1664525 + 1013904223) % 4294967296;
-      return state / 4294967296;
-    };
+  const prngStateRef = useRef(seed);
+  useEffect(() => {
+    prngStateRef.current = seed;
   }, [seed]);
+  const prng = useCallback(() => {
+    prngStateRef.current = (prngStateRef.current * 1664525 + 1013904223) % 4294967296;
+    return prngStateRef.current / 4294967296;
+  }, []);
 
   // Color theme based on stats
   const colors = useMemo(() => {

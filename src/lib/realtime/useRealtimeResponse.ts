@@ -158,17 +158,22 @@ export function useRealtimeResponse(context: ResponseContext, options: UseRealti
 
     const warning = getWarningResponse(context);
     if (warning && (!currentResponse || currentResponse.type !== 'warning')) {
-      setCurrentResponse(warning);
-      setIsVisible(true);
+      const showTimer = setTimeout(() => {
+        setCurrentResponse(warning);
+        setIsVisible(true);
 
-      // Play audio for warning
-      void playResponseAudio(warning);
+        // Play audio for warning
+        void playResponseAudio(warning);
+      }, 0);
 
-      const timer = setTimeout(() => {
+      const hideTimer = setTimeout(() => {
         setIsVisible(false);
       }, warning.duration);
 
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(showTimer);
+        clearTimeout(hideTimer);
+      };
     }
   }, [context, enableWarnings, currentResponse, playResponseAudio]);
 

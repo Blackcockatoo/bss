@@ -38,9 +38,7 @@ export function OnboardingTutorial({ onComplete, forceShow = false }: Onboarding
     if (typeof window === 'undefined') return;
 
     const completed = localStorage.getItem(STORAGE_KEY);
-    if (forceShow || completed !== 'true') {
-      setIsVisible(true);
-    }
+    setIsVisible(forceShow || completed !== 'true');
     setHasChecked(true);
   }, [forceShow]);
 

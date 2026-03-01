@@ -137,6 +137,7 @@ export function RitualLoop({ onRitualComplete, jewbleDigits, initialProgress, pe
   const [tapCount, setTapCount] = useState(0);
   const [holdProgress, setHoldProgress] = useState(0);
   const [breathPhase, setBreathPhase] = useState<'inhale' | 'hold' | 'exhale' | 'idle'>('idle');
+  const [breathActive, setBreathActive] = useState(false);
   const holdTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const breathTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -179,11 +180,12 @@ export function RitualLoop({ onRitualComplete, jewbleDigits, initialProgress, pe
     setTapCount(prev => Math.min((RITUALS.tap.taps ?? 7), prev + 1));
   }, [ritualType]);
 
+  const holdStartRef = useRef<number>(0);
   const startHold = useCallback(() => {
     if (ritualType !== 'hold' || holdTimerRef.current) return;
-    const start = Date.now();
+    holdStartRef.current = Date.now();
     holdTimerRef.current = setInterval(() => {
-      const elapsed = Date.now() - start;
+      const elapsed = Date.now() - holdStartRef.current;
       const percent = clamp(elapsed / (RITUALS.hold.holdMs ?? 5000), 0, 1);
       setHoldProgress(Math.round(percent * 100));
       if (percent >= 1 && holdTimerRef.current) {
@@ -206,6 +208,7 @@ export function RitualLoop({ onRitualComplete, jewbleDigits, initialProgress, pe
     const cycleDuration = 12000; // 4s + 4s + 4s
     const start = Date.now();
     setBreathPhase('inhale');
+    setBreathActive(true);
 
     breathTimerRef.current = setInterval(() => {
       const elapsed = Date.now() - start;
@@ -222,6 +225,7 @@ export function RitualLoop({ onRitualComplete, jewbleDigits, initialProgress, pe
         clearInterval(breathTimerRef.current);
         breathTimerRef.current = null;
         setBreathPhase('idle');
+        setBreathActive(false);
       }
     }, 50);
   }, [ritualType]);
@@ -230,6 +234,7 @@ export function RitualLoop({ onRitualComplete, jewbleDigits, initialProgress, pe
     setTapCount(0);
     setHoldProgress(0);
     setBreathPhase('idle');
+    setBreathActive(false);
     if (holdTimerRef.current) {
       clearInterval(holdTimerRef.current);
       holdTimerRef.current = null;
@@ -562,7 +567,7 @@ export function RitualLoop({ onRitualComplete, jewbleDigits, initialProgress, pe
             <>
               <button
                 onClick={startBreath}
-                disabled={breathTimerRef.current !== null}
+                disabled={breathActive}
                 className="w-full py-4 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold text-lg shadow-lg active:scale-[0.98] transition disabled:opacity-80"
               >
                 <span className="text-2xl">◌</span>
@@ -570,7 +575,7 @@ export function RitualLoop({ onRitualComplete, jewbleDigits, initialProgress, pe
                   {breathPhase === 'idle' ? 'Begin Breath' : breathPhase} {holdProgress > 0 && `${holdProgress}%`}
                 </span>
               </button>
-              {breathTimerRef.current !== null && (
+              {breathActive && (
                 <p className="text-xs text-zinc-400 text-center">
                   Prerequisite: finish the current breath cycle to begin again.
                 </p>

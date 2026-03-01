@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 
 interface ClockwiseNodePatternProps {
   color: 'red' | 'blue' | 'black';
@@ -14,7 +14,7 @@ const NUMBER_STRINGS = {
 const ClockwiseNodePattern: React.FC<ClockwiseNodePatternProps> = ({ color }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [rotation, setRotation] = useState(0);
-  const [nodes, setNodes] = useState<{ x: number; y: number }[]>([]);
+  const [nodes, _setNodes] = useState<{ x: number; y: number }[]>([]);
   const [animationActive, setAnimationActive] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const [showApiKey, setShowApiKey] = useState(false);
