@@ -617,7 +617,6 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
       clearTimeout(initialDelay);
       clearInterval(interval);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Handler for AI play action

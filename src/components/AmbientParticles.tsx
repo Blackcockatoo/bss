@@ -119,7 +119,6 @@ export function AmbientParticles({ enabled = true }: { enabled?: boolean }) {
       ) as keyof typeof drives,
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const params = emotionToParticleParams(emotion as any, comfort as any, drives as any);
 
     return {

@@ -6,7 +6,7 @@
 
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 
 interface QuantumDataFlowProps {
@@ -16,6 +16,13 @@ interface QuantumDataFlowProps {
 export const QuantumDataFlow: React.FC<QuantumDataFlowProps> = ({ className = '' }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const particlesRef = useRef<HTMLDivElement[]>([]);
+  // Pre-compute random positions at mount to keep render pure
+  const [particlePositions] = useState(() =>
+    Array.from({ length: 20 }, () => ({ top: Math.random() * 100, left: Math.random() * 100 }))
+  );
+  const [barHeights] = useState(() =>
+    Array.from({ length: 12 }, () => Math.random() * 100 + 20)
+  );
 
   useEffect(() => {
     // Simple CSS-based particle animation
@@ -44,7 +51,7 @@ export const QuantumDataFlow: React.FC<QuantumDataFlowProps> = ({ className = ''
       className={`relative p-8 bg-slate-900 rounded-3xl overflow-hidden border border-slate-700 shadow-2xl ${className}`}
     >
       {/* Background Particles */}
-      {[...Array(20)].map((_, i) => (
+      {particlePositions.map((pos, i) => (
         <div
           key={i}
           ref={(el) => {
@@ -52,8 +59,8 @@ export const QuantumDataFlow: React.FC<QuantumDataFlowProps> = ({ className = ''
           }}
           className="absolute w-1 h-1 bg-cyan-400 rounded-full opacity-20"
           style={{
-            top: `${Math.random() * 100}%`,
-            left: `${Math.random() * 100}%`,
+            top: `${pos.top}%`,
+            left: `${pos.left}%`,
           }}
         />
       ))}
@@ -66,10 +73,10 @@ export const QuantumDataFlow: React.FC<QuantumDataFlowProps> = ({ className = ''
 
         {/* Animated Data Bars */}
         <div className="flex items-end gap-2 h-32">
-          {[...Array(12)].map((_, i) => (
+          {barHeights.map((h, i) => (
             <motion.div
               key={i}
-              animate={{ height: [20, Math.random() * 100 + 20, 20] }}
+              animate={{ height: [20, h, 20] }}
               transition={{
                 duration: 1.5,
                 repeat: Infinity,

@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { getResidue, getResidueMeta } from '@/lib/genome';
 
@@ -26,9 +26,8 @@ export const GenomeJewbleRing = memo(function GenomeJewbleRing({
   showFrontier = true,
   variant = 'clarity',
 }: GenomeJewbleRingProps) {
-  const gradientId = useMemo(
-    () => `jewbleGradient-${Math.random().toString(36).slice(2, 8)}`,
-    []
+  const [gradientId] = useState(
+    () => `jewbleGradient-${Math.random().toString(36).slice(2, 8)}`
   );
   const size = variant === 'dial' ? 320 : 240;
   const center = size / 2;

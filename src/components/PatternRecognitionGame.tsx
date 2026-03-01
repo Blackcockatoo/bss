@@ -81,12 +81,14 @@ export function PatternRecognitionGame() {
   useEffect(() => {
     if (gameState === 'input' && timeRemaining !== null) {
       if (timeRemaining <= 0) {
-        // Time's up!
-        setResult({ correct: false, accuracy: (userInput.length / pattern.length) * 100 });
-        setGameState('result');
-        setCombo(0);
-        triggerHaptic('error');
-        return;
+        // Time's up — defer state updates to avoid synchronous cascade
+        const id = requestAnimationFrame(() => {
+          setResult({ correct: false, accuracy: (userInput.length / pattern.length) * 100 });
+          setGameState('result');
+          setCombo(0);
+          triggerHaptic('error');
+        });
+        return () => cancelAnimationFrame(id);
       }
 
       const timer = setInterval(() => {

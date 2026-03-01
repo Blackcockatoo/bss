@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo } from 'react';
 import { useWellnessStore, getTodaySleepHours, getDateKey } from '@/lib/wellness';
 import { triggerHaptic } from '@/lib/haptics';
 import { Button } from '@/components/ui/button';
@@ -29,7 +29,7 @@ export function SleepTracker({ isOpen, onClose }: SleepTrackerProps) {
   const [manualSleepHour, setManualSleepHour] = useState(22);
   const [manualWakeHour, setManualWakeHour] = useState(7);
   const [quality, setQuality] = useState<1 | 2 | 3 | 4 | 5>(3);
-  const nowRef = useRef(Date.now());
+  const [mountTimestamp] = useState(() => Date.now());
 
   const todayHours = useMemo(() => getTodaySleepHours(sleep), [sleep]);
   const progress = Math.min((todayHours / sleep.dailyGoal) * 100, 100);
@@ -40,7 +40,7 @@ export function SleepTracker({ isOpen, onClose }: SleepTrackerProps) {
   const weekData = useMemo(() => {
     const days: { date: string; hours: number }[] = [];
     for (let i = 6; i >= 0; i--) {
-      const date = getDateKey(nowRef.current - i * 86400000);
+      const date = getDateKey(mountTimestamp - i * 86400000);
       const dayEntries = sleep.entries.filter(e => {
         const wakeDate = e.wakeTime ? getDateKey(e.wakeTime) : null;
         return wakeDate === date;
@@ -52,7 +52,7 @@ export function SleepTracker({ isOpen, onClose }: SleepTrackerProps) {
       days.push({ date, hours });
     }
     return days;
-  }, [sleep.entries]);
+  }, [sleep.entries, mountTimestamp]);
 
   // Calculate average sleep
   const avgSleep = useMemo(() => {

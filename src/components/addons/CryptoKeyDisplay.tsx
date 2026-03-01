@@ -55,7 +55,7 @@ export const CryptoKeyDisplay: React.FC<CryptoKeyDisplayProps> = ({
     };
 
     initKeys();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const copyToClipboard = async (text: string, label: string) => {
     try {

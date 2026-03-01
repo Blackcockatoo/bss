@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 
 type noop = (...args: any[]) => any;
@@ -12,12 +12,10 @@ export function usePersistFn<T extends noop>(fn: T) {
     fnRef.current = fn;
   });
 
-  const persistFn = useRef<T | null>(null);
-  if (!persistFn.current) {
-    persistFn.current = function (this: unknown, ...args) {
-      return fnRef.current!.apply(this, args);
-    } as T;
-  }
+  // Use useState lazy initializer to create the stable wrapper once (pure during render)
+  const [persistFn] = useState<T>(() =>
+    ((...args: any[]) => fnRef.current!(...args)) as T
+  );
 
-  return persistFn.current!;
+  return persistFn;
 }

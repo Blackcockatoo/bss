@@ -45,7 +45,7 @@ export const PetProfilePanel: React.FC<PetProfilePanelProps> = ({
       localStorage.setItem(`auralia_coat_of_arms_${petId}`, JSON.stringify(coa));
     }
 
-    setCoatOfArms(coa);
+    requestAnimationFrame(() => setCoatOfArms(coa));
   }, [petId]);
 
   // Generate blazon description

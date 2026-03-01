@@ -38,8 +38,10 @@ export function OnboardingTutorial({ onComplete, forceShow = false }: Onboarding
     if (typeof window === 'undefined') return;
 
     const completed = localStorage.getItem(STORAGE_KEY);
-    setIsVisible(forceShow || completed !== 'true');
-    setHasChecked(true);
+    requestAnimationFrame(() => {
+      setIsVisible(forceShow || completed !== 'true');
+      setHasChecked(true);
+    });
   }, [forceShow]);
 
   const handleNext = () => {
