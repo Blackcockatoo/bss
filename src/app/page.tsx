@@ -305,7 +305,7 @@ export default function LandingPage() {
       <div className="landing-grain" />
 
       <nav className="landing-nav">
-        <a className="logo" href="#">
+        <a className="logo" href="https://bluesnakestudios.com">
           <svg className="logo-mark" viewBox="0 0 28 28">
             <polygon
               points="14,2 25,8.5 25,19.5 14,26 3,19.5 3,8.5"
@@ -333,7 +333,7 @@ export default function LandingPage() {
           <a href="#student">Students</a>
           <a href="#about">About</a>
           <a
-            href="https://stevejewble.vercel.app/"
+            href="https://bss-git-main-tom-s-projects-6a215d3d.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
             className="cta-nav"
