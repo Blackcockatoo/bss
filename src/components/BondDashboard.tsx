@@ -71,9 +71,14 @@ export function BondDashboard({ petId, petName, className }: BondDashboardProps)
   }, [refreshInsights, refreshResonance]);
 
   const moments = React.useMemo(() => getMoments(memory), [memory]);
-  const totalDaysTogether = Math.floor(
-    (Date.now() - bond.bondStartedAt) / (24 * 60 * 60 * 1000)
-  ) + 1;
+  const [totalDaysTogether, setTotalDaysTogether] = React.useState(1);
+  React.useEffect(() => {
+    const compute = () =>
+      Math.floor((Date.now() - bond.bondStartedAt) / (24 * 60 * 60 * 1000)) + 1;
+    setTotalDaysTogether(compute());
+    const interval = setInterval(() => setTotalDaysTogether(compute()), 60000);
+    return () => clearInterval(interval);
+  }, [bond.bondStartedAt]);
 
   return (
     <div className={cn('space-y-4', className)}>

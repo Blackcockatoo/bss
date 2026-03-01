@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useStore } from '@/lib/store';
 import {
@@ -76,6 +76,18 @@ export function EvolutionPanel() {
 
     return `${hours}h ${minutes}m`;
   }, []);
+
+  const [ageElapsed, setAgeElapsed] = useState(() => Date.now() - evolution.lastEvolutionTime);
+  const [totalAge, setTotalAge] = useState(() => Date.now() - evolution.birthTime);
+  useEffect(() => {
+    const update = () => {
+      setAgeElapsed(Date.now() - evolution.lastEvolutionTime);
+      setTotalAge(Date.now() - evolution.birthTime);
+    };
+    update();
+    const interval = setInterval(update, 60000);
+    return () => clearInterval(interval);
+  }, [evolution.lastEvolutionTime, evolution.birthTime]);
 
   const handleEvolve = useCallback(() => {
     const evolved = tryEvolve();
@@ -169,7 +181,7 @@ export function EvolutionPanel() {
               label="Age"
               value={requirementProgress.ageProgress}
               helper={formatRequirementValue(
-                Date.now() - evolution.lastEvolutionTime,
+                ageElapsed,
                 requirementSnapshot.requirements.minAge,
                 'time',
                 formatDuration
@@ -239,7 +251,7 @@ export function EvolutionPanel() {
       )}
 
       <footer className="text-center text-xs text-zinc-500">
-        Age: {formatDuration(Date.now() - evolution.birthTime)}
+        Age: {formatDuration(totalAge)}
       </footer>
     </div>
   );

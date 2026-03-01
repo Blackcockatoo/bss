@@ -63,22 +63,23 @@ export function RegistrationCertificate({
     if (!petId) return;
 
     const storedCoa = localStorage.getItem(`auralia_coat_of_arms_${petId}`);
+    let coa: CoatOfArms | null = null;
 
     if (storedCoa) {
       try {
-        setCoatOfArms(JSON.parse(storedCoa));
+        coa = JSON.parse(storedCoa);
       } catch {
         const seed = hashString(petId);
-        const newCoa = generateFounderCoatOfArms(petId, seed);
-        localStorage.setItem(`auralia_coat_of_arms_${petId}`, JSON.stringify(newCoa));
-        setCoatOfArms(newCoa);
+        coa = generateFounderCoatOfArms(petId, seed);
+        localStorage.setItem(`auralia_coat_of_arms_${petId}`, JSON.stringify(coa));
       }
     } else {
       const seed = hashString(petId);
-      const newCoa = generateFounderCoatOfArms(petId, seed);
-      localStorage.setItem(`auralia_coat_of_arms_${petId}`, JSON.stringify(newCoa));
-      setCoatOfArms(newCoa);
+      coa = generateFounderCoatOfArms(petId, seed);
+      localStorage.setItem(`auralia_coat_of_arms_${petId}`, JSON.stringify(coa));
     }
+
+    setCoatOfArms(coa);
   }, [petId]);
 
   // Generate blazon description

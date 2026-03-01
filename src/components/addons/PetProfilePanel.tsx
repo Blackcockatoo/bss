@@ -34,16 +34,18 @@ export const PetProfilePanel: React.FC<PetProfilePanelProps> = ({
   // Generate or load coat of arms
   useEffect(() => {
     const storedCoa = localStorage.getItem(`auralia_coat_of_arms_${petId}`);
+    let coa: CoatOfArms;
 
     if (storedCoa) {
-      setCoatOfArms(JSON.parse(storedCoa));
+      coa = JSON.parse(storedCoa);
     } else {
       // Generate a new coat based on pet ID as seed
       const seed = hashString(petId);
-      const newCoa = generateFounderCoatOfArms(petId, seed);
-      localStorage.setItem(`auralia_coat_of_arms_${petId}`, JSON.stringify(newCoa));
-      setCoatOfArms(newCoa);
+      coa = generateFounderCoatOfArms(petId, seed);
+      localStorage.setItem(`auralia_coat_of_arms_${petId}`, JSON.stringify(coa));
     }
+
+    setCoatOfArms(coa);
   }, [petId]);
 
   // Generate blazon description

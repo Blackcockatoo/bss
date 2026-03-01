@@ -23,23 +23,6 @@ export const CryptoKeyDisplay: React.FC<CryptoKeyDisplayProps> = ({
   const [copied, setCopied] = useState<string | null>(null);
   const [regenerating, setRegenerating] = useState(false);
 
-  // Load or generate keys on mount
-  useEffect(() => {
-    const initKeys = async () => {
-      const storedUserKeys = localStorage.getItem('auralia_addon_user_keys');
-      const storedIssuerKeys = localStorage.getItem('auralia_addon_issuer_keys');
-
-      if (storedUserKeys && storedIssuerKeys) {
-        setUserKeys(JSON.parse(storedUserKeys));
-        setIssuerKeys(JSON.parse(storedIssuerKeys));
-      } else {
-        await regenerateKeys();
-      }
-    };
-
-    initKeys();
-  }, []);
-
   const regenerateKeys = async () => {
     setRegenerating(true);
     try {
@@ -56,6 +39,23 @@ export const CryptoKeyDisplay: React.FC<CryptoKeyDisplayProps> = ({
     }
     setRegenerating(false);
   };
+
+  // Load or generate keys on mount
+  useEffect(() => {
+    const initKeys = async () => {
+      const storedUserKeys = localStorage.getItem('auralia_addon_user_keys');
+      const storedIssuerKeys = localStorage.getItem('auralia_addon_issuer_keys');
+
+      if (storedUserKeys && storedIssuerKeys) {
+        setUserKeys(JSON.parse(storedUserKeys));
+        setIssuerKeys(JSON.parse(storedIssuerKeys));
+      } else {
+        await regenerateKeys();
+      }
+    };
+
+    initKeys();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const copyToClipboard = async (text: string, label: string) => {
     try {

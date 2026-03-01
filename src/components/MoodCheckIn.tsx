@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './card';
@@ -47,7 +48,8 @@ export function MoodCheckIn({
   const [submitted, setSubmitted] = React.useState(false);
 
   // Check if checked in recently (within 4 hours)
-  const recentlyCheckedIn = lastCheckIn && Date.now() - lastCheckIn < 4 * 60 * 60 * 1000;
+  const nowRef = useRef(Date.now());
+  const recentlyCheckedIn = lastCheckIn && nowRef.current - lastCheckIn < 4 * 60 * 60 * 1000;
 
   const handleMoodSelect = (mood: UserMood) => {
     setSelectedMood(mood);

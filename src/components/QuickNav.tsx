@@ -40,6 +40,11 @@ export function QuickNav() {
   const router = useRouter();
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isLabsOpen, setIsLabsOpen] = useState(false);
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
+    setIsLabsOpen(false);
+  }
 
   const handleBack = useCallback(() => {
     triggerHaptic('light');
@@ -70,10 +75,6 @@ export function QuickNav() {
   }, []);
 
   const showInstall = useMemo(() => installPrompt !== null, [installPrompt]);
-
-  useEffect(() => {
-    setIsLabsOpen(false);
-  }, [pathname]);
 
   const handleInstall = useCallback(async () => {
     if (!installPrompt) {

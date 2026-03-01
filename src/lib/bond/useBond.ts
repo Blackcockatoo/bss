@@ -7,7 +7,7 @@
  * persistence and initialization.
  */
 
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { useBondStore, type BondStoreState } from './store';
 import {
   loadBondState,
@@ -70,7 +70,7 @@ export function useBond({
     getSnapshot,
   } = store;
 
-  const isLoadingRef = useRef(true);
+  const [isLoading, setIsLoading] = useState(true);
   const previousBondLevelRef = useRef(bond.bondLevel);
   const cleanupRef = useRef<(() => void) | null>(null);
 
@@ -90,13 +90,13 @@ export function useBond({
           recordVisit();
           refreshInsights();
           refreshResonance();
-          isLoadingRef.current = false;
+          setIsLoading(false);
         }
       } catch (error) {
         console.error('[useBond] Failed to load state:', error);
         if (mounted) {
           initialize(petId);
-          isLoadingRef.current = false;
+          setIsLoading(false);
         }
       }
     }
@@ -202,7 +202,7 @@ export function useBond({
   }, [petId, getSnapshot]);
 
   return {
-    isLoading: isLoadingRef.current,
+    isLoading,
     bond,
     memory,
     insights,

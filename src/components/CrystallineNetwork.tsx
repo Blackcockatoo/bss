@@ -25,7 +25,7 @@
  *   small-world property.
  */
 
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { Button } from './ui/button';
 import { Zap, RotateCcw, Network, Crosshair, Dna } from 'lucide-react';
 
@@ -444,16 +444,12 @@ export function CrystallineNetwork({ dna }: CrystallineNetworkProps = {}) {
   const [mode, setModeState]         = useState<Mode>('flow');
   const [crystallized, setCrystallized] = useState(false);
   const [crystallizing, setCrystallizing] = useState(false);
-  const [stats, setStats]             = useState({ avgPath: 0, diameter: 0, edgeCount: 0, clustering: 0 });
   const [pathInfo, setPathInfo]       = useState<string>('');
-  const [dnaConnected, setDnaConnected] = useState(false);
 
-  // Build network on mount (or when DNA changes)
-  useEffect(() => {
+  // Build network (memoized on DNA)
+  const { stats, dnaConnected } = useMemo(() => {
     const net = buildNetwork(dna);
     netRef.current  = net;
-    setStats(net.stats);
-    setDnaConnected(!!dna);
 
     // Golden-spiral initial positions — seeded by DNA when available
     const posRng = dna ? createSeededRng(dnaSeed(dna + ':pos')) : Math.random;
@@ -474,6 +470,8 @@ export function CrystallineNetwork({ dna }: CrystallineNetworkProps = {}) {
       selA:        null, selB: null, pathHL: null,
       spawnT:      0,
     };
+
+    return { stats: net.stats, dnaConnected: !!dna };
   }, [dna]);
 
   // RAF simulation + render loop
