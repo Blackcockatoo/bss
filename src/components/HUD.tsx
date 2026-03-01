@@ -61,6 +61,7 @@ export function HUD({ mode = 'full' }: HUDProps) {
       <div className="grid grid-cols-4 gap-2">
         <Button
           onClick={feed}
+          title="Nourish your companion — consistent feeding builds trust and supports growth"
           className="gap-1.5 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white border-0 shadow-lg"
         >
           <UtensilsCrossed className="w-4 h-4" />
@@ -68,6 +69,7 @@ export function HUD({ mode = 'full' }: HUDProps) {
         </Button>
         <Button
           onClick={clean}
+          title="Keep things tidy — hygiene affects mood and overall wellbeing"
           className="gap-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white border-0 shadow-lg"
         >
           <Droplets className="w-4 h-4" />
@@ -75,6 +77,7 @@ export function HUD({ mode = 'full' }: HUDProps) {
         </Button>
         <Button
           onClick={play}
+          title="Play lifts mood and strengthens your bond — happy companions evolve faster"
           className="gap-1.5 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white border-0 shadow-lg"
         >
           <Sparkles className="w-4 h-4" />
@@ -82,6 +85,7 @@ export function HUD({ mode = 'full' }: HUDProps) {
         </Button>
         <Button
           onClick={sleep}
+          title="Rest restores energy — every living thing needs downtime to grow"
           className="gap-1.5 bg-gradient-to-r from-yellow-600 to-amber-600 hover:from-yellow-500 hover:to-amber-500 text-white border-0 shadow-lg"
         >
           <Zap className="w-4 h-4" />
@@ -104,6 +108,9 @@ export function HUDAdvancedStats() {
 
   return (
     <div className="space-y-3">
+      <p className="text-[10px] text-zinc-600 leading-relaxed">
+        Resonance and Nectar are earned through daily rituals. Essence is your lifetime care score — it grows with every genuine interaction and can never be bought.
+      </p>
       <div className="grid grid-cols-2 gap-3 rounded-xl border border-slate-800 bg-slate-900/40 px-3 py-2">
         <div className="space-y-1">
           <div className="text-[10px] uppercase tracking-wide text-zinc-500">Resonance</div>

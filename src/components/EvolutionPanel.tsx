@@ -250,8 +250,14 @@ export function EvolutionPanel() {
         </section>
       )}
 
-      <footer className="text-center text-xs text-zinc-500">
-        Age: {formatDuration(totalAge)}
+      <footer className="text-center text-xs text-zinc-500 space-y-1">
+        <p>Age: {formatDuration(totalAge)}</p>
+        <p className="text-zinc-700">
+          {evolution.state === 'GENETICS' && 'Genetics — where traits are first expressed, just like embryonic development.'}
+          {evolution.state === 'NEURO' && 'Neuro — personality emerges as neural pathways form through interaction.'}
+          {evolution.state === 'QUANTUM' && 'Quantum — latent potential activates, mirroring quantum biology in nature.'}
+          {evolution.state === 'SPECIATION' && 'Speciation — fully differentiated. Ready to pass traits to the next generation.'}
+        </p>
       </footer>
     </div>
   );

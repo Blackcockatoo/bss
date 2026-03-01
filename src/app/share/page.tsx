@@ -102,6 +102,9 @@ export default function ShareLandingPage() {
             recipient can verify its authenticity without trusting a central server — your achievement
             is tamper-evident by design.
           </p>
+          <p className="text-[10px] text-zinc-600 leading-relaxed">
+            This is the foundation for something bigger: a future where students can carry verifiable proof of learning between schools, districts, and platforms — without anyone owning their data.
+          </p>
           <div className="flex items-center gap-3">
             <Link
               href="/share/demo"
