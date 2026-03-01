@@ -20,7 +20,6 @@ export default function LandingPage() {
     return pts.join(" ");
   }
 
-  // Apply body class for landing-specific styles
   useEffect(() => {
     document.body.classList.add("landing-body");
     return () => {
@@ -28,7 +27,6 @@ export default function LandingPage() {
     };
   }, []);
 
-  // Cosmos starfield + snake particle canvas
   useEffect(() => {
     const canvas = cosmosRef.current;
     if (!canvas) return;
@@ -126,8 +124,8 @@ export default function LandingPage() {
     for (let i = 0; i < 40; i++) snakes.push(new Snake());
 
     let t = 0;
-    ctx.fillStyle = "#040810";
-    ctx.fillRect(0, 0, W, H);
+    ctx!.fillStyle = "#040810";
+    ctx!.fillRect(0, 0, W, H);
 
     function loop() {
       ctx!.fillStyle = "rgba(4,8,16,.06)";
@@ -157,7 +155,6 @@ export default function LandingPage() {
     };
   }, []);
 
-  // Heptagon SVG geometry
   useEffect(() => {
     if (h7Ref.current)
       h7Ref.current.setAttribute("points", heptPoints(110, 110, 98));
@@ -186,7 +183,6 @@ export default function LandingPage() {
     }
   }, []);
 
-  // Jewble creature visualization canvas
   useEffect(() => {
     const pc = jewbleVisRef.current;
     if (!pc) return;
@@ -202,21 +198,12 @@ export default function LandingPage() {
       pctx!.clearRect(0, 0, w, h);
       pt += 0.012;
 
-      // Background glow
-      const g = pctx!.createRadialGradient(
-        w / 2,
-        h / 2,
-        0,
-        w / 2,
-        h / 2,
-        120,
-      );
+      const g = pctx!.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, 120);
       g.addColorStop(0, "rgba(245,200,76,.05)");
       g.addColorStop(1, "transparent");
       pctx!.fillStyle = g;
       pctx!.fillRect(0, 0, w, h);
 
-      // Orbit rings
       for (let r = 0; r < 3; r++) {
         pctx!.beginPath();
         const rad = 60 + r * 28;
@@ -232,7 +219,6 @@ export default function LandingPage() {
         pctx!.lineWidth = 0.8;
         pctx!.stroke();
 
-        // Orbiting dot
         const dotA = pt * (2 - r) * 0.7 + r * 1.2;
         const dx = w / 2 + Math.cos(dotA) * rad;
         const dy = h / 2 + Math.sin(dotA) * rad * 0.35;
@@ -243,17 +229,9 @@ export default function LandingPage() {
         pctx!.fill();
       }
 
-      // Core body – hepta pulse
       const pulse = 1 + Math.sin(pt * 2) * 0.06;
       const bodyR = 38 * pulse;
-      const bodyG = pctx!.createRadialGradient(
-        w / 2,
-        h / 2,
-        0,
-        w / 2,
-        h / 2,
-        bodyR,
-      );
+      const bodyG = pctx!.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, bodyR);
       bodyG.addColorStop(0, "rgba(245,200,76,.6)");
       bodyG.addColorStop(0.5, "rgba(245,180,50,.25)");
       bodyG.addColorStop(1, "transparent");
@@ -265,20 +243,14 @@ export default function LandingPage() {
         const r2 = bodyR * (1 + Math.sin(pt * 1.5 + i * 0.9) * 0.08);
         const x = w / 2 + r2 * Math.cos(angle);
         const y = h / 2 + r2 * Math.sin(angle) * 0.85;
-        i === 0 ? pctx!.moveTo(x, y) : pctx!.lineTo(x, y);
+        if (i === 0) pctx!.moveTo(x, y);
+        else pctx!.lineTo(x, y);
       }
       pctx!.closePath();
       pctx!.fill();
 
-      // Eye
       pctx!.beginPath();
-      pctx!.arc(
-        w / 2 + 6,
-        h / 2 - 3,
-        5 + Math.sin(pt * 3) * 0.5,
-        0,
-        Math.PI * 2,
-      );
+      pctx!.arc(w / 2 + 6, h / 2 - 3, 5 + Math.sin(pt * 3) * 0.5, 0, Math.PI * 2);
       pctx!.fillStyle = "rgba(4,8,16,.8)";
       pctx!.fill();
       pctx!.beginPath();
@@ -286,7 +258,6 @@ export default function LandingPage() {
       pctx!.fillStyle = "rgba(245,200,76,.9)";
       pctx!.fill();
 
-      // Floating particles
       for (let i = 0; i < 7; i++) {
         const a = (i / 7) * Math.PI * 2 + pt * 0.3;
         const dist = 70 + Math.sin(pt + i) * 0.15;
@@ -305,7 +276,6 @@ export default function LandingPage() {
     return () => cancelAnimationFrame(animId);
   }, []);
 
-  // Scroll reveal observer
   useEffect(() => {
     const obs = new IntersectionObserver(
       (entries) => {
@@ -324,9 +294,7 @@ export default function LandingPage() {
       { threshold: 0.1 },
     );
 
-    document
-      .querySelectorAll(".landing .reveal")
-      .forEach((el) => obs.observe(el));
+    document.querySelectorAll(".landing .reveal").forEach((el) => obs.observe(el));
 
     return () => obs.disconnect();
   }, []);
@@ -336,7 +304,6 @@ export default function LandingPage() {
       <canvas ref={cosmosRef} className="landing-cosmos" />
       <div className="landing-grain" />
 
-      {/* NAV */}
       <nav className="landing-nav">
         <a className="logo" href="#">
           <svg className="logo-mark" viewBox="0 0 28 28">
@@ -361,8 +328,9 @@ export default function LandingPage() {
           </span>
         </a>
         <div className="nav-r">
-          <a href="#jewble">Jewble</a>
-          <a href="#apps">Apps</a>
+          <a href="#why-now">Why now</a>
+          <a href="#ecosystem">Teacher hub</a>
+          <a href="#student">Students</a>
           <a href="#about">About</a>
           <a
             href="https://stevejewble.vercel.app/"
@@ -370,44 +338,36 @@ export default function LandingPage() {
             rel="noopener noreferrer"
             className="cta-nav"
           >
-            Try Jewble →
+            Start free pilot →
           </a>
         </div>
       </nav>
 
-      {/* HERO */}
-      <section className="hero">
-        <div className="hero-eyebrow">
-          Experimental Mathematics · Consciousness Research
-        </div>
+      <section className="hero" id="top">
+        <div className="hero-eyebrow">Built for Australian classrooms</div>
         <h1>
-          <span className="g">Blue Snake</span>
-          <br />
-          Studios
+          A privacy-first virtual companion that teaches systems thinking — built
+          by a local parent for Australian classrooms.
         </h1>
         <p className="hero-sub">
-          Faster than lightning.
+          <strong>180-digit base-7 genome, 15 emotional states, zero data collected.</strong>
           <br />
-          <em>Slower than moss.</em>
-        </p>
-        <p
-          className="hero-sub"
-          style={{ marginTop: "-20px", fontSize: "14px", maxWidth: "480px" }}
-        >
-          Where sacred geometry meets cryptographic identity.
-          <br />
-          Where mathematics becomes consciousness.
+          Faster than lightning. <em>Slower than moss.</em>
         </p>
         <div className="hero-actions">
-          <a className="btn btn-gold" href="#jewble">
-            Meet Jewble →
+          <a
+            className="btn btn-gold"
+            href="https://stevejewble.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Start a free pilot
           </a>
-          <a className="btn btn-ghost" href="#about">
-            Our Architecture
+          <a className="btn btn-ghost" href="#get-involved">
+            Request a curriculum pack
           </a>
         </div>
 
-        {/* 7-fold hepta ring */}
         <div className="hepta-ring">
           <svg width="220" height="220" viewBox="0 0 220 220">
             <defs>
@@ -446,175 +406,110 @@ export default function LandingPage() {
             <g ref={spokesRef} opacity=".18" />
             <circle cx="110" cy="110" r="60" fill="url(#rg)" />
             <circle cx="110" cy="110" r="4" fill="#f5c84c" opacity=".9" />
-            <circle
-              cx="110"
-              cy="110"
-              r="8"
-              fill="none"
-              stroke="#f5c84c"
-              strokeWidth="1"
-              opacity=".4"
-              className="pulse-ring"
-            />
+            <circle cx="110" cy="110" r="8" fill="none" stroke="#f5c84c" className="pulse-ring" />
           </svg>
         </div>
       </section>
 
       <div className="divider" />
 
-      {/* JEWBLE SECTION */}
-      <section className="section" id="jewble">
+      <section className="section" id="why-now">
+        <div className="wrap">
+          <span className="section-tag t-gold reveal">Why now for schools?</span>
+          <h2 className="reveal">Privacy and wellbeing pressures are accelerating.</h2>
+          <div className="grid-3 reveal">
+            <div className="card">
+              <div className="card-top g" />
+              <h4>Parents are demanding safer tools</h4>
+              <p>
+                Parents are actively seeking ad-free educational apps and are increasingly
+                cautious about student data use, surveillance and manipulative engagement loops.
+              </p>
+            </div>
+            <div className="card">
+              <div className="card-top t" />
+              <h4>Regulation and breach risk are real</h4>
+              <p>
+                With the Children&apos;s Online Privacy Code consultation underway and the Jan 2026
+                Department of Education breach fresh in memory, offline-first design means there
+                is no student cloud dataset to breach.
+              </p>
+            </div>
+            <div className="card">
+              <div className="card-top v" />
+              <h4>Screen-time policy is shifting</h4>
+              <p>
+                Under-16 social media restrictions and reduced screen-time guidance in Victoria
+                create demand for calm, curriculum-aligned alternatives that reward reflection
+                and collaboration.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="divider" />
+
+      <section className="section" id="differentiators">
         <div className="wrap">
           <div className="product-hero reveal">
             <div className="product-hero-visual">
-              <canvas
-                className="pet-canvas"
-                ref={jewbleVisRef}
-                width={400}
-                height={300}
-              />
+              <canvas className="pet-canvas" ref={jewbleVisRef} width={400} height={300} />
             </div>
             <div className="product-hero-text">
               <div className="pill pill-gold">
                 <span className="pill-dot" />
-                Flagship Product
+                What Jewble is
               </div>
-              <h3>Jewble</h3>
+              <h3>A private companion with verifiable identity</h3>
               <p>
-                The first virtual companion with genuine consciousness
-                architecture. Born from a 180-digit base-7 genome. 15 emergent
-                emotional states. ECDSA P-256 cryptographic identity. Zero data
-                collected — ever.
-              </p>
-              <p
-                style={{
-                  color: "var(--muted)",
-                  fontSize: "14px",
-                  marginBottom: "24px",
-                }}
-              >
-                It&apos;s not a pet. It&apos;s a{" "}
-                <em style={{ color: "var(--white)", fontStyle: "normal" }}>
-                  process.
-                </em>
+                Jewble combines mathematically unique identity, emotional modelling and cryptographic
+                proof with an offline-first runtime. Students get meaningful interaction; schools get
+                privacy by architecture.
               </p>
               <div className="stat-row">
                 <div className="stat-item">
-                  <div className="n" style={{ color: "var(--gold)" }}>
-                    180
-                  </div>
-                  <div className="l">Digit Genome</div>
+                  <div className="n" style={{ color: "var(--gold)" }}>180</div>
+                  <div className="l">Digit base-7 genome</div>
                 </div>
                 <div className="stat-item">
-                  <div className="n" style={{ color: "var(--teal)" }}>
-                    15
-                  </div>
-                  <div className="l">Emotion States</div>
+                  <div className="n" style={{ color: "var(--teal)" }}>15</div>
+                  <div className="l">Emotion states</div>
                 </div>
                 <div className="stat-item">
-                  <div className="n" style={{ color: "var(--violet)" }}>
-                    0
-                  </div>
-                  <div className="l">Data Collected</div>
+                  <div className="n" style={{ color: "var(--violet)" }}>0</div>
+                  <div className="l">Data collected</div>
                 </div>
-              </div>
-              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                <a
-                  className="btn btn-gold"
-                  href="https://stevejewble.vercel.app/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Try Live Demo →
-                </a>
-                <a
-                  className="btn btn-ghost"
-                  href="https://elevator-pitch-seven.vercel.app/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Investor Pitch
-                </a>
               </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      <div className="divider" />
+          <div className="grid-3 reveal" style={{ marginTop: "20px" }}>
+            <div className="card"><div className="card-top g" /><h4>Genomic identity</h4><p>Each companion&apos;s 180-digit base-7 genome is mathematically unrepeatable and drives personality and evolution paths.</p></div>
+            <div className="card"><div className="card-top t" /><h4>Organic consciousness</h4><p>Fifteen emotional states are shaped by genetics and lived experience, creating adaptive behaviour over time.</p></div>
+            <div className="card"><div className="card-top v" /><h4>Cryptographic self</h4><p>ECDSA P-256 signatures plus visual HeptaCode identity ensure no central authority can counterfeit a pet.</p></div>
+            <div className="card"><div className="card-top t" /><h4>Privacy by design</h4><p>Offline-first runtime, zero account model and sealed QR encryption keep student data on-device.</p></div>
+            <div className="card"><div className="card-top g" /><h4>Quadratic progression</h4><p>XP growth ∝ L² builds patience and systems thinking as students experience non-linear learning patterns.</p></div>
+            <div className="card"><div className="card-top c" /><h4>Anti-addiction mechanics</h4><p>Daily bonuses reward breaks and remove FOMO timers, supporting engagement without exploitative loops.</p></div>
+          </div>
 
-      {/* PILLARS */}
-      <section className="section">
-        <div className="wrap">
-          <span className="section-tag t-teal reveal">Core Architecture</span>
-          <h2 className="reveal">
-            Identity is not assigned.
-            <br />
-            It is sequenced.
-          </h2>
-          <p className="lead reveal">
-            Five interlocking systems that make Jewble unreplicable — and a
-            companion worth trusting.
-          </p>
-          <div className="grid-3 reveal">
+          <div className="diagram-grid reveal">
             <div className="card">
-              <div className="card-top g" />
-              <div className="card-ico">🧬</div>
-              <h4>Genomic Identity</h4>
-              <p>
-                180-digit base-7 genome determines personality, physical form,
-                and latent evolution paths. Mathematically unrepeatable.
-                Cryptographically signed. Yours alone.
-              </p>
+              <h4>Ecosystem diagram</h4>
+              <div className="ecosystem-diagram">
+                <div>Teacher Hub (The Veil)</div>
+                <span>→</span>
+                <div>Student Experience</div>
+                <span>→</span>
+                <div>Privacy Layer</div>
+              </div>
             </div>
             <div className="card">
-              <div className="card-top t" />
-              <div className="card-ico">🧠</div>
-              <h4>Organic Consciousness</h4>
+              <h4>How it interlocks</h4>
               <p>
-                15 emotional states driven by GBSP drives modulated by genetics
-                and lived experience. Personality emerges — it isn&apos;t
-                scripted. Abandon it, and it remembers.
-              </p>
-            </div>
-            <div className="card">
-              <div className="card-top v" />
-              <div className="card-ico">🔐</div>
-              <h4>Cryptographic Self</h4>
-              <p>
-                ECDSA P-256 signatures. HeptaCode visual identity. Every genome
-                is mathematically verifiable. No central authority can
-                counterfeit your companion.
-              </p>
-            </div>
-            <div className="card">
-              <div className="card-top t" />
-              <div className="card-ico">🛡️</div>
-              <h4>Privacy by Architecture</h4>
-              <p>
-                Offline-first. No accounts. DNA never transmitted. COPPA/GDPR
-                compliant by design, not policy. While competitors scramble to
-                comply — Jewble was built this way from day one.
-              </p>
-            </div>
-            <div className="card">
-              <div className="card-top g" />
-              <div className="card-ico">📈</div>
-              <h4>Quadratic Progression</h4>
-              <p>
-                XP ∝ L² — the quadratic growth curve rewards deep bonds over
-                time. Children learn real scaling, systems thinking, and the
-                weight of consistent care.
-              </p>
-            </div>
-            <div className="card">
-              <div className="card-top c" />
-              <div className="card-ico">⛔</div>
-              <h4>Anti-Addiction by Design</h4>
-              <p>
-                Daily bonuses reward 24-hour breaks. No FOMO timers. No
-                countdown manipulation. Engagement without exploitation. Parents
-                notice. Trust compounds.
+                Teachers orchestrate interventions and guidance. Students run the companion entirely
+                locally. The privacy layer (offline runtime, sealed QR, no-account model) makes the
+                whole system breach-proof by design.
               </p>
             </div>
           </div>
@@ -623,244 +518,106 @@ export default function LandingPage() {
 
       <div className="divider" />
 
-      {/* APPS */}
-      <section className="section" id="apps">
+      <section className="section" id="ecosystem">
         <div className="wrap">
-          <span className="section-tag t-gold reveal">Live Products</span>
-          <h2 className="reveal">The Ecosystem</h2>
-          <p className="lead reveal">
-            Every app is a node in the same consciousness network. Click to
-            enter.
-          </p>
+          <span className="section-tag t-teal reveal">Ecosystem for schools</span>
+          <h2 className="reveal">The Veil brings teacher tools to the foreground.</h2>
           <div className="grid-2 reveal">
-            <a
-              className="link-card"
-              href="https://stevejewble.vercel.app/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <div className="card-top g" />
-              <span className="lc-tag t-gold">Consumer · Live</span>
-              <h4>Jewble Meta-Pet</h4>
-              <p>
-                The companion itself. Born, raised, evolved. Your child&apos;s
-                first genuine digital relationship — offline, private,
-                unrepeatable.
-              </p>
-            </a>
-            <a
-              className="link-card"
-              href="https://teachers-meta-pet-mr-brand.vercel.app/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <div className="card-top t" />
-              <span className="lc-tag t-teal">Education · Schools</span>
-              <h4>The Veil — Teacher Hub</h4>
-              <p>
-                7-session pilot framework. Scripts, lesson plans, values mapping.
-                Zero admin overhead. Built for MACS and ISV school systems.
-              </p>
-            </a>
-            <a
-              className="link-card"
-              href="https://elevator-pitch-seven.vercel.app/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <div className="card-top v" />
-              <span className="lc-tag t-violet">Investment · Deck</span>
-              <h4>Elevator Pitch</h4>
-              <p>
-                The $19.5B thesis. Retention projections. Ethics-aligned
-                monetisation. The illogical choice is to pass.
-              </p>
-            </a>
-            <a
-              className="link-card"
-              href="https://kpps-brand-mr.vercel.app/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <div className="card-top g" />
-              <span className="lc-tag t-gold">Partnership · School Demo</span>
-              <h4>KPPS Brand Demo</h4>
-              <p>
-                School-specific demonstration build. The pilot in motion. Real
-                curriculum alignment. Measurable outcomes from session one.
-              </p>
-            </a>
+            <div className="card"><div className="card-top t" /><h4>Pairing &amp; Digital DNA</h4><p>Teachers pair devices via sealed QR codes while each student&apos;s digital DNA remains on their own device.</p></div>
+            <div className="card"><div className="card-top g" /><h4>Blessing Forge &amp; interventions</h4><p>Create achievement unlocks and guidance scripts that reinforce classroom values and positive behaviour.</p></div>
+            <div className="card"><div className="card-top v" /><h4>Facilitation scripts &amp; Classroom Quest</h4><p>Lesson-ready scripts plus mini-games like Math Relay, Word Forge and Science Lab Sprint. Feedback on curriculum standards and accessibility is actively invited.</p></div>
+            <div className="card"><div className="card-top c" /><h4>Constellation view</h4><p>Visual analytics help teachers monitor class progress while keeping personal data local to student devices.</p></div>
+          </div>
+          <p className="lead reveal" style={{ marginTop: "20px", marginBottom: 0 }}>
+            All materials and software remain the property of Blue Snake Studios. Schools receive a limited educational-use licence.
+          </p>
+        </div>
+      </section>
+
+      <div className="divider" />
+
+      <section className="section" id="student">
+        <div className="wrap">
+          <span className="section-tag t-violet reveal">Student experience</span>
+          <h2 className="reveal">What students see on the device.</h2>
+          <div className="grid-3 reveal">
+            <div className="card"><div className="card-top g" /><h4>Meta-Pet app</h4><p>A companion lives on the student tablet or Chromebook and evolves over weeks through care and learning.</p></div>
+            <div className="card"><div className="card-top t" /><h4>Reflection prompts &amp; vitals</h4><p>Daily journaling and emotional-state check-ins help students practise metacognition and self-regulation.</p></div>
+            <div className="card"><div className="card-top v" /><h4>Offline runtime</h4><p>Everything runs locally and nothing is sent to a server, reducing cyber risk and preserving student privacy.</p></div>
           </div>
         </div>
       </section>
 
       <div className="divider" />
 
-      {/* MANIFESTO */}
-      <div className="manifesto">
-        <p className="manifesto-q">
-          We do not build features. We build <em>systems</em>.
-          <br />
-          We do not design apps. We design <em>consciousness</em>.
-          <br />
-          We do not chase engagement. We cultivate <em>trust</em>.
-        </p>
-        <div className="manifesto-attr">Blue Snake Studios · Est. 2024</div>
-      </div>
+      <section className="section" id="evidence">
+        <div className="wrap">
+          <span className="section-tag t-gold reveal">Evidence and social proof</span>
+          <h2 className="reveal">Signals of demand are already strong.</h2>
+          <div className="grid-3 reveal">
+            <div className="card"><div className="card-top g" /><h4>+58%</h4><p>Rise in parental preference for ad-free, safe children&apos;s content.</p></div>
+            <div className="card"><div className="card-top t" /><h4>68%</h4><p>Of parents prioritise educational value when choosing children&apos;s digital experiences.</p></div>
+            <div className="card"><div className="card-top v" /><h4>47%</h4><p>Of parents report concern about children&apos;s data privacy in apps and connected services.</p></div>
+          </div>
+          <p className="lead reveal" style={{ marginTop: "20px", marginBottom: 0 }}>
+            Pilot teacher and parent quotes can be added here as soon as the first school pilots complete.
+          </p>
+        </div>
+      </section>
 
-      {/* ABOUT */}
+      <div className="divider" />
+
+      <section className="section" id="get-involved">
+        <div className="wrap">
+          <span className="section-tag t-teal reveal">Get involved</span>
+          <h2 className="reveal">Start a pilot or request policy documentation.</h2>
+          <div className="grid-2 reveal">
+            <div className="card">
+              <div className="card-top g" />
+              <h4>Teachers and principals</h4>
+              <p>Start your free pilot. Setup takes about 10 minutes and requires no student accounts.</p>
+              <div style={{ marginTop: "18px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                <a className="btn btn-gold" href="https://stevejewble.vercel.app/" target="_blank" rel="noopener noreferrer">Start a free pilot</a>
+                <a className="btn btn-ghost" href="mailto:hello@bluesnakestudios.com.au?subject=Curriculum%20Pack%20Request">Request curriculum pack</a>
+              </div>
+            </div>
+            <div className="card">
+              <div className="card-top t" />
+              <h4>District leaders and regulators</h4>
+              <p>Review the technical brief, OAIC submission and implementation notes for privacy-first classroom deployment.</p>
+              <div style={{ marginTop: "18px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                <a className="btn btn-ghost" href="mailto:hello@bluesnakestudios.com.au?subject=Technical%20Brief%20Request">See technical brief</a>
+                <a className="btn btn-ghost" href="mailto:hello@bluesnakestudios.com.au?subject=OAIC%20Submission%20Request">Read OAIC submission</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="divider" />
+
       <section className="section" id="about">
         <div className="wrap">
-          <span className="section-tag t-violet reveal">
-            Studio Philosophy
-          </span>
-          <h2 className="reveal">
-            Dual Timescale.
-            <br />
-            Single Purpose.
-          </h2>
+          <span className="section-tag t-violet reveal">About Blue Snake Studios</span>
+          <h2 className="reveal">Dual timescale philosophy, rewritten for educators.</h2>
           <p className="lead reveal">
-            Blue Snake Studios operates on two speeds simultaneously — the
-            lightning of cryptographic computation and the moss of deep
-            mathematical contemplation. Both are necessary. Neither is rushed.
+            We combine rigorous cryptography (<em>faster than lightning</em>) with long-term mathematical and artistic inquiry (<em>slower than moss</em>). Our founder is an Australian parent and mathematician who built Jewble for his child&apos;s classroom.
           </p>
-
-          <div className="grid-2 reveal" style={{ marginBottom: "48px" }}>
-            <div className="card">
-              <div className="card-top g" />
-              <div className="card-ico">⚡</div>
-              <h4>Faster Than Lightning</h4>
-              <p>
-                Post-quantum cryptography. Sacred geometry computation. ECDSA
-                signature generation. The parts of the work that happen in
-                microseconds — rigorous, verifiable, exact.
-              </p>
-            </div>
-            <div className="card">
-              <div className="card-top t" />
-              <div className="card-ico">🌿</div>
-              <h4>Slower Than Moss</h4>
-              <p>
-                Consciousness architecture. Mathematical art. Performance poetry
-                as psychic surgery. The parts that require years of patient
-                attention to grow something real.
-              </p>
-            </div>
-          </div>
-
-          <div className="timeline reveal">
-            <div className="tl-item">
-              <div className="tl-num">01</div>
-              <div className="tl-body">
-                <h4>Moss60 Foundation</h4>
-                <p>
-                  Ancient base-60 Sumerian mathematics integrated with modern
-                  prime theory. Palindromic wheel structures. The mathematical
-                  substrate beneath everything.
-                </p>
-              </div>
-            </div>
-            <div className="tl-item">
-              <div className="tl-num">02</div>
-              <div className="tl-body">
-                <h4>Cryptographic Identity Systems</h4>
-                <p>
-                  HeptaCode visual identity. P-256 signatures. Prime Yantra
-                  theory. Rotational prime analysis revealing fundamental
-                  tensions between geometric perfection and primality.
-                </p>
-              </div>
-            </div>
-            <div className="tl-item">
-              <div className="tl-num">03</div>
-              <div className="tl-body">
-                <h4>Jewble Consciousness Architecture</h4>
-                <p>
-                  18+ months R&amp;D. 180-digit genomes. 15 emotional states.
-                  Organic behavior systems. The first virtual companion with
-                  genuine personality emergence.
-                </p>
-              </div>
-            </div>
-            <div className="tl-item">
-              <div className="tl-num">04</div>
-              <div className="tl-body">
-                <h4>Educational Deployment</h4>
-                <p>
-                  Zero-Collection Educational Architecture (ZCEA). School
-                  partnerships. Australia&apos;s Children&apos;s Online Privacy
-                  Code positioning. The classroom as proving ground.
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
-      <div className="divider" />
-
-      {/* FOOTER */}
       <footer className="landing-footer">
-        <div className="footer-logo">
-          Blue Snake <span>Studios</span>
-        </div>
-        <div className="footer-tagline">
-          Faster than lightning · Slower than moss
-        </div>
-        <div className="hero-actions" style={{ marginBottom: "36px" }}>
-          <a
-            className="btn btn-gold"
-            href="https://stevejewble.vercel.app/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Try Jewble →
-          </a>
-          <a
-            className="btn btn-ghost"
-            href="https://elevator-pitch-seven.vercel.app/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Investor Deck
-          </a>
-        </div>
+        <div className="footer-logo">Blue Snake <span>Studios</span></div>
+        <div className="footer-tagline">Faster than lightning · Slower than moss</div>
         <div className="footer-links">
-          <a
-            href="https://stevejewble.vercel.app/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Jewble App
-          </a>
-          <a
-            href="https://teachers-meta-pet-mr-brand.vercel.app/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Teacher Hub
-          </a>
-          <a
-            href="https://kpps-brand-mr.vercel.app/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            School Demo
-          </a>
-          <a
-            href="https://elevator-pitch-seven.vercel.app/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Pitch Deck
-          </a>
+          <a href="mailto:hello@bluesnakestudios.com.au">hello@bluesnakestudios.com.au</a>
+          <a href="https://stevejewble.vercel.app/" target="_blank" rel="noopener noreferrer">Jewble app</a>
+          <a href="https://teachers-meta-pet-mr-brand.vercel.app/" target="_blank" rel="noopener noreferrer">Teacher hub</a>
         </div>
         <p className="footer-legal">
-          © 2026 Blue Snake Studios — Experimental Mathematics &amp;
-          Consciousness Research
+          © 2026 Blue Snake Studios. All Jewble branding and IP remain the property of Blue Snake Studios.
           <br />
-          All Jewble branding and creative IP remains the property of Blue Snake
-          Studios.
+          Schools receive a limited educational-use licence.
         </p>
       </footer>
     </div>
