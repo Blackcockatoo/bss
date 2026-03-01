@@ -225,8 +225,8 @@ export default function LandingPage() {
         </a>
         <div className="nav-r">
           <a href="#for-schools">For Schools</a>
-          <a href="https://teachers-meta-pet-mr-brand.vercel.app/" target="_blank" rel="noopener noreferrer">Teacher Hub</a>
-          <a href="https://stevejewble.vercel.app/" target="_blank" rel="noopener noreferrer">Student App</a>
+          <a href="#teacher-hub">Teacher Hub</a>
+          <a href="#student-app">Student App</a>
           <a href="#privacy">Privacy</a>
           <a href="#pilot">Pilot</a>
           <a className="cta-nav" href="#pilot">Start a Pilot</a>
@@ -269,33 +269,6 @@ export default function LandingPage() {
         <p className="lead" style={{ marginBottom: 0, maxWidth: "760px" }}>
           Designed for schools that need safer tools under rising privacy expectations and device-policy change.
         </p>
-      </section>
-
-      <div className="divider" />
-
-      <section className="section" id="app-directions">
-        <div className="wrap">
-          <span className="section-tag t-gold reveal">App directions</span>
-          <h2 className="reveal">Where to go, step by step.</h2>
-          <div className="grid-2 reveal">
-            <div className="card">
-              <div className="card-top g" />
-              <h4>1) Open the Teacher Hub (The Veil)</h4>
-              <p>Use this first to generate pairing cards and run facilitation scripts.</p>
-              <div style={{ marginTop: "16px" }}>
-                <a className="btn btn-gold" href="https://teachers-meta-pet-mr-brand.vercel.app/" target="_blank" rel="noopener noreferrer">Open Teacher Hub</a>
-              </div>
-            </div>
-            <div className="card">
-              <div className="card-top t" />
-              <h4>2) Open the Student Meta-Pet App</h4>
-              <p>Students scan the QR pairing card and continue learning on-device.</p>
-              <div style={{ marginTop: "16px" }}>
-                <a className="btn btn-ghost" href="https://stevejewble.vercel.app/" target="_blank" rel="noopener noreferrer">Open Student App</a>
-              </div>
-            </div>
-          </div>
-        </div>
       </section>
 
       <div className="divider" />
@@ -393,6 +366,7 @@ export default function LandingPage() {
             <div className="card"><div className="card-top g" /><h4>Pilot format</h4><p>7 sessions (30–45 minutes).</p><h4 style={{ marginTop: "14px" }}>Setup time</h4><p>~10 minutes.</p><h4 style={{ marginTop: "14px" }}>What you get</h4><p>Teacher scripts + classroom activities + simple rollout guide.</p></div>
             <div className="card"><div className="card-top t" /><h4>What you don&apos;t need</h4><p>Accounts, student emails, cloud dashboards.</p><div style={{ marginTop: "18px", display: "flex", gap: "10px", flexWrap: "wrap" }}><a className="btn btn-gold" href="mailto:hello@bluesnakestudios.com.au?subject=Start%20School%20Pilot">Start a Pilot →</a><a className="btn btn-ghost" href="mailto:hello@bluesnakestudios.com.au?subject=Book%2012-minute%20Call">Book a 12-minute Call</a></div></div>
           </div>
+          <p className="lead reveal" style={{ marginTop: "20px", marginBottom: 0 }}>We don&apos;t &ldquo;handle data carefully.&rdquo; We don&apos;t collect it.</p>
         </div>
       </section>
 
