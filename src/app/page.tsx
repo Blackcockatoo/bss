@@ -4,6 +4,33 @@ import { useEffect, useRef } from "react";
 import "./landing.css";
 
 export default function LandingPage() {
+  const adCards = [
+    {
+      platform: "Meta / Instagram",
+      audience: "Parents",
+      headline: "A digital pet that never sells your child.",
+      body:
+        "Jewble is an offline-first companion app with no ads, no surveillance, and no account setup. Kids grow a calm creature while building reflection habits and systems thinking.",
+      cta: "Join the pilot waitlist.",
+    },
+    {
+      platform: "LinkedIn",
+      audience: "School leaders",
+      headline: "The classroom wellbeing pilot with zero admin drag.",
+      body:
+        "Deploy in minutes with no student accounts and no dashboard overhead. Teacher Hub includes pairing cards, facilitation scripts, and privacy-first implementation guides.",
+      cta: "Request the KPPS implementation pack.",
+    },
+    {
+      platform: "X / Threads",
+      audience: "Investors & partners",
+      headline: "Category shift: post-adtech kids products are now investable.",
+      body:
+        "Jewble combines privacy-by-design architecture, education distribution, and retention-led product loops in a market where regulation is accelerating differentiation.",
+      cta: "Request the investor briefing packet.",
+    },
+  ];
+
   const kppsDocs = [
     {
       title: "Package index",
@@ -61,6 +88,25 @@ export default function LandingPage() {
       description:
         "Technical architecture and privacy-by-design controls for ICT and leadership review.",
     },
+  ];
+
+  const marketRows = [
+    ["Global educational apps", "$6.4B", "$19.5B", "14.9%"],
+    ["Social emotional learning tech", "$2.1B", "$7.9B", "17.9%"],
+    ["Child-safe digital wellbeing", "$1.2B", "$4.6B", "18.3%"],
+  ];
+
+  const regulatoryRows = [
+    ["Children's Privacy Code", "Active", "Raises compliance costs", "Offline-first, zero-ad telemetry baseline"],
+    ["Age Appropriate Design", "Expanding", "Limits behavioural targeting", "No behavioural ads or dark patterns"],
+    ["School procurement standards", "Tightening", "Longer due diligence", "Teacher Hub package and privacy briefs ready"],
+  ];
+
+  const actionPlan = [
+    "Close 3 pilot schools and capture baseline-to-outcome evidence.",
+    "Publish parent and teacher testimonials with quantified engagement deltas.",
+    "Open partner pipeline for district rollout and education channel licensing.",
+    "Expand premium roadmap: cosmetics, cloud backup, and curriculum modules.",
   ];
 
   const cosmosRef = useRef<HTMLCanvasElement>(null);
