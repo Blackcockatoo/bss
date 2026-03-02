@@ -16,7 +16,6 @@ export function PhaserGame({ petData, onGameEnd }: PhaserGameProps) {
   const gameRef = useRef<import('phaser').Game | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const onGameEndRef = useRef(onGameEnd);
-  const petDataRef = useRef(petData);
   const handleGameEndRef = useRef<((event: Event) => void) | null>(null);
 
   const resizeGame = useCallback(() => {
@@ -49,11 +48,8 @@ export function PhaserGame({ petData, onGameEnd }: PhaserGameProps) {
   }, [onGameEnd]);
 
   useEffect(() => {
-    petDataRef.current = petData;
-    if (gameRef.current?.scene.isActive('MenuScene')) {
-      sendPetDataToMenuScene();
-    }
-  }, [petData, sendPetDataToMenuScene]);
+    gameRef.current?.registry.set('petData', petData);
+  }, [petData]);
 
   useEffect(() => {
     if (!containerRef.current || typeof window === 'undefined') return;
