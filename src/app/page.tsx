@@ -85,6 +85,11 @@ export default function LandingPage() {
     };
   }, []);
 
+  function copyAd(headline: string, body: string, cta: string) {
+    const text = `${headline}\n\n${body}\n\n${cta}`;
+    navigator.clipboard.writeText(text).catch(() => undefined);
+  }
+
   useEffect(() => {
     const canvas = cosmosRef.current;
     if (!canvas) return;
@@ -332,6 +337,104 @@ export default function LandingPage() {
         <p className="lead" style={{ marginBottom: 0, maxWidth: "760px" }}>
           180-digit base-7 genome. 15 emotional states. Zero data collected.
         </p>
+      </section>
+
+      <div className="divider" />
+
+      <section className="section" id="parents">
+        <div className="wrap">
+          <span className="section-tag t-teal reveal">Layer 1 — Parents &amp; kids</span>
+          <h2 className="reveal">Something noticed you noticing it.</h2>
+          <p className="lead reveal">
+            A privacy-first companion that teaches systems thinking, responsibility, and emotional
+            regulation without harvesting data. No accounts. No tracking. No ad-tech loops.
+          </p>
+          <div className="campaign-card-grid reveal">
+            <div className="card"><div className="card-top t" /><h4>Genuinely unique</h4><p>180-digit base-7 genome with mathematically unique identity and expression.</p></div>
+            <div className="card"><div className="card-top t" /><h4>Privacy by architecture</h4><p>Offline-first runtime with local-only core data model and no default tracking.</p></div>
+            <div className="card"><div className="card-top t" /><h4>Screen-time with substance</h4><p>15 emotional states and care loops that teach feedback, cause/effect, and reflection.</p></div>
+            <div className="card"><div className="card-top t" /><h4>Anti-addiction design</h4><p>Progression pacing rewards consistency and breaks over binge behaviour.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <div className="divider" />
+
+      <section className="section" id="schools">
+        <div className="wrap">
+          <span className="section-tag t-gold reveal">Layer 2 — Schools &amp; educators</span>
+          <h2 className="reveal">The tool your curriculum already needs.</h2>
+          <p className="lead reveal">
+            A structured two-week implementation path designed for real classrooms: light setup,
+            practical scripts, and evidence-aligned outcomes.
+          </p>
+          <div className="campaign-card-grid reveal">
+            <div className="card"><div className="card-top g" /><h4>Complete implementation package</h4><p>Session guides, scripts, reflection prompts, values mapping, and parent comms templates.</p></div>
+            <div className="card"><div className="card-top g" /><h4>Curriculum alignment</h4><p>Supports Digital Technologies, wellbeing practice, and systems-thinking pedagogy.</p></div>
+            <div className="card"><div className="card-top g" /><h4>Zero teacher overhead</h4><p>No student account admin workflows for baseline deployment.</p></div>
+            <div className="card"><div className="card-top g" /><h4>Measurable outcomes</h4><p>Supports reporting around engagement, wellbeing language, and digital-safety posture.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <div className="divider" />
+
+      <section className="section" id="investors">
+        <div className="wrap">
+          <span className="section-tag t-violet reveal">Layer 3 — Investors</span>
+          <h2 className="reveal">The illogical choice is to pass.</h2>
+          <p className="lead reveal">Market momentum, regulatory change, and ethical monetisation are converging.</p>
+          <div className="briefing-table-wrap reveal">
+            <table className="briefing-table">
+              <thead><tr><th>Metric</th><th>Industry</th><th>Jewble (Projected)</th><th>Driver</th></tr></thead>
+              <tbody>
+                <tr><td>Day 30 retention</td><td>5–8%</td><td>35–50%</td><td>Visible consciousness and evolution loops</td></tr>
+                <tr><td>Free→Paid conversion</td><td>5–10%</td><td>Up to 30%</td><td>Trust-led premium positioning</td></tr>
+                <tr><td>12-month LTV</td><td>$5–10</td><td>$15–30</td><td>Deep progression plus cosmetic/education layers</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <div className="divider" />
+
+      <section className="section" id="strategy">
+        <div className="wrap">
+          <span className="section-tag" style={{ color: "var(--coral)" }}>Campaign intelligence</span>
+          <h2 className="reveal">Memetic architecture</h2>
+          <p className="lead reveal">Three audience registers: parents, schools, and investors — one coherent thesis.</p>
+          <div className="campaign-card-grid reveal">
+            <div className="card"><div className="card-top t" /><h4>Endowment priming</h4><p>Pre-ownership language increases emotional commitment before install.</p></div>
+            <div className="card"><div className="card-top g" /><h4>Fear inversion</h4><p>Privacy claims are framed as parent and school agency, not compliance jargon.</p></div>
+            <div className="card"><div className="card-top v" /><h4>Inevitability framing</h4><p>Regulatory and category shifts make the thesis easier to validate over time.</p></div>
+            <div className="card"><div className="card-top c" /><h4>Veil mechanics</h4><p>Simple interface, deep systems learning, layered for each stakeholder audience.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <div className="divider" />
+
+      <section className="section" id="ads">
+        <div className="wrap">
+          <span className="section-tag t-gold reveal">Ready-to-deploy copy</span>
+          <h2 className="reveal">Ad copy bank</h2>
+          <p className="lead reveal">Platform-ready baseline messaging for immediate outreach and campaign testing.</p>
+          <div className="ad-card-grid reveal">
+            {adCards.map((ad) => (
+              <div className="ad-copy-card" key={ad.headline}>
+                <div className="ad-copy-top">
+                  <span className="ad-platform">{ad.platform}</span>
+                  <button type="button" className="ad-copy-btn" onClick={() => copyAd(ad.headline, ad.body, ad.cta)}>Copy</button>
+                </div>
+                <div className="ad-audience">{ad.audience}</div>
+                <h4>{ad.headline}</h4>
+                <p>{ad.body}</p>
+                <p className="ad-cta">{ad.cta}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
       <div className="divider" />
