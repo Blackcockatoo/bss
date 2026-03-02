@@ -6,17 +6,35 @@ import { MenuScene } from './scenes/MenuScene';
 import { GameScene } from './scenes/GameScene';
 import { NarrativeScene } from './scenes/NarrativeScene';
 
+const MIN_WIDTH = 320;
+const MIN_HEIGHT = 520;
+const BASE_WIDTH = 800;
+const BASE_HEIGHT = 600;
+
+const getViewport = () => {
+  if (typeof window === 'undefined') {
+    return { width: BASE_WIDTH, height: BASE_HEIGHT };
+  }
+
+  return {
+    width: Math.max(MIN_WIDTH, Math.min(BASE_WIDTH, window.innerWidth)),
+    height: Math.max(MIN_HEIGHT, Math.min(BASE_HEIGHT, window.innerHeight - 120)),
+  };
+};
+
+const viewport = getViewport();
+
 export const gameConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO, // WebGL with Canvas fallback
-  width: 800,
-  height: 600,
+  width: viewport.width,
+  height: viewport.height,
   parent: 'phaser-game-container',
   backgroundColor: '#0a0520',
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
-    width: 800,
-    height: 600,
+    width: viewport.width,
+    height: viewport.height,
   },
   physics: {
     default: 'arcade',
