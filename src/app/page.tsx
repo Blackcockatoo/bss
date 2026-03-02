@@ -4,27 +4,27 @@ import { useEffect, useRef } from "react";
 import "./landing.css";
 
 export default function LandingPage() {
-  const schoolPackDocs = [
+  const kppsDocs = [
     {
-      title: "Package index template",
+      title: "Package index",
       tag: "Start here",
       href: "/docs/kpps/00_Package_Index.md",
       description:
-        "Overview template for your school implementation package, audience pathways, and rollout steps.",
+        "Overview of the full KPPS Teacher Hub package, audience pathways, and rollout steps.",
     },
     {
-      title: "Teacher Hub welcome template",
+      title: "Teacher Hub welcome",
       tag: "Document 1",
       href: "/docs/kpps/01_KPPS_Teacher_Hub_Welcome.md",
       description:
-        "Customisable welcome framing for mission fit, pilot context, and rollout intent.",
+        "Strategic framing of The Veil model, mission fit, and the pilot context for schools.",
     },
     {
-      title: "Implementation guide template",
+      title: "Implementation guide",
       tag: "Document 2",
       href: "/docs/kpps/02_KPPS_Implementation_Guide.md",
       description:
-        "Seven-session classroom roadmap that can be adapted to your local teaching model.",
+        "Seven-session classroom roadmap aligned to the KPPS gradual release structure.",
     },
     {
       title: "Facilitation scripts",
@@ -41,11 +41,11 @@ export default function LandingPage() {
         "Printable and digital prompt bank across wellbeing, systems thinking, and values.",
     },
     {
-      title: "Values integration map template",
+      title: "Values integration map",
       tag: "Document 5",
       href: "/docs/kpps/05_KPPS_Values_Integration_Map.md",
       description:
-        "Leadership-level alignment template for school values, policy intent, and success metrics.",
+        "Leadership-level alignment to KPPS values, policy intent, and success metrics.",
     },
     {
       title: "Parent communication kit",
@@ -61,29 +61,6 @@ export default function LandingPage() {
       description:
         "Technical architecture and privacy-by-design controls for ICT and leadership review.",
     },
-  ];
-
-  const marketRows = [
-    ["Virtual Pet Simulator Apps", "$326M – $1.5B", "$525M – $4.2B", "9.8% – 22%"],
-    ["Kids’ Apps (All Categories)", "$2.1B", "$16.2B – $17.6B", "26.7% – 28.4%"],
-    ["Kids’ Educational Apps", "$7.1B", "$28.1B", "17.6%"],
-    ["Education Apps (All Ages)", "$6.2B", "$41.6B", "21.5%"],
-    ["Combined Addressable Market", "$15B+", "$30B+", "—"],
-  ];
-
-  const regulatoryRows = [
-    ["US COPPA 2025 Update", "Effective June 2025", "Major consent/data-flow overhauls", "Already aligned: no data collected"],
-    ["Australia Children’s Online Privacy Code", "Mandatory by Dec 2026", "Default settings and child-safe controls required", "Already aligned: offline-first, no accounts"],
-    ["UK Age Appropriate Design Code", "Active since 2021", "Ongoing enforcement and fines", "Already aligned: privacy by design"],
-    ["FTC enforcement precedent", "$20M fine (Genshin Impact)", "Clear increase in children’s privacy enforcement", "Near-zero exposure by architecture"],
-    ["Australia social media age ban (16+)", "Active Dec 2025", "Age verification pressure across platforms", "No social verification model required"],
-  ];
-
-  const actionPlan = [
-    "Week 1: App Store foundations (developer accounts, listing copy, privacy policy, sales assets).",
-    "Week 2: Build and submit (PWA packaging plus iOS/Android submissions).",
-    "Weeks 3–4: Launch and outreach (schools, press, parent channels, investor packet distribution).",
-    "Ongoing: ASO iteration, seasonal content drops, regulatory-positioned messaging, and education case studies.",
   ];
 
   const cosmosRef = useRef<HTMLCanvasElement>(null);
@@ -310,7 +287,7 @@ export default function LandingPage() {
           <a href="#why-now">Why Now</a>
           <a href="#what-jewble-is">What It Is</a>
           <a href="#for-teachers">For Teachers</a>
-          <a href="#school-pack">School Pack</a>
+          <a href="#kpps-package">KPPS Pack</a>
           <a href="#student-experience">Student App</a>
           <a href="#evidence">Evidence</a>
           <a href="#investor-brief">Investor Brief</a>
@@ -523,20 +500,20 @@ export default function LandingPage() {
 
       <div className="divider" />
 
-      <section className="section" id="school-pack">
+      <section className="section" id="kpps-package">
         <div className="wrap">
-          <span className="section-tag t-teal reveal">School implementation pack</span>
-          <h2 className="reveal">A complete school pack, adaptable for any classroom community.</h2>
+          <span className="section-tag t-teal reveal">KPPS Teacher Hub package</span>
+          <h2 className="reveal">All implementation files are now on the landing page.</h2>
           <p className="lead reveal">
-            Open the full implementation pack directly from here. These documents are provided as practical templates
-            your leadership team can adapt for your school context, language, and policy requirements.
+            Open any file directly from here. Each document is hosted in <code>/public/docs/kpps</code>
+            so schools can quickly review, download, and share the full package.
           </p>
 
-          <div className="school-pack-doc-grid reveal">
-            {schoolPackDocs.map((doc) => (
+          <div className="kpps-doc-grid reveal">
+            {kppsDocs.map((doc) => (
               <a
                 key={doc.href}
-                className="link-card school-pack-doc-card"
+                className="link-card kpps-doc-card"
                 href={doc.href}
                 target="_blank"
                 rel="noopener noreferrer"

@@ -565,72 +565,14 @@ body.landing-body {
   max-width: 90%;
 }
 
-.landing .school-pack-doc-grid {
+.landing .kpps-doc-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 14px;
 }
 
-.landing .school-pack-doc-card h4 {
+.landing .kpps-doc-card h4 {
   font-size: 16px;
-}
-
-.landing .briefing-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
-  margin-bottom: 14px;
-}
-
-.landing .briefing-table-wrap {
-  overflow-x: auto;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  margin-top: 10px;
-}
-
-.landing .briefing-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-}
-
-.landing .briefing-table th,
-.landing .briefing-table td {
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--line);
-  text-align: left;
-  vertical-align: top;
-}
-
-.landing .briefing-table th {
-  color: var(--white);
-  font-weight: 700;
-  font-size: 11px;
-  letter-spacing: 0.3px;
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.landing .briefing-table td {
-  color: var(--muted);
-  line-height: 1.6;
-}
-
-.landing .briefing-note {
-  margin-top: 12px;
-  font-size: 11px;
-  color: var(--muted);
-}
-
-.landing .briefing-list {
-  list-style: disc;
-  margin: 8px 0 0;
-  padding-left: 18px;
-  color: var(--muted);
-  display: grid;
-  gap: 8px;
-  font-size: 13px;
-  line-height: 1.65;
 }
 
 /* ── MANIFESTO ── */
@@ -931,12 +873,8 @@ body.landing-body {
     grid-template-columns: 1fr;
   }
 
-  .landing .school-pack-doc-grid {
+  .landing .kpps-doc-grid {
     grid-template-columns: 1fr;
-  }
-
-  .landing .briefing-table {
-    font-size: 11px;
   }
 
   .landing .diagram-grid {
