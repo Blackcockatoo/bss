@@ -290,6 +290,7 @@ export default function LandingPage() {
           <a href="#kpps-package">KPPS Pack</a>
           <a href="#student-experience">Student App</a>
           <a href="#evidence">Evidence</a>
+          <a href="#investor-brief">Investor Brief</a>
           <a className="cta-nav" href="#get-involved">Start a Pilot</a>
         </div>
       </nav>
@@ -590,6 +591,111 @@ export default function LandingPage() {
             <div className="evidence-stat">
               <div className="es-num">47%</div>
               <div className="es-label">cite data privacy as a top concern with children&apos;s apps</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="divider" />
+
+      <section className="section" id="investor-brief">
+        <div className="wrap">
+          <span className="section-tag t-violet reveal">Investor &amp; partner briefing packet</span>
+          <h2 className="reveal">Jewble Meta-Pet — where consciousness meets code.</h2>
+          <p className="lead reveal">
+            Confidential snapshot (February 2026): market timing, regulatory moat, product readiness,
+            and commercialisation pathways for investors, strategic partners, and education buyers.
+          </p>
+
+          <div className="briefing-grid reveal">
+            <div className="card">
+              <div className="card-top g" />
+              <h4>The opportunity in numbers</h4>
+              <div className="briefing-table-wrap">
+                <table className="briefing-table">
+                  <thead>
+                    <tr>
+                      <th>Market segment</th>
+                      <th>2025</th>
+                      <th>2033</th>
+                      <th>CAGR</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {marketRows.map((row) => (
+                      <tr key={row[0]}>
+                        <td>{row[0]}</td>
+                        <td>{row[1]}</td>
+                        <td>{row[2]}</td>
+                        <td>{row[3]}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="briefing-note">Sources: Research and Markets, IMARC, 360iResearch, and other 2025 market reports.</p>
+            </div>
+
+            <div className="card">
+              <div className="card-top t" />
+              <h4>Regulatory moat</h4>
+              <div className="briefing-table-wrap">
+                <table className="briefing-table">
+                  <thead>
+                    <tr>
+                      <th>Regulation</th>
+                      <th>Status</th>
+                      <th>Competitor impact</th>
+                      <th>Jewble position</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {regulatoryRows.map((row) => (
+                      <tr key={row[0]}>
+                        <td>{row[0]}</td>
+                        <td>{row[1]}</td>
+                        <td>{row[2]}</td>
+                        <td>{row[3]}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="briefing-note">Core thesis: compliance is architectural, not an expensive retrofit.</p>
+            </div>
+          </div>
+
+          <div className="grid-3 reveal">
+            <div className="card">
+              <div className="card-top v" />
+              <h4>Five differentiators</h4>
+              <ul className="briefing-list">
+                <li>15-state organic consciousness model driven by genetics + care history.</li>
+                <li>180-digit base-7 genome with cryptographic identity and tamper-evident traits.</li>
+                <li>Offline-first, zero-account architecture with local-only core runtime.</li>
+                <li>Deep progression: evolution, duels, mini-games, lineage, cosmetics, achievements.</li>
+                <li>Non-violent, calm UX suitable for family and school environments.</li>
+              </ul>
+            </div>
+            <div className="card">
+              <div className="card-top g" />
+              <h4>Monetisation pathways</h4>
+              <ul className="briefing-list">
+                <li>Premium app one-time purchase ($4.99–$9.99).</li>
+                <li>Optional visual-only cosmetic packs.</li>
+                <li>Educational licensing for schools and districts.</li>
+                <li>Optional encrypted cloud-sync subscription.</li>
+                <li>SDK / white-label licensing for education and wellness partners.</li>
+              </ul>
+            </div>
+            <div className="card">
+              <div className="card-top t" />
+              <h4>Immediate action plan</h4>
+              <ul className="briefing-list">
+                {actionPlan.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
