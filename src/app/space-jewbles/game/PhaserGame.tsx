@@ -16,13 +16,18 @@ export function PhaserGame({ petData, onGameEnd }: PhaserGameProps) {
   const gameRef = useRef<import('phaser').Game | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const onGameEndRef = useRef(onGameEnd);
-  const petDataRef = useRef(petData);
   const handleGameEndRef = useRef<((event: Event) => void) | null>(null);
 
-  const sendPetDataToMenuScene = useCallback(() => {
-    const menuScene = gameRef.current?.scene.getScene('MenuScene');
-    if (!menuScene) return;
-    menuScene.events.emit('petData', petDataRef.current);
+  const resizeGame = useCallback(() => {
+    const game = gameRef.current;
+    const container = containerRef.current;
+    if (!game || !container) return;
+
+    const bounds = container.getBoundingClientRect();
+    const width = Math.max(320, Math.floor(bounds.width));
+    const height = Math.max(520, Math.floor(bounds.height));
+
+    game.scale.resize(width, height);
   }, []);
 
   if (!handleGameEndRef.current) {
@@ -37,11 +42,8 @@ export function PhaserGame({ petData, onGameEnd }: PhaserGameProps) {
   }, [onGameEnd]);
 
   useEffect(() => {
-    petDataRef.current = petData;
-    if (gameRef.current?.scene.isActive('MenuScene')) {
-      sendPetDataToMenuScene();
-    }
-  }, [petData, sendPetDataToMenuScene]);
+    gameRef.current?.registry.set('petData', petData);
+  }, [petData]);
 
   useEffect(() => {
     if (!containerRef.current || typeof window === 'undefined') return;
@@ -62,28 +64,33 @@ export function PhaserGame({ petData, onGameEnd }: PhaserGameProps) {
           parent: containerRef.current!,
         });
 
-        // Send pet data to MenuScene when it is created or becomes active
-        const menuScene = gameRef.current.scene.getScene('MenuScene');
-        if (menuScene) {
-          if (menuScene.scene.isActive()) {
-            sendPetDataToMenuScene();
-          } else {
-            menuScene.events.once('create', sendPetDataToMenuScene);
-            menuScene.events.once('wake', sendPetDataToMenuScene);
-          }
-        }
+        gameRef.current.registry.set('petData', petData);
+
+        resizeGame();
       });
     });
 
+    window.addEventListener('resize', resizeGame);
+    const resizeObserver = typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(() => {
+          resizeGame();
+        })
+      : null;
+    if (resizeObserver) {
+      resizeObserver.observe(containerRef.current);
+    }
+
     // Cleanup on unmount
     return () => {
+      window.removeEventListener('resize', resizeGame);
+      resizeObserver?.disconnect();
       window.removeEventListener('gameEnd', handleGameEndRef.current as EventListener);
       if (gameRef.current) {
         gameRef.current.destroy(true);
         gameRef.current = null;
       }
     };
-  }, [sendPetDataToMenuScene]);
+  }, [petData, resizeGame]);
 
   return (
     <div

@@ -54,7 +54,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   init(data: any) {
-    this.petData = data.petData;
+    this.petData = data?.petData ?? this.registry.get('petData');
   }
 
   create() {

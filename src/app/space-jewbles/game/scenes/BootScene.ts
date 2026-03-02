@@ -57,7 +57,8 @@ export class BootScene extends Phaser.Scene {
   }
 
   create() {
-    // Transition to MenuScene
-    this.scene.start('MenuScene');
+    // Start gameplay immediately (React page already provides pre-game UI)
+    const petData = this.registry.get('petData');
+    this.scene.start('GameScene', { petData });
   }
 }
