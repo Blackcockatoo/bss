@@ -335,6 +335,7 @@ export default function LandingPage() {
           </span>
         </a>
         <div className="nav-r">
+          <a href="/space-jewbles">Play Space Jewbles</a>
           <a href="#why-now">Why Now</a>
           <a href="#what-jewble-is">What It Is</a>
           <a href="#for-teachers">For Teachers</a>
@@ -359,6 +360,7 @@ export default function LandingPage() {
           <em>Faster than lightning. Slower than moss.</em>
         </p>
         <div className="hero-actions">
+          <a className="btn btn-gold" href="/space-jewbles">Play Space Jewbles</a>
           <a className="btn btn-gold" href="https://teachers-meta-pet-mr-brand.vercel.app/" target="_blank" rel="noopener noreferrer">Start a Free Pilot</a>
           <a className="btn btn-ghost" href="/blue-snake-studios.html" target="_blank" rel="noopener noreferrer">Visit BlueSnakeStudios.com</a>
           <a className="btn btn-ghost" href="mailto:hello@bluesnakestudios.com.au?subject=Curriculum%20Pack%20Request">Request a Curriculum Pack</a>
