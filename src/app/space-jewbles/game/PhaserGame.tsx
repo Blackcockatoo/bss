@@ -30,6 +30,12 @@ export function PhaserGame({ petData, onGameEnd }: PhaserGameProps) {
     game.scale.resize(width, height);
   }, []);
 
+  const sendPetDataToMenuScene = useCallback(() => {
+    const menuScene = gameRef.current?.scene.getScene('MenuScene');
+    if (!menuScene) return;
+    menuScene.events.emit('petData', petDataRef.current);
+  }, []);
+
   if (!handleGameEndRef.current) {
     handleGameEndRef.current = (event: Event) => {
       const customEvent = event as CustomEvent;
@@ -64,9 +70,18 @@ export function PhaserGame({ petData, onGameEnd }: PhaserGameProps) {
           parent: containerRef.current!,
         });
 
-        gameRef.current.registry.set('petData', petData);
-
         resizeGame();
+
+        // Send pet data to MenuScene when it is created or becomes active
+        const menuScene = gameRef.current.scene.getScene('MenuScene');
+        if (menuScene) {
+          if (menuScene.scene.isActive()) {
+            sendPetDataToMenuScene();
+          } else {
+            menuScene.events.once('create', sendPetDataToMenuScene);
+            menuScene.events.once('wake', sendPetDataToMenuScene);
+          }
+        }
       });
     });
 
@@ -90,7 +105,7 @@ export function PhaserGame({ petData, onGameEnd }: PhaserGameProps) {
         gameRef.current = null;
       }
     };
-  }, [petData, resizeGame]);
+  }, [resizeGame, sendPetDataToMenuScene]);
 
   return (
     <div
