@@ -565,6 +565,148 @@ body.landing-body {
   max-width: 90%;
 }
 
+.landing .school-pack-doc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.landing .school-pack-doc-card h4 {
+  font-size: 16px;
+}
+
+.landing .briefing-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.landing .briefing-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-top: 10px;
+}
+
+.landing .briefing-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.landing .briefing-table th,
+.landing .briefing-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.landing .briefing-table th {
+  color: var(--white);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.3px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.landing .briefing-table td {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.landing .briefing-note {
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.landing .briefing-list {
+  list-style: disc;
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.landing .campaign-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.landing .ad-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.landing .ad-copy-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.landing .ad-copy-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.landing .ad-platform,
+.landing .ad-audience {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.landing .ad-audience {
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+.landing .ad-copy-btn {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.landing .ad-copy-btn:hover {
+  color: var(--white);
+}
+
+.landing .ad-copy-card h4 {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.landing .ad-copy-card p {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.65;
+  white-space: pre-line;
+}
+
+.landing .ad-copy-card .ad-cta {
+  margin-top: 12px;
+  color: var(--gold);
+  font-weight: 600;
+}
+
 /* ── MANIFESTO ── */
 .landing .manifesto {
   padding: 80px 32px;
@@ -861,6 +1003,19 @@ body.landing-body {
 
   .landing .grid-2 {
     grid-template-columns: 1fr;
+  }
+
+  .landing .campaign-card-grid,
+  .landing .ad-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .landing .school-pack-doc-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .landing .briefing-table {
+    font-size: 11px;
   }
 
   .landing .diagram-grid {

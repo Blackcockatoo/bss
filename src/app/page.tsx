@@ -4,6 +4,112 @@ import { useEffect, useRef } from "react";
 import "./landing.css";
 
 export default function LandingPage() {
+  const schoolPackDocs = [
+    {
+      title: "Package index template",
+      tag: "Start here",
+      href: "/docs/kpps/00_Package_Index.md",
+      description:
+        "Overview template for your school implementation package, audience pathways, and rollout steps.",
+    },
+    {
+      title: "Teacher Hub welcome template",
+      tag: "Document 1",
+      href: "/docs/kpps/01_KPPS_Teacher_Hub_Welcome.md",
+      description:
+        "Customisable welcome framing for mission fit, pilot context, and rollout intent.",
+    },
+    {
+      title: "Implementation guide template",
+      tag: "Document 2",
+      href: "/docs/kpps/02_KPPS_Implementation_Guide.md",
+      description:
+        "Seven-session classroom roadmap that can be adapted to your local teaching model.",
+    },
+    {
+      title: "Facilitation scripts",
+      tag: "Document 3",
+      href: "/docs/kpps/03_KPPS_Facilitation_Scripts.md",
+      description:
+        "Plug-and-play teacher language and transition cues for each pilot session.",
+    },
+    {
+      title: "Reflection prompts",
+      tag: "Document 4",
+      href: "/docs/kpps/04_KPPS_Reflection_Prompts.md",
+      description:
+        "Printable and digital prompt bank across wellbeing, systems thinking, and values.",
+    },
+    {
+      title: "Values integration map template",
+      tag: "Document 5",
+      href: "/docs/kpps/05_KPPS_Values_Integration_Map.md",
+      description:
+        "Leadership-level alignment template for school values, policy intent, and success metrics.",
+    },
+    {
+      title: "Parent communication kit",
+      tag: "Document 6",
+      href: "/docs/kpps/06_KPPS_Parent_Communication_Kit.md",
+      description:
+        "Ready-to-send Sentral and newsletter templates for pre, mid, and post-pilot updates.",
+    },
+    {
+      title: "Privacy & safety brief",
+      tag: "Document 7",
+      href: "/docs/kpps/07_KPPS_Privacy_Safety_Brief.md",
+      description:
+        "Technical architecture and privacy-by-design controls for ICT and leadership review.",
+    },
+  ];
+
+  const marketRows = [
+    ["Virtual Pet Simulator Apps", "$326M – $1.5B", "$525M – $4.2B", "9.8% – 22%"],
+    ["Kids’ Apps (All Categories)", "$2.1B", "$16.2B – $17.6B", "26.7% – 28.4%"],
+    ["Kids’ Educational Apps", "$7.1B", "$28.1B", "17.6%"],
+    ["Education Apps (All Ages)", "$6.2B", "$41.6B", "21.5%"],
+    ["Combined Addressable Market", "$15B+", "$30B+", "—"],
+  ];
+
+  const regulatoryRows = [
+    ["US COPPA 2025 Update", "Effective June 2025", "Major consent/data-flow overhauls", "Already aligned: no data collected"],
+    ["Australia Children’s Online Privacy Code", "Mandatory by Dec 2026", "Default settings and child-safe controls required", "Already aligned: offline-first, no accounts"],
+    ["UK Age Appropriate Design Code", "Active since 2021", "Ongoing enforcement and fines", "Already aligned: privacy by design"],
+    ["FTC enforcement precedent", "$20M fine (Genshin Impact)", "Clear increase in children’s privacy enforcement", "Near-zero exposure by architecture"],
+    ["Australia social media age ban (16+)", "Active Dec 2025", "Age verification pressure across platforms", "No social verification model required"],
+  ];
+
+  const actionPlan = [
+    "Week 1: App Store foundations (developer accounts, listing copy, privacy policy, sales assets).",
+    "Week 2: Build and submit (PWA packaging plus iOS/Android submissions).",
+    "Weeks 3–4: Launch and outreach (schools, press, parent channels, investor packet distribution).",
+    "Ongoing: ASO iteration, seasonal content drops, regulatory-positioned messaging, and education case studies.",
+  ];
+
+  const adCards = [
+    {
+      audience: "Parents / Consumer",
+      platform: "Instagram / Facebook — Primary",
+      headline: "Something noticed you noticing it.",
+      body: "Your child's new companion is born from a 180-digit genome. It learns. It evolves. It remembers how it was treated.\n\nNo accounts. No tracking. No data leaves the device. Just a quiet, intelligent creature that teaches responsibility, patience, and systems thinking.",
+      cta: "CTA: Meet your Jewble →",
+    },
+    {
+      audience: "Schools / Education",
+      platform: "Email — Outreach to school leadership",
+      headline: "A 2-week pilot that creates no new admin burden.",
+      body: "Offline-first, zero-account classroom deployment with implementation scripts and values-aligned activities.\n\nOne class. Two weeks. Seven sessions. No new account overhead for staff, students, or families.",
+      cta: "CTA: Request the implementation package →",
+    },
+    {
+      audience: "Investors",
+      platform: "Investor outreach",
+      headline: "$19.5B+ narrative with a privacy-by-architecture moat.",
+      body: "Jewble combines consciousness architecture, cryptographic identity, and compliance-aligned product design in one category-defining companion platform.\n\nThe model supports premium D2C, school licensing, and strategic SDK pathways.",
+      cta: "CTA: Schedule demo →",
+    },
+  ];
+
   const cosmosRef = useRef<HTMLCanvasElement>(null);
   const h7Ref = useRef<SVGPolygonElement>(null);
   const h7bRef = useRef<SVGPolygonElement>(null);
@@ -25,6 +131,11 @@ export default function LandingPage() {
       document.body.classList.remove("landing-body");
     };
   }, []);
+
+  function copyAd(headline: string, body: string, cta: string) {
+    const text = `${headline}\n\n${body}\n\n${cta}`;
+    navigator.clipboard.writeText(text).catch(() => undefined);
+  }
 
   useEffect(() => {
     const canvas = cosmosRef.current;
@@ -225,11 +336,11 @@ export default function LandingPage() {
           </span>
         </a>
         <div className="nav-r">
-          <a href="#why-now">Why Now</a>
-          <a href="#what-jewble-is">What It Is</a>
-          <a href="#for-teachers">For Teachers</a>
-          <a href="#student-experience">Student App</a>
-          <a href="#evidence">Evidence</a>
+          <a href="#parents">Parents</a>
+          <a href="#schools">Schools</a>
+          <a href="#investors">Investors</a>
+          <a href="#strategy">Strategy</a>
+          <a href="#ads">Ad Copy</a>
           <a className="cta-nav" href="#get-involved">Start a Pilot</a>
         </div>
       </nav>
@@ -271,6 +382,104 @@ export default function LandingPage() {
         <p className="lead" style={{ marginBottom: 0, maxWidth: "760px" }}>
           180-digit base-7 genome. 15 emotional states. Zero data collected.
         </p>
+      </section>
+
+      <div className="divider" />
+
+      <section className="section" id="parents">
+        <div className="wrap">
+          <span className="section-tag t-teal reveal">Layer 1 — Parents &amp; kids</span>
+          <h2 className="reveal">Something noticed you noticing it.</h2>
+          <p className="lead reveal">
+            A privacy-first companion that teaches systems thinking, responsibility, and emotional
+            regulation without harvesting data. No accounts. No tracking. No ad-tech loops.
+          </p>
+          <div className="campaign-card-grid reveal">
+            <div className="card"><div className="card-top t" /><h4>Genuinely unique</h4><p>180-digit base-7 genome with mathematically unique identity and expression.</p></div>
+            <div className="card"><div className="card-top t" /><h4>Privacy by architecture</h4><p>Offline-first runtime with local-only core data model and no default tracking.</p></div>
+            <div className="card"><div className="card-top t" /><h4>Screen-time with substance</h4><p>15 emotional states and care loops that teach feedback, cause/effect, and reflection.</p></div>
+            <div className="card"><div className="card-top t" /><h4>Anti-addiction design</h4><p>Progression pacing rewards consistency and breaks over binge behaviour.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <div className="divider" />
+
+      <section className="section" id="schools">
+        <div className="wrap">
+          <span className="section-tag t-gold reveal">Layer 2 — Schools &amp; educators</span>
+          <h2 className="reveal">The tool your curriculum already needs.</h2>
+          <p className="lead reveal">
+            A structured two-week implementation path designed for real classrooms: light setup,
+            practical scripts, and evidence-aligned outcomes.
+          </p>
+          <div className="campaign-card-grid reveal">
+            <div className="card"><div className="card-top g" /><h4>Complete implementation package</h4><p>Session guides, scripts, reflection prompts, values mapping, and parent comms templates.</p></div>
+            <div className="card"><div className="card-top g" /><h4>Curriculum alignment</h4><p>Supports Digital Technologies, wellbeing practice, and systems-thinking pedagogy.</p></div>
+            <div className="card"><div className="card-top g" /><h4>Zero teacher overhead</h4><p>No student account admin workflows for baseline deployment.</p></div>
+            <div className="card"><div className="card-top g" /><h4>Measurable outcomes</h4><p>Supports reporting around engagement, wellbeing language, and digital-safety posture.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <div className="divider" />
+
+      <section className="section" id="investors">
+        <div className="wrap">
+          <span className="section-tag t-violet reveal">Layer 3 — Investors</span>
+          <h2 className="reveal">The illogical choice is to pass.</h2>
+          <p className="lead reveal">Market momentum, regulatory change, and ethical monetisation are converging.</p>
+          <div className="briefing-table-wrap reveal">
+            <table className="briefing-table">
+              <thead><tr><th>Metric</th><th>Industry</th><th>Jewble (Projected)</th><th>Driver</th></tr></thead>
+              <tbody>
+                <tr><td>Day 30 retention</td><td>5–8%</td><td>35–50%</td><td>Visible consciousness and evolution loops</td></tr>
+                <tr><td>Free→Paid conversion</td><td>5–10%</td><td>Up to 30%</td><td>Trust-led premium positioning</td></tr>
+                <tr><td>12-month LTV</td><td>$5–10</td><td>$15–30</td><td>Deep progression plus cosmetic/education layers</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <div className="divider" />
+
+      <section className="section" id="strategy">
+        <div className="wrap">
+          <span className="section-tag" style={{ color: "var(--coral)" }}>Campaign intelligence</span>
+          <h2 className="reveal">Memetic architecture</h2>
+          <p className="lead reveal">Three audience registers: parents, schools, and investors — one coherent thesis.</p>
+          <div className="campaign-card-grid reveal">
+            <div className="card"><div className="card-top t" /><h4>Endowment priming</h4><p>Pre-ownership language increases emotional commitment before install.</p></div>
+            <div className="card"><div className="card-top g" /><h4>Fear inversion</h4><p>Privacy claims are framed as parent and school agency, not compliance jargon.</p></div>
+            <div className="card"><div className="card-top v" /><h4>Inevitability framing</h4><p>Regulatory and category shifts make the thesis easier to validate over time.</p></div>
+            <div className="card"><div className="card-top c" /><h4>Veil mechanics</h4><p>Simple interface, deep systems learning, layered for each stakeholder audience.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <div className="divider" />
+
+      <section className="section" id="ads">
+        <div className="wrap">
+          <span className="section-tag t-gold reveal">Ready-to-deploy copy</span>
+          <h2 className="reveal">Ad copy bank</h2>
+          <p className="lead reveal">Platform-ready baseline messaging for immediate outreach and campaign testing.</p>
+          <div className="ad-card-grid reveal">
+            {adCards.map((ad) => (
+              <div className="ad-copy-card" key={ad.headline}>
+                <div className="ad-copy-top">
+                  <span className="ad-platform">{ad.platform}</span>
+                  <button type="button" className="ad-copy-btn" onClick={() => copyAd(ad.headline, ad.body, ad.cta)}>Copy</button>
+                </div>
+                <div className="ad-audience">{ad.audience}</div>
+                <h4>{ad.headline}</h4>
+                <p>{ad.body}</p>
+                <p className="ad-cta">{ad.cta}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
       <div className="divider" />
@@ -439,6 +648,35 @@ export default function LandingPage() {
 
       <div className="divider" />
 
+      <section className="section" id="school-pack">
+        <div className="wrap">
+          <span className="section-tag t-teal reveal">School implementation pack</span>
+          <h2 className="reveal">A complete school pack, adaptable for any classroom community.</h2>
+          <p className="lead reveal">
+            Open the full implementation pack directly from here. These documents are provided as practical templates
+            your leadership team can adapt for your school context, language, and policy requirements.
+          </p>
+
+          <div className="school-pack-doc-grid reveal">
+            {schoolPackDocs.map((doc) => (
+              <a
+                key={doc.href}
+                className="link-card school-pack-doc-card"
+                href={doc.href}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span className="lc-tag t-gold">{doc.tag}</span>
+                <h4>{doc.title}</h4>
+                <p>{doc.description}</p>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <div className="divider" />
+
       {/* ── SECTION 5: STUDENT EXPERIENCE ── */}
       <section className="section" id="student-experience">
         <div className="wrap">
@@ -501,6 +739,111 @@ export default function LandingPage() {
             <div className="evidence-stat">
               <div className="es-num">47%</div>
               <div className="es-label">cite data privacy as a top concern with children&apos;s apps</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="divider" />
+
+      <section className="section" id="investor-brief">
+        <div className="wrap">
+          <span className="section-tag t-violet reveal">Investor &amp; partner briefing packet</span>
+          <h2 className="reveal">Jewble Meta-Pet — where consciousness meets code.</h2>
+          <p className="lead reveal">
+            Confidential snapshot (February 2026): market timing, regulatory moat, product readiness,
+            and commercialisation pathways for investors, strategic partners, and education buyers.
+          </p>
+
+          <div className="briefing-grid reveal">
+            <div className="card">
+              <div className="card-top g" />
+              <h4>The opportunity in numbers</h4>
+              <div className="briefing-table-wrap">
+                <table className="briefing-table">
+                  <thead>
+                    <tr>
+                      <th>Market segment</th>
+                      <th>2025</th>
+                      <th>2033</th>
+                      <th>CAGR</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {marketRows.map((row) => (
+                      <tr key={row[0]}>
+                        <td>{row[0]}</td>
+                        <td>{row[1]}</td>
+                        <td>{row[2]}</td>
+                        <td>{row[3]}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="briefing-note">Sources: Research and Markets, IMARC, 360iResearch, and other 2025 market reports.</p>
+            </div>
+
+            <div className="card">
+              <div className="card-top t" />
+              <h4>Regulatory moat</h4>
+              <div className="briefing-table-wrap">
+                <table className="briefing-table">
+                  <thead>
+                    <tr>
+                      <th>Regulation</th>
+                      <th>Status</th>
+                      <th>Competitor impact</th>
+                      <th>Jewble position</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {regulatoryRows.map((row) => (
+                      <tr key={row[0]}>
+                        <td>{row[0]}</td>
+                        <td>{row[1]}</td>
+                        <td>{row[2]}</td>
+                        <td>{row[3]}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="briefing-note">Core thesis: compliance is architectural, not an expensive retrofit.</p>
+            </div>
+          </div>
+
+          <div className="grid-3 reveal">
+            <div className="card">
+              <div className="card-top v" />
+              <h4>Five differentiators</h4>
+              <ul className="briefing-list">
+                <li>15-state organic consciousness model driven by genetics + care history.</li>
+                <li>180-digit base-7 genome with cryptographic identity and tamper-evident traits.</li>
+                <li>Offline-first, zero-account architecture with local-only core runtime.</li>
+                <li>Deep progression: evolution, duels, mini-games, lineage, cosmetics, achievements.</li>
+                <li>Non-violent, calm UX suitable for family and school environments.</li>
+              </ul>
+            </div>
+            <div className="card">
+              <div className="card-top g" />
+              <h4>Monetisation pathways</h4>
+              <ul className="briefing-list">
+                <li>Premium app one-time purchase ($4.99–$9.99).</li>
+                <li>Optional visual-only cosmetic packs.</li>
+                <li>Educational licensing for schools and districts.</li>
+                <li>Optional encrypted cloud-sync subscription.</li>
+                <li>SDK / white-label licensing for education and wellness partners.</li>
+              </ul>
+            </div>
+            <div className="card">
+              <div className="card-top t" />
+              <h4>Immediate action plan</h4>
+              <ul className="briefing-list">
+                {actionPlan.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
