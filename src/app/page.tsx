@@ -4,6 +4,65 @@ import { useEffect, useRef } from "react";
 import "./landing.css";
 
 export default function LandingPage() {
+  const kppsDocs = [
+    {
+      title: "Package index",
+      tag: "Start here",
+      href: "/docs/kpps/00_Package_Index.md",
+      description:
+        "Overview of the full KPPS Teacher Hub package, audience pathways, and rollout steps.",
+    },
+    {
+      title: "Teacher Hub welcome",
+      tag: "Document 1",
+      href: "/docs/kpps/01_KPPS_Teacher_Hub_Welcome.md",
+      description:
+        "Strategic framing of The Veil model, mission fit, and the pilot context for schools.",
+    },
+    {
+      title: "Implementation guide",
+      tag: "Document 2",
+      href: "/docs/kpps/02_KPPS_Implementation_Guide.md",
+      description:
+        "Seven-session classroom roadmap aligned to the KPPS gradual release structure.",
+    },
+    {
+      title: "Facilitation scripts",
+      tag: "Document 3",
+      href: "/docs/kpps/03_KPPS_Facilitation_Scripts.md",
+      description:
+        "Plug-and-play teacher language and transition cues for each pilot session.",
+    },
+    {
+      title: "Reflection prompts",
+      tag: "Document 4",
+      href: "/docs/kpps/04_KPPS_Reflection_Prompts.md",
+      description:
+        "Printable and digital prompt bank across wellbeing, systems thinking, and values.",
+    },
+    {
+      title: "Values integration map",
+      tag: "Document 5",
+      href: "/docs/kpps/05_KPPS_Values_Integration_Map.md",
+      description:
+        "Leadership-level alignment to KPPS values, policy intent, and success metrics.",
+    },
+    {
+      title: "Parent communication kit",
+      tag: "Document 6",
+      href: "/docs/kpps/06_KPPS_Parent_Communication_Kit.md",
+      description:
+        "Ready-to-send Sentral and newsletter templates for pre, mid, and post-pilot updates.",
+    },
+    {
+      title: "Privacy & safety brief",
+      tag: "Document 7",
+      href: "/docs/kpps/07_KPPS_Privacy_Safety_Brief.md",
+      description:
+        "Technical architecture and privacy-by-design controls for ICT and leadership review.",
+    },
+  ];
+
   const cosmosRef = useRef<HTMLCanvasElement>(null);
   const h7Ref = useRef<SVGPolygonElement>(null);
   const h7bRef = useRef<SVGPolygonElement>(null);
@@ -228,6 +287,7 @@ export default function LandingPage() {
           <a href="#why-now">Why Now</a>
           <a href="#what-jewble-is">What It Is</a>
           <a href="#for-teachers">For Teachers</a>
+          <a href="#kpps-package">KPPS Pack</a>
           <a href="#student-experience">Student App</a>
           <a href="#evidence">Evidence</a>
           <a className="cta-nav" href="#get-involved">Start a Pilot</a>
@@ -434,6 +494,35 @@ export default function LandingPage() {
             All Jewble branding and creative IP remains the property of Blue Snake Studios.
             Schools receive a limited educational-use licence during pilot.
           </p>
+        </div>
+      </section>
+
+      <div className="divider" />
+
+      <section className="section" id="kpps-package">
+        <div className="wrap">
+          <span className="section-tag t-teal reveal">KPPS Teacher Hub package</span>
+          <h2 className="reveal">All implementation files are now on the landing page.</h2>
+          <p className="lead reveal">
+            Open any file directly from here. Each document is hosted in <code>/public/docs/kpps</code>
+            so schools can quickly review, download, and share the full package.
+          </p>
+
+          <div className="kpps-doc-grid reveal">
+            {kppsDocs.map((doc) => (
+              <a
+                key={doc.href}
+                className="link-card kpps-doc-card"
+                href={doc.href}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span className="lc-tag t-gold">{doc.tag}</span>
+                <h4>{doc.title}</h4>
+                <p>{doc.description}</p>
+              </a>
+            ))}
+          </div>
         </div>
       </section>
 
