@@ -342,6 +342,7 @@ export default function LandingPage() {
           <a href="#student-experience">Student App</a>
           <a href="#evidence">Evidence</a>
           <a href="#investor-brief">Investor Brief</a>
+          <a href="/blue-snake-studios.html" target="_blank" rel="noopener noreferrer">BlueSnakeStudios.com</a>
           <a className="cta-nav" href="#get-involved">Start a Pilot</a>
         </div>
       </nav>
@@ -359,6 +360,7 @@ export default function LandingPage() {
         </p>
         <div className="hero-actions">
           <a className="btn btn-gold" href="https://teachers-meta-pet-mr-brand.vercel.app/" target="_blank" rel="noopener noreferrer">Start a Free Pilot</a>
+          <a className="btn btn-ghost" href="/blue-snake-studios.html" target="_blank" rel="noopener noreferrer">Visit BlueSnakeStudios.com</a>
           <a className="btn btn-ghost" href="mailto:hello@bluesnakestudios.com.au?subject=Curriculum%20Pack%20Request">Request a Curriculum Pack</a>
         </div>
 
