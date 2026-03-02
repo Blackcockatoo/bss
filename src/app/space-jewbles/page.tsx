@@ -167,7 +167,7 @@ export default function SpaceJewblesPage() {
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-slate-700/50">
+      <div className="flex items-center justify-between gap-2 p-3 sm:p-4 border-b border-slate-700/50">
         <Link href="/pet">
           <Button
             variant="ghost"
@@ -179,11 +179,11 @@ export default function SpaceJewblesPage() {
           </Button>
         </Link>
 
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+        <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
           Space Jewbles
         </h1>
 
-        <div className="flex gap-4 text-sm">
+        <div className="hidden sm:flex gap-4 text-sm">
           <div className="flex items-center gap-2 text-amber-400">
             <Trophy className="w-4 h-4" />
             <span aria-live="polite">
@@ -202,8 +202,8 @@ export default function SpaceJewblesPage() {
       {/* Game Area */}
       <div className="flex-1 relative">
         {!gameStarted ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
-            <div className="max-w-md w-full bg-slate-900/90 backdrop-blur-sm rounded-3xl border border-slate-700/50 p-8 text-center">
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-4 sm:p-8">
+            <div className="max-w-md w-full max-h-[calc(100vh-8rem)] overflow-y-auto bg-slate-900/90 backdrop-blur-sm rounded-3xl border border-slate-700/50 p-5 sm:p-8 text-center">
               {/* Animated title */}
               <div className="text-6xl mb-6 animate-bounce">
                 <span className="text-cyan-400">S</span>
@@ -212,7 +212,7 @@ export default function SpaceJewblesPage() {
                 <span className="text-amber-400">C</span>
                 <span className="text-emerald-400">E</span>
               </div>
-              <h2 className="text-4xl font-bold text-white mb-2">JEWBLES</h2>
+              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2">JEWBLES</h2>
               <p className="text-slate-400 mb-6">
                 Defend the cosmos with your pet and absurd weaponry!
               </p>
@@ -256,7 +256,7 @@ export default function SpaceJewblesPage() {
               )}
 
               {/* Stats */}
-              <div className="grid grid-cols-3 gap-4 mb-4 text-sm">
+              <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4 text-xs sm:text-sm">
                 <div className="bg-slate-800/30 rounded-lg p-3">
                   <div className="text-amber-400 font-bold text-xl">
                     {safeMiniGames.spaceJewblesHighScore.toLocaleString()}
@@ -329,13 +329,13 @@ export default function SpaceJewblesPage() {
 
               <Button
                 onClick={handleStartGame}
-                className="w-full py-6 text-xl font-bold bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500"
+                className="w-full py-5 sm:py-6 text-lg sm:text-xl font-bold bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500"
               >
                 {lastResult ? 'Play Again' : 'Start Game'}
               </Button>
 
               <p className="text-slate-500 text-xs mt-4">
-                Tap to attack | 1-7 to switch weapons | U for upgrades
+                Tap to attack • Use the bottom weapon row • U opens upgrades
               </p>
             </div>
           </div>
