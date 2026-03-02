@@ -565,6 +565,16 @@ body.landing-body {
   max-width: 90%;
 }
 
+.landing .kpps-doc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.landing .kpps-doc-card h4 {
+  font-size: 16px;
+}
+
 /* ── MANIFESTO ── */
 .landing .manifesto {
   padding: 80px 32px;
@@ -860,6 +870,10 @@ body.landing-body {
   }
 
   .landing .grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .landing .kpps-doc-grid {
     grid-template-columns: 1fr;
   }
 
