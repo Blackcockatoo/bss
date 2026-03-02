@@ -19,6 +19,18 @@ export function PhaserGame({ petData, onGameEnd }: PhaserGameProps) {
   const petDataRef = useRef(petData);
   const handleGameEndRef = useRef<((event: Event) => void) | null>(null);
 
+  const resizeGame = useCallback(() => {
+    const game = gameRef.current;
+    const container = containerRef.current;
+    if (!game || !container) return;
+
+    const bounds = container.getBoundingClientRect();
+    const width = Math.max(320, Math.floor(bounds.width));
+    const height = Math.max(520, Math.floor(bounds.height));
+
+    game.scale.resize(width, height);
+  }, []);
+
   const sendPetDataToMenuScene = useCallback(() => {
     const menuScene = gameRef.current?.scene.getScene('MenuScene');
     if (!menuScene) return;
@@ -62,6 +74,8 @@ export function PhaserGame({ petData, onGameEnd }: PhaserGameProps) {
           parent: containerRef.current!,
         });
 
+        resizeGame();
+
         // Send pet data to MenuScene when it is created or becomes active
         const menuScene = gameRef.current.scene.getScene('MenuScene');
         if (menuScene) {
@@ -75,15 +89,27 @@ export function PhaserGame({ petData, onGameEnd }: PhaserGameProps) {
       });
     });
 
+    window.addEventListener('resize', resizeGame);
+    const resizeObserver = typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(() => {
+          resizeGame();
+        })
+      : null;
+    if (resizeObserver) {
+      resizeObserver.observe(containerRef.current);
+    }
+
     // Cleanup on unmount
     return () => {
+      window.removeEventListener('resize', resizeGame);
+      resizeObserver?.disconnect();
       window.removeEventListener('gameEnd', handleGameEndRef.current as EventListener);
       if (gameRef.current) {
         gameRef.current.destroy(true);
         gameRef.current = null;
       }
     };
-  }, [sendPetDataToMenuScene]);
+  }, [resizeGame, sendPetDataToMenuScene]);
 
   return (
     <div
