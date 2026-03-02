@@ -15,6 +15,7 @@ interface PhaserGameProps {
 export function PhaserGame({ petData, onGameEnd }: PhaserGameProps) {
   const gameRef = useRef<import('phaser').Game | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const petDataRef = useRef(petData);
   const onGameEndRef = useRef(onGameEnd);
   const handleGameEndRef = useRef<((event: Event) => void) | null>(null);
 
@@ -48,6 +49,7 @@ export function PhaserGame({ petData, onGameEnd }: PhaserGameProps) {
   }, [onGameEnd]);
 
   useEffect(() => {
+    petDataRef.current = petData;
     gameRef.current?.registry.set('petData', petData);
   }, [petData]);
 
