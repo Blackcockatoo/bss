@@ -83,6 +83,10 @@ export class WaveSystem {
     // Generate wave configuration
     this.currentWaveConfig = this.generateWaveConfig(wave);
     this.enemiesInWave = this.currentWaveConfig.enemyCount;
+
+    if (this.enemiesInWave > 0 && this.currentWaveConfig.spawnDelay > 0) {
+      this.spawnTimer = this.currentWaveConfig.spawnDelay;
+    }
   }
 
   setWaveCompleteCallback(callback: (wave: number) => void): void {
