@@ -12,13 +12,13 @@ const COLOR_VARIANTS = {
 
 // Connections between feature nodes based on system relationships
 const FEATURE_CONNECTIONS: [number, number][] = [
-  [0, 1], [0, 2], [0, 3],       // Home connects to Explore, Battle, Games
+  [0, 1], [0, 2], [0, 3],       // Home connects to Explore, Pet, Space Jewbles
   [6, 7], [6, 10], [6, 11],     // MOSS60 connects to DNA, Network, QR
   [7, 8], [8, 9],               // DNA → Identity → Lineage
   [1, 3],                        // Explore ↔ Games
   [4, 5],                        // Style ↔ Rewards
   [10, 6],                       // Network ↔ MOSS60
-  [2, 5],                        // Battle ↔ Rewards
+  [2, 5],                        // Pet ↔ Rewards
 ];
 
 export function NetworkView({

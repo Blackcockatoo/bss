@@ -940,6 +940,14 @@ body.landing-body {
 }
 
 /* ── RESPONSIVE ── */
+@media (max-width: 1080px) {
+  .landing .nav-r a {
+    font-size: 9px;
+    padding: 8px 10px;
+    letter-spacing: 1px;
+  }
+}
+
 @media (max-width: 768px) {
   .landing .landing-nav {
     padding: 0 20px;

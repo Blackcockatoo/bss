@@ -168,14 +168,14 @@ export default function SpaceJewblesPage() {
 
       {/* Header */}
       <div className="flex items-center justify-between gap-2 p-3 sm:p-4 border-b border-slate-700/50">
-        <Link href="/pet">
+        <Link href="/compass">
           <Button
             variant="ghost"
             size="sm"
             className="gap-2 text-slate-300 hover:text-white"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Pet
+            Back to Compass
           </Button>
         </Link>
 
@@ -214,7 +214,7 @@ export default function SpaceJewblesPage() {
               </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2">JEWBLES</h2>
               <p className="text-slate-400 mb-6">
-                Defend the cosmos with your pet and absurd weaponry!
+                Defend the cosmos with your companion and collectible tools.
               </p>
 
               {lastResult && (
@@ -335,7 +335,7 @@ export default function SpaceJewblesPage() {
               </Button>
 
               <p className="text-slate-500 text-xs mt-4">
-                Tap to attack • Use the bottom weapon row • U opens upgrades
+                Tap to attack • Use the bottom tool row • U opens upgrades
               </p>
             </div>
           </div>

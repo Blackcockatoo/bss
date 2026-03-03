@@ -371,6 +371,7 @@ export default function LandingPage() {
           <a href="#for-teachers">For Teachers</a>
           <a href="#kpps-package">KPPS Pack</a>
           <a href="#student-experience">Student App</a>
+          <a href="#compass">Compass</a>
           <a href="#evidence">Evidence</a>
           <a href="#investor-brief">Investor Brief</a>
           <a href="/blue-snake-studios.html" target="_blank" rel="noopener noreferrer">BlueSnakeStudios.com</a>
@@ -790,7 +791,39 @@ export default function LandingPage() {
 
       <div className="divider" />
 
-      {/* ── SECTION 6: EVIDENCE ── */}
+      {/* ── SECTION 6: COMPASS ── */}
+      <section className="section" id="compass">
+        <div className="wrap">
+          <span className="section-tag t-violet reveal">Compass</span>
+          <h2 className="reveal">A fluid navigation layer for learning paths and optional play.</h2>
+          <p className="lead reveal">
+            Compass gives students and teachers a shared map of the platform. Rotate through
+            core tools quickly, then jump directly to the right experience without menu hunting.
+          </p>
+
+          <div className="grid-2 reveal">
+            <a className="link-card" href="/compass">
+              <span className="lc-tag t-violet">Navigator</span>
+              <h4>Open Compass</h4>
+              <p>Use the 12-sector wheel to move smoothly across learning, identity, and classroom tools.</p>
+            </a>
+            <a className="link-card" href="/space-jewbles">
+              <span className="lc-tag t-teal">Optional activity</span>
+              <h4>Play Space Jewbles</h4>
+              <p>Launch the arcade mode directly, with progression tied back to the same companion profile.</p>
+            </a>
+          </div>
+
+          <p className="lead reveal" style={{ marginTop: "24px", marginBottom: 0, fontSize: "12px" }}>
+            Compass and Space Jewbles routes are wired directly into this deployment and can be enabled
+            or restricted by each school&apos;s implementation plan.
+          </p>
+        </div>
+      </section>
+
+      <div className="divider" />
+
+      {/* ── SECTION 7: EVIDENCE ── */}
       <section className="section" id="evidence">
         <div className="wrap">
           <span className="section-tag t-teal reveal">Evidence</span>
@@ -927,7 +960,7 @@ export default function LandingPage() {
 
       <div className="divider" />
 
-      {/* ── SECTION 7: GET INVOLVED ── */}
+      {/* ── SECTION 8: GET INVOLVED ── */}
       <section className="section" id="get-involved">
         <div className="wrap">
           <span className="section-tag t-violet reveal">Get involved</span>
@@ -981,7 +1014,7 @@ export default function LandingPage() {
 
       <div className="divider" />
 
-      {/* ── SECTION 8: ABOUT ── */}
+      {/* ── SECTION 9: ABOUT ── */}
       <section className="section" id="about">
         <div className="wrap">
           <span className="section-tag t-gold reveal">About</span>
