@@ -281,6 +281,94 @@ body.landing-body {
   background: rgba(255, 255, 255, 0.05);
 }
 
+/* ── PILOT MODAL ── */
+.landing .pilot-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+  display: grid;
+  place-items: center;
+  background: rgba(1, 4, 10, 0.72);
+  backdrop-filter: blur(8px);
+  padding: 20px;
+}
+
+.landing .pilot-modal {
+  width: min(760px, 100%);
+  background: rgba(9, 16, 30, 0.97);
+  border: 1px solid rgba(245, 200, 76, 0.24);
+  border-radius: 18px;
+  padding: 24px;
+  position: relative;
+  box-shadow: 0 18px 64px rgba(0, 0, 0, 0.45);
+}
+
+.landing .pilot-modal-tag {
+  display: inline-flex;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+
+.landing .pilot-modal h3 {
+  margin: 0 0 10px;
+  font-size: clamp(24px, 3vw, 32px);
+}
+
+.landing .pilot-modal p {
+  margin: 0 0 20px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.landing .pilot-modal-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.landing .pilot-modal-links a {
+  display: block;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+  color: var(--white);
+  font-size: 13px;
+  font-weight: 600;
+  transition: 0.15s ease;
+}
+
+.landing .pilot-modal-links a:hover {
+  border-color: rgba(245, 200, 76, 0.6);
+  color: var(--gold);
+  transform: translateY(-1px);
+}
+
+.landing .pilot-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--white);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.landing .pilot-modal-close:hover {
+  border-color: rgba(245, 200, 76, 0.5);
+  color: var(--gold);
+}
+
 /* ── SECTION ── */
 .landing .wrap {
   max-width: 1100px;
@@ -904,5 +992,13 @@ body.landing-body {
 
   .landing .context-list li {
     font-size: 13px;
+  }
+
+  .landing .pilot-modal {
+    padding: 20px;
+  }
+
+  .landing .pilot-modal-links {
+    grid-template-columns: 1fr;
   }
 }

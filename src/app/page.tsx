@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./landing.css";
 
 export default function LandingPage() {
@@ -110,10 +110,20 @@ export default function LandingPage() {
   ];
 
   const cosmosRef = useRef<HTMLCanvasElement>(null);
+  const modalPanelRef = useRef<HTMLDivElement>(null);
   const h7Ref = useRef<SVGPolygonElement>(null);
   const h7bRef = useRef<SVGPolygonElement>(null);
   const h7cRef = useRef<SVGPolygonElement>(null);
   const spokesRef = useRef<SVGGElement>(null);
+  const [isPilotModalOpen, setIsPilotModalOpen] = useState(false);
+
+  function openPilotModal() {
+    setIsPilotModalOpen(true);
+  }
+
+  function closePilotModal() {
+    setIsPilotModalOpen(false);
+  }
 
   function heptPoints(cx: number, cy: number, r: number, offset = 0) {
     const pts: number[] = [];
@@ -130,6 +140,26 @@ export default function LandingPage() {
       document.body.classList.remove("landing-body");
     };
   }, []);
+
+  useEffect(() => {
+    if (!isPilotModalOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closePilotModal();
+      }
+    };
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", onKeyDown);
+    modalPanelRef.current?.focus();
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isPilotModalOpen]);
 
   function copyAd(headline: string, body: string, cta: string) {
     const text = `${headline}\n\n${body}\n\n${cta}`;
@@ -361,7 +391,7 @@ export default function LandingPage() {
         </p>
         <div className="hero-actions">
           <a className="btn btn-gold" href="/space-jewbles">Play Space Jewbles</a>
-          <a className="btn btn-gold" href="https://teachers-meta-pet-mr-brand.vercel.app/" target="_blank" rel="noopener noreferrer">Start a Free Pilot</a>
+          <button type="button" className="btn btn-gold" onClick={openPilotModal}>Start a Free Pilot</button>
           <a className="btn btn-ghost" href="/blue-snake-studios.html" target="_blank" rel="noopener noreferrer">Visit BlueSnakeStudios.com</a>
           <a className="btn btn-ghost" href="mailto:hello@bluesnakestudios.com.au?subject=Curriculum%20Pack%20Request">Request a Curriculum Pack</a>
         </div>
@@ -388,6 +418,39 @@ export default function LandingPage() {
           180-digit base-7 genome. 15 emotional states. Zero data collected.
         </p>
       </section>
+
+      {isPilotModalOpen ? (
+        <div
+          className="pilot-modal-overlay"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              closePilotModal();
+            }
+          }}
+        >
+          <div
+            className="pilot-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="pilot-modal-title"
+            tabIndex={-1}
+            ref={modalPanelRef}
+          >
+            <button type="button" className="pilot-modal-close" onClick={closePilotModal} aria-label="Close pilot links modal">
+              ×
+            </button>
+            <span className="pilot-modal-tag">Start a pilot</span>
+            <h3 id="pilot-modal-title">Pick your best next step</h3>
+            <p>Open Teacher Hub instantly, review routes, or explore the local package docs.</p>
+            <div className="pilot-modal-links">
+              <a href="https://teachers-meta-pet-mr-brand.vercel.app/?as=teacher" target="_blank" rel="noopener noreferrer">Teacher Hub (teacher deeplink)</a>
+              <a href="https://teachers-meta-pet-mr-brand.vercel.app/routes" target="_blank" rel="noopener noreferrer">Route map</a>
+              <a href="/docs/kpps/00_Package_Index.md">Local docs: KPPS package index</a>
+              <a href="mailto:hello@bluesnakestudios.com.au?subject=Start%20Free%20Pilot">Email fallback</a>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <div className="divider" />
 
