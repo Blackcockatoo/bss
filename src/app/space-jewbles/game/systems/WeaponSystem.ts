@@ -117,12 +117,12 @@ export class WeaponSystem {
     const weapon = this.getCurrentWeapon();
     this.lastFireTime = this.scene.time.now;
 
-    // Create projectile sprite
-    const projectile = this.scene.physics.add.sprite(fromX, fromY, '');
-
-    // Generate projectile texture
+    // Generate projectile texture before sprite creation
     this.createProjectileTexture(weapon);
-    projectile.setTexture(`weapon-${weapon.name}`);
+    const textureKey = `weapon-${weapon.name}`;
+
+    // Create projectile sprite
+    const projectile = this.scene.physics.add.sprite(fromX, fromY, textureKey);
 
     // Calculate direction and velocity
     const angle = Phaser.Math.Angle.Between(fromX, fromY, targetX, targetY);
@@ -157,50 +157,52 @@ export class WeaponSystem {
     if (this.scene.textures.exists(textureKey)) return;
 
     const graphics = this.scene.add.graphics();
+    const cx = 16;
+    const cy = 16;
 
     switch (weapon.special) {
       case 'DOT': // Banana - curved shape
         graphics.fillStyle(weapon.color, 1);
-        graphics.fillEllipse(0, 0, 20, 8);
+        graphics.fillEllipse(cx, cy, 20, 8);
         break;
 
       case 'CRIT': // Boot - angular
         graphics.fillStyle(weapon.color, 1);
-        graphics.fillRect(-10, -10, 20, 20);
+        graphics.fillRect(cx - 10, cy - 10, 20, 20);
         break;
 
       case 'SPLASH': // Book - rectangular
         graphics.fillStyle(weapon.color, 1);
-        graphics.fillRect(-12, -8, 24, 16);
+        graphics.fillRect(cx - 12, cy - 8, 24, 16);
         graphics.lineStyle(2, 0x000000);
-        graphics.strokeRect(-12, -8, 24, 16);
+        graphics.strokeRect(cx - 12, cy - 8, 24, 16);
         break;
 
       case 'RAPID': // Chicken - small circle
         graphics.fillStyle(weapon.color, 1);
-        graphics.fillCircle(0, 0, 8);
+        graphics.fillCircle(cx, cy, 8);
         break;
 
       case 'SLOW': // Donut - ring
         graphics.fillStyle(weapon.color, 1);
-        graphics.fillCircle(0, 0, 12);
+        graphics.fillCircle(cx, cy, 12);
         graphics.fillStyle(0x000000, 1);
-        graphics.fillCircle(0, 0, 6);
+        graphics.fillCircle(cx, cy, 6);
         break;
 
       case 'PIERCE': // Toilet Paper - thin line
         graphics.lineStyle(4, weapon.color);
-        graphics.lineBetween(-15, 0, 15, 0);
+        graphics.lineBetween(cx - 15, cy, cx + 15, cy);
         break;
 
       case 'ULTIMATE': // Cosmic Sock - large star
         graphics.fillStyle(weapon.color, 1);
-        this.drawStar(graphics, 0, 0, 5, 15, 8);
+        this.drawStar(graphics, cx, cy, 5, 15, 8);
         break;
 
       default:
         graphics.fillStyle(weapon.color, 1);
-        graphics.fillCircle(0, 0, 10);
+        graphics.fillCircle(cx, cy, 10);
     }
 
     graphics.generateTexture(textureKey, 32, 32);

@@ -628,6 +628,7 @@
         const ctx = canvas.getContext('2d');
         const CANVAS_WIDTH = 800;
         const CANVAS_HEIGHT = 600;
+        let currentLayout = { playerSpawnY: CANVAS_HEIGHT - 70 };
 
         // ============================================
         // CONSTANTS
@@ -957,7 +958,7 @@
         }
 
         // Get initial layout
-        let currentLayout = calculateResponsiveLayout();
+        currentLayout = calculateResponsiveLayout();
 
         // ============================================
         // AUDIO SYSTEM
