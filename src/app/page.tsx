@@ -7,7 +7,7 @@ type NavId =
   | "parents"
   | "schools"
   | "veil"
-  | "kpps"
+  | "schoolDocs"
   | "investors"
   | "strategy"
   | "ads";
@@ -55,7 +55,7 @@ const navLinks: Array<{ id: NavId; label: string; audience: string }> = [
   { id: "parents", label: "Parents", audience: "parents" },
   { id: "schools", label: "Schools", audience: "schools" },
   { id: "veil", label: "Teacher Delivery", audience: "teachers" },
-  { id: "kpps", label: "KPPS Docs", audience: "schools" },
+  { id: "schoolDocs", label: "School Docs", audience: "schools" },
   { id: "investors", label: "Government", audience: "schools" },
   { id: "strategy", label: "Assurance", audience: "" },
   { id: "ads", label: "Communication", audience: "" },
@@ -84,9 +84,9 @@ const labyrinthNodes: LabyrinthNode[] = [
     accent: "coral",
   },
   {
-    id: "kpps",
+    id: "schoolDocs",
     chamber: "Chamber 04",
-    title: "KPPS documentation",
+    title: "School documentation",
     body: "Keep every implementation and safety document available in one place for quick review.",
     accent: "teal",
   },
@@ -266,12 +266,12 @@ const assuranceCards: StrategyCard[] = [
   },
 ];
 
-const kppsDocs = [
+const schoolDocs = [
   {
     tag: "Index",
     title: "00 Package Index",
     href: "/docs/kpps/00_Package_Index.md",
-    description: "Master map linking the complete KPPS implementation package.",
+    description: "Master map linking the complete school implementation package.",
   },
   {
     tag: "Doc 1",
@@ -453,7 +453,7 @@ const metricsRows = [
     "Implementation pathway",
     "Custom rollout planning",
     "Two-week, seven-session pilot",
-    "KPPS implementation package",
+    "School implementation package",
   ],
 ];
 
@@ -753,8 +753,7 @@ export default function LandingPage() {
               Open teacher delivery tools and pathway
             </h3>
             <p>
-              Jump straight into teacher mode, route map, KPPS school demo, or
-              open the full documentation package from this landing page.
+              Jump straight into teacher mode, route map, and the full documentation package from this landing page.
             </p>
             <div className="pilot-modal-links">
               <a
@@ -772,18 +771,11 @@ export default function LandingPage() {
                 Teacher route map
               </a>
               <a
-                href="https://kpps-brand-mr.vercel.app/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                KPPS school demo
-              </a>
-              <a
                 href="/docs/kpps/00_Package_Index.md"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                KPPS package index
+                School package index
               </a>
             </div>
           </div>
@@ -948,7 +940,7 @@ export default function LandingPage() {
             <h3>Teacher launch stack</h3>
             <p>
               Use the direct links below to run the full teacher workflow: The
-              Veil hub, route map, and live KPPS school demo.
+              Veil hub, route map, and implementation documentation.
             </p>
           </div>
           <div className="veil-actions">
@@ -968,14 +960,6 @@ export default function LandingPage() {
             >
               Route Map -&gt;
             </a>
-            <a
-              className="btn btn-ghost"
-              href="https://kpps-brand-mr.vercel.app/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              KPPS Demo -&gt;
-            </a>
           </div>
         </div>
 
@@ -984,20 +968,20 @@ export default function LandingPage() {
 
       <div className="divider" />
 
-      <section className="section" id="kpps">
-        <div className="section-label teal">Layer 4 - KPPS Documentation</div>
+      <section className="section" id="schoolDocs">
+        <div className="section-label teal">Layer 4 - School Documentation</div>
         <h2>
           Full implementation docs
           <br />
           stay visible on this page.
         </h2>
         <p className="lead">
-          Every KPPS document is linked directly from this landing page so
+          Every implementation document is linked directly from this landing page so
           teachers, leadership, and ICT reviewers can access materials quickly.
         </p>
 
         <div className="kpps-grid">
-          {kppsDocs.map((doc) => (
+          {schoolDocs.map((doc) => (
             <a
               key={doc.href}
               className="kpps-card"
@@ -1012,7 +996,7 @@ export default function LandingPage() {
           ))}
         </div>
 
-        <NextGate from="kpps" />
+        <NextGate from="schoolDocs" />
       </section>
 
       <section className="section" id="investors">
@@ -1167,14 +1151,6 @@ export default function LandingPage() {
             rel="noopener noreferrer"
           >
             The Veil Teacher Hub -&gt;
-          </a>
-          <a
-            className="btn btn-ghost"
-            href="https://kpps-brand-mr.vercel.app/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            KPPS Demo -&gt;
           </a>
         </div>
         <p className="footer-legal">
