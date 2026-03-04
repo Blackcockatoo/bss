@@ -37,19 +37,20 @@
     }
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
     "next-env.d.ts",
-    "build/types/**/*.ts",
+    ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "types/**/*.d.ts",
-    ".next/dev/dev/types/**/*.ts"
+    ".next/dev/dev/types/**/*.ts",
+    "build/types/**/*.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "types/**/*.d.ts"
   ],
   "exclude": [
     "node_modules",
     "archive",
     "premium_addon_library",
-    "time-calculator-compass"
+    "time-calculator-compass",
+    "05-Teacher-Veil-App"
   ]
 }
