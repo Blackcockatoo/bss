@@ -1138,11 +1138,11 @@ export default function LandingPage() {
         <div className="hero-cta footer-cta">
           <a
             className="btn btn-gold"
-            href="https://1-bss-meta-pet-a-tom-s-projects-6a215d3d.vercel.app/"
+            href="https://bluesnakestudios.com"
             target="_blank"
             rel="noopener noreferrer"
           >
-            Try Jewble -&gt;
+            Try MetaPet -&gt;
           </a>
           <a
             className="btn btn-ghost"
