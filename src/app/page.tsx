@@ -3,6 +3,63 @@
 import { useEffect, useRef, useState } from "react";
 import "./landing.css";
 
+type SnakeHue = "gold" | "teal";
+
+class Snake {
+  x = 0;
+  y = 0;
+  angle = 0;
+  speed = 0;
+  life = 0;
+  maxLife = 0;
+  hue: SnakeHue = "gold";
+  r = 0;
+  trail: { x: number; y: number }[] = [];
+
+  constructor() {
+    this.reset();
+  }
+
+  reset() {
+    this.x = Math.random() * 2000;
+    this.y = Math.random() * 2000;
+    this.angle = Math.random() * Math.PI * 2;
+    this.speed = 0.3 + Math.random() * 0.7;
+    this.life = 0;
+    this.maxLife = 200 + Math.random() * 300;
+    this.hue = Math.random() < 0.6 ? "gold" : "teal";
+    this.r = Math.random() * 0.8 + 0.3;
+    this.trail = [];
+  }
+
+  update() {
+    this.angle += (Math.random() - 0.5) * 0.08;
+    this.x += Math.cos(this.angle) * this.speed;
+    this.y += Math.sin(this.angle) * this.speed;
+    this.life++;
+    this.trail.push({ x: this.x, y: this.y });
+    if (this.trail.length > 30) this.trail.shift();
+    if (this.life > this.maxLife) this.reset();
+  }
+
+  draw(c: CanvasRenderingContext2D) {
+    if (this.trail.length < 2) return;
+    const pct = this.life / this.maxLife;
+    const fade = Math.sin(pct * Math.PI);
+    c.beginPath();
+    c.moveTo(this.trail[0].x, this.trail[0].y);
+    for (let i = 1; i < this.trail.length; i++) {
+      c.lineTo(this.trail[i].x, this.trail[i].y);
+    }
+    c.strokeStyle =
+      this.hue === "gold"
+        ? `rgba(245,200,76,${fade * 0.15})`
+        : `rgba(77,214,200,${fade * 0.12})`;
+    c.lineWidth = this.r;
+    c.stroke();
+  }
+}
+
 export default function LandingPage() {
   const adCards = [
     {
@@ -185,61 +242,6 @@ export default function LandingPage() {
     }
 
     const stars: Star[] = [];
-
-    class Snake {
-      x = 0;
-      y = 0;
-      angle = 0;
-      speed = 0;
-      life = 0;
-      maxLife = 0;
-      hue: "gold" | "teal" = "gold";
-      r = 0;
-      trail: { x: number; y: number }[] = [];
-
-      constructor() {
-        this.reset();
-      }
-
-      reset() {
-        this.x = Math.random() * 2000;
-        this.y = Math.random() * 2000;
-        this.angle = Math.random() * Math.PI * 2;
-        this.speed = 0.3 + Math.random() * 0.7;
-        this.life = 0;
-        this.maxLife = 200 + Math.random() * 300;
-        this.hue = Math.random() < 0.6 ? "gold" : "teal";
-        this.r = Math.random() * 0.8 + 0.3;
-        this.trail = [];
-      }
-
-      update() {
-        this.angle += (Math.random() - 0.5) * 0.08;
-        this.x += Math.cos(this.angle) * this.speed;
-        this.y += Math.sin(this.angle) * this.speed;
-        this.life++;
-        this.trail.push({ x: this.x, y: this.y });
-        if (this.trail.length > 30) this.trail.shift();
-        if (this.life > this.maxLife) this.reset();
-      }
-
-      draw(c: CanvasRenderingContext2D) {
-        if (this.trail.length < 2) return;
-        const pct = this.life / this.maxLife;
-        const fade = Math.sin(pct * Math.PI);
-        c.beginPath();
-        c.moveTo(this.trail[0].x, this.trail[0].y);
-        for (let i = 1; i < this.trail.length; i++) {
-          c.lineTo(this.trail[i].x, this.trail[i].y);
-        }
-        c.strokeStyle =
-          this.hue === "gold"
-            ? `rgba(245,200,76,${fade * 0.15})`
-            : `rgba(77,214,200,${fade * 0.12})`;
-        c.lineWidth = this.r;
-        c.stroke();
-      }
-    }
 
     const snakes: Snake[] = [];
 
