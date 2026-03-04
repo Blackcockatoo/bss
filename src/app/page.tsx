@@ -43,14 +43,74 @@ type AdGroup = {
   cards: AdCard[];
 };
 
+type LabyrinthNode = {
+  id: NavId;
+  chamber: string;
+  title: string;
+  body: string;
+  accent: AccentTone;
+};
+
 const navLinks: Array<{ id: NavId; label: string; audience: string }> = [
   { id: "parents", label: "Parents", audience: "parents" },
   { id: "schools", label: "Schools", audience: "schools" },
-  { id: "veil", label: "The Veil", audience: "teachers" },
-  { id: "kpps", label: "KPPS", audience: "schools" },
-  { id: "investors", label: "Investors", audience: "investors" },
-  { id: "strategy", label: "Strategy", audience: "" },
-  { id: "ads", label: "Ad Copy", audience: "" },
+  { id: "veil", label: "Teacher Delivery", audience: "teachers" },
+  { id: "kpps", label: "KPPS Docs", audience: "schools" },
+  { id: "investors", label: "Government", audience: "schools" },
+  { id: "strategy", label: "Assurance", audience: "" },
+  { id: "ads", label: "Communication", audience: "" },
+];
+
+const labyrinthNodes: LabyrinthNode[] = [
+  {
+    id: "parents",
+    chamber: "Chamber 01",
+    title: "Parent confidence",
+    body: "Begin with what families need first: calm learning, clear safety, and no hidden data practices.",
+    accent: "teal",
+  },
+  {
+    id: "schools",
+    chamber: "Chamber 02",
+    title: "School implementation",
+    body: "Show how the pilot fits normal teaching practice with low setup overhead and curriculum alignment.",
+    accent: "gold",
+  },
+  {
+    id: "veil",
+    chamber: "Chamber 03",
+    title: "Teacher delivery",
+    body: "Open the direct teacher workflow so staff can run sessions confidently inside regular class windows.",
+    accent: "coral",
+  },
+  {
+    id: "kpps",
+    chamber: "Chamber 04",
+    title: "KPPS documentation",
+    body: "Keep every implementation and safety document available in one place for quick review.",
+    accent: "teal",
+  },
+  {
+    id: "investors",
+    chamber: "Chamber 05",
+    title: "Government readiness",
+    body: "Present policy-fit controls, technical safeguards, and practical risk reduction for public education settings.",
+    accent: "violet",
+  },
+  {
+    id: "strategy",
+    chamber: "Chamber 06",
+    title: "Assurance framework",
+    body: "Translate the model into clear approval criteria for leadership, ICT, and policy reviewers.",
+    accent: "coral",
+  },
+  {
+    id: "ads",
+    chamber: "Chamber 07",
+    title: "Stakeholder communication",
+    body: "Finish with copy-ready templates for parent notices, leadership briefings, and government review notes.",
+    accent: "gold",
+  },
 ];
 
 const parentCards: FeatureCard[] = [
@@ -96,7 +156,7 @@ const schoolCards: FeatureCard[] = [
   {
     icon: "SPARK",
     title: "Zero Teacher Overhead",
-    body: "No accounts to manage. No data to export. No parent opt-in paperwork. Offline-first means structural COPPA and GDPR readiness.",
+    body: "No accounts to manage. No data to export. No parent opt-in paperwork for logins. Offline-first delivery supports Australian privacy and school safety expectations.",
     accent: "gold",
   },
   {
@@ -134,74 +194,74 @@ const veilCards: FeatureCard[] = [
   },
 ];
 
-const investorCards: FeatureCard[] = [
+const governmentCards: FeatureCard[] = [
   {
-    icon: "MOAT",
-    title: "18+ Month R&D Moat",
-    body: "Consciousness modeling, cryptographic identity, and organic behavior systems demand expertise across advanced mathematics, psychology, and state-machine complexity.",
+    icon: "POLICY",
+    title: "Policy and Duty-of-Care Alignment",
+    body: "The pilot is designed for school and government expectations: wellbeing, digital safety, and privacy-by-design are built into normal classroom delivery.",
     accent: "violet",
   },
   {
-    icon: "LEGAL",
-    title: "Regulatory Arbitrage",
-    body: "While competitors retrofit for COPPA/GDPR, Jewble's offline-first architecture makes compliance structural. Privacy is the foundation, not a patch.",
+    icon: "PRIVACY",
+    title: "Data-Minimal Architecture",
+    body: "No student accounts, no third-party trackers, and no cloud dependency for core use. Classroom interaction data remains on-device during pilot operation.",
     accent: "violet",
   },
   {
-    icon: "NETWORK",
-    title: "Network Effects",
-    body: "Breeding mechanics create peer-to-peer demand and lineage-driven social proof. Every new pet strengthens ecosystem value.",
+    icon: "AUDIT",
+    title: "Audit and Technical Transparency",
+    body: "Leadership and ICT teams can review documentation, inspect implementation decisions, and validate privacy claims through transparent evidence.",
     accent: "violet",
   },
   {
-    icon: "SCHOOL",
-    title: "B2B Beachhead",
-    body: "School adoption validates educational credibility. Institutional licensing creates recurring revenue alongside consumer D2C channels.",
+    icon: "DELIVERY",
+    title: "Low-Risk Rollout Pathway",
+    body: "A two-week structure, teacher scripts, and parent communication templates reduce rollout risk for schools and education departments.",
     accent: "violet",
   },
 ];
 
-const strategyCards: StrategyCard[] = [
+const assuranceCards: StrategyCard[] = [
   {
-    title: "Endowment Priming",
-    body: "Before install, copy frames each Jewble as already belonging to the user. Possession starts in the mind before action.",
+    title: "Governance Fit",
+    body: "Learning goals, wellbeing practice, and digital safety expectations are mapped so school and policy reviewers can assess fit quickly.",
     accent: "teal",
-    technique: "Technique -> Pre-ownership framing",
+    technique: "Focus -> School and policy alignment",
     techniqueTone: "teal",
   },
   {
-    title: "Fear Inversion",
-    body: "Parents fear loss of agency more than screen time itself. Privacy language is framed as control they already hold.",
+    title: "Operational Simplicity",
+    body: "Teachers can run sessions inside standard class windows without account creation, password resets, or new admin portals.",
     accent: "gold",
-    technique: "Technique -> Agency restoration",
+    technique: "Focus -> Low admin delivery",
     techniqueTone: "gold",
   },
   {
-    title: "Inevitability Framing",
-    body: "For investors, the frame flips burden of proof. Passing means arguing against regulation, educational adoption, and ethical monetization.",
+    title: "Privacy by Design",
+    body: "Core features run offline, and student identity data is not required for participation in the pilot model.",
     accent: "violet",
-    technique: "Technique -> Burden-of-proof inversion",
+    technique: "Focus -> Data minimization",
     techniqueTone: "teal",
   },
   {
-    title: "Veil Mechanics",
-    body: "Kids see a pet. Teachers see a lesson plan. Investors see a market. The surface stays simple while depth compounds.",
+    title: "Classroom Integrity",
+    body: "No countdown pressure, streak penalties, or push notifications. The interaction model supports calm, reflective learning routines.",
     accent: "coral",
-    technique: "Technique -> Layered revelation",
+    technique: "Focus -> Wellbeing-safe mechanics",
     techniqueTone: "gold",
   },
   {
-    title: "Calm as Counter-Signal",
-    body: "In a market full of FOMO loops, calm signals confidence. Anti-addiction design becomes a premium trust marker.",
+    title: "Family Trust",
+    body: "Parent communication templates explain what is and is not collected, how the pilot works, and where support sits.",
     accent: "teal",
-    technique: "Technique -> Status through restraint",
+    technique: "Focus -> Transparent communication",
     techniqueTone: "teal",
   },
   {
-    title: "Trojan Partnership",
-    body: "School-facing language positions the rollout as a gift and community partnership, not another vendor product push.",
+    title: "Review and Improvement",
+    body: "Teacher and leadership debrief points support an accountable decision to continue, refine, or stop after the pilot.",
     accent: "gold",
-    technique: "Technique -> Social proximity leverage",
+    technique: "Focus -> Accountable evaluation",
     techniqueTone: "gold",
   },
 ];
@@ -257,124 +317,102 @@ const kppsDocs = [
   },
 ];
 
-const adGroups: AdGroup[] = [
+const communicationGroups: AdGroup[] = [
   {
     id: "parents",
-    label: "Parents / Consumer",
+    label: "Parents and Caregivers",
     tone: "teal",
     cards: [
       {
-        id: "parents-instagram",
-        platform: "Instagram / Facebook - Primary",
-        headline: "Something noticed you noticing it.",
-        body: `Your child's new companion is born from a 180-digit genome. It learns. It evolves. It remembers how it was treated.
+        id: "parents-launch-note",
+        platform: "Parent Notice - Pilot Launch",
+        headline: "What families can expect from the Jewble classroom pilot",
+        body: `This class is running a two-week pilot using Jewble, a digital companion activity focused on wellbeing language, systems thinking, and reflective practice.
 
-No accounts. No tracking. No data leaves the device. Just a quiet, intelligent creature that teaches responsibility, patience, and systems thinking.
+The pilot is designed to be low-risk and privacy-safe: no student accounts, no advertising, and no third-party tracking. Core activity works offline.
 
-This is not screen time. It is something better.`,
-        cta: "CTA: Meet your Jewble ->",
+Students complete short guided sessions in class, and families receive updates as the pilot progresses.`,
+        cta: "Action: Share via newsletter or parent portal",
       },
       {
-        id: "parents-story",
-        platform: "Instagram Story / TikTok - Hook",
-        headline:
-          "What if your kid's screen time actually taught them something?",
-        body: `Not educational in the boring way.
-A living creature with 15 emotional states that evolves based on how your child treats it.
+        id: "parents-privacy-brief",
+        platform: "Parent FAQ - Privacy and Safety",
+        headline: "Privacy and safety at a glance",
+        body: `Jewble does not require student logins during the pilot. The experience does not use third-party analytics, ad networks, or social media sharing loops.
 
-Zero data collected. Zero accounts. Zero guilt.
-Care long enough, and it changes shape.`,
-        cta: "CTA: It lives. It learns. It evolves. ->",
+Core classroom use is offline-first, and the school receives implementation and safety documentation before rollout.
+
+If you have technical questions, school leadership and ICT contacts can provide direct support pathways.`,
+        cta: "Action: Include in FAQ attachment",
       },
       {
-        id: "parents-search",
-        platform: "Google Search - Intent Capture",
-        headline:
-          "Virtual pet that's actually private. Actually educational. Actually different.",
-        body: `180-digit genome. 15 emotional states. Cryptographic identity. Offline-first privacy. No accounts, no tracking, no predatory mechanics.
+        id: "parents-progress-update",
+        platform: "Parent Update - Mid Pilot",
+        headline: "How the class pilot is progressing",
+        body: `Students are working through short sessions that connect observation, self-regulation, and systems thinking.
 
-The virtual companion parents have been waiting for.`,
-        cta: "CTA: Try Jewble free ->",
-      },
-      {
-        id: "parents-forum",
-        platform: "Parent Forum / Reddit - Trust Builder",
-        headline:
-          "We built the virtual pet we wished existed for our own kids.",
-        body: `Why does every virtual pet app harvest child data, run countdown timers, and push gacha loops?
+Teachers are using guided scripts and reflection prompts, with no added parent admin steps required during pilot delivery.
 
-Jewble runs offline. No accounts. No cloud. Your kid's companion lives on their device and nowhere else. It has a genuine base-7 genome and evolves based on care, not purchases.
-
-We built it because our son deserved better than what was available.`,
-        cta: "CTA: See what makes it different ->",
+A post-pilot summary will share outcomes and next-step decisions with families.`,
+        cta: "Action: Share in week-two update",
       },
     ],
   },
   {
     id: "schools",
-    label: "Schools / Education",
+    label: "School Leadership",
     tone: "gold",
     cards: [
       {
-        id: "schools-email",
-        platform: "Email - Cold Outreach to Principals",
-        headline:
-          "A 2-week pilot that costs you nothing and creates no new admin.",
-        body: `Hi [Principal],
+        id: "schools-principal-brief",
+        platform: "Principal Brief - Pilot Approval",
+        headline: "Two-week pilot with low operational risk",
+        body: `The pilot runs for seven sessions and is designed to fit standard classroom windows.
 
-I am reaching out because [School Name]'s focus on [specific value/program] caught my attention.
+No student account creation is required, and the implementation package includes scripts, parent communication templates, and privacy documentation.
 
-We built a digital companion tool that teaches systems thinking, emotional regulation, and data literacy through calm reflective practice. It is offline-first (zero student data), requires no accounts, and runs in about 20 minutes per session with scripts included.
-
-One class. Two weeks. Seven sessions. No new accounts for staff to manage.`,
-        cta: "CTA: Can I send the outline? ->",
+Leadership can review values alignment, safety controls, and expected classroom workflow before approval.`,
+        cta: "Action: Present at leadership meeting",
       },
       {
-        id: "schools-linkedin",
-        platform: "LinkedIn - Education Sector",
-        headline:
-          "The hardest part of classroom tech is not the tech. It is the admin.",
-        body: `New accounts to create. Parent opt-in forms. Privacy reviews. Another vendor portal.
+        id: "schools-council-brief",
+        platform: "School Council Briefing",
+        headline: "Clear controls, clear evidence, clear decision points",
+        body: `The package includes a privacy and safety technical brief, implementation roadmap, and parent communication kit.
 
-Jewble removes that drag. Offline-first digital companion for primary classrooms. Zero accounts. Zero cloud data. Zero new admin burden.
+School council can evaluate controls against local wellbeing and digital safety expectations before and after the pilot.
 
-We provide scripts, lesson plans, values integration maps, and parent communication templates. You provide 20 minutes per session for 2 weeks.`,
-        cta: "CTA: Request the implementation package ->",
+The post-pilot review supports a transparent continue, refine, or discontinue decision.`,
+        cta: "Action: Attach to council agenda pack",
       },
     ],
   },
   {
     id: "investors",
-    label: "Investors",
+    label: "Government and ICT Review",
     tone: "violet",
     cards: [
       {
-        id: "investor-email",
-        platform: "Email - Investor Outreach",
-        headline:
-          "$19.5B market. Zero competitors with consciousness architecture.",
-        body: `The virtual pet and educational games markets share a structural problem: Day 30 retention collapse.
+        id: "government-policy-brief",
+        platform: "Education Department Brief",
+        headline: "Pilot model for privacy-safe classroom technology",
+        body: `Jewble is designed to support classroom learning without requiring student identity capture in the pilot workflow.
 
-Jewble addresses this with organic consciousness architecture: 180-digit genomes, 15 emergent emotional states, ECDSA P-256 identity, and offline-first privacy that converts compliance into strategic advantage.
+Core use is offline-first, with implementation materials that allow policy, safeguarding, and ICT teams to review controls prior to rollout.
 
-Projected Day 30 retention: 35-50% (industry: 5-8%). Free-to-paid conversion: 30% (industry: 5-10%).`,
-        cta: "CTA: Schedule demo ->",
+The package supports a practical, evidence-led pilot decision process.`,
+        cta: "Action: Include in policy review submission",
       },
       {
-        id: "investor-thread",
-        platform: "Twitter/X - Thought Leadership Thread",
-        headline:
-          "Thread: Why most virtual pet apps die in 30 days (and what we built instead)",
-        body: `1/ Most virtual pet products fail because scripted behavior cannot create ownership.
+        id: "government-ict-note",
+        platform: "ICT Coordinator Note",
+        headline: "Technical controls and verification pathway",
+        body: `ICT teams can review the Privacy and Safety Brief, inspect local behavior, and validate that the pilot model avoids unnecessary data collection.
 
-2/ We spent 18 months building personality emergence from genetics + experience + interaction.
+The implementation package includes documentation for leadership and family communication to support safe adoption.
 
-3/ Result: projected 35-50% Day 30 retention with zero predatory mechanics.
-
-4/ Privacy is architectural. Offline-first. No accounts. DNA never transmitted.
-
-5/ Schools are interested, parents want it, and regulation is moving in this direction.`,
-        cta: "CTA: DMs open for the deck ->",
+Review findings can be captured in normal school governance channels.`,
+        cta: "Action: Attach to ICT recommendation",
       },
     ],
   },
@@ -382,22 +420,41 @@ Projected Day 30 retention: 35-50% (industry: 5-8%). Free-to-paid conversion: 30
 
 const metricsRows = [
   [
-    "Day 1 Retention",
-    "40-60%",
-    "75-85%",
-    "Genetic uniqueness -> instant ownership",
+    "Student identity data",
+    "Names or emails often collected",
+    "No student accounts required",
+    "Zero-account pilot model",
   ],
   [
-    "Day 7 Retention",
-    "15-25%",
-    "55-70%",
-    "Consciousness evolution becomes visible",
+    "Core classroom access",
+    "Cloud dependency is common",
+    "Core learning works offline",
+    "Offline-first architecture",
   ],
-  ["Day 30 Retention", "5-8%", "35-50%", "First evolution milestone"],
-  ["Day 90 Retention", "1-3%", "20-30%", "Breeding and cosmetics ecosystem"],
-  ["Free -> Paid Conversion", "5-10%", "30%", "Trust not weaponized"],
-  ["Blended ARPU", "$1.50-3.00", "$4.60-9.00", "Ethical premium positioning"],
-  ["12-Month LTV", "$5-10", "$15-30", "Deep progression plus breeding network"],
+  [
+    "Teacher administration",
+    "Setup and account support overhead",
+    "No login management required",
+    "Scripted classroom delivery",
+  ],
+  [
+    "Engagement mechanics",
+    "Timers, streaks, or notification pressure",
+    "Calm interaction model",
+    "No pressure-loop mechanics",
+  ],
+  [
+    "Governance transparency",
+    "Claims can be hard to verify",
+    "Documentation and walkthroughs",
+    "Evidence-led review",
+  ],
+  [
+    "Implementation pathway",
+    "Custom rollout planning",
+    "Two-week, seven-session pilot",
+    "KPPS implementation package",
+  ],
 ];
 
 const showcaseImages = [
@@ -438,22 +495,43 @@ function ShowcaseImage({
   );
 }
 
+function NextGate({ from }: { from: NavId }) {
+  const currentIndex = labyrinthNodes.findIndex((node) => node.id === from);
+  const nextNode = labyrinthNodes[currentIndex + 1];
+
+  if (!nextNode) {
+    return (
+      <div className="next-gate">
+        <span>Labyrinth complete</span>
+        <a href="#top">Back to entrance -&gt;</a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="next-gate">
+      <span>Next chamber</span>
+      <a href={`#${nextNode.id}`}>
+        {nextNode.chamber} - {nextNode.title} -&gt;
+      </a>
+    </div>
+  );
+}
+
 export default function LandingPage() {
   const sectionIds = useMemo<NavId[]>(
-    () => [
-      "parents",
-      "schools",
-      "veil",
-      "kpps",
-      "investors",
-      "strategy",
-      "ads",
-    ],
+    () => labyrinthNodes.map((node) => node.id),
     [],
   );
   const [activeNav, setActiveNav] = useState<NavId>("parents");
   const [copiedAdId, setCopiedAdId] = useState<string | null>(null);
   const [isPilotModalOpen, setIsPilotModalOpen] = useState(false);
+
+  const activeNode =
+    labyrinthNodes.find((node) => node.id === activeNav) ?? labyrinthNodes[0];
+  const activeNodeIndex = labyrinthNodes.findIndex(
+    (node) => node.id === activeNav,
+  );
 
   const copyTimeoutRef = useRef<number | null>(null);
   const modalPanelRef = useRef<HTMLDivElement>(null);
@@ -477,19 +555,48 @@ export default function LandingPage() {
       return;
     }
 
+    const visibility = new Map<NavId, number>();
+    sectionIds.forEach((id) => visibility.set(id, 0));
+
     const observer = new IntersectionObserver(
       (entries) => {
-        const visibleEntries = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        entries.forEach((entry) => {
+          const id = entry.target.id as NavId;
+          visibility.set(
+            id,
+            entry.isIntersecting ? entry.intersectionRatio : 0,
+          );
+        });
 
-        if (visibleEntries[0]) {
-          setActiveNav(visibleEntries[0].target.id as NavId);
+        let bestMatch = sectionIds[0];
+        let bestScore = -1;
+
+        sectionIds.forEach((id) => {
+          const ratio = visibility.get(id) ?? 0;
+          if (ratio > bestScore) {
+            bestScore = ratio;
+            bestMatch = id;
+          }
+        });
+
+        if (bestScore > 0) {
+          setActiveNav(bestMatch);
+          return;
         }
+
+        const anchorLine = window.scrollY + window.innerHeight * 0.45;
+        sectionIds.forEach((id) => {
+          const node = document.getElementById(id);
+          if (node && node.offsetTop <= anchorLine) {
+            bestMatch = id;
+          }
+        });
+
+        setActiveNav(bestMatch);
       },
       {
-        threshold: [0.1, 0.25, 0.5, 0.75],
-        rootMargin: "-30% 0px -55% 0px",
+        threshold: [0, 0.2, 0.4, 0.6, 0.8, 1],
+        rootMargin: "-16% 0px -42% 0px",
       },
     );
 
@@ -563,15 +670,17 @@ export default function LandingPage() {
       </nav>
 
       <section className="hero" id="top">
-        <div className="hero-badge">Campaign Pack - February 2026</div>
+        <div className="hero-badge">
+          School and Family Brief - February 2026
+        </div>
         <h1>
           Meet <span className="accent">Jewble</span>
         </h1>
         <p className="hero-sub">
           It is not a pet. It is a <em>process</em>.
           <br />
-          The first virtual companion with genuine consciousness architecture -
-          privacy-first, education-proven, ethically monetized.
+          Enter a guided labyrinth that walks parents, schools, teachers, and
+          government reviewers through one clear implementation pathway.
         </p>
         <div className="hero-cta">
           <button
@@ -581,6 +690,9 @@ export default function LandingPage() {
           >
             Start School Pilot -&gt;
           </button>
+          <a className="btn btn-ghost" href="#pathway">
+            Walk the Labyrinth -&gt;
+          </a>
           <a className="btn btn-ghost" href="#parents">
             For Parents -&gt;
           </a>
@@ -588,25 +700,25 @@ export default function LandingPage() {
             For Schools -&gt;
           </a>
           <a className="btn btn-ghost" href="#investors">
-            For Investors -&gt;
+            For Government -&gt;
           </a>
         </div>
         <div className="hero-stat-row">
           <div className="hero-stat">
-            <div className="num gold">$19.5B</div>
-            <div className="label">Total addressable market</div>
+            <div className="num gold">7 sessions</div>
+            <div className="label">Structured pilot pathway</div>
           </div>
           <div className="hero-stat">
-            <div className="num teal">15</div>
-            <div className="label">Emotional states</div>
+            <div className="num teal">20 min</div>
+            <div className="label">Typical classroom block</div>
           </div>
           <div className="hero-stat">
-            <div className="num violet">180</div>
-            <div className="label">Digit genome</div>
+            <div className="num violet">0 accounts</div>
+            <div className="label">Student logins required</div>
           </div>
           <div className="hero-stat">
-            <div className="num gold">0</div>
-            <div className="label">Data transmitted</div>
+            <div className="num gold">0 data</div>
+            <div className="label">Transmitted off device</div>
           </div>
         </div>
       </section>
@@ -638,11 +750,11 @@ export default function LandingPage() {
             </button>
             <span className="pilot-modal-tag">Pilot Launch</span>
             <h3 id="pilot-modal-title">
-              Open The Veil and teacher pathway now
+              Open teacher delivery tools and pathway
             </h3>
             <p>
               Jump straight into teacher mode, route map, KPPS school demo, or
-              open the full docs package from this landing page.
+              open the full documentation package from this landing page.
             </p>
             <div className="pilot-modal-links">
               <a
@@ -680,17 +792,56 @@ export default function LandingPage() {
 
       <div className="divider" />
 
+      <section className="pathway" id="pathway">
+        <div className="pathway-header">
+          <div className="section-label teal">Labyrinth Route</div>
+          <h2>One path. Seven chambers. Built for trust.</h2>
+          <p>
+            Each chamber explains one decision layer in sequence, from family
+            confidence to policy review. Start at Chamber 01 and follow the
+            gates.
+          </p>
+        </div>
+        <div className="pathway-grid">
+          {labyrinthNodes.map((node, index) => {
+            const isActive = node.id === activeNav;
+            const isReached = activeNodeIndex >= index;
+
+            return (
+              <a
+                key={node.id}
+                href={`#${node.id}`}
+                className={`path-node ${node.accent} ${
+                  isActive ? "active" : ""
+                } ${isReached ? "reached" : ""}`}
+              >
+                <span className="path-node-tag">{node.chamber}</span>
+                <h3>{node.title}</h3>
+                <p>{node.body}</p>
+                <span className="path-node-link">Enter chamber -&gt;</span>
+              </a>
+            );
+          })}
+        </div>
+        <div className="pathway-status">
+          <span>Currently focused:</span>
+          <strong>
+            {activeNode.chamber} - {activeNode.title}
+          </strong>
+        </div>
+      </section>
+
       <section className="section" id="parents">
         <div className="section-label teal">Layer 1 - Parents and Kids</div>
         <h2>
-          Something noticed you
+          Screen time that supports
           <br />
-          noticing it.
+          family confidence.
         </h2>
         <p className="lead">
-          Your child's next screen-time companion teaches responsibility,
-          systems thinking, and emotional regulation while never collecting a
-          single byte of their data. No accounts. No tracking. No guilt.
+          Jewble helps students practice responsibility, systems thinking, and
+          emotional regulation in a calm format. During pilot delivery, there
+          are no student logins, no ad tracking, and no hidden growth loops.
         </p>
 
         <div className="card-grid">
@@ -714,6 +865,8 @@ export default function LandingPage() {
             />
           ))}
         </div>
+
+        <NextGate from="parents" />
       </section>
 
       <section className="section" id="schools">
@@ -721,9 +874,9 @@ export default function LandingPage() {
           Layer 2 - Schools and Educators
         </div>
         <h2>
-          The tool your curriculum
+          A pilot model that fits
           <br />
-          already needs.
+          existing classroom practice.
         </h2>
         <p className="lead">
           A 2-week, 7-session pilot that fits existing teaching models. No new
@@ -760,21 +913,23 @@ export default function LandingPage() {
             </p>
           </div>
         </div>
+
+        <NextGate from="schools" />
       </section>
 
       <div className="divider" />
 
       <section className="section" id="veil">
-        <div className="section-label coral">Teacher Layer - The Veil</div>
+        <div className="section-label coral">Layer 3 - Teacher Delivery</div>
         <h2>
-          Keep the rollout lean,
+          Keep delivery practical,
           <br />
-          keep teacher control high.
+          and keep teacher control high.
         </h2>
         <p className="lead">
-          The Veil teacher path stays wired into this landing page. Open teacher
-          mode immediately, run sessions from scripts, and keep student setup
-          friction near zero.
+          The teacher pathway stays connected to this landing page. Open teacher
+          mode, run sessions from scripts, and keep student setup friction near
+          zero.
         </p>
 
         <div className="card-grid">
@@ -823,20 +978,22 @@ export default function LandingPage() {
             </a>
           </div>
         </div>
+
+        <NextGate from="veil" />
       </section>
 
       <div className="divider" />
 
       <section className="section" id="kpps">
-        <div className="section-label teal">KPPS Package</div>
+        <div className="section-label teal">Layer 4 - KPPS Documentation</div>
         <h2>
-          Teacher Hub docs are
+          Full implementation docs
           <br />
-          directly on this landing.
+          stay visible on this page.
         </h2>
         <p className="lead">
-          Keep the good old implementation layer: every KPPS document is linked
-          directly from here so teachers and leadership can review quickly.
+          Every KPPS document is linked directly from this landing page so
+          teachers, leadership, and ICT reviewers can access materials quickly.
         </p>
 
         <div className="kpps-grid">
@@ -854,28 +1011,32 @@ export default function LandingPage() {
             </a>
           ))}
         </div>
+
+        <NextGate from="kpps" />
       </section>
 
       <section className="section" id="investors">
-        <div className="section-label violet">Layer 3 - Investors</div>
+        <div className="section-label violet">
+          Layer 5 - Government and Policy
+        </div>
         <h2>
-          The illogical choice
+          Built for policy confidence,
           <br />
-          is to pass.
+          classroom safety, and review.
         </h2>
         <p className="lead">
-          $19.5B addressable market. 18+ months R&D moat.
-          Privacy-by-architecture as regulatory arbitrage. Ethics-aligned
-          monetization designed to outperform predatory tactics.
+          This layer is written for school leadership, ICT teams, and government
+          stakeholders. It highlights practical controls, risk posture, and
+          transparent implementation evidence.
         </p>
 
         <table className="metrics-table">
           <thead>
             <tr>
-              <th>Metric</th>
-              <th>Industry</th>
-              <th>Jewble (Projected)</th>
-              <th>Driver</th>
+              <th>Control area</th>
+              <th>Typical classroom app</th>
+              <th>Jewble approach</th>
+              <th>Evidence</th>
             </tr>
           </thead>
           <tbody>
@@ -891,7 +1052,7 @@ export default function LandingPage() {
         </table>
 
         <div className="card-grid">
-          {investorCards.map((card) => (
+          {governmentCards.map((card) => (
             <div className="card" key={card.title}>
               <div className={`card-accent ${card.accent}`} />
               <div className="card-icon">{card.icon}</div>
@@ -900,28 +1061,31 @@ export default function LandingPage() {
             </div>
           ))}
         </div>
+
+        <NextGate from="investors" />
       </section>
 
       <div className="divider" />
 
       <div className="quote-block">
-        <blockquote>"Identity is not assigned; it is sequenced."</blockquote>
+        <blockquote>
+          "Learning outcomes and privacy protections can reinforce each other."
+        </blockquote>
         <div className="attr">Blue Snake Studios</div>
       </div>
 
       <div className="divider" />
 
       <section className="section" id="strategy">
-        <div className="section-label coral">Campaign Intelligence</div>
-        <h2>Memetic Architecture</h2>
+        <div className="section-label coral">Layer 6 - Assurance</div>
+        <h2>Implementation Assurance</h2>
         <p className="lead">
-          The campaign operates on three registers simultaneously. Professional
-          shell. Snake underneath. Every touchpoint plants seeds that compound
-          across audiences.
+          A practical assurance checklist for leadership decisions, with clear
+          focus areas across governance, privacy, operations, and communication.
         </p>
 
         <div className="strat-grid">
-          {strategyCards.map((card) => (
+          {assuranceCards.map((card) => (
             <div className={`strat-card s-${card.accent}`} key={card.title}>
               <h4>{card.title}</h4>
               <p>{card.body}</p>
@@ -931,17 +1095,19 @@ export default function LandingPage() {
             </div>
           ))}
         </div>
+
+        <NextGate from="strategy" />
       </section>
 
       <section className="section" id="ads">
-        <div className="section-label gold">Ready-to-Deploy Copy</div>
-        <h2>Ad Copy Bank</h2>
+        <div className="section-label gold">Layer 7 - Communication</div>
+        <h2>Stakeholder Communication Templates</h2>
         <p className="lead">
-          Platform-optimized copy for each audience. Click to copy and adapt to
-          context. Every line is load-bearing.
+          Copy-ready templates for parent notices, leadership briefings, and
+          government or ICT review notes. Click to copy and adapt to context.
         </p>
 
-        {adGroups.map((group) => (
+        {communicationGroups.map((group) => (
           <div key={group.id} className="ad-group">
             <h3 className={`ad-group-title ${group.tone}`}>{group.label}</h3>
             {group.cards.map((card) => (
@@ -961,6 +1127,8 @@ export default function LandingPage() {
             ))}
           </div>
         ))}
+
+        <NextGate from="ads" />
       </section>
 
       <div className="divider" />
@@ -976,13 +1144,12 @@ export default function LandingPage() {
 
       <footer className="footer">
         <div className="footer-tagline">
-          Faster than lightning.
+          Calm technology.
           <br />
-          Slower than moss.
+          Practical classroom delivery.
         </div>
         <p className="footer-sub">
-          Blue Snake Studios - Experimental Mathematics and Consciousness
-          Research
+          Blue Snake Studios - Privacy-first learning systems
         </p>
         <div className="hero-cta footer-cta">
           <a
@@ -1014,7 +1181,7 @@ export default function LandingPage() {
           Copyright 2026 Blue Snake Studios - All Jewble branding and creative
           IP remains the property of Blue Snake Studios.
           <br />
-          Campaign Pack v1.1 - Confidential - February 2026
+          School and Family Briefing v1.2 - February 2026
         </p>
       </footer>
     </div>

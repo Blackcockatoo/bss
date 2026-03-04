@@ -355,6 +355,161 @@ body.landing-body {
   color: var(--coral);
 }
 
+.landing .pathway {
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 82px 32px 40px;
+}
+
+.landing .pathway-header p {
+  margin: 0;
+  max-width: 760px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.landing .pathway-header h2 {
+  margin: 0 0 14px;
+  font-size: clamp(30px, 4.6vw, 46px);
+  line-height: 1.1;
+  letter-spacing: -1px;
+}
+
+.landing .pathway-grid {
+  margin-top: 26px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.landing .path-node {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 188px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: linear-gradient(165deg, rgba(17, 31, 58, 0.95), rgba(8, 15, 28, 0.95));
+  padding: 18px;
+  text-decoration: none;
+  color: var(--white);
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.landing .path-node::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.landing .path-node.reached {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.landing .path-node.active {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.34);
+}
+
+.landing .path-node.active::before {
+  opacity: 1;
+}
+
+.landing .path-node.teal::before {
+  background: radial-gradient(420px 180px at -10% -20%, rgba(77, 214, 200, 0.22), transparent 70%);
+}
+
+.landing .path-node.gold::before {
+  background: radial-gradient(420px 180px at -10% -20%, rgba(245, 200, 76, 0.22), transparent 70%);
+}
+
+.landing .path-node.violet::before {
+  background: radial-gradient(420px 180px at -10% -20%, rgba(167, 139, 250, 0.22), transparent 70%);
+}
+
+.landing .path-node.coral::before {
+  background: radial-gradient(420px 180px at -10% -20%, rgba(255, 107, 107, 0.22), transparent 70%);
+}
+
+.landing .path-node:hover {
+  transform: translateY(-2px);
+}
+
+.landing .path-node:hover,
+.landing .path-node.active {
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.25);
+}
+
+.landing .path-node-tag {
+  position: relative;
+  z-index: 1;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.landing .path-node h3 {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.15;
+  text-transform: capitalize;
+}
+
+.landing .path-node p {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.landing .path-node-link {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--white);
+}
+
+.landing .pathway-status {
+  margin-top: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+  padding: 8px 14px;
+}
+
+.landing .pathway-status span {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.landing .pathway-status strong {
+  font-size: 12px;
+  letter-spacing: 0.2px;
+}
+
 .landing .section {
   position: relative;
   z-index: 2;
@@ -814,6 +969,38 @@ body.landing-body {
   color: var(--white);
 }
 
+.landing .next-gate {
+  margin-top: 30px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: linear-gradient(120deg, rgba(77, 214, 200, 0.08), rgba(17, 31, 58, 0.9));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.landing .next-gate span {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.landing .next-gate a {
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--white);
+}
+
+.landing .next-gate a:hover {
+  color: var(--teal);
+}
+
 .landing .poster-section {
   text-align: center;
 }
@@ -893,6 +1080,10 @@ body.landing-body {
     padding: 64px 16px;
   }
 
+  .landing .pathway {
+    padding: 64px 16px 34px;
+  }
+
   .landing .hero-stat-row {
     gap: 22px;
   }
@@ -913,6 +1104,11 @@ body.landing-body {
 
   .landing .pilot-modal-links {
     grid-template-columns: 1fr;
+  }
+
+  .landing .next-gate {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 
