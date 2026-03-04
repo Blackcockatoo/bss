@@ -7,7 +7,6 @@ type NavId =
   | "parents"
   | "schools"
   | "veil"
-  | "schoolDocs"
   | "investors"
   | "strategy"
   | "ads";
@@ -55,7 +54,6 @@ const navLinks: Array<{ id: NavId; label: string; audience: string }> = [
   { id: "parents", label: "Parents", audience: "parents" },
   { id: "schools", label: "Schools", audience: "schools" },
   { id: "veil", label: "Teacher Delivery", audience: "teachers" },
-  { id: "schoolDocs", label: "School Docs", audience: "schools" },
   { id: "investors", label: "Government", audience: "schools" },
   { id: "strategy", label: "Assurance", audience: "" },
   { id: "ads", label: "Communication", audience: "" },
@@ -84,29 +82,22 @@ const labyrinthNodes: LabyrinthNode[] = [
     accent: "coral",
   },
   {
-    id: "schoolDocs",
-    chamber: "Chamber 04",
-    title: "School documentation",
-    body: "Keep every implementation and safety document available in one place for quick review.",
-    accent: "teal",
-  },
-  {
     id: "investors",
-    chamber: "Chamber 05",
+    chamber: "Chamber 04",
     title: "Government readiness",
     body: "Present policy-fit controls, technical safeguards, and practical risk reduction for public education settings.",
     accent: "violet",
   },
   {
     id: "strategy",
-    chamber: "Chamber 06",
+    chamber: "Chamber 05",
     title: "Assurance framework",
     body: "Translate the model into clear approval criteria for leadership, ICT, and policy reviewers.",
     accent: "coral",
   },
   {
     id: "ads",
-    chamber: "Chamber 07",
+    chamber: "Chamber 06",
     title: "Stakeholder communication",
     body: "Finish with copy-ready templates for parent notices, leadership briefings, and government review notes.",
     accent: "gold",
@@ -263,57 +254,6 @@ const assuranceCards: StrategyCard[] = [
     accent: "gold",
     technique: "Focus -> Accountable evaluation",
     techniqueTone: "gold",
-  },
-];
-
-const schoolDocs = [
-  {
-    tag: "Index",
-    title: "00 Package Index",
-    href: "/docs/kpps/00_Package_Index.md",
-    description: "Master map linking the complete school implementation package.",
-  },
-  {
-    tag: "Doc 1",
-    title: "01 Teacher Hub Welcome",
-    href: "/docs/kpps/01_KPPS_Teacher_Hub_Welcome.md",
-    description: "Strategic framing of The Veil model and pilot intent.",
-  },
-  {
-    tag: "Doc 2",
-    title: "02 Implementation Guide",
-    href: "/docs/kpps/02_KPPS_Implementation_Guide.md",
-    description: "7-session practical rollout plan for classroom delivery.",
-  },
-  {
-    tag: "Doc 3",
-    title: "03 Facilitation Scripts",
-    href: "/docs/kpps/03_KPPS_Facilitation_Scripts.md",
-    description: "Plug-and-play teacher language for each pilot session.",
-  },
-  {
-    tag: "Doc 4",
-    title: "04 Reflection Prompts",
-    href: "/docs/kpps/04_KPPS_Reflection_Prompts.md",
-    description: "Prompt bank across wellbeing, systems thinking, and values.",
-  },
-  {
-    tag: "Doc 5",
-    title: "05 Values Integration Map",
-    href: "/docs/kpps/05_KPPS_Values_Integration_Map.md",
-    description: "Alignment map to values frameworks and learning outcomes.",
-  },
-  {
-    tag: "Doc 6",
-    title: "06 Parent Communication Kit",
-    href: "/docs/kpps/06_KPPS_Parent_Communication_Kit.md",
-    description: "Ready-to-send parent communication templates and updates.",
-  },
-  {
-    tag: "Doc 7",
-    title: "07 Privacy and Safety Brief",
-    href: "/docs/kpps/07_KPPS_Privacy_Safety_Brief.md",
-    description: "Technical architecture and privacy controls for ICT review.",
   },
 ];
 
@@ -968,40 +908,9 @@ export default function LandingPage() {
 
       <div className="divider" />
 
-      <section className="section" id="schoolDocs">
-        <div className="section-label teal">Layer 4 - School Documentation</div>
-        <h2>
-          Full implementation docs
-          <br />
-          stay visible on this page.
-        </h2>
-        <p className="lead">
-          Every implementation document is linked directly from this landing page so
-          teachers, leadership, and ICT reviewers can access materials quickly.
-        </p>
-
-        <div className="kpps-grid">
-          {schoolDocs.map((doc) => (
-            <a
-              key={doc.href}
-              className="kpps-card"
-              href={doc.href}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <span className="tag">{doc.tag}</span>
-              <h4>{doc.title}</h4>
-              <p>{doc.description}</p>
-            </a>
-          ))}
-        </div>
-
-        <NextGate from="schoolDocs" />
-      </section>
-
       <section className="section" id="investors">
         <div className="section-label violet">
-          Layer 5 - Government and Policy
+          Layer 4 - Government and Policy
         </div>
         <h2>
           Built for policy confidence,
@@ -1061,7 +970,7 @@ export default function LandingPage() {
       <div className="divider" />
 
       <section className="section" id="strategy">
-        <div className="section-label coral">Layer 6 - Assurance</div>
+        <div className="section-label coral">Layer 5 - Assurance</div>
         <h2>Implementation Assurance</h2>
         <p className="lead">
           A practical assurance checklist for leadership decisions, with clear
@@ -1084,7 +993,7 @@ export default function LandingPage() {
       </section>
 
       <section className="section" id="ads">
-        <div className="section-label gold">Layer 7 - Communication</div>
+        <div className="section-label gold">Layer 6 - Communication</div>
         <h2>Stakeholder Communication Templates</h2>
         <p className="lead">
           Copy-ready templates for parent notices, leadership briefings, and
