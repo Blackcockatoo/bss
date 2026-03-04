@@ -701,52 +701,6 @@ body.landing-body {
   justify-content: flex-end;
 }
 
-.landing .kpps-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.landing .kpps-card {
-  position: relative;
-  display: block;
-  text-decoration: none;
-  color: var(--white);
-  border-radius: 16px;
-  border: 1px solid var(--line);
-  background: var(--card);
-  padding: 22px;
-  transition: transform 0.15s ease, border-color 0.2s ease;
-}
-
-.landing .kpps-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(77, 214, 200, 0.5);
-}
-
-.landing .kpps-card .tag {
-  display: inline-flex;
-  margin-bottom: 10px;
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--teal);
-}
-
-.landing .kpps-card h4 {
-  margin: 0 0 8px;
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.landing .kpps-card p {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.65;
-  color: var(--muted);
-}
-
 .landing .metrics-table {
   width: 100%;
   margin: 32px 0;
@@ -1090,10 +1044,6 @@ body.landing-body {
 
   .landing .strat-grid,
   .landing .showcase,
-  .landing .kpps-grid {
-    grid-template-columns: 1fr;
-  }
-
   .landing .veil-panel {
     grid-template-columns: 1fr;
   }
