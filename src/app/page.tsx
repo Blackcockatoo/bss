@@ -980,16 +980,15 @@ export default function LandingPage() {
           teachers, leadership, and ICT reviewers can access materials quickly.
         </p>
 
-        <div className="kpps-grid">
+        <div>
           {schoolDocs.map((doc) => (
             <a
               key={doc.href}
-              className="kpps-card"
               href={doc.href}
               target="_blank"
               rel="noopener noreferrer"
             >
-              <span className="tag">{doc.tag}</span>
+              <span>{doc.tag}</span>
               <h4>{doc.title}</h4>
               <p>{doc.description}</p>
             </a>
