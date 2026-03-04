@@ -908,6 +908,36 @@ export default function LandingPage() {
 
       <div className="divider" />
 
+      <section className="section" id="schoolDocs">
+        <div className="section-label teal">Layer 4 - School Documentation</div>
+        <h2>
+          Full implementation docs
+          <br />
+          stay visible on this page.
+        </h2>
+        <p className="lead">
+          Every implementation document is linked directly from this landing page so
+          teachers, leadership, and ICT reviewers can access materials quickly.
+        </p>
+
+        <div>
+          {schoolDocs.map((doc) => (
+            <a
+              key={doc.href}
+              href={doc.href}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span>{doc.tag}</span>
+              <h4>{doc.title}</h4>
+              <p>{doc.description}</p>
+            </a>
+          ))}
+        </div>
+
+        <NextGate from="schoolDocs" />
+      </section>
+
       <section className="section" id="investors">
         <div className="section-label violet">
           Layer 4 - Government and Policy
