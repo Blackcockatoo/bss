@@ -775,7 +775,7 @@ export default function LandingPage() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Implementation docs
+                School package index
               </a>
             </div>
           </div>
@@ -969,7 +969,7 @@ export default function LandingPage() {
       <div className="divider" />
 
       <section className="section" id="schoolDocs">
-        <div className="section-label teal">Implementation Documentation</div>
+        <div className="section-label teal">Layer 4 - School Documentation</div>
         <h2>
           Full implementation docs
           <br />
