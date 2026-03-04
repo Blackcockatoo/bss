@@ -1,0 +1,34 @@
+<svg width="1200" height="900" viewBox="0 0 1200 900" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Jewble Adventures</title>
+  <desc id="desc">Stylized adventure scene placeholder artwork.</desc>
+  <defs>
+    <linearGradient id="bg" x1="600" y1="0" x2="600" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#162F4A"/>
+      <stop offset="1" stop-color="#0A1628"/>
+    </linearGradient>
+    <linearGradient id="path" x1="300" y1="800" x2="930" y2="420" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5C84C" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#4DD6C8" stop-opacity="0.08"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="900" fill="url(#bg)"/>
+
+  <circle cx="970" cy="150" r="92" fill="#F5C84C" fill-opacity="0.18"/>
+  <circle cx="970" cy="150" r="58" fill="#F5C84C" fill-opacity="0.3"/>
+
+  <path d="M0 700L160 640L300 690L470 620L620 680L800 600L1030 660L1200 610V900H0V700Z" fill="#0E233A"/>
+  <path d="M0 750L210 680L430 760L620 700L830 760L1040 690L1200 740V900H0V750Z" fill="#102945"/>
+
+  <path d="M180 790C350 650 550 560 910 430" stroke="url(#path)" stroke-width="14" stroke-linecap="round"/>
+  <circle cx="915" cy="427" r="14" fill="#4DD6C8"/>
+  <circle cx="915" cy="427" r="30" stroke="#4DD6C8" stroke-opacity="0.35"/>
+
+  <g opacity="0.26" stroke="#4DD6C8">
+    <path d="M120 170H480"/>
+    <path d="M130 210H420"/>
+    <path d="M140 250H370"/>
+  </g>
+
+  <text x="600" y="815" fill="#E8EEF7" font-family="Outfit, Segoe UI, sans-serif" font-size="46" text-anchor="middle" letter-spacing="2">ADVENTURE WORLD</text>
+</svg>

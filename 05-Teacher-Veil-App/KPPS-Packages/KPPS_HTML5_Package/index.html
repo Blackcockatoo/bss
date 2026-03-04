@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>KPPS Web Pack</title>
+  <style>
+    :root{
+      --bg:#070b10;
+      --text:#e8eef7;
+      --muted:#a2b3cc;
+      --line:rgba(255,255,255,.10);
+      --accent:#f5c84c;
+      --accent2:#4dd6c8;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+      --radius:18px;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background: radial-gradient(1200px 800px at 20% 10%, rgba(77,214,200,.12), transparent 60%),
+                  radial-gradient(900px 600px at 85% 30%, rgba(245,200,76,.12), transparent 60%),
+                  var(--bg);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 26px 16px;
+    }
+    .shell{max-width: 980px; width:100%}
+    .title{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom: 18px;
+    }
+    h1{margin:0; font-size:28px; letter-spacing:.2px}
+    p{margin:6px 0 0; color:var(--muted); line-height:1.6}
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .card{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px 18px 16px;
+      min-height: 170px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+    .card h2{font-size:16px; margin:0 0 6px}
+    .card .desc{color:var(--muted); font-size:13px; line-height:1.6; margin:0 0 10px}
+    .btnrow{display:flex; gap:10px; flex-wrap:wrap}
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.25);
+      color:var(--text);
+      text-decoration:none;
+      font-size:13px;
+      transition: transform .08s ease, border-color .12s ease, background .12s ease;
+    }
+    .btn:hover{transform: translateY(-1px); border-color: rgba(245,200,76,.50); background: rgba(245,200,76,.08)}
+    .btn.alt:hover{border-color: rgba(77,214,200,.50); background: rgba(77,214,200,.08)}
+    .footer{margin-top: 16px; color:var(--muted); font-size:12px; line-height:1.6}
+    code{background: rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.10); padding:2px 6px; border-radius: 8px}
+    @media (max-width: 900px){ .grid{grid-template-columns: 1fr} }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="title">
+      <div>
+        <h1>KPPS Web Pack</h1>
+        <p>Two deployed apps (kept separate) + an offline-friendly Teacher Hub docs site.</p>
+      </div>
+      <div style="color:var(--muted); font-size:12px">HTML5 • no build step</div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div>
+          <h2>Meta-Pet App (live)</h2>
+          <p class="desc">Launch the deployed Meta-Pet cockpit + pet interaction demo.</p>
+        </div>
+        <div class="btnrow">
+          <a class="btn alt" href="https://kpps-brand-mr.vercel.app/" target="_blank" rel="noopener">Open app ↗</a>
+          <a class="btn" href="./app/meta-pet-wrapper.html">Local launcher</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div>
+          <h2>Teacher Hub App (live)</h2>
+          <p class="desc">Launch the deployed Teacher Hub experience (“The Veil”).</p>
+        </div>
+        <div class="btnrow">
+          <a class="btn alt" href="https://teachers-meta-pet-mr-brand.vercel.app/" target="_blank" rel="noopener">Open hub ↗</a>
+          <a class="btn" href="./app/teacher-hub-wrapper.html">Local launcher</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div>
+          <h2>School Docs (offline)</h2>
+          <p class="desc">Browse the KPPS implementation package as a clean, printable site.</p>
+        </div>
+        <div class="btnrow">
+          <a class="btn alt" href="./school/teacher-hub/index.html">Open docs</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      Deploy tip: you can host this folder anywhere static (GitHub Pages, Netlify, Vercel static, school intranet).<br/>
+      For local use, open <code>index.html</code> in a browser.
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,9 @@
+node_modules/
+.next/
+.env.local
+.env*.local
+dist/
+*.log
+.DS_Store
+Thumbs.db
+next-env.d.ts
