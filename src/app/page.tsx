@@ -716,8 +716,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <div className="divider" />
-
       <section className="section" id="schools">
         <div className="section-label gold">
           Layer 2 - Schools and Educators
@@ -858,8 +856,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <div className="divider" />
-
       <section className="section" id="investors">
         <div className="section-label violet">Layer 3 - Investors</div>
         <h2>
@@ -936,8 +932,6 @@ export default function LandingPage() {
           ))}
         </div>
       </section>
-
-      <div className="divider" />
 
       <section className="section" id="ads">
         <div className="section-label gold">Ready-to-Deploy Copy</div>
