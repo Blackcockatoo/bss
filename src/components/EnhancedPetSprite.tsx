@@ -236,7 +236,7 @@ export const EnhancedPetSprite = memo(function EnhancedPetSprite() {
       >
         <Image
           src={cockatooSrc}
-          alt="Jewble Cockatoo State"
+          alt="Meta-Pet Cockatoo State"
           width={140}
           height={140}
           priority={false}

@@ -5,7 +5,7 @@ import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import Image from "next/image";
 import { getCockatooDataUri } from "@/lib/cockatooSprites";
 
-type JewbleLoadingScreenProps = {
+type MetaPetLoadingScreenProps = {
   /** Optional external progress 0–100. If omitted, a smooth fake progress is used. */
   progress?: number;
   /** Optional explicit status label. If omitted, it's derived from progress. */
@@ -19,7 +19,7 @@ const STAGE_MESSAGES: { threshold: number; label: string }[] = [
   { threshold: 45, label: "Syncing prime tails with the lattice…" },
   { threshold: 65, label: "Focusing cyan light through the halo…" },
   { threshold: 85, label: "Harmonising soul, seed, and shell…" },
-  { threshold: 100, label: "Docking into the Jewble cockpit…" },
+  { threshold: 100, label: "Docking into the Meta-Pet cockpit…" },
 ];
 
 const ambientSparkleVariants = {
@@ -30,7 +30,7 @@ const ambientSparkleVariants = {
   },
 };
 
-export function JewbleLoadingScreen(props: JewbleLoadingScreenProps) {
+export function MetaPetLoadingScreen(props: MetaPetLoadingScreenProps) {
   const [internalProgress, setInternalProgress] = useState(0);
   const [isDodging, setIsDodging] = useState(false);
   const dodgeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -209,7 +209,7 @@ export function JewbleLoadingScreen(props: JewbleLoadingScreenProps) {
               >
                 <Image
                   src={getCockatooDataUri("flying")}
-                  alt="Jewble Cockatoo"
+                  alt="Meta-Pet Cockatoo"
                   width={56}
                   height={56}
                   priority
@@ -220,7 +220,7 @@ export function JewbleLoadingScreen(props: JewbleLoadingScreenProps) {
 
             <div className="w-full md:w-1/2 space-y-6">
               <div>
-                <p className="text-xs tracking-[0.25em] uppercase text-cyan-300/70 mb-2">Jewble // Meta-Pet</p>
+                <p className="text-xs tracking-[0.25em] uppercase text-cyan-300/70 mb-2">Meta-Pet // Blue Snake Studios</p>
                 <h1 className="text-2xl md:text-3xl font-semibold text-slate-50">The Celestial Flight</h1>
                 <p className="mt-2 text-sm text-slate-300/80">
                   Your cockpit is spinning up. Our cockatoo is tracing figure-eights through a gold–cyan mandala while the core experience boots in the background.
@@ -244,7 +244,7 @@ export function JewbleLoadingScreen(props: JewbleLoadingScreenProps) {
 
               <div className="text-[0.7rem] text-slate-400 leading-relaxed">
                 Tip: tap or click the cockatoo to make it briefly dodge off its orbit.  
-                It’ll always snap back to the flight path—just like Jewble recovering from a cold start.
+                It will always snap back to the flight path—just like Meta-Pet recovering from a cold start.
               </div>
             </div>
           </div>

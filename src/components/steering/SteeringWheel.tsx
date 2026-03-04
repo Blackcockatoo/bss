@@ -53,6 +53,10 @@ export function SteeringWheel() {
     setSelectedFeature(position);
     const target = NAVIGATION_TARGETS[position];
     if (target) {
+      if (target.route.startsWith('http')) {
+        window.location.href = target.route;
+        return;
+      }
       router.push(target.route);
     }
   }, [router]);

@@ -16,9 +16,9 @@ const HOW_TO_EARN = [
   {
     emoji: '🎮',
     title: 'Play mini-games',
-    description: 'Space Jewbles, Pattern Recognition, and Vimana exploration all reward Essence, cosmetics, and earnable add-ons.',
-    route: '/space-jewbles',
-    cta: 'Play Space Jewbles',
+    description: 'Pattern Recognition and Vimana exploration reward Essence, cosmetics, and earnable add-ons.',
+    route: '/school-game',
+    cta: 'Open Classroom Quest',
   },
   {
     emoji: '🧬',

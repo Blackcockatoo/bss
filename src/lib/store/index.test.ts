@@ -388,31 +388,6 @@ describe('Store State Management', () => {
       expect(achievements.some(a => a.id === 'minigame-focus-streak')).toBe(true);
     });
 
-    it('should accumulate Space Jewbles metrics across runs', () => {
-      useStore.getState().recordSpaceJewblesRun(1200, 4, 1, 0);
-      useStore.getState().recordSpaceJewblesRun(2200, 7, 2, 1);
-
-      const miniGames = useStore.getState().miniGames;
-      expect(miniGames.spaceJewblesRunsPlayed).toBe(2);
-      expect(miniGames.spaceJewblesTotalScore).toBe(3400);
-      expect(miniGames.spaceJewblesTotalWaves).toBe(11);
-      expect(miniGames.spaceJewblesHighScore).toBe(2200);
-      expect(miniGames.spaceJewblesMaxWave).toBe(7);
-      expect(miniGames.spaceJewblesBossesDefeated).toBe(3);
-      expect(miniGames.spaceJewblesMythicDrops).toBe(1);
-    });
-
-    it('should sanitize negative Space Jewbles values before updating metrics', () => {
-      useStore.getState().recordSpaceJewblesRun(-100, -5, -2, -1);
-
-      const miniGames = useStore.getState().miniGames;
-      expect(miniGames.spaceJewblesLastScore).toBe(0);
-      expect(miniGames.spaceJewblesLastWave).toBe(0);
-      expect(miniGames.spaceJewblesBossesDefeated).toBe(0);
-      expect(miniGames.spaceJewblesMythicDrops).toBe(0);
-      expect(miniGames.spaceJewblesTotalScore).toBe(0);
-      expect(miniGames.spaceJewblesTotalWaves).toBe(0);
-    });
   });
 
   describe('Hydration', () => {

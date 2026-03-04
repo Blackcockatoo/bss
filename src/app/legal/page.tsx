@@ -6,7 +6,7 @@ export default function LegalPage() {
       <h1 className="text-3xl font-semibold text-slate-100">Legal</h1>
       <p className="text-sm text-slate-300">
         This page outlines licensing and intellectual property notices for the
-        Jewble experience.
+        Meta-Pet experience.
       </p>
       <section className="rounded-lg border border-slate-800 bg-slate-950/40 p-4">
         <LegalNotice className="text-slate-300" />

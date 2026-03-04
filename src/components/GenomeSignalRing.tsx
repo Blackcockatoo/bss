@@ -4,14 +4,14 @@ import { memo, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { getResidue, getResidueMeta } from '@/lib/genome';
 
-export type GenomeJewbleRingVariant = 'clarity' | 'dial';
+export type GenomeSignalRingVariant = 'clarity' | 'dial';
 
-export interface GenomeJewbleRingProps {
+export interface GenomeSignalRingProps {
   redDigits: number[];
   blackDigits: number[];
   blueDigits: number[];
   showFrontier?: boolean;
-  variant?: GenomeJewbleRingVariant;
+  variant?: GenomeSignalRingVariant;
 }
 
 interface PolarPoint {
@@ -19,15 +19,15 @@ interface PolarPoint {
   y: number;
 }
 
-export const GenomeJewbleRing = memo(function GenomeJewbleRing({
+export const GenomeSignalRing = memo(function GenomeSignalRing({
   redDigits,
   blackDigits,
   blueDigits,
   showFrontier = true,
   variant = 'clarity',
-}: GenomeJewbleRingProps) {
+}: GenomeSignalRingProps) {
   const [gradientId] = useState(
-    () => `jewbleGradient-${Math.random().toString(36).slice(2, 8)}`
+    () => `signalGradient-${Math.random().toString(36).slice(2, 8)}`
   );
   const size = variant === 'dial' ? 320 : 240;
   const center = size / 2;

@@ -94,15 +94,15 @@ export default function PetPage() {
           <div className="p-6 bg-slate-900/90 border-t border-slate-700/50 flex-shrink-0">
             <HUD mode="simple" />
             <div className="mt-4">
-              <Link href="/space-jewbles">
+              <a href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">
                 <Button
                   type="button"
                   className="w-full gap-2 bg-gradient-to-r from-cyan-600 to-purple-600 text-white hover:from-cyan-500 hover:to-purple-500"
                 >
                   <Rocket className="h-4 w-4" />
-                  Enter Space Jewbles
+                  Visit BlueSnakeStudios.com
                 </Button>
-              </Link>
+              </a>
             </div>
             <div className="mt-6 border-t border-slate-800/80 pt-4">
               <Button

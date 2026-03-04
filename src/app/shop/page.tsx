@@ -9,9 +9,6 @@ import {
   PHOENIX_WINGS,
   CRYSTAL_HEART,
   VOID_MASK,
-  SPACE_JEWBLES_BADGE,
-  COSMIC_BANANA_WEAPON,
-  MYTHIC_HUNTER_AURA,
 } from '@/lib/addons/catalog';
 import type { AddonTemplate } from '@/lib/addons/catalog';
 
@@ -24,11 +21,7 @@ const PREMIUM_ADDONS: AddonTemplate[] = [
   VOID_MASK,
 ];
 
-const EARNABLE_ADDONS: { template: AddonTemplate; achievement: string; route: string }[] = [
-  { template: SPACE_JEWBLES_BADGE, achievement: 'Reach wave 10 in Space Jewbles', route: '/space-jewbles' },
-  { template: COSMIC_BANANA_WEAPON, achievement: 'Defeat 5+ bosses in Space Jewbles', route: '/space-jewbles' },
-  { template: MYTHIC_HUNTER_AURA, achievement: 'Collect 3+ mythic drops in Space Jewbles', route: '/space-jewbles' },
-];
+const EARNABLE_ADDONS: { template: AddonTemplate; achievement: string; route: string }[] = [];
 
 const RARITY_STYLES: Record<string, { badge: string; border: string; glow: string }> = {
   rare:      { badge: 'bg-blue-700 text-blue-100',   border: 'border-blue-700/40',   glow: 'from-blue-950/40' },
@@ -146,13 +139,19 @@ export default function ShopPage() {
       {/* Earnable Addons */}
       <section className="mb-10">
         <h2 className="mb-1 text-xl font-semibold text-zinc-100">Earn Free Addons</h2>
-        <p className="mb-5 text-sm text-zinc-500">Complete in-game achievements to unlock these items at no cost.</p>
+        <p className="mb-5 text-sm text-zinc-500">Complete in-app achievements to unlock free items at no cost.</p>
 
-        <div className="flex flex-col gap-3">
-          {EARNABLE_ADDONS.map(({ template, achievement, route }) => (
-            <EarnableCard key={template.id} template={template} achievement={achievement} route={route} />
-          ))}
-        </div>
+        {EARNABLE_ADDONS.length > 0 ? (
+          <div className="flex flex-col gap-3">
+            {EARNABLE_ADDONS.map(({ template, achievement, route }) => (
+              <EarnableCard key={template.id} template={template} achievement={achievement} route={route} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 text-sm text-zinc-500">
+            New earnable addons will be announced soon.
+          </div>
+        )}
       </section>
 
       {/* Footer note */}

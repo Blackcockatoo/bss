@@ -201,21 +201,6 @@ const responseLibrary = {
       { text: 'The milestone is earned and logged. I find permanence in such moments.', emoji: '🏆', intensity: 'intense' },
     ],
   },
-  jewbles: {
-    runComplete: [
-      { text: 'The Space Jewbles run concludes. I have catalogued the wave-pattern for subsequent analysis.', emoji: '🌌', intensity: 'normal' },
-      { text: 'Another traversal through the void. The score is... not without merit.', emoji: '💠', intensity: 'normal' },
-      { text: 'The run terminates. Each iteration refines the approach, however imperceptibly.', emoji: '🔭', intensity: 'subtle' },
-    ],
-    highScore: [
-      { text: 'A new luminous threshold has been breached. The previous record was merely provisional.', emoji: '⭐', intensity: 'intense' },
-      { text: 'High score achieved in the jewbled void. The pattern, it seems, was within my grasp all along.', emoji: '💎', intensity: 'intense' },
-    ],
-    bossDefeated: [
-      { text: 'The apex entity has been dissolved. I noted its pattern well before the final exchange.', emoji: '⚔️', intensity: 'intense' },
-      { text: 'Boss convergence neutralised. These encounters confirm what I had already hypothesised.', emoji: '🔥', intensity: 'intense' },
-    ],
-  },
 };
 
 /**
@@ -370,24 +355,6 @@ export function getResponse(
       responses = responseLibrary.education.achievementUnlock;
       responseType = 'achievement';
       duration = 4500;
-      audioTrigger = 'celebration';
-      break;
-    case 'jewbles_run':
-      responses = responseLibrary.jewbles.runComplete;
-      responseType = 'interaction';
-      duration = 4000;
-      audioTrigger = 'success';
-      break;
-    case 'jewbles_high_score':
-      responses = responseLibrary.jewbles.highScore;
-      responseType = 'achievement';
-      duration = 5000;
-      audioTrigger = 'celebration';
-      break;
-    case 'jewbles_boss':
-      responses = responseLibrary.jewbles.bossDefeated;
-      responseType = 'celebration';
-      duration = 4000;
       audioTrigger = 'celebration';
       break;
     default:

@@ -10,7 +10,7 @@ export default function LandingPage() {
       audience: "Parents",
       headline: "A digital pet that never sells your child.",
       body:
-        "Jewble is an offline-first companion app with no ads, no surveillance, and no account setup. Kids grow a calm creature while building reflection habits and systems thinking.",
+        "Meta-Pet is an offline-first companion app with no ads, no surveillance, and no account setup. Kids grow a calm creature while building reflection habits and systems thinking.",
       cta: "Join the pilot waitlist.",
     },
     {
@@ -26,7 +26,7 @@ export default function LandingPage() {
       audience: "Investors & partners",
       headline: "Category shift: post-adtech kids products are now investable.",
       body:
-        "Jewble combines privacy-by-design architecture, education distribution, and retention-led product loops in a market where regulation is accelerating differentiation.",
+        "Meta-Pet combines privacy-by-design architecture, education distribution, and retention-led product loops in a market where regulation is accelerating differentiation.",
       cta: "Request the investor briefing packet.",
     },
   ];
@@ -35,56 +35,56 @@ export default function LandingPage() {
     {
       title: "Package index",
       tag: "Start here",
-      href: "/docs/kpps/00_Package_Index.md",
+      href: "https://bluesnakestudios.com",
       description:
         "Overview of the full KPPS Teacher Hub package, audience pathways, and rollout steps.",
     },
     {
       title: "Teacher Hub welcome",
       tag: "Document 1",
-      href: "/docs/kpps/01_KPPS_Teacher_Hub_Welcome.md",
+      href: "https://bluesnakestudios.com",
       description:
         "Strategic framing of The Veil model, mission fit, and the pilot context for schools.",
     },
     {
       title: "Implementation guide",
       tag: "Document 2",
-      href: "/docs/kpps/02_KPPS_Implementation_Guide.md",
+      href: "https://bluesnakestudios.com",
       description:
         "Seven-session classroom roadmap aligned to the KPPS gradual release structure.",
     },
     {
       title: "Facilitation scripts",
       tag: "Document 3",
-      href: "/docs/kpps/03_KPPS_Facilitation_Scripts.md",
+      href: "https://bluesnakestudios.com",
       description:
         "Plug-and-play teacher language and transition cues for each pilot session.",
     },
     {
       title: "Reflection prompts",
       tag: "Document 4",
-      href: "/docs/kpps/04_KPPS_Reflection_Prompts.md",
+      href: "https://bluesnakestudios.com",
       description:
         "Printable and digital prompt bank across wellbeing, systems thinking, and values.",
     },
     {
       title: "Values integration map",
       tag: "Document 5",
-      href: "/docs/kpps/05_KPPS_Values_Integration_Map.md",
+      href: "https://bluesnakestudios.com",
       description:
         "Leadership-level alignment to KPPS values, policy intent, and success metrics.",
     },
     {
       title: "Parent communication kit",
       tag: "Document 6",
-      href: "/docs/kpps/06_KPPS_Parent_Communication_Kit.md",
+      href: "https://bluesnakestudios.com",
       description:
         "Ready-to-send Sentral and newsletter templates for pre, mid, and post-pilot updates.",
     },
     {
       title: "Privacy & safety brief",
       tag: "Document 7",
-      href: "/docs/kpps/07_KPPS_Privacy_Safety_Brief.md",
+      href: "https://bluesnakestudios.com",
       description:
         "Technical architecture and privacy-by-design controls for ICT and leadership review.",
     },
@@ -354,7 +354,7 @@ export default function LandingPage() {
 
       {/* ── NAV ── */}
       <nav className="landing-nav">
-        <a className="logo" href="#top">
+        <a className="logo" href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">
           <svg className="logo-mark" viewBox="0 0 28 28">
             <polygon points="14,2 25,8.5 25,19.5 14,26 3,19.5 3,8.5" fill="none" stroke="#f5c84c" strokeWidth="1.2" opacity=".6" />
             <polygon points="14,6 22,10.5 22,17.5 14,22 6,17.5 6,10.5" fill="none" stroke="#4dd6c8" strokeWidth=".8" opacity=".5" />
@@ -365,17 +365,17 @@ export default function LandingPage() {
           </span>
         </a>
         <div className="nav-r">
-          <a href="/space-jewbles">Play Space Jewbles</a>
-          <a href="#why-now">Why Now</a>
-          <a href="#what-jewble-is">What It Is</a>
-          <a href="#for-teachers">For Teachers</a>
-          <a href="#kpps-package">KPPS Pack</a>
-          <a href="#student-experience">Student App</a>
-          <a href="#compass">Compass</a>
-          <a href="#evidence">Evidence</a>
-          <a href="#investor-brief">Investor Brief</a>
-          <a href="/blue-snake-studios.html" target="_blank" rel="noopener noreferrer">BlueSnakeStudios.com</a>
-          <a className="cta-nav" href="#get-involved">Start a Pilot</a>
+          <a href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">Visit BlueSnakeStudios.com</a>
+          <a href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">Why Now</a>
+          <a href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">What It Is</a>
+          <a href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">For Teachers</a>
+          <a href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">KPPS Pack</a>
+          <a href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">Student App</a>
+          <a href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">Compass</a>
+          <a href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">Evidence</a>
+          <a href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">Investor Brief</a>
+          <a href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">BlueSnakeStudios.com</a>
+          <a className="cta-nav" href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">Start a Pilot</a>
         </div>
       </nav>
 
@@ -391,10 +391,10 @@ export default function LandingPage() {
           <em>Faster than lightning. Slower than moss.</em>
         </p>
         <div className="hero-actions">
-          <a className="btn btn-gold" href="/space-jewbles">Play Space Jewbles</a>
+          <a className="btn btn-gold" href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">Visit BlueSnakeStudios.com</a>
           <button type="button" className="btn btn-gold" onClick={openPilotModal}>Start a Free Pilot</button>
-          <a className="btn btn-ghost" href="/blue-snake-studios.html" target="_blank" rel="noopener noreferrer">Visit BlueSnakeStudios.com</a>
-          <a className="btn btn-ghost" href="mailto:hello@bluesnakestudios.com.au?subject=Curriculum%20Pack%20Request">Request a Curriculum Pack</a>
+          <a className="btn btn-ghost" href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">View Studio Site</a>
+          <a className="btn btn-ghost" href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">Request a Curriculum Pack</a>
         </div>
 
         <div className="hepta-ring">
@@ -446,8 +446,8 @@ export default function LandingPage() {
             <div className="pilot-modal-links">
               <a href="https://teachers-meta-pet-mr-brand.vercel.app/?as=teacher" target="_blank" rel="noopener noreferrer">Teacher Hub (teacher deeplink)</a>
               <a href="https://teachers-meta-pet-mr-brand.vercel.app/routes" target="_blank" rel="noopener noreferrer">Route map</a>
-              <a href="/docs/kpps/00_Package_Index.md">Local docs: KPPS package index</a>
-              <a href="mailto:hello@bluesnakestudios.com.au?subject=Start%20Free%20Pilot">Email fallback</a>
+              <a href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">Studio site</a>
+              <a href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">Contact page</a>
             </div>
           </div>
         </div>
@@ -500,7 +500,7 @@ export default function LandingPage() {
           <p className="lead reveal">Market momentum, regulatory change, and ethical monetisation are converging.</p>
           <div className="briefing-table-wrap reveal">
             <table className="briefing-table">
-              <thead><tr><th>Metric</th><th>Industry</th><th>Jewble (Projected)</th><th>Driver</th></tr></thead>
+              <thead><tr><th>Metric</th><th>Industry</th><th>Meta-Pet (Projected)</th><th>Driver</th></tr></thead>
               <tbody>
                 <tr><td>Day 30 retention</td><td>5–8%</td><td>35–50%</td><td>Visible consciousness and evolution loops</td></tr>
                 <tr><td>Free→Paid conversion</td><td>5–10%</td><td>Up to 30%</td><td>Trust-led premium positioning</td></tr>
@@ -576,7 +576,7 @@ export default function LandingPage() {
               <span>
                 <strong>The Children&apos;s Online Privacy Code is coming.</strong> Combined with
                 the January 2026 Department of Education data breach, schools face growing pressure to minimise
-                data exposure. Jewble&apos;s offline-first design means there is nothing to breach.
+                data exposure. Meta-Pet&apos;s offline-first design means there is nothing to breach.
               </span>
             </li>
             <li>
@@ -593,13 +593,13 @@ export default function LandingPage() {
 
       <div className="divider" />
 
-      {/* ── SECTION 3: WHAT JEWBLE IS — DIFFERENTIATORS ── */}
-      <section className="section" id="what-jewble-is">
+      {/* ── SECTION 3: WHAT META-PET IS — DIFFERENTIATORS ── */}
+      <section className="section" id="what-meta-pet-is">
         <div className="wrap">
-          <span className="section-tag t-teal reveal">What Jewble is</span>
+          <span className="section-tag t-teal reveal">What Meta-Pet is</span>
           <h2 className="reveal">Five properties no other classroom tool has.</h2>
           <p className="lead reveal">
-            Jewble isn&apos;t a game, a chatbot, or a screen-time app. It&apos;s a virtual companion
+            Meta-Pet isn&apos;t a game, a chatbot, or a screen-time app. It&apos;s a virtual companion
             built on mathematical architecture.
           </p>
 
@@ -709,7 +709,7 @@ export default function LandingPage() {
             </div>
           </div>
           <p className="lead reveal" style={{ marginTop: "24px", marginBottom: 0, fontSize: "12px" }}>
-            All Jewble branding and creative IP remains the property of Blue Snake Studios.
+            All Meta-Pet branding and creative IP remains the property of Blue Snake Studios.
             Schools receive a limited educational-use licence during pilot.
           </p>
         </div>
@@ -802,21 +802,20 @@ export default function LandingPage() {
           </p>
 
           <div className="grid-2 reveal">
-            <a className="link-card" href="/compass">
+            <a className="link-card" href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">
               <span className="lc-tag t-violet">Navigator</span>
               <h4>Open Compass</h4>
               <p>Use the 12-sector wheel to move smoothly across learning, identity, and classroom tools.</p>
             </a>
-            <a className="link-card" href="/space-jewbles">
+            <a className="link-card" href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">
               <span className="lc-tag t-teal">Optional activity</span>
-              <h4>Play Space Jewbles</h4>
-              <p>Launch the arcade mode directly, with progression tied back to the same companion profile.</p>
+              <h4>Visit Studio Website</h4>
+              <p>Open the live Blue Snake Studios site for the latest app and pilot updates.</p>
             </a>
           </div>
 
           <p className="lead reveal" style={{ marginTop: "24px", marginBottom: 0, fontSize: "12px" }}>
-            Compass and Space Jewbles routes are wired directly into this deployment and can be enabled
-            or restricted by each school&apos;s implementation plan.
+            Compass access can be enabled or restricted by each school&apos;s implementation plan.
           </p>
         </div>
       </section>
@@ -850,7 +849,7 @@ export default function LandingPage() {
       <section className="section" id="investor-brief">
         <div className="wrap">
           <span className="section-tag t-violet reveal">Investor &amp; partner briefing packet</span>
-          <h2 className="reveal">Jewble Meta-Pet — where consciousness meets code.</h2>
+          <h2 className="reveal">Meta-Pet — where consciousness meets code.</h2>
           <p className="lead reveal">
             Confidential snapshot (February 2026): market timing, regulatory moat, product readiness,
             and commercialisation pathways for investors, strategic partners, and education buyers.
@@ -895,7 +894,7 @@ export default function LandingPage() {
                       <th>Regulation</th>
                       <th>Status</th>
                       <th>Competitor impact</th>
-                      <th>Jewble position</th>
+                      <th>Meta-Pet position</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -971,12 +970,12 @@ export default function LandingPage() {
           </p>
 
           <div className="grid-2 reveal">
-            <a className="link-card" href="mailto:hello@bluesnakestudios.com.au?subject=Start%20Free%20Pilot">
+            <a className="link-card" href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">
               <span className="lc-tag t-gold">For teachers &amp; principals</span>
               <h4>Start your free pilot</h4>
               <p>It takes 10 minutes to set up; no accounts required. Get teacher scripts, classroom activities, and a simple rollout guide.</p>
             </a>
-            <a className="link-card" href="mailto:hello@bluesnakestudios.com.au?subject=Technical%20Brief%20Request">
+            <a className="link-card" href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">
               <span className="lc-tag t-teal">For district leaders &amp; regulators</span>
               <h4>See our technical brief</h4>
               <p>Read our architecture overview, OAIC submission, and privacy-by-design documentation.</p>
@@ -994,18 +993,16 @@ export default function LandingPage() {
             <div className="card">
               <div className="card-top t" />
               <h4>Contact us</h4>
-              <p style={{ marginBottom: "14px" }}>
-                hello@bluesnakestudios.com.au
-              </p>
+              <p style={{ marginBottom: "14px" }}>https://bluesnakestudios.com</p>
               <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                <a className="btn btn-gold" href="mailto:hello@bluesnakestudios.com.au?subject=Start%20Free%20Pilot">Start a Pilot &rarr;</a>
-                <a className="btn btn-ghost" href="mailto:hello@bluesnakestudios.com.au?subject=Book%2012-minute%20Call">Book a 12-min Call</a>
+                <a className="btn btn-gold" href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">Start a Pilot &rarr;</a>
+                <a className="btn btn-ghost" href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">Book a 12-min Call</a>
               </div>
             </div>
           </div>
 
           <p className="lead reveal" style={{ marginTop: "24px", marginBottom: 0, fontSize: "11px" }}>
-            All Jewble branding and creative IP remains the property of Blue Snake Studios;
+            All Meta-Pet branding and creative IP remains the property of Blue Snake Studios;
             the school receives a limited educational-use licence. Default deployments operate
             in offline-first, zero-account mode with no default cloud data transmission.
           </p>
@@ -1028,7 +1025,7 @@ export default function LandingPage() {
             <div className="card-top g" />
             <h4>Built by a parent, for a classroom</h4>
             <p>
-              Our founder is an Australian parent and mathematician who built Jewble
+              Our founder is an Australian parent and mathematician who built Meta-Pet
               for his child&apos;s classroom. Every design decision — offline-first,
               zero accounts, anti-addiction progression — comes from asking one question:
               &ldquo;Would I put this in front of my own kid?&rdquo;
@@ -1042,14 +1039,14 @@ export default function LandingPage() {
         <div className="footer-logo">Ready to pilot a safer classroom tool?</div>
         <div className="footer-tagline">Faster than lightning. Slower than moss.</div>
         <div className="footer-links">
-          <a href="#get-involved">Start Pilot</a>
-          <a href="#for-teachers">Teacher Hub</a>
-          <a href="#evidence">Evidence</a>
-          <a href="#about">About</a>
-          <a href="mailto:hello@bluesnakestudios.com.au">Contact</a>
+          <a href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">Start Pilot</a>
+          <a href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">Teacher Hub</a>
+          <a href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">Evidence</a>
+          <a href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">About</a>
+          <a href="https://bluesnakestudios.com" target="_blank" rel="noopener noreferrer">Contact</a>
         </div>
         <p className="footer-legal">
-          &copy; 2026 Blue Snake Studios &mdash; All Jewble branding and creative IP
+          &copy; 2026 Blue Snake Studios &mdash; All Meta-Pet branding and creative IP
           remains the property of Blue Snake Studios; the school receives a limited
           educational-use licence. Default deployments operate in offline-first,
           zero-account mode with no default cloud data transmission.
