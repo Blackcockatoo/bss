@@ -723,6 +723,9 @@ export default function LandingPage() {
             <div className="label">Transmitted off device</div>
           </div>
         </div>
+        <p className="hero-support-copy">
+          Pilot pack includes: scripts, comms templates, safety brief.
+        </p>
       </section>
 
       {isPilotModalOpen ? (
