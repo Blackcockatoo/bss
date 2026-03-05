@@ -670,6 +670,9 @@ export default function LandingPage() {
           >
             Start School Pilot -&gt;
           </button>
+          <a className="btn btn-gold" href="/pet">
+            Open MetaPet App -&gt;
+          </a>
           <a className="btn btn-ghost" href="#pathway">
             Walk the Labyrinth -&gt;
           </a>
@@ -733,9 +736,11 @@ export default function LandingPage() {
               Open teacher delivery tools and pathway
             </h3>
             <p>
-              Jump straight into teacher mode, route map, and the full documentation package from this landing page.
+              Jump straight into teacher mode, route map, and the full
+              documentation package from this landing page.
             </p>
             <div className="pilot-modal-links">
+              <a href="/pet">Open MetaPet app</a>
               <a
                 href="https://teachers-meta-pet-mr-brand.vercel.app/?as=teacher"
                 target="_blank"
@@ -956,8 +961,9 @@ export default function LandingPage() {
           stay visible on this page.
         </h2>
         <p className="lead">
-          Every implementation document is linked directly from this landing page so
-          teachers, leadership, and ICT reviewers can access materials quickly.
+          Every implementation document is linked directly from this landing
+          page so teachers, leadership, and ICT reviewers can access materials
+          quickly.
         </p>
 
         <div>
@@ -1115,12 +1121,7 @@ export default function LandingPage() {
           Blue Snake Studios - Privacy-first learning systems
         </p>
         <div className="hero-cta footer-cta">
-          <a
-            className="btn btn-gold"
-            href="https://bluesnakestudios.com"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a className="btn btn-gold" href="/pet">
             Try MetaPet -&gt;
           </a>
           <a
