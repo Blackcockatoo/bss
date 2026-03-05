@@ -336,7 +336,7 @@ const communicationGroups: AdGroup[] = [
 The pilot is designed to be low-risk and privacy-safe: no student accounts, no advertising, and no third-party tracking. Core activity works offline.
 
 Students complete short guided sessions in class, and families receive updates as the pilot progresses.`,
-        cta: "Action: Share via newsletter or parent portal",
+        cta: "Action: Share via newsletter or parent portal (Deep link: /schools#family-comms)",
       },
       {
         id: "parents-privacy-brief",
@@ -347,7 +347,7 @@ Students complete short guided sessions in class, and families receive updates a
 Core classroom use is offline-first, and the school receives implementation and safety documentation before rollout.
 
 If you have technical questions, school leadership and ICT contacts can provide direct support pathways.`,
-        cta: "Action: Include in FAQ attachment",
+        cta: "Action: Include in FAQ attachment (Deep link: /schools#family-comms)",
       },
       {
         id: "parents-progress-update",
@@ -358,7 +358,7 @@ If you have technical questions, school leadership and ICT contacts can provide 
 Teachers are using guided scripts and reflection prompts, with no added parent admin steps required during pilot delivery.
 
 A post-pilot summary will share outcomes and next-step decisions with families.`,
-        cta: "Action: Share in week-two update",
+        cta: "Action: Share in week-two update (Deep link: /schools#family-comms)",
       },
     ],
   },
@@ -376,7 +376,7 @@ A post-pilot summary will share outcomes and next-step decisions with families.`
 No student account creation is required, and the implementation package includes scripts, parent communication templates, and privacy documentation.
 
 Leadership can review values alignment, safety controls, and expected classroom workflow before approval.`,
-        cta: "Action: Present at leadership meeting",
+        cta: "Action: Present at leadership meeting (Deep link: /schools#pilot-package)",
       },
       {
         id: "schools-council-brief",
@@ -387,7 +387,7 @@ Leadership can review values alignment, safety controls, and expected classroom 
 School council can evaluate controls against local wellbeing and digital safety expectations before and after the pilot.
 
 The post-pilot review supports a transparent continue, refine, or discontinue decision.`,
-        cta: "Action: Attach to council agenda pack",
+        cta: "Action: Attach to council agenda pack (Deep link: /schools#governance)",
       },
     ],
   },
@@ -405,7 +405,7 @@ The post-pilot review supports a transparent continue, refine, or discontinue de
 Core use is offline-first, with implementation materials that allow policy, safeguarding, and ICT teams to review controls prior to rollout.
 
 The package supports a practical, evidence-led pilot decision process.`,
-        cta: "Action: Include in policy review submission",
+        cta: "Action: Include in policy review submission (Deep link: /schools#governance)",
       },
       {
         id: "government-ict-note",
@@ -416,7 +416,7 @@ The package supports a practical, evidence-led pilot decision process.`,
 The implementation package includes documentation for leadership and family communication to support safe adoption.
 
 Review findings can be captured in normal school governance channels.`,
-        cta: "Action: Attach to ICT recommendation",
+        cta: "Action: Attach to ICT recommendation (Deep link: /schools#governance)",
       },
     ],
   },
@@ -701,10 +701,14 @@ export default function LandingPage() {
           {navLinks.map((link) => (
             <a
               key={link.id}
-              href={`#${link.id}`}
+              href={link.id === "schools" ? "/schools" : `#${link.id}`}
               data-audience={link.audience}
               className={activeNav === link.id ? "active" : ""}
-              onClick={() => setActiveNav(link.id)}
+              onClick={() => {
+                if (link.id !== "schools") {
+                  setActiveNav(link.id);
+                }
+              }}
             >
               {link.label}
             </a>
