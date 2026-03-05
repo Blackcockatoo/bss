@@ -58,33 +58,15 @@ type LabyrinthNode = {
   accent: AccentTone;
 };
 
-type SchoolDoc = {
-  href: string;
-  tag: string;
-  title: string;
-  description: string;
+type HeroAudience = "schools" | "parents" | "government";
+
+type HeroAction = {
+  id: HeroAudience;
+  label: string;
+  primaryLabel: string;
+  href?: string;
+  action?: "openPilot";
 };
-
-type NavigationContextValue = {
-  activeNav: NavId;
-  setActiveNav: (id: NavId) => void;
-  activeNodeIndex: number;
-  totalChambers: number;
-  nextNode: LabyrinthNode | null;
-  previousNode: LabyrinthNode | null;
-  isMiniMapOpen: boolean;
-  setIsMiniMapOpen: (isOpen: boolean) => void;
-};
-
-const NavigationContext = createContext<NavigationContextValue | null>(null);
-
-function useNavigationContext() {
-  const context = useContext(NavigationContext);
-  if (!context) {
-    throw new Error("Navigation context is unavailable");
-  }
-  return context;
-}
 
 const navLinks: Array<{ id: NavId; label: string; audience: string }> = [
   { id: "parents", label: "Parents", audience: "parents" },
@@ -94,6 +76,27 @@ const navLinks: Array<{ id: NavId; label: string; audience: string }> = [
   { id: "investors", label: "Government", audience: "schools" },
   { id: "strategy", label: "Assurance", audience: "" },
   { id: "ads", label: "Communication", audience: "" },
+];
+
+const heroActions: HeroAction[] = [
+  {
+    id: "schools",
+    label: "Schools",
+    primaryLabel: "Start a 2-week pilot",
+    action: "openPilot",
+  },
+  {
+    id: "parents",
+    label: "Parents",
+    primaryLabel: "What families can expect",
+    href: "#parents",
+  },
+  {
+    id: "government",
+    label: "Government / ICT",
+    primaryLabel: "Privacy & Safety Brief (technical)",
+    href: "#investors",
+  },
 ];
 
 const labyrinthNodes: LabyrinthNode[] = [
@@ -419,6 +422,8 @@ Review findings can be captured in normal school governance channels.`,
   },
 ];
 
+const privacySafetyBriefHref = "/docs/kpps/07_KPPS_Privacy_Safety_Brief.md";
+
 const metricsRows = [
   [
     "Student identity data",
@@ -537,8 +542,11 @@ export default function LandingPage() {
     [],
   );
   const [activeNav, setActiveNav] = useState<NavId>("parents");
+  const [heroAudience, setHeroAudience] = useState<HeroAudience>("schools");
   const [copiedAdId, setCopiedAdId] = useState<string | null>(null);
   const [isPilotModalOpen, setIsPilotModalOpen] = useState(false);
+  const [isPrivacyDisclosureOpen, setIsPrivacyDisclosureOpen] =
+    useState(false);
 
   const activeNode =
     labyrinthNodes.find((node) => node.id === activeNav) ?? labyrinthNodes[0];
@@ -662,6 +670,12 @@ export default function LandingPage() {
     }
   }
 
+  const activeHeroAction =
+    heroActions.find((action) => action.id === heroAudience) ?? heroActions[0];
+  const secondaryHeroActions = heroActions.filter(
+    (action) => action.id !== activeHeroAction.id,
+  );
+
   return (
     <NavigationContext.Provider
       value={{
@@ -695,6 +709,14 @@ export default function LandingPage() {
               {link.label}
             </a>
           ))}
+          <a
+            href={privacySafetyBriefHref}
+            data-audience="investors"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Privacy &amp; Safety Brief (ICT)
+          </a>
         </div>
         <div className="pathway-status">
           <span>{`Chamber ${activeNodeIndex + 1} of ${labyrinthNodes.length}`}</span>
@@ -721,27 +743,104 @@ export default function LandingPage() {
           Enter a guided labyrinth that walks parents, schools, teachers, and
           government reviewers through one clear implementation pathway.
         </p>
-        <div className="hero-cta">
+        <div className="hero-privacy-disclosure">
           <button
-            className="btn btn-gold"
             type="button"
-            onClick={() => setIsPilotModalOpen(true)}
+            className="privacy-disclosure-toggle"
+            aria-expanded={isPrivacyDisclosureOpen}
+            aria-controls="hero-privacy-details"
+            onClick={() =>
+              setIsPrivacyDisclosureOpen((isOpen) => !isOpen)
+            }
           >
-            Start School Pilot -&gt;
+            Privacy commitments for this pilot
+            <span aria-hidden="true">
+              {isPrivacyDisclosureOpen ? "−" : "+"}
+            </span>
           </button>
-          <a className="btn btn-ghost" href="#pathway">
-            Walk the Labyrinth -&gt;
-          </a>
-          <a className="btn btn-ghost" href="#parents">
-            For Parents -&gt;
-          </a>
-          <a className="btn btn-ghost" href="#schools">
-            For Schools -&gt;
-          </a>
-          <a className="btn btn-ghost" href="#investors">
-            For Government -&gt;
-          </a>
+          <div
+            id="hero-privacy-details"
+            className="privacy-disclosure-panel"
+            hidden={!isPrivacyDisclosureOpen}
+          >
+            <ul>
+              <li>
+                <strong>On-device only:</strong> classroom interaction data stays
+                on the student&apos;s device during pilot use.
+              </li>
+              <li>
+                <strong>No third-party analytics:</strong> the pilot flow does
+                not include Google Analytics, Mixpanel, or similar SDKs.
+              </li>
+              <li>
+                <strong>No ads:</strong> the classroom experience has no ad
+                networks, sponsored placements, or in-app ad units.
+              </li>
+              <li>
+                <strong>No trackers:</strong> no third-party tracking pixels,
+                cookies, or profiling scripts are used in the pilot workflow.
+              </li>
+            </ul>
+          </div>
         </div>
+        <div className="hero-cta">
+          <div className="hero-audience-tabs" role="tablist" aria-label="Audience focus">
+            {heroActions.map((action) => (
+              <button
+                key={action.id}
+                className={
+                  action.id === activeHeroAction.id
+                    ? "hero-audience-tab active"
+                    : "hero-audience-tab"
+                }
+                role="tab"
+                type="button"
+                aria-selected={action.id === activeHeroAction.id}
+                onClick={() => setHeroAudience(action.id)}
+              >
+                {action.label}
+              </button>
+            ))}
+          </div>
+          <div className="hero-audience-cta" data-audience={activeHeroAction.id}>
+            {activeHeroAction.action === "openPilot" ? (
+              <button
+                className="btn btn-primary"
+                type="button"
+                onClick={() => setIsPilotModalOpen(true)}
+              >
+                {activeHeroAction.primaryLabel}
+              </button>
+            ) : (
+              <a className="btn btn-primary" href={activeHeroAction.href}>
+                {activeHeroAction.primaryLabel}
+              </a>
+            )}
+            <div className="hero-cta-links">
+              {secondaryHeroActions.map((action) => (
+                <a key={action.id} className="hero-link secondary" href={action.href}>
+                  {action.primaryLabel}
+                </a>
+              ))}
+              <a className="hero-link tertiary" href="#pathway">
+                Walk the Labyrinth
+              </a>
+            </div>
+          </div>
+        </div>
+        <aside className="hero-ict-card" aria-label="ICT review quick access">
+          <span>Early-stage decision support</span>
+          <p>
+            ICT reviewers can open the canonical technical brief immediately.
+          </p>
+          <a
+            href={privacySafetyBriefHref}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Privacy &amp; Safety Brief (ICT) -&gt;
+          </a>
+        </aside>
         <div className="hero-stat-row">
           <div className="hero-stat">
             <div className="num gold">7 sessions</div>
@@ -760,6 +859,9 @@ export default function LandingPage() {
             <div className="label">Transmitted off device</div>
           </div>
         </div>
+        <p className="hero-support-copy">
+          Pilot pack includes: scripts, comms templates, safety brief.
+        </p>
       </section>
 
       {isPilotModalOpen ? (
@@ -1158,12 +1260,20 @@ export default function LandingPage() {
       <div className="divider" />
 
       <section className="section poster-section">
-        <img
-          className="full-img"
-          src="/assets/poster.svg"
-          alt="Jewble Meta-Pet poster"
-          loading="lazy"
-        />
+        <article
+          className="pilot-pack-card"
+          aria-label="Download card for the final Pilot Pack PDF"
+        >
+          <p className="pilot-pack-stamp">Updated: March 2026</p>
+          <h3>Download the Pilot Pack (PDF)</h3>
+          <p>
+            Finalized parent, classroom, and policy resources in one ready-to-
+            share package.
+          </p>
+          <a className="btn btn-gold" href="/assets/Jewble-Pilot-Pack.pdf" download>
+            Download the Pilot Pack (PDF)
+          </a>
+        </article>
       </section>
 
       <footer className="footer">
