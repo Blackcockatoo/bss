@@ -1,5 +1,12 @@
 import { render, screen, within } from "@testing-library/react";
+import { vi } from "vitest";
 import HomePage from "./page";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
+}));
 
 describe("landing page navigation structure", () => {
   it("keeps nav/section ids aligned with the seven chamber model", () => {
@@ -26,6 +33,10 @@ describe("landing page navigation structure", () => {
 
     expect(
       (nav as HTMLElement).querySelector('a[href="/pet"]'),
+    ).toBeInTheDocument();
+
+    expect(
+      (nav as HTMLElement).querySelector('a[href="/compass"]'),
     ).toBeInTheDocument();
 
     expect(

@@ -849,6 +849,27 @@ body.landing-body {
   line-height: 1.7;
 }
 
+.landing .compass-inline .lead {
+  max-width: 760px;
+  margin-bottom: 30px;
+}
+
+.landing .compass-inline-shell {
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 26px 18px;
+  background:
+    radial-gradient(120% 180% at 0% 0%, rgba(77, 214, 200, 0.1), transparent 55%),
+    radial-gradient(120% 180% at 100% 0%, rgba(245, 200, 76, 0.11), transparent 56%),
+    rgba(10, 22, 40, 0.8);
+}
+
+.landing .compass-inline-actions {
+  margin-top: 22px;
+  display: flex;
+  justify-content: center;
+}
+
 .landing .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -1385,6 +1406,10 @@ body.landing-body {
 
   .landing .pathway {
     padding: 64px 16px 34px;
+  }
+
+  .landing .compass-inline-shell {
+    padding: 20px 12px;
   }
 
   .landing .hero-stat-row {
