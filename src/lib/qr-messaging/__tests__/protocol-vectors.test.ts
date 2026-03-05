@@ -1,30 +1,50 @@
-import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import {
-  moss60Hash,
-  extendedHash,
-  toBase60,
-  encodeMoss60,
-  decodeMoss60,
-  generateKeyPair,
   computeSharedSecret,
-  deriveKeys,
+  decodeMoss60,
   decodeProtocolPayload,
+  deriveKeys,
+  encodeMoss60,
+  extendedHash,
+  generateKeyPair,
+  moss60Hash,
   parseProtocolEnvelope,
+  toBase60,
   validateProtocolEnvelope,
-} from '@/lib/qr-messaging';
+} from "@/lib/qr-messaging";
+import { describe, expect, it } from "vitest";
 
-function loadFixture<T>(name: string): T {
-  const fullPath = path.join(process.cwd(), 'docs/protocol/vectors', name);
-  return JSON.parse(readFileSync(fullPath, 'utf8')) as T;
+function getModuleFilePath(metaUrl: string): string {
+  if (metaUrl.startsWith("file://")) {
+    return fileURLToPath(metaUrl);
+  }
+
+  const fsSegment = "/@fs/";
+  const fsIndex = metaUrl.indexOf(fsSegment);
+  if (fsIndex >= 0) {
+    return decodeURIComponent(metaUrl.slice(fsIndex + fsSegment.length));
+  }
+
+  return process.cwd();
 }
 
-describe('MOSS60 protocol fixtures', () => {
-  it('matches hash vectors', () => {
+const protocolFixtureRoot = path.resolve(
+  path.dirname(getModuleFilePath(import.meta.url)),
+  "../../../../docs/protocol/vectors",
+);
+
+function loadFixture<T>(name: string): T {
+  const fixturePath = path.join(protocolFixtureRoot, name);
+  return JSON.parse(readFileSync(fixturePath, "utf8")) as T;
+}
+
+describe("MOSS60 protocol fixtures", () => {
+  it("matches hash vectors", () => {
     const fixture = loadFixture<{
       vectors: Array<{ input: string; hash: string; extended8: string }>;
-    }>('hash-vectors.json');
+    }>("hash-vectors.json");
 
     for (const vector of fixture.vectors) {
       expect(moss60Hash(vector.input)).toBe(vector.hash);
@@ -32,10 +52,15 @@ describe('MOSS60 protocol fixtures', () => {
     }
   });
 
-  it('matches encoding vectors', () => {
+  it("matches encoding vectors", () => {
     const fixture = loadFixture<{
-      vectors: Array<{ input: string; base60: string; moss60: string; roundTrip: string }>;
-    }>('encoding-vectors.json');
+      vectors: Array<{
+        input: string;
+        base60: string;
+        moss60: string;
+        roundTrip: string;
+      }>;
+    }>("encoding-vectors.json");
 
     for (const vector of fixture.vectors) {
       expect(toBase60(vector.input)).toBe(vector.base60);
@@ -44,14 +69,14 @@ describe('MOSS60 protocol fixtures', () => {
     }
   });
 
-  it('matches key derivation vectors', () => {
+  it("matches key derivation vectors", () => {
     const fixture = loadFixture<{
       seeds: { alice: string; bob: string };
       bobPublic: string;
       sharedSecret: number[];
       encryptionKey: number[];
       decryptionKey: number[];
-    }>('key-derivation-vectors.json');
+    }>("key-derivation-vectors.json");
 
     const alice = generateKeyPair(fixture.seeds.alice);
     const sharedSecret = computeSharedSecret(alice.private, fixture.bobPublic);
@@ -62,10 +87,10 @@ describe('MOSS60 protocol fixtures', () => {
     expect(keys.decryptionKey).toEqual(fixture.decryptionKey);
   });
 
-  it('matches envelope vectors and validates negotiation', () => {
+  it("matches envelope vectors and validates negotiation", () => {
     const fixture = loadFixture<{
       vectors: Array<{ name: string; rawEnvelope: string }>;
-    }>('envelope-vectors.json');
+    }>("envelope-vectors.json");
 
     for (const vector of fixture.vectors) {
       const envelope = parseProtocolEnvelope(vector.rawEnvelope);
@@ -76,7 +101,7 @@ describe('MOSS60 protocol fixtures', () => {
 
       const decoded = decodeProtocolPayload(vector.rawEnvelope);
       expect(decoded.decoded.length).toBeGreaterThan(0);
-      expect(decoded.envelope?.version).toBe('1.0');
+      expect(decoded.envelope?.version).toBe("1.0");
       expect(decoded.envelope?.capabilities.length).toBeGreaterThanOrEqual(4);
     }
   });

@@ -8,7 +8,7 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     globals: true,
-    setupFiles: ['./test/setup.ts'],
+    setupFiles: [path.resolve(__dirname, './test/setup.ts')],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -20,6 +20,12 @@ export default defineConfig({
         '**/mockData',
         '**/.{idea,git,cache,output,temp}',
       ],
+      thresholds: {
+        statements: 58,
+        branches: 50,
+        functions: 56,
+        lines: 60,
+      },
     },
   },
   resolve: {
