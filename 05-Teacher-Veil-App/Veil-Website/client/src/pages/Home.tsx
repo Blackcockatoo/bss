@@ -218,7 +218,7 @@ export default function Home() {
               </Button>
             </Link>
             <a
-              href="https://1-bss-meta-pet-mr-brand.vercel.app"
+              href="https://bluesnakestudios.com"
               target="_blank"
               rel="noopener noreferrer"
             >

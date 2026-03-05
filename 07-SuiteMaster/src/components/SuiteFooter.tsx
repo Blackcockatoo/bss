@@ -3,7 +3,7 @@
 import { SM } from "@/lib/tokens";
 
 const LINKS = [
-  { label: "MetaPet ↗", href: "https://1-bss-meta-pet-mr-brand.vercel.app" },
+  { label: "MetaPet ↗", href: "https://bluesnakestudios.com" },
   { label: "Teacher Hub ↗", href: "https://teachers-meta-pet-mr-brand.vercel.app" },
   { label: "Campaign ↗", href: "https://elevator-pitch-seven.vercel.app" },
   { label: "Elevator →", href: "https://elevator-pitch-seven.vercel.app/elevator" },

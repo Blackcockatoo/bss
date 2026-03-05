@@ -13,4 +13,4 @@ export const tokens = {
 } as const;
 
 export const TEACHER_HUB_URL = "https://teachers-meta-pet-mr-brand.vercel.app";
-export const METAPET_APP_URL = "https://1-bss-meta-pet-mr-brand.vercel.app";
+export const METAPET_APP_URL = "https://bluesnakestudios.com";
