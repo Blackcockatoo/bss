@@ -1057,12 +1057,20 @@ export default function LandingPage() {
       <div className="divider" />
 
       <section className="section poster-section">
-        <img
-          className="full-img"
-          src="/assets/poster.svg"
-          alt="Jewble Meta-Pet poster"
-          loading="lazy"
-        />
+        <article
+          className="pilot-pack-card"
+          aria-label="Download card for the final Pilot Pack PDF"
+        >
+          <p className="pilot-pack-stamp">Updated: March 2026</p>
+          <h3>Download the Pilot Pack (PDF)</h3>
+          <p>
+            Finalized parent, classroom, and policy resources in one ready-to-
+            share package.
+          </p>
+          <a className="btn btn-gold" href="/assets/Jewble-Pilot-Pack.pdf" download>
+            Download the Pilot Pack (PDF)
+          </a>
+        </article>
       </section>
 
       <footer className="footer">
