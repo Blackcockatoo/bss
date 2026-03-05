@@ -51,7 +51,7 @@ export default function SuiteNav() {
         }}
       >
         <a
-          href="https://1-bss-meta-pet-mr-brand.vercel.app"
+          href="https://bluesnakestudios.com"
           target="_blank"
           rel="noopener noreferrer"
           style={{

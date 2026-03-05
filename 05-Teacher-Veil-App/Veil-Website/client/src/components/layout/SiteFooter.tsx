@@ -50,7 +50,7 @@ export default function SiteFooter() {
             <ul className="space-y-1.5 text-sm">
               <li>
                 <a
-                  href="https://1-bss-meta-pet-mr-brand.vercel.app"
+                  href="https://bluesnakestudios.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="opacity-60 hover:opacity-100 transition-opacity"

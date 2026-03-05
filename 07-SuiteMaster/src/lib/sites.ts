@@ -21,7 +21,7 @@ export const SITES: SiteEntry[] = [
     tagline: "The companion with a 180-digit genome",
     description:
       "15 emotional states. Homeostasis-based vitals. Genome-based evolution. Zero data collected — ever. The core Jewble product.",
-    url: "https://1-bss-meta-pet-mr-brand.vercel.app",
+    url: "https://bluesnakestudios.com",
     accent: "#f5c84c",
     accentDim: "rgba(245,200,76,.10)",
     accentBorder: "rgba(245,200,76,.28)",
