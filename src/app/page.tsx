@@ -1,12 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import "./landing.css";
 
 type NavId =
   | "parents"
   | "schools"
   | "veil"
+  | "schoolDocs"
   | "investors"
   | "strategy"
   | "ads";
@@ -50,10 +58,39 @@ type LabyrinthNode = {
   accent: AccentTone;
 };
 
+type SchoolDoc = {
+  href: string;
+  tag: string;
+  title: string;
+  description: string;
+};
+
+type NavigationContextValue = {
+  activeNav: NavId;
+  setActiveNav: (id: NavId) => void;
+  activeNodeIndex: number;
+  totalChambers: number;
+  nextNode: LabyrinthNode | null;
+  previousNode: LabyrinthNode | null;
+  isMiniMapOpen: boolean;
+  setIsMiniMapOpen: (isOpen: boolean) => void;
+};
+
+const NavigationContext = createContext<NavigationContextValue | null>(null);
+
+function useNavigationContext() {
+  const context = useContext(NavigationContext);
+  if (!context) {
+    throw new Error("Navigation context is unavailable");
+  }
+  return context;
+}
+
 const navLinks: Array<{ id: NavId; label: string; audience: string }> = [
   { id: "parents", label: "Parents", audience: "parents" },
   { id: "schools", label: "Schools", audience: "schools" },
   { id: "veil", label: "Teacher Delivery", audience: "teachers" },
+  { id: "schoolDocs", label: "School Docs", audience: "schools" },
   { id: "investors", label: "Government", audience: "schools" },
   { id: "strategy", label: "Assurance", audience: "" },
   { id: "ads", label: "Communication", audience: "" },
@@ -83,24 +120,48 @@ const labyrinthNodes: LabyrinthNode[] = [
   },
   {
     id: "investors",
-    chamber: "Chamber 04",
+    chamber: "Chamber 05",
     title: "Government readiness",
     body: "Present policy-fit controls, technical safeguards, and practical risk reduction for public education settings.",
     accent: "violet",
   },
   {
     id: "strategy",
-    chamber: "Chamber 05",
+    chamber: "Chamber 06",
     title: "Assurance framework",
     body: "Translate the model into clear approval criteria for leadership, ICT, and policy reviewers.",
     accent: "coral",
   },
   {
     id: "ads",
-    chamber: "Chamber 06",
+    chamber: "Chamber 07",
     title: "Stakeholder communication",
     body: "Finish with copy-ready templates for parent notices, leadership briefings, and government review notes.",
     accent: "gold",
+  },
+];
+
+const schoolDocs: SchoolDoc[] = [
+  {
+    href: "/docs/kpps/00_Package_Index.md",
+    tag: "Index",
+    title: "Implementation package index",
+    description:
+      "Master list of pilot materials so leadership and ICT reviewers can locate every supporting document quickly.",
+  },
+  {
+    href: "/docs/kpps/04_Privacy_and_Safety_Brief.md",
+    tag: "Safety",
+    title: "Privacy and safety brief",
+    description:
+      "Plain-language controls summary covering data minimization, duty-of-care expectations, and verification notes.",
+  },
+  {
+    href: "/docs/kpps/06_Implementation_Runbook.md",
+    tag: "Runbook",
+    title: "Teacher implementation runbook",
+    description:
+      "Operational steps for sessions, facilitation handover, and post-pilot review so delivery stays consistent.",
   },
 ];
 
@@ -436,13 +497,19 @@ function ShowcaseImage({
 }
 
 function NextGate({ from }: { from: NavId }) {
-  const currentIndex = labyrinthNodes.findIndex((node) => node.id === from);
-  const nextNode = labyrinthNodes[currentIndex + 1];
+  const { activeNodeIndex, totalChambers, nextNode, previousNode } =
+    useNavigationContext();
 
   if (!nextNode) {
     return (
       <div className="next-gate">
+        <span>{`Chamber ${activeNodeIndex + 1} of ${totalChambers}`}</span>
         <span>Labyrinth complete</span>
+        {previousNode ? (
+          <a href={`#${previousNode.id}`}>
+            &lt;- {previousNode.chamber} - {previousNode.title}
+          </a>
+        ) : null}
         <a href="#top">Back to entrance -&gt;</a>
       </div>
     );
@@ -450,6 +517,12 @@ function NextGate({ from }: { from: NavId }) {
 
   return (
     <div className="next-gate">
+      <span>{`Chamber ${activeNodeIndex + 1} of ${totalChambers}`}</span>
+      {from !== labyrinthNodes[0].id && previousNode ? (
+        <a href={`#${previousNode.id}`}>
+          &lt;- {previousNode.chamber} - {previousNode.title}
+        </a>
+      ) : null}
       <span>Next chamber</span>
       <a href={`#${nextNode.id}`}>
         {nextNode.chamber} - {nextNode.title} -&gt;
@@ -472,6 +545,10 @@ export default function LandingPage() {
   const activeNodeIndex = labyrinthNodes.findIndex(
     (node) => node.id === activeNav,
   );
+  const [isMiniMapOpen, setIsMiniMapOpen] = useState(true);
+
+  const nextNode = labyrinthNodes[activeNodeIndex + 1] ?? null;
+  const previousNode = labyrinthNodes[activeNodeIndex - 1] ?? null;
 
   const copyTimeoutRef = useRef<number | null>(null);
   const modalPanelRef = useRef<HTMLDivElement>(null);
@@ -586,6 +663,18 @@ export default function LandingPage() {
   }
 
   return (
+    <NavigationContext.Provider
+      value={{
+        activeNav,
+        setActiveNav,
+        activeNodeIndex,
+        totalChambers: labyrinthNodes.length,
+        nextNode,
+        previousNode,
+        isMiniMapOpen,
+        setIsMiniMapOpen,
+      }}
+    >
     <div className="landing">
       <div className="ambient" />
       <div className="grain" />
@@ -606,6 +695,16 @@ export default function LandingPage() {
               {link.label}
             </a>
           ))}
+        </div>
+        <div className="pathway-status">
+          <span>{`Chamber ${activeNodeIndex + 1} of ${labyrinthNodes.length}`}</span>
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={() => setIsMiniMapOpen(!isMiniMapOpen)}
+          >
+            {isMiniMapOpen ? "Hide mini-map" : "Show mini-map"}
+          </button>
         </div>
       </nav>
 
@@ -734,27 +833,29 @@ export default function LandingPage() {
             gates.
           </p>
         </div>
-        <div className="pathway-grid">
-          {labyrinthNodes.map((node, index) => {
-            const isActive = node.id === activeNav;
-            const isReached = activeNodeIndex >= index;
+        {isMiniMapOpen ? (
+          <div className="pathway-grid">
+            {labyrinthNodes.map((node, index) => {
+              const isActive = node.id === activeNav;
+              const isReached = activeNodeIndex >= index;
 
-            return (
-              <a
-                key={node.id}
-                href={`#${node.id}`}
-                className={`path-node ${node.accent} ${
-                  isActive ? "active" : ""
-                } ${isReached ? "reached" : ""}`}
-              >
-                <span className="path-node-tag">{node.chamber}</span>
-                <h3>{node.title}</h3>
-                <p>{node.body}</p>
-                <span className="path-node-link">Enter chamber -&gt;</span>
-              </a>
-            );
-          })}
-        </div>
+              return (
+                <a
+                  key={node.id}
+                  href={`#${node.id}`}
+                  className={`path-node ${node.accent} ${
+                    isActive ? "active" : ""
+                  } ${isReached ? "reached" : ""}`}
+                >
+                  <span className="path-node-tag">{node.chamber}</span>
+                  <h3>{node.title}</h3>
+                  <p>{node.body}</p>
+                  <span className="path-node-link">Enter chamber -&gt;</span>
+                </a>
+              );
+            })}
+          </div>
+        ) : null}
         <div className="pathway-status">
           <span>Currently focused:</span>
           <strong>
@@ -940,7 +1041,7 @@ export default function LandingPage() {
 
       <section className="section" id="investors">
         <div className="section-label violet">
-          Layer 4 - Government and Policy
+          Layer 5 - Government and Policy
         </div>
         <h2>
           Built for policy confidence,
@@ -1000,7 +1101,7 @@ export default function LandingPage() {
       <div className="divider" />
 
       <section className="section" id="strategy">
-        <div className="section-label coral">Layer 5 - Assurance</div>
+        <div className="section-label coral">Layer 6 - Assurance</div>
         <h2>Implementation Assurance</h2>
         <p className="lead">
           A practical assurance checklist for leadership decisions, with clear
@@ -1023,7 +1124,7 @@ export default function LandingPage() {
       </section>
 
       <section className="section" id="ads">
-        <div className="section-label gold">Layer 6 - Communication</div>
+        <div className="section-label gold">Layer 7 - Communication</div>
         <h2>Stakeholder Communication Templates</h2>
         <p className="lead">
           Copy-ready templates for parent notices, leadership briefings, and
@@ -1100,5 +1201,6 @@ export default function LandingPage() {
         </p>
       </footer>
     </div>
+    </NavigationContext.Provider>
   );
 }
