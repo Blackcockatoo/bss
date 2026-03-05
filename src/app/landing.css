@@ -268,6 +268,16 @@ body.landing-body {
   text-transform: uppercase;
 }
 
+.landing .hero-support-copy {
+  width: min(960px, 100%);
+  margin: 14px 0 0;
+  padding: 0 2px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(232, 238, 247, 0.72);
+  text-align: center;
+}
+
 .landing .pilot-modal-overlay {
   position: fixed;
   inset: 0;
@@ -1073,6 +1083,12 @@ body.landing-body {
 
   .landing .hero-stat-row {
     justify-content: flex-start;
+  }
+
+  .landing .hero-support-copy {
+    margin-top: 10px;
+    font-size: 12px;
+    text-align: left;
   }
 
   .landing .hero-stat {
