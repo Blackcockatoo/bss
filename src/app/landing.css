@@ -88,6 +88,37 @@ body.landing-body {
   gap: 6px;
 }
 
+.landing .nav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.landing .nav-launch {
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--gold-dim);
+  color: var(--gold);
+  background: rgba(245, 200, 76, 0.1);
+  transition: all 0.15s ease;
+}
+
+.landing .nav-launch:hover {
+  color: #fff5cf;
+  border-color: rgba(245, 200, 76, 0.55);
+  background: rgba(245, 200, 76, 0.2);
+}
+
+.landing .nav-launch:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}
+
 .landing .nav-links a {
   text-decoration: none;
   font-size: 11px;
@@ -1337,6 +1368,15 @@ body.landing-body {
 
   .landing .nav-links {
     display: none;
+  }
+
+  .landing .nav-right {
+    gap: 8px;
+  }
+
+  .landing .nav-launch {
+    padding: 7px 11px;
+    font-size: 10px;
   }
 
   .landing .section {

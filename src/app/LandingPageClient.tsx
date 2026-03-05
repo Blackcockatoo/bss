@@ -634,18 +634,26 @@ export default function LandingPage() {
         <div className="nav-logo">
           Blue Snake <span>Studios</span>
         </div>
-        <div className="nav-links">
-          {navLinks.map((link) => (
-            <a
-              key={link.id}
-              href={`#${link.id}`}
-              data-audience={link.audience}
-              className={activeNav === link.id ? "active" : ""}
-              onClick={() => setActiveNav(link.id)}
-            >
-              {link.label}
-            </a>
-          ))}
+        <div className="nav-right">
+          <div className="nav-links">
+            {navLinks.map((link) => (
+              <a
+                key={link.id}
+                href={`#${link.id}`}
+                data-audience={link.audience}
+                className={activeNav === link.id ? "active" : ""}
+                onClick={() => setActiveNav(link.id)}
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
+          <a className="nav-launch" href="/compass">
+            Open Compass Wheel
+          </a>
+          <a className="nav-launch" href="/pet">
+            Open MetaPet
+          </a>
         </div>
       </nav>
 
@@ -672,6 +680,9 @@ export default function LandingPage() {
           </button>
           <a className="btn btn-gold" href="/pet">
             Open MetaPet App -&gt;
+          </a>
+          <a className="btn btn-gold" href="/compass">
+            Open Compass Wheel -&gt;
           </a>
           <a className="btn btn-ghost" href="#pathway">
             Walk the Labyrinth -&gt;
@@ -741,6 +752,7 @@ export default function LandingPage() {
             </p>
             <div className="pilot-modal-links">
               <a href="/pet">Open MetaPet app</a>
+              <a href="/compass">Open Compass Wheel</a>
               <a
                 href="https://teachers-meta-pet-mr-brand.vercel.app/?as=teacher"
                 target="_blank"
@@ -1123,6 +1135,9 @@ export default function LandingPage() {
         <div className="hero-cta footer-cta">
           <a className="btn btn-gold" href="/pet">
             Try MetaPet -&gt;
+          </a>
+          <a className="btn btn-gold" href="/compass">
+            Open Compass Wheel -&gt;
           </a>
           <a
             className="btn btn-ghost"

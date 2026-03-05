@@ -24,7 +24,9 @@ describe("landing page navigation structure", () => {
       ).toBeInTheDocument();
     }
 
-    expect(container.querySelector('a[href="/pet"]')).toBeInTheDocument();
+    expect(
+      (nav as HTMLElement).querySelector('a[href="/pet"]'),
+    ).toBeInTheDocument();
 
     expect(
       within(nav as HTMLElement).getByRole("link", { name: /school docs/i }),
