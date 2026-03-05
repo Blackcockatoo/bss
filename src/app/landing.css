@@ -185,10 +185,79 @@ body.landing-body {
 
 .landing .hero-cta {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  animation: fadeUp 0.8s ease 0.3s both;
+}
+
+.landing .hero-audience-tabs {
+  display: inline-flex;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line);
+}
+
+.landing .hero-audience-tab {
+  border: 1px solid transparent;
+  color: var(--muted);
+  background: transparent;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.landing .hero-audience-tab:hover {
+  color: var(--white);
+}
+
+.landing .hero-audience-tab.active {
+  color: var(--white);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.landing .hero-audience-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.landing .hero-cta-links {
+  display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 12px;
-  animation: fadeUp 0.8s ease 0.3s both;
+}
+
+.landing .hero-link {
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.15s ease;
+}
+
+.landing .hero-link.secondary {
+  color: var(--white);
+  opacity: 0.9;
+}
+
+.landing .hero-link.secondary:hover {
+  opacity: 1;
+}
+
+.landing .hero-link.tertiary {
+  color: var(--muted);
+}
+
+.landing .hero-link.tertiary:hover {
+  color: var(--white);
 }
 
 .landing .btn {
@@ -204,6 +273,38 @@ body.landing-body {
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
+}
+
+
+.landing .btn-primary {
+  color: #080b10;
+  background: var(--gold);
+}
+
+.landing .hero-audience-cta[data-audience="parents"] .btn-primary {
+  color: #03231f;
+  background: var(--teal);
+}
+
+.landing .hero-audience-cta[data-audience="government"] .btn-primary {
+  color: #f5f3ff;
+  background: var(--violet);
+}
+
+.landing .btn-primary:hover {
+  transform: translateY(-2px);
+}
+
+.landing .hero-audience-cta[data-audience="schools"] .btn-primary:hover {
+  box-shadow: 0 10px 30px rgba(245, 200, 76, 0.25);
+}
+
+.landing .hero-audience-cta[data-audience="parents"] .btn-primary:hover {
+  box-shadow: 0 10px 30px rgba(77, 214, 200, 0.25);
+}
+
+.landing .hero-audience-cta[data-audience="government"] .btn-primary:hover {
+  box-shadow: 0 10px 30px rgba(167, 139, 250, 0.28);
 }
 
 .landing .btn-gold {
