@@ -517,12 +517,14 @@ export async function decryptWithExportKey(
 }
 
 export async function importExportKey(name: string, keyHex: string): Promise<ExportKey> {
+  const normalizedKeyHex = keyHex.trim().toLowerCase();
+
   // Validate key
-  if (keyHex.length !== 64) {
+  if (!/^[0-9a-f]{64}$/.test(normalizedKeyHex)) {
     throw new Error('Invalid key format - must be 64 hex characters');
   }
 
-  const fingerprint = (await hashData(keyHex)).slice(0, 16);
+  const fingerprint = (await hashData(normalizedKeyHex)).slice(0, 16);
   const now = Date.now();
 
   // Check if already imported
@@ -546,7 +548,7 @@ export async function importExportKey(name: string, keyHex: string): Promise<Exp
   store.exportKeys.push(exportKey);
   saveKeyStore(store);
 
-  localStorage.setItem(`metapet-export-key-${exportKey.id}`, keyHex);
+  localStorage.setItem(`metapet-export-key-${exportKey.id}`, normalizedKeyHex);
 
   return exportKey;
 }
