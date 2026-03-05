@@ -193,12 +193,142 @@ body.landing-body {
   font-weight: 500;
 }
 
+.landing .hero-privacy-disclosure {
+  width: min(760px, 100%);
+  margin: 0 0 28px;
+  animation: fadeUp 0.8s ease 0.25s both;
+}
+
+.landing .privacy-disclosure-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--white);
+  border-radius: 12px;
+  padding: 13px 16px;
+  font-family: var(--display);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.landing .privacy-disclosure-toggle:hover {
+  border-color: rgba(77, 214, 200, 0.35);
+  background: rgba(77, 214, 200, 0.08);
+}
+
+.landing .privacy-disclosure-toggle:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+.landing .privacy-disclosure-toggle span {
+  font-size: 22px;
+  line-height: 1;
+  color: var(--teal);
+}
+
+.landing .privacy-disclosure-panel {
+  margin-top: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(10, 22, 40, 0.9);
+  padding: 14px 16px 12px;
+}
+
+.landing .privacy-disclosure-panel ul {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.landing .privacy-disclosure-panel strong {
+  color: var(--white);
+}
+
 .landing .hero-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  animation: fadeUp 0.8s ease 0.3s both;
+}
+
+.landing .hero-audience-tabs {
+  display: inline-flex;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line);
+}
+
+.landing .hero-audience-tab {
+  border: 1px solid transparent;
+  color: var(--muted);
+  background: transparent;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.landing .hero-audience-tab:hover {
+  color: var(--white);
+}
+
+.landing .hero-audience-tab.active {
+  color: var(--white);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.landing .hero-audience-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.landing .hero-cta-links {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 12px;
-  animation: fadeUp 0.8s ease 0.3s both;
+}
+
+.landing .hero-link {
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.15s ease;
+}
+
+.landing .hero-link.secondary {
+  color: var(--white);
+  opacity: 0.9;
+}
+
+.landing .hero-link.secondary:hover {
+  opacity: 1;
+}
+
+.landing .hero-link.tertiary {
+  color: var(--muted);
+}
+
+.landing .hero-link.tertiary:hover {
+  color: var(--white);
 }
 
 .landing .btn {
@@ -214,6 +344,38 @@ body.landing-body {
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
+}
+
+
+.landing .btn-primary {
+  color: #080b10;
+  background: var(--gold);
+}
+
+.landing .hero-audience-cta[data-audience="parents"] .btn-primary {
+  color: #03231f;
+  background: var(--teal);
+}
+
+.landing .hero-audience-cta[data-audience="government"] .btn-primary {
+  color: #f5f3ff;
+  background: var(--violet);
+}
+
+.landing .btn-primary:hover {
+  transform: translateY(-2px);
+}
+
+.landing .hero-audience-cta[data-audience="schools"] .btn-primary:hover {
+  box-shadow: 0 10px 30px rgba(245, 200, 76, 0.25);
+}
+
+.landing .hero-audience-cta[data-audience="parents"] .btn-primary:hover {
+  box-shadow: 0 10px 30px rgba(77, 214, 200, 0.25);
+}
+
+.landing .hero-audience-cta[data-audience="government"] .btn-primary:hover {
+  box-shadow: 0 10px 30px rgba(167, 139, 250, 0.28);
 }
 
 .landing .btn-gold {
@@ -259,6 +421,47 @@ body.landing-body {
   animation: fadeUp 0.8s ease 0.4s both;
 }
 
+.landing .hero-ict-card {
+  margin-top: 20px;
+  width: min(680px, 100%);
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  border-radius: 14px;
+  background: linear-gradient(150deg, rgba(167, 139, 250, 0.14), rgba(17, 31, 58, 0.84));
+  padding: 14px 16px;
+  text-align: left;
+  animation: fadeUp 0.8s ease 0.35s both;
+}
+
+.landing .hero-ict-card span {
+  display: inline-flex;
+  margin-bottom: 6px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--violet);
+}
+
+.landing .hero-ict-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.landing .hero-ict-card a {
+  display: inline-flex;
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--white);
+}
+
+.landing .hero-ict-card a:hover {
+  color: var(--violet);
+}
+
 .landing .hero-stat {
   text-align: center;
 }
@@ -286,6 +489,16 @@ body.landing-body {
   color: var(--muted);
   letter-spacing: 1px;
   text-transform: uppercase;
+}
+
+.landing .hero-support-copy {
+  width: min(960px, 100%);
+  margin: 14px 0 0;
+  padding: 0 2px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(232, 238, 247, 0.72);
+  text-align: center;
 }
 
 .landing .pilot-modal-overlay {
@@ -1015,6 +1228,46 @@ body.landing-body {
   text-align: center;
 }
 
+.landing .pilot-pack-card {
+  max-width: 760px;
+  margin: 0 auto;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: linear-gradient(145deg, rgba(77, 214, 200, 0.08), rgba(17, 31, 58, 0.96));
+  padding: 28px 24px;
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+}
+
+.landing .pilot-pack-stamp {
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(240, 200, 61, 0.45);
+  background: rgba(240, 200, 61, 0.12);
+  color: var(--gold);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+}
+
+.landing .pilot-pack-card h3 {
+  margin: 0;
+  font-size: clamp(22px, 4vw, 32px);
+}
+
+.landing .pilot-pack-card p {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--muted);
+}
+
+.landing .pilot-pack-card .btn {
+  margin-top: 8px;
+}
+
 .landing .full-img {
   width: 100%;
   max-width: 760px;
@@ -1129,6 +1382,12 @@ body.landing-body {
 
   .landing .hero-stat-row {
     justify-content: flex-start;
+  }
+
+  .landing .hero-support-copy {
+    margin-top: 10px;
+    font-size: 12px;
+    text-align: left;
   }
 
   .landing .hero-stat {
