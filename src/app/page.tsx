@@ -693,7 +693,7 @@ export default function LandingPage() {
       <div className="ambient" />
       <div className="grain" />
 
-      <nav>
+      <nav aria-label="Primary">
         <div className="nav-logo">
           Blue Snake <span>Studios</span>
         </div>
@@ -879,6 +879,7 @@ export default function LandingPage() {
         >
           <div
             className="pilot-modal"
+            id="pilot-modal-panel"
             role="dialog"
             aria-modal="true"
             aria-labelledby="pilot-modal-title"
@@ -905,6 +906,7 @@ export default function LandingPage() {
                 href="https://teachers-meta-pet-mr-brand.vercel.app/?as=teacher"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Open Teacher Hub (The Veil) in a new tab"
               >
                 Teacher Hub (The Veil)
               </a>
@@ -912,6 +914,7 @@ export default function LandingPage() {
                 href="https://teachers-meta-pet-mr-brand.vercel.app/routes"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Open Teacher route map in a new tab"
               >
                 Teacher route map
               </a>
@@ -919,6 +922,7 @@ export default function LandingPage() {
                 href="/docs/kpps/00_Package_Index.md"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Open School package index in a new tab"
               >
                 School package index
               </a>
@@ -1246,6 +1250,7 @@ export default function LandingPage() {
                   className="copy-btn"
                   type="button"
                   onClick={() => copyAd(card)}
+                  aria-label={`Copy template: ${card.headline}`}
                 >
                   {copiedAdId === card.id ? "Copied!" : "Copy"}
                 </button>

@@ -126,6 +126,16 @@ body.landing-body {
   color: var(--coral);
 }
 
+.landing .nav-links a:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--white);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
 .landing .hero {
   position: relative;
   z-index: 2;
@@ -389,6 +399,16 @@ body.landing-body {
   background: rgba(255, 255, 255, 0.04);
 }
 
+.landing .btn:focus-visible,
+.landing .copy-btn:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(5, 10, 18, 0.95);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
 .landing .hero-stat-row {
   display: flex;
   flex-wrap: wrap;
@@ -548,6 +568,16 @@ body.landing-body {
   transform: translateY(-1px);
 }
 
+.landing .pilot-modal-links a:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+  border-color: var(--gold);
+  background: rgba(245, 200, 76, 0.12);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
 .landing .pilot-modal-close {
   position: absolute;
   top: 14px;
@@ -658,6 +688,22 @@ body.landing-body {
 .landing .path-node:hover,
 .landing .path-node.active {
   box-shadow: 0 12px 34px rgba(0, 0, 0, 0.25);
+}
+
+.landing .path-node:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+  border-color: var(--gold);
+  box-shadow:
+    0 0 0 4px rgba(5, 10, 18, 0.92),
+    0 12px 34px rgba(0, 0, 0, 0.25);
+  transform: translateY(-2px);
+}
+
+.landing .path-node:focus-visible .path-node-link {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }
 
 .landing .path-node-tag {
@@ -1166,6 +1212,16 @@ body.landing-body {
 
 .landing .next-gate a:hover {
   color: var(--teal);
+}
+
+.landing .next-gate a:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }
 
 .landing .poster-section {
