@@ -7,6 +7,7 @@ type NavId =
   | "parents"
   | "schools"
   | "veil"
+  | "schoolDocs"
   | "investors"
   | "strategy"
   | "ads";
@@ -50,10 +51,18 @@ type LabyrinthNode = {
   accent: AccentTone;
 };
 
+type SchoolDoc = {
+  href: string;
+  tag: string;
+  title: string;
+  description: string;
+};
+
 const navLinks: Array<{ id: NavId; label: string; audience: string }> = [
   { id: "parents", label: "Parents", audience: "parents" },
   { id: "schools", label: "Schools", audience: "schools" },
   { id: "veil", label: "Teacher Delivery", audience: "teachers" },
+  { id: "schoolDocs", label: "School Docs", audience: "schools" },
   { id: "investors", label: "Government", audience: "schools" },
   { id: "strategy", label: "Assurance", audience: "" },
   { id: "ads", label: "Communication", audience: "" },
@@ -82,25 +91,56 @@ const labyrinthNodes: LabyrinthNode[] = [
     accent: "coral",
   },
   {
-    id: "investors",
+    id: "schoolDocs",
     chamber: "Chamber 04",
+    title: "School documentation",
+    body: "Surface implementation documents directly on-page so teachers and leadership can verify delivery details quickly.",
+    accent: "teal",
+  },
+  {
+    id: "investors",
+    chamber: "Chamber 05",
     title: "Government readiness",
     body: "Present policy-fit controls, technical safeguards, and practical risk reduction for public education settings.",
     accent: "violet",
   },
   {
     id: "strategy",
-    chamber: "Chamber 05",
+    chamber: "Chamber 06",
     title: "Assurance framework",
     body: "Translate the model into clear approval criteria for leadership, ICT, and policy reviewers.",
     accent: "coral",
   },
   {
     id: "ads",
-    chamber: "Chamber 06",
+    chamber: "Chamber 07",
     title: "Stakeholder communication",
     body: "Finish with copy-ready templates for parent notices, leadership briefings, and government review notes.",
     accent: "gold",
+  },
+];
+
+const schoolDocs: SchoolDoc[] = [
+  {
+    href: "/docs/kpps/00_Package_Index.md",
+    tag: "Index",
+    title: "Implementation package index",
+    description:
+      "Master list of pilot materials so leadership and ICT reviewers can locate every supporting document quickly.",
+  },
+  {
+    href: "/docs/kpps/04_Privacy_and_Safety_Brief.md",
+    tag: "Safety",
+    title: "Privacy and safety brief",
+    description:
+      "Plain-language controls summary covering data minimization, duty-of-care expectations, and verification notes.",
+  },
+  {
+    href: "/docs/kpps/06_Implementation_Runbook.md",
+    tag: "Runbook",
+    title: "Teacher implementation runbook",
+    description:
+      "Operational steps for sessions, facilitation handover, and post-pilot review so delivery stays consistent.",
   },
 ];
 
