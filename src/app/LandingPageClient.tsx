@@ -1,20 +1,12 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./landing.css";
 
 type NavId =
   | "parents"
   | "schools"
   | "veil"
-  | "schoolDocs"
   | "investors"
   | "strategy"
   | "ads";
@@ -58,45 +50,13 @@ type LabyrinthNode = {
   accent: AccentTone;
 };
 
-type HeroAudience = "schools" | "parents" | "government";
-
-type HeroAction = {
-  id: HeroAudience;
-  label: string;
-  primaryLabel: string;
-  href?: string;
-  action?: "openPilot";
-};
-
 const navLinks: Array<{ id: NavId; label: string; audience: string }> = [
   { id: "parents", label: "Parents", audience: "parents" },
   { id: "schools", label: "Schools", audience: "schools" },
   { id: "veil", label: "Teacher Delivery", audience: "teachers" },
-  { id: "schoolDocs", label: "School Docs", audience: "schools" },
   { id: "investors", label: "Government", audience: "schools" },
   { id: "strategy", label: "Assurance", audience: "" },
   { id: "ads", label: "Communication", audience: "" },
-];
-
-const heroActions: HeroAction[] = [
-  {
-    id: "schools",
-    label: "Schools",
-    primaryLabel: "Start a 2-week pilot",
-    action: "openPilot",
-  },
-  {
-    id: "parents",
-    label: "Parents",
-    primaryLabel: "What families can expect",
-    href: "#parents",
-  },
-  {
-    id: "government",
-    label: "Government / ICT",
-    primaryLabel: "Privacy & Safety Brief (technical)",
-    href: "#investors",
-  },
 ];
 
 const labyrinthNodes: LabyrinthNode[] = [
@@ -123,48 +83,24 @@ const labyrinthNodes: LabyrinthNode[] = [
   },
   {
     id: "investors",
-    chamber: "Chamber 05",
+    chamber: "Chamber 04",
     title: "Government readiness",
     body: "Present policy-fit controls, technical safeguards, and practical risk reduction for public education settings.",
     accent: "violet",
   },
   {
     id: "strategy",
-    chamber: "Chamber 06",
+    chamber: "Chamber 05",
     title: "Assurance framework",
     body: "Translate the model into clear approval criteria for leadership, ICT, and policy reviewers.",
     accent: "coral",
   },
   {
     id: "ads",
-    chamber: "Chamber 07",
+    chamber: "Chamber 06",
     title: "Stakeholder communication",
     body: "Finish with copy-ready templates for parent notices, leadership briefings, and government review notes.",
     accent: "gold",
-  },
-];
-
-const schoolDocs: SchoolDoc[] = [
-  {
-    href: "/docs/kpps/00_Package_Index.md",
-    tag: "Index",
-    title: "Implementation package index",
-    description:
-      "Master list of pilot materials so leadership and ICT reviewers can locate every supporting document quickly.",
-  },
-  {
-    href: "/docs/kpps/04_Privacy_and_Safety_Brief.md",
-    tag: "Safety",
-    title: "Privacy and safety brief",
-    description:
-      "Plain-language controls summary covering data minimization, duty-of-care expectations, and verification notes.",
-  },
-  {
-    href: "/docs/kpps/06_Implementation_Runbook.md",
-    tag: "Runbook",
-    title: "Teacher implementation runbook",
-    description:
-      "Operational steps for sessions, facilitation handover, and post-pilot review so delivery stays consistent.",
   },
 ];
 
@@ -336,7 +272,7 @@ const communicationGroups: AdGroup[] = [
 The pilot is designed to be low-risk and privacy-safe: no student accounts, no advertising, and no third-party tracking. Core activity works offline.
 
 Students complete short guided sessions in class, and families receive updates as the pilot progresses.`,
-        cta: "Action: Share via newsletter or parent portal (Deep link: /schools#family-comms)",
+        cta: "Action: Share via newsletter or parent portal",
       },
       {
         id: "parents-privacy-brief",
@@ -347,7 +283,7 @@ Students complete short guided sessions in class, and families receive updates a
 Core classroom use is offline-first, and the school receives implementation and safety documentation before rollout.
 
 If you have technical questions, school leadership and ICT contacts can provide direct support pathways.`,
-        cta: "Action: Include in FAQ attachment (Deep link: /schools#family-comms)",
+        cta: "Action: Include in FAQ attachment",
       },
       {
         id: "parents-progress-update",
@@ -358,7 +294,7 @@ If you have technical questions, school leadership and ICT contacts can provide 
 Teachers are using guided scripts and reflection prompts, with no added parent admin steps required during pilot delivery.
 
 A post-pilot summary will share outcomes and next-step decisions with families.`,
-        cta: "Action: Share in week-two update (Deep link: /schools#family-comms)",
+        cta: "Action: Share in week-two update",
       },
     ],
   },
@@ -376,7 +312,7 @@ A post-pilot summary will share outcomes and next-step decisions with families.`
 No student account creation is required, and the implementation package includes scripts, parent communication templates, and privacy documentation.
 
 Leadership can review values alignment, safety controls, and expected classroom workflow before approval.`,
-        cta: "Action: Present at leadership meeting (Deep link: /schools#pilot-package)",
+        cta: "Action: Present at leadership meeting",
       },
       {
         id: "schools-council-brief",
@@ -387,7 +323,7 @@ Leadership can review values alignment, safety controls, and expected classroom 
 School council can evaluate controls against local wellbeing and digital safety expectations before and after the pilot.
 
 The post-pilot review supports a transparent continue, refine, or discontinue decision.`,
-        cta: "Action: Attach to council agenda pack (Deep link: /schools#governance)",
+        cta: "Action: Attach to council agenda pack",
       },
     ],
   },
@@ -405,7 +341,7 @@ The post-pilot review supports a transparent continue, refine, or discontinue de
 Core use is offline-first, with implementation materials that allow policy, safeguarding, and ICT teams to review controls prior to rollout.
 
 The package supports a practical, evidence-led pilot decision process.`,
-        cta: "Action: Include in policy review submission (Deep link: /schools#governance)",
+        cta: "Action: Include in policy review submission",
       },
       {
         id: "government-ict-note",
@@ -416,13 +352,11 @@ The package supports a practical, evidence-led pilot decision process.`,
 The implementation package includes documentation for leadership and family communication to support safe adoption.
 
 Review findings can be captured in normal school governance channels.`,
-        cta: "Action: Attach to ICT recommendation (Deep link: /schools#governance)",
+        cta: "Action: Attach to ICT recommendation",
       },
     ],
   },
 ];
-
-const privacySafetyBriefHref = "/docs/kpps/07_KPPS_Privacy_Safety_Brief.md";
 
 const metricsRows = [
   [
@@ -502,19 +436,13 @@ function ShowcaseImage({
 }
 
 function NextGate({ from }: { from: NavId }) {
-  const { activeNodeIndex, totalChambers, nextNode, previousNode } =
-    useNavigationContext();
+  const currentIndex = labyrinthNodes.findIndex((node) => node.id === from);
+  const nextNode = labyrinthNodes[currentIndex + 1];
 
   if (!nextNode) {
     return (
       <div className="next-gate">
-        <span>{`Chamber ${activeNodeIndex + 1} of ${totalChambers}`}</span>
         <span>Labyrinth complete</span>
-        {previousNode ? (
-          <a href={`#${previousNode.id}`}>
-            &lt;- {previousNode.chamber} - {previousNode.title}
-          </a>
-        ) : null}
         <a href="#top">Back to entrance -&gt;</a>
       </div>
     );
@@ -522,12 +450,6 @@ function NextGate({ from }: { from: NavId }) {
 
   return (
     <div className="next-gate">
-      <span>{`Chamber ${activeNodeIndex + 1} of ${totalChambers}`}</span>
-      {from !== labyrinthNodes[0].id && previousNode ? (
-        <a href={`#${previousNode.id}`}>
-          &lt;- {previousNode.chamber} - {previousNode.title}
-        </a>
-      ) : null}
       <span>Next chamber</span>
       <a href={`#${nextNode.id}`}>
         {nextNode.chamber} - {nextNode.title} -&gt;
@@ -542,21 +464,14 @@ export default function LandingPage() {
     [],
   );
   const [activeNav, setActiveNav] = useState<NavId>("parents");
-  const [heroAudience, setHeroAudience] = useState<HeroAudience>("schools");
   const [copiedAdId, setCopiedAdId] = useState<string | null>(null);
   const [isPilotModalOpen, setIsPilotModalOpen] = useState(false);
-  const [isPrivacyDisclosureOpen, setIsPrivacyDisclosureOpen] =
-    useState(false);
 
   const activeNode =
     labyrinthNodes.find((node) => node.id === activeNav) ?? labyrinthNodes[0];
   const activeNodeIndex = labyrinthNodes.findIndex(
     (node) => node.id === activeNav,
   );
-  const [isMiniMapOpen, setIsMiniMapOpen] = useState(true);
-
-  const nextNode = labyrinthNodes[activeNodeIndex + 1] ?? null;
-  const previousNode = labyrinthNodes[activeNodeIndex - 1] ?? null;
 
   const copyTimeoutRef = useRef<number | null>(null);
   const modalPanelRef = useRef<HTMLDivElement>(null);
@@ -670,25 +585,7 @@ export default function LandingPage() {
     }
   }
 
-  const activeHeroAction =
-    heroActions.find((action) => action.id === heroAudience) ?? heroActions[0];
-  const secondaryHeroActions = heroActions.filter(
-    (action) => action.id !== activeHeroAction.id,
-  );
-
   return (
-    <NavigationContext.Provider
-      value={{
-        activeNav,
-        setActiveNav,
-        activeNodeIndex,
-        totalChambers: labyrinthNodes.length,
-        nextNode,
-        previousNode,
-        isMiniMapOpen,
-        setIsMiniMapOpen,
-      }}
-    >
     <div className="landing">
       <div className="ambient" />
       <div className="grain" />
@@ -701,36 +598,14 @@ export default function LandingPage() {
           {navLinks.map((link) => (
             <a
               key={link.id}
-              href={link.id === "schools" ? "/schools" : `#${link.id}`}
+              href={`#${link.id}`}
               data-audience={link.audience}
               className={activeNav === link.id ? "active" : ""}
-              onClick={() => {
-                if (link.id !== "schools") {
-                  setActiveNav(link.id);
-                }
-              }}
+              onClick={() => setActiveNav(link.id)}
             >
               {link.label}
             </a>
           ))}
-          <a
-            href={privacySafetyBriefHref}
-            data-audience="investors"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Privacy &amp; Safety Brief (ICT)
-          </a>
-        </div>
-        <div className="pathway-status">
-          <span>{`Chamber ${activeNodeIndex + 1} of ${labyrinthNodes.length}`}</span>
-          <button
-            type="button"
-            className="btn btn-ghost"
-            onClick={() => setIsMiniMapOpen(!isMiniMapOpen)}
-          >
-            {isMiniMapOpen ? "Hide mini-map" : "Show mini-map"}
-          </button>
         </div>
       </nav>
 
@@ -747,104 +622,27 @@ export default function LandingPage() {
           Enter a guided labyrinth that walks parents, schools, teachers, and
           government reviewers through one clear implementation pathway.
         </p>
-        <div className="hero-privacy-disclosure">
-          <button
-            type="button"
-            className="privacy-disclosure-toggle"
-            aria-expanded={isPrivacyDisclosureOpen}
-            aria-controls="hero-privacy-details"
-            onClick={() =>
-              setIsPrivacyDisclosureOpen((isOpen) => !isOpen)
-            }
-          >
-            Privacy commitments for this pilot
-            <span aria-hidden="true">
-              {isPrivacyDisclosureOpen ? "−" : "+"}
-            </span>
-          </button>
-          <div
-            id="hero-privacy-details"
-            className="privacy-disclosure-panel"
-            hidden={!isPrivacyDisclosureOpen}
-          >
-            <ul>
-              <li>
-                <strong>On-device only:</strong> classroom interaction data stays
-                on the student&apos;s device during pilot use.
-              </li>
-              <li>
-                <strong>No third-party analytics:</strong> the pilot flow does
-                not include Google Analytics, Mixpanel, or similar SDKs.
-              </li>
-              <li>
-                <strong>No ads:</strong> the classroom experience has no ad
-                networks, sponsored placements, or in-app ad units.
-              </li>
-              <li>
-                <strong>No trackers:</strong> no third-party tracking pixels,
-                cookies, or profiling scripts are used in the pilot workflow.
-              </li>
-            </ul>
-          </div>
-        </div>
         <div className="hero-cta">
-          <div className="hero-audience-tabs" role="tablist" aria-label="Audience focus">
-            {heroActions.map((action) => (
-              <button
-                key={action.id}
-                className={
-                  action.id === activeHeroAction.id
-                    ? "hero-audience-tab active"
-                    : "hero-audience-tab"
-                }
-                role="tab"
-                type="button"
-                aria-selected={action.id === activeHeroAction.id}
-                onClick={() => setHeroAudience(action.id)}
-              >
-                {action.label}
-              </button>
-            ))}
-          </div>
-          <div className="hero-audience-cta" data-audience={activeHeroAction.id}>
-            {activeHeroAction.action === "openPilot" ? (
-              <button
-                className="btn btn-primary"
-                type="button"
-                onClick={() => setIsPilotModalOpen(true)}
-              >
-                {activeHeroAction.primaryLabel}
-              </button>
-            ) : (
-              <a className="btn btn-primary" href={activeHeroAction.href}>
-                {activeHeroAction.primaryLabel}
-              </a>
-            )}
-            <div className="hero-cta-links">
-              {secondaryHeroActions.map((action) => (
-                <a key={action.id} className="hero-link secondary" href={action.href}>
-                  {action.primaryLabel}
-                </a>
-              ))}
-              <a className="hero-link tertiary" href="#pathway">
-                Walk the Labyrinth
-              </a>
-            </div>
-          </div>
-        </div>
-        <aside className="hero-ict-card" aria-label="ICT review quick access">
-          <span>Early-stage decision support</span>
-          <p>
-            ICT reviewers can open the canonical technical brief immediately.
-          </p>
-          <a
-            href={privacySafetyBriefHref}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            className="btn btn-gold"
+            type="button"
+            onClick={() => setIsPilotModalOpen(true)}
           >
-            Privacy &amp; Safety Brief (ICT) -&gt;
+            Start School Pilot -&gt;
+          </button>
+          <a className="btn btn-ghost" href="#pathway">
+            Walk the Labyrinth -&gt;
           </a>
-        </aside>
+          <a className="btn btn-ghost" href="#parents">
+            For Parents -&gt;
+          </a>
+          <a className="btn btn-ghost" href="#schools">
+            For Schools -&gt;
+          </a>
+          <a className="btn btn-ghost" href="#investors">
+            For Government -&gt;
+          </a>
+        </div>
         <div className="hero-stat-row">
           <div className="hero-stat">
             <div className="num gold">7 sessions</div>
@@ -863,9 +661,6 @@ export default function LandingPage() {
             <div className="label">Transmitted off device</div>
           </div>
         </div>
-        <p className="hero-support-copy">
-          Pilot pack includes: scripts, comms templates, safety brief.
-        </p>
       </section>
 
       {isPilotModalOpen ? (
@@ -939,29 +734,27 @@ export default function LandingPage() {
             gates.
           </p>
         </div>
-        {isMiniMapOpen ? (
-          <div className="pathway-grid">
-            {labyrinthNodes.map((node, index) => {
-              const isActive = node.id === activeNav;
-              const isReached = activeNodeIndex >= index;
+        <div className="pathway-grid">
+          {labyrinthNodes.map((node, index) => {
+            const isActive = node.id === activeNav;
+            const isReached = activeNodeIndex >= index;
 
-              return (
-                <a
-                  key={node.id}
-                  href={`#${node.id}`}
-                  className={`path-node ${node.accent} ${
-                    isActive ? "active" : ""
-                  } ${isReached ? "reached" : ""}`}
-                >
-                  <span className="path-node-tag">{node.chamber}</span>
-                  <h3>{node.title}</h3>
-                  <p>{node.body}</p>
-                  <span className="path-node-link">Enter chamber -&gt;</span>
-                </a>
-              );
-            })}
-          </div>
-        ) : null}
+            return (
+              <a
+                key={node.id}
+                href={`#${node.id}`}
+                className={`path-node ${node.accent} ${
+                  isActive ? "active" : ""
+                } ${isReached ? "reached" : ""}`}
+              >
+                <span className="path-node-tag">{node.chamber}</span>
+                <h3>{node.title}</h3>
+                <p>{node.body}</p>
+                <span className="path-node-link">Enter chamber -&gt;</span>
+              </a>
+            );
+          })}
+        </div>
         <div className="pathway-status">
           <span>Currently focused:</span>
           <strong>
@@ -1147,7 +940,7 @@ export default function LandingPage() {
 
       <section className="section" id="investors">
         <div className="section-label violet">
-          Layer 5 - Government and Policy
+          Layer 4 - Government and Policy
         </div>
         <h2>
           Built for policy confidence,
@@ -1207,7 +1000,7 @@ export default function LandingPage() {
       <div className="divider" />
 
       <section className="section" id="strategy">
-        <div className="section-label coral">Layer 6 - Assurance</div>
+        <div className="section-label coral">Layer 5 - Assurance</div>
         <h2>Implementation Assurance</h2>
         <p className="lead">
           A practical assurance checklist for leadership decisions, with clear
@@ -1230,7 +1023,7 @@ export default function LandingPage() {
       </section>
 
       <section className="section" id="ads">
-        <div className="section-label gold">Layer 7 - Communication</div>
+        <div className="section-label gold">Layer 6 - Communication</div>
         <h2>Stakeholder Communication Templates</h2>
         <p className="lead">
           Copy-ready templates for parent notices, leadership briefings, and
@@ -1264,20 +1057,12 @@ export default function LandingPage() {
       <div className="divider" />
 
       <section className="section poster-section">
-        <article
-          className="pilot-pack-card"
-          aria-label="Download card for the final Pilot Pack PDF"
-        >
-          <p className="pilot-pack-stamp">Updated: March 2026</p>
-          <h3>Download the Pilot Pack (PDF)</h3>
-          <p>
-            Finalized parent, classroom, and policy resources in one ready-to-
-            share package.
-          </p>
-          <a className="btn btn-gold" href="/assets/Jewble-Pilot-Pack.pdf" download>
-            Download the Pilot Pack (PDF)
-          </a>
-        </article>
+        <img
+          className="full-img"
+          src="/assets/poster.svg"
+          alt="Jewble Meta-Pet poster"
+          loading="lazy"
+        />
       </section>
 
       <footer className="footer">
@@ -1315,6 +1100,5 @@ export default function LandingPage() {
         </p>
       </footer>
     </div>
-    </NavigationContext.Provider>
   );
 }
