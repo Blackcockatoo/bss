@@ -16,7 +16,7 @@ The structural commitment that binds the entire ecosystem:
 ---
 
 ### PRODUCT 1: Jewble Meta-Pet App
-URL: https://1-bss-meta-pet-mr-brand.vercel.app
+URL: https://bluesnakestudios.com
 Framework: Next.js 16, dark-cyber aesthetic (slate-950/purple-950 gradients)
 
 The core product. A digital companion for classrooms:

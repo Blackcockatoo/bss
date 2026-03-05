@@ -10,7 +10,7 @@ const NAV_LINKS = [
 ];
 
 const EXTERNAL_LINKS = [
-  { label: "MetaPet App ↗", href: "https://1-bss-meta-pet-mr-brand.vercel.app" },
+  { label: "MetaPet App ↗", href: "https://bluesnakestudios.com" },
   { label: "Jewble ↗", href: "https://teachers-meta-pet-mr-brand.vercel.app" },
 ];
 
