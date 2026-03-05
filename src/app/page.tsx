@@ -466,6 +466,8 @@ export default function LandingPage() {
   const [activeNav, setActiveNav] = useState<NavId>("parents");
   const [copiedAdId, setCopiedAdId] = useState<string | null>(null);
   const [isPilotModalOpen, setIsPilotModalOpen] = useState(false);
+  const [isPrivacyDisclosureOpen, setIsPrivacyDisclosureOpen] =
+    useState(false);
 
   const activeNode =
     labyrinthNodes.find((node) => node.id === activeNav) ?? labyrinthNodes[0];
@@ -622,6 +624,46 @@ export default function LandingPage() {
           Enter a guided labyrinth that walks parents, schools, teachers, and
           government reviewers through one clear implementation pathway.
         </p>
+        <div className="hero-privacy-disclosure">
+          <button
+            type="button"
+            className="privacy-disclosure-toggle"
+            aria-expanded={isPrivacyDisclosureOpen}
+            aria-controls="hero-privacy-details"
+            onClick={() =>
+              setIsPrivacyDisclosureOpen((isOpen) => !isOpen)
+            }
+          >
+            Privacy commitments for this pilot
+            <span aria-hidden="true">
+              {isPrivacyDisclosureOpen ? "−" : "+"}
+            </span>
+          </button>
+          <div
+            id="hero-privacy-details"
+            className="privacy-disclosure-panel"
+            hidden={!isPrivacyDisclosureOpen}
+          >
+            <ul>
+              <li>
+                <strong>On-device only:</strong> classroom interaction data stays
+                on the student&apos;s device during pilot use.
+              </li>
+              <li>
+                <strong>No third-party analytics:</strong> the pilot flow does
+                not include Google Analytics, Mixpanel, or similar SDKs.
+              </li>
+              <li>
+                <strong>No ads:</strong> the classroom experience has no ad
+                networks, sponsored placements, or in-app ad units.
+              </li>
+              <li>
+                <strong>No trackers:</strong> no third-party tracking pixels,
+                cookies, or profiling scripts are used in the pilot workflow.
+              </li>
+            </ul>
+          </div>
+        </div>
         <div className="hero-cta">
           <button
             className="btn btn-gold"
