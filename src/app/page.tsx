@@ -50,6 +50,16 @@ type LabyrinthNode = {
   accent: AccentTone;
 };
 
+type HeroAudience = "schools" | "parents" | "government";
+
+type HeroAction = {
+  id: HeroAudience;
+  label: string;
+  primaryLabel: string;
+  href?: string;
+  action?: "openPilot";
+};
+
 const navLinks: Array<{ id: NavId; label: string; audience: string }> = [
   { id: "parents", label: "Parents", audience: "parents" },
   { id: "schools", label: "Schools", audience: "schools" },
@@ -57,6 +67,27 @@ const navLinks: Array<{ id: NavId; label: string; audience: string }> = [
   { id: "investors", label: "Government", audience: "schools" },
   { id: "strategy", label: "Assurance", audience: "" },
   { id: "ads", label: "Communication", audience: "" },
+];
+
+const heroActions: HeroAction[] = [
+  {
+    id: "schools",
+    label: "Schools",
+    primaryLabel: "Start a 2-week pilot",
+    action: "openPilot",
+  },
+  {
+    id: "parents",
+    label: "Parents",
+    primaryLabel: "What families can expect",
+    href: "#parents",
+  },
+  {
+    id: "government",
+    label: "Government / ICT",
+    primaryLabel: "Privacy & Safety Brief (technical)",
+    href: "#investors",
+  },
 ];
 
 const labyrinthNodes: LabyrinthNode[] = [
@@ -464,6 +495,7 @@ export default function LandingPage() {
     [],
   );
   const [activeNav, setActiveNav] = useState<NavId>("parents");
+  const [heroAudience, setHeroAudience] = useState<HeroAudience>("schools");
   const [copiedAdId, setCopiedAdId] = useState<string | null>(null);
   const [isPilotModalOpen, setIsPilotModalOpen] = useState(false);
 
@@ -585,6 +617,12 @@ export default function LandingPage() {
     }
   }
 
+  const activeHeroAction =
+    heroActions.find((action) => action.id === heroAudience) ?? heroActions[0];
+  const secondaryHeroActions = heroActions.filter(
+    (action) => action.id !== activeHeroAction.id,
+  );
+
   return (
     <div className="landing">
       <div className="ambient" />
@@ -623,25 +661,49 @@ export default function LandingPage() {
           government reviewers through one clear implementation pathway.
         </p>
         <div className="hero-cta">
-          <button
-            className="btn btn-gold"
-            type="button"
-            onClick={() => setIsPilotModalOpen(true)}
-          >
-            Start School Pilot -&gt;
-          </button>
-          <a className="btn btn-ghost" href="#pathway">
-            Walk the Labyrinth -&gt;
-          </a>
-          <a className="btn btn-ghost" href="#parents">
-            For Parents -&gt;
-          </a>
-          <a className="btn btn-ghost" href="#schools">
-            For Schools -&gt;
-          </a>
-          <a className="btn btn-ghost" href="#investors">
-            For Government -&gt;
-          </a>
+          <div className="hero-audience-tabs" role="tablist" aria-label="Audience focus">
+            {heroActions.map((action) => (
+              <button
+                key={action.id}
+                className={
+                  action.id === activeHeroAction.id
+                    ? "hero-audience-tab active"
+                    : "hero-audience-tab"
+                }
+                role="tab"
+                type="button"
+                aria-selected={action.id === activeHeroAction.id}
+                onClick={() => setHeroAudience(action.id)}
+              >
+                {action.label}
+              </button>
+            ))}
+          </div>
+          <div className="hero-audience-cta" data-audience={activeHeroAction.id}>
+            {activeHeroAction.action === "openPilot" ? (
+              <button
+                className="btn btn-primary"
+                type="button"
+                onClick={() => setIsPilotModalOpen(true)}
+              >
+                {activeHeroAction.primaryLabel}
+              </button>
+            ) : (
+              <a className="btn btn-primary" href={activeHeroAction.href}>
+                {activeHeroAction.primaryLabel}
+              </a>
+            )}
+            <div className="hero-cta-links">
+              {secondaryHeroActions.map((action) => (
+                <a key={action.id} className="hero-link secondary" href={action.href}>
+                  {action.primaryLabel}
+                </a>
+              ))}
+              <a className="hero-link tertiary" href="#pathway">
+                Walk the Labyrinth
+              </a>
+            </div>
+          </div>
         </div>
         <div className="hero-stat-row">
           <div className="hero-stat">
