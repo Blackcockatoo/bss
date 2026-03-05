@@ -727,7 +727,7 @@ export default function LandingPage() {
       <section className="pathway" id="pathway">
         <div className="pathway-header">
           <div className="section-label teal">Labyrinth Route</div>
-          <h2>One path. Seven chambers. Built for trust.</h2>
+          <h2>One path. Six chambers. Built for trust.</h2>
           <p>
             Each chamber explains one decision layer in sequence, from family
             confidence to policy review. Start at Chamber 01 and follow the
@@ -904,38 +904,6 @@ export default function LandingPage() {
         </div>
 
         <NextGate from="veil" />
-      </section>
-
-      <div className="divider" />
-
-      <section className="section" id="schoolDocs">
-        <div className="section-label teal">Layer 4 - School Documentation</div>
-        <h2>
-          Full implementation docs
-          <br />
-          stay visible on this page.
-        </h2>
-        <p className="lead">
-          Every implementation document is linked directly from this landing page so
-          teachers, leadership, and ICT reviewers can access materials quickly.
-        </p>
-
-        <div>
-          {schoolDocs.map((doc) => (
-            <a
-              key={doc.href}
-              href={doc.href}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <span>{doc.tag}</span>
-              <h4>{doc.title}</h4>
-              <p>{doc.description}</p>
-            </a>
-          ))}
-        </div>
-
-        <NextGate from="schoolDocs" />
       </section>
 
       <section className="section" id="investors">
