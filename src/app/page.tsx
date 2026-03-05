@@ -358,6 +358,8 @@ Review findings can be captured in normal school governance channels.`,
   },
 ];
 
+const privacySafetyBriefHref = "/docs/kpps/07_KPPS_Privacy_Safety_Brief.md";
+
 const metricsRows = [
   [
     "Student identity data",
@@ -606,6 +608,14 @@ export default function LandingPage() {
               {link.label}
             </a>
           ))}
+          <a
+            href={privacySafetyBriefHref}
+            data-audience="investors"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Privacy &amp; Safety Brief (ICT)
+          </a>
         </div>
       </nav>
 
@@ -643,6 +653,19 @@ export default function LandingPage() {
             For Government -&gt;
           </a>
         </div>
+        <aside className="hero-ict-card" aria-label="ICT review quick access">
+          <span>Early-stage decision support</span>
+          <p>
+            ICT reviewers can open the canonical technical brief immediately.
+          </p>
+          <a
+            href={privacySafetyBriefHref}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Privacy &amp; Safety Brief (ICT) -&gt;
+          </a>
+        </aside>
         <div className="hero-stat-row">
           <div className="hero-stat">
             <div className="num gold">7 sessions</div>

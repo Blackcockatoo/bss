@@ -239,6 +239,47 @@ body.landing-body {
   animation: fadeUp 0.8s ease 0.4s both;
 }
 
+.landing .hero-ict-card {
+  margin-top: 20px;
+  width: min(680px, 100%);
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  border-radius: 14px;
+  background: linear-gradient(150deg, rgba(167, 139, 250, 0.14), rgba(17, 31, 58, 0.84));
+  padding: 14px 16px;
+  text-align: left;
+  animation: fadeUp 0.8s ease 0.35s both;
+}
+
+.landing .hero-ict-card span {
+  display: inline-flex;
+  margin-bottom: 6px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--violet);
+}
+
+.landing .hero-ict-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.landing .hero-ict-card a {
+  display: inline-flex;
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--white);
+}
+
+.landing .hero-ict-card a:hover {
+  color: var(--violet);
+}
+
 .landing .hero-stat {
   text-align: center;
 }
