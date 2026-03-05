@@ -16,8 +16,14 @@ describe('landing page navigation structure', () => {
 
     expect(within(nav as HTMLElement).getByRole('link', { name: /school docs/i })).toBeInTheDocument();
 
-    for (let layer = 1; layer <= 7; layer += 1) {
-      expect(screen.getByText(new RegExp(`Layer ${layer}\\b`, 'i'))).toBeVisible();
+    for (let chamber = 1; chamber <= 7; chamber += 1) {
+      const chamberLabel = `Chamber ${String(chamber).padStart(2, '0')}`;
+      const chamberMatches = screen.getAllByText(new RegExp(chamberLabel, 'i'));
+      expect(chamberMatches.length).toBeGreaterThan(0);
+
+      for (const chamberMatch of chamberMatches) {
+        expect(chamberMatch).toBeVisible();
+      }
     }
   });
 });
