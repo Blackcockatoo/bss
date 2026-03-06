@@ -1,6 +1,5 @@
 "use client";
 
-import { SteeringWheel } from "@/components/steering";
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./landing.css";
 
@@ -679,12 +678,6 @@ export default function LandingPage() {
           >
             Start School Pilot -&gt;
           </button>
-          <a className="btn btn-gold" href="/pet">
-            Open MetaPet App -&gt;
-          </a>
-          <a className="btn btn-gold" href="/compass">
-            Open Compass Wheel -&gt;
-          </a>
           <a className="btn btn-ghost" href="#pathway">
             Walk the Labyrinth -&gt;
           </a>
@@ -775,32 +768,13 @@ export default function LandingPage() {
               >
                 School package index
               </a>
+              <a href="mailto:hello@bluesnakestudios.com.au?subject=Start%20Free%20Pilot">
+                Email us
+              </a>
             </div>
           </div>
         </div>
       ) : null}
-
-      <div className="divider" />
-
-      <section className="section compass-inline" id="compass-wheel">
-        <div className="section-label violet">Compass Wheel</div>
-        <h2>Use the wheel directly from home.</h2>
-        <p className="lead">
-          The live Compass Wheel is embedded here so students and teachers can
-          rotate through sectors and launch tools without leaving the landing
-          page.
-        </p>
-
-        <div className="compass-inline-shell">
-          <SteeringWheel />
-        </div>
-
-        <div className="compass-inline-actions">
-          <a className="btn btn-ghost" href="/compass">
-            Open Full Compass Page -&gt;
-          </a>
-        </div>
-      </section>
 
       <div className="divider" />
 
@@ -1159,7 +1133,7 @@ export default function LandingPage() {
           <a className="btn btn-gold" href="/pet">
             Try MetaPet -&gt;
           </a>
-          <a className="btn btn-gold" href="/compass">
+          <a className="btn btn-ghost" href="/compass">
             Open Compass Wheel -&gt;
           </a>
           <a
