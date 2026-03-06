@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Teacher Hub App Launcher</title>
+  <style>
+    body{margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background:#0b0f14; color:#e8eef7; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;}
+    .card{max-width:820px; width:100%; border:1px solid rgba(255,255,255,.12); border-radius:16px; padding:18px; background:rgba(255,255,255,.03)}
+    .row{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
+    a{color:inherit}
+    .btn{display:inline-flex; gap:8px; align-items:center; justify-content:center; padding:10px 12px; border-radius:12px;
+      border:1px solid rgba(255,255,255,.12); background:rgba(0,0,0,.25); text-decoration:none}
+    .btn:hover{border-color: rgba(245,200,76,.55); background: rgba(245,200,76,.08)}
+    iframe{width:100%; height:72vh; border:1px solid rgba(255,255,255,.12); border-radius:12px; margin-top:14px; background:#000}
+    .muted{color: rgba(232,238,247,.72); line-height:1.6}
+    code{background:rgba(0,0,0,.25); padding:2px 6px; border-radius:8px; border:1px solid rgba(255,255,255,.10)}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1 style="margin:0; font-size:18px">Teacher Hub App (Live)</h1>
+    <p class="muted">This launcher keeps the app separate while giving you a local “directory” entry point. If the embed is blocked by headers, use the open button.</p>
+    <div class="row">
+      <a class="btn" href="../index.html">← Home</a>
+      <a class="btn" href="https://teachers-meta-pet-mr-brand.vercel.app/" target="_blank" rel="noopener">Open in new tab ↗</a>
+    </div>
+    <iframe src="https://teachers-meta-pet-mr-brand.vercel.app/" title="Teacher Hub App"></iframe>
+    <p class="muted">Deploy note: when hosted on a school domain, consider whitelisting <code>*.vercel.app</code> if your content filter blocks it.</p>
+  </div>
+</body>
+</html>

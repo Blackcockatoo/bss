@@ -16,9 +16,9 @@ const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: getSiteUrlObject(),
-  title: "Blue Snake Studios — Privacy-First Virtual Companion for Australian Classrooms",
+  title: "Blue Snake Studios",
   description:
-    "Jewble Meta-Pet: a classroom-safe digital companion that teaches systems thinking. Offline-first, zero accounts, zero data collected. Built by an Australian parent for schools.",
+    "Blue Snake Studios builds privacy-first digital learning experiences for schools and families.",
   manifest: "/manifest.json",
   icons: {
     icon: "/icon.svg",
@@ -30,18 +30,18 @@ export const metadata: Metadata = {
     title: "Blue Snake Studios",
   },
   openGraph: {
-    title: "Blue Snake Studios — Privacy-First Virtual Companion for Australian Classrooms",
+    title: "Blue Snake Studios",
     description:
-      "Jewble Meta-Pet: a classroom-safe digital companion that teaches systems thinking. Offline-first, zero accounts, zero data collected.",
+      "Blue Snake Studios builds privacy-first digital learning experiences for schools and families.",
     url: siteUrl,
     siteName: "Blue Snake Studios",
     type: "website",
   },
   twitter: {
     card: "summary",
-    title: "Blue Snake Studios — Privacy-First Virtual Companion for Australian Classrooms",
+    title: "Blue Snake Studios",
     description:
-      "Jewble Meta-Pet: a classroom-safe digital companion that teaches systems thinking. Offline-first, zero accounts, zero data collected.",
+      "Blue Snake Studios builds privacy-first digital learning experiences for schools and families.",
   },
 };
 

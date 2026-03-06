@@ -1,20 +1,29 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useStore } from '@/lib/store';
-import { HUD, HUDAdvancedStats } from '@/components/HUD';
-import AuraliaMetaPet from '@/components/AuraliaMetaPet';
-import { Button } from '@/components/ui/button';
-import { PetResponseOverlay } from '@/components/PetResponseOverlay';
-import { AddonInventoryPanel } from '@/components/addons/AddonInventoryPanel';
-import { PetProfilePanel } from '@/components/addons/PetProfilePanel';
-import { initializeStarterAddons } from '@/lib/addons/starter';
-import { Sparkles, Shield, Move, UserCircle, ChevronDown, ChevronUp, Rocket } from 'lucide-react';
-import Link from 'next/link';
+import AuraliaMetaPet from "@/components/AuraliaMetaPet";
+import { HUD, HUDAdvancedStats } from "@/components/HUD";
+import { PetResponseOverlay } from "@/components/PetResponseOverlay";
+import { AddonInventoryPanel } from "@/components/addons/AddonInventoryPanel";
+import { PetProfilePanel } from "@/components/addons/PetProfilePanel";
+import { Button } from "@/components/ui/button";
+import { initializeStarterAddons } from "@/lib/addons/starter";
+import { useStore } from "@/lib/store";
+import {
+  ChevronDown,
+  ChevronUp,
+  Compass,
+  Move,
+  Rocket,
+  Shield,
+  Sparkles,
+  UserCircle,
+} from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function PetPage() {
-  const startTick = useStore(s => s.startTick);
-  const stopTick = useStore(s => s.stopTick);
+  const startTick = useStore((s) => s.startTick);
+  const stopTick = useStore((s) => s.stopTick);
   const [showAddonPanel, setShowAddonPanel] = useState(false);
   const [showProfilePanel, setShowProfilePanel] = useState(false);
   const [addonEditMode, setAddonEditMode] = useState(false);
@@ -31,7 +40,9 @@ export default function PetPage() {
     if (!addonsInitialized) {
       initializeStarterAddons().then((result) => {
         if (result.success) {
-          console.log(`Addon system initialized! Created ${result.addonsCreated} starter addons.`);
+          console.log(
+            `Addon system initialized! Created ${result.addonsCreated} starter addons.`,
+          );
           setAddonsInitialized(true);
         }
       });
@@ -94,15 +105,19 @@ export default function PetPage() {
           <div className="p-6 bg-slate-900/90 border-t border-slate-700/50 flex-shrink-0">
             <HUD mode="simple" />
             <div className="mt-4">
-              <Link href="/space-jewbles">
+              <a
+                href="https://bluesnakestudios.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Button
                   type="button"
                   className="w-full gap-2 bg-gradient-to-r from-cyan-600 to-purple-600 text-white hover:from-cyan-500 hover:to-purple-500"
                 >
                   <Rocket className="h-4 w-4" />
-                  Enter Space Jewbles
+                  Visit BlueSnakeStudios.com
                 </Button>
-              </Link>
+              </a>
             </div>
             <div className="mt-6 border-t border-slate-800/80 pt-4">
               <Button
@@ -113,13 +128,31 @@ export default function PetPage() {
                 aria-expanded={showAdvanced}
               >
                 <span className="font-semibold">Advanced / Mechanics Lab</span>
-                <span className="sr-only"> — peek under the hood to see identity, addons, and the crypto systems that keep your companion secure</span>
-                {showAdvanced ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                <span className="sr-only">
+                  {" "}
+                  — peek under the hood to see identity, addons, and the crypto
+                  systems that keep your companion secure
+                </span>
+                {showAdvanced ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
               </Button>
 
               {showAdvanced && (
                 <div className="mt-4 space-y-4 rounded-2xl border border-slate-800/80 bg-slate-950/60 p-4">
                   <div className="flex flex-wrap gap-2">
+                    <Link href="/compass">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-2 border-cyan-700 bg-cyan-900/80 text-cyan-200 hover:bg-cyan-800"
+                      >
+                        <Compass className="w-4 h-4" />
+                        Compass Wheel
+                      </Button>
+                    </Link>
                     <Link href="/identity">
                       <Button
                         variant="outline"
@@ -134,20 +167,24 @@ export default function PetPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => setAddonEditMode(!addonEditMode)}
-                      className={`gap-2 ${addonEditMode
-                        ? 'border-blue-500 bg-blue-600 text-white hover:bg-blue-700'
-                        : 'border-slate-700 bg-slate-900/80 text-zinc-300 hover:bg-slate-800'}`}
+                      className={`gap-2 ${
+                        addonEditMode
+                          ? "border-blue-500 bg-blue-600 text-white hover:bg-blue-700"
+                          : "border-slate-700 bg-slate-900/80 text-zinc-300 hover:bg-slate-800"
+                      }`}
                     >
                       <Move className="w-4 h-4" />
-                      {addonEditMode ? 'Editing' : 'Edit'}
+                      {addonEditMode ? "Editing" : "Edit"}
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={handleToggleProfilePanel}
-                      className={`gap-2 ${showProfilePanel
-                        ? 'border-amber-500 bg-amber-600 text-white hover:bg-amber-700'
-                        : 'border-amber-700 bg-amber-900/80 text-amber-200 hover:bg-amber-800'}`}
+                      className={`gap-2 ${
+                        showProfilePanel
+                          ? "border-amber-500 bg-amber-600 text-white hover:bg-amber-700"
+                          : "border-amber-700 bg-amber-900/80 text-amber-200 hover:bg-amber-800"
+                      }`}
                     >
                       <Shield className="w-4 h-4" />
                       Profile
@@ -156,9 +193,11 @@ export default function PetPage() {
                       variant="outline"
                       size="sm"
                       onClick={handleToggleAddonPanel}
-                      className={`gap-2 ${showAddonPanel
-                        ? 'border-purple-500 bg-purple-600 text-white hover:bg-purple-700'
-                        : 'border-purple-700 bg-purple-900/80 text-purple-200 hover:bg-purple-800'}`}
+                      className={`gap-2 ${
+                        showAddonPanel
+                          ? "border-purple-500 bg-purple-600 text-white hover:bg-purple-700"
+                          : "border-purple-700 bg-purple-900/80 text-purple-200 hover:bg-purple-800"
+                      }`}
                     >
                       <Sparkles className="w-4 h-4" />
                       Addons
@@ -167,7 +206,8 @@ export default function PetPage() {
 
                   {addonEditMode && (
                     <div className="rounded-lg border border-blue-500/50 bg-blue-600/20 px-3 py-2 text-xs text-blue-100">
-                      <span className="font-semibold">Edit Mode Active</span> — Drag addons to reposition, hover for controls.
+                      <span className="font-semibold">Edit Mode Active</span> —
+                      Drag addons to reposition, hover for controls.
                     </div>
                   )}
 
@@ -183,8 +223,16 @@ export default function PetPage() {
                     {showAddonPanel && <AddonInventoryPanel />}
                     {!showProfilePanel && !showAddonPanel && (
                       <div className="rounded-lg border border-dashed border-slate-700/60 p-4 text-xs text-slate-400 space-y-2">
-                        <p>Use the controls above to open the profile or addon panels.</p>
-                        <p className="text-slate-500">Every addon is cryptographically signed with ECDSA — the same standard used in banking and blockchain. We believe digital items should be truly owned, not rented.</p>
+                        <p>
+                          Use the controls above to open the profile or addon
+                          panels.
+                        </p>
+                        <p className="text-slate-500">
+                          Every addon is cryptographically signed with ECDSA —
+                          the same standard used in banking and blockchain. We
+                          believe digital items should be truly owned, not
+                          rented.
+                        </p>
                       </div>
                     )}
                   </div>

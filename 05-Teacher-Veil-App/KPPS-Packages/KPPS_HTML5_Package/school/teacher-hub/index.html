@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>KPPS Teacher Hub</title>
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --panel:#0f1721;
+      --text:#e8eef7;
+      --muted:#9fb0c8;
+      --line:rgba(255,255,255,.08);
+      --accent:#f5c84c;
+      --accent2:#4dd6c8;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      background: radial-gradient(1200px 700px at 10% 10%, rgba(77,214,200,.12), transparent 60%),
+                  radial-gradient(900px 600px at 90% 30%, rgba(245,200,76,.10), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+    }
+    a{color:inherit}
+    .wrap{
+      display:grid;
+      grid-template-columns: 320px 1fr;
+      min-height:100vh;
+    }
+    aside{
+      position:sticky; top:0;
+      height:100vh;
+      padding:18px 14px;
+      border-right:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(15,23,33,.9), rgba(15,23,33,.75));
+      backdrop-filter: blur(8px);
+    }
+    .brand{
+      padding:14px 14px 10px;
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      background: rgba(255,255,255,.03);
+    }
+    .brand h1{
+      font-size:16px; margin:0 0 4px;
+      letter-spacing:.2px;
+    }
+    .brand p{margin:0; color:var(--muted); font-size:12px; line-height:1.4}
+    .brand .row{
+      display:flex; gap:8px; margin-top:10px; flex-wrap:wrap
+    }
+    .pill{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.02);
+      padding:7px 10px;
+      border-radius:999px;
+      font-size:12px;
+      text-decoration:none;
+      transition: transform .08s ease, border-color .12s ease, background .12s ease;
+    }
+    .pill:hover{transform: translateY(-1px); border-color: rgba(245,200,76,.45); background: rgba(245,200,76,.06)}
+    .pill.alt:hover{border-color: rgba(77,214,200,.45); background: rgba(77,214,200,.06)}
+    .search{
+      margin:14px 0 10px;
+      display:flex; gap:8px;
+    }
+    input[type="search"]{
+      width:100%;
+      padding:11px 12px;
+      border-radius: 12px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.25);
+      color: var(--text);
+      outline:none;
+    }
+    input[type="search"]::placeholder{color:rgba(159,176,200,.8)}
+    nav{
+      margin-top:8px;
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.02);
+      overflow:hidden;
+    }
+    .nav-item{
+      display:flex;
+      gap:10px;
+      padding:12px 14px;
+      border-bottom:1px solid var(--line);
+      cursor:pointer;
+      user-select:none;
+      text-decoration:none;
+    }
+    .nav-item:last-child{border-bottom:none}
+    .nav-item .dot{
+      width:10px; height:10px; border-radius:50%;
+      margin-top:5px;
+      background: rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.12);
+      flex: 0 0 auto;
+    }
+    .nav-item.active{
+      background: linear-gradient(90deg, rgba(245,200,76,.10), rgba(77,214,200,.08));
+    }
+    .nav-item.active .dot{
+      background: var(--accent);
+      border-color: rgba(245,200,76,.55);
+      box-shadow: 0 0 0 3px rgba(245,200,76,.12);
+    }
+    .nav-item .t{
+      font-size:13px; line-height:1.35;
+    }
+    .nav-item .s{
+      display:block; font-size:11px; color:var(--muted); margin-top:3px;
+    }
+    main{
+      padding:26px 28px 60px;
+      max-width: 1050px;
+    }
+    .topline{
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      align-items:center;
+      margin-bottom:14px;
+    }
+    .crumb{
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing:.2px;
+    }
+    .card{
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.03);
+      box-shadow: var(--shadow);
+      padding: 22px 22px;
+    }
+    .md h1{font-size:28px; margin:0 0 10px}
+    .md h2{font-size:20px; margin:26px 0 10px}
+    .md h3{font-size:16px; margin:20px 0 8px}
+    .md p{color:rgba(232,238,247,.95); line-height:1.7; margin:10px 0}
+    .md ul, .md ol{margin:10px 0 10px 22px; line-height:1.7}
+    .md li{margin:6px 0}
+    .md hr{border:none; border-top:1px solid var(--line); margin:20px 0}
+    .md code{font-family:var(--mono); font-size: 0.95em; background: rgba(0,0,0,.25); padding: 2px 6px; border-radius: 7px; border:1px solid rgba(255,255,255,.08)}
+    .md pre{
+      overflow:auto;
+      background: rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: 14px;
+      padding: 14px 14px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
+    }
+    .md pre code{background: transparent; border:none; padding:0}
+    .md blockquote{
+      margin: 14px 0;
+      padding: 10px 14px;
+      border-left: 3px solid rgba(77,214,200,.55);
+      background: rgba(77,214,200,.06);
+      border-radius: 12px;
+      color: rgba(232,238,247,.92);
+    }
+    .md table{
+      width:100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      overflow:hidden;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .md th, .md td{
+      text-align:left;
+      padding:10px 10px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      vertical-align: top;
+    }
+    .md th{background: rgba(255,255,255,.04)}
+    .md tr:last-child td{border-bottom:none}
+    .footer{
+      margin-top:16px;
+      color: var(--muted);
+      font-size:12px;
+      line-height:1.6;
+    }
+    .smallbtn{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      border-radius: 12px;
+      padding:10px 12px;
+      font-size:12px;
+      cursor:pointer;
+      color: var(--text);
+    }
+    .smallbtn:hover{border-color: rgba(245,200,76,.45); background: rgba(245,200,76,.06)}
+    @media (max-width: 920px){
+      .wrap{grid-template-columns: 1fr}
+      aside{position:relative; height:auto}
+      main{padding: 18px 14px 50px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <aside>
+      <div class="brand">
+        <h1>KPPS Teacher Hub</h1>
+        <p>Offline-friendly HTML5 pack for school implementation docs.</p>
+        <div class="row">
+          <a class="pill" href="../../index.html">Home</a>
+          <a class="pill alt" href="https://kpps-brand-mr.vercel.app/" target="_blank" rel="noopener">Meta-Pet App ↗</a>
+        </div>
+      </div>
+
+      <div class="search">
+        <input id="q" type="search" placeholder="Search docs…" />
+      </div>
+
+      <nav id="nav"></nav>
+
+      <div class="footer">
+        Tip: bookmark a specific doc by copying the URL hash.<br/>
+        (Example: <code>#02_KPPS_Implementation_Guide</code>)
+      </div>
+    </aside>
+
+    <main>
+      <div class="topline">
+        <div class="crumb" id="crumb">Loading…</div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap">
+          <button class="smallbtn" id="copylink">Copy link</button>
+          <button class="smallbtn" id="print">Print</button>
+        </div>
+      </div>
+
+      <div class="card md" id="content"></div>
+    </main>
+  </div>
+
+  <script src="./docs.js"></script>
+  <script>
+    // Tiny markdown renderer (good enough for this package).
+    // Supports: headings, bold/italic, links, code fences, inline code, lists, blockquotes, hr, tables.
+    function escapeHtml(s){
+      return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    }
+
+    function renderInline(s){
+      // code
+      s = s.replace(/`([^`]+)`/g, (_,a)=>`<code>${escapeHtml(a)}</code>`);
+      // links [text](url)
+      s = s.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, (_,t,u)=>`<a href="${escapeHtml(u)}" target="_blank" rel="noopener">${escapeHtml(t)}</a>`);
+      // bold
+      s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      // italic (single *)
+      s = s.replace(/(^|[^*])\*([^*]+)\*(?!\*)/g, (m,p,a)=> `${p}<em>${a}</em>`);
+      return s;
+    }
+
+    function mdToHtml(md){
+      md = md.replace(/\r\n/g,'\n');
+
+      // fenced code blocks
+      const blocks = [];
+      md = md.replace(/```([\s\S]*?)```/g, (_,code)=>{
+        blocks.push(code);
+        return `@@CODEBLOCK_${blocks.length-1}@@`;
+      });
+
+      // tables (very simple: header | header, separator |---, rows)
+      // We'll process per paragraph chunk later.
+
+      const lines = md.split('\n');
+      let html = '';
+      let inUl=false, inOl=false, inBlockquote=false;
+
+      function closeLists(){
+        if(inUl){ html += '</ul>'; inUl=false; }
+        if(inOl){ html += '</ol>'; inOl=false; }
+      }
+      function closeQuote(){
+        if(inBlockquote){ html += '</blockquote>'; inBlockquote=false; }
+      }
+
+      for(let i=0;i<lines.length;i++){
+        let line = lines[i];
+
+        // codeblock placeholder
+        if(line.includes('@@CODEBLOCK_')){
+          closeLists(); closeQuote();
+          const idx = parseInt(line.match(/@@CODEBLOCK_(\d+)@@/)[1],10);
+          const code = blocks[idx].replace(/^\n/,'');
+          html += `<pre><code>${escapeHtml(code)}</code></pre>`;
+          continue;
+        }
+
+        // hr
+        if(/^\s*---\s*$/.test(line)){
+          closeLists(); closeQuote();
+          html += '<hr/>';
+          continue;
+        }
+
+        // headings
+        let hm = line.match(/^(#{1,6})\s+(.*)$/);
+        if(hm){
+          closeLists(); closeQuote();
+          const level = hm[1].length;
+          const text = renderInline(escapeHtml(hm[2].trim()));
+          html += `<h${level}>${text}</h${level}>`;
+          continue;
+        }
+
+        // blockquote
+        if(/^>\s?/.test(line)){
+          closeLists();
+          if(!inBlockquote){ html += '<blockquote>'; inBlockquote=true; }
+          html += `<p>${renderInline(escapeHtml(line.replace(/^>\s?/,'')))}</p>`;
+          continue;
+        } else {
+          closeQuote();
+        }
+
+        // lists
+        let um = line.match(/^\s*[-*+]\s+(.*)$/);
+        let om = line.match(/^\s*\d+\.\s+(.*)$/);
+        if(um){
+          if(inOl){ html += '</ol>'; inOl=false; }
+          if(!inUl){ html += '<ul>'; inUl=true; }
+          html += `<li>${renderInline(escapeHtml(um[1]))}</li>`;
+          continue;
+        }
+        if(om){
+          if(inUl){ html += '</ul>'; inUl=false; }
+          if(!inOl){ html += '<ol>'; inOl=true; }
+          html += `<li>${renderInline(escapeHtml(om[1]))}</li>`;
+          continue;
+        }
+
+        // blank line
+        if(/^[\s]*$/.test(line)){
+          closeLists(); closeQuote();
+          continue;
+        }
+
+        // table detection: line contains | and next line is separator
+        if(line.includes('|') && i+1 < lines.length && /^\s*\|?\s*:?[-]{3,}:?\s*(\|\s*:?[-]{3,}:?\s*)+\|?\s*$/.test(lines[i+1])){
+          closeLists(); closeQuote();
+          const headerLine = line.trim();
+          const sepLine = lines[i+1];
+          const headers = headerLine.replace(/^\|/,'').replace(/\|$/,'').split('|').map(s=>s.trim());
+          let rows = [];
+          i += 2;
+          while(i < lines.length && lines[i].includes('|') && !/^[\s]*$/.test(lines[i])){
+            const row = lines[i].trim().replace(/^\|/,'').replace(/\|$/,'').split('|').map(s=>s.trim());
+            rows.push(row);
+            i++;
+          }
+          i--; // loop will increment
+          html += '<table><thead><tr>' + headers.map(h=>`<th>${renderInline(escapeHtml(h))}</th>`).join('') + '</tr></thead><tbody>';
+          for(const r of rows){
+            html += '<tr>' + r.map(c=>`<td>${renderInline(escapeHtml(c))}</td>`).join('') + '</tr>';
+          }
+          html += '</tbody></table>';
+          continue;
+        }
+
+        // paragraph
+        closeLists(); closeQuote();
+        html += `<p>${renderInline(escapeHtml(line.trim()))}</p>`;
+      }
+
+      // close at end
+      if(inUl) html += '</ul>';
+      if(inOl) html += '</ol>';
+      if(inBlockquote) html += '</blockquote>';
+
+      return html;
+    }
+
+    const DOCS = window.KPPS_DOCS || [];
+    const nav = document.getElementById('nav');
+    const content = document.getElementById('content');
+    const q = document.getElementById('q');
+    const crumb = document.getElementById('crumb');
+
+    function setActive(id){
+      document.querySelectorAll('.nav-item').forEach(el=>{
+        el.classList.toggle('active', el.dataset.id === id);
+      });
+    }
+
+    function renderNav(filterText=''){
+      nav.innerHTML = '';
+      const term = filterText.trim().toLowerCase();
+      const items = DOCS.filter(d => {
+        if(!term) return true;
+        return (d.title+' '+d.filename+' '+d.markdown).toLowerCase().includes(term);
+      });
+
+      for(const d of items){
+        const a = document.createElement('a');
+        a.href = '#'+d.id;
+        a.className = 'nav-item';
+        a.dataset.id = d.id;
+        a.innerHTML = `<span class="dot"></span><span class="t">${escapeHtml(d.title)}<span class="s">${escapeHtml(d.filename)}</span></span>`;
+        nav.appendChild(a);
+      }
+
+      if(items.length === 0){
+        const empty = document.createElement('div');
+        empty.style.padding = '14px';
+        empty.style.color = 'var(--muted)';
+        empty.textContent = 'No matches. Try fewer letters.';
+        nav.appendChild(empty);
+      }
+    }
+
+    function pickDoc(){
+      const hash = (location.hash || '').replace('#','').trim();
+      const chosen = DOCS.find(d => d.id === hash) || DOCS[0];
+      if(!chosen) return null;
+      if(chosen.id !== hash) location.hash = '#'+chosen.id;
+      return chosen;
+    }
+
+    function render(){
+      const d = pickDoc();
+      if(!d) return;
+      setActive(d.id);
+      crumb.textContent = d.title;
+      content.innerHTML = mdToHtml(d.markdown);
+      document.title = d.title + ' — KPPS Teacher Hub';
+      window.scrollTo({top:0, behavior:'instant'});
+    }
+
+    q.addEventListener('input', ()=> renderNav(q.value));
+    window.addEventListener('hashchange', render);
+
+    document.getElementById('copylink').addEventListener('click', async ()=>{
+      try{
+        await navigator.clipboard.writeText(location.href);
+      }catch(e){
+        // fallback
+        const t=document.createElement('textarea');
+        t.value=location.href; document.body.appendChild(t); t.select();
+        document.execCommand('copy'); document.body.removeChild(t);
+      }
+    });
+
+    document.getElementById('print').addEventListener('click', ()=> window.print());
+
+    renderNav();
+    render();
+  </script>
+</body>
+</html>

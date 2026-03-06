@@ -124,12 +124,12 @@ export interface RitualLoopProps {
     stage: string;
     progress: RitualProgress;
   }) => void;
-  jewbleDigits?: { red: number[]; blue: number[]; black: number[] };
+  signalDigits?: { red: number[]; blue: number[]; black: number[] };
   initialProgress?: RitualProgress;
   petId?: string;
 }
 
-export function RitualLoop({ onRitualComplete, jewbleDigits, initialProgress, petId }: RitualLoopProps) {
+export function RitualLoop({ onRitualComplete, signalDigits, initialProgress, petId }: RitualLoopProps) {
   const [inputType, setInputType] = useState<RitualInputType>('mood');
   const [inputValue, setInputValue] = useState<string>(INPUT_OPTIONS.mood[0]);
   const [ritualType, setRitualType] = useState<RitualType>('tap');
@@ -600,7 +600,7 @@ export function RitualLoop({ onRitualComplete, jewbleDigits, initialProgress, pe
           <HeptaYantraCanvas
             size={280}
             onYantraComplete={handleYantraComplete}
-            jewbleDigits={jewbleDigits}
+            signalDigits={signalDigits}
           />
         </div>
       )}

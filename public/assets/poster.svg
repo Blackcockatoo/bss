@@ -1,0 +1,46 @@
+<svg width="1400" height="2000" viewBox="0 0 1400 2000" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Jewble Meta-Pet Poster</title>
+  <desc id="desc">Poster-style placeholder artwork for the landing page.</desc>
+  <defs>
+    <linearGradient id="bg" x1="220" y1="120" x2="1180" y2="1880" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#111F3A"/>
+      <stop offset="1" stop-color="#060E1D"/>
+    </linearGradient>
+    <radialGradient id="orb" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(700 840) rotate(90) scale(430 440)">
+      <stop stop-color="#F5C84C" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#4DD6C8" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1400" height="2000" rx="42" fill="url(#bg)"/>
+
+  <g opacity="0.2" stroke="#4DD6C8">
+    <path d="M130 240H1270"/>
+    <path d="M130 300H1270"/>
+    <path d="M130 1760H1270"/>
+    <path d="M130 1820H1270"/>
+  </g>
+
+  <text x="700" y="250" fill="#F5C84C" font-family="Space Mono, Consolas, monospace" font-size="34" text-anchor="middle" letter-spacing="6">BLUE SNAKE STUDIOS</text>
+  <text x="700" y="420" fill="#E8EEF7" font-family="Outfit, Segoe UI, sans-serif" font-size="134" font-weight="800" text-anchor="middle">JEWBLE</text>
+  <text x="700" y="500" fill="#7A8DA8" font-family="Outfit, Segoe UI, sans-serif" font-size="40" font-weight="300" text-anchor="middle">THE META-PET EVOLUTION</text>
+
+  <circle cx="700" cy="840" r="430" fill="url(#orb)"/>
+  <circle cx="700" cy="840" r="260" fill="#183052" stroke="#2E5A8A" stroke-width="4"/>
+  <circle cx="610" cy="810" r="34" fill="#0A1628"/>
+  <circle cx="790" cy="810" r="34" fill="#0A1628"/>
+  <circle cx="620" cy="798" r="10" fill="#F5C84C"/>
+  <circle cx="800" cy="798" r="10" fill="#F5C84C"/>
+  <path d="M635 930C668 970 732 970 765 930" stroke="#4DD6C8" stroke-width="12" stroke-linecap="round"/>
+
+  <g opacity="0.22" stroke="#F5C84C" stroke-width="2">
+    <polygon points="700,560 835,640 835,800 700,880 565,800 565,640"/>
+    <polygon points="700,620 785,670 785,770 700,820 615,770 615,670"/>
+  </g>
+
+  <text x="700" y="1230" fill="#E8EEF7" font-family="Outfit, Segoe UI, sans-serif" font-size="54" font-weight="700" text-anchor="middle">PRIVACY-FIRST • EDUCATION-PROVEN</text>
+  <text x="700" y="1310" fill="#7A8DA8" font-family="Outfit, Segoe UI, sans-serif" font-size="38" font-weight="300" text-anchor="middle">180-DIGIT GENOME • 15 EMOTIONAL STATES • 0 DATA TRANSMITTED</text>
+
+  <text x="700" y="1660" fill="#F5C84C" font-family="Space Mono, Consolas, monospace" font-size="34" text-anchor="middle" letter-spacing="4">FASTER THAN LIGHTNING • SLOWER THAN MOSS</text>
+  <text x="700" y="1780" fill="#E8EEF7" font-family="Outfit, Segoe UI, sans-serif" font-size="30" text-anchor="middle">Campaign Pack Placeholder Poster</text>
+</svg>

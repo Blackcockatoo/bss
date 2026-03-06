@@ -1,5 +1,5 @@
-import { JewbleLoadingScreen } from "@/components/JewbleLoadingScreen";
+import { MetaPetLoadingScreen } from "@/components/MetaPetLoadingScreen";
 
 export default function Loading() {
-  return <JewbleLoadingScreen />;
+  return <MetaPetLoadingScreen />;
 }

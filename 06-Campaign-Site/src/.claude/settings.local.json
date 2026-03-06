@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd:*)",
+      "Bash(cd H:/06-Campaign-Site && npm install 2>&1)",
+      "Bash(rm -rf H:/06-Campaign-Site/node_modules && cd H:/06-Campaign-Site && npm install 2>&1)",
+      "Bash(cmd /c \"rmdir /s /q H:\\\\06-Campaign-Site\\\\node_modules\" && cd H:/06-Campaign-Site && npm install 2>&1)"
+    ]
+  }
+}

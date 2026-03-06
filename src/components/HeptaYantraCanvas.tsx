@@ -18,7 +18,7 @@ type YantraPattern = 'triangle' | 'hexagram' | 'heptagram' | 'spiral' | 'cross' 
 interface YantraResult {
   pattern: YantraPattern;
   confidence: number;
-  residueActivation: number[]; // Which Jewble residues (0-59) get activated
+  residueActivation: number[]; // Which signal residues (0-59) get activated
   energy: number; // Energy bonus for pet
   message: string;
 }
@@ -26,7 +26,7 @@ interface YantraResult {
 interface HeptaYantraCanvasProps {
   size?: number;
   onYantraComplete?: (result: YantraResult) => void;
-  jewbleDigits?: { red: number[]; blue: number[]; black: number[] };
+  signalDigits?: { red: number[]; blue: number[]; black: number[] };
   className?: string;
 }
 
@@ -245,7 +245,7 @@ function analyzePattern(strokes: Stroke[]): YantraResult {
 export function HeptaYantraCanvas({
   size = 300,
   onYantraComplete,
-  jewbleDigits,
+  signalDigits,
   className,
 }: HeptaYantraCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -255,7 +255,7 @@ export function HeptaYantraCanvas({
   const [lastResult, setLastResult] = useState<YantraResult | null>(null);
   const [showResult, setShowResult] = useState(false);
 
-  // Draw background grid and Jewble residue markers
+  // Draw background grid and signal residue markers
   const drawBackground = useCallback((ctx: CanvasRenderingContext2D) => {
     const centerX = size / 2;
     const centerY = size / 2;
@@ -298,8 +298,8 @@ export function HeptaYantraCanvas({
       ctx.stroke();
     }
 
-    // Draw Jewble digit markers if provided
-    if (jewbleDigits) {
+    // Draw signal digit markers if provided
+    if (signalDigits) {
       const drawDigits = (digits: number[], color: string, ringRadius: number) => {
         digits.forEach(d => {
           const angle = (d / 60) * Math.PI * 2 - Math.PI / 2;
@@ -313,9 +313,9 @@ export function HeptaYantraCanvas({
         });
       };
 
-      drawDigits(jewbleDigits.red, 'rgba(251, 113, 133, 0.7)', radius * 0.35);
-      drawDigits(jewbleDigits.blue, 'rgba(56, 189, 248, 0.7)', radius * 0.55);
-      drawDigits(jewbleDigits.black, 'rgba(167, 139, 250, 0.7)', radius * 0.75);
+      drawDigits(signalDigits.red, 'rgba(251, 113, 133, 0.7)', radius * 0.35);
+      drawDigits(signalDigits.blue, 'rgba(56, 189, 248, 0.7)', radius * 0.55);
+      drawDigits(signalDigits.black, 'rgba(167, 139, 250, 0.7)', radius * 0.75);
     }
 
     // Draw activated residues from last result
@@ -337,7 +337,7 @@ export function HeptaYantraCanvas({
         ctx.fill();
       });
     }
-  }, [size, jewbleDigits, lastResult, showResult]);
+  }, [size, signalDigits, lastResult, showResult]);
 
   // Draw all strokes
   const drawStrokes = useCallback((ctx: CanvasRenderingContext2D) => {

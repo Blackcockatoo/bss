@@ -123,7 +123,6 @@ export interface MetaPetState {
   recordBattle: (result: 'win' | 'loss', opponent: string) => void;
   updateMiniGameScore: (game: 'memory' | 'rhythm', score: number) => void;
   recordVimanaRun: (score: number, lines: number, level: number) => void;
-  recordSpaceJewblesRun: (score: number, wave: number, bossesDefeated: number, mythicDrops: number) => void;
   exploreCell: (cellId: string) => void;
   resolveAnomaly: (cellId: string) => void;
   recordReward: (payload: RewardPayloadInput) => void;
@@ -666,70 +665,6 @@ export function createMetaPetWebStore(
 
         return update;
       });
-
-      rewardPayloads.forEach(payload => get().recordReward(payload));
-    },
-
-    recordSpaceJewblesRun(score, wave, bossesDefeated, mythicDrops) {
-      if (get().systemState === 'sealed') return;
-      const safeScore = Math.max(0, Math.floor(score));
-      const safeWave = Math.max(0, Math.floor(wave));
-      const safeBossesDefeated = Math.max(0, Math.floor(bossesDefeated));
-      const safeMythicDrops = Math.max(0, Math.floor(mythicDrops));
-      const rewardPayloads: RewardPayloadInput[] = [];
-      set(state => {
-        const previous = state.miniGames;
-        const hasProgress = safeScore > 0 || safeWave > 0;
-
-        const next: MiniGameProgress = {
-          ...previous,
-          focusStreak: hasProgress ? previous.focusStreak + 1 : 0,
-          spaceJewblesHighScore: Math.max(previous.spaceJewblesHighScore, safeScore),
-          spaceJewblesMaxWave: Math.max(previous.spaceJewblesMaxWave, safeWave),
-          spaceJewblesLastScore: safeScore,
-          spaceJewblesLastWave: safeWave,
-          spaceJewblesMythicDrops: previous.spaceJewblesMythicDrops + safeMythicDrops,
-          spaceJewblesBossesDefeated: previous.spaceJewblesBossesDefeated + safeBossesDefeated,
-          spaceJewblesRunsPlayed: previous.spaceJewblesRunsPlayed + 1,
-          spaceJewblesTotalScore: previous.spaceJewblesTotalScore + safeScore,
-          spaceJewblesTotalWaves: previous.spaceJewblesTotalWaves + safeWave,
-          lastPlayedAt: Date.now(),
-        };
-
-        const achievements = state.achievements;
-
-        const update: Partial<MetaPetState> = { miniGames: next };
-
-        // Grant XP based on performance (5-15 XP, scaled by wave and score)
-        if (hasProgress) {
-          const xpGain = Math.min(15, Math.max(5, Math.floor(safeWave / 2) + Math.floor(safeScore / 1000)));
-          update.evolution = gainExperience(state.evolution, xpGain);
-        }
-
-        // Boost vitals from playing
-        const moodBoost = Math.min(8, Math.floor(safeWave));
-        const energyCost = Math.min(5, Math.floor(safeWave / 3));
-        update.vitals = {
-          ...state.vitals,
-          mood: clamp(state.vitals.mood + moodBoost),
-          energy: clamp(state.vitals.energy - energyCost),
-        };
-
-        return update;
-      });
-
-      // Record game result as reward
-      if (safeScore > 0) {
-        rewardPayloads.push({
-          source: 'minigame',
-          title: 'Space Jewbles Run',
-          description: `Reached wave ${safeWave} with ${safeScore} points.`,
-          reward: {
-            type: 'score',
-            value: safeScore,
-          },
-        });
-      }
 
       rewardPayloads.forEach(payload => get().recordReward(payload));
     },

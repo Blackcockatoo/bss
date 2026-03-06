@@ -46,16 +46,6 @@ export interface MiniGameProgress {
   vimanaLastScore: number;
   vimanaLastLines: number;
   vimanaLastLevel: number;
-  // Space Jewbles fields
-  spaceJewblesHighScore: number;
-  spaceJewblesMaxWave: number;
-  spaceJewblesLastScore: number;
-  spaceJewblesLastWave: number;
-  spaceJewblesMythicDrops: number;
-  spaceJewblesBossesDefeated: number;
-  spaceJewblesRunsPlayed: number;
-  spaceJewblesTotalScore: number;
-  spaceJewblesTotalWaves: number;
   lastPlayedAt: number | null;
 }
 
@@ -147,55 +137,6 @@ export const ACHIEVEMENT_CATALOG: Achievement[] = [
     description: 'Build a focus streak of 5 mini-game runs.',
     category: 'minigame',
   },
-  // Space Jewbles achievements
-  {
-    id: 'jewbles-first-run',
-    title: 'Into the Void',
-    description: 'Complete your first Space Jewbles run.',
-    category: 'minigame',
-  },
-  {
-    id: 'jewbles-wave-5',
-    title: 'Wave Rider',
-    description: 'Survive to wave 5 in Space Jewbles.',
-    category: 'minigame',
-  },
-  {
-    id: 'jewbles-wave-10',
-    title: 'Tide Sovereign',
-    description: 'Survive to wave 10 in Space Jewbles.',
-    category: 'minigame',
-  },
-  {
-    id: 'jewbles-score-10k',
-    title: 'Luminous Threshold',
-    description: 'Score 10,000 points in a single Space Jewbles run.',
-    category: 'minigame',
-  },
-  {
-    id: 'jewbles-first-boss',
-    title: 'Apex Convergence',
-    description: 'Defeat a boss in Space Jewbles.',
-    category: 'minigame',
-  },
-  {
-    id: 'jewbles-boss-5',
-    title: 'Spectral Vanquisher',
-    description: 'Defeat 5 bosses across all Space Jewbles runs.',
-    category: 'minigame',
-  },
-  {
-    id: 'jewbles-veteran',
-    title: 'Constellation Keeper',
-    description: 'Complete 10 Space Jewbles runs.',
-    category: 'minigame',
-  },
-  {
-    id: 'jewbles-mythic',
-    title: 'Mythic Resonance',
-    description: 'Collect a mythic drop in Space Jewbles.',
-    category: 'minigame',
-  },
 ];
 
 export interface CreateBattleStatsOptions {
@@ -226,16 +167,6 @@ export function createDefaultMiniGameProgress(overrides: Partial<MiniGameProgres
     vimanaLastScore: 0,
     vimanaLastLines: 0,
     vimanaLastLevel: 0,
-    // Space Jewbles defaults
-    spaceJewblesHighScore: 0,
-    spaceJewblesMaxWave: 0,
-    spaceJewblesLastScore: 0,
-    spaceJewblesLastWave: 0,
-    spaceJewblesMythicDrops: 0,
-    spaceJewblesBossesDefeated: 0,
-    spaceJewblesRunsPlayed: 0,
-    spaceJewblesTotalScore: 0,
-    spaceJewblesTotalWaves: 0,
     lastPlayedAt: null,
     ...overrides,
   };

@@ -4,7 +4,7 @@ import { memo, type ComponentType, useState } from 'react';
 
 import { useStore } from '@/lib/store';
 import { Sparkles, Palette, Brain, Zap, Orbit, Link2, Ban, Dna, Info } from 'lucide-react';
-import { GenomeJewbleRing } from './GenomeJewbleRing';
+import { GenomeSignalRing } from './GenomeSignalRing';
 
 type GeneticsPresetId = 'single' | 'multi' | 'polygenic';
 
@@ -300,7 +300,7 @@ export const TraitPanel = memo(function TraitPanel() {
         </h3>
         <div className="grid gap-3 lg:grid-cols-[1fr,0.9fr]">
           <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3">
-            <GenomeJewbleRing
+            <GenomeSignalRing
               redDigits={genome.red60}
               blackDigits={genome.black60}
               blueDigits={genome.blue60}

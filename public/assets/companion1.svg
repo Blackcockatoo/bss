@@ -1,0 +1,38 @@
+<svg width="1200" height="900" viewBox="0 0 1200 900" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Jewble Companion One</title>
+  <desc id="desc">Stylized companion portrait placeholder artwork.</desc>
+  <defs>
+    <linearGradient id="bg" x1="120" y1="80" x2="1080" y2="820" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#132949"/>
+      <stop offset="1" stop-color="#0A1628"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(600 430) rotate(90) scale(330 420)">
+      <stop stop-color="#F5C84C" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#F5C84C" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="900" fill="url(#bg)"/>
+  <circle cx="600" cy="430" r="330" fill="url(#halo)"/>
+
+  <g opacity="0.22" stroke="#4DD6C8">
+    <path d="M130 170H1070"/>
+    <path d="M130 730H1070"/>
+    <path d="M210 90V810"/>
+    <path d="M990 90V810"/>
+  </g>
+
+  <g transform="translate(0 14)">
+    <ellipse cx="600" cy="500" rx="220" ry="190" fill="#122644" stroke="#284A73" stroke-width="3"/>
+    <ellipse cx="600" cy="470" rx="170" ry="150" fill="#1A355C"/>
+    <circle cx="540" cy="455" r="22" fill="#0A1628"/>
+    <circle cx="660" cy="455" r="22" fill="#0A1628"/>
+    <circle cx="548" cy="447" r="6" fill="#F5C84C"/>
+    <circle cx="668" cy="447" r="6" fill="#F5C84C"/>
+    <path d="M560 528C580 548 620 548 640 528" stroke="#4DD6C8" stroke-width="8" stroke-linecap="round"/>
+    <path d="M450 390L520 338" stroke="#4DD6C8" stroke-width="12" stroke-linecap="round"/>
+    <path d="M750 390L680 338" stroke="#4DD6C8" stroke-width="12" stroke-linecap="round"/>
+  </g>
+
+  <text x="600" y="805" fill="#E8EEF7" font-family="Outfit, Segoe UI, sans-serif" font-size="46" text-anchor="middle" letter-spacing="2">COMPANION REVEAL</text>
+</svg>
