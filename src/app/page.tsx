@@ -365,7 +365,6 @@ export default function LandingPage() {
           </span>
         </a>
         <div className="nav-r">
-          <a href="/space-jewbles">Play Space Jewbles</a>
           <a href="#why-now">Why Now</a>
           <a href="#what-jewble-is">What It Is</a>
           <a href="#for-teachers">For Teachers</a>
@@ -374,7 +373,6 @@ export default function LandingPage() {
           <a href="#compass">Compass</a>
           <a href="#evidence">Evidence</a>
           <a href="#investor-brief">Investor Brief</a>
-          <a href="/blue-snake-studios.html" target="_blank" rel="noopener noreferrer">BlueSnakeStudios.com</a>
           <a className="cta-nav" href="#get-involved">Start a Pilot</a>
         </div>
       </nav>
@@ -391,10 +389,8 @@ export default function LandingPage() {
           <em>Faster than lightning. Slower than moss.</em>
         </p>
         <div className="hero-actions">
-          <a className="btn btn-gold" href="/space-jewbles">Play Space Jewbles</a>
           <button type="button" className="btn btn-gold" onClick={openPilotModal}>Start a Free Pilot</button>
-          <a className="btn btn-ghost" href="/blue-snake-studios.html" target="_blank" rel="noopener noreferrer">Visit BlueSnakeStudios.com</a>
-          <a className="btn btn-ghost" href="mailto:hello@bluesnakestudios.com.au?subject=Curriculum%20Pack%20Request">Request a Curriculum Pack</a>
+          <a className="btn btn-ghost" href="#for-teachers">Explore Teacher Hub</a>
         </div>
 
         <div className="hepta-ring">
@@ -441,13 +437,13 @@ export default function LandingPage() {
               ×
             </button>
             <span className="pilot-modal-tag">Start a pilot</span>
-            <h3 id="pilot-modal-title">Pick your best next step</h3>
-            <p>Open Teacher Hub instantly, review routes, or explore the local package docs.</p>
+            <h3 id="pilot-modal-title">Ready to get started?</h3>
+            <p>Explore the Teacher Hub below or reach out directly to hello@bluesnakestudios.com.au</p>
             <div className="pilot-modal-links">
-              <a href="https://teachers-meta-pet-mr-brand.vercel.app/?as=teacher" target="_blank" rel="noopener noreferrer">Teacher Hub (teacher deeplink)</a>
-              <a href="https://teachers-meta-pet-mr-brand.vercel.app/routes" target="_blank" rel="noopener noreferrer">Route map</a>
-              <a href="/docs/kpps/00_Package_Index.md">Local docs: KPPS package index</a>
-              <a href="mailto:hello@bluesnakestudios.com.au?subject=Start%20Free%20Pilot">Email fallback</a>
+              <button type="button" className="pilot-modal-link-btn" onClick={() => { closePilotModal(); document.getElementById('for-teachers')?.scrollIntoView({ behavior: 'smooth' }); }}>Teacher Hub</button>
+              <button type="button" className="pilot-modal-link-btn" onClick={() => { closePilotModal(); document.getElementById('kpps-package')?.scrollIntoView({ behavior: 'smooth' }); }}>KPPS Package</button>
+              <button type="button" className="pilot-modal-link-btn" onClick={() => { closePilotModal(); document.getElementById('evidence')?.scrollIntoView({ behavior: 'smooth' }); }}>Evidence</button>
+              <a href="mailto:hello@bluesnakestudios.com.au?subject=Pilot%20Request" className="pilot-modal-links-email">Email us</a>
             </div>
           </div>
         </div>
@@ -732,8 +728,6 @@ export default function LandingPage() {
                 key={doc.href}
                 className="link-card kpps-doc-card"
                 href={doc.href}
-                target="_blank"
-                rel="noopener noreferrer"
               >
                 <span className="lc-tag t-gold">{doc.tag}</span>
                 <h4>{doc.title}</h4>
@@ -802,15 +796,15 @@ export default function LandingPage() {
           </p>
 
           <div className="grid-2 reveal">
-            <a className="link-card" href="/compass">
+            <a className="link-card" href="#compass">
               <span className="lc-tag t-violet">Navigator</span>
-              <h4>Open Compass</h4>
-              <p>Use the 12-sector wheel to move smoothly across learning, identity, and classroom tools.</p>
+              <h4>Explore Compass</h4>
+              <p>Learn about the 12-sector wheel to move smoothly across learning, identity, and classroom tools.</p>
             </a>
-            <a className="link-card" href="/space-jewbles">
+            <a className="link-card" href="mailto:hello@bluesnakestudios.com.au?subject=Space%20Jewbles%20Interest">
               <span className="lc-tag t-teal">Optional activity</span>
-              <h4>Play Space Jewbles</h4>
-              <p>Launch the arcade mode directly, with progression tied back to the same companion profile.</p>
+              <h4>Space Jewbles</h4>
+              <p>Interested in the arcade mode? Contact us for more information and integration options.</p>
             </a>
           </div>
 
