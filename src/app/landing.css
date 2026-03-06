@@ -580,7 +580,8 @@ body.landing-body {
   gap: 10px;
 }
 
-.landing .pilot-modal-links a {
+.landing .pilot-modal-links a,
+.landing .pilot-modal-link-btn {
   display: block;
   text-decoration: none;
   color: var(--white);
