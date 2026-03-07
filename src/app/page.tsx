@@ -354,8 +354,10 @@ function CurriculumQueueSection() {
   const classEnergy = useEducationStore((s) => s.classEnergy.level);
   const promptResponseCount = useEducationStore((s) => s.promptResponseCount);
   const vibeReactionCount = useEducationStore((s) => s.vibeReactionCount);
-  const unlockedEduAchievements = useEducationStore((s) =>
-    s.eduAchievements.filter((entry) => entry.unlockedAt !== null),
+  const eduAchievements = useEducationStore((s) => s.eduAchievements);
+  const unlockedEduAchievements = useMemo(
+    () => eduAchievements.filter((entry) => entry.unlockedAt !== null),
+    [eduAchievements],
   );
   const rewardHistory = useStore((s) => s.rewardHistory);
 
