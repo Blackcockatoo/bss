@@ -10,7 +10,7 @@ const HOW_TO_EARN = [
     emoji: '❤️',
     title: 'Care for your companion',
     description: 'Feed, clean, and play with your pet daily. Consistent care unlocks Caretaker achievements and earns Essence.',
-    route: '/',
+    route: '/pet',
     cta: 'Care now',
   },
   {
@@ -31,7 +31,7 @@ const HOW_TO_EARN = [
     emoji: '🏆',
     title: 'Complete achievements',
     description: 'Each unlocked achievement awards +25 Essence instantly. Track progress in the Rewards tab on the main screen.',
-    route: '/',
+    route: '/pet',
     cta: 'View companion',
   },
 ];
