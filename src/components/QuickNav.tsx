@@ -1,8 +1,5 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
 import {
   ArrowDownToLine,
   ArrowLeft,
@@ -13,32 +10,36 @@ import {
   PawPrint,
   QrCode,
   UserCircle,
-} from 'lucide-react';
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { Button } from '@/components/ui/button';
-import { triggerHaptic } from '@/lib/haptics';
+import { Button } from "@/components/ui/button";
+import { triggerHaptic } from "@/lib/haptics";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
 const NAV_ITEMS = [
-  { href: '/pet', label: 'Home', icon: Home },
-  { href: '/pet', label: 'Pet', icon: PawPrint },
-  { href: '/school-game', label: 'School', icon: BookOpen },
-  { href: '/identity', label: 'Identity', icon: UserCircle },
-  { href: '/genome-explorer', label: 'Genome', icon: Dna },
+  { href: "/", label: "Home", icon: Home },
+  { href: "/pet", label: "Pet", icon: PawPrint },
+  { href: "/school-game", label: "School", icon: BookOpen },
+  { href: "/identity", label: "Identity", icon: UserCircle },
+  { href: "/genome-explorer", label: "Genome", icon: Dna },
 ];
 
 const LAB_ITEMS = [
-  { href: '/qr-messaging', label: 'QR (Experimental)', icon: QrCode },
+  { href: "/qr-messaging", label: "QR (Experimental)", icon: QrCode },
 ];
 
 export function QuickNav() {
   const pathname = usePathname();
   const router = useRouter();
-  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [installPrompt, setInstallPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
   const [isLabsOpen, setIsLabsOpen] = useState(false);
   const [prevPathname, setPrevPathname] = useState(pathname);
   if (prevPathname !== pathname) {
@@ -47,12 +48,12 @@ export function QuickNav() {
   }
 
   const handleBack = useCallback(() => {
-    triggerHaptic('light');
-    if (typeof window !== 'undefined' && window.history.length > 1) {
+    triggerHaptic("light");
+    if (typeof window !== "undefined" && window.history.length > 1) {
       router.back();
       return;
     }
-    router.push('/pet');
+    router.push("/");
   }, [router]);
 
   useEffect(() => {
@@ -65,12 +66,15 @@ export function QuickNav() {
       setInstallPrompt(null);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt,
+      );
+      window.removeEventListener("appinstalled", handleAppInstalled);
     };
   }, []);
 
@@ -80,21 +84,21 @@ export function QuickNav() {
     if (!installPrompt) {
       return;
     }
-    triggerHaptic('success');
+    triggerHaptic("success");
     await installPrompt.prompt();
     const choice = await installPrompt.userChoice;
-    if (choice.outcome === 'accepted') {
+    if (choice.outcome === "accepted") {
       setInstallPrompt(null);
     }
   }, [installPrompt]);
 
   const handleNavClick = useCallback(() => {
-    triggerHaptic('selection');
+    triggerHaptic("selection");
   }, []);
 
   const handleLabsToggle = useCallback(() => {
-    triggerHaptic('selection');
-    setIsLabsOpen(open => !open);
+    triggerHaptic("selection");
+    setIsLabsOpen((open) => !open);
   }, []);
 
   return (
@@ -118,7 +122,7 @@ export function QuickNav() {
 
           {/* Nav Items */}
           <div className="flex-1 flex items-center justify-around">
-            {NAV_ITEMS.map(item => {
+            {NAV_ITEMS.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
               return (
@@ -134,14 +138,17 @@ export function QuickNav() {
                       min-w-[52px] h-12 px-2 rounded-xl
                       transition-all duration-200
                       touch-manipulation
-                      ${isActive
-                        ? 'bg-cyan-500/20 text-cyan-300'
-                        : 'text-slate-400 hover:bg-slate-800/60 hover:text-white active:scale-95'
+                      ${
+                        isActive
+                          ? "bg-cyan-500/20 text-cyan-300"
+                          : "text-slate-400 hover:bg-slate-800/60 hover:text-white active:scale-95"
                       }
                     `}
                   >
                     <Icon className="h-5 w-5" />
-                    <span className={`text-[9px] font-medium ${isActive ? 'opacity-100' : 'opacity-70'}`}>
+                    <span
+                      className={`text-[9px] font-medium ${isActive ? "opacity-100" : "opacity-70"}`}
+                    >
                       {item.label}
                     </span>
                   </div>
@@ -155,7 +162,7 @@ export function QuickNav() {
                 size="icon"
                 onClick={handleLabsToggle}
                 className={`h-12 w-12 rounded-xl text-slate-400 hover:bg-slate-800/60 hover:text-white touch-manipulation ${
-                  isLabsOpen ? 'bg-slate-800/70 text-white' : ''
+                  isLabsOpen ? "bg-slate-800/70 text-white" : ""
                 }`}
                 aria-label="Toggle labs navigation"
               >
@@ -167,7 +174,7 @@ export function QuickNav() {
                     Labs
                   </div>
                   <div className="space-y-1">
-                    {LAB_ITEMS.map(item => {
+                    {LAB_ITEMS.map((item) => {
                       const Icon = item.icon;
                       const isActive = pathname === item.href;
                       return (
@@ -178,7 +185,9 @@ export function QuickNav() {
                           className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-slate-300 hover:bg-slate-800/70 hover:text-white"
                         >
                           <Icon className="h-4 w-4" />
-                          <span className={isActive ? 'text-cyan-300' : undefined}>
+                          <span
+                            className={isActive ? "text-cyan-300" : undefined}
+                          >
                             {item.label}
                           </span>
                         </Link>

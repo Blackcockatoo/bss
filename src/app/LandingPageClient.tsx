@@ -8,6 +8,7 @@ type NavId =
   | "parents"
   | "schools"
   | "veil"
+  | "elevator"
   | "schoolDocs"
   | "investors"
   | "strategy"
@@ -64,6 +65,7 @@ const navLinks: Array<{ id: NavId; label: string; audience: string }> = [
   { id: "parents", label: "Parents", audience: "parents" },
   { id: "schools", label: "Schools", audience: "schools" },
   { id: "veil", label: "Teacher Delivery", audience: "teachers" },
+  { id: "elevator", label: "Pitch", audience: "investors" },
   { id: "schoolDocs", label: "School Docs", audience: "schools" },
   { id: "investors", label: "Government", audience: "schools" },
   { id: "strategy", label: "Assurance", audience: "" },
@@ -93,29 +95,36 @@ const labyrinthNodes: LabyrinthNode[] = [
     accent: "coral",
   },
   {
-    id: "schoolDocs",
+    id: "elevator",
     chamber: "Chamber 04",
+    title: "Pitch pathways",
+    body: "Give investors, leadership, and reviewers one direct launch point into the live pitch and the teacher stack.",
+    accent: "violet",
+  },
+  {
+    id: "schoolDocs",
+    chamber: "Chamber 05",
     title: "School documentation",
     body: "Surface implementation documents directly on-page so teachers and leadership can verify delivery details quickly.",
     accent: "teal",
   },
   {
     id: "investors",
-    chamber: "Chamber 05",
+    chamber: "Chamber 06",
     title: "Government readiness",
     body: "Present policy-fit controls, technical safeguards, and practical risk reduction for public education settings.",
     accent: "violet",
   },
   {
     id: "strategy",
-    chamber: "Chamber 06",
+    chamber: "Chamber 07",
     title: "Assurance framework",
     body: "Translate the model into clear approval criteria for leadership, ICT, and policy reviewers.",
     accent: "coral",
   },
   {
     id: "ads",
-    chamber: "Chamber 07",
+    chamber: "Chamber 08",
     title: "Stakeholder communication",
     body: "Finish with copy-ready templates for parent notices, leadership briefings, and government review notes.",
     accent: "gold",
@@ -127,35 +136,40 @@ const schoolDocs: SchoolDoc[] = [
     href: "/docs/kpps/00_Package_Index.md",
     tag: "Index",
     title: "Implementation Package Index",
-    description: "Master list of pilot materials so leadership and ICT reviewers can locate every supporting document quickly.",
+    description:
+      "Master list of pilot materials so leadership and ICT reviewers can locate every supporting document quickly.",
     accent: "teal",
   },
   {
     href: "/docs/kpps/07_KPPS_Privacy_Safety_Brief.md",
     tag: "Safety",
     title: "Privacy and Safety Brief",
-    description: "Plain-language controls summary covering data minimization, duty-of-care expectations, and verification notes.",
+    description:
+      "Plain-language controls summary covering data minimization, duty-of-care expectations, and verification notes.",
     accent: "violet",
   },
   {
     href: "/docs/kpps/02_KPPS_Implementation_Guide.md",
     tag: "Guide",
     title: "Teacher Implementation Guide",
-    description: "Operational steps for sessions, facilitation handover, and post-pilot review so delivery stays consistent.",
+    description:
+      "Operational steps for sessions, facilitation handover, and post-pilot review so delivery stays consistent.",
     accent: "gold",
   },
   {
     href: "/docs/kpps/03_KPPS_Facilitation_Scripts.md",
     tag: "Scripts",
     title: "Classroom Facilitation Scripts",
-    description: "Practical teacher language for each session to ensure consistent delivery within classroom windows.",
+    description:
+      "Practical teacher language for each session to ensure consistent delivery within classroom windows.",
     accent: "coral",
   },
   {
     href: "/docs/kpps/06_KPPS_Parent_Communication_Kit.md",
     tag: "Parent Kit",
     title: "Parent Communication Kit",
-    description: "Templates for newsletters, portal updates, and FAQs to maintain transparent family engagement.",
+    description:
+      "Templates for newsletters, portal updates, and FAQs to maintain transparent family engagement.",
     accent: "teal",
   },
 ];
@@ -663,8 +677,8 @@ export default function LandingPage() {
                 {link.label}
               </a>
             ))}
-            <a 
-              href="#compass-wheel" 
+            <a
+              href="#compass-wheel"
               className={activeNav === "veil" ? "active" : ""}
             >
               Compass Wheel
@@ -705,6 +719,9 @@ export default function LandingPage() {
           </a>
           <a className="btn btn-gold" href="/compass">
             Open Compass Wheel -&gt;
+          </a>
+          <a className="btn btn-ghost" href="#elevator">
+            Open the Pitch Stack -&gt;
           </a>
           <a className="btn btn-ghost" href="#pathway">
             Walk the Labyrinth -&gt;
@@ -1009,8 +1026,85 @@ export default function LandingPage() {
 
       <div className="divider" />
 
+      <section className="section" id="elevator">
+        <div className="section-label violet">
+          Layer 4 - Pitch and Launch Paths
+        </div>
+        <h2>
+          Open the pitch.
+          <br />
+          Open the teacher stack.
+        </h2>
+        <p className="lead">
+          This landing page now routes both decision flows directly: investor
+          and reviewer audiences can launch the live elevator pitch, while
+          schools and teachers can move straight into The Veil and the delivery
+          route.
+        </p>
+
+        <div className="elevator-grid">
+          <div className="elevator-card investor-lane">
+            <div className="elevator-card-label">Investor lane</div>
+            <h3>Interactive pitch and thesis entry points</h3>
+            <p>
+              Open the live investor experience or the campaign overview without
+              leaving the main landing flow.
+            </p>
+            <div className="elevator-actions">
+              <a
+                className="btn btn-gold"
+                href="https://elevator-pitch-seven.vercel.app/elevator"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Enter Elevator Pitch -&gt;
+              </a>
+              <a
+                className="btn btn-ghost"
+                href="https://elevator-pitch-seven.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open Campaign Site -&gt;
+              </a>
+            </div>
+          </div>
+
+          <div className="elevator-card teacher-lane">
+            <div className="elevator-card-label">Teacher lane</div>
+            <h3>The Veil and route map stay one click away</h3>
+            <p>
+              Keep teacher delivery practical with direct access to the teacher
+              hub and the classroom route sequence.
+            </p>
+            <div className="elevator-actions">
+              <a
+                className="btn btn-gold"
+                href="https://teachers-meta-pet-mr-brand.vercel.app/?as=teacher"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open The Veil -&gt;
+              </a>
+              <a
+                className="btn btn-ghost"
+                href="https://teachers-meta-pet-mr-brand.vercel.app/routes"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open Teacher Route -&gt;
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <NextGate from="elevator" />
+      </section>
+
+      <div className="divider" />
+
       <section className="section" id="schoolDocs">
-        <div className="section-label teal">Layer 4 - School Documentation</div>
+        <div className="section-label teal">Layer 5 - School Documentation</div>
         <h2>
           Full implementation docs
           <br />
@@ -1030,7 +1124,7 @@ export default function LandingPage() {
               className="card"
               target="_blank"
               rel="noopener noreferrer"
-              style={{ textDecoration: 'none' }}
+              style={{ textDecoration: "none" }}
             >
               <div className={`card-accent ${doc.accent}`} />
               <div className="card-icon">{doc.tag}</div>
@@ -1045,7 +1139,7 @@ export default function LandingPage() {
 
       <section className="section" id="investors">
         <div className="section-label violet">
-          Layer 5 - Government and Policy
+          Layer 6 - Government and Policy
         </div>
         <h2>
           Built for policy confidence,
@@ -1105,7 +1199,7 @@ export default function LandingPage() {
       <div className="divider" />
 
       <section className="section" id="strategy">
-        <div className="section-label coral">Layer 6 - Assurance</div>
+        <div className="section-label coral">Layer 7 - Assurance</div>
         <h2>Implementation Assurance</h2>
         <p className="lead">
           A practical assurance checklist for leadership decisions, with clear
@@ -1128,7 +1222,7 @@ export default function LandingPage() {
       </section>
 
       <section className="section" id="ads">
-        <div className="section-label gold">Layer 7 - Communication</div>
+        <div className="section-label gold">Layer 8 - Communication</div>
         <h2>Stakeholder Communication Templates</h2>
         <p className="lead">
           Copy-ready templates for parent notices, leadership briefings, and
@@ -1185,6 +1279,14 @@ export default function LandingPage() {
           </a>
           <a className="btn btn-gold" href="/compass">
             Open Compass Wheel -&gt;
+          </a>
+          <a
+            className="btn btn-gold"
+            href="https://elevator-pitch-seven.vercel.app/elevator"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open Elevator Pitch -&gt;
           </a>
           <a
             className="btn btn-ghost"
