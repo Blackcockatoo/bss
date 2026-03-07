@@ -34,7 +34,12 @@
       "@metapet/core/*": [
         "./src/*"
       ]
-    }
+    },
+    "types": [
+      "vitest/globals",
+      "@testing-library/jest-dom",
+      "google.maps"
+    ]
   },
   "include": [
     "next-env.d.ts",
