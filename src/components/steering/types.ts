@@ -14,7 +14,7 @@ export const NAVIGATION_TARGETS: NavigationTarget[] = [
   { position: 0,  angle: 0,   label: 'Home',      route: '/',              icon: 'Home' },
   { position: 1,  angle: 30,  label: 'Explore',    route: '/scaffold',      icon: 'Map' },
   { position: 2,  angle: 60,  label: 'Pet',        route: '/pet',           icon: 'Swords' },
-  { position: 3,  angle: 90,  label: 'Studio Site', route: 'https://bluesnakestudios.com', icon: 'Globe' },
+  { position: 3,  angle: 90,  label: 'Space Jewbles', route: '/space-jewbles', icon: 'Rocket' },
   { position: 4,  angle: 120, label: 'Style',       route: '/visualizer',    icon: 'Sparkles' },
   { position: 5,  angle: 150, label: 'Rewards',     route: '/share',         icon: 'Trophy' },
   { position: 6,  angle: 180, label: 'Shop',         route: '/shop',          icon: 'ShoppingBag' },

@@ -57,6 +57,7 @@ type SchoolDoc = {
   tag: string;
   title: string;
   description: string;
+  accent: AccentTone;
 };
 
 const navLinks: Array<{ id: NavId; label: string; audience: string }> = [
@@ -125,23 +126,37 @@ const schoolDocs: SchoolDoc[] = [
   {
     href: "/docs/kpps/00_Package_Index.md",
     tag: "Index",
-    title: "Implementation package index",
-    description:
-      "Master list of pilot materials so leadership and ICT reviewers can locate every supporting document quickly.",
+    title: "Implementation Package Index",
+    description: "Master list of pilot materials so leadership and ICT reviewers can locate every supporting document quickly.",
+    accent: "teal",
   },
   {
-    href: "/docs/kpps/04_Privacy_and_Safety_Brief.md",
+    href: "/docs/kpps/07_KPPS_Privacy_Safety_Brief.md",
     tag: "Safety",
-    title: "Privacy and safety brief",
-    description:
-      "Plain-language controls summary covering data minimization, duty-of-care expectations, and verification notes.",
+    title: "Privacy and Safety Brief",
+    description: "Plain-language controls summary covering data minimization, duty-of-care expectations, and verification notes.",
+    accent: "violet",
   },
   {
-    href: "/docs/kpps/06_Implementation_Runbook.md",
-    tag: "Runbook",
-    title: "Teacher implementation runbook",
-    description:
-      "Operational steps for sessions, facilitation handover, and post-pilot review so delivery stays consistent.",
+    href: "/docs/kpps/02_KPPS_Implementation_Guide.md",
+    tag: "Guide",
+    title: "Teacher Implementation Guide",
+    description: "Operational steps for sessions, facilitation handover, and post-pilot review so delivery stays consistent.",
+    accent: "gold",
+  },
+  {
+    href: "/docs/kpps/03_KPPS_Facilitation_Scripts.md",
+    tag: "Scripts",
+    title: "Classroom Facilitation Scripts",
+    description: "Practical teacher language for each session to ensure consistent delivery within classroom windows.",
+    accent: "coral",
+  },
+  {
+    href: "/docs/kpps/06_KPPS_Parent_Communication_Kit.md",
+    tag: "Parent Kit",
+    title: "Parent Communication Kit",
+    description: "Templates for newsletters, portal updates, and FAQs to maintain transparent family engagement.",
+    accent: "teal",
   },
 ];
 
@@ -648,6 +663,12 @@ export default function LandingPage() {
                 {link.label}
               </a>
             ))}
+            <a 
+              href="#compass-wheel" 
+              className={activeNav === "veil" ? "active" : ""}
+            >
+              Compass Wheel
+            </a>
           </div>
           <a className="nav-launch" href="/compass">
             Open Compass Wheel
@@ -1001,16 +1022,19 @@ export default function LandingPage() {
           quickly.
         </p>
 
-        <div>
+        <div className="card-grid">
           {schoolDocs.map((doc) => (
             <a
               key={doc.href}
               href={doc.href}
+              className="card"
               target="_blank"
               rel="noopener noreferrer"
+              style={{ textDecoration: 'none' }}
             >
-              <span>{doc.tag}</span>
-              <h4>{doc.title}</h4>
+              <div className={`card-accent ${doc.accent}`} />
+              <div className="card-icon">{doc.tag}</div>
+              <h3>{doc.title}</h3>
               <p>{doc.description}</p>
             </a>
           ))}
@@ -1021,7 +1045,7 @@ export default function LandingPage() {
 
       <section className="section" id="investors">
         <div className="section-label violet">
-          Layer 4 - Government and Policy
+          Layer 5 - Government and Policy
         </div>
         <h2>
           Built for policy confidence,
@@ -1081,7 +1105,7 @@ export default function LandingPage() {
       <div className="divider" />
 
       <section className="section" id="strategy">
-        <div className="section-label coral">Layer 5 - Assurance</div>
+        <div className="section-label coral">Layer 6 - Assurance</div>
         <h2>Implementation Assurance</h2>
         <p className="lead">
           A practical assurance checklist for leadership decisions, with clear
@@ -1104,7 +1128,7 @@ export default function LandingPage() {
       </section>
 
       <section className="section" id="ads">
-        <div className="section-label gold">Layer 6 - Communication</div>
+        <div className="section-label gold">Layer 7 - Communication</div>
         <h2>Stakeholder Communication Templates</h2>
         <p className="lead">
           Copy-ready templates for parent notices, leadership briefings, and

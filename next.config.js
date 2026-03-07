@@ -6,15 +6,6 @@ const nextConfig = {
   turbopack: {
     root: __dirname,
   },
-  async redirects() {
-    return [
-      {
-        source: "/space-jewbles",
-        destination: "https://bluesnakestudios.com",
-        permanent: true,
-      },
-    ];
-  },
   images: {
     unoptimized: true,
     remotePatterns: [
