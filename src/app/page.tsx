@@ -789,9 +789,16 @@ export default function Home() {
   const crestRef = useRef<PrimeTailID | null>(null);
   const heptaRef = useRef<HeptaDigits | null>(null);
   const sessionStartRef = useRef<number | null>(null);
+  const hasCheckedWellnessRef = useRef(false);
+  const hasInitializedAppRef = useRef(false);
 
   // Check wellness streaks on mount
   useEffect(() => {
+    if (hasCheckedWellnessRef.current) {
+      return;
+    }
+
+    hasCheckedWellnessRef.current = true;
     checkStreaks();
   }, [checkStreaks]);
 
@@ -1653,6 +1660,11 @@ export default function Home() {
   );
 
   useEffect(() => {
+    if (hasInitializedAppRef.current) {
+      return;
+    }
+
+    hasInitializedAppRef.current = true;
     startTick();
     void initializeIdentity();
 
