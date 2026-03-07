@@ -24,7 +24,7 @@ type BeforeInstallPromptEvent = Event & {
 };
 
 const NAV_ITEMS = [
-  { href: '/', label: 'Home', icon: Home },
+  { href: '/pet', label: 'Home', icon: Home },
   { href: '/pet', label: 'Pet', icon: PawPrint },
   { href: '/school-game', label: 'School', icon: BookOpen },
   { href: '/identity', label: 'Identity', icon: UserCircle },
@@ -52,7 +52,7 @@ export function QuickNav() {
       router.back();
       return;
     }
-    router.push('/');
+    router.push('/pet');
   }, [router]);
 
   useEffect(() => {
