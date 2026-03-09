@@ -6,17 +6,22 @@
 
 import { mintAddon } from './mint';
 import { useAddonStore } from './store';
-import { WIZARD_HAT, WIZARD_STAFF, CELESTIAL_CROWN } from './catalog';
+import {
+  WIZARD_HAT,
+  WIZARD_STAFF,
+  CELESTIAL_CROWN,
+} from './catalog';
 import { CUSTOM_ADDONS } from './customAddons';
 import { generateAddonKeypair } from './crypto';
 
-const CORE_STARTER_TEMPLATE_IDS = [WIZARD_HAT.id, WIZARD_STAFF.id, CELESTIAL_CROWN.id] as const;
-
-const CUSTOM_STARTER_TEMPLATE_IDS = Object.keys(CUSTOM_ADDONS).sort((a, b) =>
-  a.localeCompare(b, undefined, { numeric: true })
-);
-
-const STARTER_TEMPLATE_IDS = [...CORE_STARTER_TEMPLATE_IDS, ...CUSTOM_STARTER_TEMPLATE_IDS] as const;
+const STARTER_TEMPLATE_IDS = [
+  WIZARD_HAT.id,
+  WIZARD_STAFF.id,
+  CELESTIAL_CROWN.id,
+  'custom-addon-1008',
+  'custom-addon-1009',
+  'custom-addon-1010',
+] as const;
 
 /**
  * Initialize addon system with starter items
@@ -64,7 +69,7 @@ export async function initializeStarterAddons(): Promise<{
     let created = 0;
 
     for (const template of starterTemplates) {
-      // Idempotent: only mint if user doesn't already own this template id
+      // idempotent: only mint if user doesn't already own this template id
       if (addons[template.id]) {
         continue;
       }
