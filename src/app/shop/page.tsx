@@ -238,34 +238,55 @@ export default function ShopPage() {
         </div>
       </section>
 
-      {/* Custom Collection Addons */}
-      <section className="mb-12">
-        <h2 className="mb-1 text-xl font-semibold text-zinc-100">
-          Custom Collection
-        </h2>
-        <p className="mb-5 text-sm text-zinc-500">
-          The new custom addons (IDs 1008-1023) are listed here and demo items
-          are auto-minted in the Pet screen.
-        </p>
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {CUSTOM_COLLECTION_ADDONS.map((addon) => (
-            <AddonCard key={addon.id} addon={addon} />
-          ))}
-        </div>
-      </section>
-
       {/* Earnable Addons */}
       <section className="mb-10">
-        <h2 className="mb-3 text-xl font-semibold">Premium Addons</h2>
+        <div className="mb-4 flex items-end justify-between">
+          <div>
+            <h2 className="text-xl font-semibold">Premium Addons</h2>
+            <p className="text-sm text-zinc-500">Available with Companion Pass or Teacher Pro.</p>
+          </div>
+          <Link href="/pricing" className="text-xs text-cyan-400 hover:text-cyan-300 underline underline-offset-2">
+            View plans →
+          </Link>
+        </div>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {PREMIUM_ADDONS.map((addon) => (
             <AddonCard
               key={addon.id}
               addon={addon}
-              ctaLabel="Premium preview"
+              ctaLabel="Companion Pass · included"
             />
           ))}
+        </div>
+      </section>
+
+      {/* Addon Marketplace Coming Soon */}
+      <section className="mb-10 rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-950/30 to-slate-900/60 p-6 md:p-8">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-amber-300">
+              Addon Marketplace — Coming Soon
+            </p>
+            <h3 className="mt-1 text-lg font-bold text-zinc-100">
+              Individual drops · Creator revenue share · Limited editions
+            </h3>
+            <p className="mt-2 max-w-xl text-sm text-zinc-400 leading-relaxed">
+              Buy individual addon packs from $1.99. Creators earn 70% of each sale.
+              Limited-edition mythic drops with on-chain scarcity. Educators can share
+              curriculum-themed addon bundles. The marketplace opens when the ecosystem is ready.
+            </p>
+          </div>
+          <div className="shrink-0">
+            <span className="inline-flex rounded-xl border border-amber-400/30 bg-amber-950/40 px-4 py-2 text-sm font-semibold text-amber-200">
+              Notify me
+            </span>
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2 text-[11px] text-zinc-500">
+          <span className="rounded-md border border-zinc-700 bg-zinc-900/70 px-2 py-0.5">Drop pricing: $1.99–$9.99</span>
+          <span className="rounded-md border border-zinc-700 bg-zinc-900/70 px-2 py-0.5">Creator cut: 70%</span>
+          <span className="rounded-md border border-zinc-700 bg-zinc-900/70 px-2 py-0.5">Cryptographically signed editions</span>
+          <span className="rounded-md border border-zinc-700 bg-zinc-900/70 px-2 py-0.5">Curriculum addon bundles</span>
         </div>
       </section>
     </main>

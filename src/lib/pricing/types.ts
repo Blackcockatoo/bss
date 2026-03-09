@@ -1,13 +1,18 @@
-export type PlanId = 'free' | 'pro';
+export type PlanId = 'free' | 'consumer' | 'pro' | 'school';
+
+export type PlanAudience = 'consumer' | 'educator' | 'institution';
 
 export interface PlanDefinition {
   id: PlanId;
   name: string;
+  tagline: string;
   description: string;
+  audience: PlanAudience;
   priceMonthly: number;
   priceYearly: number;
   limits: PlanLimits;
   features: PlanFeature[];
+  highlight?: boolean;
 }
 
 export interface PlanLimits {
@@ -23,6 +28,8 @@ export interface PlanFeature {
   label: string;
   included: boolean;
   proOnly?: boolean;
+  consumerOnly?: boolean;
+  schoolOnly?: boolean;
 }
 
 export type SubscriptionStatus = 'active' | 'trialing' | 'expired' | 'canceled';

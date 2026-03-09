@@ -20,11 +20,14 @@ export function getHeptaChromaticColor(vitals: Vitals): string {
     '#9400D3', // Violet (Low Energy, Low Hunger)
   ];
 
-  // Map vitals to a single value (0 to 100) for color wheel position
-  // We'll use a combination of Energy and inverse Hunger.
-  const energyWeight = 0.6;
-  const hungerWeight = 0.4;
-  const normalizedValue = vitals.energy * energyWeight + (100 - vitals.hunger) * hungerWeight;
+  // Life force: all 4 vitals contribute proportionally
+  // Energy (30%) — vibrancy driver; Hygiene (25%) — clarity/care;
+  // Mood (25%) — emotional health; Hunger inverse (20%) — satiation drag
+  const normalizedValue =
+    vitals.energy * 0.30 +
+    vitals.hygiene * 0.25 +
+    vitals.mood * 0.25 +
+    (100 - vitals.hunger) * 0.20;
 
   // Map the normalized value (0-100) to the number of colors (0-6.999)
   const colorIndex = (normalizedValue / 100) * colors.length;
@@ -213,13 +216,13 @@ export function getPetBehaviorState(vitals: Vitals): PetBehaviorState {
   // Priority-based FSM logic
 
   // Extreme states take priority
-  if (vitals.hunger > 80) return 'panic-hungry';
+  if (vitals.hunger > 75) return 'panic-hungry';
   if (vitals.hygiene < 20) return 'panic-dirty';
-  if (vitals.energy < 15) return 'sleep';
+  if (vitals.energy < 10) return 'sleep';
 
-  // Mood-based states
+  // Mood-based states — require both mood AND energy for wander-energetic
   if (vitals.mood > 70) {
-    return vitals.energy > 60 ? 'wander-energetic' : 'idle-happy';
+    return vitals.energy > 60 && vitals.mood > 60 ? 'wander-energetic' : 'idle-happy';
   }
   if (vitals.mood > 40) {
     return vitals.energy > 50 ? 'wander-energetic' : 'idle-neutral';
