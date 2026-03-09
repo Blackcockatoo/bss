@@ -36,8 +36,7 @@ export default function SchoolsPage() {
             This page is a direct school-facing narrative: implementation
             readiness, privacy-by-design, and communication support in one
             place. Use it for internal navigation, newsletters, and campaign
-            CTAs without sending stakeholders through the full landing
-            labyrinth.
+            CTAs without sending stakeholders through extra marketing layers.
           </p>
           <div className="flex flex-wrap gap-3 pt-2">
             <Link
@@ -48,9 +47,9 @@ export default function SchoolsPage() {
             </Link>
             <Link
               className="rounded-full border border-slate-700 px-5 py-2 text-sm font-semibold text-slate-100"
-              href="/landing"
+              href="/"
             >
-              Back to landing
+              Back to MetaPet
             </Link>
           </div>
         </header>

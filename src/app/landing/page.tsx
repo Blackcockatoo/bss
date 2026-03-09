@@ -1,3 +1,5 @@
-import LandingPage from "../LandingPageClient";
+import { permanentRedirect } from "next/navigation";
 
-export default LandingPage;
+export default function LandingPage() {
+  permanentRedirect("/");
+}
