@@ -6,6 +6,7 @@
  */
 
 import type { Addon, AddonCategory, AddonRarity, AddonAttachment, AddonVisual } from './types';
+import { CUSTOM_ADDONS } from './customAddons';
 
 export interface AddonTemplate {
   id: string;
@@ -688,6 +689,7 @@ export const ADDON_CATALOG: Record<string, AddonTemplate> = {
   'phoenix-wings-001': PHOENIX_WINGS,
   'crystal-heart-001': CRYSTAL_HEART,
   'void-mask-001': VOID_MASK,
+  ...CUSTOM_ADDONS,
 };
 
 /**

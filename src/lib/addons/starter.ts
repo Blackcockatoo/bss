@@ -11,7 +11,17 @@ import {
   WIZARD_STAFF,
   CELESTIAL_CROWN,
 } from './catalog';
+import { CUSTOM_ADDONS } from './customAddons';
 import { generateAddonKeypair } from './crypto';
+
+const STARTER_TEMPLATE_IDS = [
+  WIZARD_HAT.id,
+  WIZARD_STAFF.id,
+  CELESTIAL_CROWN.id,
+  'custom-addon-1008',
+  'custom-addon-1009',
+  'custom-addon-1010',
+] as const;
 
 /**
  * Initialize addon system with starter items
@@ -43,23 +53,27 @@ export async function initializeStarterAddons(): Promise<{
     const issuerKeysData = JSON.parse(issuerKeys);
 
     // Initialize store
-    const { setOwnerPublicKey, addAddon } = useAddonStore.getState();
+    const { setOwnerPublicKey, addAddon, addons } = useAddonStore.getState();
     setOwnerPublicKey(userKeysData.publicKey);
 
-    // Check if we already have addons
-    const existingAddons = Object.keys(useAddonStore.getState().addons);
-    if (existingAddons.length > 0) {
-      return {
-        success: true,
-        addonsCreated: 0,
-      };
-    }
+    const starterTemplates = STARTER_TEMPLATE_IDS.map((id) => {
+      if (id.startsWith('custom-addon-')) {
+        return CUSTOM_ADDONS[id];
+      }
 
-    // Create starter addons
-    const starterTemplates = [WIZARD_HAT, WIZARD_STAFF, CELESTIAL_CROWN];
+      if (id === WIZARD_HAT.id) return WIZARD_HAT;
+      if (id === WIZARD_STAFF.id) return WIZARD_STAFF;
+      return CELESTIAL_CROWN;
+    }).filter(Boolean);
+
     let created = 0;
 
     for (const template of starterTemplates) {
+      // idempotent: only mint if user doesn't already own this template id
+      if (addons[template.id]) {
+        continue;
+      }
+
       const addon = await mintAddon(
         {
           addonTypeId: template.id,
@@ -107,4 +121,3 @@ export function resetAddonSystem(): void {
   localStorage.removeItem('auralia-addon-storage');
   useAddonStore.persist.clearStorage();
 }
-
