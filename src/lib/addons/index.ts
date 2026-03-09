@@ -32,6 +32,7 @@ export {
   getAddonsByCategory,
   getAddonsByRarity,
 } from './catalog';
+export { CUSTOM_ADDONS } from './customAddons';
 
 // Crypto functions
 export {
