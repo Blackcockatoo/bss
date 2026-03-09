@@ -50,6 +50,8 @@ export interface AddonAttachment {
 export interface AddonVisual {
   /** SVG path data or component reference */
   svgPath?: string;
+  /** Optional custom equipped renderer */
+  customRenderer?: "seraphicPendantField";
   /** Optional full preview asset for inventory/shop cards */
   previewAsset?: string;
   /** Color palette for the addon */

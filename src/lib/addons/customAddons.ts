@@ -489,6 +489,41 @@ const CUSTOM_ADDON_LIST: AddonTemplate[] = [
     modifiers: { curiosity: 30, energy: 20 },
     metadata: { creator, tags: ["aura", "sentience"], maxEditions: 5 },
   },
+  {
+    id: "custom-addon-1024",
+    name: "Seraphic Pendant Field",
+    description:
+      "A living pendant lattice that projects a tesseract halo, helix strands, and oracle particles around Auralia's heart-field.",
+    category: "accessory",
+    rarity: "mythic",
+    attachment: {
+      anchorPoint: "body",
+      offset: { x: 0, y: 16, z: 0 },
+      scale: 0.9,
+      rotation: 0,
+      followAnimation: true,
+    },
+    visual: {
+      svgPath:
+        "M 50 8 C 34 8 20 15 8 31 C 22 22 33 18 50 18 C 67 18 78 22 92 31 C 80 15 66 8 50 8 Z M 50 33 C 33 33 20 46 20 63 C 20 82 34 94 50 94 C 66 94 80 82 80 63 C 80 46 67 33 50 33 Z M 50 41 L 59 55 L 76 58 L 64 70 L 67 87 L 50 78 L 33 87 L 36 70 L 24 58 L 41 55 Z",
+      customRenderer: "seraphicPendantField",
+      previewAsset: previewAsset("1024-seraphic-pendant-field.svg"),
+      colors: {
+        primary: "#101739",
+        secondary: "#F3D87A",
+        accent: "#7CF7FF",
+        glow: "rgba(124, 247, 255, 0.35)",
+      },
+      animation: { type: "shimmer", duration: 1800, easing: "ease-in-out" },
+      particles: { count: 12, color: "#7CF7FF", size: 1.4, behavior: "orbit" },
+    },
+    modifiers: { energy: 18, curiosity: 24, bond: 18, luck: 12 },
+    metadata: {
+      creator,
+      tags: ["pendant", "tesseract", "helix", "oracle"],
+      maxEditions: 3,
+    },
+  },
 ];
 
 export const CUSTOM_ADDONS: Record<string, AddonTemplate> = Object.fromEntries(

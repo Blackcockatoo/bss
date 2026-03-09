@@ -4,23 +4,20 @@
  * This provides an easy way to initialize the addon system with some starter items
  */
 
-import { mintAddon } from './mint';
-import { useAddonStore } from './store';
-import {
-  WIZARD_HAT,
-  WIZARD_STAFF,
-  CELESTIAL_CROWN,
-} from './catalog';
-import { CUSTOM_ADDONS } from './customAddons';
-import { generateAddonKeypair } from './crypto';
+import { CELESTIAL_CROWN, WIZARD_HAT, WIZARD_STAFF } from "./catalog";
+import { generateAddonKeypair } from "./crypto";
+import { CUSTOM_ADDONS } from "./customAddons";
+import { mintAddon } from "./mint";
+import { useAddonStore } from "./store";
 
 const STARTER_TEMPLATE_IDS = [
   WIZARD_HAT.id,
   WIZARD_STAFF.id,
   CELESTIAL_CROWN.id,
-  'custom-addon-1008',
-  'custom-addon-1009',
-  'custom-addon-1010',
+  "custom-addon-1008",
+  "custom-addon-1009",
+  "custom-addon-1010",
+  "custom-addon-1024",
 ] as const;
 
 /**
@@ -34,16 +31,22 @@ export async function initializeStarterAddons(): Promise<{
 }> {
   try {
     // Check if we already have keys
-    let userKeys = localStorage.getItem('auralia_addon_user_keys');
-    let issuerKeys = localStorage.getItem('auralia_addon_issuer_keys');
+    let userKeys = localStorage.getItem("auralia_addon_user_keys");
+    let issuerKeys = localStorage.getItem("auralia_addon_issuer_keys");
 
     if (!userKeys || !issuerKeys) {
       // Generate keys
       const newUserKeys = await generateAddonKeypair();
       const newIssuerKeys = await generateAddonKeypair();
 
-      localStorage.setItem('auralia_addon_user_keys', JSON.stringify(newUserKeys));
-      localStorage.setItem('auralia_addon_issuer_keys', JSON.stringify(newIssuerKeys));
+      localStorage.setItem(
+        "auralia_addon_user_keys",
+        JSON.stringify(newUserKeys),
+      );
+      localStorage.setItem(
+        "auralia_addon_issuer_keys",
+        JSON.stringify(newIssuerKeys),
+      );
 
       userKeys = JSON.stringify(newUserKeys);
       issuerKeys = JSON.stringify(newIssuerKeys);
@@ -57,7 +60,7 @@ export async function initializeStarterAddons(): Promise<{
     setOwnerPublicKey(userKeysData.publicKey);
 
     const starterTemplates = STARTER_TEMPLATE_IDS.map((id) => {
-      if (id.startsWith('custom-addon-')) {
+      if (id.startsWith("custom-addon-")) {
         return CUSTOM_ADDONS[id];
       }
 
@@ -82,7 +85,7 @@ export async function initializeStarterAddons(): Promise<{
         },
         issuerKeysData.privateKey,
         issuerKeysData.publicKey,
-        userKeysData.privateKey
+        userKeysData.privateKey,
       );
 
       const success = await addAddon(addon);
@@ -94,7 +97,7 @@ export async function initializeStarterAddons(): Promise<{
       addonsCreated: created,
     };
   } catch (error) {
-    console.error('Failed to initialize starter addons:', error);
+    console.error("Failed to initialize starter addons:", error);
     return {
       success: false,
       addonsCreated: 0,
@@ -107,8 +110,8 @@ export async function initializeStarterAddons(): Promise<{
  * Check if addon system is initialized
  */
 export function isAddonSystemInitialized(): boolean {
-  const userKeys = localStorage.getItem('auralia_addon_user_keys');
-  const issuerKeys = localStorage.getItem('auralia_addon_issuer_keys');
+  const userKeys = localStorage.getItem("auralia_addon_user_keys");
+  const issuerKeys = localStorage.getItem("auralia_addon_issuer_keys");
   return !!(userKeys && issuerKeys);
 }
 
@@ -116,8 +119,8 @@ export function isAddonSystemInitialized(): boolean {
  * Reset addon system (for testing)
  */
 export function resetAddonSystem(): void {
-  localStorage.removeItem('auralia_addon_user_keys');
-  localStorage.removeItem('auralia_addon_issuer_keys');
-  localStorage.removeItem('auralia-addon-storage');
+  localStorage.removeItem("auralia_addon_user_keys");
+  localStorage.removeItem("auralia_addon_issuer_keys");
+  localStorage.removeItem("auralia-addon-storage");
   useAddonStore.persist.clearStorage();
 }

@@ -1,0 +1,108 @@
+<svg width="1200" height="1200" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bgGlow" cx="50%" cy="42%" r="60%" fx="50%" fy="42%">
+      <stop offset="0%" stop-color="#1B1440"/>
+      <stop offset="45%" stop-color="#0E0B24"/>
+      <stop offset="100%" stop-color="#05060D"/>
+    </radialGradient>
+
+    <linearGradient id="goldLine" x1="240" y1="200" x2="960" y2="1000" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F8E7A1"/>
+      <stop offset="25%" stop-color="#E7C96B"/>
+      <stop offset="50%" stop-color="#FFF1B8"/>
+      <stop offset="75%" stop-color="#C99B2E"/>
+      <stop offset="100%" stop-color="#F3D87A"/>
+    </linearGradient>
+
+    <linearGradient id="gemGlow" x1="470" y1="420" x2="730" y2="760" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7CF7FF"/>
+      <stop offset="50%" stop-color="#4F7CFF"/>
+      <stop offset="100%" stop-color="#7B3CFF"/>
+    </linearGradient>
+
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="strongGlow" x="-80%" y="-80%" width="260%" height="260%" filterUnits="objectBoundingBox" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="22" result="blur1"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur2"/>
+      <feMerge>
+        <feMergeNode in="blur1"/>
+        <feMergeNode in="blur2"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <path id="necklaceArc" d="M300 300C385 205 485 160 600 160C715 160 815 205 900 300"/>
+    <path id="innerArc" d="M350 340C425 260 508 222 600 222C692 222 775 260 850 340"/>
+  </defs>
+
+  <rect width="1200" height="1200" fill="url(#bgGlow)"/>
+
+  <g opacity="0.32" filter="url(#softGlow)">
+    <circle cx="600" cy="590" r="300" stroke="#3E2A8F" stroke-width="2"/>
+    <circle cx="600" cy="590" r="220" stroke="#2FBACF" stroke-width="1.5"/>
+    <path d="M600 240L687 393L860 423L736 548L760 720L600 642L440 720L464 548L340 423L513 393L600 240Z" stroke="#8C6BFF" stroke-width="2"/>
+  </g>
+
+  <g filter="url(#softGlow)">
+    <use href="#necklaceArc" stroke="url(#goldLine)" stroke-width="20" stroke-linecap="round"/>
+    <use href="#innerArc" stroke="url(#goldLine)" stroke-width="8" stroke-linecap="round" opacity="0.72"/>
+  </g>
+
+  <g>
+    <circle cx="300" cy="300" r="22" fill="#FFF1B8" stroke="url(#goldLine)" stroke-width="6"/>
+    <circle cx="900" cy="300" r="22" fill="#FFF1B8" stroke="url(#goldLine)" stroke-width="6"/>
+  </g>
+
+  <g>
+    <circle cx="390" cy="242" r="18" fill="#F7E6A8" stroke="url(#goldLine)" stroke-width="5"/>
+    <circle cx="480" cy="194" r="16" fill="#F7E6A8" stroke="url(#goldLine)" stroke-width="5"/>
+    <circle cx="600" cy="176" r="18" fill="#F7E6A8" stroke="url(#goldLine)" stroke-width="5"/>
+    <circle cx="720" cy="194" r="16" fill="#F7E6A8" stroke="url(#goldLine)" stroke-width="5"/>
+    <circle cx="810" cy="242" r="18" fill="#F7E6A8" stroke="url(#goldLine)" stroke-width="5"/>
+  </g>
+
+  <g opacity="0.9">
+    <path d="M420 436C470 498 529 537 600 550C671 537 730 498 780 436" stroke="url(#goldLine)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M450 470C492 517 542 547 600 558C658 547 708 517 750 470" stroke="#FCE8A4" stroke-opacity="0.65" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <g filter="url(#strongGlow)">
+    <circle cx="600" cy="625" r="136" fill="#0B0E27" stroke="url(#goldLine)" stroke-width="12"/>
+    <circle cx="600" cy="625" r="112" fill="#101739" stroke="#F4D97E" stroke-opacity="0.65" stroke-width="3"/>
+    <path d="M600 510L628 568L692 578L646 623L657 688L600 658L543 688L554 623L508 578L572 568L600 510Z" fill="url(#gemGlow)" stroke="#D9F8FF" stroke-width="4" stroke-linejoin="round"/>
+    <circle cx="600" cy="625" r="84" stroke="#AEEBFF" stroke-opacity="0.7" stroke-width="2"/>
+    <circle cx="600" cy="625" r="58" stroke="#7E5CFF" stroke-opacity="0.8" stroke-width="2"/>
+    <path d="M600 540L649 625L600 710L551 625L600 540Z" stroke="#E5F7FF" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M515 625H685" stroke="#E5F7FF" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M600 540V710" stroke="#E5F7FF" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+
+  <g opacity="0.7" filter="url(#softGlow)">
+    <circle cx="600" cy="625" r="185" stroke="#2ED3FF" stroke-opacity="0.18" stroke-width="6"/>
+    <circle cx="600" cy="625" r="235" stroke="#7E4DFF" stroke-opacity="0.12" stroke-width="4"/>
+  </g>
+
+  <g>
+    <path d="M485 730L455 845" stroke="url(#goldLine)" stroke-width="8" stroke-linecap="round"/>
+    <path d="M600 760L600 900" stroke="url(#goldLine)" stroke-width="8" stroke-linecap="round"/>
+    <path d="M715 730L745 845" stroke="url(#goldLine)" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="455" cy="845" r="24" fill="#101739" stroke="url(#goldLine)" stroke-width="7"/>
+    <circle cx="600" cy="900" r="32" fill="#101739" stroke="url(#goldLine)" stroke-width="8"/>
+    <circle cx="745" cy="845" r="24" fill="#101739" stroke="url(#goldLine)" stroke-width="7"/>
+    <circle cx="455" cy="845" r="10" fill="#5AE6FF"/>
+    <circle cx="600" cy="900" r="14" fill="#7E5CFF"/>
+    <circle cx="745" cy="845" r="10" fill="#5AE6FF"/>
+  </g>
+
+  <g opacity="0.65">
+    <path d="M530 360C553 339 576 328 600 328C624 328 647 339 670 360" stroke="#F8E7A1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M502 390C536 359 568 345 600 345C632 345 664 359 698 390" stroke="#F8E7A1" stroke-opacity="0.6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
