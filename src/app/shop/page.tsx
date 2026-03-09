@@ -11,6 +11,7 @@ import {
   VOID_MASK,
 } from '@/lib/addons/catalog';
 import type { AddonTemplate } from '@/lib/addons/catalog';
+import { CUSTOM_ADDONS } from '@/lib/addons/customAddons';
 
 const PREMIUM_ADDONS: AddonTemplate[] = [
   HOLOGRAPHIC_VAULT,
@@ -22,6 +23,10 @@ const PREMIUM_ADDONS: AddonTemplate[] = [
 ];
 
 const EARNABLE_ADDONS: { template: AddonTemplate; achievement: string; route: string }[] = [];
+
+const CUSTOM_COLLECTION_ADDONS: AddonTemplate[] = Object.values(CUSTOM_ADDONS).sort((a, b) =>
+  a.id.localeCompare(b.id, undefined, { numeric: true })
+);
 
 const RARITY_STYLES: Record<string, { badge: string; border: string; glow: string }> = {
   rare:      { badge: 'bg-blue-700 text-blue-100',   border: 'border-blue-700/40',   glow: 'from-blue-950/40' },
@@ -131,6 +136,18 @@ export default function ShopPage() {
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {PREMIUM_ADDONS.map(addon => (
+            <AddonCard key={addon.id} addon={addon} />
+          ))}
+        </div>
+      </section>
+
+      {/* Custom Collection Addons */}
+      <section className="mb-12">
+        <h2 className="mb-1 text-xl font-semibold text-zinc-100">Custom Collection</h2>
+        <p className="mb-5 text-sm text-zinc-500">The new custom addons (IDs 1008-1023) are listed here and demo items are auto-minted in the Pet screen.</p>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {CUSTOM_COLLECTION_ADDONS.map(addon => (
             <AddonCard key={addon.id} addon={addon} />
           ))}
         </div>
