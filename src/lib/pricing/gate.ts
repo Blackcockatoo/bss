@@ -8,6 +8,16 @@ const FEATURE_PLAN_REQUIREMENTS: Record<string, PlanId> = {
   'custom-standards-mapping': 'pro',
   'priority-support': 'pro',
   'premium-addons': 'pro',
+  'premium-addons-consumer': 'consumer',
+  'dream-journal': 'consumer',
+  'genome-explorer': 'consumer',
+  'wellness-sync': 'consumer',
+  'unlimited-teachers': 'school',
+  'student-cap-500': 'school',
+  'custom-branding': 'school',
+  'admin-dashboard': 'school',
+  'bulk-dna': 'school',
+  'extended-analytics': 'school',
 };
 
 const RESOURCE_LIMIT_KEYS = {
@@ -24,10 +34,19 @@ function resolveRequiredPlan(featureId: string): PlanId {
   return FEATURE_PLAN_REQUIREMENTS[featureId] ?? 'free';
 }
 
+const PLAN_TIER: Record<PlanId, number> = { free: 0, consumer: 1, pro: 2, school: 3 };
+
 export function canAccess(featureId: string, subscription: UserSubscription): boolean {
   const requiredPlan = resolveRequiredPlan(featureId);
   if (requiredPlan === 'free') return true;
-  return subscription.planId === 'pro' && (subscription.status === 'active' || subscription.status === 'trialing');
+  const isActive = subscription.status === 'active' || subscription.status === 'trialing';
+  if (!isActive) return false;
+  // School plan grants access to all pro features; consumer grants consumer features
+  const userTier = PLAN_TIER[subscription.planId] ?? 0;
+  const requiredTier = PLAN_TIER[requiredPlan] ?? 0;
+  // School overrides everything; for consumer vs pro they are parallel tracks
+  if (subscription.planId === 'school') return true;
+  return userTier >= requiredTier;
 }
 
 export function getPlanRequired(featureId: string): PlanId {
