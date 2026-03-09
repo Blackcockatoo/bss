@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Starlight Mantle">
+  <defs>
+    <linearGradient id="bgGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#080915"/>
+      <stop offset="45%" stop-color="#050518"/>
+      <stop offset="100%" stop-color="#0b0013"/>
+    </linearGradient>
+    <radialGradient id="nebula" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="rgba(75,0,130,0.46)"/>
+      <stop offset="55%" stop-color="rgba(25,25,112,0.18)"/>
+      <stop offset="100%" stop-color="rgba(25,25,112,0)"/>
+    </radialGradient>
+    <linearGradient id="frame" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="rgba(246,216,107,0.85)"/>
+      <stop offset="50%" stop-color="rgba(25,25,112,0.82)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0.85)"/>
+    </linearGradient>
+    <linearGradient id="iconFill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#595998"/>
+      <stop offset="58%" stop-color="#4B0082"/>
+      <stop offset="100%" stop-color="#FFFFFF"/>
+    </linearGradient>
+    <filter id="glowLarge" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="28" flood-color="rgba(25,25,112,0.55)"/>
+    </filter>
+    <clipPath id="cardClip">
+      <rect x="36" y="36" width="952" height="952" rx="48"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bgGradient)"/>
+  <g clip-path="url(#cardClip)">
+    <rect x="36" y="36" width="952" height="952" rx="48" fill="url(#bgGradient)"/>
+    <ellipse cx="512" cy="360" rx="430" ry="310" fill="url(#nebula)"/>
+    <circle cx="498.2" cy="519.2" r="2.2" fill="white" opacity="0.27"/>
+<circle cx="373.2" cy="292.9" r="4.2" fill="white" opacity="0.88"/>
+<circle cx="149.1" cy="288.2" r="3.2" fill="white" opacity="0.81"/>
+<circle cx="608.1" cy="511.7" r="3.5" fill="white" opacity="0.38"/>
+<circle cx="682.9" cy="406.9" r="1.8" fill="white" opacity="0.89"/>
+<circle cx="613.7" cy="266.7" r="2.0" fill="white" opacity="0.84"/>
+<circle cx="229.0" cy="390.6" r="2.5" fill="white" opacity="0.60"/>
+<circle cx="250.3" cy="352.8" r="2.5" fill="white" opacity="0.25"/>
+<circle cx="719.5" cy="304.6" r="1.6" fill="white" opacity="0.59"/>
+<circle cx="173.9" cy="231.6" r="3.4" fill="white" opacity="0.47"/>
+<circle cx="534.0" cy="367.5" r="4.7" fill="white" opacity="0.27"/>
+<circle cx="234.9" cy="287.3" r="3.9" fill="white" opacity="0.31"/>
+<circle cx="493.3" cy="475.0" r="4.6" fill="white" opacity="0.70"/>
+<circle cx="686.9" cy="310.0" r="2.5" fill="white" opacity="0.64"/>
+<circle cx="304.7" cy="461.0" r="1.5" fill="white" opacity="0.64"/>
+<circle cx="619.1" cy="328.8" r="4.5" fill="white" opacity="0.81"/>
+<circle cx="579.9" cy="633.7" r="2.0" fill="white" opacity="0.82"/>
+<circle cx="604.6" cy="649.1" r="2.8" fill="white" opacity="0.59"/>
+<circle cx="813.9" cy="630.9" r="3.4" fill="white" opacity="0.52"/>
+<circle cx="691.2" cy="412.5" r="3.7" fill="white" opacity="0.58"/>
+<circle cx="741.0" cy="688.6" r="3.2" fill="white" opacity="0.24"/>
+<circle cx="817.0" cy="536.1" r="3.8" fill="white" opacity="0.38"/>
+<circle cx="767.4" cy="672.4" r="3.1" fill="white" opacity="0.27"/>
+<circle cx="187.6" cy="508.4" r="2.4" fill="white" opacity="0.35"/>
+    <g transform="translate(538.0 457.0) rotate(86.0)" opacity="0.52">
+<path d="M0 -13.1 L3.2 -3.2 L13.1 0 L3.2 3.2 L0 13.1 L-3.2 3.2 L-13.1 0 L-3.2 -3.2 Z" fill="#FFFFFF"/>
+</g>
+<g transform="translate(403.4 323.4) rotate(175.9)" opacity="0.36">
+<path d="M0 -18.9 L4.5 -4.5 L18.9 0 L4.5 4.5 L0 18.9 L-4.5 4.5 L-18.9 0 L-4.5 -4.5 Z" fill="#FFFFFF"/>
+</g>
+<g transform="translate(385.9 389.4) rotate(31.0)" opacity="0.45">
+<path d="M0 -14.7 L3.5 -3.5 L14.7 0 L3.5 3.5 L0 14.7 L-3.5 3.5 L-14.7 0 L-3.5 -3.5 Z" fill="#FFFFFF"/>
+</g>
+<g transform="translate(400.8 175.2) rotate(30.9)" opacity="0.52">
+<path d="M0 -12.4 L3.0 -3.0 L12.4 0 L3.0 3.0 L0 12.4 L-3.0 3.0 L-12.4 0 L-3.0 -3.0 Z" fill="#FFFFFF"/>
+</g>
+<g transform="translate(601.3 469.8) rotate(11.4)" opacity="0.29">
+<path d="M0 -19.2 L4.6 -4.6 L19.2 0 L4.6 4.6 L0 19.2 L-4.6 4.6 L-19.2 0 L-4.6 -4.6 Z" fill="#FFFFFF"/>
+</g>
+<g transform="translate(316.5 161.7) rotate(95.6)" opacity="0.46">
+<path d="M0 -8.3 L2.0 -2.0 L8.3 0 L2.0 2.0 L0 8.3 L-2.0 2.0 L-8.3 0 L-2.0 -2.0 Z" fill="#FFFFFF"/>
+</g>
+<g transform="translate(507.7 237.1) rotate(57.0)" opacity="0.35">
+<path d="M0 -13.5 L3.2 -3.2 L13.5 0 L3.2 3.2 L0 13.5 L-3.2 3.2 L-13.5 0 L-3.2 -3.2 Z" fill="#FFFFFF"/>
+</g>
+<g transform="translate(561.1 308.0) rotate(169.2)" opacity="0.38">
+<path d="M0 -13.5 L3.2 -3.2 L13.5 0 L3.2 3.2 L0 13.5 L-3.2 3.2 L-13.5 0 L-3.2 -3.2 Z" fill="#FFFFFF"/>
+</g>
+<g transform="translate(635.3 372.3) rotate(27.9)" opacity="0.51">
+<path d="M0 -16.8 L4.0 -4.0 L16.8 0 L4.0 4.0 L0 16.8 L-4.0 4.0 L-16.8 0 L-4.0 -4.0 Z" fill="#FFFFFF"/>
+</g>
+<g transform="translate(382.6 366.1) rotate(143.2)" opacity="0.29">
+<path d="M0 -20.1 L4.8 -4.8 L20.1 0 L4.8 4.8 L0 20.1 L-4.8 4.8 L-20.1 0 L-4.8 -4.8 Z" fill="#FFFFFF"/>
+</g>
+<g transform="translate(676.2 529.5) rotate(60.5)" opacity="0.28">
+<path d="M0 -17.3 L4.2 -4.2 L17.3 0 L4.2 4.2 L0 17.3 L-4.2 4.2 L-17.3 0 L-4.2 -4.2 Z" fill="#FFFFFF"/>
+</g>
+<g transform="translate(238.9 216.1) rotate(140.7)" opacity="0.40">
+<path d="M0 -19.9 L4.8 -4.8 L19.9 0 L4.8 4.8 L0 19.9 L-4.8 4.8 L-19.9 0 L-4.8 -4.8 Z" fill="#FFFFFF"/>
+</g>
+<g transform="translate(647.9 393.2) rotate(87.1)" opacity="0.25">
+<path d="M0 -9.5 L2.3 -2.3 L9.5 0 L2.3 2.3 L0 9.5 L-2.3 2.3 L-9.5 0 L-2.3 -2.3 Z" fill="#FFFFFF"/>
+</g>
+<g transform="translate(601.7 188.2) rotate(23.0)" opacity="0.38">
+<path d="M0 -15.7 L3.8 -3.8 L15.7 0 L3.8 3.8 L0 15.7 L-3.8 3.8 L-15.7 0 L-3.8 -3.8 Z" fill="#FFFFFF"/>
+</g>
+    <circle cx="512" cy="390" r="304" fill="none" stroke="rgba(25,25,112,0.16)" stroke-width="28"/>
+    <circle cx="512" cy="390" r="280" fill="none" stroke="rgba(75,0,130,0.26)" stroke-width="5"/>
+    
+        <circle cx="512" cy="390" r="290" fill="none" stroke="rgba(75,0,130,0.28)" stroke-width="5" stroke-dasharray="4 14"/>
+        <circle cx="512" cy="390" r="250" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
+        
+    <g filter="url(#softShadow)">
+      <circle cx="512" cy="392" r="226" fill="rgba(5,6,10,0.62)" stroke="rgba(246,216,107,0.22)" stroke-width="2"/>
+      <circle cx="512" cy="392" r="178" fill="rgba(25,25,112,0.1)" stroke="rgba(255,255,255,0.24)" stroke-width="2"/>
+      
+    <g transform="translate(232 112) scale(5.6)">
+      <path d="M 20 20 Q 50 0 80 20 L 85 80 Q 50 100 15 80 Z" fill="url(#iconFill)" stroke="#ffffff" stroke-width="1.6" stroke-linejoin="round" filter="url(#glowLarge)"/>
+      <path d="M 20 20 Q 50 0 80 20 L 85 80 Q 50 100 15 80 Z" fill="none" stroke="white" stroke-width="0.55" opacity="0.38"/>
+    </g>
+    
+    </g>
+
+    <rect x="64" y="64" width="896" height="896" rx="34" fill="none" stroke="url(#frame)" stroke-width="3"/>
+
+    <g transform="translate(92 760)">
+      <rect x="0" y="0" width="840" height="172" rx="28" fill="rgba(5,6,10,0.45)" stroke="rgba(25,25,112,0.35)" stroke-width="2"/>
+      <text x="34" y="42" fill="rgba(246,216,107,0.95)" font-size="22" font-family="Inter,Segoe UI,Arial,sans-serif" letter-spacing="3">1017  •  ACCESSORY</text>
+      <text x="34" y="80" fill="white" font-size="34" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif">Starlight Mantle</text>
+      <text x="34" y="134" fill="rgba(255,255,255,0.74)" font-size="20" font-family="Inter,Segoe UI,Arial,sans-serif">A cloak woven from captured</text><text x="34" y="158" fill="rgba(255,255,255,0.74)" font-size="20" font-family="Inter,Segoe UI,Arial,sans-serif">starlight that twinkles with</text><text x="34" y="182" fill="rgba(255,255,255,0.74)" font-size="20" font-family="Inter,Segoe UI,Arial,sans-serif">distant constellations and</text>
+      <text x="790" y="42" text-anchor="end" fill="rgba(255,255,255,0.92)" font-size="26" font-family="Inter,Segoe UI,Arial,sans-serif" letter-spacing="2">MYTHIC</text>
+    </g>
+
+    <g transform="translate(92 92)">
+      <rect x="0" y="0" width="160" height="44" rx="22" fill="rgba(5,6,10,0.44)" stroke="rgba(25,25,112,0.35)" stroke-width="2"/>
+      <text x="80" y="29" text-anchor="middle" fill="#FFFFFF" font-size="26" font-family="Inter,Segoe UI Symbol,Arial,sans-serif">◈  custom-addon-1017</text>
+    </g>
+  </g>
+</svg>

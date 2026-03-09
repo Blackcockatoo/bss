@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Resonance Amplifier">
+  <defs>
+    <linearGradient id="bgGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d0e14"/>
+      <stop offset="45%" stop-color="#380f00"/>
+      <stop offset="100%" stop-color="#262000"/>
+    </linearGradient>
+    <radialGradient id="nebula" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="rgba(255,215,0,0.46)"/>
+      <stop offset="55%" stop-color="rgba(255,69,0,0.18)"/>
+      <stop offset="100%" stop-color="rgba(255,69,0,0)"/>
+    </radialGradient>
+    <linearGradient id="frame" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="rgba(243,155,61,0.85)"/>
+      <stop offset="50%" stop-color="rgba(255,69,0,0.82)"/>
+      <stop offset="100%" stop-color="rgba(173,255,47,0.85)"/>
+    </linearGradient>
+    <linearGradient id="iconFill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff7947"/>
+      <stop offset="58%" stop-color="#FFD700"/>
+      <stop offset="100%" stop-color="#ADFF2F"/>
+    </linearGradient>
+    <filter id="glowLarge" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="28" flood-color="rgba(255,69,0,0.55)"/>
+    </filter>
+    <clipPath id="cardClip">
+      <rect x="36" y="36" width="952" height="952" rx="48"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bgGradient)"/>
+  <g clip-path="url(#cardClip)">
+    <rect x="36" y="36" width="952" height="952" rx="48" fill="url(#bgGradient)"/>
+    <ellipse cx="512" cy="360" rx="430" ry="310" fill="url(#nebula)"/>
+    <circle cx="433.5" cy="608.9" r="4.0" fill="white" opacity="0.67"/>
+<circle cx="723.9" cy="309.2" r="4.1" fill="white" opacity="0.33"/>
+<circle cx="531.7" cy="591.5" r="2.3" fill="white" opacity="0.73"/>
+<circle cx="225.8" cy="569.6" r="4.3" fill="white" opacity="0.74"/>
+<circle cx="639.3" cy="195.4" r="2.8" fill="white" opacity="0.61"/>
+<circle cx="807.3" cy="735.5" r="3.6" fill="white" opacity="0.47"/>
+<circle cx="868.9" cy="170.9" r="1.7" fill="white" opacity="0.63"/>
+<circle cx="383.5" cy="422.1" r="1.6" fill="white" opacity="0.45"/>
+<circle cx="820.0" cy="692.0" r="4.7" fill="white" opacity="0.29"/>
+<circle cx="713.2" cy="485.5" r="3.9" fill="white" opacity="0.20"/>
+<circle cx="799.6" cy="236.6" r="2.9" fill="white" opacity="0.22"/>
+<circle cx="363.9" cy="259.3" r="3.2" fill="white" opacity="0.23"/>
+<circle cx="298.0" cy="514.0" r="2.5" fill="white" opacity="0.83"/>
+<circle cx="155.4" cy="715.4" r="4.1" fill="white" opacity="0.52"/>
+<circle cx="649.4" cy="732.0" r="4.3" fill="white" opacity="0.61"/>
+<circle cx="501.7" cy="149.4" r="4.1" fill="white" opacity="0.59"/>
+    <g transform="translate(340.1 231.1) rotate(109.9)" opacity="0.39">
+<path d="M0 -9.7 L2.3 -2.3 L9.7 0 L2.3 2.3 L0 9.7 L-2.3 2.3 L-9.7 0 L-2.3 -2.3 Z" fill="#ADFF2F"/>
+</g>
+<g transform="translate(520.2 327.4) rotate(161.8)" opacity="0.34">
+<path d="M0 -16.4 L3.9 -3.9 L16.4 0 L3.9 3.9 L0 16.4 L-3.9 3.9 L-16.4 0 L-3.9 -3.9 Z" fill="#ADFF2F"/>
+</g>
+<g transform="translate(494.0 284.3) rotate(135.7)" opacity="0.41">
+<path d="M0 -11.0 L2.6 -2.6 L11.0 0 L2.6 2.6 L0 11.0 L-2.6 2.6 L-11.0 0 L-2.6 -2.6 Z" fill="#ADFF2F"/>
+</g>
+<g transform="translate(757.1 550.0) rotate(41.0)" opacity="0.55">
+<path d="M0 -22.0 L5.3 -5.3 L22.0 0 L5.3 5.3 L0 22.0 L-5.3 5.3 L-22.0 0 L-5.3 -5.3 Z" fill="#ADFF2F"/>
+</g>
+<g transform="translate(474.1 445.1) rotate(87.3)" opacity="0.54">
+<path d="M0 -21.5 L5.2 -5.2 L21.5 0 L5.2 5.2 L0 21.5 L-5.2 5.2 L-21.5 0 L-5.2 -5.2 Z" fill="#ADFF2F"/>
+</g>
+<g transform="translate(421.7 282.6) rotate(102.9)" opacity="0.38">
+<path d="M0 -16.5 L4.0 -4.0 L16.5 0 L4.0 4.0 L0 16.5 L-4.0 4.0 L-16.5 0 L-4.0 -4.0 Z" fill="#ADFF2F"/>
+</g>
+<g transform="translate(451.0 441.7) rotate(148.5)" opacity="0.54">
+<path d="M0 -10.0 L2.4 -2.4 L10.0 0 L2.4 2.4 L0 10.0 L-2.4 2.4 L-10.0 0 L-2.4 -2.4 Z" fill="#ADFF2F"/>
+</g>
+<g transform="translate(377.1 478.4) rotate(94.0)" opacity="0.25">
+<path d="M0 -8.1 L1.9 -1.9 L8.1 0 L1.9 1.9 L0 8.1 L-1.9 1.9 L-8.1 0 L-1.9 -1.9 Z" fill="#ADFF2F"/>
+</g>
+<g transform="translate(535.1 321.4) rotate(85.6)" opacity="0.18">
+<path d="M0 -9.9 L2.4 -2.4 L9.9 0 L2.4 2.4 L0 9.9 L-2.4 2.4 L-9.9 0 L-2.4 -2.4 Z" fill="#ADFF2F"/>
+</g>
+<g transform="translate(334.0 572.6) rotate(110.3)" opacity="0.37">
+<path d="M0 -20.2 L4.8 -4.8 L20.2 0 L4.8 4.8 L0 20.2 L-4.8 4.8 L-20.2 0 L-4.8 -4.8 Z" fill="#ADFF2F"/>
+</g>
+    <circle cx="512" cy="390" r="304" fill="none" stroke="rgba(255,69,0,0.16)" stroke-width="28"/>
+    <circle cx="512" cy="390" r="280" fill="none" stroke="rgba(255,215,0,0.26)" stroke-width="5"/>
+    
+        <path d="M180 390 C260 300, 340 480, 420 390 S580 300, 660 390 S820 480, 844 390" fill="none" stroke="rgba(173,255,47,0.25)" stroke-width="10" stroke-linecap="round"/>
+        <path d="M180 430 C260 340, 340 520, 420 430 S580 340, 660 430 S820 520, 844 430" fill="none" stroke="rgba(255,69,0,0.16)" stroke-width="6" stroke-linecap="round"/>
+        
+    <g filter="url(#softShadow)">
+      <circle cx="512" cy="392" r="226" fill="rgba(5,6,10,0.62)" stroke="rgba(243,155,61,0.22)" stroke-width="2"/>
+      <circle cx="512" cy="392" r="178" fill="rgba(255,69,0,0.1)" stroke="rgba(173,255,47,0.24)" stroke-width="2"/>
+      
+    <g transform="translate(232 112) scale(5.6)">
+      <path d="M 50 10 A 40 40 0 1 1 50 90 A 40 40 0 1 1 50 10 Z
+        M 50 20 A 30 30 0 1 1 50 80 A 30 30 0 1 1 50 20 Z" fill="url(#iconFill)" stroke="#bdff58" stroke-width="1.6" stroke-linejoin="round" filter="url(#glowLarge)"/>
+      <path d="M 50 10 A 40 40 0 1 1 50 90 A 40 40 0 1 1 50 10 Z
+        M 50 20 A 30 30 0 1 1 50 80 A 30 30 0 1 1 50 20 Z" fill="none" stroke="white" stroke-width="0.55" opacity="0.38"/>
+    </g>
+    
+    </g>
+
+    <rect x="64" y="64" width="896" height="896" rx="34" fill="none" stroke="url(#frame)" stroke-width="3"/>
+
+    <g transform="translate(92 760)">
+      <rect x="0" y="0" width="840" height="172" rx="28" fill="rgba(5,6,10,0.45)" stroke="rgba(255,69,0,0.35)" stroke-width="2"/>
+      <text x="34" y="42" fill="rgba(243,155,61,0.95)" font-size="22" font-family="Inter,Segoe UI,Arial,sans-serif" letter-spacing="3">1018  •  EFFECT</text>
+      <text x="34" y="80" fill="white" font-size="34" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif">Resonance</text><text x="34" y="120" fill="white" font-size="34" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif">Amplifier</text>
+      <text x="34" y="134" fill="rgba(255,255,255,0.74)" font-size="20" font-family="Inter,Segoe UI,Arial,sans-serif">A device that amplifies emotional</text><text x="34" y="158" fill="rgba(255,255,255,0.74)" font-size="20" font-family="Inter,Segoe UI,Arial,sans-serif">resonance, causing moods to</text><text x="34" y="182" fill="rgba(255,255,255,0.74)" font-size="20" font-family="Inter,Segoe UI,Arial,sans-serif">manifest as visible, swirling</text>
+      <text x="790" y="42" text-anchor="end" fill="rgba(173,255,47,0.92)" font-size="26" font-family="Inter,Segoe UI,Arial,sans-serif" letter-spacing="2">LEGENDARY</text>
+    </g>
+
+    <g transform="translate(92 92)">
+      <rect x="0" y="0" width="160" height="44" rx="22" fill="rgba(5,6,10,0.44)" stroke="rgba(255,69,0,0.35)" stroke-width="2"/>
+      <text x="80" y="29" text-anchor="middle" fill="#ADFF2F" font-size="26" font-family="Inter,Segoe UI Symbol,Arial,sans-serif">≈  custom-addon-1018</text>
+    </g>
+  </g>
+</svg>

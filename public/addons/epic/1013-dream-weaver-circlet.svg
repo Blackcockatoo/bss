@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Dream Weaver Circlet">
+  <defs>
+    <linearGradient id="bgGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0812"/>
+      <stop offset="45%" stop-color="#201830"/>
+      <stop offset="100%" stop-color="#1b0c1f"/>
+    </linearGradient>
+    <radialGradient id="nebula" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="rgba(186,85,211,0.46)"/>
+      <stop offset="55%" stop-color="rgba(147,112,219,0.18)"/>
+      <stop offset="100%" stop-color="rgba(147,112,219,0)"/>
+    </radialGradient>
+    <linearGradient id="frame" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="rgba(197,108,240,0.85)"/>
+      <stop offset="50%" stop-color="rgba(147,112,219,0.82)"/>
+      <stop offset="100%" stop-color="rgba(255,192,203,0.85)"/>
+    </linearGradient>
+    <linearGradient id="iconFill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#b198e5"/>
+      <stop offset="58%" stop-color="#BA55D3"/>
+      <stop offset="100%" stop-color="#FFC0CB"/>
+    </linearGradient>
+    <filter id="glowLarge" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="28" flood-color="rgba(147,112,219,0.55)"/>
+    </filter>
+    <clipPath id="cardClip">
+      <rect x="36" y="36" width="952" height="952" rx="48"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bgGradient)"/>
+  <g clip-path="url(#cardClip)">
+    <rect x="36" y="36" width="952" height="952" rx="48" fill="url(#bgGradient)"/>
+    <ellipse cx="512" cy="360" rx="430" ry="310" fill="url(#nebula)"/>
+    <circle cx="812.1" cy="605.3" r="3.9" fill="white" opacity="0.71"/>
+<circle cx="758.7" cy="560.4" r="3.5" fill="white" opacity="0.22"/>
+<circle cx="782.5" cy="136.7" r="2.4" fill="white" opacity="0.38"/>
+<circle cx="613.1" cy="149.3" r="3.1" fill="white" opacity="0.43"/>
+<circle cx="297.6" cy="295.7" r="4.1" fill="white" opacity="0.31"/>
+<circle cx="848.4" cy="314.5" r="4.8" fill="white" opacity="0.72"/>
+<circle cx="291.3" cy="542.9" r="2.9" fill="white" opacity="0.49"/>
+<circle cx="828.6" cy="417.8" r="4.0" fill="white" opacity="0.25"/>
+<circle cx="651.4" cy="550.8" r="2.6" fill="white" opacity="0.63"/>
+<circle cx="790.2" cy="286.6" r="3.8" fill="white" opacity="0.55"/>
+<circle cx="508.4" cy="394.6" r="3.3" fill="white" opacity="0.43"/>
+<circle cx="347.2" cy="429.6" r="3.2" fill="white" opacity="0.25"/>
+    <g transform="translate(483.7 324.1) rotate(168.7)" opacity="0.45">
+<path d="M0 -17.6 L4.2 -4.2 L17.6 0 L4.2 4.2 L0 17.6 L-4.2 4.2 L-17.6 0 L-4.2 -4.2 Z" fill="#FFC0CB"/>
+</g>
+<g transform="translate(268.2 136.3) rotate(122.6)" opacity="0.29">
+<path d="M0 -12.8 L3.1 -3.1 L12.8 0 L3.1 3.1 L0 12.8 L-3.1 3.1 L-12.8 0 L-3.1 -3.1 Z" fill="#FFC0CB"/>
+</g>
+<g transform="translate(716.6 178.2) rotate(94.6)" opacity="0.41">
+<path d="M0 -14.5 L3.5 -3.5 L14.5 0 L3.5 3.5 L0 14.5 L-3.5 3.5 L-14.5 0 L-3.5 -3.5 Z" fill="#FFC0CB"/>
+</g>
+<g transform="translate(400.2 222.0) rotate(30.8)" opacity="0.19">
+<path d="M0 -16.5 L4.0 -4.0 L16.5 0 L4.0 4.0 L0 16.5 L-4.0 4.0 L-16.5 0 L-4.0 -4.0 Z" fill="#FFC0CB"/>
+</g>
+<g transform="translate(669.4 168.0) rotate(128.5)" opacity="0.31">
+<path d="M0 -12.0 L2.9 -2.9 L12.0 0 L2.9 2.9 L0 12.0 L-2.9 2.9 L-12.0 0 L-2.9 -2.9 Z" fill="#FFC0CB"/>
+</g>
+<g transform="translate(266.3 198.8) rotate(54.6)" opacity="0.48">
+<path d="M0 -17.9 L4.3 -4.3 L17.9 0 L4.3 4.3 L0 17.9 L-4.3 4.3 L-17.9 0 L-4.3 -4.3 Z" fill="#FFC0CB"/>
+</g>
+<g transform="translate(480.0 470.0) rotate(97.3)" opacity="0.31">
+<path d="M0 -21.4 L5.1 -5.1 L21.4 0 L5.1 5.1 L0 21.4 L-5.1 5.1 L-21.4 0 L-5.1 -5.1 Z" fill="#FFC0CB"/>
+</g>
+<g transform="translate(283.0 440.9) rotate(159.4)" opacity="0.34">
+<path d="M0 -14.8 L3.5 -3.5 L14.8 0 L3.5 3.5 L0 14.8 L-3.5 3.5 L-14.8 0 L-3.5 -3.5 Z" fill="#FFC0CB"/>
+</g>
+    <circle cx="512" cy="390" r="304" fill="none" stroke="rgba(147,112,219,0.16)" stroke-width="28"/>
+    <circle cx="512" cy="390" r="280" fill="none" stroke="rgba(186,85,211,0.26)" stroke-width="5"/>
+    
+        <path d="M280 290 Q512 170 744 290" fill="none" stroke="rgba(186,85,211,0.32)" stroke-width="8"/>
+        <circle cx="362" cy="255" r="10" fill="#FFC0CB" opacity="0.55"/>
+        <circle cx="512" cy="220" r="12" fill="#FFC0CB" opacity="0.72"/>
+        <circle cx="662" cy="255" r="10" fill="#FFC0CB" opacity="0.55"/>
+        
+    <g filter="url(#softShadow)">
+      <circle cx="512" cy="392" r="226" fill="rgba(5,6,10,0.62)" stroke="rgba(197,108,240,0.22)" stroke-width="2"/>
+      <circle cx="512" cy="392" r="178" fill="rgba(147,112,219,0.1)" stroke="rgba(255,192,203,0.24)" stroke-width="2"/>
+      
+    <g transform="translate(232 112) scale(5.6)">
+      <path d="M 20 50 A 30 30 0 1 1 80 50 A 30 30 0 1 1 20 50 Z
+        M 30 50 A 20 20 0 1 1 70 50 A 20 20 0 1 1 30 50 Z" fill="url(#iconFill)" stroke="#ffccd5" stroke-width="1.6" stroke-linejoin="round" filter="url(#glowLarge)"/>
+      <path d="M 20 50 A 30 30 0 1 1 80 50 A 30 30 0 1 1 20 50 Z
+        M 30 50 A 20 20 0 1 1 70 50 A 20 20 0 1 1 30 50 Z" fill="none" stroke="white" stroke-width="0.55" opacity="0.38"/>
+    </g>
+    
+    </g>
+
+    <rect x="64" y="64" width="896" height="896" rx="34" fill="none" stroke="url(#frame)" stroke-width="3"/>
+
+    <g transform="translate(92 760)">
+      <rect x="0" y="0" width="840" height="172" rx="28" fill="rgba(5,6,10,0.45)" stroke="rgba(147,112,219,0.35)" stroke-width="2"/>
+      <text x="34" y="42" fill="rgba(197,108,240,0.95)" font-size="22" font-family="Inter,Segoe UI,Arial,sans-serif" letter-spacing="3">1013  •  HEADWEAR</text>
+      <text x="34" y="80" fill="white" font-size="34" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif">Dream Weaver</text><text x="34" y="120" fill="white" font-size="34" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif">Circlet</text>
+      <text x="34" y="134" fill="rgba(255,255,255,0.74)" font-size="20" font-family="Inter,Segoe UI,Arial,sans-serif">A delicate circlet that taps into</text><text x="34" y="158" fill="rgba(255,255,255,0.74)" font-size="20" font-family="Inter,Segoe UI,Arial,sans-serif">the collective unconscious,</text><text x="34" y="182" fill="rgba(255,255,255,0.74)" font-size="20" font-family="Inter,Segoe UI,Arial,sans-serif">occasionally manifesting</text>
+      <text x="790" y="42" text-anchor="end" fill="rgba(255,192,203,0.92)" font-size="26" font-family="Inter,Segoe UI,Arial,sans-serif" letter-spacing="2">EPIC</text>
+    </g>
+
+    <g transform="translate(92 92)">
+      <rect x="0" y="0" width="160" height="44" rx="22" fill="rgba(5,6,10,0.44)" stroke="rgba(147,112,219,0.35)" stroke-width="2"/>
+      <text x="80" y="29" text-anchor="middle" fill="#FFC0CB" font-size="26" font-family="Inter,Segoe UI Symbol,Arial,sans-serif">⌁  custom-addon-1013</text>
+    </g>
+  </g>
+</svg>

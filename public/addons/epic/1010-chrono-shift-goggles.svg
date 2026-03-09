@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Chrono-Shift Goggles">
+  <defs>
+    <linearGradient id="bgGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#080915"/>
+      <stop offset="45%" stop-color="#061f38"/>
+      <stop offset="100%" stop-color="#140621"/>
+    </linearGradient>
+    <radialGradient id="nebula" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="rgba(138,43,226,0.46)"/>
+      <stop offset="55%" stop-color="rgba(30,144,255,0.18)"/>
+      <stop offset="100%" stop-color="rgba(30,144,255,0)"/>
+    </radialGradient>
+    <linearGradient id="frame" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="rgba(246,216,107,0.85)"/>
+      <stop offset="50%" stop-color="rgba(30,144,255,0.82)"/>
+      <stop offset="100%" stop-color="rgba(255,215,0,0.85)"/>
+    </linearGradient>
+    <linearGradient id="iconFill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5dafff"/>
+      <stop offset="58%" stop-color="#8A2BE2"/>
+      <stop offset="100%" stop-color="#FFD700"/>
+    </linearGradient>
+    <filter id="glowLarge" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="28" flood-color="rgba(30,144,255,0.55)"/>
+    </filter>
+    <clipPath id="cardClip">
+      <rect x="36" y="36" width="952" height="952" rx="48"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bgGradient)"/>
+  <g clip-path="url(#cardClip)">
+    <rect x="36" y="36" width="952" height="952" rx="48" fill="url(#bgGradient)"/>
+    <ellipse cx="512" cy="360" rx="430" ry="310" fill="url(#nebula)"/>
+    <circle cx="638.5" cy="665.3" r="2.4" fill="white" opacity="0.26"/>
+<circle cx="463.3" cy="208.5" r="3.0" fill="white" opacity="0.71"/>
+<circle cx="293.2" cy="650.4" r="3.3" fill="white" opacity="0.55"/>
+<circle cx="879.5" cy="479.9" r="2.0" fill="white" opacity="0.53"/>
+<circle cx="712.2" cy="343.1" r="1.8" fill="white" opacity="0.57"/>
+<circle cx="550.6" cy="288.4" r="4.0" fill="white" opacity="0.30"/>
+<circle cx="516.0" cy="700.3" r="5.0" fill="white" opacity="0.75"/>
+<circle cx="881.2" cy="584.5" r="2.2" fill="white" opacity="0.50"/>
+<circle cx="660.2" cy="111.1" r="4.5" fill="white" opacity="0.85"/>
+<circle cx="162.8" cy="457.3" r="3.6" fill="white" opacity="0.60"/>
+<circle cx="181.0" cy="673.5" r="2.3" fill="white" opacity="0.24"/>
+<circle cx="645.3" cy="475.5" r="2.3" fill="white" opacity="0.57"/>
+<circle cx="293.0" cy="192.5" r="4.8" fill="white" opacity="0.26"/>
+<circle cx="497.6" cy="737.5" r="1.6" fill="white" opacity="0.33"/>
+<circle cx="604.3" cy="582.0" r="4.5" fill="white" opacity="0.81"/>
+<circle cx="160.5" cy="130.5" r="3.7" fill="white" opacity="0.28"/>
+<circle cx="783.1" cy="744.0" r="4.4" fill="white" opacity="0.83"/>
+<circle cx="179.2" cy="720.9" r="3.2" fill="white" opacity="0.51"/>
+<circle cx="815.9" cy="123.8" r="4.1" fill="white" opacity="0.28"/>
+<circle cx="142.0" cy="544.5" r="1.8" fill="white" opacity="0.87"/>
+<circle cx="542.9" cy="520.1" r="1.6" fill="white" opacity="0.52"/>
+<circle cx="158.6" cy="258.9" r="2.2" fill="white" opacity="0.64"/>
+<circle cx="728.7" cy="717.8" r="2.6" fill="white" opacity="0.58"/>
+<circle cx="339.3" cy="424.9" r="1.5" fill="white" opacity="0.51"/>
+    <g transform="translate(331.9 566.8) rotate(53.8)" opacity="0.32">
+<path d="M0 -19.0 L4.6 -4.6 L19.0 0 L4.6 4.6 L0 19.0 L-4.6 4.6 L-19.0 0 L-4.6 -4.6 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(329.3 543.5) rotate(156.2)" opacity="0.28">
+<path d="M0 -10.8 L2.6 -2.6 L10.8 0 L2.6 2.6 L0 10.8 L-2.6 2.6 L-10.8 0 L-2.6 -2.6 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(478.3 204.8) rotate(127.6)" opacity="0.34">
+<path d="M0 -10.4 L2.5 -2.5 L10.4 0 L2.5 2.5 L0 10.4 L-2.5 2.5 L-10.4 0 L-2.5 -2.5 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(299.5 347.6) rotate(35.4)" opacity="0.48">
+<path d="M0 -11.6 L2.8 -2.8 L11.6 0 L2.8 2.8 L0 11.6 L-2.8 2.8 L-11.6 0 L-2.8 -2.8 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(782.5 526.8) rotate(114.2)" opacity="0.48">
+<path d="M0 -16.3 L3.9 -3.9 L16.3 0 L3.9 3.9 L0 16.3 L-3.9 3.9 L-16.3 0 L-3.9 -3.9 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(807.0 396.9) rotate(107.4)" opacity="0.22">
+<path d="M0 -20.1 L4.8 -4.8 L20.1 0 L4.8 4.8 L0 20.1 L-4.8 4.8 L-20.1 0 L-4.8 -4.8 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(760.3 457.4) rotate(168.6)" opacity="0.53">
+<path d="M0 -20.4 L4.9 -4.9 L20.4 0 L4.9 4.9 L0 20.4 L-4.9 4.9 L-20.4 0 L-4.9 -4.9 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(465.6 613.0) rotate(44.3)" opacity="0.36">
+<path d="M0 -8.2 L2.0 -2.0 L8.2 0 L2.0 2.0 L0 8.2 L-2.0 2.0 L-8.2 0 L-2.0 -2.0 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(778.5 158.3) rotate(135.9)" opacity="0.44">
+<path d="M0 -16.8 L4.0 -4.0 L16.8 0 L4.0 4.0 L0 16.8 L-4.0 4.0 L-16.8 0 L-4.0 -4.0 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(774.0 619.1) rotate(168.2)" opacity="0.35">
+<path d="M0 -9.9 L2.4 -2.4 L9.9 0 L2.4 2.4 L0 9.9 L-2.4 2.4 L-9.9 0 L-2.4 -2.4 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(299.4 228.0) rotate(163.5)" opacity="0.46">
+<path d="M0 -17.9 L4.3 -4.3 L17.9 0 L4.3 4.3 L0 17.9 L-4.3 4.3 L-17.9 0 L-4.3 -4.3 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(360.1 186.4) rotate(136.0)" opacity="0.26">
+<path d="M0 -9.2 L2.2 -2.2 L9.2 0 L2.2 2.2 L0 9.2 L-2.2 2.2 L-9.2 0 L-2.2 -2.2 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(551.1 480.7) rotate(65.8)" opacity="0.30">
+<path d="M0 -21.6 L5.2 -5.2 L21.6 0 L5.2 5.2 L0 21.6 L-5.2 5.2 L-21.6 0 L-5.2 -5.2 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(352.2 629.2) rotate(3.2)" opacity="0.43">
+<path d="M0 -20.6 L4.9 -4.9 L20.6 0 L4.9 4.9 L0 20.6 L-4.9 4.9 L-20.6 0 L-4.9 -4.9 Z" fill="#FFD700"/>
+</g>
+    <circle cx="512" cy="390" r="304" fill="none" stroke="rgba(30,144,255,0.16)" stroke-width="28"/>
+    <circle cx="512" cy="390" r="280" fill="none" stroke="rgba(138,43,226,0.26)" stroke-width="5"/>
+    
+        <path d="M280 290 Q512 170 744 290" fill="none" stroke="rgba(138,43,226,0.32)" stroke-width="8"/>
+        <circle cx="362" cy="255" r="10" fill="#FFD700" opacity="0.55"/>
+        <circle cx="512" cy="220" r="12" fill="#FFD700" opacity="0.72"/>
+        <circle cx="662" cy="255" r="10" fill="#FFD700" opacity="0.55"/>
+        
+    <g filter="url(#softShadow)">
+      <circle cx="512" cy="392" r="226" fill="rgba(5,6,10,0.62)" stroke="rgba(246,216,107,0.22)" stroke-width="2"/>
+      <circle cx="512" cy="392" r="178" fill="rgba(30,144,255,0.1)" stroke="rgba(255,215,0,0.24)" stroke-width="2"/>
+      
+    <g transform="translate(232 112) scale(5.6)">
+      <path d="M 30 40 A 20 20 0 1 1 70 40 A 20 20 0 1 1 30 40 Z
+        M 35 40 A 5 5 0 1 1 45 40 A 5 5 0 1 1 35 40 Z
+        M 55 40 A 5 5 0 1 1 65 40 A 5 5 0 1 1 55 40 Z" fill="url(#iconFill)" stroke="#ffdf33" stroke-width="1.6" stroke-linejoin="round" filter="url(#glowLarge)"/>
+      <path d="M 30 40 A 20 20 0 1 1 70 40 A 20 20 0 1 1 30 40 Z
+        M 35 40 A 5 5 0 1 1 45 40 A 5 5 0 1 1 35 40 Z
+        M 55 40 A 5 5 0 1 1 65 40 A 5 5 0 1 1 55 40 Z" fill="none" stroke="white" stroke-width="0.55" opacity="0.38"/>
+    </g>
+    
+    </g>
+
+    <rect x="64" y="64" width="896" height="896" rx="34" fill="none" stroke="url(#frame)" stroke-width="3"/>
+
+    <g transform="translate(92 760)">
+      <rect x="0" y="0" width="840" height="172" rx="28" fill="rgba(5,6,10,0.45)" stroke="rgba(30,144,255,0.35)" stroke-width="2"/>
+      <text x="34" y="42" fill="rgba(246,216,107,0.95)" font-size="22" font-family="Inter,Segoe UI,Arial,sans-serif" letter-spacing="3">1010  •  HEADWEAR</text>
+      <text x="34" y="80" fill="white" font-size="34" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif">Chrono-Shift</text><text x="34" y="120" fill="white" font-size="34" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif">Goggles</text>
+      <text x="34" y="134" fill="rgba(255,255,255,0.74)" font-size="20" font-family="Inter,Segoe UI,Arial,sans-serif">Goggles that allow glimpses into</text><text x="34" y="158" fill="rgba(255,255,255,0.74)" font-size="20" font-family="Inter,Segoe UI,Arial,sans-serif">alternate timelines, causing the</text><text x="34" y="182" fill="rgba(255,255,255,0.74)" font-size="20" font-family="Inter,Segoe UI,Arial,sans-serif">wearer to occasionally appear</text>
+      <text x="790" y="42" text-anchor="end" fill="rgba(255,215,0,0.92)" font-size="26" font-family="Inter,Segoe UI,Arial,sans-serif" letter-spacing="2">MYTHIC</text>
+    </g>
+
+    <g transform="translate(92 92)">
+      <rect x="0" y="0" width="160" height="44" rx="22" fill="rgba(5,6,10,0.44)" stroke="rgba(30,144,255,0.35)" stroke-width="2"/>
+      <text x="80" y="29" text-anchor="middle" fill="#FFD700" font-size="26" font-family="Inter,Segoe UI Symbol,Arial,sans-serif">⌁  custom-addon-1010</text>
+    </g>
+  </g>
+</svg>

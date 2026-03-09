@@ -2,23 +2,32 @@
  * Addon Inventory Panel - UI for managing addons
  */
 
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useAddonStore } from '@/lib/addons';
-import type { Addon } from '@/lib/addons';
+import { useAddonStore } from "@/lib/addons";
+import type { Addon } from "@/lib/addons";
+import type React from "react";
+import { useEffect, useState } from "react";
 
 export const AddonInventoryPanel: React.FC = () => {
   const { addons, equipped, equipAddon, unequipAddon, getAddonsByCategory } =
     useAddonStore();
 
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedAddon, setSelectedAddon] = useState<Addon | null>(null);
 
-  const categories = ['all', 'headwear', 'weapon', 'accessory', 'aura', 'companion', 'effect'];
+  const categories = [
+    "all",
+    "headwear",
+    "weapon",
+    "accessory",
+    "aura",
+    "companion",
+    "effect",
+  ];
 
   const displayedAddons =
-    selectedCategory === 'all'
+    selectedCategory === "all"
       ? Object.values(addons)
       : getAddonsByCategory(selectedCategory);
 
@@ -44,7 +53,8 @@ export const AddonInventoryPanel: React.FC = () => {
       <div className="mb-4">
         <h2 className="text-xl font-bold text-white mb-2">Addon Inventory</h2>
         <p className="text-sm text-slate-400">
-          {Object.keys(addons).length} addon{Object.keys(addons).length !== 1 ? 's' : ''} owned
+          {Object.keys(addons).length} addon
+          {Object.keys(addons).length !== 1 ? "s" : ""} owned
         </p>
       </div>
 
@@ -56,8 +66,8 @@ export const AddonInventoryPanel: React.FC = () => {
             onClick={() => setSelectedCategory(category)}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
               selectedCategory === category
-                ? 'bg-blue-600 text-white'
-                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                ? "bg-blue-600 text-white"
+                : "bg-slate-800 text-slate-300 hover:bg-slate-700"
             }`}
           >
             {category.charAt(0).toUpperCase() + category.slice(1)}
@@ -116,18 +126,18 @@ const AddonCard: React.FC<AddonCardProps> = ({
   onUnequip,
 }) => {
   const rarityColors = {
-    common: 'from-slate-600 to-slate-700',
-    uncommon: 'from-green-600 to-green-700',
-    rare: 'from-blue-600 to-blue-700',
-    epic: 'from-purple-600 to-purple-700',
-    legendary: 'from-orange-600 to-orange-700',
-    mythic: 'from-pink-600 to-pink-700',
+    common: "from-slate-600 to-slate-700",
+    uncommon: "from-green-600 to-green-700",
+    rare: "from-blue-600 to-blue-700",
+    epic: "from-purple-600 to-purple-700",
+    legendary: "from-orange-600 to-orange-700",
+    mythic: "from-pink-600 to-pink-700",
   };
 
   return (
     <div
       className={`relative rounded-lg overflow-hidden cursor-pointer transition-all hover:scale-105 ${
-        equipped ? 'ring-2 ring-yellow-400' : ''
+        equipped ? "ring-2 ring-yellow-400" : ""
       }`}
       onClick={onClick}
     >
@@ -136,14 +146,26 @@ const AddonCard: React.FC<AddonCardProps> = ({
       >
         {/* Icon Preview */}
         <div className="w-12 h-12 mb-2">
-          <svg viewBox="0 0 100 100" className="w-full h-full">
-            <path
-              d={addon.visual.svgPath || 'M 50 50 m -25 0 a 25 25 0 1 0 50 0 a 25 25 0 1 0 -50 0'}
-              fill={addon.visual.colors.primary}
-              stroke={addon.visual.colors.accent}
-              strokeWidth="2"
+          {addon.visual.previewAsset ? (
+            <img
+              src={addon.visual.previewAsset}
+              alt={addon.name}
+              className="w-full h-full rounded-md object-cover"
+              loading="lazy"
             />
-          </svg>
+          ) : (
+            <svg viewBox="0 0 100 100" className="w-full h-full">
+              <path
+                d={
+                  addon.visual.svgPath ||
+                  "M 50 50 m -25 0 a 25 25 0 1 0 50 0 a 25 25 0 1 0 -50 0"
+                }
+                fill={addon.visual.colors.primary}
+                stroke={addon.visual.colors.accent}
+                strokeWidth="2"
+              />
+            </svg>
+          )}
         </div>
 
         {/* Name */}
@@ -209,14 +231,25 @@ const AddonDetailModal: React.FC<AddonDetailModalProps> = ({
 
         {/* Preview */}
         <div className="mb-4 aspect-square bg-slate-800 rounded-lg flex items-center justify-center">
-          <svg viewBox="0 0 100 100" className="w-3/4 h-3/4">
-            <path
-              d={addon.visual.svgPath || 'M 50 50 m -25 0 a 25 25 0 1 0 50 0 a 25 25 0 1 0 -50 0'}
-              fill={addon.visual.colors.primary}
-              stroke={addon.visual.colors.accent}
-              strokeWidth="2"
+          {addon.visual.previewAsset ? (
+            <img
+              src={addon.visual.previewAsset}
+              alt={addon.name}
+              className="h-full w-full rounded-lg object-cover"
             />
-          </svg>
+          ) : (
+            <svg viewBox="0 0 100 100" className="w-3/4 h-3/4">
+              <path
+                d={
+                  addon.visual.svgPath ||
+                  "M 50 50 m -25 0 a 25 25 0 1 0 50 0 a 25 25 0 1 0 -50 0"
+                }
+                fill={addon.visual.colors.primary}
+                stroke={addon.visual.colors.accent}
+                strokeWidth="2"
+              />
+            </svg>
+          )}
         </div>
 
         {/* Description */}
@@ -225,12 +258,18 @@ const AddonDetailModal: React.FC<AddonDetailModalProps> = ({
         {/* Modifiers */}
         {addon.modifiers && (
           <div className="mb-4">
-            <h4 className="text-sm font-semibold text-white mb-2">Stat Bonuses:</h4>
+            <h4 className="text-sm font-semibold text-white mb-2">
+              Stat Bonuses:
+            </h4>
             <div className="grid grid-cols-2 gap-2">
               {Object.entries(addon.modifiers).map(([stat, value]) => (
                 <div key={stat} className="bg-slate-800 rounded px-3 py-1.5">
-                  <span className="text-slate-400 text-xs capitalize">{stat}:</span>
-                  <span className="text-green-400 text-sm font-bold ml-1">+{value}</span>
+                  <span className="text-slate-400 text-xs capitalize">
+                    {stat}:
+                  </span>
+                  <span className="text-green-400 text-sm font-bold ml-1">
+                    +{value}
+                  </span>
                 </div>
               ))}
             </div>

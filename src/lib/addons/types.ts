@@ -5,16 +5,35 @@
  * ownership keys, making them non-copyable and verifiable.
  */
 
-export type AddonCategory = 'headwear' | 'weapon' | 'accessory' | 'aura' | 'companion' | 'effect';
+export type AddonCategory =
+  | "headwear"
+  | "weapon"
+  | "accessory"
+  | "aura"
+  | "companion"
+  | "effect";
 
-export type AddonRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic';
+export type AddonRarity =
+  | "common"
+  | "uncommon"
+  | "rare"
+  | "epic"
+  | "legendary"
+  | "mythic";
 
 /**
  * Position and attachment data for rendering the addon
  */
 export interface AddonAttachment {
   /** Where the addon attaches to the pet */
-  anchorPoint: 'head' | 'body' | 'left-hand' | 'right-hand' | 'back' | 'floating' | 'aura';
+  anchorPoint:
+    | "head"
+    | "body"
+    | "left-hand"
+    | "right-hand"
+    | "back"
+    | "floating"
+    | "aura";
   /** Offset from anchor point */
   offset: { x: number; y: number; z?: number };
   /** Scale relative to pet size */
@@ -31,6 +50,8 @@ export interface AddonAttachment {
 export interface AddonVisual {
   /** SVG path data or component reference */
   svgPath?: string;
+  /** Optional full preview asset for inventory/shop cards */
+  previewAsset?: string;
   /** Color palette for the addon */
   colors: {
     primary: string;
@@ -40,7 +61,7 @@ export interface AddonVisual {
   };
   /** Animation effects */
   animation?: {
-    type: 'float' | 'rotate' | 'pulse' | 'shimmer' | 'sparkle' | 'glow';
+    type: "float" | "rotate" | "pulse" | "shimmer" | "sparkle" | "glow";
     duration: number;
     easing?: string;
   };
@@ -49,7 +70,7 @@ export interface AddonVisual {
     count: number;
     color: string;
     size: number;
-    behavior: 'orbit' | 'trail' | 'burst' | 'ambient';
+    behavior: "orbit" | "trail" | "burst" | "ambient";
   };
 }
 

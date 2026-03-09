@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Temporal Loop Charm">
+  <defs>
+    <linearGradient id="bgGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#080915"/>
+      <stop offset="45%" stop-color="#0f1c27"/>
+      <stop offset="100%" stop-color="#1a1d21"/>
+    </linearGradient>
+    <radialGradient id="nebula" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="rgba(176,196,222,0.46)"/>
+      <stop offset="55%" stop-color="rgba(70,130,180,0.18)"/>
+      <stop offset="100%" stop-color="rgba(70,130,180,0)"/>
+    </radialGradient>
+    <linearGradient id="frame" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="rgba(246,216,107,0.85)"/>
+      <stop offset="50%" stop-color="rgba(70,130,180,0.82)"/>
+      <stop offset="100%" stop-color="rgba(255,69,0,0.85)"/>
+    </linearGradient>
+    <linearGradient id="iconFill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#79a5c9"/>
+      <stop offset="58%" stop-color="#B0C4DE"/>
+      <stop offset="100%" stop-color="#FF4500"/>
+    </linearGradient>
+    <filter id="glowLarge" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="28" flood-color="rgba(70,130,180,0.55)"/>
+    </filter>
+    <clipPath id="cardClip">
+      <rect x="36" y="36" width="952" height="952" rx="48"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bgGradient)"/>
+  <g clip-path="url(#cardClip)">
+    <rect x="36" y="36" width="952" height="952" rx="48" fill="url(#bgGradient)"/>
+    <ellipse cx="512" cy="360" rx="430" ry="310" fill="url(#nebula)"/>
+    <circle cx="523.5" cy="257.9" r="1.6" fill="white" opacity="0.50"/>
+<circle cx="862.4" cy="510.5" r="3.1" fill="white" opacity="0.56"/>
+<circle cx="327.5" cy="562.4" r="3.6" fill="white" opacity="0.27"/>
+<circle cx="779.1" cy="596.4" r="4.0" fill="white" opacity="0.37"/>
+<circle cx="797.8" cy="343.8" r="2.7" fill="white" opacity="0.74"/>
+<circle cx="323.7" cy="707.5" r="1.7" fill="white" opacity="0.39"/>
+<circle cx="612.9" cy="335.0" r="3.0" fill="white" opacity="0.22"/>
+<circle cx="863.0" cy="628.8" r="4.5" fill="white" opacity="0.32"/>
+<circle cx="575.2" cy="402.0" r="1.9" fill="white" opacity="0.34"/>
+<circle cx="526.7" cy="142.2" r="1.7" fill="white" opacity="0.71"/>
+<circle cx="694.9" cy="671.2" r="4.6" fill="white" opacity="0.29"/>
+<circle cx="300.4" cy="713.6" r="3.6" fill="white" opacity="0.51"/>
+<circle cx="643.4" cy="640.6" r="5.0" fill="white" opacity="0.64"/>
+<circle cx="634.8" cy="114.4" r="4.0" fill="white" opacity="0.40"/>
+<circle cx="196.5" cy="490.4" r="2.8" fill="white" opacity="0.65"/>
+<circle cx="211.5" cy="391.7" r="3.4" fill="white" opacity="0.21"/>
+<circle cx="394.8" cy="466.8" r="2.1" fill="white" opacity="0.57"/>
+<circle cx="624.2" cy="140.7" r="2.1" fill="white" opacity="0.59"/>
+<circle cx="452.7" cy="581.1" r="2.3" fill="white" opacity="0.21"/>
+<circle cx="573.7" cy="127.2" r="4.2" fill="white" opacity="0.29"/>
+<circle cx="500.1" cy="377.2" r="2.0" fill="white" opacity="0.29"/>
+<circle cx="235.4" cy="261.0" r="2.8" fill="white" opacity="0.33"/>
+<circle cx="285.9" cy="573.6" r="3.7" fill="white" opacity="0.47"/>
+<circle cx="663.8" cy="233.5" r="2.3" fill="white" opacity="0.32"/>
+    <g transform="translate(427.7 557.6) rotate(48.9)" opacity="0.49">
+<path d="M0 -8.5 L2.0 -2.0 L8.5 0 L2.0 2.0 L0 8.5 L-2.0 2.0 L-8.5 0 L-2.0 -2.0 Z" fill="#FF4500"/>
+</g>
+<g transform="translate(633.6 305.5) rotate(125.2)" opacity="0.25">
+<path d="M0 -16.5 L4.0 -4.0 L16.5 0 L4.0 4.0 L0 16.5 L-4.0 4.0 L-16.5 0 L-4.0 -4.0 Z" fill="#FF4500"/>
+</g>
+<g transform="translate(703.6 235.9) rotate(91.8)" opacity="0.29">
+<path d="M0 -15.5 L3.7 -3.7 L15.5 0 L3.7 3.7 L0 15.5 L-3.7 3.7 L-15.5 0 L-3.7 -3.7 Z" fill="#FF4500"/>
+</g>
+<g transform="translate(488.3 582.6) rotate(63.0)" opacity="0.54">
+<path d="M0 -9.9 L2.4 -2.4 L9.9 0 L2.4 2.4 L0 9.9 L-2.4 2.4 L-9.9 0 L-2.4 -2.4 Z" fill="#FF4500"/>
+</g>
+<g transform="translate(637.1 396.9) rotate(56.0)" opacity="0.25">
+<path d="M0 -12.5 L3.0 -3.0 L12.5 0 L3.0 3.0 L0 12.5 L-3.0 3.0 L-12.5 0 L-3.0 -3.0 Z" fill="#FF4500"/>
+</g>
+<g transform="translate(366.5 379.0) rotate(131.2)" opacity="0.22">
+<path d="M0 -8.1 L2.0 -2.0 L8.1 0 L2.0 2.0 L0 8.1 L-2.0 2.0 L-8.1 0 L-2.0 -2.0 Z" fill="#FF4500"/>
+</g>
+<g transform="translate(530.9 479.1) rotate(100.6)" opacity="0.21">
+<path d="M0 -9.7 L2.3 -2.3 L9.7 0 L2.3 2.3 L0 9.7 L-2.3 2.3 L-9.7 0 L-2.3 -2.3 Z" fill="#FF4500"/>
+</g>
+<g transform="translate(786.7 195.5) rotate(87.3)" opacity="0.20">
+<path d="M0 -13.2 L3.2 -3.2 L13.2 0 L3.2 3.2 L0 13.2 L-3.2 3.2 L-13.2 0 L-3.2 -3.2 Z" fill="#FF4500"/>
+</g>
+<g transform="translate(336.6 590.3) rotate(92.2)" opacity="0.31">
+<path d="M0 -8.7 L2.1 -2.1 L8.7 0 L2.1 2.1 L0 8.7 L-2.1 2.1 L-8.7 0 L-2.1 -2.1 Z" fill="#FF4500"/>
+</g>
+<g transform="translate(628.5 394.1) rotate(30.0)" opacity="0.21">
+<path d="M0 -14.7 L3.5 -3.5 L14.7 0 L3.5 3.5 L0 14.7 L-3.5 3.5 L-14.7 0 L-3.5 -3.5 Z" fill="#FF4500"/>
+</g>
+<g transform="translate(503.0 217.9) rotate(107.2)" opacity="0.22">
+<path d="M0 -12.2 L2.9 -2.9 L12.2 0 L2.9 2.9 L0 12.2 L-2.9 2.9 L-12.2 0 L-2.9 -2.9 Z" fill="#FF4500"/>
+</g>
+<g transform="translate(278.4 328.7) rotate(19.9)" opacity="0.44">
+<path d="M0 -13.4 L3.2 -3.2 L13.4 0 L3.2 3.2 L0 13.4 L-3.2 3.2 L-13.4 0 L-3.2 -3.2 Z" fill="#FF4500"/>
+</g>
+<g transform="translate(575.1 311.6) rotate(105.9)" opacity="0.34">
+<path d="M0 -9.7 L2.3 -2.3 L9.7 0 L2.3 2.3 L0 9.7 L-2.3 2.3 L-9.7 0 L-2.3 -2.3 Z" fill="#FF4500"/>
+</g>
+<g transform="translate(609.0 341.0) rotate(0.1)" opacity="0.29">
+<path d="M0 -19.2 L4.6 -4.6 L19.2 0 L4.6 4.6 L0 19.2 L-4.6 4.6 L-19.2 0 L-4.6 -4.6 Z" fill="#FF4500"/>
+</g>
+    <circle cx="512" cy="390" r="304" fill="none" stroke="rgba(70,130,180,0.16)" stroke-width="28"/>
+    <circle cx="512" cy="390" r="280" fill="none" stroke="rgba(176,196,222,0.26)" stroke-width="5"/>
+    
+        <circle cx="512" cy="390" r="290" fill="none" stroke="rgba(176,196,222,0.28)" stroke-width="5" stroke-dasharray="4 14"/>
+        <circle cx="512" cy="390" r="250" fill="none" stroke="rgba(255,69,0,0.35)" stroke-width="2"/>
+        
+    <g filter="url(#softShadow)">
+      <circle cx="512" cy="392" r="226" fill="rgba(5,6,10,0.62)" stroke="rgba(246,216,107,0.22)" stroke-width="2"/>
+      <circle cx="512" cy="392" r="178" fill="rgba(70,130,180,0.1)" stroke="rgba(255,69,0,0.24)" stroke-width="2"/>
+      
+    <g transform="translate(232 112) scale(5.6)">
+      <path d="M 50 20 A 30 30 0 1 0 50 80 A 30 30 0 0 0 50 20 Z
+        M 50 30 L 70 50 L 50 70 L 30 50 Z" fill="url(#iconFill)" stroke="#ff6a33" stroke-width="1.6" stroke-linejoin="round" filter="url(#glowLarge)"/>
+      <path d="M 50 20 A 30 30 0 1 0 50 80 A 30 30 0 0 0 50 20 Z
+        M 50 30 L 70 50 L 50 70 L 30 50 Z" fill="none" stroke="white" stroke-width="0.55" opacity="0.38"/>
+    </g>
+    
+    </g>
+
+    <rect x="64" y="64" width="896" height="896" rx="34" fill="none" stroke="url(#frame)" stroke-width="3"/>
+
+    <g transform="translate(92 760)">
+      <rect x="0" y="0" width="840" height="172" rx="28" fill="rgba(5,6,10,0.45)" stroke="rgba(70,130,180,0.35)" stroke-width="2"/>
+      <text x="34" y="42" fill="rgba(246,216,107,0.95)" font-size="22" font-family="Inter,Segoe UI,Arial,sans-serif" letter-spacing="3">1014  •  ACCESSORY</text>
+      <text x="34" y="80" fill="white" font-size="34" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif">Temporal Loop</text><text x="34" y="120" fill="white" font-size="34" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif">Charm</text>
+      <text x="34" y="134" fill="rgba(255,255,255,0.74)" font-size="20" font-family="Inter,Segoe UI,Arial,sans-serif">A small charm that causes minor,</text><text x="34" y="158" fill="rgba(255,255,255,0.74)" font-size="20" font-family="Inter,Segoe UI,Arial,sans-serif">localized time loops, making small</text><text x="34" y="182" fill="rgba(255,255,255,0.74)" font-size="20" font-family="Inter,Segoe UI,Arial,sans-serif">actions repeat for a fraction of a</text>
+      <text x="790" y="42" text-anchor="end" fill="rgba(255,69,0,0.92)" font-size="26" font-family="Inter,Segoe UI,Arial,sans-serif" letter-spacing="2">MYTHIC</text>
+    </g>
+
+    <g transform="translate(92 92)">
+      <rect x="0" y="0" width="160" height="44" rx="22" fill="rgba(5,6,10,0.44)" stroke="rgba(70,130,180,0.35)" stroke-width="2"/>
+      <text x="80" y="29" text-anchor="middle" fill="#FF4500" font-size="26" font-family="Inter,Segoe UI Symbol,Arial,sans-serif">◈  custom-addon-1014</text>
+    </g>
+  </g>
+</svg>

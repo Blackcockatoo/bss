@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Chronal Compass">
+  <defs>
+    <linearGradient id="bgGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#080915"/>
+      <stop offset="45%" stop-color="#252525"/>
+      <stop offset="100%" stop-color="#0f0f0f"/>
+    </linearGradient>
+    <radialGradient id="nebula" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="rgba(105,105,105,0.46)"/>
+      <stop offset="55%" stop-color="rgba(169,169,169,0.18)"/>
+      <stop offset="100%" stop-color="rgba(169,169,169,0)"/>
+    </radialGradient>
+    <linearGradient id="frame" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="rgba(246,216,107,0.85)"/>
+      <stop offset="50%" stop-color="rgba(169,169,169,0.82)"/>
+      <stop offset="100%" stop-color="rgba(255,215,0,0.85)"/>
+    </linearGradient>
+    <linearGradient id="iconFill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#c1c1c1"/>
+      <stop offset="58%" stop-color="#696969"/>
+      <stop offset="100%" stop-color="#FFD700"/>
+    </linearGradient>
+    <filter id="glowLarge" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="28" flood-color="rgba(169,169,169,0.55)"/>
+    </filter>
+    <clipPath id="cardClip">
+      <rect x="36" y="36" width="952" height="952" rx="48"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bgGradient)"/>
+  <g clip-path="url(#cardClip)">
+    <rect x="36" y="36" width="952" height="952" rx="48" fill="url(#bgGradient)"/>
+    <ellipse cx="512" cy="360" rx="430" ry="310" fill="url(#nebula)"/>
+    <circle cx="535.0" cy="217.7" r="2.4" fill="white" opacity="0.38"/>
+<circle cx="444.4" cy="383.7" r="2.9" fill="white" opacity="0.28"/>
+<circle cx="742.6" cy="270.0" r="3.0" fill="white" opacity="0.70"/>
+<circle cx="813.2" cy="113.7" r="3.8" fill="white" opacity="0.36"/>
+<circle cx="584.0" cy="328.8" r="1.8" fill="white" opacity="0.45"/>
+<circle cx="429.8" cy="680.0" r="2.9" fill="white" opacity="0.21"/>
+<circle cx="256.8" cy="389.4" r="4.9" fill="white" opacity="0.89"/>
+<circle cx="841.5" cy="171.8" r="3.3" fill="white" opacity="0.39"/>
+<circle cx="755.7" cy="648.1" r="4.4" fill="white" opacity="0.87"/>
+<circle cx="662.9" cy="725.9" r="1.6" fill="white" opacity="0.50"/>
+<circle cx="209.9" cy="362.2" r="4.0" fill="white" opacity="0.43"/>
+<circle cx="200.2" cy="144.5" r="2.9" fill="white" opacity="0.34"/>
+<circle cx="633.5" cy="372.6" r="1.6" fill="white" opacity="0.84"/>
+<circle cx="231.1" cy="590.7" r="3.6" fill="white" opacity="0.62"/>
+<circle cx="226.9" cy="655.8" r="3.4" fill="white" opacity="0.29"/>
+<circle cx="541.6" cy="704.5" r="4.8" fill="white" opacity="0.22"/>
+<circle cx="293.5" cy="497.3" r="3.3" fill="white" opacity="0.35"/>
+<circle cx="219.6" cy="137.5" r="1.8" fill="white" opacity="0.77"/>
+<circle cx="540.0" cy="166.8" r="2.9" fill="white" opacity="0.72"/>
+<circle cx="322.4" cy="706.0" r="4.1" fill="white" opacity="0.47"/>
+<circle cx="769.3" cy="567.8" r="2.1" fill="white" opacity="0.26"/>
+<circle cx="153.8" cy="132.0" r="3.7" fill="white" opacity="0.45"/>
+<circle cx="302.5" cy="340.0" r="2.1" fill="white" opacity="0.79"/>
+<circle cx="335.9" cy="567.3" r="2.3" fill="white" opacity="0.78"/>
+    <g transform="translate(317.9 395.9) rotate(176.0)" opacity="0.53">
+<path d="M0 -12.3 L2.9 -2.9 L12.3 0 L2.9 2.9 L0 12.3 L-2.9 2.9 L-12.3 0 L-2.9 -2.9 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(468.7 545.2) rotate(114.7)" opacity="0.22">
+<path d="M0 -18.6 L4.5 -4.5 L18.6 0 L4.5 4.5 L0 18.6 L-4.5 4.5 L-18.6 0 L-4.5 -4.5 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(579.2 239.5) rotate(177.9)" opacity="0.48">
+<path d="M0 -9.1 L2.2 -2.2 L9.1 0 L2.2 2.2 L0 9.1 L-2.2 2.2 L-9.1 0 L-2.2 -2.2 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(498.7 323.0) rotate(106.0)" opacity="0.27">
+<path d="M0 -17.1 L4.1 -4.1 L17.1 0 L4.1 4.1 L0 17.1 L-4.1 4.1 L-17.1 0 L-4.1 -4.1 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(534.8 134.8) rotate(163.6)" opacity="0.55">
+<path d="M0 -15.4 L3.7 -3.7 L15.4 0 L3.7 3.7 L0 15.4 L-3.7 3.7 L-15.4 0 L-3.7 -3.7 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(282.6 610.7) rotate(147.9)" opacity="0.47">
+<path d="M0 -20.1 L4.8 -4.8 L20.1 0 L4.8 4.8 L0 20.1 L-4.8 4.8 L-20.1 0 L-4.8 -4.8 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(776.8 236.1) rotate(91.3)" opacity="0.29">
+<path d="M0 -20.2 L4.8 -4.8 L20.2 0 L4.8 4.8 L0 20.2 L-4.8 4.8 L-20.2 0 L-4.8 -4.8 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(650.3 370.7) rotate(174.8)" opacity="0.45">
+<path d="M0 -14.3 L3.4 -3.4 L14.3 0 L3.4 3.4 L0 14.3 L-3.4 3.4 L-14.3 0 L-3.4 -3.4 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(630.1 125.6) rotate(97.3)" opacity="0.44">
+<path d="M0 -9.8 L2.3 -2.3 L9.8 0 L2.3 2.3 L0 9.8 L-2.3 2.3 L-9.8 0 L-2.3 -2.3 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(656.8 623.6) rotate(45.8)" opacity="0.42">
+<path d="M0 -16.1 L3.9 -3.9 L16.1 0 L3.9 3.9 L0 16.1 L-3.9 3.9 L-16.1 0 L-3.9 -3.9 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(721.5 286.6) rotate(69.8)" opacity="0.28">
+<path d="M0 -15.0 L3.6 -3.6 L15.0 0 L3.6 3.6 L0 15.0 L-3.6 3.6 L-15.0 0 L-3.6 -3.6 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(568.3 252.4) rotate(87.0)" opacity="0.21">
+<path d="M0 -10.6 L2.6 -2.6 L10.6 0 L2.6 2.6 L0 10.6 L-2.6 2.6 L-10.6 0 L-2.6 -2.6 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(783.5 275.3) rotate(99.6)" opacity="0.21">
+<path d="M0 -12.7 L3.1 -3.1 L12.7 0 L3.1 3.1 L0 12.7 L-3.1 3.1 L-12.7 0 L-3.1 -3.1 Z" fill="#FFD700"/>
+</g>
+<g transform="translate(627.3 435.2) rotate(41.5)" opacity="0.44">
+<path d="M0 -13.6 L3.3 -3.3 L13.6 0 L3.3 3.3 L0 13.6 L-3.3 3.3 L-13.6 0 L-3.3 -3.3 Z" fill="#FFD700"/>
+</g>
+    <circle cx="512" cy="390" r="304" fill="none" stroke="rgba(169,169,169,0.16)" stroke-width="28"/>
+    <circle cx="512" cy="390" r="280" fill="none" stroke="rgba(105,105,105,0.26)" stroke-width="5"/>
+    
+        <circle cx="512" cy="390" r="290" fill="none" stroke="rgba(105,105,105,0.28)" stroke-width="5" stroke-dasharray="4 14"/>
+        <circle cx="512" cy="390" r="250" fill="none" stroke="rgba(255,215,0,0.35)" stroke-width="2"/>
+        
+    <g filter="url(#softShadow)">
+      <circle cx="512" cy="392" r="226" fill="rgba(5,6,10,0.62)" stroke="rgba(246,216,107,0.22)" stroke-width="2"/>
+      <circle cx="512" cy="392" r="178" fill="rgba(169,169,169,0.1)" stroke="rgba(255,215,0,0.24)" stroke-width="2"/>
+      
+    <g transform="translate(232 112) scale(5.6)">
+      <path d="M 50 50 A 30 30 0 1 1 50 50 Z
+        M 50 20 L 55 30 L 45 30 Z
+        M 50 80 L 55 70 L 45 70 Z
+        M 20 50 L 30 55 L 30 45 Z
+        M 80 50 L 70 55 L 70 45 Z" fill="url(#iconFill)" stroke="#ffdf33" stroke-width="1.6" stroke-linejoin="round" filter="url(#glowLarge)"/>
+      <path d="M 50 50 A 30 30 0 1 1 50 50 Z
+        M 50 20 L 55 30 L 45 30 Z
+        M 50 80 L 55 70 L 45 70 Z
+        M 20 50 L 30 55 L 30 45 Z
+        M 80 50 L 70 55 L 70 45 Z" fill="none" stroke="white" stroke-width="0.55" opacity="0.38"/>
+    </g>
+    
+    </g>
+
+    <rect x="64" y="64" width="896" height="896" rx="34" fill="none" stroke="url(#frame)" stroke-width="3"/>
+
+    <g transform="translate(92 760)">
+      <rect x="0" y="0" width="840" height="172" rx="28" fill="rgba(5,6,10,0.45)" stroke="rgba(169,169,169,0.35)" stroke-width="2"/>
+      <text x="34" y="42" fill="rgba(246,216,107,0.95)" font-size="22" font-family="Inter,Segoe UI,Arial,sans-serif" letter-spacing="3">1021  •  ACCESSORY</text>
+      <text x="34" y="80" fill="white" font-size="34" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif">Chronal Compass</text>
+      <text x="34" y="134" fill="rgba(255,255,255,0.74)" font-size="20" font-family="Inter,Segoe UI,Arial,sans-serif">A compass that points to temporal</text><text x="34" y="158" fill="rgba(255,255,255,0.74)" font-size="20" font-family="Inter,Segoe UI,Arial,sans-serif">anomalies rather than magnetic</text><text x="34" y="182" fill="rgba(255,255,255,0.74)" font-size="20" font-family="Inter,Segoe UI,Arial,sans-serif">north, with a needle that spins</text>
+      <text x="790" y="42" text-anchor="end" fill="rgba(255,215,0,0.92)" font-size="26" font-family="Inter,Segoe UI,Arial,sans-serif" letter-spacing="2">MYTHIC</text>
+    </g>
+
+    <g transform="translate(92 92)">
+      <rect x="0" y="0" width="160" height="44" rx="22" fill="rgba(5,6,10,0.44)" stroke="rgba(169,169,169,0.35)" stroke-width="2"/>
+      <text x="80" y="29" text-anchor="middle" fill="#FFD700" font-size="26" font-family="Inter,Segoe UI Symbol,Arial,sans-serif">◈  custom-addon-1021</text>
+    </g>
+  </g>
+</svg>
