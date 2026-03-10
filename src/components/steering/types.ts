@@ -17,8 +17,8 @@ export const NAVIGATION_TARGETS: NavigationTarget[] = [
   {
     position: 3,
     angle: 90,
-    label: "Space Jewbles",
-    route: "/space-jewbles",
+    label: "Monkey Invaders",
+    route: "/monkey-invaders",
     icon: "Rocket",
   },
   {

@@ -1,0 +1,3254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Monkey Invaders - Blue Snake Studios</title>
+    <meta name="description" content="A B$S arcade experiment: banana-powered space nonsense with touch controls, difficulty modes, and boss levels.">
+    <style>
+        :root {
+            --bg-deep: #050814;
+            --bg-mid: #0a0f1d;
+            --gold: #ffd24a;
+            --orange: #ff8f1f;
+            --teal: #43dfc8;
+            --red: #ff5f68;
+            --cyan: #52d9ff;
+            --violet: #a26dff;
+            --panel: rgba(6, 10, 18, 0.82);
+            --line: rgba(255, 255, 255, 0.12);
+            --line-strong: rgba(255, 210, 74, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overscroll-behavior: none;
+        }
+
+        body {
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at top, rgba(67, 223, 200, 0.08), transparent 34%),
+                radial-gradient(circle at 20% 80%, rgba(255, 143, 31, 0.12), transparent 30%),
+                linear-gradient(180deg, var(--bg-mid), var(--bg-deep));
+            color: #fff;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #floatingNav {
+            position: fixed;
+            top: calc(10px + env(safe-area-inset-top));
+            left: 12px;
+            right: 12px;
+            z-index: 250;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .nav-btn,
+        .brand-chip {
+            pointer-events: auto;
+            border: 1px solid var(--line);
+            background: rgba(4, 7, 14, 0.78);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.28);
+        }
+
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            height: 40px;
+            padding: 0 14px;
+            border-radius: 999px;
+            color: #dbe6f4;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .nav-btn:hover,
+        .nav-btn:focus-visible {
+            border-color: rgba(255, 210, 74, 0.4);
+            color: #fff;
+            outline: none;
+        }
+
+        .brand-chip {
+            flex: 1;
+            min-width: 0;
+            height: 40px;
+            padding: 0 14px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #cbd6e6;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .brand-chip strong {
+            color: var(--gold);
+        }
+
+        .brand-chip span {
+            color: #7fb8ff;
+            letter-spacing: 0.14em;
+        }
+
+        #phoneHint {
+            position: fixed;
+            top: calc(58px + env(safe-area-inset-top));
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 240;
+            display: none;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(255, 143, 31, 0.16);
+            border: 1px solid rgba(255, 143, 31, 0.34);
+            color: #ffd8ad;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        #gameWrapper {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #gameContainer {
+            position: absolute;
+            inset: 0;
+            width: 800px;
+            height: 600px;
+            border-radius: 22px;
+            overflow: hidden;
+            transform-origin: top left;
+            will-change: transform;
+            background: #070b16;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow:
+                0 0 80px rgba(255, 210, 74, 0.2),
+                0 0 120px rgba(255, 143, 31, 0.1),
+                inset 0 0 100px rgba(0, 0, 0, 0.38);
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 800px;
+            height: 600px;
+            touch-action: none;
+        }
+
+        #ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 18px;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.76) 0%, transparent 100%);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .ui-item {
+            font-size: 17px;
+            font-weight: 800;
+            text-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .score { color: var(--gold); }
+        .level { color: #7effb8; }
+        .lives { color: #ff8a8f; }
+
+        #brandWatermark {
+            position: absolute;
+            top: 54px;
+            right: 18px;
+            z-index: 11;
+            color: rgba(255, 255, 255, 0.24);
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            pointer-events: none;
+        }
+
+        #bossHud {
+            position: absolute;
+            top: 56px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(520px, calc(100% - 34px));
+            display: none;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 16px;
+            background: rgba(0, 0, 0, 0.56);
+            border: 1px solid rgba(255, 95, 104, 0.25);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 12;
+            pointer-events: none;
+        }
+
+        #bossHud.active {
+            display: grid;
+        }
+
+        .boss-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #ffe0d2;
+        }
+
+        .boss-title-row small {
+            color: rgba(255, 255, 255, 0.54);
+            font-size: 10px;
+        }
+
+        .boss-bar {
+            width: 100%;
+            height: 10px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .boss-bar > span {
+            display: block;
+            height: 100%;
+            width: 100%;
+            border-radius: inherit;
+            transition: width 0.18s ease;
+        }
+
+        #bossHpFill {
+            background: linear-gradient(90deg, #ff7d5e, #ff4358);
+        }
+
+        #bossHumiliationFill {
+            background: linear-gradient(90deg, #4de0ff, #9d84ff);
+        }
+
+        #comboHud {
+            position: absolute;
+            left: 16px;
+            bottom: 56px;
+            z-index: 12;
+            display: none;
+            min-width: 188px;
+            padding: 10px 12px;
+            border-radius: 16px;
+            background: rgba(0, 0, 0, 0.52);
+            border: 1px solid rgba(255, 210, 74, 0.18);
+            pointer-events: none;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        #comboHud.active {
+            display: grid;
+            gap: 6px;
+        }
+
+        .combo-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .combo-top strong {
+            color: var(--gold);
+        }
+
+        .combo-bar {
+            height: 8px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .combo-bar span {
+            display: block;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), var(--orange));
+            transition: width 0.14s ease;
+        }
+
+        #powerupDisplay {
+            position: absolute;
+            bottom: 78px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            max-width: 420px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .powerup-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.62);
+            border: 2px solid;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 800;
+            opacity: 0.38;
+            transition: all 0.25s ease;
+        }
+
+        .powerup-icon.active {
+            opacity: 1;
+            box-shadow: 0 0 18px currentColor;
+            animation: pulse 0.55s ease infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.08); }
+        }
+
+        #bnnTicker {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 26px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.82);
+            border-top: 1px solid rgba(67, 223, 200, 0.28);
+            color: #7dffd9;
+            z-index: 14;
+            pointer-events: none;
+            white-space: nowrap;
+            text-shadow: 0 0 6px rgba(67, 223, 200, 0.35);
+        }
+
+        #bnnTickerContent {
+            display: inline-block;
+            padding: 0 12px;
+            line-height: 26px;
+            font-size: 13px;
+            font-weight: 800;
+            animation: tickerScroll 15s linear infinite;
+        }
+
+        @keyframes tickerScroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        #startScreen,
+        #gameOverScreen,
+        #levelScreen,
+        #pauseOverlay,
+        #bossRewardScreen {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 100;
+            text-align: center;
+            padding: 30px;
+        }
+
+        #gameOverScreen,
+        #levelScreen,
+        #pauseOverlay,
+        #bossRewardScreen {
+            display: none;
+        }
+
+        #pauseOverlay {
+            background: rgba(0, 0, 0, 0.74);
+        }
+
+        .brand-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            margin-bottom: 18px;
+            border-radius: 999px;
+            background: rgba(255, 210, 74, 0.1);
+            border: 1px solid var(--line-strong);
+            color: #ffe79d;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .emoji-title {
+            font-size: 78px;
+            margin-bottom: 18px;
+            animation: bounce 1.2s ease infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-14px); }
+        }
+
+        h1 {
+            margin-bottom: 10px;
+            font-size: 48px;
+            color: var(--gold);
+            letter-spacing: 0.04em;
+            text-shadow:
+                0 0 20px rgba(255, 143, 31, 0.75),
+                0 0 42px rgba(255, 92, 0, 0.4);
+        }
+
+        h2 {
+            margin-bottom: 18px;
+            font-size: 42px;
+            color: #79ffd0;
+            text-shadow: 0 0 22px rgba(67, 223, 200, 0.48);
+        }
+
+        .subtitle {
+            max-width: 600px;
+            margin-bottom: 24px;
+            color: #aeb7c8;
+            font-size: 18px;
+            line-height: 1.65;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 34px;
+            border: none;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #ff7215, #ffa52c);
+            color: #fff;
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 14px 40px rgba(255, 114, 21, 0.28);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            touch-action: manipulation;
+        }
+
+        .btn:hover,
+        .btn:focus-visible {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 46px rgba(255, 114, 21, 0.35);
+            outline: none;
+        }
+
+        .controls {
+            margin-top: 26px;
+            color: #7f8797;
+            line-height: 1.8;
+            font-size: 15px;
+        }
+
+        .controls span {
+            display: inline-block;
+            margin: 0 5px;
+            padding: 4px 10px;
+            border-radius: 8px;
+            background: rgba(255, 210, 74, 0.12);
+            color: #ffe07e;
+            font-weight: 800;
+        }
+
+        .difficulty-panel {
+            display: grid;
+            gap: 10px;
+            width: min(560px, 100%);
+            margin: 6px 0 18px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .difficulty-option {
+            padding: 14px 14px 12px;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(7, 10, 17, 0.66);
+            text-align: left;
+            color: #d7dfec;
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+            touch-action: manipulation;
+        }
+
+        .difficulty-option strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+
+        .difficulty-option small {
+            display: block;
+            font-size: 12px;
+            line-height: 1.45;
+            color: #94a0b4;
+        }
+
+        .difficulty-option.active {
+            border-color: rgba(255, 210, 74, 0.46);
+            background: rgba(255, 210, 74, 0.12);
+            transform: translateY(-2px);
+        }
+
+        #difficultyDescription {
+            max-width: 560px;
+            margin-bottom: 22px;
+            color: #8cc0ff;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .final-score {
+            margin: 10px 0 22px;
+            color: var(--gold);
+            font-size: 34px;
+            font-weight: 900;
+        }
+
+        .screen-note {
+            margin-top: 16px;
+            color: rgba(255, 255, 255, 0.48);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .record-line {
+            margin-bottom: 12px;
+            color: #8cc0ff;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .record-board {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            width: min(560px, 100%);
+            margin: 0 0 22px;
+        }
+
+        .record-chip {
+            padding: 12px 12px 10px;
+            border-radius: 16px;
+            background: rgba(7, 10, 17, 0.54);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .record-chip span {
+            display: block;
+            margin-bottom: 4px;
+            color: #96a2b6;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .record-chip strong {
+            color: #fff5c8;
+            font-size: 20px;
+            font-weight: 900;
+        }
+
+        .record-callout {
+            min-height: 22px;
+            margin: -4px 0 16px;
+            color: #8cc0ff;
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        #bossRewardScreen {
+            background: rgba(0, 0, 0, 0.88);
+        }
+
+        .reward-rank {
+            width: 120px;
+            height: 120px;
+            margin: 6px 0 14px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 210, 74, 0.35), rgba(255, 143, 31, 0.1));
+            border: 2px solid rgba(255, 210, 74, 0.45);
+            box-shadow: 0 0 40px rgba(255, 210, 74, 0.16);
+            color: #fff3b1;
+            font-size: 58px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+        }
+
+        .reward-caption {
+            margin-bottom: 18px;
+            color: #9fd2ff;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .reward-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+            width: min(620px, 100%);
+            margin-bottom: 24px;
+        }
+
+        .reward-item {
+            padding: 12px;
+            border-radius: 16px;
+            background: rgba(7, 10, 17, 0.56);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .reward-item span {
+            display: block;
+            margin-bottom: 6px;
+            color: #93a0b2;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .reward-item strong {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 900;
+        }
+
+        #touchControls {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 230;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+            pointer-events: none;
+        }
+
+        #touchControls .touch-group {
+            display: flex;
+            gap: 14px;
+            pointer-events: auto;
+        }
+
+        #touchControls .touch-btn {
+            width: 76px;
+            height: 76px;
+            border: 2px solid rgba(255, 255, 255, 0.24);
+            border-radius: 20px;
+            background: rgba(4, 7, 14, 0.58);
+            color: #fff;
+            font-size: 30px;
+            font-weight: 900;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.48);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            pointer-events: auto;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #touchControls .touch-btn.fire {
+            width: 98px;
+            height: 98px;
+            border-radius: 24px;
+            font-size: 36px;
+            background: linear-gradient(135deg, rgba(255, 114, 21, 0.88), rgba(255, 165, 44, 0.88));
+            border-color: rgba(255, 255, 255, 0.34);
+        }
+
+        #touchControls .touch-btn.pressed {
+            transform: translateY(2px) scale(0.985);
+            filter: brightness(1.14);
+        }
+
+        @media (max-width: 680px) {
+            h1 { font-size: 34px; }
+            h2 { font-size: 30px; }
+            .emoji-title { font-size: 60px; }
+            .subtitle { font-size: 16px; }
+            .btn { padding: 12px 24px; font-size: 16px; }
+            .difficulty-panel { grid-template-columns: 1fr; }
+            .record-board { grid-template-columns: 1fr; }
+            .reward-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            #ui { padding: 10px 12px; }
+            .ui-item { font-size: 14px; }
+            #brandWatermark { top: 42px; font-size: 9px; }
+            #bossHud { top: 48px; }
+            #comboHud { bottom: 118px; }
+            #powerupDisplay { bottom: 128px; max-width: 92vw; }
+            .powerup-icon { width: 32px; height: 32px; font-size: 12px; }
+            .brand-chip span { display: none; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="floatingNav">
+        <a class="nav-btn" href="/compass">&larr; Compass</a>
+        <div class="brand-chip"><strong>B$S</strong> <span>Blue Snake Studios</span> Arcade</div>
+        <button id="fullscreenBtn" class="nav-btn" type="button">Fullscreen</button>
+    </div>
+
+    <div id="phoneHint">Landscape feels better on phones.</div>
+
+    <div id="gameWrapper">
+        <div id="gameContainer">
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+            <div id="ui">
+                <div class="ui-item score">🍌 Score: <span id="scoreValue">0</span></div>
+                <div class="ui-item level">⭐ Level: <span id="levelValue">1</span></div>
+                <div class="ui-item lives">❤️ Lives: <span id="livesValue">3</span></div>
+            </div>
+
+            <div id="brandWatermark">B$S // Blue Snake Studios</div>
+
+            <div id="bossHud" aria-hidden="true">
+                <div class="boss-title-row">
+                    <span id="bossName">Galactic Produce Inspector</span>
+                    <small id="bossStateLabel">Humiliation Required</small>
+                </div>
+                <div class="boss-bar"><span id="bossHpFill"></span></div>
+                <div class="boss-bar"><span id="bossHumiliationFill"></span></div>
+            </div>
+
+            <div id="comboHud" aria-hidden="true">
+                <div class="combo-top">
+                    <span><strong id="comboCount">x1</strong> Potassium Pressure</span>
+                    <span id="comboBest">Best 0</span>
+                </div>
+                <div class="combo-bar"><span id="comboPressureFill"></span></div>
+            </div>
+
+            <div id="powerupDisplay">
+                <div class="powerup-icon" id="pw-double" style="border-color:#ff6b6b;color:#ff6b6b;" title="Double Banana">2x</div>
+                <div class="powerup-icon" id="pw-triple" style="border-color:#ff00ff;color:#ff00ff;" title="Triple Banana">3x</div>
+                <div class="powerup-icon" id="pw-rapid" style="border-color:#00ffff;color:#00ffff;" title="Rapid Fire">⚡</div>
+                <div class="powerup-icon" id="pw-range" style="border-color:#00ff88;color:#00ff88;" title="Long Range">↑</div>
+                <div class="powerup-icon" id="pw-double-monkey" style="border-color:#ffaa00;color:#ffaa00;" title="Double Monkey">🐵🐵</div>
+                <div class="powerup-icon" id="pw-gun" style="border-color:#ff4444;color:#ff4444;" title="Banana Gun">🔫</div>
+                <div class="powerup-icon" id="pw-bazooka" style="border-color:#ff0066;color:#ff0066;" title="Bazooka">💥</div>
+            </div>
+
+            <div id="bnnTicker">
+                <span id="bnnTickerContent"></span>
+            </div>
+
+            <div id="startScreen">
+                <div class="brand-kicker">B$S Arcade // Blue Snake Studios</div>
+                <div class="emoji-title">🐵🍌👽</div>
+                <h1>MONKEY INVADERS</h1>
+                <p class="subtitle">The only thing standing between Earth and alien domination is a monkey, a dream, and an endless supply of potassium-rich projectiles.</p>
+                <div class="difficulty-panel" role="group" aria-label="Difficulty selection">
+                    <button class="difficulty-option" type="button" data-difficulty="easy">
+                        <strong>Banana Break</strong>
+                        <small>Extra lives, kinder drops, bosses with less paperwork.</small>
+                    </button>
+                    <button class="difficulty-option" type="button" data-difficulty="normal">
+                        <strong>Monkey Business</strong>
+                        <small>The intended blend of slapstick, chaos, and cosmic liability.</small>
+                    </button>
+                    <button class="difficulty-option" type="button" data-difficulty="hard">
+                        <strong>Potassium Crisis</strong>
+                        <small>Faster invaders, angrier bosses, slightly richer score multipliers.</small>
+                    </button>
+                </div>
+                <p id="difficultyDescription">Difficulty: Monkey Business // Standard B$S nonsense calibration.</p>
+                <p id="difficultyRecord" class="record-line"></p>
+                <div class="record-board">
+                    <div class="record-chip">
+                        <span>Banana Break</span>
+                        <strong id="bestEasy">0</strong>
+                    </div>
+                    <div class="record-chip">
+                        <span>Monkey Business</span>
+                        <strong id="bestNormal">0</strong>
+                    </div>
+                    <div class="record-chip">
+                        <span>Potassium Crisis</span>
+                        <strong id="bestHard">0</strong>
+                    </div>
+                </div>
+                <button id="startButton" class="btn" type="button">Start the Banana War</button>
+                <div class="controls">
+                    <span>SPACE</span> or <span>TOUCH FIRE</span> to throw bananas<br>
+                    <span>A / D</span> or <span>◀ / ▶</span> to move<br>
+                    <span>P</span> Pause &middot; Boss every <span>5</span> levels
+                </div>
+                <div class="screen-note">Filed under B$S // absurd logic, satisfying consequences</div>
+            </div>
+
+            <div id="gameOverScreen">
+                <div class="brand-kicker">B$S Incident Report</div>
+                <div class="emoji-title">😭💀🍌</div>
+                <h1>GAME OVER</h1>
+                <p class="subtitle" id="gameOverSubtitle">The cosmos weeps for your potassium deficiency.</p>
+                <div class="final-score">Final Score: <span id="finalScore">0</span></div>
+                <div id="recordCallout" class="record-callout"></div>
+                <button id="playAgainButton" class="btn" type="button">Play Again</button>
+                <div class="screen-note">Prepared by Blue Snake Studios // fruitkind remains under review</div>
+            </div>
+
+            <div id="levelScreen">
+                <div class="brand-kicker">B$S Emergency Broadcast</div>
+                <h2 id="levelText">Level 2</h2>
+                <p class="subtitle" id="levelSubtext">Here they come!</p>
+            </div>
+
+            <div id="pauseOverlay">
+                <div class="brand-kicker">B$S Hold Pattern</div>
+                <div class="emoji-title">⏸️</div>
+                <h2>Game Paused</h2>
+                <p class="subtitle">Take a breath. The fate of all fruitkind is on hold.</p>
+                <button id="resumeButton" class="btn" type="button">Resume</button>
+            </div>
+
+            <div id="bossRewardScreen">
+                <div class="brand-kicker">B$S Clearance Stamp</div>
+                <h2 id="bossRewardTitle">Boss Neutralized</h2>
+                <p class="subtitle" id="bossRewardSubtext">The paperwork has collapsed under sustained ridicule.</p>
+                <div id="bossRewardRank" class="reward-rank">A</div>
+                <div id="bossRewardCaption" class="reward-caption">Blue Snake Studios rates this incident highly.</div>
+                <div class="reward-grid">
+                    <div class="reward-item">
+                        <span>Lives Left</span>
+                        <strong id="rewardLives">3</strong>
+                    </div>
+                    <div class="reward-item">
+                        <span>Best Combo</span>
+                        <strong id="rewardCombo">x0</strong>
+                    </div>
+                    <div class="reward-item">
+                        <span>Difficulty</span>
+                        <strong id="rewardDifficulty">Normal</strong>
+                    </div>
+                    <div class="reward-item">
+                        <span>Boss Bounty</span>
+                        <strong id="rewardBounty">0</strong>
+                    </div>
+                </div>
+                <button id="continueBossButton" class="btn" type="button">Continue</button>
+                <div class="screen-note">Rapid fire and bazooka bounty approved by Blue Snake Studios</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="touchControls" aria-label="Touch Controls">
+        <div class="touch-group">
+            <button id="btnLeft" class="touch-btn" aria-label="Move Left">◀</button>
+            <button id="btnRight" class="touch-btn" aria-label="Move Right">▶</button>
+        </div>
+        <button id="btnFire" class="touch-btn fire" aria-label="Throw Banana">🍌</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const gameWrapper = document.getElementById('gameWrapper');
+        const gameContainer = document.getElementById('gameContainer');
+        const touchControls = document.getElementById('touchControls');
+        const pauseOverlay = document.getElementById('pauseOverlay');
+        const phoneHint = document.getElementById('phoneHint');
+        const floatingNav = document.getElementById('floatingNav');
+        const bossHud = document.getElementById('bossHud');
+        const comboHud = document.getElementById('comboHud');
+        const bnnTickerContent = document.getElementById('bnnTickerContent');
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const levelScreen = document.getElementById('levelScreen');
+        const bossRewardScreen = document.getElementById('bossRewardScreen');
+        const levelTextElement = document.getElementById('levelText');
+        const levelSubtextElement = document.getElementById('levelSubtext');
+
+        const BASE_WIDTH = 800;
+        const BASE_HEIGHT = 600;
+        const HIGH_SCORE_KEY = 'bss-monkey-highscores-v1';
+        const hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        const keys = {};
+        const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        const difficultyPresets = {
+            easy: {
+                label: 'Banana Break',
+                desc: 'Easy // extra life cushion, kinder drops, softer boss paperwork.',
+                startLives: 4,
+                alienSpeedMult: 0.88,
+                powerupChanceMult: 1.28,
+                absurdDropChanceMult: 1.15,
+                hazardChanceMult: 0.68,
+                bossHpMult: 0.84,
+                bossAttackMult: 0.88,
+                comboWindowMs: 2400,
+                scoreMult: 0.95,
+                pityDropOnLifeLoss: true,
+                comboThreshold: 85,
+            },
+            normal: {
+                label: 'Monkey Business',
+                desc: 'Normal // standard B$S nonsense calibration with full slapstick liability.',
+                startLives: 3,
+                alienSpeedMult: 1,
+                powerupChanceMult: 1,
+                absurdDropChanceMult: 1,
+                hazardChanceMult: 1,
+                bossHpMult: 1,
+                bossAttackMult: 1,
+                comboWindowMs: 2000,
+                scoreMult: 1,
+                pityDropOnLifeLoss: false,
+                comboThreshold: 100,
+            },
+            hard: {
+                label: 'Potassium Crisis',
+                desc: 'Hard // faster waves, meaner bosses, juicier points, fewer apologies.',
+                startLives: 2,
+                alienSpeedMult: 1.18,
+                powerupChanceMult: 0.9,
+                absurdDropChanceMult: 0.96,
+                hazardChanceMult: 1.35,
+                bossHpMult: 1.34,
+                bossAttackMult: 1.2,
+                comboWindowMs: 1600,
+                scoreMult: 1.3,
+                pityDropOnLifeLoss: false,
+                comboThreshold: 110,
+            },
+        };
+
+        let difficulty = localStorage.getItem('bss-monkey-difficulty') || 'normal';
+        if (!difficultyPresets[difficulty]) difficulty = 'normal';
+
+        const monkey = {
+            x: 370,
+            y: 520,
+            width: 60,
+            height: 60,
+            speed: 7,
+            throwCooldown: 0,
+            throwRate: 300,
+            bananaSpeed: 12,
+            powerups: {
+                double: false,
+                triple: false,
+                rapid: false,
+                range: false,
+                doubleMonkey: false,
+                gun: false,
+                bazooka: false,
+            },
+        };
+
+        let secondMonkey = { x: 430, active: false };
+
+        let gameRunning = false;
+        let paused = false;
+        let score = 0;
+        let level = 1;
+        let lives = difficultyPresets[difficulty].startLives;
+        let levelTransition = false;
+        let lastTime = 0;
+        let tickerTimer = 0;
+        let currentTickerIndex = 0;
+        let boss = null;
+        let bossAttacks = [];
+        let bossPuddles = [];
+        let bossRewardPending = null;
+
+        let aliens = [];
+        let bananas = [];
+        let groundBananas = [];
+        let particles = [];
+        let powerups = [];
+        let explosions = [];
+        let absurdDrops = [];
+        let floatingTexts = [];
+        let bgShapes = [];
+        let bgTime = 0;
+
+        const sillyFX = {
+            turbo: 0,
+            jam: 0,
+            invert: 0,
+            confetti: 0,
+            bananaRain: 0,
+            shake: 0,
+        };
+
+        const combo = {
+            count: 0,
+            timer: 0,
+            pressure: 0,
+            best: 0,
+        };
+
+        const powerupTimers = {};
+
+        const MAX_ABSURD_DROPS = hasTouch ? 18 : 30;
+        const MAX_FLOAT_TEXTS = hasTouch ? 8 : 14;
+        const TICKER_CHANGE_INTERVAL = 8000;
+
+        let alienDirection = 1;
+        let alienSpeed = 0.5;
+        let alienMoveTimer = 0;
+
+        const bgThemes = [
+            { type: 'triangles', colors: ['#1a0a3e', '#2a1a4e', '#0a1a3e'], accent: '#4a2a7e' },
+            { type: 'hexagons', colors: ['#0a2a1a', '#1a3a2a', '#0a3a2a'], accent: '#2a6a4a' },
+            { type: 'circles', colors: ['#2a0a1a', '#3a1a2a', '#2a1a2a'], accent: '#6a2a4a' },
+            { type: 'diamonds', colors: ['#1a1a0a', '#2a2a1a', '#2a1a0a'], accent: '#5a5a2a' },
+            { type: 'spiral', colors: ['#0a1a2a', '#1a2a3a', '#0a2a3a'], accent: '#3a5a7a' },
+            { type: 'squares', colors: ['#1a0a2a', '#2a1a3a', '#1a1a3a'], accent: '#5a3a7a' },
+            { type: 'stars', colors: ['#0a0a2a', '#1a1a3a', '#0a1a2a'], accent: '#4a4a8a' },
+            { type: 'vortex', colors: ['#1a0a1a', '#2a1a2a', '#1a1a2a'], accent: '#6a3a6a' },
+        ];
+
+        const announcerLines = {
+            levelStart: [
+                'Level up! Time to make some cosmic compost!',
+                'Wave incoming! Prepare for maximum potassium deployment!',
+                'Blue Snake Studios reminds you that throwing fruit is now mandatory.',
+                'New level! The aliens remain tragically underqualified.',
+            ],
+            bossIntro: [
+                'Boss level! The paperwork has become hostile!',
+                'A manager has arrived. This is never good.',
+                'Maximum absurdity approaching. Tighten your banana grip.',
+            ],
+            bossMeltdown: [
+                'Humiliation threshold exceeded! The boss is spiraling!',
+                'Boss meltdown! File this under emotional damage!',
+                'You embarrassed them on galactic television! Hit the weak spot!',
+            ],
+            bossDown: [
+                'Boss defeated! Blue Snake Studios will deny all involvement.',
+                'They folded under pressure. Specifically potassium pressure.',
+                'Manager neutralized. Fruitkind survives another audit.',
+            ],
+            powerup: [
+                'Powerup acquired! You are now a regulated menace.',
+                'New toy! This will age terribly for the aliens.',
+                'Upgrade secured. The banana economy is booming.',
+            ],
+            lifeLost: [
+                'Ouch. That was legally categorized as monkey negligence.',
+                'Life lost! Shake it off before the boss notices.',
+                'Critical potassium failure. Please remain dramatic.',
+            ],
+            pause: [
+                'Game paused. The emergency broadcast is buffering.',
+                'Hold everything. Fruitkind requests a short recess.',
+            ],
+            unpause: [
+                'Resume! Return to the banana-powered consequences.',
+                'Broadcast restored. Continue the nonsense.',
+            ],
+            bazooka: [
+                'KABOOM! That was less a banana and more a policy statement.',
+                'Explosive fruit deployed. Legal is panicking.',
+            ],
+            achievement: [
+                'ACHIEVEMENT UNLOCKED: {title}',
+                'B$S CERTIFIED NONSENSE: {title}',
+                'AWARDED: {title}',
+            ],
+        };
+
+        const bnnTickerLines = [
+            'B$S // BREAKING: Aliens continue slipping in markets with weak oversight. 🍌',
+            'B$S // WEATHER: Heavy banana showers and moderate humiliation expected tonight. 🌌',
+            'B$S // COMMERCE: Potassium futures remain irrationally bullish. 📈',
+            'B$S // SPORT: Monkey improves record to undefeated against paperwork-heavy invaders. 🏆',
+            'B$S // LIFESTYLE: Experts recommend peeling before throwing for optimal scandal. ⚠️',
+            'B$S // CULTURE: Blue Snake Studios denies creating this crisis and also takes full credit. 🐍',
+            'B$S // HEALTH: Doctors confirm daily banana intake may repel middle management from space. 🩺',
+            'B$S // ECONOMY: Fruitkind remains volatile, but morale is surprisingly high. 💹',
+        ];
+
+        const levelSubtexts = [
+            'The first wave is always the most polite. Do not trust them.',
+            'They brought friends and exactly zero self-awareness.',
+            'Things are escalating in a way HR specifically warned about.',
+            'Cosmic winds are high. So is the alien complaint volume.',
+            'Boss level. A manager has entered the war zone with clipboards.',
+            'Back to business. The survivors look rattled.',
+            'The invaders are now improvising. That is not reassuring.',
+            'Maximum density. Minimum dignity. Keep swinging.',
+            'The galaxy is watching and frankly loving the mess.',
+            'Boss level. Tears and invoices are expected.',
+            'Pure, unlicensed nonsense. Blue Snake Studios feels great about it.',
+        ];
+
+        const gameOverSubtitles = [
+            'The cosmos weeps for your potassium deficiency.',
+            'Your monkey business has been terminated. Try again?',
+            'The aliens are celebrating. Their dancing is embarrassing.',
+            'You have been reassigned to desk duty in the fruit mines.',
+            'A noble effort, but space remains aggressively litigious.',
+        ];
+
+        const bossProfiles = [
+            {
+                kind: 'inspector',
+                name: 'Galactic Produce Inspector',
+                stateLabel: 'Humiliation Required',
+                subtitle: 'A clipboard-driven tyrant from the Department of Unripe Enforcement.',
+                color: '#ffd24a',
+                accent: '#ff8f1f',
+                baseHp: 180,
+                baseHumiliation: 120,
+                moveSpeed: 2.3,
+                attackEvery: 2350,
+                summonEvery: 2900,
+                attackWidth: 118,
+                warningMs: 880,
+                attackSpeed: 13,
+            },
+            {
+                kind: 'sobzilla',
+                name: 'Admiral Sobzilla',
+                stateLabel: 'Tantrum Meter',
+                subtitle: 'A crying warlord weaponizing tears and impossible neediness.',
+                color: '#6ff2ff',
+                accent: '#79a6ff',
+                baseHp: 250,
+                baseHumiliation: 150,
+                moveSpeed: 2.0,
+                attackEvery: 2050,
+                summonEvery: 2550,
+                attackWidth: 92,
+                warningMs: 720,
+                attackSpeed: 11,
+            },
+            {
+                kind: 'embargo',
+                name: 'Banana Embargo Mothership',
+                stateLabel: 'Cargo Shame',
+                subtitle: 'A bureaucratic dreadnought with lanes full of confiscation crates.',
+                color: '#ff6c8c',
+                accent: '#ffb347',
+                baseHp: 340,
+                baseHumiliation: 185,
+                moveSpeed: 1.8,
+                attackEvery: 1850,
+                summonEvery: 2300,
+                attackWidth: 150,
+                warningMs: 980,
+                attackSpeed: 16,
+            },
+        ];
+
+        const absurdDropCatalog = [
+            { bucket: 'helpful', name: 'Energy Drink', emoji: '🥤', color: '#00ff88', behavior: 'wobble', effect: 'turbo', points: 80, description: 'A sugary boost! You feel legally faster.' },
+            { bucket: 'helpful', name: 'Turbo Sneakers', emoji: '👟', color: '#00ff88', behavior: 'zigzag', effect: 'turbo', points: 90, description: 'Powered by adrenaline and suspect engineering.' },
+            { bucket: 'helpful', name: 'Golden Banana', emoji: '🍌', color: '#ffd700', behavior: 'spiral', effect: 'bananaRain', points: 140, description: 'The legendary fruit. Deliciously overqualified.' },
+            { bucket: 'helpful', name: 'Disco Ball', emoji: '🪩', color: '#00ffff', behavior: 'drift', effect: 'confetti', points: 110, description: 'It is party time whether you consent or not.' },
+            { bucket: 'mischief', name: 'Left Sock of Chaos', emoji: '🧦', color: '#ff00ff', behavior: 'wobble', effect: 'invert', points: 120, description: 'Swaps left and right because it can.' },
+            { bucket: 'mischief', name: 'Sticky Jam Jar', emoji: '🍯', color: '#ffaa00', behavior: 'parachute', effect: 'jam', points: 120, description: 'Great on toast. Bad for warfare.' },
+            { bucket: 'mischief', name: 'Earthquake Button', emoji: '🧨', color: '#ff6b6b', behavior: 'meteor', effect: 'shake', points: 150, description: 'Mostly rude, occasionally hilarious.' },
+            { bucket: 'hazard', name: 'Cartoon Anvil', emoji: '🧱', color: '#ff4444', behavior: 'meteor', isHazard: true, points: 0, description: 'Guaranteed to ruin your day.' },
+            { bucket: 'hazard', name: 'Falling Piano', emoji: '🎹', color: '#ff4444', behavior: 'meteor', isHazard: true, points: 0, description: 'Classical music with impact damage.' },
+            { bucket: 'hazard', name: 'Angry Cactus', emoji: '🌵', color: '#ff4444', behavior: 'meteor', isHazard: true, points: 0, description: 'Spiky, furious, and plummeting from orbit.' },
+            { bucket: 'harmless', name: 'Rubber Chicken', emoji: '🐔', color: '#ffd700', behavior: 'wobble', points: 100, description: 'Squeaks upon collection. Pure morale.' },
+            { bucket: 'harmless', name: 'Whoopee Cushion', emoji: '💨', color: '#ffd700', behavior: 'bounce', points: 110, description: 'The sound of strategic disrespect.' },
+            { bucket: 'harmless', name: 'Pizza Slice', emoji: '🍕', color: '#ff9500', behavior: 'drift', points: 105, description: 'A delicious distraction from cosmic law.' },
+            { bucket: 'harmless', name: 'Mystery Donut', emoji: '🍩', color: '#ff69b4', behavior: 'spiral', points: 115, description: 'Glazed with the tears of defeated invaders.' },
+            { bucket: 'harmless', name: 'Screaming Goat', emoji: '🐐', color: '#00bfff', behavior: 'wobble', points: 110, description: 'No gameplay value beyond vibes. Still worth points.' },
+            { bucket: 'harmless', name: 'Tiny UFO', emoji: '🛸', color: '#7fff00', behavior: 'spiral', points: 120, description: 'A lost intern craft full of regret.' },
+            { bucket: 'harmless', name: 'Glitter Bomb', emoji: '✨', color: '#00ffff', behavior: 'parachute', points: 110, description: 'Everything is sparkly now. Everything.' },
+            { bucket: 'harmless', name: 'Bread Slapper', emoji: '🍞', color: '#ffd700', behavior: 'zigzag', points: 95, description: 'A slice of bread with authority issues.' },
+            { bucket: 'harmless', name: 'Forbidden Pineapple', emoji: '🍍', color: '#ffd700', behavior: 'spiral', points: 120, description: 'Do not ask why it is forbidden.' },
+            { bucket: 'harmless', name: 'Cheese Wheel', emoji: '🧀', color: '#ff9500', behavior: 'bounce', points: 110, description: 'Aged to perfection and mildly aggressive.' },
+            { bucket: 'harmless', name: 'Clown Shoe', emoji: '👞', color: '#ff69b4', behavior: 'slinky', points: 110, description: 'Oversized and deeply committed to the bit.' },
+            { bucket: 'harmless', name: 'Banana Peel', emoji: '🍌', color: '#ffe135', behavior: 'parachute', points: 90, groundEffect: 'peel', description: 'The classic trap. Dignity evaporates on contact.' },
+            { bucket: 'harmless', name: 'Soap Bar', emoji: '🧼', color: '#00ffff', behavior: 'drift', points: 95, groundEffect: 'peel', description: 'Slippery even in vacuum conditions.' },
+            { bucket: 'harmless', name: 'Skateboard', emoji: '🛹', color: '#00ff88', behavior: 'zigzag', points: 110, groundEffect: 'peel', description: 'The aliens remain terrible at this.' },
+            { bucket: 'harmless', name: 'Pocket Crab', emoji: '🦀', color: '#ff6b6b', behavior: 'slinky', points: 115, description: 'He pinches, but he means well.' },
+            { bucket: 'harmless', name: 'Wizard Frog', emoji: '🐸', color: '#7fff00', behavior: 'wobble', points: 110, description: 'Magical support from the swamp division.' },
+            { bucket: 'harmless', name: 'Space Burrito', emoji: '🌯', color: '#00bfff', behavior: 'drift', points: 110, description: 'Contains beans and possibly a singularity.' },
+            { bucket: 'harmless', name: 'Uncanny Mask', emoji: '🎭', color: '#ff69b4', behavior: 'spiral', points: 130, description: 'Stares into your soul and pays you for it.' },
+            { bucket: 'harmless', name: 'The Answer (42)', emoji: '❓', color: '#9370db', behavior: 'spiral', points: 420, description: 'The answer to the ultimate question. Apparently worth points.' },
+        ];
+
+        const achievements = {
+            firstPeel: false,
+            doubleKill: false,
+            tripleKill: false,
+            bazookaBlast: false,
+            bossBeat: false,
+        };
+
+        let highScores = loadHighScores();
+
+        function getPreset() {
+            return difficultyPresets[difficulty];
+        }
+
+        function loadHighScores() {
+            const defaults = { easy: 0, normal: 0, hard: 0 };
+            try {
+                const raw = localStorage.getItem(HIGH_SCORE_KEY);
+                if (!raw) return defaults;
+                const parsed = JSON.parse(raw);
+                return {
+                    easy: Number(parsed.easy) || 0,
+                    normal: Number(parsed.normal) || 0,
+                    hard: Number(parsed.hard) || 0,
+                };
+            } catch (error) {
+                console.warn('Failed to load Monkey Invaders high scores:', error);
+                return defaults;
+            }
+        }
+
+        function saveHighScores() {
+            try {
+                localStorage.setItem(HIGH_SCORE_KEY, JSON.stringify(highScores));
+            } catch (error) {
+                console.warn('Failed to save Monkey Invaders high scores:', error);
+            }
+        }
+
+        function formatScore(value) {
+            return Number(value || 0).toLocaleString('en-US');
+        }
+
+        function updateHighScoreUI() {
+            document.getElementById('bestEasy').textContent = formatScore(highScores.easy);
+            document.getElementById('bestNormal').textContent = formatScore(highScores.normal);
+            document.getElementById('bestHard').textContent = formatScore(highScores.hard);
+            document.getElementById('difficultyRecord').textContent = `Current best // ${difficultyPresets[difficulty].label}: ${formatScore(highScores[difficulty])}`;
+        }
+
+        function syncHighScore() {
+            const currentBest = highScores[difficulty] || 0;
+            const isNewRecord = score > currentBest;
+            if (isNewRecord) {
+                highScores[difficulty] = score;
+                saveHighScores();
+                updateHighScoreUI();
+            }
+            return isNewRecord;
+        }
+
+        function getBossRank() {
+            let rankScore = 20;
+            rankScore += lives * 14;
+            rankScore += Math.min(combo.best, 10) * 5;
+            if (difficulty === 'hard') rankScore += 10;
+            if (difficulty === 'easy') rankScore -= 4;
+            if (rankScore >= 92) return { letter: 'S', title: 'Potassium Royalty' };
+            if (rankScore >= 72) return { letter: 'A', title: 'Banana Executive' };
+            if (rankScore >= 52) return { letter: 'B', title: 'Fruit Enforcer' };
+            if (rankScore >= 34) return { letter: 'C', title: 'Peel Survivor' };
+            return { letter: 'D', title: 'Paperwork Casualty' };
+        }
+
+        function showBossReward(defeatedBoss) {
+            const rank = getBossRank();
+            const bounty = 1500 * level;
+            bossRewardPending = {
+                boss: defeatedBoss,
+                rank,
+                bounty,
+            };
+            levelTransition = true;
+            paused = true;
+            document.getElementById('bossRewardTitle').textContent = `${defeatedBoss.name} Neutralized`;
+            document.getElementById('bossRewardSubtext').textContent = `${defeatedBoss.subtitle} Blue Snake Studios has filed the incident as a complete banana success.`;
+            document.getElementById('bossRewardRank').textContent = rank.letter;
+            document.getElementById('bossRewardCaption').textContent = `B$S Clearance Rank // ${rank.title}`;
+            document.getElementById('rewardLives').textContent = String(lives);
+            document.getElementById('rewardCombo').textContent = `x${combo.best}`;
+            document.getElementById('rewardDifficulty').textContent = difficultyPresets[difficulty].label;
+            document.getElementById('rewardBounty').textContent = formatScore(bounty);
+            bossRewardScreen.style.display = 'flex';
+        }
+
+        function continueBossReward() {
+            if (!bossRewardPending) return;
+            bossRewardPending = null;
+            bossRewardScreen.style.display = 'none';
+            paused = false;
+            lastTime = performance.now();
+            nextLevel();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function setDifficulty(nextDifficulty) {
+            if (!difficultyPresets[nextDifficulty]) return;
+            difficulty = nextDifficulty;
+            localStorage.setItem('bss-monkey-difficulty', difficulty);
+            document.querySelectorAll('.difficulty-option').forEach(button => {
+                button.classList.toggle('active', button.dataset.difficulty === difficulty);
+            });
+            document.getElementById('difficultyDescription').textContent = `Difficulty: ${difficultyPresets[difficulty].label} // ${difficultyPresets[difficulty].desc}`;
+            updateHighScoreUI();
+        }
+
+        function isBossLevel(value) {
+            return value > 0 && value % 5 === 0;
+        }
+
+        function getBossProfile(levelValue) {
+            const tier = Math.max(1, Math.floor(levelValue / 5));
+            const base = bossProfiles[(tier - 1) % bossProfiles.length];
+            const hpScale = 1 + (tier - 1) * 0.42;
+            const humiliationScale = 1 + (tier - 1) * 0.18;
+            const preset = getPreset();
+            return {
+                ...base,
+                hp: Math.round(base.baseHp * hpScale * preset.bossHpMult),
+                humiliationCap: Math.round(base.baseHumiliation * humiliationScale),
+                moveSpeed: base.moveSpeed * (0.96 + (tier - 1) * 0.06),
+                attackEvery: base.attackEvery / preset.bossAttackMult,
+                summonEvery: base.summonEvery / preset.bossAttackMult,
+                attackSpeed: base.attackSpeed * preset.bossAttackMult,
+            };
+        }
+
+        function addFloatingText(x, y, text, color = '#fff', life = 1400, size = 18, drift = 0.5) {
+            if (floatingTexts.length >= MAX_FLOAT_TEXTS) floatingTexts.shift();
+            floatingTexts.push({ x, y, text, color, life, size, drift: (Math.random() - 0.5) * drift });
+        }
+
+        function announce(event, extra = {}) {
+            if (!gameRunning || paused) return;
+            const lines = announcerLines[event];
+            if (!lines || lines.length === 0) return;
+            let text = lines[Math.floor(Math.random() * lines.length)];
+            if (event === 'achievement') {
+                text = text.replace('{title}', extra.title);
+                addFloatingText(canvas.width / 2, canvas.height / 2, text, extra.color || '#fff', 2200, 30, 0);
+                return;
+            }
+            addFloatingText(canvas.width / 2, canvas.height * 0.72, text, extra.color || '#ffd700', 1600, 23, 0);
+        }
+
+        function showAchievement(title, color = '#ffd700') {
+            announce('achievement', { title, color });
+        }
+
+        function updateTicker(dt) {
+            tickerTimer += dt;
+            if (tickerTimer >= TICKER_CHANGE_INTERVAL) {
+                tickerTimer = 0;
+                currentTickerIndex = (currentTickerIndex + 1) % bnnTickerLines.length;
+                bnnTickerContent.textContent = bnnTickerLines[currentTickerIndex];
+            }
+        }
+
+        function getTheme() {
+            return bgThemes[Math.min(level - 1, bgThemes.length - 1)];
+        }
+
+        function initBackground() {
+            bgShapes = [];
+            const count = hasTouch ? 20 : 30;
+            for (let i = 0; i < count; i++) {
+                bgShapes.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 40 + 20,
+                    speed: Math.random() * 0.5 + 0.1,
+                    rotation: Math.random() * Math.PI * 2,
+                    rotSpeed: (Math.random() - 0.5) * 0.02,
+                    alpha: Math.random() * 0.3 + 0.1,
+                    phase: Math.random() * Math.PI * 2,
+                });
+            }
+        }
+
+        function updatePhoneHint() {
+            const shouldShow = hasTouch && window.innerHeight > window.innerWidth && window.innerWidth < 920;
+            phoneHint.style.display = shouldShow ? 'block' : 'none';
+        }
+
+        function getTopReserve() {
+            return (floatingNav ? floatingNav.getBoundingClientRect().height : 0) + (phoneHint.style.display === 'block' ? 34 : 0) + 26;
+        }
+
+        function getBottomReserve() {
+            if (!touchControls || touchControls.style.display === 'none') return 18;
+            return touchControls.getBoundingClientRect().height + 12;
+        }
+
+        function fitGameToScreen() {
+            updatePhoneHint();
+            const pad = 24;
+            const availW = Math.max(220, window.innerWidth - pad);
+            const availH = Math.max(220, window.innerHeight - getTopReserve() - getBottomReserve() - 12);
+            const scale = Math.min(availW / BASE_WIDTH, availH / BASE_HEIGHT, 1);
+            window.currentScale = scale;
+            gameWrapper.style.width = `${Math.floor(BASE_WIDTH * scale)}px`;
+            gameWrapper.style.height = `${Math.floor(BASE_HEIGHT * scale)}px`;
+            gameContainer.style.transform = `translate(0px, 0px) scale(${scale})`;
+        }
+
+        function clearPowerupTimers() {
+            Object.keys(powerupTimers).forEach(key => {
+                clearTimeout(powerupTimers[key]);
+                delete powerupTimers[key];
+            });
+        }
+
+        function resetCombo() {
+            combo.count = 0;
+            combo.timer = 0;
+            combo.pressure = 0;
+            updateComboUI();
+        }
+
+        function updateComboUI() {
+            const active = combo.count > 1 || combo.pressure > 0;
+            comboHud.classList.toggle('active', active);
+            document.getElementById('comboCount').textContent = `x${Math.max(1, combo.count)}`;
+            document.getElementById('comboBest').textContent = `Best ${combo.best}`;
+            document.getElementById('comboPressureFill').style.width = `${Math.max(0, Math.min(100, combo.pressure))}%`;
+        }
+
+        function bumpCombo(amount = 1, pressureGain = 16, x = monkey.x + monkey.width / 2, y = monkey.y - 12) {
+            combo.count += amount;
+            combo.timer = getPreset().comboWindowMs;
+            combo.best = Math.max(combo.best, combo.count);
+            combo.pressure = Math.min(100, combo.pressure + pressureGain);
+            if (combo.count >= 3) {
+                addFloatingText(x, y, `POTASSIUM x${combo.count}`, '#ffd24a', 900, 14, 0.25);
+            }
+            if (combo.pressure >= getPreset().comboThreshold) {
+                combo.pressure = 0;
+                sillyFX.bananaRain = Math.max(sillyFX.bananaRain, 4200);
+                sillyFX.turbo = Math.max(sillyFX.turbo, 2800);
+                addFloatingText(canvas.width / 2, canvas.height * 0.6, 'MONKEY MODE! 🍌', '#ffd24a', 1800, 28, 0);
+            }
+            updateComboUI();
+        }
+
+        function updateCombo(dt) {
+            if (combo.timer > 0) {
+                combo.timer -= dt;
+                if (combo.timer <= 0) {
+                    combo.count = 0;
+                }
+            }
+            if (combo.pressure > 0 && combo.timer <= 0) {
+                combo.pressure = Math.max(0, combo.pressure - dt * 0.03);
+            }
+            updateComboUI();
+        }
+
+        function addScore(points, sourceX, sourceY, color = '#ffd24a') {
+            const comboBonus = combo.count > 1 ? 1 + Math.min(combo.count, 8) * 0.08 : 1;
+            const total = Math.round(points * getPreset().scoreMult * comboBonus);
+            score += total;
+            updateUI();
+            if (sourceX !== undefined && sourceY !== undefined && total >= 100) {
+                addFloatingText(sourceX, sourceY, `+${total}`, color, 1000, 16, 0.18);
+            }
+        }
+
+        function createParticles(x, y, color, count = 10) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x,
+                    y,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8,
+                    life: 1,
+                    color,
+                    size: Math.random() * 6 + 2,
+                });
+            }
+        }
+
+        function createTears(x, y) {
+            for (let i = 0; i < 6; i++) {
+                particles.push({
+                    x: x + (Math.random() - 0.5) * 20,
+                    y,
+                    vx: (Math.random() - 0.5) * 3,
+                    vy: Math.random() * 3 + 1,
+                    life: 1,
+                    color: '#00bfff',
+                    size: Math.random() * 4 + 3,
+                    isTear: true,
+                });
+            }
+        }
+
+        function createExplosion(x, y, radius) {
+            explosions.push({ x, y, radius: 0, maxRadius: radius, life: 1 });
+            let aliensHit = 0;
+            let bossHit = false;
+            aliens.forEach(alien => {
+                if (!alien.alive || alien.crying) return;
+                const dist = Math.hypot(alien.x + alien.width / 2 - x, alien.y + alien.height / 2 - y);
+                if (dist < radius) {
+                    markAlienAsDefeated(alien, x, y, true);
+                    aliensHit += 1;
+                }
+            });
+            if (boss) {
+                const distToBoss = Math.hypot((boss.x + boss.width / 2) - x, (boss.y + boss.height / 2) - y);
+                if (distToBoss < radius + 90) {
+                    bossHit = true;
+                    raiseHumiliation(24, x, y, '#ffd24a');
+                    if (boss.vulnerableTimer > 0) damageBoss(10, 'bazooka');
+                }
+            }
+            if (aliensHit > 0 || bossHit) {
+                announce('bazooka');
+                if (!achievements.bazookaBlast) {
+                    showAchievement('BAZOOKA BANANZA!', '#ff0066');
+                    achievements.bazookaBlast = true;
+                }
+            }
+            createParticles(x, y, '#ff6600', 28);
+            createParticles(x, y, '#ffff00', 18);
+        }
+
+        function applyAbsurdEffect(effect) {
+            switch (effect) {
+                case 'turbo':
+                    sillyFX.turbo = Math.max(sillyFX.turbo, 6500);
+                    addFloatingText(monkey.x + monkey.width / 2, monkey.y - 10, 'SUGAR RUSH! 🥤', '#00ff88');
+                    break;
+                case 'jam':
+                    sillyFX.jam = Math.max(sillyFX.jam, 5200);
+                    addFloatingText(monkey.x + monkey.width / 2, monkey.y - 10, 'STICKY HANDS! 🍯', '#ffaa00');
+                    break;
+                case 'invert':
+                    sillyFX.invert = Math.max(sillyFX.invert, 4200);
+                    addFloatingText(monkey.x + monkey.width / 2, monkey.y - 10, 'LEFT IS RIGHT! 🧦', '#ff00ff');
+                    break;
+                case 'confetti':
+                    sillyFX.confetti = Math.max(sillyFX.confetti, 5200);
+                    addFloatingText(monkey.x + monkey.width / 2, monkey.y - 10, 'DISCO TIME! 🪩', '#00ffff');
+                    break;
+                case 'bananaRain':
+                    sillyFX.bananaRain = Math.max(sillyFX.bananaRain, 3600);
+                    addFloatingText(monkey.x + monkey.width / 2, monkey.y - 10, 'BANANA RAIN! 🍌', '#ffd700');
+                    break;
+                case 'shake':
+                    sillyFX.shake = Math.max(sillyFX.shake, 2600);
+                    addFloatingText(monkey.x + monkey.width / 2, monkey.y - 10, 'EARTHQUAKE! 🧨', '#ff6b6b');
+                    break;
+            }
+        }
+
+        function pickAbsurdDrop() {
+            const preset = getPreset();
+            const hazardCutoff = 0.02 * preset.hazardChanceMult;
+            const mischiefCutoff = hazardCutoff + 0.08;
+            const helpfulCutoff = mischiefCutoff + 0.2 * preset.absurdDropChanceMult;
+            const r = Math.random();
+            let bucket = 'harmless';
+            if (r < hazardCutoff) bucket = 'hazard';
+            else if (r < mischiefCutoff) bucket = 'mischief';
+            else if (r < helpfulCutoff) bucket = 'helpful';
+            const options = absurdDropCatalog.filter(drop => (drop.bucket || 'harmless') === bucket);
+            return options[Math.floor(Math.random() * options.length)] || absurdDropCatalog[0];
+        }
+
+        function spawnAbsurdDrop(x, y, force = false) {
+            const chance = Math.min(0.8, 0.45 * getPreset().absurdDropChanceMult);
+            if (!force && Math.random() > chance) return;
+            if (absurdDrops.length >= MAX_ABSURD_DROPS) return;
+            const pick = pickAbsurdDrop();
+            const baseFall = (1.6 + Math.random() * 1.4 + Math.min(level * 0.08, 0.9)) * (pick.isHazard ? 1.8 : 1);
+            absurdDrops.push({
+                x,
+                y,
+                startX: x,
+                startY: y,
+                size: pick.isHazard ? 52 : 44,
+                emoji: pick.emoji,
+                name: pick.name,
+                color: pick.color,
+                behavior: pick.behavior || 'straight',
+                effect: pick.effect || 'points',
+                groundEffect: pick.groundEffect || 'splat',
+                isHazard: !!pick.isHazard,
+                points: pick.points || 90,
+                vx: (Math.random() - 0.5) * 2.5,
+                vy: baseFall,
+                rot: Math.random() * Math.PI * 2,
+                rotSpeed: (Math.random() - 0.5) * 0.25,
+                t: Math.random() * 1000,
+                bounces: 0,
+                description: pick.description,
+            });
+        }
+
+        function handleDropGround(item) {
+            const gy = canvas.height - 25;
+            if (item.groundEffect === 'peel') {
+                groundBananas.push({ x: item.x, y: gy, rotation: Math.random() * Math.PI, timer: 1800, alpha: 1 });
+                createParticles(item.x, gy - 10, '#ffe135', hasTouch ? 8 : 14);
+                addFloatingText(item.x, gy - 25, 'SLIPPERY! 🧼', '#ffe135');
+                if (!achievements.firstPeel) {
+                    showAchievement('FIRST PEEL!', '#ffe135');
+                    achievements.firstPeel = true;
+                }
+            } else {
+                createParticles(item.x, gy - 10, item.color, hasTouch ? 6 : 10);
+            }
+        }
+
+        function collectAbsurdDrop(item) {
+            if (item.isHazard) return;
+            addScore((item.points || 90) * level, item.x, item.y, item.color);
+            bumpCombo(1, 12, item.x, item.y);
+            createParticles(item.x, item.y, item.color, hasTouch ? 10 : 16);
+            addFloatingText(item.x, item.y - 10, `${item.emoji} ${item.name}`, item.color, 1600, 16, 0.35);
+            if (item.effect && item.effect !== 'points') applyAbsurdEffect(item.effect);
+        }
+
+        function spawnBonusBanana(x) {
+            bananas.push({
+                x,
+                y: monkey.y - 6,
+                vx: (Math.random() - 0.5) * 1.2,
+                vy: -(monkey.bananaSpeed * 0.9),
+                rotation: 0,
+                width: 30,
+                height: 15,
+                isBazooka: false,
+                isGun: false,
+                explosionRadius: 0,
+                isBonus: true,
+            });
+        }
+
+        function updateUI() {
+            document.getElementById('scoreValue').textContent = score;
+            document.getElementById('levelValue').textContent = level;
+            document.getElementById('livesValue').textContent = lives;
+        }
+
+        function updatePowerupUI() {
+            Object.keys(monkey.powerups).forEach(key => {
+                const element = document.getElementById(`pw-${key}`);
+                if (element) element.classList.toggle('active', monkey.powerups[key]);
+            });
+        }
+
+        function updateBossHUD() {
+            const active = !!boss;
+            bossHud.classList.toggle('active', active);
+            if (!active) return;
+            document.getElementById('bossName').textContent = boss.name;
+            document.getElementById('bossStateLabel').textContent = boss.vulnerableTimer > 0 ? 'Vulnerable // Hit Hard' : boss.stateLabel;
+            document.getElementById('bossHpFill').style.width = `${Math.max(0, (boss.hp / boss.maxHp) * 100)}%`;
+            document.getElementById('bossHumiliationFill').style.width = `${Math.max(0, Math.min(100, (boss.humiliation / boss.maxHumiliation) * 100))}%`;
+        }
+
+        function showBossBanner(profile) {
+            levelTextElement.textContent = `BOSS LEVEL ${level}`;
+            levelSubtextElement.textContent = `${profile.name} // ${profile.subtitle}`;
+        }
+
+        function spawnPowerup(x, y, forcedType) {
+            const chance = Math.min(0.48, 0.18 * getPreset().powerupChanceMult);
+            if (!forcedType && Math.random() > chance) return;
+            const types = ['double', 'triple', 'rapid', 'range', 'doubleMonkey', 'gun', 'bazooka'];
+            const weights = [20, 14, 20, 16, 10, 12, 8];
+            let type = forcedType;
+            if (!type) {
+                let rand = Math.random() * weights.reduce((a, b) => a + b, 0);
+                for (let i = 0; i < types.length; i++) {
+                    rand -= weights[i];
+                    if (rand <= 0) {
+                        type = types[i];
+                        break;
+                    }
+                }
+            }
+            const colors = {
+                double: '#ff6b6b',
+                triple: '#ff00ff',
+                rapid: '#00ffff',
+                range: '#00ff88',
+                doubleMonkey: '#ffaa00',
+                gun: '#ff4444',
+                bazooka: '#ff0066',
+            };
+            const symbols = {
+                double: '2x',
+                triple: '3x',
+                rapid: '⚡',
+                range: '↑',
+                doubleMonkey: '🐵🐵',
+                gun: '🔫',
+                bazooka: '💥',
+            };
+            powerups.push({ x, y, type, color: colors[type], symbol: symbols[type], vy: 2.5, pulse: 0 });
+        }
+
+        function applyPowerup(type) {
+            if (type === 'double' || type === 'triple') {
+                monkey.powerups.double = false;
+                monkey.powerups.triple = false;
+            }
+            if (type === 'gun' || type === 'bazooka') {
+                monkey.powerups.gun = false;
+                monkey.powerups.bazooka = false;
+            }
+            monkey.powerups[type] = true;
+            if (type === 'doubleMonkey') {
+                secondMonkey.x = monkey.x + 100;
+                secondMonkey.active = true;
+            }
+            if (powerupTimers[type]) clearTimeout(powerupTimers[type]);
+            powerupTimers[type] = setTimeout(() => {
+                monkey.powerups[type] = false;
+                if (type === 'doubleMonkey') secondMonkey.active = false;
+                updatePowerupUI();
+                delete powerupTimers[type];
+            }, type === 'bazooka' ? 8000 : 12000);
+            updatePowerupUI();
+            announce('powerup');
+        }
+
+        function resetTransientState() {
+            monkey.x = 370;
+            monkey.throwCooldown = 0;
+            bananas = [];
+            groundBananas = [];
+            particles = [];
+            powerups = [];
+            explosions = [];
+            absurdDrops = [];
+            floatingTexts = [];
+            boss = null;
+            bossAttacks = [];
+            bossPuddles = [];
+            bossRewardPending = null;
+            bossRewardScreen.style.display = 'none';
+            clearPowerupTimers();
+            Object.keys(monkey.powerups).forEach(key => {
+                monkey.powerups[key] = false;
+            });
+            Object.keys(sillyFX).forEach(key => {
+                sillyFX[key] = 0;
+            });
+            secondMonkey.x = 430;
+            secondMonkey.active = false;
+            resetCombo();
+            updatePowerupUI();
+            updateBossHUD();
+        }
+
+        function createBoss(levelValue) {
+            const profile = getBossProfile(levelValue);
+            boss = {
+                ...profile,
+                x: canvas.width / 2 - 110,
+                y: 112,
+                width: 220,
+                height: 108,
+                vx: profile.moveSpeed,
+                maxHp: profile.hp,
+                hp: profile.hp,
+                maxHumiliation: profile.humiliationCap,
+                humiliation: 0,
+                vulnerableTimer: 0,
+                attackCooldown: 1500,
+                summonCooldown: 1900,
+                flashTimer: 0,
+                introTimer: 1400,
+            };
+            bossAttacks = [];
+            bossPuddles = [];
+            updateBossHUD();
+        }
+
+        function createAliens() {
+            aliens = [];
+            if (isBossLevel(level)) {
+                createBoss(level);
+                return;
+            }
+            const rows = Math.min(3 + Math.floor(level / 2), 5);
+            const cols = Math.min(6 + Math.floor(level / 3), 9);
+            const alienWidth = 50;
+            const alienHeight = 45;
+            const padding = 15;
+            const startX = (canvas.width - (cols * (alienWidth + padding))) / 2 + 30;
+            const startY = 60;
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    aliens.push({
+                        x: startX + col * (alienWidth + padding),
+                        y: startY + row * (alienHeight + padding),
+                        width: alienWidth,
+                        height: alienHeight,
+                        type: row % 3,
+                        alive: true,
+                        crying: false,
+                        cryTimer: 0,
+                        fallSpeed: 0,
+                        rotation: 0,
+                        bobOffset: Math.random() * Math.PI * 2,
+                        slipping: false,
+                        slipDir: 0,
+                        isMinion: false,
+                    });
+                }
+            }
+            alienDirection = 1;
+            alienSpeed = (0.5 + level * 0.12) * getPreset().alienSpeedMult;
+            alienMoveTimer = 0;
+        }
+
+        function spawnBossMinion() {
+            if (!boss) return;
+            const minionCount = aliens.filter(alien => alien.alive && alien.isMinion).length;
+            if (minionCount >= 6) return;
+            aliens.push({
+                x: boss.x + 20 + Math.random() * (boss.width - 40),
+                y: boss.y + boss.height - 8,
+                width: 42,
+                height: 38,
+                type: Math.floor(Math.random() * 3),
+                alive: true,
+                crying: false,
+                cryTimer: 0,
+                fallSpeed: 0,
+                rotation: 0,
+                bobOffset: Math.random() * Math.PI * 2,
+                slipping: false,
+                slipDir: 0,
+                isMinion: true,
+                vx: (Math.random() > 0.5 ? 1 : -1) * (1.2 + Math.random() * 1.4),
+                vy: 0.85 + Math.random() * 0.55 + level * 0.03,
+            });
+        }
+
+        function raiseHumiliation(amount, x, y, color = '#52d9ff') {
+            if (!boss) return;
+            boss.humiliation = Math.min(boss.maxHumiliation, boss.humiliation + amount);
+            boss.flashTimer = 120;
+            createParticles(x, y, color, 8);
+            updateBossHUD();
+            if (boss.humiliation >= boss.maxHumiliation && boss.vulnerableTimer <= 0) {
+                boss.humiliation = 0;
+                boss.vulnerableTimer = Math.max(2400, 4800 / getPreset().bossAttackMult);
+                boss.flashTimer = 260;
+                updateBossHUD();
+                announce('bossMeltdown', { color: '#7de8ff' });
+                addFloatingText(boss.x + boss.width / 2, boss.y - 10, 'MELTDOWN! HIT HARD!', '#7de8ff', 1900, 26, 0);
+            }
+        }
+
+        function damageBoss(amount, reason) {
+            if (!boss) return;
+            boss.hp = Math.max(0, boss.hp - amount);
+            boss.flashTimer = 200;
+            addScore(70 * level, boss.x + boss.width / 2, boss.y + boss.height / 2, boss.accent);
+            bumpCombo(1, 18, boss.x + boss.width / 2, boss.y + boss.height / 2);
+            if (reason === 'bazooka') {
+                createParticles(boss.x + boss.width / 2, boss.y + boss.height / 2, boss.accent, 18);
+            }
+            updateBossHUD();
+            if (boss.hp <= 0) {
+                defeatBoss();
+            }
+        }
+
+        function defeatBoss() {
+            if (!boss) return;
+            const defeatX = boss.x + boss.width / 2;
+            const defeatY = boss.y + boss.height / 2;
+            const defeatedBoss = { ...boss };
+            boss = null;
+            updateBossHUD();
+            createExplosion(defeatX, defeatY, 120);
+            createParticles(defeatX, defeatY, defeatedBoss.accent, 36);
+            createParticles(defeatX, defeatY, '#fff1b0', 22);
+            addScore(1500 * level, defeatX, defeatY, '#ffd24a');
+            spawnPowerup(defeatX - 48, defeatY + 12, 'rapid');
+            spawnPowerup(defeatX + 48, defeatY + 12, 'bazooka');
+            aliens = aliens.filter(alien => !alien.isMinion);
+            bossAttacks = [];
+            if (!achievements.bossBeat) {
+                showAchievement('BOSS PAPERWORK REVOKED!', defeatedBoss.color);
+                achievements.bossBeat = true;
+            }
+            announce('bossDown', { color: defeatedBoss.color });
+            showBossReward(defeatedBoss);
+        }
+
+        function spawnBossAttack() {
+            if (!boss) return;
+            const attackCount = boss.kind === 'embargo' ? 2 : 1;
+            const extraAttack = boss.hp / boss.maxHp < 0.45 ? 1 : 0;
+            const totalAttacks = attackCount + extraAttack;
+            for (let i = 0; i < totalAttacks; i++) {
+                if (boss.kind === 'embargo') {
+                    const width = 108 + Math.random() * 26;
+                    const side = Math.random() < 0.5 ? 'left' : 'right';
+                    bossAttacks.push({
+                        mode: 'horizontal',
+                        kind: boss.kind,
+                        x: side === 'left' ? -width - 20 : canvas.width + 20,
+                        y: 150 + Math.random() * 250,
+                        width,
+                        height: 56,
+                        warning: boss.warningMs,
+                        speed: boss.attackSpeed,
+                        vx: side === 'left' ? boss.attackSpeed : -boss.attackSpeed,
+                        color: boss.color,
+                        accent: boss.accent,
+                    });
+                } else {
+                    const width = boss.attackWidth;
+                    const x = Math.max(0, Math.min(canvas.width - width, Math.random() * (canvas.width - width)));
+                    bossAttacks.push({
+                        mode: 'vertical',
+                        kind: boss.kind,
+                        leavesPuddle: boss.kind === 'sobzilla',
+                        x,
+                        width,
+                        y: boss.y + boss.height,
+                        height: boss.kind === 'sobzilla' ? 32 : 44,
+                        warning: boss.warningMs,
+                        speed: boss.attackSpeed,
+                        color: boss.color,
+                        accent: boss.accent,
+                    });
+                }
+            }
+        }
+
+        function createBossPuddle(attack) {
+            bossPuddles.push({
+                x: attack.x,
+                width: attack.width,
+                y: canvas.height - 39,
+                height: 14,
+                timer: 3400,
+                pulse: Math.random() * Math.PI * 2,
+            });
+        }
+
+        function markAlienAsDefeated(alien, hitX, hitY, exploded = false) {
+            if (!alien || !alien.alive || alien.crying) return;
+            alien.crying = true;
+            alien.cryTimer = 1000;
+            alien.fallSpeed = exploded ? -5 : -3;
+            createParticles(hitX, hitY, '#ffe135', exploded ? 16 : 12);
+            createTears(alien.x + alien.width / 2, alien.y);
+            addScore(100 * level, alien.x + alien.width / 2, alien.y, '#ffe135');
+            bumpCombo(1, exploded ? 20 : 14, alien.x + alien.width / 2, alien.y + alien.height / 2);
+            spawnPowerup(alien.x + alien.width / 2, alien.y + alien.height / 2);
+            spawnAbsurdDrop(alien.x + alien.width / 2, alien.y + alien.height / 2, false);
+        }
+
+        function drawBackground() {
+            const theme = getTheme();
+            bgTime += isReducedMotion ? 0.003 : 0.01;
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            const rad = Math.max(canvas.width, canvas.height) * 0.85;
+            const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad);
+            grad.addColorStop(0, theme.colors[0]);
+            grad.addColorStop(0.5, theme.colors[1]);
+            grad.addColorStop(1, theme.colors[2]);
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            bgShapes.forEach(shape => {
+                ctx.save();
+                ctx.translate(shape.x, shape.y);
+                ctx.rotate(shape.rotation);
+                ctx.globalAlpha = shape.alpha + Math.sin(bgTime + shape.phase) * 0.1;
+                ctx.strokeStyle = theme.accent;
+                ctx.lineWidth = 1.5;
+                const s = shape.size + Math.sin(bgTime * 2 + shape.phase) * 5;
+                switch (theme.type) {
+                    case 'triangles':
+                        ctx.beginPath();
+                        ctx.moveTo(0, -s);
+                        ctx.lineTo(s * 0.866, s * 0.5);
+                        ctx.lineTo(-s * 0.866, s * 0.5);
+                        ctx.closePath();
+                        ctx.stroke();
+                        break;
+                    case 'hexagons':
+                        ctx.beginPath();
+                        for (let i = 0; i < 6; i++) {
+                            const angle = i * Math.PI / 3;
+                            const px = Math.cos(angle) * s;
+                            const py = Math.sin(angle) * s;
+                            if (i === 0) ctx.moveTo(px, py);
+                            else ctx.lineTo(px, py);
+                        }
+                        ctx.closePath();
+                        ctx.stroke();
+                        break;
+                    case 'circles':
+                        ctx.beginPath();
+                        ctx.arc(0, 0, s * 0.6, 0, Math.PI * 2);
+                        ctx.stroke();
+                        break;
+                    case 'diamonds':
+                        ctx.beginPath();
+                        ctx.moveTo(0, -s);
+                        ctx.lineTo(s * 0.7, 0);
+                        ctx.lineTo(0, s);
+                        ctx.lineTo(-s * 0.7, 0);
+                        ctx.closePath();
+                        ctx.stroke();
+                        break;
+                    case 'spiral':
+                        ctx.beginPath();
+                        for (let i = 0; i < 50; i++) {
+                            const angle = i * 0.3 + bgTime;
+                            const r = i * s / 50;
+                            const px = Math.cos(angle) * r;
+                            const py = Math.sin(angle) * r;
+                            if (i === 0) ctx.moveTo(px, py);
+                            else ctx.lineTo(px, py);
+                        }
+                        ctx.stroke();
+                        break;
+                    case 'squares':
+                        ctx.strokeRect(-s / 2, -s / 2, s, s);
+                        ctx.strokeRect(-s / 3, -s / 3, s * 2 / 3, s * 2 / 3);
+                        break;
+                    case 'stars':
+                        ctx.beginPath();
+                        for (let i = 0; i < 5; i++) {
+                            const angle1 = (i * 4 * Math.PI / 5) - Math.PI / 2;
+                            const angle2 = ((i + 0.5) * 4 * Math.PI / 5) - Math.PI / 2;
+                            ctx.lineTo(Math.cos(angle1) * s, Math.sin(angle1) * s);
+                            ctx.lineTo(Math.cos(angle2) * s * 0.4, Math.sin(angle2) * s * 0.4);
+                        }
+                        ctx.closePath();
+                        ctx.stroke();
+                        break;
+                    default:
+                        ctx.beginPath();
+                        for (let i = 0; i < 30; i++) {
+                            const angle = i * 0.5 + bgTime * 2;
+                            const r = s * (1 - i / 30);
+                            ctx.lineTo(Math.cos(angle) * r, Math.sin(angle) * r);
+                        }
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.arc(0, 0, s * 0.3, 0, Math.PI * 2);
+                        ctx.stroke();
+                        break;
+                }
+                ctx.restore();
+                shape.y += shape.speed;
+                shape.rotation += shape.rotSpeed;
+                if (shape.y > canvas.height + shape.size) {
+                    shape.y = -shape.size;
+                    shape.x = Math.random() * canvas.width;
+                }
+            });
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.03)';
+            for (let y = 0; y < canvas.height; y += 4) {
+                ctx.fillRect(0, y, canvas.width, 2);
+            }
+        }
+
+        function drawMonkey(x, y, mirrored = false) {
+            ctx.save();
+            ctx.translate(x + monkey.width / 2, y + monkey.height / 2);
+            if (mirrored) ctx.scale(-1, 1);
+            ctx.fillStyle = '#8b4513';
+            ctx.beginPath();
+            ctx.ellipse(0, 5, 25, 28, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#deb887';
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 18, 20, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.ellipse(-7, -5, 5, 6, 0, 0, Math.PI * 2);
+            ctx.ellipse(7, -5, 5, 6, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(-7, -4, 3, 0, Math.PI * 2);
+            ctx.arc(7, -4, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(-8, -6, 1.5, 0, Math.PI * 2);
+            ctx.arc(6, -6, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(0, 2, 8, 0.2, Math.PI - 0.2);
+            ctx.stroke();
+            ctx.fillStyle = '#8b4513';
+            ctx.beginPath();
+            ctx.arc(-22, -5, 10, 0, Math.PI * 2);
+            ctx.arc(22, -5, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#deb887';
+            ctx.beginPath();
+            ctx.arc(-22, -5, 6, 0, Math.PI * 2);
+            ctx.arc(22, -5, 6, 0, Math.PI * 2);
+            ctx.fill();
+            if (monkey.powerups.bazooka) {
+                ctx.fillStyle = '#444';
+                ctx.fillRect(8, -8, 35, 12);
+                ctx.fillStyle = '#666';
+                ctx.fillRect(8, -5, 35, 6);
+                ctx.fillStyle = '#333';
+                ctx.beginPath();
+                ctx.arc(43, -2, 6, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (monkey.powerups.gun) {
+                ctx.fillStyle = '#555';
+                ctx.fillRect(12, -3, 25, 8);
+                ctx.fillStyle = '#777';
+                ctx.fillRect(12, -1, 25, 4);
+            }
+            ctx.restore();
+        }
+
+        function drawAlien(alien) {
+            ctx.save();
+            ctx.translate(alien.x + alien.width / 2, alien.y + alien.height / 2);
+            if (alien.crying || alien.slipping) ctx.rotate(alien.rotation);
+            const colors = ['#7fff00', '#ff69b4', '#9370db'];
+            const bodyColor = colors[alien.type];
+            if (!alien.crying) {
+                ctx.shadowColor = bodyColor;
+                ctx.shadowBlur = alien.isMinion ? 6 : 10;
+            }
+            ctx.fillStyle = bodyColor;
+            ctx.beginPath();
+            ctx.ellipse(0, 5, alien.isMinion ? 18 : 22, alien.isMinion ? 14 : 18, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(0, -8, alien.isMinion ? 14 : 18, alien.isMinion ? 12 : 16, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            if (alien.crying) {
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#000';
+                ctx.beginPath();
+                ctx.moveTo(-10, -10); ctx.lineTo(-4, -8);
+                ctx.moveTo(-10, -6); ctx.lineTo(-4, -8);
+                ctx.moveTo(10, -10); ctx.lineTo(4, -8);
+                ctx.moveTo(10, -6); ctx.lineTo(4, -8);
+                ctx.stroke();
+            } else {
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.ellipse(-8, -10, alien.isMinion ? 6 : 8, alien.isMinion ? 8 : 10, 0, 0, Math.PI * 2);
+                ctx.ellipse(8, -10, alien.isMinion ? 6 : 8, alien.isMinion ? 8 : 10, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(-8, -8, alien.isMinion ? 3 : 4, 0, Math.PI * 2);
+                ctx.arc(8, -8, alien.isMinion ? 3 : 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#ff0000';
+                ctx.beginPath();
+                ctx.arc(-8, -8, 2, 0, Math.PI * 2);
+                ctx.arc(8, -8, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            if (alien.crying) {
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(0, 8, 6, Math.PI + 0.3, -0.3);
+                ctx.stroke();
+            } else {
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(0, 2, 6, 0, Math.PI);
+                ctx.fill();
+            }
+            ctx.strokeStyle = bodyColor;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(-8, -22); ctx.lineTo(-12, -32);
+            ctx.moveTo(8, -22); ctx.lineTo(12, -32);
+            ctx.stroke();
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(-12, -32, 4, 0, Math.PI * 2);
+            ctx.arc(12, -32, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function drawBoss() {
+            if (!boss) return;
+            ctx.save();
+            ctx.translate(boss.x + boss.width / 2, boss.y + boss.height / 2);
+            const wobble = boss.vulnerableTimer > 0 ? Math.sin(Date.now() / 70) * 0.08 : 0;
+            ctx.rotate(wobble);
+            if (boss.flashTimer > 0) {
+                ctx.shadowColor = boss.accent;
+                ctx.shadowBlur = 18;
+            }
+            ctx.fillStyle = boss.color;
+            ctx.beginPath();
+            ctx.ellipse(0, 12, 92, 48, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(0, -24, 76, 58, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.ellipse(-26, -34, 16, 20, 0, 0, Math.PI * 2);
+            ctx.ellipse(26, -34, 16, 20, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = boss.vulnerableTimer > 0 ? '#ff3158' : '#000';
+            ctx.beginPath();
+            ctx.arc(-24, -31, 8, 0, Math.PI * 2);
+            ctx.arc(24, -31, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(-27, -35, 2.4, 0, Math.PI * 2);
+            ctx.arc(21, -35, 2.4, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.strokeStyle = '#1c1c1c';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            if (boss.vulnerableTimer > 0) ctx.arc(0, -4, 24, 0.15, Math.PI - 0.15);
+            else ctx.arc(0, 10, 18, Math.PI + 0.25, -0.25);
+            ctx.stroke();
+
+            ctx.strokeStyle = boss.color;
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(-30, -70); ctx.lineTo(-44, -92);
+            ctx.moveTo(30, -70); ctx.lineTo(44, -92);
+            ctx.stroke();
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(-44, -92, 8, 0, Math.PI * 2);
+            ctx.arc(44, -92, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (boss.kind === 'inspector') {
+                ctx.fillStyle = '#364153';
+                ctx.fillRect(48, -10, 52, 68);
+                ctx.fillStyle = '#9db0c7';
+                ctx.fillRect(54, -2, 40, 50);
+                ctx.fillStyle = '#ff8f1f';
+                ctx.fillRect(60, 8, 28, 8);
+                ctx.fillStyle = '#101826';
+                ctx.font = 'bold 14px sans-serif';
+                ctx.fillText('B$S', 64, 26);
+            } else if (boss.kind === 'sobzilla') {
+                ctx.fillStyle = '#52d9ff';
+                ctx.beginPath();
+                ctx.ellipse(-32, -6, 8, 22, 0, 0, Math.PI * 2);
+                ctx.ellipse(32, -6, 8, 22, 0, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                ctx.fillStyle = '#5d3946';
+                ctx.fillRect(-56, 32, 112, 42);
+                ctx.strokeStyle = '#ffb347';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(-56, 32, 112, 42);
+                ctx.fillStyle = '#ffd24a';
+                ctx.fillRect(-10, 40, 20, 28);
+            }
+
+            if (boss.vulnerableTimer > 0) {
+                ctx.strokeStyle = '#fff0a0';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(0, 0, 28 + Math.sin(Date.now() / 60) * 4, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        function drawBanana(banana) {
+            ctx.save();
+            ctx.translate(banana.x, banana.y);
+            ctx.rotate(banana.rotation);
+            const scale = banana.isBazooka ? 1.8 : (banana.isGun ? 0.8 : 1);
+            ctx.scale(scale, scale);
+            if (banana.isBazooka) {
+                ctx.fillStyle = '#ff0066';
+                ctx.fillRect(-15, -10, 30, 20);
+                ctx.fillStyle = '#ff6600';
+                ctx.beginPath();
+                ctx.moveTo(15, -10);
+                ctx.lineTo(25, 0);
+                ctx.lineTo(15, 10);
+                ctx.fill();
+                ctx.fillStyle = `rgba(255, 100, 0, ${Math.random() * 0.8 + 0.2})`;
+                ctx.beginPath();
+                ctx.arc(-20, 0, Math.random() * 8 + 4, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (banana.isGun) {
+                ctx.fillStyle = '#ffff00';
+                ctx.beginPath();
+                ctx.ellipse(0, 0, 10, 5, 0, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                ctx.fillStyle = '#ffe135';
+                ctx.beginPath();
+                ctx.arc(0, 0, 10, 0, Math.PI, true);
+                ctx.lineTo(0, 0);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(0, 0, 10, Math.PI, Math.PI * 2, true);
+                ctx.lineTo(0, 0);
+                ctx.fill();
+                ctx.fillStyle = '#8b4513';
+                ctx.fillRect(-2, -10, 4, 20);
+            }
+            ctx.restore();
+        }
+
+        function drawGroundBanana(banana) {
+            ctx.save();
+            ctx.translate(banana.x, banana.y);
+            ctx.rotate(banana.rotation);
+            ctx.globalAlpha = banana.alpha;
+            ctx.fillStyle = '#ffe135';
+            ctx.beginPath();
+            ctx.moveTo(-20, 0);
+            ctx.lineTo(20, 0);
+            ctx.lineTo(10, -15);
+            ctx.lineTo(-10, -15);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function drawPowerup(powerup) {
+            ctx.save();
+            ctx.translate(powerup.x, powerup.y);
+            powerup.pulse += 0.1;
+            const scale = 1 + Math.sin(powerup.pulse) * 0.1;
+            ctx.scale(scale, scale);
+            ctx.shadowColor = powerup.color;
+            ctx.shadowBlur = 15;
+            ctx.fillStyle = powerup.color;
+            ctx.beginPath();
+            ctx.arc(0, 0, 15, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(powerup.symbol, 0, 2);
+            ctx.restore();
+        }
+
+        function drawAbsurdDrop(item) {
+            ctx.save();
+            ctx.translate(item.x, item.y);
+            ctx.rotate(item.rot);
+            ctx.shadowColor = item.color;
+            ctx.shadowBlur = 10;
+            ctx.font = `${item.size}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(item.emoji, 0, 0);
+            ctx.restore();
+        }
+
+        function drawBossPuddles() {
+            bossPuddles.forEach(puddle => {
+                ctx.save();
+                const shimmer = 0.78 + Math.sin(Date.now() / 140 + puddle.pulse) * 0.12;
+                ctx.globalAlpha = puddle.timer < 800 ? puddle.timer / 800 : 0.78;
+                ctx.fillStyle = `rgba(82, 217, 255, ${shimmer})`;
+                ctx.fillRect(puddle.x, puddle.y, puddle.width, puddle.height);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.fillRect(puddle.x + 6, puddle.y + 2, Math.max(0, puddle.width - 12), 3);
+                ctx.restore();
+            });
+        }
+
+        function drawBossAttacks() {
+            bossAttacks.forEach(attack => {
+                ctx.save();
+                if (attack.warning > 0) {
+                    if (attack.mode === 'horizontal') {
+                        ctx.fillStyle = 'rgba(255, 108, 140, 0.18)';
+                        ctx.fillRect(0, attack.y, canvas.width, attack.height);
+                    } else {
+                        ctx.fillStyle = attack.kind === 'sobzilla' ? 'rgba(82, 217, 255, 0.18)' : 'rgba(255, 95, 104, 0.18)';
+                        ctx.fillRect(attack.x, 0, attack.width, canvas.height);
+                    }
+                    ctx.fillStyle = attack.accent;
+                    ctx.font = 'bold 12px sans-serif';
+                    ctx.textAlign = 'center';
+                    if (attack.mode === 'horizontal') {
+                        ctx.fillText('EMBARGO SWEEP', canvas.width / 2, attack.y - 10);
+                    } else {
+                        ctx.fillText(attack.kind === 'sobzilla' ? 'TEAR LANE' : 'WARNING', attack.x + attack.width / 2, 80);
+                    }
+                } else {
+                    if (attack.mode === 'horizontal') {
+                        ctx.fillStyle = '#5d3946';
+                        ctx.fillRect(attack.x, attack.y, attack.width, attack.height);
+                        ctx.strokeStyle = attack.accent;
+                        ctx.lineWidth = 3;
+                        ctx.strokeRect(attack.x, attack.y, attack.width, attack.height);
+                        ctx.fillStyle = '#ffd24a';
+                        ctx.fillRect(attack.x + attack.width * 0.35, attack.y + 10, attack.width * 0.3, attack.height - 20);
+                    } else {
+                        ctx.fillStyle = attack.color;
+                        ctx.fillRect(attack.x, attack.y, attack.width, attack.height);
+                        ctx.strokeStyle = attack.accent;
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(attack.x, attack.y, attack.width, attack.height);
+                        if (attack.kind === 'sobzilla') {
+                            ctx.fillStyle = 'rgba(255,255,255,0.22)';
+                            ctx.fillRect(attack.x + 8, attack.y + 4, Math.max(0, attack.width - 16), 5);
+                        }
+                    }
+                }
+                ctx.restore();
+            });
+        }
+
+        function drawFloatingTexts() {
+            floatingTexts.forEach(text => {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, text.life / 1600);
+                ctx.font = `bold ${text.size}px sans-serif`;
+                ctx.fillStyle = text.color;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+                ctx.shadowBlur = 5;
+                ctx.fillText(text.text, text.x, text.y);
+                ctx.restore();
+            });
+        }
+
+        function drawExplosion(explosion) {
+            ctx.save();
+            ctx.globalAlpha = explosion.life;
+            ctx.fillStyle = '#ff6600';
+            ctx.shadowColor = '#ffff00';
+            ctx.shadowBlur = 20;
+            ctx.beginPath();
+            ctx.arc(explosion.x, explosion.y, explosion.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function drawParticles() {
+            particles.forEach(particle => {
+                ctx.save();
+                ctx.globalAlpha = particle.life;
+                ctx.fillStyle = particle.color;
+                if (particle.isTear) {
+                    ctx.beginPath();
+                    ctx.arc(particle.x, particle.y, particle.size / 2, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    ctx.fillRect(particle.x, particle.y, particle.size, particle.size);
+                }
+                ctx.restore();
+            });
+        }
+
+        function drawGroundBananas() { groundBananas.forEach(drawGroundBanana); }
+        function drawPowerups() { powerups.forEach(drawPowerup); }
+        function drawAbsurdDrops() { absurdDrops.forEach(drawAbsurdDrop); }
+        function drawBananas() { bananas.forEach(drawBanana); }
+        function drawAliens() { aliens.forEach(alien => { if (alien.alive) drawAlien(alien); }); }
+        function drawExplosions() { explosions.forEach(drawExplosion); }
+
+        function throwBanana(fromX, ignoreCooldown = false) {
+            if (!ignoreCooldown && monkey.throwCooldown > 0) return;
+            const isBazooka = monkey.powerups.bazooka;
+            const isGun = monkey.powerups.gun;
+            let shots = 1;
+            if (monkey.powerups.triple) shots = 3;
+            else if (monkey.powerups.double) shots = 2;
+            const spread = shots > 1 ? 12 : 0;
+            const speed = monkey.bananaSpeed * (monkey.powerups.range ? 1.5 : 1) * (isGun ? 1.8 : 1);
+            for (let i = 0; i < shots; i++) {
+                const angle = shots === 1 ? 0 : (i - (shots - 1) / 2) * spread;
+                const radians = (angle - 90) * Math.PI / 180;
+                bananas.push({
+                    x: fromX,
+                    y: monkey.y,
+                    vx: Math.cos(radians) * speed * 0.3,
+                    vy: -speed,
+                    rotation: 0,
+                    width: isBazooka ? 50 : 30,
+                    height: isBazooka ? 25 : 15,
+                    isBazooka,
+                    isGun,
+                    explosionRadius: isBazooka ? 80 : 0,
+                });
+            }
+            let cooldown = monkey.powerups.rapid ? monkey.throwRate / 2.5 : (isGun ? monkey.throwRate / 3 : monkey.throwRate);
+            if (sillyFX.jam > 0) cooldown *= 1.7;
+            if (!ignoreCooldown) monkey.throwCooldown = cooldown;
+        }
+
+        function checkRectHit(x, y, target) {
+            return x > target.x && x < target.x + target.width && y > target.y && y < target.y + target.height;
+        }
+
+        function updateMonkey(dt) {
+            const step = dt / 16.6667;
+            const speedMult = sillyFX.turbo > 0 ? 1.45 : 1;
+            const speed = monkey.speed * speedMult * step;
+            const leftPressed = keys.ArrowLeft || keys.KeyA;
+            const rightPressed = keys.ArrowRight || keys.KeyD;
+            const invert = sillyFX.invert > 0;
+            if (invert ? rightPressed : leftPressed) {
+                monkey.x -= speed;
+                if (monkey.powerups.doubleMonkey) secondMonkey.x -= speed;
+            }
+            if (invert ? leftPressed : rightPressed) {
+                monkey.x += speed;
+                if (monkey.powerups.doubleMonkey) secondMonkey.x += speed;
+            }
+            monkey.x = Math.max(0, Math.min(canvas.width - monkey.width, monkey.x));
+            if (monkey.powerups.doubleMonkey) {
+                secondMonkey.x = Math.max(0, Math.min(canvas.width - monkey.width, secondMonkey.x));
+            }
+            if (monkey.throwCooldown > 0) monkey.throwCooldown -= dt;
+            if (keys.Space) {
+                const canShoot = monkey.throwCooldown <= 0;
+                throwBanana(monkey.x + monkey.width / 2);
+                if (monkey.powerups.doubleMonkey && canShoot) throwBanana(secondMonkey.x + monkey.width / 2, true);
+            }
+        }
+
+        function updateBoss(dt) {
+            if (!boss || levelTransition) return;
+            const step = dt / 16.6667;
+            if (boss.introTimer > 0) boss.introTimer -= dt;
+            boss.x += boss.vx * step;
+            if (boss.x < 20 || boss.x + boss.width > canvas.width - 20) boss.vx *= -1;
+            boss.attackCooldown -= dt;
+            boss.summonCooldown -= dt;
+            boss.flashTimer = Math.max(0, boss.flashTimer - dt);
+            if (boss.vulnerableTimer > 0) {
+                boss.vulnerableTimer -= dt;
+            } else if (boss.humiliation > 0) {
+                boss.humiliation = Math.max(0, boss.humiliation - dt * 0.01);
+            }
+            if (boss.attackCooldown <= 0 && boss.introTimer <= 0) {
+                spawnBossAttack();
+                boss.attackCooldown = boss.attackEvery * (boss.hp / boss.maxHp < 0.45 ? 0.75 : 1);
+            }
+            if (boss.summonCooldown <= 0 && boss.introTimer <= 0) {
+                spawnBossMinion();
+                if (boss.kind === 'embargo' && Math.random() < 0.45) spawnBossMinion();
+                boss.summonCooldown = boss.summonEvery;
+            }
+
+            for (let i = bossPuddles.length - 1; i >= 0; i--) {
+                const puddle = bossPuddles[i];
+                puddle.timer -= dt;
+                const hitsMonkey = monkey.x + monkey.width > puddle.x && monkey.x < puddle.x + puddle.width && monkey.y + monkey.height > puddle.y && monkey.y < puddle.y + puddle.height + 12;
+                const hitsBuddy = monkey.powerups.doubleMonkey && secondMonkey.active && secondMonkey.x + monkey.width > puddle.x && secondMonkey.x < puddle.x + puddle.width && monkey.y + monkey.height > puddle.y && monkey.y < puddle.y + puddle.height + 12;
+                if (hitsMonkey || hitsBuddy) {
+                    createParticles(puddle.x + puddle.width / 2, puddle.y, '#52d9ff', 10);
+                    applyAbsurdEffect('jam');
+                    bossPuddles.splice(i, 1);
+                    continue;
+                }
+                if (puddle.timer <= 0) bossPuddles.splice(i, 1);
+            }
+
+            for (let i = bossAttacks.length - 1; i >= 0; i--) {
+                const attack = bossAttacks[i];
+                if (attack.warning > 0) {
+                    attack.warning -= dt;
+                } else {
+                    if (attack.mode === 'horizontal') {
+                        attack.x += attack.vx * step;
+                    } else {
+                        attack.y += attack.speed * step;
+                    }
+                    const hitsMonkey = monkey.x + monkey.width > attack.x && monkey.x < attack.x + attack.width && monkey.y + monkey.height > attack.y && monkey.y < attack.y + attack.height;
+                    const hitsBuddy = monkey.powerups.doubleMonkey && secondMonkey.active && secondMonkey.x + monkey.width > attack.x && secondMonkey.x < attack.x + attack.width && monkey.y + monkey.height > attack.y && monkey.y < attack.y + attack.height;
+                    if (hitsMonkey || hitsBuddy) {
+                        bossAttacks.splice(i, 1);
+                        loseLife();
+                        continue;
+                    }
+                    if (attack.mode === 'horizontal') {
+                        if ((attack.vx > 0 && attack.x > canvas.width + 40) || (attack.vx < 0 && attack.x + attack.width < -40)) {
+                            bossAttacks.splice(i, 1);
+                        }
+                    } else if (attack.y + attack.height >= canvas.height - 25) {
+                        if (attack.leavesPuddle) {
+                            createBossPuddle(attack);
+                        } else {
+                            createParticles(attack.x + attack.width / 2, canvas.height - 36, attack.accent, 8);
+                        }
+                        bossAttacks.splice(i, 1);
+                    } else if (attack.y > canvas.height + 40) {
+                        bossAttacks.splice(i, 1);
+                    }
+                }
+            }
+            updateBossHUD();
+        }
+
+        function updateAliens(dt) {
+            if (levelTransition) return;
+            if (boss) {
+                const step = dt / 16.6667;
+                aliens.forEach(alien => {
+                    if (!alien.alive) return;
+                    if (!alien.crying && !alien.slipping) {
+                        alien.x += alien.vx * step;
+                        alien.y += alien.vy * step;
+                        if (alien.x <= 0 || alien.x >= canvas.width - alien.width) alien.vx *= -1;
+                        if (alien.y > canvas.height - 96) {
+                            alien.alive = false;
+                            loseLife();
+                        }
+                    }
+                    if (alien.crying) {
+                        alien.cryTimer -= dt;
+                        alien.fallSpeed += 0.5;
+                        alien.y += alien.fallSpeed;
+                        alien.rotation += 0.1 * (alien.slipDir || 1);
+                        if (Math.random() < 0.3) createTears(alien.x + alien.width / 2, alien.y + alien.height / 2);
+                        if (alien.y > canvas.height + 50) alien.alive = false;
+                    }
+                    if (alien.slipping && !alien.crying) {
+                        alien.x += alien.slipDir * 8;
+                        alien.rotation += alien.slipDir * 0.2;
+                        if (Math.abs(alien.rotation) > 1) {
+                            alien.crying = true;
+                            alien.cryTimer = 1000;
+                            createParticles(alien.x + alien.width / 2, alien.y + alien.height / 2, '#ffff00', 15);
+                        }
+                    }
+                });
+                return;
+            }
+
+            alienMoveTimer += dt;
+            if (alienMoveTimer > 16) {
+                alienMoveTimer = 0;
+                let hitEdge = false;
+                let lowestY = 0;
+                aliens.forEach(alien => {
+                    if (!alien.alive) return;
+                    if (!alien.crying && !alien.slipping) {
+                        alien.x += alienDirection * alienSpeed;
+                        alien.y += Math.sin(Date.now() / 300 + alien.bobOffset) * 0.3;
+                        if (alien.x <= 10 || alien.x >= canvas.width - alien.width - 10) hitEdge = true;
+                        lowestY = Math.max(lowestY, alien.y);
+                    }
+                });
+                if (hitEdge) {
+                    alienDirection *= -1;
+                    aliens.forEach(alien => {
+                        if (alien.alive && !alien.crying && !alien.slipping) alien.y += 12;
+                    });
+                }
+                if (lowestY > canvas.height - 100) loseLife();
+            }
+            aliens.forEach(alien => {
+                if (alien.crying) {
+                    alien.cryTimer -= dt;
+                    alien.fallSpeed += 0.5;
+                    alien.y += alien.fallSpeed;
+                    alien.rotation += 0.1 * (alien.slipDir || 1);
+                    if (Math.random() < 0.3) createTears(alien.x + alien.width / 2, alien.y + alien.height / 2);
+                    if (alien.y > canvas.height + 50) alien.alive = false;
+                }
+                if (alien.slipping && !alien.crying) {
+                    alien.x += alien.slipDir * 8;
+                    alien.rotation += alien.slipDir * 0.2;
+                    if (Math.abs(alien.rotation) > 1) {
+                        alien.crying = true;
+                        alien.cryTimer = 1000;
+                        createParticles(alien.x + alien.width / 2, alien.y + alien.height / 2, '#ffff00', 15);
+                    }
+                }
+            });
+        }
+
+        function updateBananas() {
+            for (let i = bananas.length - 1; i >= 0; i--) {
+                const banana = bananas[i];
+                banana.x += banana.vx;
+                banana.y += banana.vy;
+                banana.rotation += banana.isGun ? 0.5 : 0.3;
+                let hit = false;
+                let aliensHitCount = 0;
+
+                if (boss && checkRectHit(banana.x, banana.y, boss)) {
+                    hit = true;
+                    if (banana.isBazooka) {
+                        createExplosion(banana.x, banana.y, banana.explosionRadius);
+                    } else {
+                        raiseHumiliation(banana.isGun ? 12 : 10, banana.x, banana.y);
+                        if (boss.vulnerableTimer > 0) {
+                            damageBoss(banana.isGun ? 3 : 2, banana.isGun ? 'gun' : 'banana');
+                        } else {
+                            addFloatingText(banana.x, banana.y - 10, 'EMBARRASSED!', '#52d9ff', 700, 13, 0.12);
+                        }
+                    }
+                    createParticles(banana.x, banana.y, banana.isBazooka ? '#ff7d5e' : '#52d9ff', 12);
+                }
+
+                aliens.forEach(alien => {
+                    if (!alien.alive || alien.crying || hit) return;
+                    if (checkRectHit(banana.x, banana.y, alien)) {
+                        hit = true;
+                        aliensHitCount += 1;
+                        if (banana.isBazooka) createExplosion(banana.x, banana.y, banana.explosionRadius);
+                        else markAlienAsDefeated(alien, banana.x, banana.y);
+                        groundBananas.push({ x: banana.x, y: canvas.height - 25, rotation: Math.random() * Math.PI, timer: 1500, alpha: 1 });
+                    }
+                });
+
+                if (aliensHitCount === 2 && !achievements.doubleKill) {
+                    showAchievement('DOUBLE MONKEY MAYHEM!', '#ff00ff');
+                    achievements.doubleKill = true;
+                } else if (aliensHitCount >= 3 && !achievements.tripleKill) {
+                    showAchievement('TRIPLE THREAT TOSS!', '#ff00ff');
+                    achievements.tripleKill = true;
+                }
+
+                if (hit || banana.y < -30 || banana.x < -20 || banana.x > canvas.width + 20) {
+                    bananas.splice(i, 1);
+                }
+            }
+        }
+
+        function updateGroundBananas(dt) {
+            for (let i = groundBananas.length - 1; i >= 0; i--) {
+                const banana = groundBananas[i];
+                banana.timer -= dt;
+                if (banana.timer < 500) banana.alpha = banana.timer / 500;
+                aliens.forEach(alien => {
+                    if (!alien.alive || alien.crying || alien.slipping) return;
+                    const dist = Math.abs(alien.x + alien.width / 2 - banana.x);
+                    if (dist < 30 && alien.y > canvas.height - 150) {
+                        alien.slipping = true;
+                        alien.slipDir = alien.x > banana.x ? 1 : -1;
+                        createParticles(banana.x, banana.y, '#ffe135', 8);
+                        addScore(150 * level, alien.x + alien.width / 2, alien.y, '#ffe135');
+                        bumpCombo(1, 18, alien.x + alien.width / 2, alien.y);
+                        spawnAbsurdDrop(alien.x + alien.width / 2, alien.y + alien.height / 2, false);
+                    }
+                });
+                if (banana.timer <= 0) groundBananas.splice(i, 1);
+            }
+        }
+
+        function updatePowerups() {
+            for (let i = powerups.length - 1; i >= 0; i--) {
+                const powerup = powerups[i];
+                powerup.y += powerup.vy;
+                const hitsMonkey = powerup.x > monkey.x && powerup.x < monkey.x + monkey.width && powerup.y > monkey.y && powerup.y < monkey.y + monkey.height;
+                const hitsBuddy = monkey.powerups.doubleMonkey && powerup.x > secondMonkey.x && powerup.x < secondMonkey.x + monkey.width && powerup.y > monkey.y && powerup.y < monkey.y + monkey.height;
+                if (hitsMonkey || hitsBuddy) {
+                    applyPowerup(powerup.type);
+                    createParticles(powerup.x, powerup.y, powerup.color, 24);
+                    powerups.splice(i, 1);
+                    continue;
+                }
+                if (powerup.y > canvas.height + 30) powerups.splice(i, 1);
+            }
+        }
+
+        function updateAbsurdDrops(dt) {
+            for (let i = absurdDrops.length - 1; i >= 0; i--) {
+                const item = absurdDrops[i];
+                item.t += dt;
+                switch (item.behavior) {
+                    case 'wobble':
+                        item.x = item.startX + Math.sin(item.t / 200) * 15;
+                        item.y += item.vy * (dt / 16.6667);
+                        break;
+                    case 'zigzag':
+                        item.x += Math.sin(item.t / 100) * 3 * (dt / 16.6667);
+                        item.y += item.vy * (dt / 16.6667);
+                        break;
+                    case 'spiral':
+                        item.x = item.startX + Math.cos(item.t / 150) * 30;
+                        item.y = item.startY + item.t / 10;
+                        break;
+                    case 'drift':
+                        item.x += Math.sin(item.t / 500) * 1 * (dt / 16.6667);
+                        item.y += item.vy * 0.8 * (dt / 16.6667);
+                        break;
+                    case 'parachute':
+                        item.y += item.vy * 0.5 * (dt / 16.6667);
+                        break;
+                    case 'meteor':
+                        item.y += item.vy * 1.5 * (dt / 16.6667);
+                        break;
+                    case 'bounce':
+                        item.y += item.vy * (dt / 16.6667);
+                        if (item.y > canvas.height - 25 && item.bounces < 3) {
+                            item.vy *= -0.6;
+                            item.bounces += 1;
+                        }
+                        break;
+                    case 'slinky':
+                        item.y += item.vy * (dt / 16.6667);
+                        item.x += Math.sin(item.t / 50) * 5 * (dt / 16.6667);
+                        break;
+                    default:
+                        item.y += item.vy * (dt / 16.6667);
+                        break;
+                }
+                item.rot += item.rotSpeed * (dt / 16.6667);
+                const hitsMonkey = item.x > monkey.x && item.x < monkey.x + monkey.width && item.y > monkey.y && item.y < monkey.y + monkey.height;
+                const hitsBuddy = monkey.powerups.doubleMonkey && item.x > secondMonkey.x && item.x < secondMonkey.x + monkey.width && item.y > monkey.y && item.y < monkey.y + monkey.height;
+                if (hitsMonkey || hitsBuddy) {
+                    if (item.isHazard) loseLife();
+                    else collectAbsurdDrop(item);
+                    absurdDrops.splice(i, 1);
+                    continue;
+                }
+                if (item.y > canvas.height - 25) {
+                    handleDropGround(item);
+                    absurdDrops.splice(i, 1);
+                }
+            }
+        }
+
+        function updateFloatingTexts(dt) {
+            for (let i = floatingTexts.length - 1; i >= 0; i--) {
+                const text = floatingTexts[i];
+                text.life -= dt;
+                text.y -= 0.5 * (dt / 16.6667);
+                text.x += text.drift * (dt / 16.6667);
+                if (text.life <= 0) floatingTexts.splice(i, 1);
+            }
+        }
+
+        function updateExplosions(dt) {
+            for (let i = explosions.length - 1; i >= 0; i--) {
+                const explosion = explosions[i];
+                explosion.radius += (explosion.maxRadius / 10) * (dt / 16.6667);
+                explosion.life -= 0.05 * (dt / 16.6667);
+                if (explosion.life <= 0) explosions.splice(i, 1);
+            }
+        }
+
+        function updateParticles(dt) {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const particle = particles[i];
+                particle.x += particle.vx * (dt / 16.6667);
+                particle.y += particle.vy * (dt / 16.6667);
+                particle.life -= 0.02 * (dt / 16.6667);
+                if (particle.isTear) particle.vy += 0.1;
+                if (particle.life <= 0) particles.splice(i, 1);
+            }
+        }
+
+        function updateSillyFX(dt) {
+            Object.keys(sillyFX).forEach(key => {
+                if (sillyFX[key] > 0) {
+                    sillyFX[key] -= dt;
+                    if (sillyFX[key] < 0) sillyFX[key] = 0;
+                }
+            });
+        }
+
+        function loseLife() {
+            if (!gameRunning || levelTransition) return;
+            lives -= 1;
+            updateUI();
+            announce('lifeLost');
+            resetCombo();
+            if (lives <= 0) {
+                gameOver();
+                return;
+            }
+            monkey.x = 370;
+            monkey.throwCooldown = 0;
+            bananas = [];
+            bossAttacks = [];
+            clearPowerupTimers();
+            Object.keys(monkey.powerups).forEach(key => {
+                monkey.powerups[key] = false;
+            });
+            secondMonkey.x = 430;
+            secondMonkey.active = false;
+            updatePowerupUI();
+            if (getPreset().pityDropOnLifeLoss) {
+                spawnPowerup(canvas.width / 2, canvas.height * 0.4, Math.random() > 0.5 ? 'rapid' : 'double');
+            }
+        }
+
+        function pauseGame(silent = false) {
+            if (!gameRunning || paused || levelTransition || bossRewardPending) return;
+            paused = true;
+            pauseOverlay.style.display = 'flex';
+            if (!silent) announce('pause');
+        }
+
+        function unpauseGame() {
+            if (!gameRunning || !paused || bossRewardPending) return;
+            paused = false;
+            pauseOverlay.style.display = 'none';
+            announce('unpause');
+            lastTime = performance.now();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function startGame() {
+            startScreen.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+            pauseOverlay.style.display = 'none';
+            bossRewardScreen.style.display = 'none';
+            score = 0;
+            level = 1;
+            lives = getPreset().startLives;
+            gameRunning = true;
+            paused = false;
+            levelTransition = false;
+            aliens = [];
+            resetTransientState();
+            Object.keys(achievements).forEach(key => {
+                achievements[key] = false;
+            });
+            currentTickerIndex = 0;
+            tickerTimer = 0;
+            bnnTickerContent.textContent = bnnTickerLines[currentTickerIndex];
+            document.getElementById('recordCallout').textContent = '';
+            updateUI();
+            initBackground();
+            createAliens();
+            lastTime = performance.now();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function nextLevel() {
+            level += 1;
+            levelTransition = true;
+            if (isBossLevel(level)) {
+                const profile = getBossProfile(level);
+                levelTextElement.textContent = `BOSS LEVEL ${level}`;
+                levelSubtextElement.textContent = `${profile.name} // ${profile.subtitle}`;
+            } else {
+                levelTextElement.textContent = `LEVEL ${level}`;
+                levelSubtextElement.textContent = levelSubtexts[Math.min(level - 1, levelSubtexts.length - 1)] || levelSubtexts[levelSubtexts.length - 1];
+            }
+            levelScreen.style.display = 'flex';
+            bananas = [];
+            powerups = [];
+            if (isBossLevel(level)) announce('bossIntro');
+            else announce('levelStart');
+            setTimeout(() => {
+                levelScreen.style.display = 'none';
+                levelTransition = false;
+                initBackground();
+                createAliens();
+                updateUI();
+                updateBossHUD();
+            }, 2500);
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            paused = false;
+            boss = null;
+            bossAttacks = [];
+            bossPuddles = [];
+            bossRewardPending = null;
+            bossRewardScreen.style.display = 'none';
+            updateBossHUD();
+            const isNewRecord = syncHighScore();
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('gameOverSubtitle').textContent = gameOverSubtitles[Math.floor(Math.random() * gameOverSubtitles.length)];
+            document.getElementById('recordCallout').textContent = isNewRecord
+                ? `New ${difficultyPresets[difficulty].label} record // ${formatScore(score)}`
+                : `Best ${difficultyPresets[difficulty].label} // ${formatScore(highScores[difficulty])}`;
+            gameOverScreen.style.display = 'flex';
+        }
+
+        function bindHold(button, keyCode) {
+            if (!button) return;
+            let down = false;
+            const set = value => {
+                down = value;
+                keys[keyCode] = value;
+                button.classList.toggle('pressed', value);
+            };
+            const onDown = event => {
+                event.preventDefault();
+                try {
+                    if (button.setPointerCapture) button.setPointerCapture(event.pointerId);
+                } catch (error) {
+                    void error;
+                }
+                set(true);
+            };
+            const onUp = event => {
+                if (event && event.preventDefault) event.preventDefault();
+                if (!down) return;
+                set(false);
+            };
+            if (window.PointerEvent) {
+                button.addEventListener('pointerdown', onDown, { passive: false });
+                button.addEventListener('pointerup', onUp, { passive: false });
+                button.addEventListener('pointercancel', onUp, { passive: false });
+                button.addEventListener('lostpointercapture', onUp, { passive: false });
+            } else {
+                button.addEventListener('touchstart', event => { event.preventDefault(); set(true); }, { passive: false });
+                button.addEventListener('touchend', onUp, { passive: false });
+                button.addEventListener('touchcancel', onUp, { passive: false });
+                button.addEventListener('mousedown', event => { event.preventDefault(); set(true); });
+                button.addEventListener('mouseup', onUp);
+                button.addEventListener('mouseleave', onUp);
+            }
+            button.addEventListener('contextmenu', event => event.preventDefault());
+        }
+
+        function gameLoop(currentTime) {
+            if (!gameRunning || paused) return;
+            const dt = Math.min(currentTime - lastTime, 34);
+            lastTime = currentTime;
+            let shakeX = 0;
+            let shakeY = 0;
+            if (sillyFX.shake > 0) {
+                shakeX = (Math.random() - 0.5) * 10;
+                shakeY = (Math.random() - 0.5) * 10;
+            }
+            const scale = window.currentScale || 1;
+            gameContainer.style.transform = `translate(${shakeX}px, ${shakeY}px) scale(${scale})`;
+
+            updateSillyFX(dt);
+            updateCombo(dt);
+            updateTicker(dt);
+            updateMonkey(dt);
+            updateBoss(dt);
+            updateAliens(dt);
+            updateBananas(dt);
+            updateGroundBananas(dt);
+            updatePowerups(dt);
+            updateAbsurdDrops(dt);
+            updateExplosions(dt);
+            updateParticles(dt);
+            updateFloatingTexts(dt);
+
+            const aliveAliens = aliens.filter(alien => alien.alive).length;
+            if (!boss && aliveAliens === 0 && !levelTransition) nextLevel();
+
+            drawBackground();
+            ctx.fillStyle = '#3e3e46';
+            ctx.fillRect(0, canvas.height - 25, canvas.width, 25);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+            ctx.fillRect(0, canvas.height - 24, canvas.width, 2);
+            drawGroundBananas();
+            drawBossPuddles();
+            drawPowerups();
+            drawAbsurdDrops();
+            drawBossAttacks();
+            if (boss) drawBoss();
+            drawMonkey(monkey.x, monkey.y);
+            if (monkey.powerups.doubleMonkey && secondMonkey.active) drawMonkey(secondMonkey.x, monkey.y, true);
+            drawBananas();
+            drawAliens();
+            drawExplosions();
+            drawParticles();
+            drawFloatingTexts();
+
+            if (sillyFX.confetti > 0) {
+                for (let i = 0; i < (hasTouch ? 2 : 5); i++) {
+                    createParticles(
+                        Math.random() * canvas.width,
+                        Math.random() * canvas.height,
+                        ['#ff00ff', '#00ffff', '#ffff00', '#ff6b6b'][Math.floor(Math.random() * 4)],
+                        1,
+                    );
+                }
+            }
+
+            if (sillyFX.bananaRain > 0 && Math.random() < 0.1) {
+                spawnBonusBanana(Math.random() * canvas.width);
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        document.querySelectorAll('.difficulty-option').forEach(button => {
+            button.addEventListener('click', () => setDifficulty(button.dataset.difficulty));
+        });
+
+        document.getElementById('startButton').addEventListener('click', startGame);
+        document.getElementById('playAgainButton').addEventListener('click', startGame);
+        document.getElementById('resumeButton').addEventListener('click', unpauseGame);
+        document.getElementById('continueBossButton').addEventListener('click', continueBossReward);
+
+        document.getElementById('fullscreenBtn').addEventListener('click', async () => {
+            try {
+                if (document.fullscreenElement) await document.exitFullscreen();
+                else await document.documentElement.requestFullscreen();
+            } catch (error) {
+                console.warn('Fullscreen unavailable:', error);
+            }
+        });
+
+        window.addEventListener('keydown', event => {
+            if (bossRewardPending && (event.code === 'Enter' || event.code === 'Space')) {
+                event.preventDefault();
+                continueBossReward();
+                return;
+            }
+            keys[event.code] = true;
+            if (event.code === 'Space' && gameRunning && !paused) event.preventDefault();
+            if (event.code === 'KeyP' && gameRunning) {
+                if (bossRewardPending) return;
+                if (paused) unpauseGame();
+                else pauseGame();
+            }
+        });
+
+        window.addEventListener('keyup', event => {
+            keys[event.code] = false;
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) pauseGame(true);
+        });
+
+        window.addEventListener('blur', () => {
+            if (!document.hidden) pauseGame(true);
+        });
+
+        window.addEventListener('resize', fitGameToScreen, { passive: true });
+        window.addEventListener('orientationchange', fitGameToScreen, { passive: true });
+
+        if (hasTouch && touchControls) {
+            touchControls.style.display = 'flex';
+            bindHold(document.getElementById('btnLeft'), 'ArrowLeft');
+            bindHold(document.getElementById('btnRight'), 'ArrowRight');
+            bindHold(document.getElementById('btnFire'), 'Space');
+        }
+
+        bnnTickerContent.textContent = bnnTickerLines[currentTickerIndex];
+        setDifficulty(difficulty);
+        fitGameToScreen();
+        updateUI();
+        updatePowerupUI();
+        updateBossHUD();
+        updateComboUI();
+        initBackground();
+    </script>
+</body>
+</html>

@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { SteeringWheel } from '@/components/steering';
+import { SteeringWheel } from "@/components/steering";
+import Link from "next/link";
 
 export default function CompassPage() {
   return (
@@ -23,12 +23,18 @@ export default function CompassPage() {
       <main className="flex-1 flex flex-col items-center justify-center p-4 pt-16 gap-7">
         <SteeringWheel />
         <p className="text-xs text-zinc-500 max-w-md text-center leading-relaxed">
-          The compass maps the MOSS60 system with twelve live sectors. Drag to rotate,
-          tap a sector to open it, and use this as the fast path between core learning
-          tools and optional activities.
+          The compass maps the MOSS60 system with twelve live sectors. Drag to
+          rotate, tap a sector to open it, and use this as the fast path between
+          core learning tools and optional activities.
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-3">
+          <Link
+            href="/monkey-invaders"
+            className="rounded-full border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-xs font-semibold text-amber-200 hover:border-amber-300 hover:text-amber-100 transition-colors"
+          >
+            Launch Monkey Invaders
+          </Link>
           <Link
             href="/school-game"
             className="rounded-full border border-zinc-700 bg-zinc-900/80 px-4 py-2 text-xs font-semibold text-zinc-300 hover:border-zinc-500 hover:text-zinc-100 transition-colors"

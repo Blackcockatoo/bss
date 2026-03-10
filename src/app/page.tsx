@@ -2436,6 +2436,12 @@ export default function Home() {
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <Link
+                  href="/monkey-invaders"
+                  className="px-4 py-2 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-200 text-sm font-medium hover:bg-amber-500/30 hover:border-amber-300 transition-colors touch-manipulation"
+                >
+                  Launch Monkey Invaders
+                </Link>
+                <Link
                   href="/compass"
                   className="px-4 py-2 rounded-xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-200 text-sm font-medium hover:bg-cyan-500/30 hover:border-cyan-400 transition-colors touch-manipulation"
                 >
