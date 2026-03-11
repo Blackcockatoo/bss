@@ -3277,6 +3277,31 @@
             bossCueCooldown: 0,
         };
 
+        const cheats = {
+            invincible: false,
+            endlessCredits: false,
+            mascotParty: false,
+        };
+
+        const operatorState = {
+            open: false,
+            resumeOnClose: false,
+            holdTimer: null,
+            fps: 60,
+        };
+
+        const mascotState = {
+            mood: 'idle',
+            timer: 0,
+        };
+
+        const endingState = {
+            active: false,
+            finalBoss: null,
+            stingerRevealed: false,
+            timeoutId: null,
+        };
+
         const flashState = {
             alpha: 0,
             duration: 0,
