@@ -39,6 +39,7 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            position: relative;
             background:
                 radial-gradient(circle at top, rgba(67, 223, 200, 0.08), transparent 34%),
                 radial-gradient(circle at 20% 80%, rgba(255, 143, 31, 0.12), transparent 30%),
@@ -46,6 +47,160 @@
             color: #fff;
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             -webkit-tap-highlight-color: transparent;
+        }
+
+        #arcadeRoom {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .room-wall,
+        .room-floor,
+        .room-light,
+        .room-neon,
+        .room-cabinet {
+            position: absolute;
+        }
+
+        .room-wall {
+            inset: 0 0 34% 0;
+            background:
+                radial-gradient(circle at 50% 12%, rgba(82, 217, 255, 0.14), transparent 30%),
+                radial-gradient(circle at 18% 26%, rgba(255, 108, 140, 0.1), transparent 24%),
+                linear-gradient(180deg, rgba(18, 24, 38, 0.84), rgba(7, 10, 18, 0.96));
+        }
+
+        .room-wall::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(90deg, rgba(255,255,255,0.02), transparent 18%, transparent 82%, rgba(255,255,255,0.02)),
+                repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0 2px, transparent 2px 140px);
+            opacity: 0.26;
+        }
+
+        .room-floor {
+            inset: 66% 0 0 0;
+            background:
+                linear-gradient(180deg, rgba(18, 24, 38, 0.1), rgba(4, 7, 14, 0.92) 22%),
+                linear-gradient(90deg, rgba(82, 217, 255, 0.04), rgba(255, 210, 74, 0.03), rgba(255, 108, 140, 0.04));
+            transform: perspective(1000px) rotateX(66deg);
+            transform-origin: top center;
+        }
+
+        .room-floor::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                repeating-linear-gradient(90deg, rgba(82, 217, 255, 0.12) 0 2px, transparent 2px 58px),
+                repeating-linear-gradient(180deg, rgba(82, 217, 255, 0.09) 0 2px, transparent 2px 48px);
+            opacity: 0.28;
+        }
+
+        .room-light {
+            top: -8%;
+            width: 46%;
+            height: 80%;
+            filter: blur(0.5px);
+            opacity: 0.22;
+            background: linear-gradient(180deg, rgba(255,255,255,0.22), transparent 70%);
+            clip-path: polygon(48% 0, 56% 0, 78% 100%, 26% 100%);
+            animation: roomLightFloat 7s ease-in-out infinite alternate;
+        }
+
+        .room-light.left { left: -8%; }
+        .room-light.right { right: -8%; animation-delay: -3s; }
+
+        .room-neon {
+            top: 14%;
+            width: 15%;
+            height: 10%;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), 0 0 30px currentColor;
+            opacity: 0.46;
+            animation: neonPulse 2.8s ease-in-out infinite alternate;
+        }
+
+        .room-neon.left {
+            left: 10%;
+            color: rgba(255, 108, 140, 0.7);
+            background: radial-gradient(circle at 40% 50%, rgba(255,108,140,0.24), transparent 66%);
+        }
+
+        .room-neon.right {
+            right: 10%;
+            color: rgba(82, 217, 255, 0.72);
+            background: radial-gradient(circle at 40% 50%, rgba(82,217,255,0.24), transparent 66%);
+            animation-delay: -1.2s;
+        }
+
+        .room-neon::before {
+            content: attr(data-label);
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            color: rgba(255,255,255,0.86);
+            font-size: clamp(10px, 1vw, 13px);
+            font-weight: 900;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+        }
+
+        .room-cabinet {
+            bottom: 20%;
+            width: 10%;
+            height: 26%;
+            border-radius: 18px 18px 12px 12px;
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.08), transparent 18%, rgba(0,0,0,0.38) 100%),
+                linear-gradient(180deg, rgba(32,38,54,0.92), rgba(12,16,26,0.96));
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+            opacity: 0.45;
+        }
+
+        .room-cabinet::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 18%;
+            right: 18%;
+            height: 30%;
+            border-radius: 12px;
+            background: linear-gradient(180deg, rgba(255,210,74,0.2), rgba(82,217,255,0.12));
+        }
+
+        .room-cabinet::after {
+            content: '';
+            position: absolute;
+            bottom: 10%;
+            left: 18%;
+            right: 18%;
+            height: 12%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(255,108,140,0.56), rgba(255,210,74,0.56), rgba(82,217,255,0.56));
+        }
+
+        .room-cabinet.one { left: 8%; transform: scale(0.9); }
+        .room-cabinet.two { left: 18%; transform: scale(0.74); opacity: 0.34; }
+        .room-cabinet.three { right: 10%; transform: scale(0.86); }
+        .room-cabinet.four { right: 22%; transform: scale(0.7); opacity: 0.3; }
+
+        @keyframes neonPulse {
+            from { opacity: 0.34; transform: translateY(0); }
+            to { opacity: 0.56; transform: translateY(-2px); }
+        }
+
+        @keyframes roomLightFloat {
+            from { transform: translateY(0) scaleX(1); }
+            to { transform: translateY(1.5%) scaleX(1.04); }
         }
 
         #floatingNav {
@@ -170,6 +325,7 @@
             position: relative;
             width: 800px;
             height: 600px;
+            z-index: 2;
             touch-action: none;
             user-select: none;
             -webkit-user-select: none;
@@ -380,6 +536,99 @@
         .deck-buttons span:nth-child(1) { --btn-color: #ff6c8c; }
         .deck-buttons span:nth-child(2) { --btn-color: #ffd24a; }
         .deck-buttons span:nth-child(3) { --btn-color: #52d9ff; }
+
+        .cabinet-mascot {
+            position: absolute;
+            top: 44%;
+            width: 16%;
+            display: grid;
+            justify-items: center;
+            gap: 8px;
+            transition: transform 0.2s ease, filter 0.2s ease;
+        }
+
+        .cabinet-mascot.left { left: 5.5%; }
+        .cabinet-mascot.right { right: 5.5%; }
+
+        .mascot-body {
+            width: 100%;
+            aspect-ratio: 1;
+            display: grid;
+            place-items: center;
+            border-radius: 22px;
+            font-size: clamp(32px, 3vw, 46px);
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.08), transparent 18%, rgba(0,0,0,0.34) 100%),
+                linear-gradient(135deg, rgba(255,210,74,0.12), rgba(82,217,255,0.08));
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), inset 0 -12px 18px rgba(0,0,0,0.34);
+        }
+
+        .cabinet-mascot.right .mascot-body {
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.08), transparent 18%, rgba(0,0,0,0.34) 100%),
+                linear-gradient(135deg, rgba(255,108,140,0.12), rgba(82,217,255,0.08));
+        }
+
+        .mascot-caption {
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(6, 10, 18, 0.68);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #cfe0f4;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .cabinet-mascot.right .mascot-caption {
+            color: #ffd9df;
+        }
+
+        #cabinetDecor[data-mood='idle'] .cabinet-mascot {
+            animation: mascotBob 2.8s ease-in-out infinite;
+        }
+
+        #cabinetDecor[data-mood='attract'] .cabinet-mascot,
+        #cabinetDecor[data-mood='hype'] .cabinet-mascot,
+        #cabinetDecor[data-mood='celebrate'] .cabinet-mascot,
+        #cabinetDecor[data-mood='cheat'] .cabinet-mascot {
+            animation: mascotBounce 0.9s ease-in-out infinite;
+        }
+
+        #cabinetDecor[data-mood='alarm'] .cabinet-mascot {
+            animation: mascotAlarm 0.35s ease-in-out infinite;
+        }
+
+        #cabinetDecor[data-mood='pain'] .cabinet-mascot,
+        #cabinetDecor[data-mood='sad'] .cabinet-mascot {
+            animation: mascotDroop 0.8s ease forwards;
+            filter: saturate(0.75);
+        }
+
+        @keyframes mascotBob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        @keyframes mascotBounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-8px) scale(1.04); }
+        }
+
+        @keyframes mascotAlarm {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(-3px) rotate(-2deg); }
+            75% { transform: translateX(3px) rotate(2deg); }
+        }
+
+        @keyframes mascotDroop {
+            from { transform: translateY(0) scale(1); }
+            to { transform: translateY(8px) scale(0.96); }
+        }
 
         #gameWrapper::before,
         #gameWrapper::after {
@@ -1462,6 +1711,18 @@
             background: rgba(0, 0, 0, 0.88);
         }
 
+        #bossRewardScreen[data-kind='inspector'] .reward-art {
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.22), transparent 22%), linear-gradient(135deg, rgba(255,210,74,0.18), rgba(255,143,31,0.2));
+        }
+
+        #bossRewardScreen[data-kind='sobzilla'] .reward-art {
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.22), transparent 22%), linear-gradient(135deg, rgba(111,242,255,0.2), rgba(121,166,255,0.18));
+        }
+
+        #bossRewardScreen[data-kind='embargo'] .reward-art {
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.22), transparent 22%), linear-gradient(135deg, rgba(255,179,71,0.18), rgba(255,108,140,0.2));
+        }
+
         #initialsEntryScreen {
             position: absolute;
             inset: 0;
@@ -1593,6 +1854,280 @@
             line-height: 1.6;
         }
 
+        #operatorMenu,
+        #endingSequenceScreen {
+            position: absolute;
+            inset: 0;
+            z-index: 132;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 28px;
+            background: rgba(0, 0, 0, 0.84);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            text-align: center;
+        }
+
+        .operator-shell,
+        .ending-shell {
+            width: min(720px, 100%);
+            padding: 22px;
+            border-radius: 24px;
+            background: rgba(7, 10, 17, 0.84);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 22px 60px rgba(0, 0, 0, 0.36);
+        }
+
+        .operator-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin: 18px 0;
+            text-align: left;
+        }
+
+        .operator-section {
+            padding: 16px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .operator-section h3 {
+            margin-bottom: 12px;
+            color: #fff1b0;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        .operator-actions {
+            display: grid;
+            gap: 8px;
+        }
+
+        .operator-btn {
+            min-height: 42px;
+            padding: 10px 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: #dce5f2;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            text-align: left;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .operator-btn.is-off {
+            color: #8f9db2;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .operator-btn.is-accent {
+            color: #fff1b0;
+            border-color: rgba(255, 210, 74, 0.26);
+            background: rgba(255, 210, 74, 0.08);
+        }
+
+        .diagnostic-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .diag-item {
+            padding: 10px 12px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .diag-item span {
+            display: block;
+            margin-bottom: 4px;
+            color: #8ea3be;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .diag-item strong {
+            color: #fff;
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+        }
+
+        .operator-footer {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .operator-hint,
+        .ending-hint {
+            margin-top: 14px;
+            color: #8ea3be;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .ending-hero {
+            display: grid;
+            grid-template-columns: 150px minmax(0, 1fr);
+            gap: 18px;
+            align-items: center;
+            margin: 18px 0;
+            text-align: left;
+        }
+
+        .ending-art {
+            min-height: 150px;
+            border-radius: 24px;
+            display: grid;
+            place-items: center;
+            font-size: 72px;
+            background:
+                radial-gradient(circle at 30% 30%, rgba(255,255,255,0.22), transparent 22%),
+                linear-gradient(135deg, rgba(255,210,74,0.16), rgba(255,108,140,0.12), rgba(82,217,255,0.14));
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: inset 0 -18px 24px rgba(0,0,0,0.24);
+        }
+
+        .ending-copy h2 {
+            margin-bottom: 10px;
+        }
+
+        .ending-stamp {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(255, 210, 74, 0.1);
+            border: 1px solid rgba(255, 210, 74, 0.24);
+            color: #fff1b0;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .ending-copy p {
+            color: #c2cbda;
+            font-size: 15px;
+            line-height: 1.65;
+        }
+
+        .credits-shell {
+            position: relative;
+            height: 220px;
+            overflow: hidden;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            margin: 0 0 16px;
+        }
+
+        .credits-shell::before,
+        .credits-shell::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 48px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .credits-shell::before {
+            top: 0;
+            background: linear-gradient(180deg, rgba(7, 10, 17, 0.98), transparent);
+        }
+
+        .credits-shell::after {
+            bottom: 0;
+            background: linear-gradient(0deg, rgba(7, 10, 17, 0.98), transparent);
+        }
+
+        .credits-roll {
+            display: grid;
+            gap: 18px;
+            padding: 220px 24px 90px;
+            transform: translateY(0);
+        }
+
+        .credits-roll.run {
+            animation: creditsRoll 16s linear forwards;
+        }
+
+        .credits-line strong,
+        .credits-line span {
+            display: block;
+        }
+
+        .credits-line strong {
+            color: #fff1b0;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .credits-line span {
+            color: #d7dfec;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        @keyframes creditsRoll {
+            from { transform: translateY(0); }
+            to { transform: translateY(-72%); }
+        }
+
+        .post-credits-card {
+            display: none;
+            margin: 0 0 18px;
+            padding: 16px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: left;
+        }
+
+        .post-credits-card.active {
+            display: block;
+        }
+
+        .post-credits-card strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #fff1b0;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        .post-credits-card p {
+            color: #d7dfec;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
         .reward-rank {
             width: 120px;
             height: 120px;
@@ -1616,6 +2151,59 @@
             font-weight: 800;
             letter-spacing: 0.08em;
             text-transform: uppercase;
+        }
+
+        .reward-hero {
+            display: grid;
+            grid-template-columns: 132px minmax(0, 1fr);
+            gap: 16px;
+            align-items: center;
+            width: min(620px, 100%);
+            margin-bottom: 18px;
+            padding: 16px;
+            border-radius: 22px;
+            background: rgba(7, 10, 17, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+        }
+
+        .reward-art {
+            height: 132px;
+            border-radius: 22px;
+            display: grid;
+            place-items: center;
+            font-size: 66px;
+            background:
+                radial-gradient(circle at 30% 30%, rgba(255,255,255,0.22), transparent 22%),
+                linear-gradient(135deg, rgba(255,210,74,0.16), rgba(255,108,140,0.12), rgba(82,217,255,0.14));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 -18px 22px rgba(0,0,0,0.24);
+        }
+
+        .reward-copy {
+            text-align: left;
+        }
+
+        .reward-stamp {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(255, 210, 74, 0.1);
+            border: 1px solid rgba(255, 210, 74, 0.24);
+            color: #fff1b0;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .reward-flavor {
+            color: #c2cbda;
+            font-size: 15px;
+            line-height: 1.6;
         }
 
         .reward-grid {
@@ -1710,6 +2298,10 @@
             .difficulty-panel { grid-template-columns: 1fr; }
             .record-board { grid-template-columns: 1fr; }
             .reward-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .reward-hero,
+            .ending-hero,
+            .operator-grid,
+            .diagnostic-grid { grid-template-columns: 1fr; }
             .initials-grid { gap: 8px; }
             .initial-letter { font-size: 36px; }
             .pause-grid { grid-template-columns: 1fr; }
@@ -1799,7 +2391,7 @@
 <body>
     <div id="floatingNav">
         <a class="nav-btn" href="/compass">&larr; Compass</a>
-        <div class="brand-chip"><strong>B$S</strong> <span>Blue Snake Studios</span> Arcade</div>
+        <div id="brandChip" class="brand-chip"><strong>B$S</strong> <span>Blue Snake Studios</span> Arcade</div>
         <div class="nav-actions">
             <button id="audioBtn" class="nav-btn" type="button">Sound On</button>
             <button id="hapticsBtn" class="nav-btn" type="button">Haptics On</button>
@@ -1809,6 +2401,19 @@
     </div>
 
     <div id="phoneHint">Hold ◀/▶ to move, hold 🍌 to fire. Landscape recommended.</div>
+
+    <div id="arcadeRoom" aria-hidden="true">
+        <div class="room-wall"></div>
+        <div class="room-light left"></div>
+        <div class="room-light right"></div>
+        <div class="room-neon left" data-label="potassium"></div>
+        <div class="room-neon right" data-label="blue snake"></div>
+        <div class="room-cabinet one"></div>
+        <div class="room-cabinet two"></div>
+        <div class="room-cabinet three"></div>
+        <div class="room-cabinet four"></div>
+        <div class="room-floor"></div>
+    </div>
 
     <div id="gameWrapper">
         <div id="cabinetDecor" aria-hidden="true">
@@ -1820,6 +2425,14 @@
             </div>
             <div class="cabinet-side-art left" data-icon="🐵"></div>
             <div class="cabinet-side-art right" data-icon="👽"></div>
+            <div class="cabinet-mascot left" id="mascotMonkey">
+                <div class="mascot-body" id="mascotMonkeyBody">🐵</div>
+                <div class="mascot-caption" id="mascotMonkeyCaption">B$S Hero</div>
+            </div>
+            <div class="cabinet-mascot right" id="mascotAlien">
+                <div class="mascot-body" id="mascotAlienBody">👽</div>
+                <div class="mascot-caption" id="mascotAlienCaption">Panic Intern</div>
+            </div>
             <div class="cabinet-speaker left"></div>
             <div class="cabinet-speaker right"></div>
             <div class="cabinet-deck">
@@ -2025,6 +2638,13 @@
                 <p class="subtitle" id="bossRewardSubtext">The paperwork has collapsed under sustained ridicule.</p>
                 <div id="bossRewardRank" class="reward-rank">A</div>
                 <div id="bossRewardCaption" class="reward-caption">Blue Snake Studios rates this incident highly.</div>
+                <div class="reward-hero">
+                    <div id="bossRewardArt" class="reward-art">📋</div>
+                    <div class="reward-copy">
+                        <div id="bossRewardStamp" class="reward-stamp">Audit Voided</div>
+                        <div id="bossRewardFlavor" class="reward-flavor">The produce inspector has been reassigned to lower-stakes paperwork somewhere far away from fruit.</div>
+                    </div>
+                </div>
                 <div class="reward-grid">
                     <div class="reward-item">
                         <span>Lives Left</span>
@@ -2045,6 +2665,75 @@
                 </div>
                 <button id="continueBossButton" class="btn" type="button">Continue</button>
                 <div class="screen-note">Rapid fire and bazooka bounty approved by Blue Snake Studios</div>
+            </div>
+
+            <div id="operatorMenu">
+                <div class="operator-shell">
+                    <div class="brand-kicker">B$S Operator Console</div>
+                    <h2>Hidden Operator Menu</h2>
+                    <p class="subtitle">Cabinet diagnostics, rule-bending, and mildly irresponsible convenience tools.</p>
+                    <div class="operator-grid">
+                        <div class="operator-section">
+                            <h3>Cheats</h3>
+                            <div class="operator-actions">
+                                <button id="opInvincibleBtn" class="operator-btn" type="button">Invincible Off</button>
+                                <button id="opArsenalBtn" class="operator-btn" type="button">Grant Arsenal</button>
+                                <button id="opMonkeyModeBtn" class="operator-btn" type="button">Trigger Monkey Mode</button>
+                                <button id="opSkipBtn" class="operator-btn" type="button">Skip Encounter</button>
+                            </div>
+                        </div>
+                        <div class="operator-section">
+                            <h3>Cabinet Settings</h3>
+                            <div class="operator-actions">
+                                <button id="opAudioBtn" class="operator-btn" type="button">Sound On</button>
+                                <button id="opHapticsBtn" class="operator-btn" type="button">Haptics On</button>
+                                <button id="opShakeBtn" class="operator-btn" type="button">Shake On</button>
+                                <button id="opEndlessCreditsBtn" class="operator-btn" type="button">Endless Credits Off</button>
+                            </div>
+                        </div>
+                        <div class="operator-section">
+                            <h3>Vanity</h3>
+                            <div class="operator-actions">
+                                <button id="opMascotPartyBtn" class="operator-btn" type="button">Mascot Party Off</button>
+                                <button id="opCreditBtn" class="operator-btn" type="button">Insert Bonus Credit</button>
+                                <button id="opTitleBtn" class="operator-btn" type="button">Return To Title</button>
+                            </div>
+                        </div>
+                        <div class="operator-section">
+                            <h3>Diagnostics</h3>
+                            <div id="operatorDiagnostics" class="diagnostic-grid"></div>
+                        </div>
+                    </div>
+                    <div class="operator-footer">
+                        <button id="operatorCloseBtn" class="btn" type="button">Close Console</button>
+                    </div>
+                    <div class="operator-hint">Hidden access: long-press the B$S chip or press <strong>Ctrl + Alt + O</strong>.</div>
+                </div>
+            </div>
+
+            <div id="endingSequenceScreen">
+                <div class="ending-shell">
+                    <div class="brand-kicker">B$S Victory Broadcast</div>
+                    <div class="ending-hero">
+                        <div id="endingArt" class="ending-art">🐵🏆</div>
+                        <div class="ending-copy">
+                            <div id="endingStamp" class="ending-stamp">Earth Saved // B$S Certified</div>
+                            <h2 id="endingTitle">Game Clear</h2>
+                            <p id="endingSubtitle">The monkey won, the aliens folded, and the potassium economy may never recover.</p>
+                        </div>
+                    </div>
+                    <div class="credits-shell">
+                        <div id="endingCreditsRoll" class="credits-roll"></div>
+                    </div>
+                    <div id="postCreditsCard" class="post-credits-card">
+                        <strong id="postCreditsTitle">Post-Credits Stinger</strong>
+                        <p id="postCreditsText">Somewhere in deep space, an unpaid intern quietly picks up a banana peel and whispers, "We can rebuild the paperwork."</p>
+                    </div>
+                    <div class="operator-footer">
+                        <button id="endingAdvanceBtn" class="btn" type="button">Skip To Stinger</button>
+                    </div>
+                    <div class="ending-hint">The B$S cabinet will keep rolling until you are emotionally finished with the victory.</div>
+                </div>
             </div>
 
             <div id="initialsEntryScreen">
@@ -2098,6 +2787,12 @@
         const pauseOverlay = document.getElementById('pauseOverlay');
         const phoneHint = document.getElementById('phoneHint');
         const floatingNav = document.getElementById('floatingNav');
+        const brandChip = document.getElementById('brandChip');
+        const cabinetDecor = document.getElementById('cabinetDecor');
+        const mascotMonkeyBody = document.getElementById('mascotMonkeyBody');
+        const mascotMonkeyCaption = document.getElementById('mascotMonkeyCaption');
+        const mascotAlienBody = document.getElementById('mascotAlienBody');
+        const mascotAlienCaption = document.getElementById('mascotAlienCaption');
         const bossHud = document.getElementById('bossHud');
         const comboHud = document.getElementById('comboHud');
         const bnnTickerContent = document.getElementById('bnnTickerContent');
@@ -2105,6 +2800,8 @@
         const gameOverScreen = document.getElementById('gameOverScreen');
         const levelScreen = document.getElementById('levelScreen');
         const bossRewardScreen = document.getElementById('bossRewardScreen');
+        const operatorMenu = document.getElementById('operatorMenu');
+        const endingSequenceScreen = document.getElementById('endingSequenceScreen');
         const initialsEntryScreen = document.getElementById('initialsEntryScreen');
         const levelTextElement = document.getElementById('levelText');
         const levelSubtextElement = document.getElementById('levelSubtext');
@@ -2126,6 +2823,31 @@
         const reviewStars = document.getElementById('reviewStars');
         const reviewQuote = document.getElementById('reviewQuote');
         const reviewByline = document.getElementById('reviewByline');
+        const operatorDiagnostics = document.getElementById('operatorDiagnostics');
+        const opInvincibleButton = document.getElementById('opInvincibleBtn');
+        const opArsenalButton = document.getElementById('opArsenalBtn');
+        const opMonkeyModeButton = document.getElementById('opMonkeyModeBtn');
+        const opSkipButton = document.getElementById('opSkipBtn');
+        const opAudioButton = document.getElementById('opAudioBtn');
+        const opHapticsButton = document.getElementById('opHapticsBtn');
+        const opShakeButton = document.getElementById('opShakeBtn');
+        const opEndlessCreditsButton = document.getElementById('opEndlessCreditsBtn');
+        const opMascotPartyButton = document.getElementById('opMascotPartyBtn');
+        const opCreditButton = document.getElementById('opCreditBtn');
+        const opTitleButton = document.getElementById('opTitleBtn');
+        const operatorCloseButton = document.getElementById('operatorCloseBtn');
+        const bossRewardArt = document.getElementById('bossRewardArt');
+        const bossRewardStamp = document.getElementById('bossRewardStamp');
+        const bossRewardFlavor = document.getElementById('bossRewardFlavor');
+        const endingArt = document.getElementById('endingArt');
+        const endingStamp = document.getElementById('endingStamp');
+        const endingTitle = document.getElementById('endingTitle');
+        const endingSubtitle = document.getElementById('endingSubtitle');
+        const endingCreditsRoll = document.getElementById('endingCreditsRoll');
+        const postCreditsCard = document.getElementById('postCreditsCard');
+        const postCreditsTitle = document.getElementById('postCreditsTitle');
+        const postCreditsText = document.getElementById('postCreditsText');
+        const endingAdvanceButton = document.getElementById('endingAdvanceBtn');
 
         const BASE_WIDTH = 800;
         const BASE_HEIGHT = 600;
@@ -2135,6 +2857,7 @@
         const AUDIO_PREF_KEY = 'bss-monkey-audio-enabled';
         const HAPTICS_PREF_KEY = 'bss-monkey-haptics-enabled';
         const SHAKE_PREF_KEY = 'bss-monkey-shake-enabled';
+        const FINAL_BOSS_LEVEL = 15;
         const PHONE_HINT_DISMISS_MS = 5000;
         const hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
         const keys = {};
@@ -2962,6 +3685,28 @@
             return phase === 'defeat' ? '255,241,177' : phase === 'meltdown' ? '255,95,104' : '255,210,74';
         }
 
+        function getBossRewardTheme(kind) {
+            if (kind === 'sobzilla') {
+                return {
+                    art: '💧👑',
+                    stamp: 'Tantrum Contained',
+                    flavor: 'Sobzilla exhausted the tear budget, flooded her own lanes, and drifted off in a cloud of melodrama.',
+                };
+            }
+            if (kind === 'embargo') {
+                return {
+                    art: '📦💥',
+                    stamp: 'Embargo Shredded',
+                    flavor: 'The Banana Embargo Mothership discovered that cargo shame, when overclocked, becomes confetti.',
+                };
+            }
+            return {
+                art: '📋☄️',
+                stamp: 'Audit Voided',
+                flavor: 'The Galactic Produce Inspector has been reassigned to harmless filing and a long, reflective nap.',
+            };
+        }
+
         function playShotSound(kind = 'banana') {
             if (!audioState.enabled || !audioState.unlocked || !audioState.context) return;
             const now = performance.now();
@@ -3345,6 +4090,7 @@
         function showBossReward(defeatedBoss) {
             const rank = getBossRank();
             const bounty = 1500 * level;
+            const rewardTheme = getBossRewardTheme(defeatedBoss.kind);
             bossRewardPending = {
                 boss: defeatedBoss,
                 rank,
@@ -3352,10 +4098,14 @@
             };
             levelTransition = true;
             paused = true;
+            bossRewardScreen.dataset.kind = defeatedBoss.kind;
             document.getElementById('bossRewardTitle').textContent = `${defeatedBoss.name} Neutralized`;
             document.getElementById('bossRewardSubtext').textContent = `${defeatedBoss.subtitle} Blue Snake Studios has filed the incident as a complete banana success.`;
             document.getElementById('bossRewardRank').textContent = rank.letter;
             document.getElementById('bossRewardCaption').textContent = `B$S Clearance Rank // ${rank.title}`;
+            if (bossRewardArt) bossRewardArt.textContent = rewardTheme.art;
+            if (bossRewardStamp) bossRewardStamp.textContent = rewardTheme.stamp;
+            if (bossRewardFlavor) bossRewardFlavor.textContent = rewardTheme.flavor;
             document.getElementById('rewardLives').textContent = String(lives);
             document.getElementById('rewardCombo').textContent = `x${combo.best}`;
             document.getElementById('rewardDifficulty').textContent = difficultyPresets[difficulty].label;
@@ -4029,6 +4779,8 @@
             bossRewardScreen.style.display = 'none';
             closeInitialsEntry();
             announcerState.bossCueCooldown = 0;
+            flashState.timer = 0;
+            flashState.alpha = 0;
             clearPowerupTimers();
             Object.keys(monkey.powerups).forEach(key => {
                 monkey.powerups[key] = false;
@@ -4042,6 +4794,7 @@
             updatePowerupUI();
             updateBossHUD();
             updateBossVisualOverlay();
+            updateScreenFlash(0);
         }
 
         function createBoss(levelValue) {
@@ -5309,10 +6062,11 @@
         function nextLevel() {
             level += 1;
             levelTransition = true;
+            let bossProfile = null;
             if (isBossLevel(level)) {
-                const profile = getBossProfile(level);
+                bossProfile = getBossProfile(level);
                 levelTextElement.textContent = `BOSS LEVEL ${level}`;
-                levelSubtextElement.textContent = `${profile.name} // ${profile.subtitle}`;
+                levelSubtextElement.textContent = `${bossProfile.name} // ${bossProfile.subtitle}`;
             } else {
                 levelTextElement.textContent = `LEVEL ${level}`;
                 levelSubtextElement.textContent = levelSubtexts[Math.min(level - 1, levelSubtexts.length - 1)] || levelSubtexts[levelSubtexts.length - 1];
@@ -5322,7 +6076,7 @@
             powerups = [];
             if (isBossLevel(level)) {
                 announce('bossIntro');
-                playBossIntroStinger(profile.kind);
+                playBossIntroStinger(bossProfile.kind);
             } else {
                 announce('levelStart');
             }
