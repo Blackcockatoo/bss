@@ -176,6 +176,211 @@
             filter: drop-shadow(0 34px 48px rgba(0, 0, 0, 0.42));
         }
 
+        #cabinetDecor {
+            position: absolute;
+            top: -14%;
+            right: -6%;
+            bottom: -18%;
+            left: -6%;
+            z-index: -4;
+            pointer-events: none;
+        }
+
+        .cabinet-marquee {
+            position: absolute;
+            top: 0;
+            left: 16%;
+            right: 16%;
+            height: 14%;
+            border-radius: 28px 28px 18px 18px;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent 16%, rgba(0, 0, 0, 0.18) 100%),
+                linear-gradient(135deg, rgba(255, 210, 74, 0.2), rgba(255, 108, 140, 0.18) 44%, rgba(82, 217, 255, 0.18));
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+                inset 0 -18px 24px rgba(0, 0, 0, 0.36),
+                0 12px 34px rgba(0, 0, 0, 0.38);
+            overflow: hidden;
+        }
+
+        .cabinet-marquee::before {
+            content: '';
+            position: absolute;
+            inset: 12% 10%;
+            border-radius: 18px;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.3), transparent 24%),
+                linear-gradient(90deg, rgba(255, 143, 31, 0.22), rgba(255, 210, 74, 0.1) 36%, rgba(82, 217, 255, 0.16) 100%);
+            opacity: 0.82;
+        }
+
+        .cabinet-marquee-text {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 0.12em;
+            color: #fff6c8;
+            text-shadow: 0 0 18px rgba(255, 210, 74, 0.3);
+        }
+
+        .cabinet-marquee-text strong {
+            font-size: clamp(14px, 1.7vw, 22px);
+            font-weight: 900;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        .cabinet-marquee-text span {
+            font-size: clamp(8px, 0.9vw, 11px);
+            font-weight: 800;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: #cce6ff;
+        }
+
+        .cabinet-side-art {
+            position: absolute;
+            top: 13%;
+            bottom: 18%;
+            width: 8.5%;
+            border-radius: 26px;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 18%, rgba(0, 0, 0, 0.34) 100%),
+                linear-gradient(160deg, rgba(255, 210, 74, 0.12), rgba(255, 108, 140, 0.14), rgba(82, 217, 255, 0.14));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), inset 0 -18px 26px rgba(0, 0, 0, 0.42);
+            display: grid;
+            place-items: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: clamp(26px, 3.2vw, 40px);
+        }
+
+        .cabinet-side-art.left { left: 0; }
+        .cabinet-side-art.right { right: 0; }
+
+        .cabinet-side-art::before {
+            content: attr(data-icon);
+            filter: drop-shadow(0 0 12px rgba(255, 210, 74, 0.18));
+        }
+
+        .cabinet-speaker {
+            position: absolute;
+            top: 22%;
+            width: 8%;
+            height: 14%;
+            border-radius: 22px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.3));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), inset 0 -12px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .cabinet-speaker.left { left: 6%; }
+        .cabinet-speaker.right { right: 6%; }
+
+        .cabinet-speaker::before,
+        .cabinet-speaker::after {
+            content: '';
+            position: absolute;
+            inset: 18% 22%;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle, rgba(0, 0, 0, 0.62) 0 38%, rgba(255, 255, 255, 0.04) 39% 43%, rgba(0, 0, 0, 0.74) 44% 100%);
+        }
+
+        .cabinet-speaker::after {
+            inset: auto 22% 18% 22%;
+            top: 56%;
+        }
+
+        .cabinet-deck {
+            position: absolute;
+            right: 11%;
+            bottom: 0;
+            left: 11%;
+            height: 18%;
+            border-radius: 22px 22px 34px 34px;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 18%, rgba(0, 0, 0, 0.34) 100%),
+                linear-gradient(135deg, rgba(26, 30, 42, 0.96), rgba(58, 34, 48, 0.94));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), inset 0 -18px 26px rgba(0, 0, 0, 0.44), 0 18px 34px rgba(0, 0, 0, 0.38);
+            overflow: hidden;
+        }
+
+        .cabinet-deck::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 20% 46%, rgba(255, 210, 74, 0.12), transparent 18%),
+                radial-gradient(circle at 82% 44%, rgba(82, 217, 255, 0.12), transparent 18%),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.04), transparent 30%, transparent 70%, rgba(255, 255, 255, 0.04));
+        }
+
+        .deck-joystick,
+        .deck-buttons {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .deck-joystick {
+            left: 18%;
+            width: 16%;
+            height: 62%;
+        }
+
+        .deck-joystick::before {
+            content: '';
+            position: absolute;
+            bottom: 8%;
+            left: 50%;
+            width: 32%;
+            height: 42%;
+            transform: translateX(-50%);
+            border-radius: 999px;
+            background: linear-gradient(180deg, #444d63, #141821);
+        }
+
+        .deck-joystick::after {
+            content: '';
+            position: absolute;
+            top: 6%;
+            left: 50%;
+            width: 34%;
+            aspect-ratio: 1;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ffd24a, #ff8f1f 62%, #7a3911 100%);
+            box-shadow: 0 0 16px rgba(255, 210, 74, 0.26);
+        }
+
+        .deck-buttons {
+            right: 12%;
+            width: 28%;
+            height: 58%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8%;
+        }
+
+        .deck-buttons span {
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.05) 18%, transparent 22%),
+                radial-gradient(circle, var(--btn-color) 0 58%, rgba(0, 0, 0, 0.55) 60% 100%);
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.06), inset 0 -8px 12px rgba(0, 0, 0, 0.38);
+        }
+
+        .deck-buttons span:nth-child(1) { --btn-color: #ff6c8c; }
+        .deck-buttons span:nth-child(2) { --btn-color: #ffd24a; }
+        .deck-buttons span:nth-child(3) { --btn-color: #52d9ff; }
+
         #gameWrapper::before,
         #gameWrapper::after {
             content: '';
@@ -401,6 +606,16 @@
                 linear-gradient(90deg, transparent 0 18%, rgba(255, 179, 71, 0.08) 18% 22%, transparent 22% 78%, rgba(255, 108, 140, 0.12) 78% 82%, transparent 82%),
                 radial-gradient(circle at 50% 18%, rgba(255, 179, 71, 0.16), transparent 32%);
             animation-duration: 7s;
+        }
+
+        #screenFlashOverlay {
+            position: absolute;
+            inset: 0;
+            z-index: 116;
+            pointer-events: none;
+            opacity: 0;
+            border-radius: inherit;
+            transition: opacity 0.06s linear;
         }
 
         @keyframes bossOverlayDrift {
@@ -1101,6 +1316,122 @@
             color: #ffd24a;
         }
 
+        .attract-panels {
+            width: min(620px, 100%);
+            margin: 0 0 16px;
+            position: relative;
+            min-height: 194px;
+        }
+
+        .attract-panel {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transform: translateY(8px) scale(0.985);
+            pointer-events: none;
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+
+        .attract-panel.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+
+        .review-shell,
+        .howto-shell {
+            width: 100%;
+            min-height: 194px;
+            padding: 18px;
+            border-radius: 22px;
+            background: rgba(7, 10, 17, 0.56);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+        }
+
+        .review-kicker,
+        .howto-kicker {
+            margin-bottom: 12px;
+            color: #fff1b0;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        .review-stars {
+            margin-bottom: 12px;
+            color: #ffd24a;
+            font-size: 18px;
+            letter-spacing: 0.18em;
+        }
+
+        .review-quote {
+            color: #eef5ff;
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 14px;
+        }
+
+        .review-byline {
+            color: #8cc0ff;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .howto-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .howto-card {
+            padding: 14px 12px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: left;
+        }
+
+        .howto-card strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #fff5c8;
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .howto-card p {
+            color: #b6c0d1;
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .attract-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 0 0 14px;
+        }
+
+        .attract-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.16);
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04);
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        .attract-dot.active {
+            background: #ffd24a;
+            transform: scale(1.18);
+        }
+
         .attract-crawl {
             width: min(620px, 100%);
             margin: 0 0 18px;
@@ -1385,6 +1716,7 @@
             .leaderboard-row { grid-template-columns: 44px minmax(0, 1fr); }
             .leaderboard-row strong,
             .leaderboard-score { grid-column: span 2; }
+            .howto-grid { grid-template-columns: 1fr; }
             #ui { padding: 10px 12px; }
             .ui-item { font-size: 14px; }
             #brandWatermark { top: 42px; font-size: 9px; }
@@ -1479,6 +1811,26 @@
     <div id="phoneHint">Hold ◀/▶ to move, hold 🍌 to fire. Landscape recommended.</div>
 
     <div id="gameWrapper">
+        <div id="cabinetDecor" aria-hidden="true">
+            <div class="cabinet-marquee">
+                <div class="cabinet-marquee-text">
+                    <strong>Monkey Invaders</strong>
+                    <span>Blue Snake Studios // Fruitkind Cabinet</span>
+                </div>
+            </div>
+            <div class="cabinet-side-art left" data-icon="🐵"></div>
+            <div class="cabinet-side-art right" data-icon="👽"></div>
+            <div class="cabinet-speaker left"></div>
+            <div class="cabinet-speaker right"></div>
+            <div class="cabinet-deck">
+                <div class="deck-joystick"></div>
+                <div class="deck-buttons">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
         <div id="gameContainer">
             <canvas id="gameCanvas" width="800" height="600"></canvas>
             <div id="crtOverlay" aria-hidden="true">
@@ -1486,6 +1838,7 @@
                 <div class="crt-noise"></div>
                 <div class="crt-vignette"></div>
             </div>
+            <div id="screenFlashOverlay" aria-hidden="true"></div>
             <div id="bossVisualOverlay" aria-hidden="true"></div>
 
             <div id="ui">
@@ -1579,11 +1932,47 @@
                         <em id="bestHardInitials">BSS</em>
                     </div>
                 </div>
-                <div class="leaderboard-shell">
-                    <div class="leaderboard-title">B$S Cabinet Legends</div>
-                    <div id="leaderboardRows" class="leaderboard-rows"></div>
+                <div class="attract-panels">
+                    <div class="attract-panel active" data-panel="leaderboard">
+                        <div class="leaderboard-shell">
+                            <div class="leaderboard-title">B$S Cabinet Legends</div>
+                            <div id="leaderboardRows" class="leaderboard-rows"></div>
+                        </div>
+                        <div id="attractCrawl" class="attract-crawl"><span id="attractCrawlText"></span></div>
+                    </div>
+                    <div class="attract-panel" data-panel="reviews">
+                        <div class="review-shell">
+                            <div class="review-kicker">Totally Real Cabinet Reviews</div>
+                            <div id="reviewStars" class="review-stars">★★★★★</div>
+                            <div id="reviewQuote" class="review-quote">"The only game brave enough to weaponize fruit and office politics."</div>
+                            <div id="reviewByline" class="review-byline">Potassium Weekly // 11 Bananas out of 10</div>
+                        </div>
+                    </div>
+                    <div class="attract-panel" data-panel="howto">
+                        <div class="howto-shell">
+                            <div class="howto-kicker">How To Survive The Cabinet</div>
+                            <div class="howto-grid">
+                                <div class="howto-card">
+                                    <strong>Move Smart</strong>
+                                    <p>Use <code>A / D</code>, arrows, or touch buttons. Stay slippery and keep a lane open.</p>
+                                </div>
+                                <div class="howto-card">
+                                    <strong>Chain Chaos</strong>
+                                    <p>Catch absurd drops, trigger peels, and build combo pressure until Monkey Mode kicks in.</p>
+                                </div>
+                                <div class="howto-card">
+                                    <strong>Break Bosses</strong>
+                                    <p>Bosses take shame first, damage second. Humiliate them, then unload when they melt down.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div id="attractCrawl" class="attract-crawl"><span id="attractCrawlText"></span></div>
+                <div class="attract-indicators" aria-hidden="true">
+                    <span class="attract-dot active" data-dot="0"></span>
+                    <span class="attract-dot" data-dot="1"></span>
+                    <span class="attract-dot" data-dot="2"></span>
+                </div>
                 <button id="startButton" class="btn" type="button">Press Start</button>
                 <div class="controls">
                     <span>SPACE</span> or <span>TOUCH FIRE</span> to throw bananas<br>
@@ -1730,12 +2119,18 @@
         const creditDisplay = document.getElementById('creditDisplay');
         const coinDisplay = document.getElementById('coinDisplay');
         const creditSignal = document.getElementById('creditSignal');
+        const screenFlashOverlay = document.getElementById('screenFlashOverlay');
         const bossVisualOverlay = document.getElementById('bossVisualOverlay');
         const leaderboardRows = document.getElementById('leaderboardRows');
         const attractCrawlText = document.getElementById('attractCrawlText');
+        const reviewStars = document.getElementById('reviewStars');
+        const reviewQuote = document.getElementById('reviewQuote');
+        const reviewByline = document.getElementById('reviewByline');
 
         const BASE_WIDTH = 800;
         const BASE_HEIGHT = 600;
+        const CABINET_WIDTH = 896;
+        const CABINET_HEIGHT = 792;
         const HIGH_SCORE_KEY = 'bss-monkey-highscores-v1';
         const AUDIO_PREF_KEY = 'bss-monkey-audio-enabled';
         const HAPTICS_PREF_KEY = 'bss-monkey-haptics-enabled';
@@ -2136,6 +2531,9 @@
             aliens: [],
             bananas: [],
             particles: [],
+            panelIndex: 0,
+            panelTimer: 0,
+            reviewIndex: 0,
         };
 
         const initialsState = {
@@ -2155,6 +2553,32 @@
         const announcerState = {
             bossCueCooldown: 0,
         };
+
+        const flashState = {
+            alpha: 0,
+            duration: 0,
+            timer: 0,
+            color: '255,255,255',
+            blend: 'screen',
+        };
+
+        const cabinetReviews = [
+            {
+                stars: '★★★★★',
+                quote: '"The only cabinet brave enough to combine alien warfare, potassium futures, and public humiliation."',
+                byline: 'Potassium Weekly // 11 Bananas out of 10',
+            },
+            {
+                stars: '★★★★★',
+                quote: '"A deeply irresponsible amount of fun. We lost three hours and one sense of dignity."',
+                byline: 'Joystick Crime Review // Cabinet of the Month',
+            },
+            {
+                stars: '★★★★☆',
+                quote: '"The bosses cry, the monkey thrives, and accounting still has questions."',
+                byline: 'Blue Snack Quarterly // Recommended by snack scientists',
+            },
+        ];
 
         function getPreset() {
             return difficultyPresets[difficulty];
@@ -2213,6 +2637,53 @@
                     ? `Starts ${String(creditsState.starts).padStart(2, '0')}`
                     : 'B$S House Credit Ready';
             }
+        }
+
+        function updateAttractPanels() {
+            const panels = Array.from(document.querySelectorAll('.attract-panel'));
+            const dots = Array.from(document.querySelectorAll('.attract-dot'));
+            panels.forEach((panel, index) => {
+                panel.classList.toggle('active', index === attractState.panelIndex);
+            });
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === attractState.panelIndex);
+            });
+            const review = cabinetReviews[attractState.reviewIndex % cabinetReviews.length];
+            if (reviewStars) reviewStars.textContent = review.stars;
+            if (reviewQuote) reviewQuote.textContent = review.quote;
+            if (reviewByline) reviewByline.textContent = review.byline;
+        }
+
+        function cycleAttractPanel(dt) {
+            if (!attractState.active || startScreen.style.display === 'none') return;
+            attractState.panelTimer -= dt;
+            if (attractState.panelTimer > 0) return;
+            attractState.panelIndex = (attractState.panelIndex + 1) % 3;
+            if (attractState.panelIndex === 1) {
+                attractState.reviewIndex = (attractState.reviewIndex + 1) % cabinetReviews.length;
+            }
+            attractState.panelTimer = 4200;
+            updateAttractPanels();
+        }
+
+        function triggerScreenFlash(color = '255,255,255', alpha = 0.6, duration = 220, blend = 'screen') {
+            flashState.color = color;
+            flashState.alpha = alpha;
+            flashState.duration = duration;
+            flashState.timer = duration;
+            flashState.blend = blend;
+            updateScreenFlash(0);
+        }
+
+        function updateScreenFlash(dt) {
+            if (!screenFlashOverlay) return;
+            if (flashState.timer > 0) {
+                flashState.timer = Math.max(0, flashState.timer - dt);
+            }
+            const progress = flashState.duration > 0 ? flashState.timer / flashState.duration : 0;
+            screenFlashOverlay.style.opacity = String(Math.max(0, progress * flashState.alpha));
+            screenFlashOverlay.style.mixBlendMode = flashState.blend;
+            screenFlashOverlay.style.background = `radial-gradient(circle at 50% 42%, rgba(${flashState.color}, ${0.18 + progress * 0.5}), transparent 38%), linear-gradient(180deg, rgba(${flashState.color}, ${0.12 + progress * 0.35}), rgba(${flashState.color}, 0))`;
         }
 
         function loadHighScores() {
@@ -2479,6 +2950,16 @@
                 hit: [220, 180],
                 attack: [277.18, 220],
             };
+        }
+
+        function getBossFlashColor(kind, phase = 'intro') {
+            if (kind === 'sobzilla') {
+                return phase === 'defeat' ? '196,245,255' : phase === 'meltdown' ? '111,242,255' : '121,166,255';
+            }
+            if (kind === 'embargo') {
+                return phase === 'defeat' ? '255,210,120' : phase === 'meltdown' ? '255,108,140' : '255,179,71';
+            }
+            return phase === 'defeat' ? '255,241,177' : phase === 'meltdown' ? '255,95,104' : '255,210,74';
         }
 
         function playShotSound(kind = 'banana') {
@@ -3038,7 +3519,7 @@
             const pad = 24;
             const availW = Math.max(220, window.innerWidth - pad);
             const availH = Math.max(220, window.innerHeight - getTopReserve() - getBottomReserve() - 12);
-            const scale = Math.min(availW / BASE_WIDTH, availH / BASE_HEIGHT, 1);
+            const scale = Math.min(availW / CABINET_WIDTH, availH / CABINET_HEIGHT, 1);
             window.currentScale = scale;
             gameWrapper.style.width = `${Math.floor(BASE_WIDTH * scale)}px`;
             gameWrapper.style.height = `${Math.floor(BASE_HEIGHT * scale)}px`;
@@ -3050,6 +3531,9 @@
             attractState.monkeyDir = 1;
             attractState.shotTimer = 260;
             attractState.phase = 0;
+            attractState.panelIndex = 0;
+            attractState.panelTimer = 4200;
+            attractState.reviewIndex = 0;
             attractState.bananas = [];
             attractState.particles = [];
             attractState.aliens = Array.from({ length: 6 }, (_, index) => ({
@@ -3067,6 +3551,7 @@
                 flash: 0,
                 wobble: Math.random() * Math.PI * 2,
             }));
+            updateAttractPanels();
         }
 
         function startAttractMode() {
@@ -3148,7 +3633,9 @@
                 particle.life -= 0.03 * step;
                 if (particle.life <= 0) attractState.particles.splice(i, 1);
             }
+            cycleAttractPanel(dt);
             updateFloatingTexts(dt);
+            updateScreenFlash(dt);
             updateMusicBed(dt);
         }
 
@@ -3580,6 +4067,7 @@
             bossAttacks = [];
             bossPuddles = [];
             setCabinetState('boss');
+            triggerScreenFlash(getBossFlashColor(profile.kind, 'intro'), 0.42, 260, 'screen');
             updateBossHUD();
             updateBossVisualOverlay();
         }
@@ -3658,8 +4146,10 @@
                 boss.vulnerableTimer = Math.max(2400, 4800 / getPreset().bossAttackMult);
                 boss.flashTimer = 260;
                 updateBossHUD();
+                updateBossVisualOverlay();
                 announce('bossMeltdown', { color: '#7de8ff' });
                 addFloatingText(boss.x + boss.width / 2, boss.y - 10, 'MELTDOWN! HIT HARD!', '#7de8ff', 1900, 26, 0);
+                triggerScreenFlash(getBossFlashColor(boss.kind, 'meltdown'), 0.52, 240, 'screen');
                 playBossMeltdownStinger(boss.kind);
                 triggerHaptic('meltdown');
             }
@@ -3689,6 +4179,7 @@
             boss = null;
             updateBossHUD();
             updateBossVisualOverlay();
+            triggerScreenFlash(getBossFlashColor(defeatedBoss.kind, 'defeat'), 0.78, 360, 'screen');
             createExplosion(defeatX, defeatY, 120);
             createParticles(defeatX, defeatY, defeatedBoss.accent, 36);
             createParticles(defeatX, defeatY, '#fff1b0', 22);
@@ -4939,6 +5430,7 @@
             updateMusicBed(dt);
             updateCombo(dt);
             updateTicker(dt);
+            updateScreenFlash(dt);
             updateMonkey(dt);
             updateBoss(dt);
             updateAliens(dt);
