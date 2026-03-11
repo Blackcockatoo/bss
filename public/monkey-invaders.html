@@ -173,6 +173,39 @@
             touch-action: none;
             user-select: none;
             -webkit-user-select: none;
+            filter: drop-shadow(0 34px 48px rgba(0, 0, 0, 0.42));
+        }
+
+        #gameWrapper::before,
+        #gameWrapper::after {
+            content: '';
+            position: absolute;
+            pointer-events: none;
+        }
+
+        #gameWrapper::before {
+            inset: -18px;
+            z-index: -2;
+            border-radius: 42px;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 12%, transparent 82%, rgba(0, 0, 0, 0.32)),
+                linear-gradient(135deg, rgba(255, 210, 74, 0.14), rgba(44, 58, 84, 0.18) 28%, rgba(14, 18, 28, 0.9) 74%);
+            box-shadow:
+                inset 0 2px 0 rgba(255, 255, 255, 0.16),
+                inset 0 -20px 36px rgba(0, 0, 0, 0.52),
+                0 0 0 1px rgba(255, 255, 255, 0.04),
+                0 24px 64px rgba(0, 0, 0, 0.48);
+        }
+
+        #gameWrapper::after {
+            inset: -8px;
+            z-index: -1;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.12),
+                inset 0 0 28px rgba(255, 210, 74, 0.05),
+                inset 0 -18px 28px rgba(0, 0, 0, 0.38);
         }
 
         #gameContainer {
@@ -180,7 +213,7 @@
             inset: 0;
             width: 800px;
             height: 600px;
-            border-radius: 22px;
+            border-radius: 30px / 20px;
             overflow: hidden;
             transform-origin: top left;
             will-change: transform;
@@ -190,6 +223,19 @@
                 0 0 80px rgba(255, 210, 74, 0.2),
                 0 0 120px rgba(255, 143, 31, 0.1),
                 inset 0 0 100px rgba(0, 0, 0, 0.38);
+        }
+
+        #gameContainer::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+                inset 0 0 120px rgba(255, 255, 255, 0.02),
+                inset 0 -18px 38px rgba(0, 0, 0, 0.28);
+            z-index: 119;
         }
 
         #gameCanvas {
@@ -205,6 +251,9 @@
             z-index: 118;
             pointer-events: none;
             overflow: hidden;
+            border-radius: inherit;
+            transform: perspective(1200px) scale(1.018, 1.032);
+            transform-origin: center center;
         }
 
         #crtOverlay::before,
@@ -284,6 +333,80 @@
         body[data-cabinet='reward'] #crtOverlay::before { opacity: 0.52; }
         body[data-cabinet='pause'] #crtOverlay::after,
         body[data-cabinet='reward'] #crtOverlay::after { opacity: 0.5; }
+
+        #bossVisualOverlay {
+            position: absolute;
+            inset: 0;
+            z-index: 117;
+            pointer-events: none;
+            opacity: 0;
+            border-radius: inherit;
+            overflow: hidden;
+            transition: opacity 0.25s ease;
+            mix-blend-mode: screen;
+        }
+
+        #bossVisualOverlay::before,
+        #bossVisualOverlay::after {
+            content: '';
+            position: absolute;
+            inset: -12%;
+            animation: bossOverlayDrift 12s ease-in-out infinite alternate;
+        }
+
+        #bossVisualOverlay.active {
+            opacity: var(--boss-overlay-opacity, 0.36);
+        }
+
+        #bossVisualOverlay.vulnerable {
+            opacity: calc(var(--boss-overlay-opacity, 0.36) + 0.12);
+        }
+
+        #bossVisualOverlay.kind-inspector::before {
+            background:
+                repeating-linear-gradient(90deg, rgba(255, 210, 74, 0.08) 0 18px, transparent 18px 46px),
+                linear-gradient(180deg, rgba(255, 143, 31, 0.16), transparent 36%, rgba(255, 210, 74, 0.1));
+        }
+
+        #bossVisualOverlay.kind-inspector::after {
+            background:
+                linear-gradient(0deg, transparent 0 76%, rgba(255, 95, 104, 0.12) 76% 79%, transparent 79% 100%),
+                radial-gradient(circle at 50% 12%, rgba(255, 210, 74, 0.18), transparent 32%);
+            animation-duration: 8s;
+        }
+
+        #bossVisualOverlay.kind-sobzilla::before {
+            background:
+                radial-gradient(circle at 20% 10%, rgba(111, 242, 255, 0.24), transparent 26%),
+                radial-gradient(circle at 74% 18%, rgba(121, 166, 255, 0.16), transparent 30%),
+                repeating-linear-gradient(160deg, rgba(111, 242, 255, 0.08) 0 14px, transparent 14px 40px);
+            filter: blur(0.4px);
+        }
+
+        #bossVisualOverlay.kind-sobzilla::after {
+            background:
+                linear-gradient(180deg, rgba(111, 242, 255, 0.12), transparent 30%, rgba(111, 242, 255, 0.16) 88%, transparent),
+                radial-gradient(circle at 50% 80%, rgba(82, 217, 255, 0.16), transparent 24%);
+            animation-duration: 10s;
+        }
+
+        #bossVisualOverlay.kind-embargo::before {
+            background:
+                repeating-linear-gradient(90deg, rgba(255, 108, 140, 0.09) 0 20px, transparent 20px 44px),
+                linear-gradient(135deg, rgba(255, 179, 71, 0.14), transparent 28%, rgba(255, 108, 140, 0.12) 72%, transparent);
+        }
+
+        #bossVisualOverlay.kind-embargo::after {
+            background:
+                linear-gradient(90deg, transparent 0 18%, rgba(255, 179, 71, 0.08) 18% 22%, transparent 22% 78%, rgba(255, 108, 140, 0.12) 78% 82%, transparent 82%),
+                radial-gradient(circle at 50% 18%, rgba(255, 179, 71, 0.16), transparent 32%);
+            animation-duration: 7s;
+        }
+
+        @keyframes bossOverlayDrift {
+            from { transform: translate3d(-2%, -1%, 0) scale(1.02); }
+            to { transform: translate3d(2%, 2%, 0) scale(1.06); }
+        }
 
         #ui {
             position: absolute;
@@ -925,6 +1048,85 @@
             text-transform: uppercase;
         }
 
+        .leaderboard-shell {
+            width: min(620px, 100%);
+            margin: 0 0 16px;
+            padding: 14px;
+            border-radius: 22px;
+            background: rgba(7, 10, 17, 0.56);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+        }
+
+        .leaderboard-title {
+            margin-bottom: 10px;
+            color: #fff1b0;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        .leaderboard-rows {
+            display: grid;
+            gap: 8px;
+        }
+
+        .leaderboard-row {
+            display: grid;
+            grid-template-columns: 52px minmax(0, 1fr) auto auto;
+            gap: 10px;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: #d9e3f1;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .leaderboard-row strong {
+            color: #fff5c8;
+            font-size: 13px;
+        }
+
+        .leaderboard-rank {
+            color: #8cc0ff;
+        }
+
+        .leaderboard-score {
+            color: #ffd24a;
+        }
+
+        .attract-crawl {
+            width: min(620px, 100%);
+            margin: 0 0 18px;
+            padding: 8px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+            white-space: nowrap;
+            color: #8cc0ff;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .attract-crawl span {
+            display: inline-block;
+            padding-left: 100%;
+            animation: crawlMarquee 18s linear infinite;
+        }
+
+        @keyframes crawlMarquee {
+            from { transform: translateX(0); }
+            to { transform: translateX(-100%); }
+        }
+
         #bossRewardScreen {
             background: rgba(0, 0, 0, 0.88);
         }
@@ -1180,6 +1382,9 @@
             .initials-grid { gap: 8px; }
             .initial-letter { font-size: 36px; }
             .pause-grid { grid-template-columns: 1fr; }
+            .leaderboard-row { grid-template-columns: 44px minmax(0, 1fr); }
+            .leaderboard-row strong,
+            .leaderboard-score { grid-column: span 2; }
             #ui { padding: 10px 12px; }
             .ui-item { font-size: 14px; }
             #brandWatermark { top: 42px; font-size: 9px; }
@@ -1281,6 +1486,7 @@
                 <div class="crt-noise"></div>
                 <div class="crt-vignette"></div>
             </div>
+            <div id="bossVisualOverlay" aria-hidden="true"></div>
 
             <div id="ui">
                 <div class="ui-item score">🍌 Score: <span id="scoreValue">0</span></div>
@@ -1373,6 +1579,11 @@
                         <em id="bestHardInitials">BSS</em>
                     </div>
                 </div>
+                <div class="leaderboard-shell">
+                    <div class="leaderboard-title">B$S Cabinet Legends</div>
+                    <div id="leaderboardRows" class="leaderboard-rows"></div>
+                </div>
+                <div id="attractCrawl" class="attract-crawl"><span id="attractCrawlText"></span></div>
                 <button id="startButton" class="btn" type="button">Press Start</button>
                 <div class="controls">
                     <span>SPACE</span> or <span>TOUCH FIRE</span> to throw bananas<br>
@@ -1519,6 +1730,9 @@
         const creditDisplay = document.getElementById('creditDisplay');
         const coinDisplay = document.getElementById('coinDisplay');
         const creditSignal = document.getElementById('creditSignal');
+        const bossVisualOverlay = document.getElementById('bossVisualOverlay');
+        const leaderboardRows = document.getElementById('leaderboardRows');
+        const attractCrawlText = document.getElementById('attractCrawlText');
 
         const BASE_WIDTH = 800;
         const BASE_HEIGHT = 600;
@@ -1692,6 +1906,11 @@
                 'Boss defeated! Blue Snake Studios will deny all involvement.',
                 'They folded under pressure. Specifically potassium pressure.',
                 'Manager neutralized. Fruitkind survives another audit.',
+            ],
+            bossPressure: [
+                'Boss integrity falling! The nonsense is getting expensive!',
+                'The boss is cracking! Keep the pressure unethical!',
+                'Structural embarrassment detected! Finish the job!',
             ],
             bossCue: {
                 inspector: [
@@ -2529,6 +2748,38 @@
             document.getElementById('bestHardInitials').textContent = highScores.hard.initials;
             const current = highScores[difficulty];
             document.getElementById('difficultyRecord').textContent = `Current best // ${difficultyPresets[difficulty].label}: ${current.initials} ${formatScore(current.score)}`;
+            const ranked = [
+                { rankLabel: '01', label: 'Banana Break', initials: highScores.easy.initials, score: highScores.easy.score },
+                { rankLabel: '02', label: 'Monkey Business', initials: highScores.normal.initials, score: highScores.normal.score },
+                { rankLabel: '03', label: 'Potassium Crisis', initials: highScores.hard.initials, score: highScores.hard.score },
+            ].sort((a, b) => b.score - a.score || a.label.localeCompare(b.label));
+            if (leaderboardRows) {
+                leaderboardRows.innerHTML = ranked.map((entry, index) => `
+                    <div class="leaderboard-row">
+                        <span class="leaderboard-rank">#${String(index + 1).padStart(2, '0')}</span>
+                        <span>${entry.label}</span>
+                        <strong>${entry.initials}</strong>
+                        <span class="leaderboard-score">${formatScore(entry.score)}</span>
+                    </div>
+                `).join('');
+            }
+            if (attractCrawlText) {
+                const crawlEntries = ranked.map(entry => `${entry.label} // ${entry.initials} ${formatScore(entry.score)}`);
+                attractCrawlText.textContent = `B$S HIGH SCORE CRAWL // ${crawlEntries.join(' // ')} // INSERT COIN // PRESS START // BLUE SNAKE STUDIOS CABINET SIGNAL`;
+            }
+        }
+
+        function updateBossVisualOverlay() {
+            if (!bossVisualOverlay) return;
+            bossVisualOverlay.className = '';
+            bossVisualOverlay.style.removeProperty('--boss-overlay-opacity');
+            if (!boss) return;
+            bossVisualOverlay.classList.add('active', `kind-${boss.kind}`);
+            if (boss.vulnerableTimer > 0) {
+                bossVisualOverlay.classList.add('vulnerable');
+            }
+            const intensity = boss.vulnerableTimer > 0 ? 0.52 : (boss.flashTimer > 0 ? 0.44 : 0.32);
+            bossVisualOverlay.style.setProperty('--boss-overlay-opacity', intensity.toFixed(2));
         }
 
         function setHighScoreRecord(targetDifficulty, scoreValue, initials) {
@@ -3303,6 +3554,7 @@
             resetCombo();
             updatePowerupUI();
             updateBossHUD();
+            updateBossVisualOverlay();
         }
 
         function createBoss(levelValue) {
@@ -3323,10 +3575,13 @@
                 summonCooldown: 1900,
                 flashTimer: 0,
                 introTimer: 1400,
+                pressureCallout: false,
             };
             bossAttacks = [];
             bossPuddles = [];
+            setCabinetState('boss');
             updateBossHUD();
+            updateBossVisualOverlay();
         }
 
         function createAliens() {
@@ -3335,6 +3590,7 @@
                 createBoss(level);
                 return;
             }
+            setCabinetState('game');
             const rows = Math.min(3 + Math.floor(level / 2), 5);
             const cols = Math.min(6 + Math.floor(level / 3), 9);
             const alienWidth = 50;
@@ -3432,6 +3688,7 @@
             const defeatedBoss = { ...boss };
             boss = null;
             updateBossHUD();
+            updateBossVisualOverlay();
             createExplosion(defeatX, defeatY, 120);
             createParticles(defeatX, defeatY, defeatedBoss.accent, 36);
             createParticles(defeatX, defeatY, '#fff1b0', 22);
@@ -4127,6 +4384,10 @@
             } else if (boss.humiliation > 0) {
                 boss.humiliation = Math.max(0, boss.humiliation - dt * 0.01);
             }
+            if (!boss.pressureCallout && boss.hp / boss.maxHp <= 0.45) {
+                boss.pressureCallout = true;
+                announce('bossPressure', { color: boss.accent });
+            }
             if (boss.attackCooldown <= 0 && boss.introTimer <= 0) {
                 spawnBossAttack();
                 boss.attackCooldown = boss.attackEvery * (boss.hp / boss.maxHp < 0.45 ? 0.75 : 1);
@@ -4185,6 +4446,7 @@
                 }
             }
             updateBossHUD();
+            updateBossVisualOverlay();
         }
 
         function updateAliens(dt) {
@@ -4593,6 +4855,7 @@
             setCabinetState('title');
             bossRewardScreen.style.display = 'none';
             updateBossHUD();
+            updateBossVisualOverlay();
             const isNewRecord = hasNewHighScore();
             document.getElementById('finalScore').textContent = score;
             document.getElementById('gameOverSubtitle').textContent = gameOverSubtitles[Math.floor(Math.random() * gameOverSubtitles.length)];
