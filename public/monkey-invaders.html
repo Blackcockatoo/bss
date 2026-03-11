@@ -71,6 +71,14 @@
             box-shadow: 0 12px 36px rgba(0, 0, 0, 0.28);
         }
 
+        .nav-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+            pointer-events: auto;
+        }
+
         .nav-btn {
             display: inline-flex;
             align-items: center;
@@ -93,6 +101,17 @@
             border-color: rgba(255, 210, 74, 0.4);
             color: #fff;
             outline: none;
+        }
+
+        .nav-btn.is-off {
+            color: #8f9db2;
+            border-color: rgba(255, 255, 255, 0.08);
+            background: rgba(4, 7, 14, 0.58);
+        }
+
+        .nav-btn.is-accent {
+            border-color: rgba(255, 210, 74, 0.32);
+            color: #ffe9a7;
         }
 
         .brand-chip {
@@ -131,6 +150,7 @@
             transform: translateX(-50%);
             z-index: 240;
             display: none;
+            max-width: min(92vw, 560px);
             padding: 8px 14px;
             border-radius: 999px;
             background: rgba(255, 143, 31, 0.16);
@@ -138,6 +158,7 @@
             color: #ffd8ad;
             font-size: 11px;
             font-weight: 700;
+            line-height: 1.35;
             letter-spacing: 0.08em;
             text-transform: uppercase;
             text-align: center;
@@ -177,6 +198,92 @@
             height: 600px;
             touch-action: none;
         }
+
+        #crtOverlay {
+            position: absolute;
+            inset: 0;
+            z-index: 118;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        #crtOverlay::before,
+        #crtOverlay::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+        }
+
+        #crtOverlay::before {
+            background:
+                repeating-linear-gradient(
+                    180deg,
+                    rgba(255, 255, 255, 0.035) 0px,
+                    rgba(255, 255, 255, 0.035) 1px,
+                    rgba(0, 0, 0, 0.09) 2px,
+                    rgba(0, 0, 0, 0.09) 4px
+                );
+            opacity: 0.46;
+            mix-blend-mode: soft-light;
+        }
+
+        #crtOverlay::after {
+            background:
+                radial-gradient(circle at 15% 10%, rgba(255, 255, 255, 0.18), transparent 28%),
+                radial-gradient(circle at 85% 0%, rgba(82, 217, 255, 0.12), transparent 32%),
+                linear-gradient(120deg, rgba(255, 255, 255, 0.08), transparent 28%, transparent 74%, rgba(255, 255, 255, 0.05));
+            opacity: 0.42;
+            mix-blend-mode: screen;
+            animation: glassSweep 8s ease-in-out infinite alternate;
+        }
+
+        .crt-noise,
+        .crt-vignette,
+        .crt-rgb {
+            position: absolute;
+            inset: 0;
+        }
+
+        .crt-noise {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.85'/%3E%3C/svg%3E");
+            opacity: 0.06;
+            mix-blend-mode: screen;
+            animation: crtFuzz 0.35s steps(3) infinite;
+        }
+
+        .crt-vignette {
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+                inset 0 0 120px rgba(0, 0, 0, 0.46),
+                inset 0 0 220px rgba(0, 0, 0, 0.24);
+        }
+
+        .crt-rgb {
+            background:
+                linear-gradient(90deg, rgba(255, 0, 76, 0.03), transparent 24%, transparent 76%, rgba(82, 217, 255, 0.03));
+            mix-blend-mode: screen;
+            opacity: 0.35;
+        }
+
+        @keyframes glassSweep {
+            from { transform: translateX(-2%) translateY(-1%) scale(1.02); }
+            to { transform: translateX(2%) translateY(1%) scale(1.04); }
+        }
+
+        @keyframes crtFuzz {
+            0% { transform: translate(0, 0); }
+            33% { transform: translate(-1px, 1px); }
+            66% { transform: translate(1px, -1px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        body[data-cabinet='title'] #crtOverlay::before { opacity: 0.58; }
+        body[data-cabinet='title'] #crtOverlay::after { opacity: 0.55; }
+        body[data-cabinet='title'] .crt-noise { opacity: 0.08; }
+        body[data-cabinet='pause'] #crtOverlay::before,
+        body[data-cabinet='reward'] #crtOverlay::before { opacity: 0.52; }
+        body[data-cabinet='pause'] #crtOverlay::after,
+        body[data-cabinet='reward'] #crtOverlay::after { opacity: 0.5; }
 
         #ui {
             position: absolute;
@@ -430,6 +537,108 @@
             background: rgba(0, 0, 0, 0.74);
         }
 
+        #startScreen {
+            background:
+                radial-gradient(circle at top, rgba(67, 223, 200, 0.08), transparent 34%),
+                linear-gradient(180deg, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.84));
+        }
+
+        .attract-banner {
+            width: min(620px, 100%);
+            margin: -4px 0 20px;
+            padding: 12px 16px;
+            border-radius: 20px;
+            background: linear-gradient(180deg, rgba(255, 210, 74, 0.08), rgba(82, 217, 255, 0.06));
+            border: 1px solid rgba(255, 210, 74, 0.18);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+        }
+
+        .insert-coin {
+            color: #fff3b1;
+            font-size: 15px;
+            font-weight: 900;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+            text-shadow: 0 0 14px rgba(255, 210, 74, 0.28);
+            animation: arcadeBlink 1s steps(2, end) infinite;
+        }
+
+        .credit-row {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 10px;
+            color: #91a0b7;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .credit-row span {
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .coin-row {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .coin-btn {
+            height: 38px;
+            padding: 0 18px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 210, 74, 0.26);
+            background: rgba(255, 210, 74, 0.1);
+            color: #fff1b0;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .coin-note {
+            align-self: center;
+            color: #8ea3be;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        #creditHud {
+            position: absolute;
+            right: 16px;
+            bottom: 38px;
+            z-index: 16;
+            padding: 7px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 210, 74, 0.18);
+            background: rgba(0, 0, 0, 0.52);
+            color: #ffe9a7;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            pointer-events: none;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        @keyframes arcadeBlink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0.28; }
+        }
+
         .brand-kicker {
             display: inline-flex;
             align-items: center;
@@ -593,6 +802,68 @@
             text-transform: uppercase;
         }
 
+        .pause-card {
+            width: min(620px, 100%);
+            margin-top: 4px;
+            padding: 18px;
+            border-radius: 24px;
+            background: rgba(7, 10, 17, 0.66);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 18px 60px rgba(0, 0, 0, 0.28);
+        }
+
+        .pause-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .pause-setting-btn,
+        .pause-action-btn {
+            height: 44px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.05);
+            color: #dce5f2;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .pause-setting-btn.is-off,
+        .pause-action-btn.is-off {
+            color: #8f9db2;
+            border-color: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .pause-setting-btn.is-accent,
+        .pause-action-btn.is-accent {
+            color: #fff1b0;
+            border-color: rgba(255, 210, 74, 0.28);
+            background: rgba(255, 210, 74, 0.08);
+        }
+
+        .pause-actions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .pause-footnote {
+            margin-top: 14px;
+            color: #8ea3be;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
         .record-line {
             margin-bottom: 12px;
             color: #8cc0ff;
@@ -633,6 +904,17 @@
             font-weight: 900;
         }
 
+        .record-chip em {
+            display: block;
+            margin-top: 4px;
+            color: #8cc0ff;
+            font-size: 11px;
+            font-style: normal;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
         .record-callout {
             min-height: 22px;
             margin: -4px 0 16px;
@@ -645,6 +927,137 @@
 
         #bossRewardScreen {
             background: rgba(0, 0, 0, 0.88);
+        }
+
+        #initialsEntryScreen {
+            position: absolute;
+            inset: 0;
+            z-index: 130;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 28px;
+            background: rgba(0, 0, 0, 0.82);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            text-align: center;
+        }
+
+        .initials-frame {
+            width: min(520px, 100%);
+            padding: 22px;
+            border-radius: 24px;
+            background: rgba(7, 10, 17, 0.82);
+            border: 1px solid rgba(255, 210, 74, 0.18);
+            box-shadow: 0 18px 60px rgba(0, 0, 0, 0.38);
+        }
+
+        .initials-title {
+            margin-bottom: 10px;
+            color: #fff3b1;
+            font-size: 26px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .initials-subtitle {
+            margin-bottom: 18px;
+            color: #aeb7c8;
+            font-size: 15px;
+            line-height: 1.55;
+        }
+
+        .initials-score {
+            margin-bottom: 18px;
+            color: #8cc0ff;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .initials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .initial-slot {
+            padding: 12px 10px;
+            border-radius: 18px;
+            background: rgba(4, 7, 14, 0.72);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .initial-slot.active {
+            border-color: rgba(255, 210, 74, 0.36);
+            box-shadow: 0 0 0 1px rgba(255, 210, 74, 0.18);
+        }
+
+        .initial-step,
+        .initial-nav,
+        .initial-save {
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.04);
+            color: #e3ebf6;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .initial-step {
+            width: 100%;
+            height: 34px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 900;
+        }
+
+        .initial-letter {
+            display: block;
+            margin: 10px 0;
+            color: #fff6c8;
+            font-size: 44px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .initial-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .initial-nav,
+        .initial-save {
+            min-width: 112px;
+            height: 40px;
+            padding: 0 16px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .initial-save {
+            border-color: rgba(255, 210, 74, 0.28);
+            background: rgba(255, 210, 74, 0.12);
+            color: #fff1b0;
+        }
+
+        .initial-hint {
+            color: rgba(255, 255, 255, 0.54);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            line-height: 1.6;
         }
 
         .reward-rank {
@@ -764,6 +1177,9 @@
             .difficulty-panel { grid-template-columns: 1fr; }
             .record-board { grid-template-columns: 1fr; }
             .reward-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .initials-grid { gap: 8px; }
+            .initial-letter { font-size: 36px; }
+            .pause-grid { grid-template-columns: 1fr; }
             #ui { padding: 10px 12px; }
             .ui-item { font-size: 14px; }
             #brandWatermark { top: 42px; font-size: 9px; }
@@ -772,6 +1188,66 @@
             #powerupDisplay { bottom: 128px; max-width: 92vw; }
             .powerup-icon { width: 32px; height: 32px; font-size: 12px; }
             .brand-chip span { display: none; }
+            .nav-actions { gap: 6px; }
+            .nav-btn { padding: 0 10px; font-size: 10px; }
+            .insert-coin { font-size: 13px; letter-spacing: 0.16em; }
+            #phoneHint {
+                max-width: min(92vw, 360px);
+                padding: 8px 12px;
+                font-size: 10px;
+                line-height: 1.45;
+                letter-spacing: 0.05em;
+            }
+        }
+
+        @media (max-width: 430px) {
+            #touchControls {
+                gap: 10px;
+                padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+            }
+
+            #touchControls .touch-group {
+                gap: 10px;
+            }
+
+            #touchControls .touch-btn {
+                width: 64px;
+                height: 64px;
+                border-radius: 18px;
+                font-size: 26px;
+            }
+
+            #touchControls .touch-btn.fire {
+                width: 84px;
+                height: 84px;
+                border-radius: 22px;
+                font-size: 32px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            #touchControls {
+                gap: 8px;
+                padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+            }
+
+            #touchControls .touch-group {
+                gap: 8px;
+            }
+
+            #touchControls .touch-btn {
+                width: 56px;
+                height: 56px;
+                border-radius: 16px;
+                font-size: 22px;
+            }
+
+            #touchControls .touch-btn.fire {
+                width: 72px;
+                height: 72px;
+                border-radius: 20px;
+                font-size: 28px;
+            }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -787,14 +1263,24 @@
     <div id="floatingNav">
         <a class="nav-btn" href="/compass">&larr; Compass</a>
         <div class="brand-chip"><strong>B$S</strong> <span>Blue Snake Studios</span> Arcade</div>
-        <button id="fullscreenBtn" class="nav-btn" type="button">Fullscreen</button>
+        <div class="nav-actions">
+            <button id="audioBtn" class="nav-btn" type="button">Sound On</button>
+            <button id="hapticsBtn" class="nav-btn" type="button">Haptics On</button>
+            <button id="shakeBtn" class="nav-btn" type="button">Shake On</button>
+            <button id="fullscreenBtn" class="nav-btn" type="button">Fullscreen</button>
+        </div>
     </div>
 
-    <div id="phoneHint">Landscape feels better on phones.</div>
+    <div id="phoneHint">Hold ◀/▶ to move, hold 🍌 to fire. Landscape recommended.</div>
 
     <div id="gameWrapper">
         <div id="gameContainer">
             <canvas id="gameCanvas" width="800" height="600"></canvas>
+            <div id="crtOverlay" aria-hidden="true">
+                <div class="crt-rgb"></div>
+                <div class="crt-noise"></div>
+                <div class="crt-vignette"></div>
+            </div>
 
             <div id="ui">
                 <div class="ui-item score">🍌 Score: <span id="scoreValue">0</span></div>
@@ -835,8 +1321,22 @@
                 <span id="bnnTickerContent"></span>
             </div>
 
+            <div id="creditHud">Credits 01</div>
+
             <div id="startScreen">
                 <div class="brand-kicker">B$S Arcade // Blue Snake Studios</div>
+                <div class="attract-banner">
+                    <div class="insert-coin">Insert Coin // Press Start</div>
+                    <div class="credit-row">
+                        <span id="creditDisplay">Credits 01</span>
+                        <span id="coinDisplay">Coins 07</span>
+                        <span id="creditSignal">B$S Cabinet Signal</span>
+                    </div>
+                    <div class="coin-row">
+                        <button id="insertCoinBtn" class="coin-btn" type="button">Insert Coin</button>
+                        <div class="coin-note">Press <strong>5</strong> or <strong>C</strong> to fake it</div>
+                    </div>
+                </div>
                 <div class="emoji-title">🐵🍌👽</div>
                 <h1>MONKEY INVADERS</h1>
                 <p class="subtitle">The only thing standing between Earth and alien domination is a monkey, a dream, and an endless supply of potassium-rich projectiles.</p>
@@ -860,23 +1360,26 @@
                     <div class="record-chip">
                         <span>Banana Break</span>
                         <strong id="bestEasy">0</strong>
+                        <em id="bestEasyInitials">BSS</em>
                     </div>
                     <div class="record-chip">
                         <span>Monkey Business</span>
                         <strong id="bestNormal">0</strong>
+                        <em id="bestNormalInitials">BSS</em>
                     </div>
                     <div class="record-chip">
                         <span>Potassium Crisis</span>
                         <strong id="bestHard">0</strong>
+                        <em id="bestHardInitials">BSS</em>
                     </div>
                 </div>
-                <button id="startButton" class="btn" type="button">Start the Banana War</button>
+                <button id="startButton" class="btn" type="button">Press Start</button>
                 <div class="controls">
                     <span>SPACE</span> or <span>TOUCH FIRE</span> to throw bananas<br>
                     <span>A / D</span> or <span>◀ / ▶</span> to move<br>
                     <span>P</span> Pause &middot; Boss every <span>5</span> levels
                 </div>
-                <div class="screen-note">Filed under B$S // absurd logic, satisfying consequences</div>
+                <div class="screen-note">No quarters required // filed under B$S absurd logic and satisfying consequences</div>
             </div>
 
             <div id="gameOverScreen">
@@ -902,6 +1405,18 @@
                 <h2>Game Paused</h2>
                 <p class="subtitle">Take a breath. The fate of all fruitkind is on hold.</p>
                 <button id="resumeButton" class="btn" type="button">Resume</button>
+                <div class="pause-card">
+                    <div class="pause-grid">
+                        <button id="pauseAudioBtn" class="pause-setting-btn" type="button">Sound On</button>
+                        <button id="pauseHapticsBtn" class="pause-setting-btn" type="button">Haptics On</button>
+                        <button id="pauseShakeBtn" class="pause-setting-btn" type="button">Shake On</button>
+                    </div>
+                    <div class="pause-actions">
+                        <button id="pauseRestartBtn" class="pause-action-btn" type="button">Restart Run</button>
+                        <button id="pauseTitleBtn" class="pause-action-btn" type="button">Return to Title</button>
+                    </div>
+                    <div class="pause-footnote">Adjust the cabinet. Then get back to work.</div>
+                </div>
             </div>
 
             <div id="bossRewardScreen">
@@ -931,6 +1446,38 @@
                 <button id="continueBossButton" class="btn" type="button">Continue</button>
                 <div class="screen-note">Rapid fire and bazooka bounty approved by Blue Snake Studios</div>
             </div>
+
+            <div id="initialsEntryScreen">
+                <div class="initials-frame">
+                    <div class="brand-kicker">B$S High Score Bureau</div>
+                    <div class="initials-title">New Record</div>
+                    <p class="initials-subtitle">Arcade law requires three glorious initials before fruitkind can archive your score.</p>
+                    <div id="initialsEntryScore" class="initials-score">Monkey Business // 0</div>
+                    <div class="initials-grid">
+                        <div class="initial-slot active" data-slot="0">
+                            <button class="initial-step" type="button" data-slot="0" data-step="1">▲</button>
+                            <span id="initialLetter0" class="initial-letter">B</span>
+                            <button class="initial-step" type="button" data-slot="0" data-step="-1">▼</button>
+                        </div>
+                        <div class="initial-slot" data-slot="1">
+                            <button class="initial-step" type="button" data-slot="1" data-step="1">▲</button>
+                            <span id="initialLetter1" class="initial-letter">S</span>
+                            <button class="initial-step" type="button" data-slot="1" data-step="-1">▼</button>
+                        </div>
+                        <div class="initial-slot" data-slot="2">
+                            <button class="initial-step" type="button" data-slot="2" data-step="1">▲</button>
+                            <span id="initialLetter2" class="initial-letter">S</span>
+                            <button class="initial-step" type="button" data-slot="2" data-step="-1">▼</button>
+                        </div>
+                    </div>
+                    <div class="initial-actions">
+                        <button id="initialPrev" class="initial-nav" type="button">Prev Slot</button>
+                        <button id="initialNext" class="initial-nav" type="button">Next Slot</button>
+                        <button id="saveInitialsButton" class="initial-save" type="button">Save Record</button>
+                    </div>
+                    <div class="initial-hint">Arrow keys change letters. Left and right switch slots. Enter saves the cabinet legend.</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -958,15 +1505,36 @@
         const gameOverScreen = document.getElementById('gameOverScreen');
         const levelScreen = document.getElementById('levelScreen');
         const bossRewardScreen = document.getElementById('bossRewardScreen');
+        const initialsEntryScreen = document.getElementById('initialsEntryScreen');
         const levelTextElement = document.getElementById('levelText');
         const levelSubtextElement = document.getElementById('levelSubtext');
+        const audioButton = document.getElementById('audioBtn');
+        const hapticsButton = document.getElementById('hapticsBtn');
+        const shakeButton = document.getElementById('shakeBtn');
+        const pauseAudioButton = document.getElementById('pauseAudioBtn');
+        const pauseHapticsButton = document.getElementById('pauseHapticsBtn');
+        const pauseShakeButton = document.getElementById('pauseShakeBtn');
+        const insertCoinButton = document.getElementById('insertCoinBtn');
+        const creditHud = document.getElementById('creditHud');
+        const creditDisplay = document.getElementById('creditDisplay');
+        const coinDisplay = document.getElementById('coinDisplay');
+        const creditSignal = document.getElementById('creditSignal');
 
         const BASE_WIDTH = 800;
         const BASE_HEIGHT = 600;
         const HIGH_SCORE_KEY = 'bss-monkey-highscores-v1';
+        const AUDIO_PREF_KEY = 'bss-monkey-audio-enabled';
+        const HAPTICS_PREF_KEY = 'bss-monkey-haptics-enabled';
+        const SHAKE_PREF_KEY = 'bss-monkey-shake-enabled';
+        const PHONE_HINT_DISMISS_MS = 5000;
         const hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
         const keys = {};
         const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const INITIAL_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+        let phoneHintTimer = null;
+        let phoneHintShownOnce = false;
+        let phoneHintDismissed = false;
 
         const difficultyPresets = {
             easy: {
@@ -1125,10 +1693,43 @@
                 'They folded under pressure. Specifically potassium pressure.',
                 'Manager neutralized. Fruitkind survives another audit.',
             ],
+            bossCue: {
+                inspector: [
+                    'Inspector attack! The clipboard is fully weaponized!',
+                    'Audit stamp incoming! Please panic in neat lines!',
+                ],
+                sobzilla: [
+                    'Sobzilla is crying on company time! Watch the tear lanes!',
+                    'Weaponized tears incoming. Moisturize if you survive.',
+                ],
+                embargo: [
+                    'Embargo sweep! The cargo doors are doing crimes again!',
+                    'Mothership sweep incoming! That crate is not symbolic!',
+                ],
+            },
             powerup: [
                 'Powerup acquired! You are now a regulated menace.',
                 'New toy! This will age terribly for the aliens.',
                 'Upgrade secured. The banana economy is booming.',
+            ],
+            combo: [
+                'Combo building! Keep the nonsense airborne!',
+                'Potassium pressure rising! Stay unreasonably effective!',
+                'Now we are chain-reaction shopping. Do not stop.',
+            ],
+            nearDeath: [
+                'One life left! The monkey is now operating on pure spite!',
+                'Near death! This is where legends and paperwork diverge!',
+                'Red alert! Fruitkind is hanging by a peel!',
+            ],
+            coin: [
+                'Credit accepted. The cabinet hungers for spectacle.',
+                'Coin inserted. Blue Snake Studios thanks you for the fake economy.',
+                'Another credit! The arcade gods are pleased.',
+            ],
+            coinComped: [
+                'B$S has comped a credit. Try not to waste the generosity.',
+                'House credit deployed. Please make it funny.',
             ],
             lifeLost: [
                 'Ouch. That was legally categorized as monkey negligence.',
@@ -1280,25 +1881,631 @@
 
         let highScores = loadHighScores();
 
+        const audioState = {
+            enabled: loadBooleanSetting(AUDIO_PREF_KEY, true),
+            unlocked: false,
+            context: null,
+            masterGain: null,
+            musicGain: null,
+            sfxGain: null,
+            noiseBuffer: null,
+            lastShotTime: 0,
+            musicTimer: 0,
+            musicStep: 0,
+            musicMode: 'idle',
+        };
+
+        const hapticState = {
+            enabled: loadBooleanSetting(HAPTICS_PREF_KEY, hasTouch),
+            lastButton: 0,
+            lastShot: 0,
+            lastHit: 0,
+        };
+
+        const visualState = {
+            shakeEnabled: loadBooleanSetting(SHAKE_PREF_KEY, true),
+        };
+
+        const attractState = {
+            active: false,
+            raf: 0,
+            lastTime: 0,
+            monkeyX: 112,
+            monkeyDir: 1,
+            shotTimer: 260,
+            phase: 0,
+            aliens: [],
+            bananas: [],
+            particles: [],
+        };
+
+        const initialsState = {
+            active: false,
+            index: 0,
+            letters: ['B', 'S', 'S'],
+            pendingScore: 0,
+            pendingDifficulty: 'normal',
+        };
+
+        const creditsState = {
+            credits: 1,
+            inserted: 7,
+            starts: 0,
+        };
+
+        const announcerState = {
+            bossCueCooldown: 0,
+        };
+
         function getPreset() {
             return difficultyPresets[difficulty];
         }
 
+        function loadBooleanSetting(key, fallback) {
+            try {
+                const raw = localStorage.getItem(key);
+                if (raw === null) return fallback;
+                return raw === 'true';
+            } catch (error) {
+                return fallback;
+            }
+        }
+
+        function saveBooleanSetting(key, value) {
+            try {
+                localStorage.setItem(key, String(value));
+            } catch (error) {
+                console.warn('Failed to save Monkey Invaders setting:', error);
+            }
+        }
+
+        function sanitizeInitials(initials) {
+            const cleaned = String(initials || '')
+                .toUpperCase()
+                .replace(/[^A-Z]/g, '')
+                .slice(0, 3);
+            return (cleaned + 'BSS').slice(0, 3);
+        }
+
+        function normalizeRecord(value) {
+            if (typeof value === 'number') {
+                return { score: value, initials: value > 0 ? 'BSS' : '---' };
+            }
+            if (value && typeof value === 'object') {
+                const scoreValue = Number(value.score) || 0;
+                return {
+                    score: scoreValue,
+                    initials: scoreValue > 0 ? sanitizeInitials(value.initials || 'BSS') : '---',
+                };
+            }
+            return { score: 0, initials: '---' };
+        }
+
+        function setCabinetState(state) {
+            document.body.dataset.cabinet = state;
+        }
+
+        function updateCreditUI() {
+            if (creditHud) creditHud.textContent = `Credits ${String(creditsState.credits).padStart(2, '0')}`;
+            if (creditDisplay) creditDisplay.textContent = `Credits ${String(creditsState.credits).padStart(2, '0')}`;
+            if (coinDisplay) coinDisplay.textContent = `Coins ${String(creditsState.inserted).padStart(2, '0')}`;
+            if (creditSignal) {
+                creditSignal.textContent = creditsState.credits > 0
+                    ? `Starts ${String(creditsState.starts).padStart(2, '0')}`
+                    : 'B$S House Credit Ready';
+            }
+        }
+
         function loadHighScores() {
-            const defaults = { easy: 0, normal: 0, hard: 0 };
+            const defaults = {
+                easy: { score: 0, initials: '---' },
+                normal: { score: 0, initials: '---' },
+                hard: { score: 0, initials: '---' },
+            };
             try {
                 const raw = localStorage.getItem(HIGH_SCORE_KEY);
                 if (!raw) return defaults;
                 const parsed = JSON.parse(raw);
                 return {
-                    easy: Number(parsed.easy) || 0,
-                    normal: Number(parsed.normal) || 0,
-                    hard: Number(parsed.hard) || 0,
+                    easy: normalizeRecord(parsed.easy),
+                    normal: normalizeRecord(parsed.normal),
+                    hard: normalizeRecord(parsed.hard),
                 };
             } catch (error) {
                 console.warn('Failed to load Monkey Invaders high scores:', error);
                 return defaults;
             }
+        }
+
+        function paintToggleButton(button, enabled, onLabel, offLabel, accent = false) {
+            if (!button) return;
+            button.textContent = enabled ? onLabel : offLabel;
+            button.classList.toggle('is-off', !enabled);
+            button.classList.toggle('is-accent', accent && enabled);
+        }
+
+        function updateSettingButtons() {
+            paintToggleButton(audioButton, audioState.enabled, 'Sound On', 'Sound Off', true);
+            paintToggleButton(hapticsButton, hapticState.enabled, 'Haptics On', 'Haptics Off');
+            paintToggleButton(shakeButton, visualState.shakeEnabled, 'Shake On', 'Shake Off');
+            paintToggleButton(pauseAudioButton, audioState.enabled, 'Sound On', 'Sound Off', true);
+            paintToggleButton(pauseHapticsButton, hapticState.enabled, 'Haptics On', 'Haptics Off');
+            paintToggleButton(pauseShakeButton, visualState.shakeEnabled, 'Shake On', 'Shake Off');
+        }
+
+        async function toggleAudioSetting() {
+            triggerHaptic('button');
+            const turningOn = !audioState.enabled;
+            if (!turningOn) {
+                playUiBlip();
+            }
+            audioState.enabled = !audioState.enabled;
+            saveBooleanSetting(AUDIO_PREF_KEY, audioState.enabled);
+            if (audioState.enabled) {
+                await ensureAudio();
+                if (audioState.masterGain && audioState.context) {
+                    audioState.masterGain.gain.setTargetAtTime(0.92, audioState.context.currentTime, 0.01);
+                }
+                playUiBlip();
+            } else if (audioState.masterGain && audioState.context) {
+                audioState.masterGain.gain.setTargetAtTime(0.0001, audioState.context.currentTime, 0.02);
+            }
+            updateSettingButtons();
+        }
+
+        async function toggleHapticsSetting() {
+            await ensureAudio();
+            hapticState.enabled = !hapticState.enabled;
+            saveBooleanSetting(HAPTICS_PREF_KEY, hapticState.enabled);
+            if (hapticState.enabled) triggerHaptic('button');
+            playUiBlip();
+            updateSettingButtons();
+        }
+
+        async function toggleShakeSetting() {
+            await ensureAudio();
+            visualState.shakeEnabled = !visualState.shakeEnabled;
+            saveBooleanSetting(SHAKE_PREF_KEY, visualState.shakeEnabled);
+            playUiBlip();
+            triggerHaptic('button');
+            updateSettingButtons();
+        }
+
+        async function insertCoin(comped = false) {
+            await ensureAudio();
+            if (!comped) {
+                creditsState.credits += 1;
+                creditsState.inserted += 1;
+                playCoinSound();
+                triggerHaptic('button');
+                announce('coin');
+                addFloatingText(canvas.width / 2, canvas.height * 0.32, 'CREDIT ADDED', '#ffd24a', 1100, 18, 0);
+            } else {
+                creditsState.credits += 1;
+                announce('coin', { comped: true });
+                addFloatingText(canvas.width / 2, canvas.height * 0.32, 'B$S HOUSE CREDIT', '#8cc0ff', 1200, 18, 0);
+            }
+            updateCreditUI();
+        }
+
+        async function consumeCreditForStart() {
+            if (creditsState.credits <= 0) {
+                await insertCoin(true);
+            }
+            creditsState.credits = Math.max(0, creditsState.credits - 1);
+            creditsState.starts += 1;
+            updateCreditUI();
+        }
+
+        function getAudioConstructor() {
+            return window.AudioContext || window.webkitAudioContext || null;
+        }
+
+        function getNoiseBuffer(context) {
+            if (audioState.noiseBuffer) return audioState.noiseBuffer;
+            const length = context.sampleRate * 0.4;
+            const buffer = context.createBuffer(1, length, context.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < length; i++) {
+                data[i] = (Math.random() * 2 - 1) * (1 - i / length);
+            }
+            audioState.noiseBuffer = buffer;
+            return buffer;
+        }
+
+        async function ensureAudio() {
+            if (!audioState.enabled) return null;
+            const AudioCtor = getAudioConstructor();
+            if (!AudioCtor) return null;
+            if (!audioState.context) {
+                const context = new AudioCtor();
+                const masterGain = context.createGain();
+                const musicGain = context.createGain();
+                const sfxGain = context.createGain();
+                masterGain.gain.value = 0.92;
+                musicGain.gain.value = 0.18;
+                sfxGain.gain.value = 0.64;
+                musicGain.connect(masterGain);
+                sfxGain.connect(masterGain);
+                masterGain.connect(context.destination);
+                audioState.context = context;
+                audioState.masterGain = masterGain;
+                audioState.musicGain = musicGain;
+                audioState.sfxGain = sfxGain;
+            }
+            if (audioState.context.state === 'suspended') {
+                await audioState.context.resume();
+            }
+            audioState.unlocked = true;
+            return audioState.context;
+        }
+
+        function scheduleTone(options) {
+            const context = audioState.context;
+            if (!context || !audioState.sfxGain) return;
+            const {
+                when = context.currentTime,
+                frequency = 440,
+                duration = 0.12,
+                gain = 0.1,
+                type = 'triangle',
+                endFrequency = frequency,
+                channel = 'sfx',
+            } = options;
+            const oscillator = context.createOscillator();
+            const gainNode = context.createGain();
+            const destination = channel === 'music' ? audioState.musicGain : audioState.sfxGain;
+            oscillator.type = type;
+            oscillator.frequency.setValueAtTime(frequency, when);
+            oscillator.frequency.exponentialRampToValueAtTime(Math.max(40, endFrequency), when + duration);
+            gainNode.gain.setValueAtTime(0.0001, when);
+            gainNode.gain.exponentialRampToValueAtTime(gain, when + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, when + duration);
+            oscillator.connect(gainNode);
+            gainNode.connect(destination);
+            oscillator.start(when);
+            oscillator.stop(when + duration + 0.02);
+        }
+
+        function scheduleNoiseBurst(options) {
+            const context = audioState.context;
+            if (!context || !audioState.sfxGain) return;
+            const {
+                when = context.currentTime,
+                duration = 0.1,
+                gain = 0.06,
+                frequency = 1200,
+                channel = 'sfx',
+            } = options;
+            const source = context.createBufferSource();
+            source.buffer = getNoiseBuffer(context);
+            const filter = context.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(frequency, when);
+            const gainNode = context.createGain();
+            const destination = channel === 'music' ? audioState.musicGain : audioState.sfxGain;
+            gainNode.gain.setValueAtTime(0.0001, when);
+            gainNode.gain.exponentialRampToValueAtTime(gain, when + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, when + duration);
+            source.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(destination);
+            source.start(when);
+            source.stop(when + duration + 0.02);
+        }
+
+        function playNoteSequence(notes, channel = 'sfx') {
+            if (!audioState.enabled || !audioState.unlocked || !audioState.context) return;
+            let cursor = audioState.context.currentTime + 0.01;
+            notes.forEach(note => {
+                scheduleTone({
+                    when: cursor,
+                    frequency: note.frequency,
+                    endFrequency: note.endFrequency || note.frequency,
+                    duration: note.duration,
+                    gain: note.gain,
+                    type: note.type || 'triangle',
+                    channel,
+                });
+                if (note.noiseGain) {
+                    scheduleNoiseBurst({
+                        when: cursor,
+                        duration: note.duration * 0.75,
+                        gain: note.noiseGain,
+                        frequency: note.noiseFrequency || 1100,
+                    });
+                }
+                cursor += note.gap || note.duration * 0.72;
+            });
+        }
+
+        function playUiBlip() {
+            playNoteSequence([
+                { frequency: 720, endFrequency: 620, duration: 0.08, gain: 0.05, type: 'square' },
+                { frequency: 940, endFrequency: 760, duration: 0.07, gain: 0.035, type: 'triangle', gap: 0.05 },
+            ]);
+        }
+
+        function playCoinSound() {
+            playNoteSequence([
+                { frequency: 880, duration: 0.07, gain: 0.045, type: 'square' },
+                { frequency: 1320, duration: 0.1, gain: 0.05, type: 'triangle', gap: 0.05 },
+                { frequency: 1760, duration: 0.14, gain: 0.038, type: 'sine', gap: 0.06 },
+            ]);
+        }
+
+        function getBossPalette(kind) {
+            if (kind === 'sobzilla') {
+                return {
+                    intro: [261.63, 246.94, 220, 293.66],
+                    meltdown: [329.63, 392, 523.25, 659.25],
+                    down: [392, 523.25, 659.25, 783.99],
+                    hit: [311.13, 246.94],
+                    attack: [493.88, 369.99],
+                };
+            }
+            if (kind === 'embargo') {
+                return {
+                    intro: [164.81, 146.83, 123.47, 185],
+                    meltdown: [185, 220, 277.18, 369.99],
+                    down: [246.94, 311.13, 369.99, 493.88],
+                    hit: [196, 146.83],
+                    attack: [123.47, 164.81],
+                };
+            }
+            return {
+                intro: [196, 156, 131, 262],
+                meltdown: [220, 330, 494, 740],
+                down: [330, 392, 523, 659],
+                hit: [220, 180],
+                attack: [277.18, 220],
+            };
+        }
+
+        function playShotSound(kind = 'banana') {
+            if (!audioState.enabled || !audioState.unlocked || !audioState.context) return;
+            const now = performance.now();
+            if (now - audioState.lastShotTime < 60) return;
+            audioState.lastShotTime = now;
+            if (kind === 'bazooka') {
+                playNoteSequence([
+                    { frequency: 240, endFrequency: 120, duration: 0.08, gain: 0.07, type: 'square', noiseGain: 0.018, noiseFrequency: 600 },
+                    { frequency: 180, endFrequency: 72, duration: 0.22, gain: 0.15, type: 'sawtooth', noiseGain: 0.08, noiseFrequency: 340, gap: 0.05 },
+                    { frequency: 360, endFrequency: 110, duration: 0.16, gain: 0.06, type: 'triangle', gap: 0.04 },
+                ]);
+                return;
+            }
+            if (kind === 'gun') {
+                playNoteSequence([
+                    { frequency: 980, endFrequency: 440, duration: 0.05, gain: 0.06, type: 'square', noiseGain: 0.02, noiseFrequency: 2600 },
+                    { frequency: 660, endFrequency: 320, duration: 0.04, gain: 0.028, type: 'square', gap: 0.04 },
+                ]);
+                return;
+            }
+            playNoteSequence([
+                { frequency: 540, endFrequency: 260, duration: 0.08, gain: 0.045, type: 'triangle', noiseGain: 0.01, noiseFrequency: 1700 },
+                { frequency: monkey.powerups.triple ? 720 : 640, endFrequency: 320, duration: 0.05, gain: 0.028, type: 'sine', gap: 0.05 },
+            ]);
+        }
+
+        function playHitSound(strength = 'normal', variant = 'default') {
+            if (!audioState.enabled || !audioState.unlocked || !audioState.context) return;
+            if (strength === 'boss') {
+                const palette = getBossPalette(variant);
+                playNoteSequence([
+                    { frequency: palette.hit[0], endFrequency: palette.hit[1], duration: 0.13, gain: 0.11, type: 'sawtooth', noiseGain: 0.038, noiseFrequency: variant === 'sobzilla' ? 980 : 720 },
+                    { frequency: palette.hit[0] * 1.18, endFrequency: palette.hit[1] * 0.9, duration: 0.09, gain: 0.05, type: variant === 'sobzilla' ? 'triangle' : 'square', gap: 0.05 },
+                ]);
+                return;
+            }
+            if (variant === 'slip') {
+                playNoteSequence([
+                    { frequency: 460, endFrequency: 220, duration: 0.11, gain: 0.05, type: 'triangle', noiseGain: 0.012, noiseFrequency: 900 },
+                    { frequency: 220, endFrequency: 150, duration: 0.08, gain: 0.032, type: 'sine', gap: 0.06 },
+                ]);
+                return;
+            }
+            playNoteSequence([
+                { frequency: 360, endFrequency: 180, duration: 0.09, gain: 0.06, type: 'square', noiseGain: 0.018, noiseFrequency: 1200 },
+                { frequency: 520, endFrequency: 260, duration: 0.05, gain: 0.02, type: 'triangle', gap: 0.05 },
+            ]);
+        }
+
+        function playPowerupSound() {
+            playNoteSequence([
+                { frequency: 520, duration: 0.09, gain: 0.05, type: 'triangle' },
+                { frequency: 780, duration: 0.1, gain: 0.05, type: 'triangle', gap: 0.08 },
+                { frequency: 1040, duration: 0.12, gain: 0.045, type: 'sine', gap: 0.08 },
+            ]);
+        }
+
+        function playBossAttackCue(kind = boss?.kind || 'inspector') {
+            const palette = getBossPalette(kind);
+            playNoteSequence([
+                { frequency: palette.attack[0], endFrequency: palette.attack[1], duration: 0.08, gain: 0.038, type: kind === 'embargo' ? 'square' : 'triangle', noiseGain: 0.012, noiseFrequency: kind === 'sobzilla' ? 1200 : 700 },
+            ]);
+        }
+
+        function playBossIntroStinger(kind = boss?.kind || 'inspector') {
+            const palette = getBossPalette(kind);
+            playNoteSequence([
+                { frequency: palette.intro[0], duration: 0.18, gain: 0.08, type: kind === 'sobzilla' ? 'triangle' : 'sawtooth', noiseGain: 0.02, noiseFrequency: 500 },
+                { frequency: palette.intro[1], duration: 0.18, gain: 0.09, type: kind === 'embargo' ? 'square' : 'sawtooth', gap: 0.12 },
+                { frequency: palette.intro[2], duration: 0.24, gain: 0.11, type: 'sawtooth', gap: 0.12 },
+                { frequency: palette.intro[3], duration: 0.3, gain: 0.12, type: kind === 'sobzilla' ? 'sine' : 'triangle', gap: 0.16 },
+            ]);
+        }
+
+        function playBossMeltdownStinger(kind = boss?.kind || 'inspector') {
+            const palette = getBossPalette(kind);
+            playNoteSequence([
+                { frequency: palette.meltdown[0], duration: 0.08, gain: 0.06, type: kind === 'embargo' ? 'square' : 'triangle' },
+                { frequency: palette.meltdown[1], duration: 0.08, gain: 0.07, type: 'square', gap: 0.07 },
+                { frequency: palette.meltdown[2], duration: 0.1, gain: 0.08, type: 'triangle', gap: 0.07 },
+                { frequency: palette.meltdown[3], duration: 0.16, gain: 0.09, type: kind === 'sobzilla' ? 'sine' : 'sawtooth', noiseGain: 0.028, noiseFrequency: kind === 'sobzilla' ? 900 : 1800 },
+            ]);
+        }
+
+        function playBossDownStinger(kind = 'inspector') {
+            const palette = getBossPalette(kind);
+            playNoteSequence([
+                { frequency: palette.down[0], duration: 0.1, gain: 0.06, type: 'triangle' },
+                { frequency: palette.down[1], duration: 0.1, gain: 0.07, type: kind === 'sobzilla' ? 'sine' : 'triangle', gap: 0.09 },
+                { frequency: palette.down[2], duration: 0.14, gain: 0.08, type: 'triangle', gap: 0.09 },
+                { frequency: palette.down[3], duration: 0.2, gain: 0.09, type: 'sine', gap: 0.1 },
+                { frequency: palette.down[3] * 1.2, duration: 0.3, gain: 0.1, type: 'sine', noiseGain: 0.02, noiseFrequency: kind === 'embargo' ? 800 : 1200 },
+            ]);
+        }
+
+        function playRewardRankStinger(letter) {
+            const map = {
+                S: [523, 659, 784, 1047],
+                A: [440, 554, 659, 880],
+                B: [392, 494, 587, 784],
+                C: [330, 392, 494, 659],
+                D: [262, 330, 392, 523],
+            };
+            const notes = map[letter] || map.B;
+            playNoteSequence(notes.map((frequency, index) => ({
+                frequency,
+                duration: index === notes.length - 1 ? 0.24 : 0.12,
+                gain: 0.075,
+                type: index === notes.length - 1 ? 'sine' : 'triangle',
+                gap: 0.09,
+            })));
+        }
+
+        function playChord(frequencies, when, options = {}) {
+            frequencies.filter(Boolean).forEach((frequency, index) => {
+                scheduleTone({
+                    when: when + index * (options.spread || 0.008),
+                    frequency,
+                    endFrequency: options.endFrequency || frequency * 0.99,
+                    duration: options.duration || 0.18,
+                    gain: options.gain || 0.02,
+                    type: options.type || 'triangle',
+                    channel: options.channel || 'music',
+                });
+            });
+        }
+
+        function scheduleMusicStep(mode) {
+            if (!audioState.context || !audioState.enabled || !audioState.unlocked) return;
+            const when = audioState.context.currentTime + 0.03;
+            if (mode === 'title') {
+                const chords = [
+                    [220, 277.18, 329.63],
+                    [246.94, 311.13, 369.99],
+                    [261.63, 329.63, 392],
+                    [246.94, 311.13, 369.99],
+                ];
+                const step = audioState.musicStep % 8;
+                const chord = chords[Math.floor(step / 2) % chords.length];
+                playChord(chord, when, { duration: 0.26, gain: 0.026, type: 'triangle' });
+                scheduleTone({ when, frequency: chord[0] / 2, endFrequency: chord[0] / 2, duration: 0.28, gain: 0.022, type: 'sine', channel: 'music' });
+                if (step % 2 === 1) {
+                    scheduleTone({ when: when + 0.08, frequency: chord[2] * 2, duration: 0.14, gain: 0.018, type: 'square', channel: 'music' });
+                }
+                audioState.musicTimer = 240;
+                return;
+            }
+            if (mode === 'game' || mode === 'boss') {
+                const progressions = mode === 'boss'
+                    ? [
+                        [174.61, 220, 261.63],
+                        [164.81, 207.65, 246.94],
+                        [146.83, 196, 246.94],
+                        [164.81, 207.65, 246.94],
+                    ]
+                    : [
+                        [196, 246.94, 293.66],
+                        [220, 277.18, 329.63],
+                        [246.94, 311.13, 369.99],
+                        [220, 277.18, 329.63],
+                    ];
+                const step = audioState.musicStep % 8;
+                const chord = progressions[Math.floor(step / 2) % progressions.length];
+                playChord(chord, when, { duration: 0.18, gain: mode === 'boss' ? 0.03 : 0.024, type: mode === 'boss' ? 'sawtooth' : 'triangle' });
+                scheduleTone({ when, frequency: chord[0] / 2, endFrequency: chord[0] / 2, duration: 0.2, gain: 0.028, type: 'sine', channel: 'music' });
+                if (step % 2 === 0) {
+                    scheduleNoiseBurst({ when, duration: 0.07, gain: mode === 'boss' ? 0.014 : 0.01, frequency: mode === 'boss' ? 180 : 140, channel: 'music' });
+                } else {
+                    scheduleNoiseBurst({ when, duration: 0.05, gain: 0.009, frequency: 1600, channel: 'music' });
+                }
+                if (step % 4 === 3) {
+                    scheduleTone({ when: when + 0.04, frequency: chord[2] * 2, duration: 0.1, gain: 0.016, type: 'square', channel: 'music' });
+                }
+                audioState.musicTimer = mode === 'boss' ? 180 : 210;
+                return;
+            }
+            if (mode === 'reward') {
+                const line = [523.25, 659.25, 783.99, 987.77, 1174.66, 987.77];
+                const frequency = line[audioState.musicStep % line.length];
+                scheduleTone({ when, frequency, duration: 0.16, gain: 0.03, type: 'sine', channel: 'music' });
+                scheduleTone({ when, frequency: frequency / 2, duration: 0.22, gain: 0.016, type: 'triangle', channel: 'music' });
+                audioState.musicTimer = 190;
+            }
+        }
+
+        function getMusicMode() {
+            if (!audioState.enabled || !audioState.unlocked || !audioState.context) return 'idle';
+            if (bossRewardPending) return 'reward';
+            if (gameRunning && !paused) return boss ? 'boss' : 'game';
+            if (!gameRunning && startScreen.style.display !== 'none') return 'title';
+            if (attractState.active) return 'title';
+            return 'idle';
+        }
+
+        function updateMusicBed(dt) {
+            const mode = getMusicMode();
+            if (mode !== audioState.musicMode) {
+                audioState.musicMode = mode;
+                audioState.musicTimer = 0;
+                audioState.musicStep = 0;
+            }
+            if (mode === 'idle') return;
+            audioState.musicTimer -= dt;
+            while (audioState.musicTimer <= 0) {
+                scheduleMusicStep(mode);
+                audioState.musicStep += 1;
+            }
+        }
+
+        function triggerHaptic(kind = 'button') {
+            if (!hapticState.enabled || isReducedMotion || !('vibrate' in navigator)) return;
+            const now = performance.now();
+            let pattern = 5;
+            let cooldown = 90;
+            if (kind === 'shot') {
+                pattern = 8;
+                cooldown = 75;
+                if (now - hapticState.lastShot < cooldown) return;
+                hapticState.lastShot = now;
+            } else if (kind === 'meltdown') {
+                pattern = [14, 35, 18];
+                cooldown = 500;
+                if (now - hapticState.lastHit < cooldown) return;
+                hapticState.lastHit = now;
+            } else if (kind === 'reward') {
+                pattern = [10, 40, 10];
+                cooldown = 500;
+                if (now - hapticState.lastHit < cooldown) return;
+                hapticState.lastHit = now;
+            } else {
+                if (now - hapticState.lastButton < cooldown) return;
+                hapticState.lastButton = now;
+            }
+            try {
+                navigator.vibrate(pattern);
+            } catch (error) {
+                console.debug('Haptic feedback failed:', error);
+            }
+        }
+
+        async function armArcadeFeedback(trigger = 'button') {
+            await ensureAudio();
+            if (trigger === 'button') playUiBlip();
+            triggerHaptic(trigger);
         }
 
         function saveHighScores() {
@@ -1314,21 +2521,80 @@
         }
 
         function updateHighScoreUI() {
-            document.getElementById('bestEasy').textContent = formatScore(highScores.easy);
-            document.getElementById('bestNormal').textContent = formatScore(highScores.normal);
-            document.getElementById('bestHard').textContent = formatScore(highScores.hard);
-            document.getElementById('difficultyRecord').textContent = `Current best // ${difficultyPresets[difficulty].label}: ${formatScore(highScores[difficulty])}`;
+            document.getElementById('bestEasy').textContent = formatScore(highScores.easy.score);
+            document.getElementById('bestEasyInitials').textContent = highScores.easy.initials;
+            document.getElementById('bestNormal').textContent = formatScore(highScores.normal.score);
+            document.getElementById('bestNormalInitials').textContent = highScores.normal.initials;
+            document.getElementById('bestHard').textContent = formatScore(highScores.hard.score);
+            document.getElementById('bestHardInitials').textContent = highScores.hard.initials;
+            const current = highScores[difficulty];
+            document.getElementById('difficultyRecord').textContent = `Current best // ${difficultyPresets[difficulty].label}: ${current.initials} ${formatScore(current.score)}`;
         }
 
-        function syncHighScore() {
-            const currentBest = highScores[difficulty] || 0;
-            const isNewRecord = score > currentBest;
-            if (isNewRecord) {
-                highScores[difficulty] = score;
-                saveHighScores();
-                updateHighScoreUI();
-            }
-            return isNewRecord;
+        function setHighScoreRecord(targetDifficulty, scoreValue, initials) {
+            highScores[targetDifficulty] = {
+                score: scoreValue,
+                initials: sanitizeInitials(initials),
+            };
+            saveHighScores();
+            updateHighScoreUI();
+        }
+
+        function hasNewHighScore() {
+            return score > (highScores[difficulty]?.score || 0);
+        }
+
+        function renderInitialsEntry() {
+            document.querySelectorAll('.initial-slot').forEach(slot => {
+                slot.classList.toggle('active', Number(slot.dataset.slot) === initialsState.index);
+            });
+            initialsState.letters.forEach((letter, index) => {
+                document.getElementById(`initialLetter${index}`).textContent = letter;
+            });
+            document.getElementById('initialsEntryScore').textContent = `${difficultyPresets[initialsState.pendingDifficulty].label} // ${formatScore(initialsState.pendingScore)}`;
+        }
+
+        function openInitialsEntry() {
+            initialsState.active = true;
+            initialsState.index = 0;
+            initialsState.pendingScore = score;
+            initialsState.pendingDifficulty = difficulty;
+            const existing = highScores[difficulty]?.initials || 'BSS';
+            initialsState.letters = sanitizeInitials(existing).split('');
+            renderInitialsEntry();
+            initialsEntryScreen.style.display = 'flex';
+            playRewardRankStinger('A');
+            triggerHaptic('reward');
+        }
+
+        function closeInitialsEntry() {
+            initialsState.active = false;
+            initialsEntryScreen.style.display = 'none';
+        }
+
+        function shiftInitial(index, delta) {
+            const letters = INITIAL_LETTERS;
+            const current = letters.indexOf(initialsState.letters[index]);
+            const nextIndex = (current + delta + letters.length) % letters.length;
+            initialsState.letters[index] = letters[nextIndex];
+            renderInitialsEntry();
+            playUiBlip();
+            triggerHaptic('button');
+        }
+
+        function moveInitialSelection(delta) {
+            initialsState.index = (initialsState.index + delta + 3) % 3;
+            renderInitialsEntry();
+            playUiBlip();
+        }
+
+        function saveInitialsEntry() {
+            const initials = initialsState.letters.join('');
+            setHighScoreRecord(initialsState.pendingDifficulty, initialsState.pendingScore, initials);
+            document.getElementById('recordCallout').textContent = `New ${difficultyPresets[initialsState.pendingDifficulty].label} record // ${initials} ${formatScore(initialsState.pendingScore)}`;
+            closeInitialsEntry();
+            playRewardRankStinger('S');
+            triggerHaptic('reward');
         }
 
         function getBossRank() {
@@ -1362,7 +2628,10 @@
             document.getElementById('rewardCombo').textContent = `x${combo.best}`;
             document.getElementById('rewardDifficulty').textContent = difficultyPresets[difficulty].label;
             document.getElementById('rewardBounty').textContent = formatScore(bounty);
+            setCabinetState('reward');
             bossRewardScreen.style.display = 'flex';
+            playRewardRankStinger(rank.letter);
+            triggerHaptic('reward');
         }
 
         function continueBossReward() {
@@ -1371,6 +2640,7 @@
             bossRewardScreen.style.display = 'none';
             paused = false;
             lastTime = performance.now();
+            setCabinetState('game');
             nextLevel();
             requestAnimationFrame(gameLoop);
         }
@@ -1414,7 +2684,12 @@
 
         function announce(event, extra = {}) {
             if (!gameRunning || paused) return;
-            const lines = announcerLines[event];
+            let lines = announcerLines[event];
+            if (event === 'bossCue') {
+                lines = announcerLines.bossCue[extra.kind] || announcerLines.bossCue.inspector;
+            } else if (event === 'coin' && extra.comped) {
+                lines = announcerLines.coinComped;
+            }
             if (!lines || lines.length === 0) return;
             let text = lines[Math.floor(Math.random() * lines.length)];
             if (event === 'achievement') {
@@ -1459,9 +2734,41 @@
             }
         }
 
+        function setPhoneHintVisible(visible) {
+            const nextDisplay = visible ? 'block' : 'none';
+            if (phoneHint.style.display === nextDisplay) return false;
+            phoneHint.style.display = nextDisplay;
+            return true;
+        }
+
+        function clearPhoneHintTimer() {
+            if (!phoneHintTimer) return;
+            window.clearTimeout(phoneHintTimer);
+            phoneHintTimer = null;
+        }
+
+        function schedulePhoneHintDismiss() {
+            clearPhoneHintTimer();
+            phoneHintTimer = window.setTimeout(() => {
+                phoneHintTimer = null;
+                phoneHintDismissed = true;
+                if (setPhoneHintVisible(false)) fitGameToScreen();
+            }, PHONE_HINT_DISMISS_MS);
+        }
+
         function updatePhoneHint() {
-            const shouldShow = hasTouch && window.innerHeight > window.innerWidth && window.innerWidth < 920;
-            phoneHint.style.display = shouldShow ? 'block' : 'none';
+            const matchesOrientationHint = hasTouch && window.innerHeight > window.innerWidth && window.innerWidth < 920;
+            const shouldForceIntroHint = hasTouch && window.innerWidth < 920 && !phoneHintShownOnce && !phoneHintDismissed;
+            const shouldShow = !phoneHintDismissed && (matchesOrientationHint || shouldForceIntroHint);
+
+            setPhoneHintVisible(shouldShow);
+
+            if (shouldShow) {
+                phoneHintShownOnce = true;
+                schedulePhoneHintDismiss();
+            } else {
+                clearPhoneHintTimer();
+            }
         }
 
         function getTopReserve() {
@@ -1483,6 +2790,155 @@
             gameWrapper.style.width = `${Math.floor(BASE_WIDTH * scale)}px`;
             gameWrapper.style.height = `${Math.floor(BASE_HEIGHT * scale)}px`;
             gameContainer.style.transform = `translate(0px, 0px) scale(${scale})`;
+        }
+
+        function resetAttractMode() {
+            attractState.monkeyX = 112;
+            attractState.monkeyDir = 1;
+            attractState.shotTimer = 260;
+            attractState.phase = 0;
+            attractState.bananas = [];
+            attractState.particles = [];
+            attractState.aliens = Array.from({ length: 6 }, (_, index) => ({
+                x: 116 + index * 94,
+                y: 138 + (index % 2) * 26,
+                baseX: 116 + index * 94,
+                baseY: 138 + (index % 2) * 26,
+                width: 50,
+                height: 45,
+                type: index % 3,
+                alive: true,
+                crying: false,
+                slipping: false,
+                rotation: 0,
+                flash: 0,
+                wobble: Math.random() * Math.PI * 2,
+            }));
+        }
+
+        function startAttractMode() {
+            if (gameRunning || attractState.active || startScreen.style.display === 'none') return;
+            if (!attractState.aliens.length) resetAttractMode();
+            attractState.active = true;
+            attractState.lastTime = performance.now();
+            attractState.raf = requestAnimationFrame(attractLoop);
+        }
+
+        function stopAttractMode() {
+            attractState.active = false;
+            if (attractState.raf) {
+                cancelAnimationFrame(attractState.raf);
+                attractState.raf = 0;
+            }
+        }
+
+        function updateAttractMode(dt) {
+            const step = dt / 16.6667;
+            attractState.phase += dt;
+            attractState.monkeyX += attractState.monkeyDir * 2.4 * step;
+            if (attractState.monkeyX < 96 || attractState.monkeyX > canvas.width - 156) {
+                attractState.monkeyDir *= -1;
+            }
+            attractState.shotTimer -= dt;
+            if (attractState.shotTimer <= 0) {
+                attractState.bananas.push({
+                    x: attractState.monkeyX + monkey.width / 2,
+                    y: monkey.y + 6,
+                    vx: attractState.monkeyDir * 0.7,
+                    vy: -10.8,
+                    rotation: 0,
+                    isBazooka: false,
+                    isGun: false,
+                });
+                attractState.shotTimer = 360 + Math.random() * 220;
+            }
+            attractState.aliens.forEach((alien, index) => {
+                alien.x = alien.baseX + Math.sin(attractState.phase / 620 + alien.wobble) * 24;
+                alien.y = alien.baseY + Math.sin(attractState.phase / 340 + index) * 10;
+                alien.flash = Math.max(0, alien.flash - dt);
+            });
+            for (let i = attractState.bananas.length - 1; i >= 0; i--) {
+                const banana = attractState.bananas[i];
+                banana.x += banana.vx * step;
+                banana.y += banana.vy * step;
+                banana.rotation += 0.25;
+                let removed = banana.y < -20;
+                for (let j = 0; j < attractState.aliens.length && !removed; j++) {
+                    const alien = attractState.aliens[j];
+                    if (
+                        banana.x > alien.x &&
+                        banana.x < alien.x + alien.width &&
+                        banana.y > alien.y &&
+                        banana.y < alien.y + alien.height
+                    ) {
+                        alien.flash = 180;
+                        for (let p = 0; p < 8; p++) {
+                            attractState.particles.push({
+                                x: banana.x,
+                                y: banana.y,
+                                vx: (Math.random() - 0.5) * 4,
+                                vy: (Math.random() - 0.5) * 4,
+                                life: 1,
+                                color: ['#ffe135', '#52d9ff', '#ff8f1f'][p % 3],
+                                size: Math.random() * 4 + 1.5,
+                            });
+                        }
+                        removed = true;
+                    }
+                }
+                if (removed) attractState.bananas.splice(i, 1);
+            }
+            for (let i = attractState.particles.length - 1; i >= 0; i--) {
+                const particle = attractState.particles[i];
+                particle.x += particle.vx * step;
+                particle.y += particle.vy * step;
+                particle.life -= 0.03 * step;
+                if (particle.life <= 0) attractState.particles.splice(i, 1);
+            }
+            updateMusicBed(dt);
+        }
+
+        function drawAttractMode() {
+            drawBackground();
+            ctx.fillStyle = '#3e3e46';
+            ctx.fillRect(0, canvas.height - 25, canvas.width, 25);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+            ctx.fillRect(0, canvas.height - 24, canvas.width, 2);
+            attractState.aliens.forEach(alien => {
+                ctx.save();
+                ctx.globalAlpha = alien.flash > 0 && Math.floor(alien.flash / 40) % 2 === 0 ? 0.35 : 1;
+                drawAlien(alien);
+                ctx.restore();
+            });
+            attractState.bananas.forEach(drawBanana);
+            drawMonkey(attractState.monkeyX, monkey.y);
+            attractState.particles.forEach(particle => {
+                ctx.save();
+                ctx.globalAlpha = particle.life;
+                ctx.fillStyle = particle.color;
+                ctx.fillRect(particle.x, particle.y, particle.size, particle.size);
+                ctx.restore();
+            });
+            ctx.save();
+            ctx.globalAlpha = 0.38;
+            ctx.fillStyle = '#d9e5f3';
+            ctx.font = '800 14px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('DEMO LOOP // B$S ARCADE ATTRACT MODE', canvas.width / 2, canvas.height - 48);
+            ctx.restore();
+        }
+
+        function attractLoop(currentTime) {
+            if (!attractState.active) return;
+            if (gameRunning || startScreen.style.display === 'none') {
+                stopAttractMode();
+                return;
+            }
+            const dt = Math.min(currentTime - attractState.lastTime, 34);
+            attractState.lastTime = currentTime;
+            updateAttractMode(dt);
+            drawAttractMode();
+            attractState.raf = requestAnimationFrame(attractLoop);
         }
 
         function clearPowerupTimers() {
@@ -1512,6 +2968,9 @@
             combo.timer = getPreset().comboWindowMs;
             combo.best = Math.max(combo.best, combo.count);
             combo.pressure = Math.min(100, combo.pressure + pressureGain);
+            if (combo.count === 3 || combo.count === 5 || combo.count === 8) {
+                announce('combo', { color: '#ffd24a' });
+            }
             if (combo.count >= 3) {
                 addFloatingText(x, y, `POTASSIUM x${combo.count}`, '#ffd24a', 900, 14, 0.25);
             }
@@ -1808,6 +3267,7 @@
             }, type === 'bazooka' ? 8000 : 12000);
             updatePowerupUI();
             announce('powerup');
+            playPowerupSound();
         }
 
         function resetTransientState() {
@@ -1825,6 +3285,7 @@
             bossPuddles = [];
             bossRewardPending = null;
             bossRewardScreen.style.display = 'none';
+            closeInitialsEntry();
             clearPowerupTimers();
             Object.keys(monkey.powerups).forEach(key => {
                 monkey.powerups[key] = false;
@@ -1938,6 +3399,8 @@
                 updateBossHUD();
                 announce('bossMeltdown', { color: '#7de8ff' });
                 addFloatingText(boss.x + boss.width / 2, boss.y - 10, 'MELTDOWN! HIT HARD!', '#7de8ff', 1900, 26, 0);
+                playBossMeltdownStinger(boss.kind);
+                triggerHaptic('meltdown');
             }
         }
 
@@ -1947,6 +3410,7 @@
             boss.flashTimer = 200;
             addScore(70 * level, boss.x + boss.width / 2, boss.y + boss.height / 2, boss.accent);
             bumpCombo(1, 18, boss.x + boss.width / 2, boss.y + boss.height / 2);
+            playHitSound('boss', boss.kind);
             if (reason === 'bazooka') {
                 createParticles(boss.x + boss.width / 2, boss.y + boss.height / 2, boss.accent, 18);
             }
@@ -1976,11 +3440,17 @@
                 achievements.bossBeat = true;
             }
             announce('bossDown', { color: defeatedBoss.color });
+            playBossDownStinger(defeatedBoss.kind);
             showBossReward(defeatedBoss);
         }
 
         function spawnBossAttack() {
             if (!boss) return;
+            playBossAttackCue(boss.kind);
+            if (announcerState.bossCueCooldown <= 0) {
+                announce('bossCue', { kind: boss.kind, color: boss.accent });
+                announcerState.bossCueCooldown = 2600;
+            }
             const attackCount = boss.kind === 'embargo' ? 2 : 1;
             const extraAttack = boss.hp / boss.maxHp < 0.45 ? 1 : 0;
             const totalAttacks = attackCount + extraAttack;
@@ -2037,6 +3507,7 @@
             alien.crying = true;
             alien.cryTimer = 1000;
             alien.fallSpeed = exploded ? -5 : -3;
+            playHitSound(exploded ? 'boss' : 'normal', exploded && boss ? boss.kind : 'default');
             createParticles(hitX, hitY, '#ffe135', exploded ? 16 : 12);
             createTears(alien.x + alien.width / 2, alien.y);
             addScore(100 * level, alien.x + alien.width / 2, alien.y, '#ffe135');
@@ -2598,6 +4069,10 @@
             }
             let cooldown = monkey.powerups.rapid ? monkey.throwRate / 2.5 : (isGun ? monkey.throwRate / 3 : monkey.throwRate);
             if (sillyFX.jam > 0) cooldown *= 1.7;
+            if (!ignoreCooldown) {
+                playShotSound(isBazooka ? 'bazooka' : (isGun ? 'gun' : 'banana'));
+                triggerHaptic('shot');
+            }
             if (!ignoreCooldown) monkey.throwCooldown = cooldown;
         }
 
@@ -2635,6 +4110,7 @@
         function updateBoss(dt) {
             if (!boss || levelTransition) return;
             const step = dt / 16.6667;
+            announcerState.bossCueCooldown = Math.max(0, announcerState.bossCueCooldown - dt);
             if (boss.introTimer > 0) boss.introTimer -= dt;
             boss.x += boss.vx * step;
             if (boss.x < 20 || boss.x + boss.width > canvas.width - 20) boss.vx *= -1;
@@ -2845,6 +4321,7 @@
                     if (dist < 30 && alien.y > canvas.height - 150) {
                         alien.slipping = true;
                         alien.slipDir = alien.x > banana.x ? 1 : -1;
+                        playHitSound('normal', 'slip');
                         createParticles(banana.x, banana.y, '#ffe135', 8);
                         addScore(150 * level, alien.x + alien.width / 2, alien.y, '#ffe135');
                         bumpCombo(1, 18, alien.x + alien.width / 2, alien.y);
@@ -2974,6 +4451,9 @@
             updateUI();
             announce('lifeLost');
             resetCombo();
+            if (lives === 1) {
+                announce('nearDeath', { color: '#ff8a8f' });
+            }
             if (lives <= 0) {
                 gameOver();
                 return;
@@ -2997,6 +4477,7 @@
         function pauseGame(silent = false) {
             if (!gameRunning || paused || levelTransition || bossRewardPending) return;
             paused = true;
+            setCabinetState('pause');
             pauseOverlay.style.display = 'flex';
             if (!silent) announce('pause');
         }
@@ -3005,22 +4486,51 @@
             if (!gameRunning || !paused || bossRewardPending) return;
             paused = false;
             pauseOverlay.style.display = 'none';
+            setCabinetState(boss ? 'boss' : 'game');
             announce('unpause');
             lastTime = performance.now();
             requestAnimationFrame(gameLoop);
         }
 
+        function returnToTitle() {
+            gameRunning = false;
+            paused = false;
+            levelTransition = false;
+            score = 0;
+            level = 1;
+            lives = getPreset().startLives;
+            startScreen.style.display = 'flex';
+            gameOverScreen.style.display = 'none';
+            levelScreen.style.display = 'none';
+            pauseOverlay.style.display = 'none';
+            bossRewardScreen.style.display = 'none';
+            closeInitialsEntry();
+            resetTransientState();
+            currentTickerIndex = 0;
+            tickerTimer = 0;
+            bnnTickerContent.textContent = bnnTickerLines[currentTickerIndex];
+            updateUI();
+            initBackground();
+            resetAttractMode();
+            setCabinetState('title');
+            startAttractMode();
+        }
+
         function startGame() {
+            stopAttractMode();
             startScreen.style.display = 'none';
             gameOverScreen.style.display = 'none';
             pauseOverlay.style.display = 'none';
             bossRewardScreen.style.display = 'none';
+            closeInitialsEntry();
+            consumeCreditForStart();
             score = 0;
             level = 1;
             lives = getPreset().startLives;
             gameRunning = true;
             paused = false;
             levelTransition = false;
+            setCabinetState('game');
             aliens = [];
             resetTransientState();
             Object.keys(achievements).forEach(key => {
@@ -3051,8 +4561,12 @@
             levelScreen.style.display = 'flex';
             bananas = [];
             powerups = [];
-            if (isBossLevel(level)) announce('bossIntro');
-            else announce('levelStart');
+            if (isBossLevel(level)) {
+                announce('bossIntro');
+                playBossIntroStinger(profile.kind);
+            } else {
+                announce('levelStart');
+            }
             setTimeout(() => {
                 levelScreen.style.display = 'none';
                 levelTransition = false;
@@ -3070,27 +4584,44 @@
             bossAttacks = [];
             bossPuddles = [];
             bossRewardPending = null;
+            setCabinetState('title');
             bossRewardScreen.style.display = 'none';
             updateBossHUD();
-            const isNewRecord = syncHighScore();
+            const isNewRecord = hasNewHighScore();
             document.getElementById('finalScore').textContent = score;
             document.getElementById('gameOverSubtitle').textContent = gameOverSubtitles[Math.floor(Math.random() * gameOverSubtitles.length)];
             document.getElementById('recordCallout').textContent = isNewRecord
-                ? `New ${difficultyPresets[difficulty].label} record // ${formatScore(score)}`
-                : `Best ${difficultyPresets[difficulty].label} // ${formatScore(highScores[difficulty])}`;
+                ? `New ${difficultyPresets[difficulty].label} record // enter initials`
+                : `Best ${difficultyPresets[difficulty].label} // ${highScores[difficulty].initials} ${formatScore(highScores[difficulty].score)}`;
             gameOverScreen.style.display = 'flex';
+            if (isNewRecord) {
+                openInitialsEntry();
+            }
         }
 
         function bindHold(button, keyCode) {
             if (!button) return;
             let down = false;
+            let activePointerId = null;
             const set = value => {
                 down = value;
                 keys[keyCode] = value;
                 button.classList.toggle('pressed', value);
             };
+            const removeGlobalListeners = () => {
+                window.removeEventListener('pointerup', onUp);
+                window.removeEventListener('pointercancel', onUp);
+                window.removeEventListener('blur', onUp);
+            };
             const onDown = event => {
                 event.preventDefault();
+                if (down) return;
+                ensureAudio();
+                if (keyCode !== 'Space') triggerHaptic('button');
+                activePointerId = event.pointerId;
+                window.addEventListener('pointerup', onUp, { passive: false });
+                window.addEventListener('pointercancel', onUp, { passive: false });
+                window.addEventListener('blur', onUp);
                 try {
                     if (button.setPointerCapture) button.setPointerCapture(event.pointerId);
                 } catch (error) {
@@ -3099,7 +4630,10 @@
                 set(true);
             };
             const onUp = event => {
+                if (event && activePointerId !== null && 'pointerId' in event && event.pointerId !== activePointerId) return;
                 if (event && event.preventDefault) event.preventDefault();
+                removeGlobalListeners();
+                activePointerId = null;
                 if (!down) return;
                 set(false);
             };
@@ -3125,7 +4659,7 @@
             lastTime = currentTime;
             let shakeX = 0;
             let shakeY = 0;
-            if (sillyFX.shake > 0) {
+            if (sillyFX.shake > 0 && visualState.shakeEnabled) {
                 shakeX = (Math.random() - 0.5) * 10;
                 shakeY = (Math.random() - 0.5) * 10;
             }
@@ -3133,6 +4667,7 @@
             gameContainer.style.transform = `translate(${shakeX}px, ${shakeY}px) scale(${scale})`;
 
             updateSillyFX(dt);
+            updateMusicBed(dt);
             updateCombo(dt);
             updateTicker(dt);
             updateMonkey(dt);
@@ -3187,15 +4722,82 @@
         }
 
         document.querySelectorAll('.difficulty-option').forEach(button => {
-            button.addEventListener('click', () => setDifficulty(button.dataset.difficulty));
+            button.addEventListener('click', async () => {
+                await armArcadeFeedback('button');
+                setDifficulty(button.dataset.difficulty);
+            });
         });
 
-        document.getElementById('startButton').addEventListener('click', startGame);
-        document.getElementById('playAgainButton').addEventListener('click', startGame);
-        document.getElementById('resumeButton').addEventListener('click', unpauseGame);
-        document.getElementById('continueBossButton').addEventListener('click', continueBossReward);
+        document.getElementById('startButton').addEventListener('click', async () => {
+            await armArcadeFeedback('button');
+            startGame();
+        });
+        document.getElementById('playAgainButton').addEventListener('click', async () => {
+            await armArcadeFeedback('button');
+            startGame();
+        });
+        document.getElementById('resumeButton').addEventListener('click', async () => {
+            await armArcadeFeedback('button');
+            unpauseGame();
+        });
+        document.getElementById('pauseRestartBtn').addEventListener('click', async () => {
+            await armArcadeFeedback('button');
+            startGame();
+        });
+        document.getElementById('pauseTitleBtn').addEventListener('click', async () => {
+            await armArcadeFeedback('button');
+            returnToTitle();
+        });
+        document.getElementById('continueBossButton').addEventListener('click', async () => {
+            await armArcadeFeedback('button');
+            continueBossReward();
+        });
+
+        document.querySelectorAll('.initial-step').forEach(button => {
+            button.addEventListener('click', async () => {
+                await ensureAudio();
+                initialsState.index = Number(button.dataset.slot);
+                shiftInitial(Number(button.dataset.slot), Number(button.dataset.step));
+            });
+        });
+
+        document.querySelectorAll('.initial-slot').forEach(slot => {
+            slot.addEventListener('click', () => {
+                initialsState.index = Number(slot.dataset.slot);
+                renderInitialsEntry();
+                playUiBlip();
+            });
+        });
+
+        document.getElementById('initialPrev').addEventListener('click', async () => {
+            await ensureAudio();
+            moveInitialSelection(-1);
+        });
+
+        document.getElementById('initialNext').addEventListener('click', async () => {
+            await ensureAudio();
+            moveInitialSelection(1);
+        });
+
+        document.getElementById('saveInitialsButton').addEventListener('click', async () => {
+            await ensureAudio();
+            saveInitialsEntry();
+        });
+
+        [audioButton, pauseAudioButton].forEach(button => {
+            button.addEventListener('click', toggleAudioSetting);
+        });
+
+        [hapticsButton, pauseHapticsButton].forEach(button => {
+            button.addEventListener('click', toggleHapticsSetting);
+        });
+
+        [shakeButton, pauseShakeButton].forEach(button => {
+            button.addEventListener('click', toggleShakeSetting);
+        });
 
         document.getElementById('fullscreenBtn').addEventListener('click', async () => {
+            await armArcadeFeedback('button');
             try {
                 if (document.fullscreenElement) await document.exitFullscreen();
                 else await document.documentElement.requestFullscreen();
@@ -3205,8 +4807,36 @@
         });
 
         window.addEventListener('keydown', event => {
+            if (initialsState.active) {
+                if (event.code === 'ArrowLeft') {
+                    event.preventDefault();
+                    moveInitialSelection(-1);
+                    return;
+                }
+                if (event.code === 'ArrowRight') {
+                    event.preventDefault();
+                    moveInitialSelection(1);
+                    return;
+                }
+                if (event.code === 'ArrowUp' || event.code === 'KeyW') {
+                    event.preventDefault();
+                    shiftInitial(initialsState.index, 1);
+                    return;
+                }
+                if (event.code === 'ArrowDown' || event.code === 'KeyS') {
+                    event.preventDefault();
+                    shiftInitial(initialsState.index, -1);
+                    return;
+                }
+                if (event.code === 'Enter' || event.code === 'Space') {
+                    event.preventDefault();
+                    saveInitialsEntry();
+                    return;
+                }
+            }
             if (bossRewardPending && (event.code === 'Enter' || event.code === 'Space')) {
                 event.preventDefault();
+                playUiBlip();
                 continueBossReward();
                 return;
             }
@@ -3242,6 +4872,7 @@
         }
 
         bnnTickerContent.textContent = bnnTickerLines[currentTickerIndex];
+        updateSettingButtons();
         setDifficulty(difficulty);
         fitGameToScreen();
         updateUI();
@@ -3249,6 +4880,8 @@
         updateBossHUD();
         updateComboUI();
         initBackground();
+        resetAttractMode();
+        startAttractMode();
     </script>
 </body>
 </html>
