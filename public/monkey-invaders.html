@@ -1305,6 +1305,22 @@
             outline: none;
         }
 
+        .tap-start-hint {
+            margin: 14px 0 10px;
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(82, 217, 255, 0.35);
+            background: rgba(8, 20, 34, 0.68);
+            color: #c9f3ff;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-shadow: 0 0 14px rgba(82, 217, 255, 0.22);
+            animation: arcadeBlink 1.2s steps(2, end) infinite;
+            display: none;
+        }
+
         .controls {
             margin-top: 26px;
             color: #7f8797;
@@ -2295,6 +2311,12 @@
             .emoji-title { font-size: 60px; }
             .subtitle { font-size: 16px; }
             .btn { padding: 12px 24px; font-size: 16px; }
+            .tap-start-hint {
+                display: block;
+                width: min(420px, calc(100% - 12px));
+                font-size: 12px;
+                letter-spacing: 0.06em;
+            }
             .difficulty-panel { grid-template-columns: 1fr; }
             .record-board { grid-template-columns: 1fr; }
             .reward-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -2587,6 +2609,7 @@
                     <span class="attract-dot" data-dot="2"></span>
                 </div>
                 <button id="startButton" class="btn" type="button">Press Start</button>
+                <p class="tap-start-hint" id="tapStartHint">Tap anywhere to launch Space Monkeys</p>
                 <div class="controls">
                     <span>SPACE</span> or <span>TOUCH FIRE</span> to throw bananas<br>
                     <span>A / D</span> or <span>◀ / ▶</span> to move<br>
@@ -6015,6 +6038,7 @@
             paused = true;
             setCabinetState('pause');
             pauseOverlay.style.display = 'flex';
+            refreshTouchControlsVisibility();
             if (!silent) announce('pause');
         }
 
@@ -6023,6 +6047,7 @@
             paused = false;
             pauseOverlay.style.display = 'none';
             setCabinetState(boss ? 'boss' : 'game');
+            refreshTouchControlsVisibility();
             announce('unpause');
             lastTime = performance.now();
             requestAnimationFrame(gameLoop);
@@ -6047,6 +6072,7 @@
             bnnTickerContent.textContent = bnnTickerLines[currentTickerIndex];
             updateUI();
             updateCreditUI();
+            refreshTouchControlsVisibility();
             initBackground();
             resetAttractMode();
             setCabinetState('title');
@@ -6078,6 +6104,7 @@
             bnnTickerContent.textContent = bnnTickerLines[currentTickerIndex];
             document.getElementById('recordCallout').textContent = '';
             updateUI();
+            refreshTouchControlsVisibility();
             initBackground();
             createAliens();
             lastTime = performance.now();
@@ -6097,6 +6124,7 @@
                 levelSubtextElement.textContent = levelSubtexts[Math.min(level - 1, levelSubtexts.length - 1)] || levelSubtexts[levelSubtexts.length - 1];
             }
             levelScreen.style.display = 'flex';
+            refreshTouchControlsVisibility();
             bananas = [];
             powerups = [];
             if (isBossLevel(level)) {
@@ -6108,6 +6136,7 @@
             setTimeout(() => {
                 levelScreen.style.display = 'none';
                 levelTransition = false;
+                refreshTouchControlsVisibility();
                 initBackground();
                 createAliens();
                 updateUI();
@@ -6133,9 +6162,16 @@
                 ? `New ${difficultyPresets[difficulty].label} record // enter initials`
                 : `Best ${difficultyPresets[difficulty].label} // ${highScores[difficulty].initials} ${formatScore(highScores[difficulty].score)}`;
             gameOverScreen.style.display = 'flex';
+            refreshTouchControlsVisibility();
             if (isNewRecord) {
                 openInitialsEntry();
             }
+        }
+
+        function refreshTouchControlsVisibility() {
+            if (!hasTouch || !touchControls) return;
+            const shouldShow = gameRunning && !paused && !levelTransition && !bossRewardPending;
+            touchControls.style.display = shouldShow ? 'flex' : 'none';
         }
 
         function bindHold(button, keyCode) {
@@ -6268,9 +6304,27 @@
             });
         });
 
+        let startRequestInFlight = false;
+        async function requestStartGame() {
+            if (startRequestInFlight || gameRunning || startScreen.style.display === 'none') return;
+            startRequestInFlight = true;
+            try {
+                await armArcadeFeedback('button');
+                await startGame();
+            } finally {
+                startRequestInFlight = false;
+            }
+        }
+
+        startScreen.addEventListener('click', event => {
+            if (!hasTouch || gameRunning || startScreen.style.display === 'none') return;
+            const target = event.target;
+            if (target instanceof Element && target.closest('button, a, input, select, textarea, [role="button"]')) return;
+            requestStartGame();
+        });
+
         document.getElementById('startButton').addEventListener('click', async () => {
-            await armArcadeFeedback('button');
-            await startGame();
+            await requestStartGame();
         });
         document.getElementById('playAgainButton').addEventListener('click', async () => {
             await armArcadeFeedback('button');
@@ -6419,10 +6473,10 @@
         window.addEventListener('orientationchange', fitGameToScreen, { passive: true });
 
         if (hasTouch && touchControls) {
-            touchControls.style.display = 'flex';
             bindHold(document.getElementById('btnLeft'), 'ArrowLeft');
             bindHold(document.getElementById('btnRight'), 'ArrowRight');
             bindHold(document.getElementById('btnFire'), 'Space');
+            refreshTouchControlsVisibility();
         }
 
         bnnTickerContent.textContent = bnnTickerLines[currentTickerIndex];
