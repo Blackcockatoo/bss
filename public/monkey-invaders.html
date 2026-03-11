@@ -2683,7 +2683,8 @@
         }
 
         function announce(event, extra = {}) {
-            if (!gameRunning || paused) return;
+            const allowWhileIdle = event === 'coin';
+            if ((!gameRunning || paused) && !allowWhileIdle) return;
             let lines = announcerLines[event];
             if (event === 'bossCue') {
                 lines = announcerLines.bossCue[extra.kind] || announcerLines.bossCue.inspector;
@@ -2697,7 +2698,8 @@
                 addFloatingText(canvas.width / 2, canvas.height / 2, text, extra.color || '#fff', 2200, 30, 0);
                 return;
             }
-            addFloatingText(canvas.width / 2, canvas.height * 0.72, text, extra.color || '#ffd700', 1600, 23, 0);
+            const floatY = allowWhileIdle ? canvas.height * 0.34 : canvas.height * 0.72;
+            addFloatingText(canvas.width / 2, floatY, text, extra.color || '#ffd700', 1600, 23, 0);
         }
 
         function showAchievement(title, color = '#ffd700') {
@@ -2895,6 +2897,7 @@
                 particle.life -= 0.03 * step;
                 if (particle.life <= 0) attractState.particles.splice(i, 1);
             }
+            updateFloatingTexts(dt);
             updateMusicBed(dt);
         }
 
@@ -2926,6 +2929,7 @@
             ctx.textAlign = 'center';
             ctx.fillText('DEMO LOOP // B$S ARCADE ATTRACT MODE', canvas.width / 2, canvas.height - 48);
             ctx.restore();
+            drawFloatingTexts();
         }
 
         function attractLoop(currentTime) {
@@ -3286,6 +3290,7 @@
             bossRewardPending = null;
             bossRewardScreen.style.display = 'none';
             closeInitialsEntry();
+            announcerState.bossCueCooldown = 0;
             clearPowerupTimers();
             Object.keys(monkey.powerups).forEach(key => {
                 monkey.powerups[key] = false;
@@ -4510,6 +4515,7 @@
             tickerTimer = 0;
             bnnTickerContent.textContent = bnnTickerLines[currentTickerIndex];
             updateUI();
+            updateCreditUI();
             initBackground();
             resetAttractMode();
             setCabinetState('title');
@@ -4730,11 +4736,11 @@
 
         document.getElementById('startButton').addEventListener('click', async () => {
             await armArcadeFeedback('button');
-            startGame();
+            await startGame();
         });
         document.getElementById('playAgainButton').addEventListener('click', async () => {
             await armArcadeFeedback('button');
-            startGame();
+            await startGame();
         });
         document.getElementById('resumeButton').addEventListener('click', async () => {
             await armArcadeFeedback('button');
@@ -4742,11 +4748,15 @@
         });
         document.getElementById('pauseRestartBtn').addEventListener('click', async () => {
             await armArcadeFeedback('button');
-            startGame();
+            await startGame();
         });
         document.getElementById('pauseTitleBtn').addEventListener('click', async () => {
             await armArcadeFeedback('button');
             returnToTitle();
+        });
+        insertCoinButton.addEventListener('click', async () => {
+            await ensureAudio();
+            await insertCoin(false);
         });
         document.getElementById('continueBossButton').addEventListener('click', async () => {
             await armArcadeFeedback('button');
@@ -4807,6 +4817,11 @@
         });
 
         window.addEventListener('keydown', event => {
+            if ((event.code === 'Digit5' || event.code === 'KeyC') && !gameRunning && !initialsState.active) {
+                event.preventDefault();
+                ensureAudio().then(() => insertCoin(false));
+                return;
+            }
             if (initialsState.active) {
                 if (event.code === 'ArrowLeft') {
                     event.preventDefault();
@@ -4833,6 +4848,11 @@
                     saveInitialsEntry();
                     return;
                 }
+            }
+            if (!gameRunning && startScreen.style.display !== 'none' && (event.code === 'Enter' || event.code === 'Space')) {
+                event.preventDefault();
+                armArcadeFeedback('button').then(() => startGame());
+                return;
             }
             if (bossRewardPending && (event.code === 'Enter' || event.code === 'Space')) {
                 event.preventDefault();
@@ -4876,11 +4896,13 @@
         setDifficulty(difficulty);
         fitGameToScreen();
         updateUI();
+        updateCreditUI();
         updatePowerupUI();
         updateBossHUD();
         updateComboUI();
         initBackground();
         resetAttractMode();
+        setCabinetState('title');
         startAttractMode();
     </script>
 </body>
