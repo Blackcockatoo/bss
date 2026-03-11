@@ -4516,14 +4516,14 @@
             startAttractMode();
         }
 
-        function startGame() {
+        async function startGame() {
             stopAttractMode();
             startScreen.style.display = 'none';
             gameOverScreen.style.display = 'none';
             pauseOverlay.style.display = 'none';
             bossRewardScreen.style.display = 'none';
             closeInitialsEntry();
-            consumeCreditForStart();
+            await consumeCreditForStart();
             score = 0;
             level = 1;
             lives = getPreset().startLives;
