@@ -1321,6 +1321,24 @@
             display: none;
         }
 
+        .quick-start-btn {
+            display: none;
+            width: min(460px, calc(100% - 10px));
+            margin-top: 12px;
+            padding: 14px 18px;
+            border: 1px solid rgba(82, 217, 255, 0.48);
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(23, 58, 88, 0.92), rgba(19, 44, 72, 0.92));
+            color: #dcf6ff;
+            font-size: 15px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-shadow: 0 0 12px rgba(82, 217, 255, 0.25);
+            box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+            touch-action: manipulation;
+        }
+
         .controls {
             margin-top: 26px;
             color: #7f8797;
@@ -1586,6 +1604,16 @@
             margin: 0 0 16px;
             position: relative;
             min-height: 194px;
+            z-index: 0;
+        }
+
+        #startButton,
+        #quickStartButton,
+        .tap-start-hint,
+        .controls,
+        .screen-note {
+            position: relative;
+            z-index: 2;
         }
 
         .attract-panel {
@@ -2306,6 +2334,12 @@
         }
 
         @media (max-width: 680px) {
+            #startScreen {
+                justify-content: flex-start;
+                overflow-y: auto;
+                padding-top: 72px;
+                padding-bottom: max(30px, env(safe-area-inset-bottom));
+            }
             h1 { font-size: 34px; }
             h2 { font-size: 30px; }
             .emoji-title { font-size: 60px; }
@@ -2316,6 +2350,18 @@
                 width: min(420px, calc(100% - 12px));
                 font-size: 12px;
                 letter-spacing: 0.06em;
+            }
+            .quick-start-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .attract-panels,
+            .attract-panel,
+            .leaderboard-shell,
+            .review-shell,
+            .howto-shell {
+                pointer-events: none;
             }
             .difficulty-panel { grid-template-columns: 1fr; }
             .record-board { grid-template-columns: 1fr; }
@@ -2609,6 +2655,7 @@
                     <span class="attract-dot" data-dot="2"></span>
                 </div>
                 <button id="startButton" class="btn" type="button">Press Start</button>
+                <button id="quickStartButton" class="quick-start-btn" type="button" aria-label="Quick start game">Tap Here To Start Instantly</button>
                 <p class="tap-start-hint" id="tapStartHint">Tap anywhere to launch Space Monkeys</p>
                 <div class="controls">
                     <span>SPACE</span> or <span>TOUCH FIRE</span> to throw bananas<br>
@@ -6316,14 +6363,20 @@
             }
         }
 
-        startScreen.addEventListener('click', event => {
+        const tryTapStart = event => {
             if (!hasTouch || gameRunning || startScreen.style.display === 'none') return;
             const target = event.target;
             if (target instanceof Element && target.closest('button, a, input, select, textarea, [role="button"]')) return;
             requestStartGame();
-        });
+        };
+
+        startScreen.addEventListener('click', tryTapStart);
+        startScreen.addEventListener('pointerup', tryTapStart, { passive: true });
 
         document.getElementById('startButton').addEventListener('click', async () => {
+            await requestStartGame();
+        });
+        document.getElementById('quickStartButton').addEventListener('click', async () => {
             await requestStartGame();
         });
         document.getElementById('playAgainButton').addEventListener('click', async () => {
