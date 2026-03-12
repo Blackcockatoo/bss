@@ -13,7 +13,24 @@ export default function GeometrySoundPage() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const searchParams = useSearchParams();
 
-  const iframeSrc = useMemo(() => buildGeometrySoundIframeSrc(searchParams), [searchParams]);
+  const iframeSrc = useMemo(() => {
+    const params = new URLSearchParams();
+    const keys = [
+      'petId',
+      'petName',
+      'petType',
+      'seed',
+      'elementProfile',
+      'resonanceIndex',
+      'session',
+    ];
+    keys.forEach(key => {
+      const value = searchParams.get(key);
+      if (value) params.set(key, value);
+    });
+    const query = params.toString();
+    return query ? `/geometry-sound.html?${query}` : '/geometry-sound.html';
+  }, [searchParams]);
 
   useEffect(() => {
     const handleResize = () => {
