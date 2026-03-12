@@ -2676,7 +2676,7 @@
                         <div class="operator-section">
                             <h3>Cheats</h3>
                             <div class="operator-actions">
-                                <button id="opInvincibleBtn" class="operator-btn" type="button">Invincible Off</button>
+                                <button id="opInvincibleBtn" class="operator-btn" type="button">Invincible Outside Bosses OFF</button>
                                 <button id="opArsenalBtn" class="operator-btn" type="button">Grant Arsenal</button>
                                 <button id="opMonkeyModeBtn" class="operator-btn" type="button">Trigger Monkey Mode</button>
                                 <button id="opSkipBtn" class="operator-btn" type="button">Skip Encounter</button>
@@ -3278,7 +3278,7 @@
         };
 
         const cheats = {
-            invincible: false,
+            invincibleOutsideBosses: false,
             endlessCredits: false,
             mascotParty: false,
         };
@@ -3469,6 +3469,18 @@
             paintToggleButton(pauseAudioButton, audioState.enabled, 'Sound On', 'Sound Off', true);
             paintToggleButton(pauseHapticsButton, hapticState.enabled, 'Haptics On', 'Haptics Off');
             paintToggleButton(pauseShakeButton, visualState.shakeEnabled, 'Shake On', 'Shake Off');
+        }
+
+        function updateOperatorButtons() {
+            paintToggleButton(opInvincibleButton, cheats.invincibleOutsideBosses, 'Invincible Outside Bosses ON', 'Invincible Outside Bosses OFF', true);
+        }
+
+        async function toggleInvincibleOutsideBosses() {
+            await ensureAudio();
+            cheats.invincibleOutsideBosses = !cheats.invincibleOutsideBosses;
+            playUiBlip();
+            triggerHaptic('button');
+            updateOperatorButtons();
         }
 
         async function toggleAudioSetting() {
@@ -5983,6 +5995,7 @@
 
         function loseLife() {
             if (!gameRunning || levelTransition) return;
+            if (!boss && cheats.invincibleOutsideBosses) return;
             lives -= 1;
             updateUI();
             announce('lifeLost');
@@ -6371,6 +6384,8 @@
             button.addEventListener('click', toggleShakeSetting);
         });
 
+        opInvincibleButton.addEventListener('click', toggleInvincibleOutsideBosses);
+
         document.getElementById('fullscreenBtn').addEventListener('click', async () => {
             await armArcadeFeedback('button');
             try {
@@ -6458,6 +6473,7 @@
 
         bnnTickerContent.textContent = bnnTickerLines[currentTickerIndex];
         updateSettingButtons();
+        updateOperatorButtons();
         setDifficulty(difficulty);
         fitGameToScreen();
         updateUI();
