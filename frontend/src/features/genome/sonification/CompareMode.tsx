@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { buildSonifiedTracks, SonificationPlaybackController, synchronizeTracks, type TrackPlaybackState } from "./engine";
+import {
+  SonificationPlaybackController,
+  type TrackPlaybackState,
+  buildSonifiedTracks,
+  synchronizeTracks,
+} from "./engine";
 import type { TraitVector } from "./mappings";
 
 type SonifySummaryResponse = {
@@ -22,8 +27,14 @@ type Props = {
 
 function toTraitVectors(summary: SonifySummaryResponse): TraitVector[] {
   return summary.normalizedTraitVector.map((trait) => {
-    const outgoing = Object.values(summary.interactionMatrix[trait.traitId] ?? {});
-    const interactionStrength = outgoing.length === 0 ? 0 : outgoing.reduce((acc, value) => acc + Math.abs(value), 0) / outgoing.length;
+    const outgoing = Object.values(
+      summary.interactionMatrix[trait.traitId] ?? {},
+    );
+    const interactionStrength =
+      outgoing.length === 0
+        ? 0
+        : outgoing.reduce((acc, value) => acc + Math.abs(value), 0) /
+          outgoing.length;
 
     return {
       traitId: trait.traitId,
@@ -39,10 +50,14 @@ export function SonificationCompareMode({ petAId, petBId }: Props) {
   const [petA, setPetA] = useState<TraitVector[] | null>(null);
   const [petB, setPetB] = useState<TraitVector[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [audioError, setAudioError] = useState<string | null>(null);
   const [activeRegionIndex, setActiveRegionIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [trackStates, setTrackStates] = useState<Record<string, TrackPlaybackState>>({});
+  const [isAudioReady, setIsAudioReady] = useState(false);
+  const [trackStates, setTrackStates] = useState<
+    Record<string, TrackPlaybackState>
+  >({});
   const engineRef = useRef<SonificationPlaybackController | null>(null);
 
   useEffect(() => {
@@ -95,20 +110,22 @@ export function SonificationCompareMode({ petAId, petBId }: Props) {
 
   useEffect(() => {
     if (synced.length === 0) {
+      setTrackStates({});
+      setIsAudioReady(false);
       return;
     }
 
     const controller = new SonificationPlaybackController();
     engineRef.current = controller;
+    setAudioError(null);
+    setIsAudioReady(false);
 
-    controller.initialize(synced).then(() => {
-      const initialStates: Record<string, TrackPlaybackState> = {};
-      for (const pair of synced) {
-        initialStates[pair.primary.traitId] = { muted: false, solo: false };
-        initialStates[pair.secondary.traitId] = { muted: false, solo: false };
-      }
-      setTrackStates(initialStates);
-    });
+    const initialStates: Record<string, TrackPlaybackState> = {};
+    for (const pair of synced) {
+      initialStates[pair.primary.traitId] = { muted: false, solo: false };
+      initialStates[pair.secondary.traitId] = { muted: false, solo: false };
+    }
+    setTrackStates(initialStates);
 
     const timer = window.setInterval(() => {
       const state = controller.getPlaybackState();
@@ -124,10 +141,36 @@ export function SonificationCompareMode({ petAId, petBId }: Props) {
     };
   }, [synced]);
 
+  async function handlePlay() {
+    if (!engineRef.current || synced.length === 0) {
+      return;
+    }
+
+    try {
+      if (!isAudioReady) {
+        await engineRef.current.initialize(synced);
+        Object.entries(trackStates).forEach(([traitId, state]) => {
+          engineRef.current?.setTrackState(traitId, state);
+        });
+        setIsAudioReady(true);
+      }
+
+      setAudioError(null);
+      engineRef.current.play();
+    } catch {
+      setAudioError(
+        "Audio playback is blocked until the browser allows sound for this page.",
+      );
+    }
+  }
+
   function toggleMute(traitId: string) {
     setTrackStates((prev) => {
       const current = prev[traitId] ?? { muted: false, solo: false };
-      const next = { ...prev, [traitId]: { ...current, muted: !current.muted } };
+      const next = {
+        ...prev,
+        [traitId]: { ...current, muted: !current.muted },
+      };
       engineRef.current?.setTrackState(traitId, next[traitId]);
       return next;
     });
@@ -146,24 +189,46 @@ export function SonificationCompareMode({ petAId, petBId }: Props) {
     <section className="rounded-xl border border-slate-800 p-4">
       <h3 className="font-semibold">Sonification Compare Mode</h3>
       <p className="text-xs text-slate-500">
-        Backend-driven trait vectors, synchronized playback controls, and mirrored visual cues for accessibility.
+        Backend-driven trait vectors, synchronized playback controls, and
+        mirrored visual cues for accessibility.
       </p>
 
-      {loadError ? <p className="mt-3 text-xs text-rose-400">{loadError}</p> : null}
+      {loadError ? (
+        <p className="mt-3 text-xs text-rose-400">{loadError}</p>
+      ) : null}
+      {audioError ? (
+        <p className="mt-2 text-xs text-amber-300">{audioError}</p>
+      ) : null}
 
       <div className="mt-4 space-y-2 rounded border border-slate-700 p-3">
         <div className="flex items-center gap-2">
-          <button className="rounded bg-slate-700 px-2 py-1 text-xs" onClick={() => engineRef.current?.play()} type="button">
+          <button
+            className="rounded bg-slate-700 px-2 py-1 text-xs"
+            onClick={() => void handlePlay()}
+            type="button"
+          >
             Play
           </button>
-          <button className="rounded bg-slate-700 px-2 py-1 text-xs" onClick={() => engineRef.current?.pause()} type="button">
+          <button
+            className="rounded bg-slate-700 px-2 py-1 text-xs"
+            onClick={() => engineRef.current?.pause()}
+            type="button"
+          >
             Pause
           </button>
-          <span className="text-xs text-slate-400">{isPlaying ? "Playing" : "Paused"}</span>
-          <span className="ml-auto text-xs text-cyan-300">Active region: {synced[activeRegionIndex]?.activeGenomeRegion ?? "n/a"}</span>
+          <span className="text-xs text-slate-400">
+            {isPlaying ? "Playing" : "Paused"}
+          </span>
+          <span className="ml-auto text-xs text-cyan-300">
+            Active region:{" "}
+            {synced[activeRegionIndex]?.activeGenomeRegion ?? "n/a"}
+          </span>
         </div>
 
-        <label className="block text-xs text-slate-300" htmlFor="sonification-seek">
+        <label
+          className="block text-xs text-slate-300"
+          htmlFor="sonification-seek"
+        >
           Timeline seek (visual + audio synced)
         </label>
         <input
@@ -180,8 +245,12 @@ export function SonificationCompareMode({ petAId, petBId }: Props) {
           value={Math.round(progress * 100)}
         />
 
-        <div aria-live="polite" className="rounded bg-slate-900 p-2 text-xs text-slate-300">
-          Visual parity cue: highlighted card and timeline position indicate the same active genomic region as audio playback.
+        <div
+          aria-live="polite"
+          className="rounded bg-slate-900 p-2 text-xs text-slate-300"
+        >
+          Visual parity cue: highlighted card and timeline position indicate the
+          same active genomic region as audio playback.
         </div>
       </div>
 
@@ -195,20 +264,36 @@ export function SonificationCompareMode({ petAId, petBId }: Props) {
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="font-medium">{pair.activeGenomeRegion}</div>
-                <span className={`rounded px-2 py-0.5 ${isActive ? "bg-cyan-400/20 text-cyan-200" : "bg-slate-800 text-slate-400"}`}>
+                <span
+                  className={`rounded px-2 py-0.5 ${isActive ? "bg-cyan-400/20 text-cyan-200" : "bg-slate-800 text-slate-400"}`}
+                >
                   {isActive ? "Active" : "Queued"}
                 </span>
               </div>
-              <div className="mt-1">A: {pair.primary.instrument} {pair.primary.chord.join("-")}</div>
-              <div>B: {pair.secondary.instrument} {pair.secondary.chord.join("-")}</div>
+              <div className="mt-1">
+                A: {pair.primary.instrument} {pair.primary.chord.join("-")}
+              </div>
+              <div>
+                B: {pair.secondary.instrument} {pair.secondary.chord.join("-")}
+              </div>
               <div className="mt-2 flex flex-wrap gap-2">
                 {[pair.primary, pair.secondary].map((track) => (
                   <div className="flex items-center gap-1" key={track.traitId}>
-                    <span className="text-[11px] text-slate-300">{track.traitId}</span>
-                    <button className="rounded bg-slate-800 px-2 py-0.5" onClick={() => toggleMute(track.traitId)} type="button">
+                    <span className="text-[11px] text-slate-300">
+                      {track.traitId}
+                    </span>
+                    <button
+                      className="rounded bg-slate-800 px-2 py-0.5"
+                      onClick={() => toggleMute(track.traitId)}
+                      type="button"
+                    >
                       {trackStates[track.traitId]?.muted ? "Unmute" : "Mute"}
                     </button>
-                    <button className="rounded bg-slate-800 px-2 py-0.5" onClick={() => toggleSolo(track.traitId)} type="button">
+                    <button
+                      className="rounded bg-slate-800 px-2 py-0.5"
+                      onClick={() => toggleSolo(track.traitId)}
+                      type="button"
+                    >
                       {trackStates[track.traitId]?.solo ? "Unsolo" : "Solo"}
                     </button>
                   </div>

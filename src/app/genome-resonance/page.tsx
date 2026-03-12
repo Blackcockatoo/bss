@@ -21,7 +21,12 @@ const nodes = [
     traitFamily: "behavior",
     effectSize: 0.8,
     confidence: 0.9,
-    stageActivation: { kitten_puppy: 0.7, adolescent: 0.9, adult: 0.8, senior: 0.6 },
+    stageActivation: {
+      kitten_puppy: 0.7,
+      adolescent: 0.9,
+      adult: 0.8,
+      senior: 0.6,
+    },
   },
   {
     id: "agility",
@@ -29,7 +34,12 @@ const nodes = [
     traitFamily: "athletic",
     effectSize: 0.74,
     confidence: 0.82,
-    stageActivation: { kitten_puppy: 0.6, adolescent: 0.8, adult: 0.9, senior: 0.5 },
+    stageActivation: {
+      kitten_puppy: 0.6,
+      adolescent: 0.8,
+      adult: 0.9,
+      senior: 0.5,
+    },
   },
   {
     id: "focus",
@@ -37,59 +47,132 @@ const nodes = [
     traitFamily: "cognition",
     effectSize: 0.59,
     confidence: 0.76,
-    stageActivation: { kitten_puppy: 0.4, adolescent: 0.6, adult: 0.7, senior: 0.7 },
+    stageActivation: {
+      kitten_puppy: 0.4,
+      adolescent: 0.6,
+      adult: 0.7,
+      senior: 0.7,
+    },
   },
 ];
 
 const edges = [
-  { source: "sociality", target: "focus", weight: 0.34, interactionType: "coexpression" as const },
-  { source: "agility", target: "focus", weight: 0.21, interactionType: "support" as const },
+  {
+    source: "sociality",
+    target: "focus",
+    weight: 0.34,
+    interactionType: "coexpression" as const,
+  },
+  {
+    source: "agility",
+    target: "focus",
+    weight: 0.21,
+    interactionType: "support" as const,
+  },
 ];
 
 const initialBlocks: ExplanationBlock[] = [
   {
     id: "exp-1",
     title: "Behavioral Signal",
-    message: "Pick a trait, run a simulation, and this panel will explain evidence-backed implications.",
+    message:
+      "Pick a trait, run a simulation, and this panel will explain evidence-backed implications.",
     sourceSignals: ["sociality", "focus"],
     confidence: 0.82,
     guardrail: "This is not a deterministic temperament diagnosis.",
   },
 ];
 
+type ApiErrorPayload = {
+  error?: string;
+};
+
+async function parseJsonSafely<T>(response: Response): Promise<T | null> {
+  try {
+    return (await response.json()) as T;
+  } catch {
+    return null;
+  }
+}
+
 export default function GenomeResonancePage() {
   const [selectedTraitId, setSelectedTraitId] = useState<string>(nodes[0].id);
   const [lastSimulation, setLastSimulation] = useState<SimulationResult[]>([]);
   const [blocks, setBlocks] = useState<ExplanationBlock[]>(initialBlocks);
+  const [requestError, setRequestError] = useState<string | null>(null);
 
   async function runSimulation(deltas: Record<string, number>) {
-    const simulationResponse = await fetch("/api/genome-resonance/simulate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ selectedTraitId, deltas }),
-    });
+    setRequestError(null);
 
-    const simulationData = (await simulationResponse.json()) as SimulationResponse;
-    setLastSimulation(simulationData.results);
+    try {
+      const simulationResponse = await fetch("/api/genome-resonance/simulate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ selectedTraitId, deltas }),
+      });
 
-    const nextViewStateKey = `${selectedTraitId}:${simulationData.results.map((item) => `${item.traitId}:${item.estimate.toFixed(2)}`).join("|")}`;
+      const simulationPayload = await parseJsonSafely<
+        SimulationResponse | ApiErrorPayload
+      >(simulationResponse);
+      if (
+        !simulationResponse.ok ||
+        !simulationPayload ||
+        !("results" in simulationPayload)
+      ) {
+        const message =
+          simulationPayload &&
+          "error" in simulationPayload &&
+          simulationPayload.error
+            ? simulationPayload.error
+            : "Simulation is unavailable right now.";
+        throw new Error(message);
+      }
 
-    const explanationResponse = await fetch("/api/genome-resonance/explain", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        petId: "pet-a",
-        viewStateKey: nextViewStateKey,
-        tone: "story",
-        selectedTraitId,
-        simulation: simulationData.results,
-      }),
-    });
+      setLastSimulation(simulationPayload.results);
 
-    const explanationData = (await explanationResponse.json()) as ExplanationResponse;
-    setBlocks(explanationData.blocks);
+      const nextViewStateKey = `${selectedTraitId}:${simulationPayload.results.map((item) => `${item.traitId}:${item.estimate.toFixed(2)}`).join("|")}`;
 
-    return simulationData.results;
+      const explanationResponse = await fetch("/api/genome-resonance/explain", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          petId: "pet-a",
+          viewStateKey: nextViewStateKey,
+          tone: "story",
+          selectedTraitId,
+          simulation: simulationPayload.results,
+        }),
+      });
+
+      const explanationPayload = await parseJsonSafely<
+        ExplanationResponse | ApiErrorPayload
+      >(explanationResponse);
+      if (
+        !explanationResponse.ok ||
+        !explanationPayload ||
+        !("blocks" in explanationPayload)
+      ) {
+        const message =
+          explanationPayload &&
+          "error" in explanationPayload &&
+          explanationPayload.error
+            ? explanationPayload.error
+            : "Explanation is unavailable right now.";
+        throw new Error(message);
+      }
+
+      setBlocks(explanationPayload.blocks);
+      return simulationPayload.results;
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Genome resonance is unavailable right now.";
+      setRequestError(message);
+      setLastSimulation([]);
+      setBlocks(initialBlocks);
+      throw error;
+    }
   }
 
   return (
@@ -99,12 +182,24 @@ export default function GenomeResonancePage() {
         <ol className="mt-2 list-decimal space-y-1 pl-5 text-xs text-slate-300">
           <li>Select a trait node in the Constellation Dome.</li>
           <li>Adjust What-If sliders and run a simulation.</li>
-          <li>Review the explainer blocks generated from node + simulation evidence.</li>
+          <li>
+            Review the explainer blocks generated from node + simulation
+            evidence.
+          </li>
         </ol>
-        <div className="mt-2 text-xs text-sky-300">Current selected node: {selectedTraitId}</div>
+        <div className="mt-2 text-xs text-sky-300">
+          Current selected node: {selectedTraitId}
+        </div>
+        {requestError ? (
+          <p className="mt-2 text-xs text-rose-400">{requestError}</p>
+        ) : null}
       </section>
 
-      <ConstellationDome nodes={nodes} edges={edges} onNodeSelect={setSelectedTraitId} />
+      <ConstellationDome
+        nodes={nodes}
+        edges={edges}
+        onNodeSelect={setSelectedTraitId}
+      />
       <WhatIfLab
         controls={[
           { id: "sociality", label: "Sociality", baseline: 0.7 },
@@ -117,18 +212,35 @@ export default function GenomeResonancePage() {
       <GenomeTimeline
         branchesByStage={{
           adult: [
-            { id: "b1", label: "Balanced Arc", confidence: 0.8, divergenceSummary: "Balanced mood and athletics." },
-            { id: "b2", label: "Performance Arc", confidence: 0.73, divergenceSummary: "Improved speed; slight focus volatility." },
+            {
+              id: "b1",
+              label: "Balanced Arc",
+              confidence: 0.8,
+              divergenceSummary: "Balanced mood and athletics.",
+            },
+            {
+              id: "b2",
+              label: "Performance Arc",
+              confidence: 0.73,
+              divergenceSummary: "Improved speed; slight focus volatility.",
+            },
           ],
         }}
       />
-      <ResonanceArena signatures={[{ petId: "pet-a", behavior: 0.8, health: 0.66, athletic: 0.74 }]} />
+      <ResonanceArena
+        signatures={[
+          { petId: "pet-a", behavior: 0.8, health: 0.66, athletic: 0.74 },
+        ]}
+      />
       <ExplainerPanel blocks={blocks} />
 
       <section className="rounded-xl border border-slate-800 p-4 text-xs">
         <h3 className="font-semibold">v1 Success Metrics</h3>
         <ul className="mt-2 list-disc space-y-1 pl-4 text-slate-300">
-          <li>Time to first trait insight (node select → first explanation block render).</li>
+          <li>
+            Time to first trait insight (node select → first explanation block
+            render).
+          </li>
           <li>% users who run at least one simulation.</li>
           <li>% simulations with viewed explanation.</li>
         </ul>

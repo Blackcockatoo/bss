@@ -15,6 +15,8 @@
     .btn:hover{border-color: rgba(245,200,76,.55); background: rgba(245,200,76,.08)}
     iframe{width:100%; height:72vh; border:1px solid rgba(255,255,255,.12); border-radius:12px; margin-top:14px; background:#000}
     .muted{color: rgba(232,238,247,.72); line-height:1.6}
+    .notice{display:none; margin-top:14px; padding:12px; border-radius:12px; border:1px solid rgba(245,200,76,.35); background:rgba(245,200,76,.08)}
+    .notice.show{display:block}
     code{background:rgba(0,0,0,.25); padding:2px 6px; border-radius:8px; border:1px solid rgba(255,255,255,.10)}
   </style>
 </head>
@@ -26,8 +28,18 @@
       <a class="btn" href="../index.html">← Home</a>
       <a class="btn" href="https://kpps-brand-mr.vercel.app/" target="_blank" rel="noopener">Open in new tab ↗</a>
     </div>
-    <iframe src="https://kpps-brand-mr.vercel.app/" title="Meta-Pet App"></iframe>
+    <iframe id="app-frame" src="https://kpps-brand-mr.vercel.app/" title="Meta-Pet App"></iframe>
+    <div class="notice" id="embed-notice">If the live app stays blank here, the host may be blocking iframe access. Use <strong>Open in new tab</strong> to continue.</div>
     <p class="muted">Deploy note: when hosted on a school domain, consider whitelisting <code>*.vercel.app</code> if your content filter blocks it.</p>
   </div>
+  <script>
+    window.setTimeout(function () {
+      var frame = document.getElementById("app-frame");
+      var notice = document.getElementById("embed-notice");
+      if (frame && notice) {
+        notice.classList.add("show");
+      }
+    }, 2500);
+  </script>
 </body>
 </html>

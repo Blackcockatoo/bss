@@ -2,7 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { SimulationResult } from "../../../../../shared/contracts/genomeResonance";
-import { listSavedScenarios, saveScenario, type SavedScenario } from "../data/genomePersistenceClient";
+import {
+  type SavedScenario,
+  listSavedScenarios,
+  saveScenario,
+} from "../data/genomePersistenceClient";
 
 export type TraitControl = {
   id: string;
@@ -23,25 +27,43 @@ type Props = {
 
 export function WhatIfLab({ controls, onSimulate, onResults }: Props) {
   const baseline = useMemo(
-    () => controls.reduce<Record<string, number>>((acc, c) => ({ ...acc, [c.id]: c.baseline }), {}),
+    () =>
+      controls.reduce<Record<string, number>>(
+        (acc, c) => ({ ...acc, [c.id]: c.baseline }),
+        {},
+      ),
     [controls],
   );
   const [values, setValues] = useState<Record<string, number>>(baseline);
   const [results, setResults] = useState<SimulationResult[]>([]);
   const [saved, setSaved] = useState<SavedScenario[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isRunning, setIsRunning] = useState(false);
 
   useEffect(() => {
-    listSavedScenarios().then(setSaved).catch(() => setError("Failed to load saved scenarios."));
+    listSavedScenarios()
+      .then(setSaved)
+      .catch(() => setError("Failed to load saved scenarios."));
   }, []);
 
   async function run() {
-    const deltas = Object.fromEntries(
-      Object.entries(values).map(([id, value]) => [id, value - baseline[id]]),
-    );
-    const nextResults = await onSimulate(deltas);
-    setResults(nextResults);
-    onResults?.(nextResults);
+    setError(null);
+    setIsRunning(true);
+
+    try {
+      const deltas = Object.fromEntries(
+        Object.entries(values).map(([id, value]) => [id, value - baseline[id]]),
+      );
+      const nextResults = await onSimulate(deltas);
+      setResults(nextResults);
+      onResults?.(nextResults);
+    } catch (error) {
+      setResults([]);
+      onResults?.([]);
+      setError(error instanceof Error ? error.message : "Simulation failed.");
+    } finally {
+      setIsRunning(false);
+    }
   }
 
   function reset() {
@@ -83,7 +105,10 @@ export function WhatIfLab({ controls, onSimulate, onResults }: Props) {
               max={1}
               min={0}
               onChange={(event) =>
-                setValues((state) => ({ ...state, [control.id]: Number(event.target.value) }))
+                setValues((state) => ({
+                  ...state,
+                  [control.id]: Number(event.target.value),
+                }))
               }
               step={0.01}
               type="range"
@@ -94,27 +119,57 @@ export function WhatIfLab({ controls, onSimulate, onResults }: Props) {
       </div>
 
       <div className="mt-3 flex gap-2 text-xs">
-        <button className="rounded bg-indigo-500 px-3 py-1 text-white" onClick={run} type="button">Simulate</button>
-        <button className="rounded border px-3 py-1" onClick={reset} type="button">Reset baseline</button>
-        <button className="rounded border px-3 py-1" onClick={persistScenario} type="button">Save/share scenario</button>
+        <button
+          className="rounded bg-indigo-500 px-3 py-1 text-white disabled:cursor-not-allowed disabled:opacity-60"
+          disabled={isRunning}
+          onClick={run}
+          type="button"
+        >
+          {isRunning ? "Simulating..." : "Simulate"}
+        </button>
+        <button
+          className="rounded border px-3 py-1"
+          onClick={reset}
+          type="button"
+        >
+          Reset baseline
+        </button>
+        <button
+          className="rounded border px-3 py-1"
+          onClick={persistScenario}
+          type="button"
+        >
+          Save/share scenario
+        </button>
       </div>
 
       <ul className="mt-4 space-y-2 text-xs">
         {results.map((result) => (
-          <li className="rounded border border-slate-700 p-2" key={result.traitId}>
+          <li
+            className="rounded border border-slate-700 p-2"
+            key={result.traitId}
+          >
             <div className="font-medium">{result.traitId}</div>
             <div>
-              Central estimate: {result.estimate.toFixed(2)} [{result.lowerBound.toFixed(2)} -{" "}
-              {result.upperBound.toFixed(2)}]
+              Central estimate: {result.estimate.toFixed(2)} [
+              {result.lowerBound.toFixed(2)} - {result.upperBound.toFixed(2)}]
             </div>
             <div>Feasibility: {(result.feasibility * 100).toFixed(0)}%</div>
-            {result.tradeoffWarning ? <div className="text-amber-300">Tradeoff: {result.tradeoffWarning}</div> : null}
+            {result.tradeoffWarning ? (
+              <div className="text-amber-300">
+                Tradeoff: {result.tradeoffWarning}
+              </div>
+            ) : null}
           </li>
         ))}
       </ul>
-      <p className="mt-3 text-xs text-slate-500">Saved scenarios: {saved.length}</p>
+      <p className="mt-3 text-xs text-slate-500">
+        Saved scenarios: {saved.length}
+      </p>
       {saved.at(-1)?.sharedToken && saved.at(-1)?.sharedToken !== "pending" ? (
-        <p className="mt-1 text-xs text-slate-500">Share token: {saved.at(-1)?.sharedToken}</p>
+        <p className="mt-1 text-xs text-slate-500">
+          Share token: {saved.at(-1)?.sharedToken}
+        </p>
       ) : null}
       {error ? <p className="mt-1 text-xs text-rose-400">{error}</p> : null}
     </section>
