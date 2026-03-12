@@ -238,9 +238,9 @@ export default function GenomeResonancePage() {
 
   return (
     <main className="space-y-4 p-4">
-      <section className="rounded-xl border border-slate-800 bg-slate-950 p-4 text-slate-100">
-        <h1 className="text-lg font-semibold">Genome Resonance v1 Loop</h1>
-        <ol className="mt-2 list-decimal space-y-1 pl-5 text-xs text-slate-300">
+      <section className="rounded-xl border border-slate-700 bg-slate-950 p-4 text-slate-100">
+        <h1 className="text-xl font-semibold tracking-tight">Genome Resonance v1 Loop</h1>
+        <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-sm text-slate-200">
           <li>Select a trait node in the Constellation Dome.</li>
           <li>Adjust What-If sliders and run a simulation.</li>
           <li>
@@ -248,11 +248,11 @@ export default function GenomeResonancePage() {
             evidence.
           </li>
         </ol>
-        <div className="mt-2 text-xs text-sky-300">
+        <div className="mt-3 text-sm font-medium text-sky-200">
           Current selected node: {selectedTraitId}
         </div>
         {requestError ? (
-          <p className="mt-2 text-xs text-rose-400">{requestError}</p>
+          <p className="mt-2 text-sm text-rose-300">{requestError}</p>
         ) : null}
       </section>
 
@@ -295,9 +295,9 @@ export default function GenomeResonancePage() {
       />
       <ExplainerPanel blocks={blocks} />
 
-      <section className="rounded-xl border border-slate-800 p-4 text-xs">
-        <h3 className="font-semibold">v1 Success Metrics</h3>
-        <ul className="mt-2 list-disc space-y-1 pl-4 text-slate-300">
+      <section className="rounded-xl border border-slate-700 p-4 text-sm">
+        <h3 className="font-semibold text-slate-100">v1 Success Metrics</h3>
+        <ul className="mt-2 list-disc space-y-1.5 pl-4 text-slate-200">
           <li>
             Time to first trait insight (node select → first explanation block
             render).

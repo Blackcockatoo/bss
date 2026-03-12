@@ -77,7 +77,7 @@ export function SteeringWheel() {
     <div className="flex flex-col items-center gap-6 w-full max-w-2xl mx-auto">
       <div className="text-center">
         <h1 className="text-2xl font-bold text-zinc-100">Navigator</h1>
-        <p className="text-sm text-zinc-500 mt-1">
+        <p className="text-sm text-zinc-300 mt-1">
           Explore the MOSS60 universe
         </p>
       </div>
@@ -97,9 +97,9 @@ export function SteeringWheel() {
       {mode === 'geometry' && <GeometryView {...viewProps} />}
 
       {selectedTarget && (
-        <div className="w-full max-w-lg flex items-center justify-between rounded-lg border border-zinc-700/50 bg-zinc-900/60 px-4 py-2">
+        <div className="w-full max-w-lg flex items-center justify-between rounded-lg border border-zinc-600 bg-zinc-900/80 px-4 py-2">
           <span className="text-sm font-medium text-zinc-200">{selectedTarget.label}</span>
-          <span className="text-xs text-zinc-500 font-mono">{selectedTarget.route}</span>
+          <span className="text-xs text-zinc-300 font-mono">{selectedTarget.route}</span>
         </div>
       )}
 
@@ -112,11 +112,11 @@ export function SteeringWheel() {
       )}
 
       {/* Sequence info footer */}
-      <div className="p-3 bg-zinc-900 rounded-lg max-w-lg text-center">
-        <p className="text-xs text-zinc-400 font-mono truncate">
+      <div className="p-3 bg-zinc-900 rounded-lg max-w-lg text-center border border-zinc-700/70">
+        <p className="text-xs text-zinc-200 font-mono truncate">
           {numberStrings[color].substring(0, 40)}...
         </p>
-        <p className="text-xs text-zinc-600 mt-1">
+        <p className="text-xs text-zinc-400 mt-1">
           {dataSource === 'seed' ? 'MossPrimeSeed' : 'Pet Genome'} &middot; {color} &middot; 60-digit base-{dataSource === 'seed' ? '10' : '7'}
         </p>
       </div>
