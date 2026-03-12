@@ -1305,6 +1305,40 @@
             outline: none;
         }
 
+        .tap-start-hint {
+            margin: 14px 0 10px;
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(82, 217, 255, 0.35);
+            background: rgba(8, 20, 34, 0.68);
+            color: #c9f3ff;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-shadow: 0 0 14px rgba(82, 217, 255, 0.22);
+            animation: arcadeBlink 1.2s steps(2, end) infinite;
+            display: none;
+        }
+
+        .quick-start-btn {
+            display: none;
+            width: min(460px, calc(100% - 10px));
+            margin-top: 12px;
+            padding: 14px 18px;
+            border: 1px solid rgba(82, 217, 255, 0.48);
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(23, 58, 88, 0.92), rgba(19, 44, 72, 0.92));
+            color: #dcf6ff;
+            font-size: 15px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-shadow: 0 0 12px rgba(82, 217, 255, 0.25);
+            box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+            touch-action: manipulation;
+        }
+
         .controls {
             margin-top: 26px;
             color: #7f8797;
@@ -1570,6 +1604,16 @@
             margin: 0 0 16px;
             position: relative;
             min-height: 194px;
+            z-index: 0;
+        }
+
+        #startButton,
+        #quickStartButton,
+        .tap-start-hint,
+        .controls,
+        .screen-note {
+            position: relative;
+            z-index: 2;
         }
 
         .attract-panel {
@@ -2290,11 +2334,35 @@
         }
 
         @media (max-width: 680px) {
+            #startScreen {
+                justify-content: flex-start;
+                overflow-y: auto;
+                padding-top: 72px;
+                padding-bottom: max(30px, env(safe-area-inset-bottom));
+            }
             h1 { font-size: 34px; }
             h2 { font-size: 30px; }
             .emoji-title { font-size: 60px; }
             .subtitle { font-size: 16px; }
             .btn { padding: 12px 24px; font-size: 16px; }
+            .tap-start-hint {
+                display: block;
+                width: min(420px, calc(100% - 12px));
+                font-size: 12px;
+                letter-spacing: 0.06em;
+            }
+            .quick-start-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .attract-panels,
+            .attract-panel,
+            .leaderboard-shell,
+            .review-shell,
+            .howto-shell {
+                pointer-events: none;
+            }
             .difficulty-panel { grid-template-columns: 1fr; }
             .record-board { grid-template-columns: 1fr; }
             .reward-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -2587,6 +2655,8 @@
                     <span class="attract-dot" data-dot="2"></span>
                 </div>
                 <button id="startButton" class="btn" type="button">Press Start</button>
+                <button id="quickStartButton" class="quick-start-btn" type="button" aria-label="Quick start game">Tap Here To Start Instantly</button>
+                <p class="tap-start-hint" id="tapStartHint">Tap anywhere to launch Space Monkeys</p>
                 <div class="controls">
                     <span>SPACE</span> or <span>TOUCH FIRE</span> to throw bananas<br>
                     <span>A / D</span> or <span>◀ / ▶</span> to move<br>
