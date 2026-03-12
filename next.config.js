@@ -3,12 +3,12 @@ const isStaticExport = process.env.NEXT_STATIC_EXPORT === "true";
 const frameAncestors = process.env.ALLOWED_FRAME_ANCESTORS?.trim() || "'self'";
 const contentSecurityPolicy = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
-  "style-src 'self' 'unsafe-inline'",
+  "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "img-src 'self' data: blob: https://source.unsplash.com https://images.unsplash.com https://ext.same-assets.com https://ugc.same-assets.com",
   "media-src 'self' blob:",
   "connect-src 'self' wss:",
-  "font-src 'self' data:",
+  "font-src 'self' data: https://fonts.gstatic.com",
   "worker-src 'self' blob:",
   "object-src 'none'",
   "base-uri 'self'",

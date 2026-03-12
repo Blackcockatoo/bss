@@ -155,6 +155,8 @@ input[type=range]::-webkit-slider-thumb{
 #sound-init-inner{text-align:center}
 #sound-init-inner h2{font-family:'Cinzel',serif;font-size:1.8rem;color:var(--accent);margin-bottom:12px}
 #sound-init-inner p{color:var(--text2);font-size:0.9rem}
+#sound-init-status{min-height:1.4em}
+#sound-init-status.error{color:#ffb4b4}
 #sound-init-inner .pulse-ring{
   width:80px;height:80px;border-radius:50%;border:2px solid var(--accent);
   margin:24px auto;display:flex;align-items:center;justify-content:center;
@@ -173,7 +175,7 @@ input[type=range]::-webkit-slider-thumb{
   <div id="sound-init-inner">
     <h2>Sacred Geometry &amp; Sonic Consciousness</h2>
     <div class="pulse-ring">&#9775;</div>
-    <p>Touch anywhere to awaken</p>
+    <p id="sound-init-status">Touch anywhere to awaken</p>
   </div>
 </div>
 
@@ -344,7 +346,17 @@ function getDigits() {
 // ===== SOUND ENGINE (Tone.js) =====
 let synth, reverb;
 
+function setSoundInitStatus(message, isError = false) {
+  const status = document.getElementById('sound-init-status');
+  if (!status) return;
+  status.textContent = message;
+  status.classList.toggle('error', isError);
+}
+
 async function initAudio() {
+  if (typeof Tone === 'undefined') {
+    throw new Error('Audio engine failed to load. Reload the page and try again.');
+  }
   await Tone.start();
   reverb = new Tone.Reverb({ decay: 4, wet: 0.3 }).toDestination();
   synth = new Tone.PolySynth(Tone.Synth, {
@@ -1264,17 +1276,21 @@ function setupEvents() {
   });
 
   // Sound init overlay
-  document.getElementById('sound-init').addEventListener('click', async () => {
-    await initAudio();
-    document.getElementById('sound-init').classList.add('hidden');
-  });
+  const soundInit = document.getElementById('sound-init');
+  const awaken = async (e) => {
+    if (e) e.preventDefault();
+    try {
+      setSoundInitStatus('Awakening resonance...');
+      await initAudio();
+      soundInit.classList.add('hidden');
+    } catch (error) {
+      setSoundInitStatus(error instanceof Error ? error.message : 'Audio failed to start.', true);
+    }
+  };
 
-  // Also handle touch for sound init
-  document.getElementById('sound-init').addEventListener('touchstart', async (e) => {
-    e.preventDefault();
-    await initAudio();
-    document.getElementById('sound-init').classList.add('hidden');
-  }, { passive: false });
+  soundInit.addEventListener('click', awaken);
+  soundInit.addEventListener('touchstart', awaken, { passive: false });
+  soundInit.addEventListener('pointerdown', awaken);
 }
 
 // ===== CURSOR HIDING FOR PARTICLES =====
