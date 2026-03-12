@@ -354,6 +354,7 @@ function setSoundInitStatus(message, isError = false) {
 }
 
 async function initAudio() {
+  if (state.audioReady) return true;
   if (typeof Tone === 'undefined') {
     throw new Error('Audio engine failed to load. Reload the page and try again.');
   }
@@ -365,6 +366,7 @@ async function initAudio() {
   }).connect(reverb);
   synth.volume.value = -8;
   state.audioReady = true;
+  return true;
 }
 
 function playNote(digit) {
@@ -373,8 +375,18 @@ function playNote(digit) {
   synth.triggerAttackRelease(freq, '8n');
 }
 
-function playSequence() {
-  if (!state.audioReady || state.playing) return;
+async function playSequence() {
+  if (state.playing) return;
+  if (!state.audioReady) {
+    try {
+      setSoundInitStatus('Awakening resonance...');
+      await initAudio();
+      document.getElementById('sound-init').classList.add('hidden');
+    } catch (error) {
+      setSoundInitStatus(error instanceof Error ? error.message : 'Audio failed to start.', true);
+      return;
+    }
+  }
   state.playing = true;
   document.getElementById('play-btn').classList.add('playing');
   const digits = getDigits();
@@ -1279,11 +1291,12 @@ function setupEvents() {
   const soundInit = document.getElementById('sound-init');
   const awaken = async (e) => {
     if (e) e.preventDefault();
+    soundInit.classList.add('hidden');
     try {
       setSoundInitStatus('Awakening resonance...');
       await initAudio();
-      soundInit.classList.add('hidden');
     } catch (error) {
+      soundInit.classList.remove('hidden');
       setSoundInitStatus(error instanceof Error ? error.message : 'Audio failed to start.', true);
     }
   };
