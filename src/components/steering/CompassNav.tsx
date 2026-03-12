@@ -266,21 +266,26 @@ export function CompassNav({
                 <g key={i}>
                   <path
                     d={sectorPath(i)}
-                    fill={isSelected ? selectedFill : isHovered ? hoverFill : 'transparent'}
-                    stroke={isSelected ? colors.primary : isHovered ? `${colors.secondary}` : 'transparent'}
-                    strokeOpacity={isSelected ? selectedStrokeOpacity : isHovered ? hoverStrokeOpacity : 0}
-                    strokeWidth={isSelected ? selectedStrokeWidth : isHovered ? hoverStrokeWidth : 0}
-                    filter={isSelected ? 'url(#sector-glow)' : isHovered ? 'url(#sector-hover-glow)' : undefined}
-                    className="transition-all duration-200"
+                    fill="rgba(255, 255, 255, 0.001)"
+                    stroke="transparent"
                     onPointerEnter={() => setHoveredSector(i)}
                     onPointerLeave={() => setHoveredSector(null)}
                     onPointerDown={(e) => e.stopPropagation()}
-                    onClick={(e) => {
+                    onPointerUp={(e) => {
                       e.stopPropagation();
                       onFeatureActivate(i);
                     }}
                     data-sector-hit="true"
                     style={{ cursor: 'pointer' }}
+                  />
+                  <path
+                    d={sectorPath(i)}
+                    fill={isSelected ? selectedFill : isHovered ? hoverFill : 'transparent'}
+                    stroke={isSelected ? colors.primary : isHovered ? `${colors.secondary}` : 'transparent'}
+                    strokeOpacity={isSelected ? selectedStrokeOpacity : isHovered ? hoverStrokeOpacity : 0}
+                    strokeWidth={isSelected ? selectedStrokeWidth : isHovered ? hoverStrokeWidth : 0}
+                    filter={isSelected ? 'url(#sector-glow)' : isHovered ? 'url(#sector-hover-glow)' : undefined}
+                    className="pointer-events-none transition-all duration-200"
                   />
                 </g>
               );
