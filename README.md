@@ -144,6 +144,10 @@ Visit `http://localhost:3000`
 
 ---
 
+## Planning Docs
+
+- Success criteria planning gate + one-page template: `docs/planning/success-criteria.md`
+
 ## Curriculum OS Docs (School Pilot)
 
 - Consolidated map: `docs/curriculum-os/README.md`
