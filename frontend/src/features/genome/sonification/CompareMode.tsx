@@ -277,8 +277,11 @@ export function SonificationCompareMode({ petAId, petBId }: Props) {
                 B: {pair.secondary.instrument} {pair.secondary.chord.join("-")}
               </div>
               <div className="mt-2 flex flex-wrap gap-2">
-                {[pair.primary, pair.secondary].map((track) => (
-                  <div className="flex items-center gap-1" key={track.traitId}>
+                {[pair.primary, pair.secondary].map((track, trackIndex) => (
+                  <div
+                    className="flex items-center gap-1"
+                    key={`${pair.activeGenomeRegion}-${track.traitId}-${trackIndex}`}
+                  >
                     <span className="text-[11px] text-slate-300">
                       {track.traitId}
                     </span>

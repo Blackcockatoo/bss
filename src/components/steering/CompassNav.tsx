@@ -266,21 +266,26 @@ export function CompassNav({
                 <g key={i}>
                   <path
                     d={sectorPath(i)}
-                    fill={isSelected ? selectedFill : isHovered ? hoverFill : 'transparent'}
-                    stroke={isSelected ? colors.primary : isHovered ? `${colors.secondary}` : 'transparent'}
-                    strokeOpacity={isSelected ? selectedStrokeOpacity : isHovered ? hoverStrokeOpacity : 0}
-                    strokeWidth={isSelected ? selectedStrokeWidth : isHovered ? hoverStrokeWidth : 0}
-                    filter={isSelected ? 'url(#sector-glow)' : isHovered ? 'url(#sector-hover-glow)' : undefined}
-                    className="transition-all duration-200"
+                    fill="rgba(255, 255, 255, 0.001)"
+                    stroke="transparent"
                     onPointerEnter={() => setHoveredSector(i)}
                     onPointerLeave={() => setHoveredSector(null)}
                     onPointerDown={(e) => e.stopPropagation()}
-                    onClick={(e) => {
+                    onPointerUp={(e) => {
                       e.stopPropagation();
                       onFeatureActivate(i);
                     }}
                     data-sector-hit="true"
                     style={{ cursor: 'pointer' }}
+                  />
+                  <path
+                    d={sectorPath(i)}
+                    fill={isSelected ? selectedFill : isHovered ? hoverFill : 'transparent'}
+                    stroke={isSelected ? colors.primary : isHovered ? `${colors.secondary}` : 'transparent'}
+                    strokeOpacity={isSelected ? selectedStrokeOpacity : isHovered ? hoverStrokeOpacity : 0}
+                    strokeWidth={isSelected ? selectedStrokeWidth : isHovered ? hoverStrokeWidth : 0}
+                    filter={isSelected ? 'url(#sector-glow)' : isHovered ? 'url(#sector-hover-glow)' : undefined}
+                    className="pointer-events-none transition-all duration-200"
                   />
                 </g>
               );
@@ -324,7 +329,7 @@ export function CompassNav({
               const isSelected = selectedFeature === i;
               const isHovered = hoveredSector === i;
               const labelLines = getLabelLines(target.label);
-              const baseFontSize = isSelected ? (isCompact ? 10.2 : 10.5) : isHovered ? (isCompact ? 9.8 : 9.4) : (isCompact ? 9.4 : 8.8);
+              const baseFontSize = isSelected ? (isCompact ? 10.8 : 11) : isHovered ? (isCompact ? 10.2 : 9.8) : (isCompact ? 9.8 : 9.2);
               const maxLineChars = Math.max(...labelLines.map((line) => line.length));
               const estimatedWidth = maxLineChars * baseFontSize * 0.56;
               const widthScale = isCompact ? Math.min(1, 84 / Math.max(estimatedWidth, 1)) : 1;
@@ -380,7 +385,7 @@ export function CompassNav({
                   <text
                     x={x}
                     y={firstLineY}
-                    fill={isSelected ? (isCompact ? '#ffffff' : '#f8fbff') : isHovered ? '#eef4ff' : '#d2ddf4'}
+                    fill={isSelected ? (isCompact ? '#ffffff' : '#f8fbff') : isHovered ? '#f3f7ff' : '#e4ecff'}
                     fontSize={fontSize}
                     fontWeight={isSelected ? 'bold' : 'normal'}
                     textAnchor="middle"
@@ -418,10 +423,10 @@ export function CompassNav({
                   key={`num-${i}`}
                   x={x} y={y}
                   fill={colors.tertiary}
-                  fontSize={isCompact ? '6.4' : '7'}
+                  fontSize={isCompact ? '7.2' : '7.8'}
                   textAnchor="middle"
                   dominantBaseline="middle"
-                  opacity={isCompact ? 0.38 : 0.6}
+                  opacity={isCompact ? 0.54 : 0.72}
                   style={{ pointerEvents: 'none' }}
                 >
                   {digits}
@@ -454,10 +459,13 @@ export function CompassNav({
           {/* Fixed center label showing selected feature */}
           <text
             x="0" y="220"
-            fill={colors.primary}
-            fontSize="12"
+            fill="#f8fbff"
+            fontSize="13.5"
             fontWeight="bold"
             textAnchor="middle"
+            stroke="rgba(4, 8, 16, 0.9)"
+            strokeWidth="1.6"
+            paintOrder="stroke"
           >
             {NAVIGATION_TARGETS[selectedFeature]?.label ?? ''}
           </text>
