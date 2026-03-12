@@ -6363,20 +6363,14 @@
             }
         }
 
-        const tryTapStart = event => {
+        startScreen.addEventListener('pointerup', event => {
             if (!hasTouch || gameRunning || startScreen.style.display === 'none') return;
             const target = event.target;
             if (target instanceof Element && target.closest('button, a, input, select, textarea, [role="button"]')) return;
             requestStartGame();
-        };
-
-        startScreen.addEventListener('click', tryTapStart);
-        startScreen.addEventListener('pointerup', tryTapStart, { passive: true });
+        }, { passive: true });
 
         document.getElementById('startButton').addEventListener('click', async () => {
-            await requestStartGame();
-        });
-        document.getElementById('quickStartButton').addEventListener('click', async () => {
             await requestStartGame();
         });
         document.getElementById('playAgainButton').addEventListener('click', async () => {
