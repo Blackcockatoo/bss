@@ -236,4 +236,10 @@ describe('Monkey Invaders smoke checks', () => {
     expect(html).toContain("font-size: 10px;");
     expect(html).toContain('Hold ◀/▶ to move, hold 🍌 to fire. Landscape recommended.');
   });
+
+  it('freezes player input during level transitions before boss spawns', () => {
+    expect(script).toContain('function updateMonkey(dt) {\n            if (levelTransition) return;');
+    expect(script).toContain('keys.Space = false;');
+    expect(script).toContain('groundBananas = [];');
+  });
 });

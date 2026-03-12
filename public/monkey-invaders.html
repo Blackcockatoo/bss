@@ -2839,6 +2839,7 @@
         const bossRewardArt = document.getElementById('bossRewardArt');
         const bossRewardStamp = document.getElementById('bossRewardStamp');
         const bossRewardFlavor = document.getElementById('bossRewardFlavor');
+        const continueBossButton = document.getElementById('continueBossButton');
         const endingArt = document.getElementById('endingArt');
         const endingStamp = document.getElementById('endingStamp');
         const endingTitle = document.getElementById('endingTitle');
@@ -3376,6 +3377,14 @@
             document.body.dataset.cabinet = state;
         }
 
+        function resolveCabinetState() {
+            if (endingState.active || bossRewardPending) return 'reward';
+            if (paused || operatorState.open) return 'pause';
+            if (boss) return 'boss';
+            if (gameRunning) return 'game';
+            return 'title';
+        }
+
         function updateCreditUI() {
             if (creditHud) creditHud.textContent = `Credits ${String(creditsState.credits).padStart(2, '0')}`;
             if (creditDisplay) creditDisplay.textContent = `Credits ${String(creditsState.credits).padStart(2, '0')}`;
@@ -3385,6 +3394,117 @@
                     ? `Starts ${String(creditsState.starts).padStart(2, '0')}`
                     : 'B$S House Credit Ready';
             }
+        }
+
+        function getDefaultMascotMood() {
+            if (endingState.active) return 'celebrate';
+            if (operatorState.open) return 'cheat';
+            if (boss) return 'alarm';
+            if (gameRunning && !paused) return 'hype';
+            if (!gameRunning && startScreen.style.display !== 'none') return 'attract';
+            if (paused) return 'idle';
+            return 'idle';
+        }
+
+        function renderMascots() {
+            if (!cabinetDecor) return;
+            const mood = mascotState.mood;
+            cabinetDecor.dataset.mood = mood;
+            const states = {
+                idle: { monkey: '🐵', monkeyCaption: 'B$S Hero', alien: '👽', alienCaption: 'Panic Intern' },
+                attract: { monkey: '🎮', monkeyCaption: 'Press Start', alien: '🛸', alienCaption: 'Demo Panic' },
+                hype: { monkey: '💪', monkeyCaption: 'Banana Ready', alien: '😵', alienCaption: 'System Overwhelmed' },
+                alarm: { monkey: '😤', monkeyCaption: 'Boss Time', alien: '🚨', alienCaption: 'Red Alert' },
+                celebrate: { monkey: '🏆', monkeyCaption: 'Fruitkind Wins', alien: '🫠', alienCaption: 'Career Ended' },
+                pain: { monkey: '🙈', monkeyCaption: 'That Hurt', alien: '😬', alienCaption: 'Not Helping' },
+                sad: { monkey: '😵', monkeyCaption: 'Retry Soon', alien: '😈', alienCaption: 'Tiny Victory' },
+                cheat: { monkey: '🕶️', monkeyCaption: 'Operator Mode', alien: '🤖', alienCaption: 'Diagnostics' },
+            };
+            const current = states[mood] || states.idle;
+            if (mascotMonkeyBody) mascotMonkeyBody.textContent = current.monkey;
+            if (mascotMonkeyCaption) mascotMonkeyCaption.textContent = current.monkeyCaption;
+            if (mascotAlienBody) mascotAlienBody.textContent = current.alien;
+            if (mascotAlienCaption) mascotAlienCaption.textContent = current.alienCaption;
+        }
+
+        function setMascotMood(mood, duration = 0) {
+            mascotState.mood = mood;
+            mascotState.timer = duration;
+            renderMascots();
+        }
+
+        function updateMascotMood(dt) {
+            if (cheats.mascotParty) {
+                setMascotMood('celebrate', 150);
+                return;
+            }
+            if (mascotState.timer > 0) {
+                mascotState.timer -= dt;
+                if (mascotState.timer > 0) return;
+            }
+            const defaultMood = getDefaultMascotMood();
+            if (mascotState.mood !== defaultMood) {
+                mascotState.mood = defaultMood;
+                renderMascots();
+            }
+        }
+
+        function paintOperatorButton(button, enabled, onLabel, offLabel, accent = false) {
+            if (!button) return;
+            button.textContent = enabled ? onLabel : offLabel;
+            button.classList.toggle('is-off', !enabled);
+            button.classList.toggle('is-accent', accent && enabled);
+        }
+
+        function updateOperatorMenu() {
+            paintOperatorButton(opInvincibleButton, cheats.invincible, 'Invincible On', 'Invincible Off', true);
+            paintOperatorButton(opAudioButton, audioState.enabled, 'Sound On', 'Sound Off', true);
+            paintOperatorButton(opHapticsButton, hapticState.enabled, 'Haptics On', 'Haptics Off');
+            paintOperatorButton(opShakeButton, visualState.shakeEnabled, 'Shake On', 'Shake Off');
+            paintOperatorButton(opEndlessCreditsButton, cheats.endlessCredits, 'Endless Credits On', 'Endless Credits Off', true);
+            paintOperatorButton(opMascotPartyButton, cheats.mascotParty, 'Mascot Party On', 'Mascot Party Off');
+            if (operatorDiagnostics) {
+                operatorDiagnostics.innerHTML = [
+                    ['State', gameRunning ? (boss ? 'Boss Fight' : paused ? 'Paused' : 'Live Run') : endingState.active ? 'Ending' : 'Attract'],
+                    ['Level', String(level)],
+                    ['Lives', String(lives)],
+                    ['Score', formatScore(score)],
+                    ['Boss', boss ? boss.name : 'None'],
+                    ['Credits', String(creditsState.credits).padStart(2, '0')],
+                    ['Cabinet', document.body.dataset.cabinet || 'title'],
+                    ['FPS', `${operatorState.fps.toFixed(0)} hz`],
+                ].map(([label, value]) => `
+                    <div class="diag-item">
+                        <span>${label}</span>
+                        <strong>${value}</strong>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function openOperatorMenu() {
+            if (operatorState.open) return;
+            operatorState.resumeOnClose = gameRunning && !paused && !levelTransition && !bossRewardPending && !endingState.active;
+            if (operatorState.resumeOnClose) pauseGame(true);
+            operatorState.open = true;
+            operatorMenu.style.display = 'flex';
+            setMascotMood('cheat', 1200);
+            updateOperatorMenu();
+            setCabinetState('pause');
+        }
+
+        function closeOperatorMenu(suppressResume = false) {
+            if (!operatorState.open) return;
+            operatorState.open = false;
+            operatorMenu.style.display = 'none';
+            if (operatorState.resumeOnClose && !suppressResume && gameRunning) {
+                operatorState.resumeOnClose = false;
+                unpauseGame();
+                return;
+            }
+            operatorState.resumeOnClose = false;
+            setCabinetState(resolveCabinetState());
+            renderMascots();
         }
 
         function updateAttractPanels() {
@@ -3469,6 +3589,13 @@
             paintToggleButton(pauseAudioButton, audioState.enabled, 'Sound On', 'Sound Off', true);
             paintToggleButton(pauseHapticsButton, hapticState.enabled, 'Haptics On', 'Haptics Off');
             paintToggleButton(pauseShakeButton, visualState.shakeEnabled, 'Shake On', 'Shake Off');
+            paintOperatorButton(opAudioButton, audioState.enabled, 'Sound On', 'Sound Off', true);
+            paintOperatorButton(opHapticsButton, hapticState.enabled, 'Haptics On', 'Haptics Off');
+            paintOperatorButton(opShakeButton, visualState.shakeEnabled, 'Shake On', 'Shake Off');
+            paintOperatorButton(opEndlessCreditsButton, cheats.endlessCredits, 'Endless Credits On', 'Endless Credits Off', true);
+            paintOperatorButton(opMascotPartyButton, cheats.mascotParty, 'Mascot Party On', 'Mascot Party Off');
+            paintOperatorButton(opInvincibleButton, cheats.invincible, 'Invincible On', 'Invincible Off', true);
+            updateOperatorMenu();
         }
 
         async function toggleAudioSetting() {
@@ -3523,16 +3650,174 @@
                 announce('coin', { comped: true });
                 addFloatingText(canvas.width / 2, canvas.height * 0.32, 'B$S HOUSE CREDIT', '#8cc0ff', 1200, 18, 0);
             }
+            setMascotMood('hype', 900);
             updateCreditUI();
         }
 
         async function consumeCreditForStart() {
+            if (cheats.endlessCredits) {
+                creditsState.starts += 1;
+                updateCreditUI();
+                return;
+            }
             if (creditsState.credits <= 0) {
                 await insertCoin(true);
             }
             creditsState.credits = Math.max(0, creditsState.credits - 1);
             creditsState.starts += 1;
             updateCreditUI();
+        }
+
+        function grantOperatorArsenal() {
+            ['triple', 'rapid', 'range', 'doubleMonkey', 'bazooka'].forEach(type => applyPowerup(type));
+            setMascotMood('cheat', 1200);
+            addFloatingText(canvas.width / 2, canvas.height * 0.58, 'OPERATOR ARSENAL', '#ffd24a', 1500, 22, 0);
+        }
+
+        function triggerMonkeyModeCheat() {
+            combo.pressure = 100;
+            combo.count = Math.max(combo.count, 5);
+            bumpCombo(0, 0);
+            sillyFX.bananaRain = Math.max(sillyFX.bananaRain, 4200);
+            sillyFX.turbo = Math.max(sillyFX.turbo, 3200);
+            setMascotMood('cheat', 1200);
+        }
+
+        function skipEncounter() {
+            if (boss) {
+                damageBoss(boss.hp, 'operator');
+                return;
+            }
+            aliens.forEach(alien => {
+                alien.alive = false;
+            });
+            addFloatingText(canvas.width / 2, canvas.height * 0.58, 'ENCOUNTER SKIPPED', '#8cc0ff', 1400, 20, 0);
+        }
+
+        function updateEndingButton() {
+            if (!endingAdvanceButton) return;
+            endingAdvanceButton.textContent = endingState.stingerRevealed ? 'Return To Title' : 'Skip To Stinger';
+        }
+
+        function clearEndingSequenceTimeout() {
+            if (endingState.timeoutId) {
+                clearTimeout(endingState.timeoutId);
+                endingState.timeoutId = null;
+            }
+        }
+
+        function buildEndingCredits(finalBoss) {
+            return [
+                ['Blue Snake Studios', 'Cabinet design, fruit law, and emotional overreach'],
+                ['Lead Heroics', 'One monkey with strong wrists and no fear of consequences'],
+                ['Alien Compliance', `${finalBoss.name} and several now-unemployed interns`],
+                ['Banana Logistics', 'Procured by B$S Potassium Division // zero refunds'],
+                ['Slip Physics', 'Peer reviewed by one rubber duck and a suspicious skateboard'],
+                ['Audio Hysteria', 'Recorded live inside the cabinet after midnight'],
+                ['Victory Report', 'Earth saved. Paperwork ruined. Fruitkind thriving.'],
+            ].map(([title, body]) => `
+                <div class="credits-line">
+                    <strong>${title}</strong>
+                    <span>${body}</span>
+                </div>
+            `).join('');
+        }
+
+        function revealPostCreditsStinger() {
+            if (!endingState.active || endingState.stingerRevealed) return;
+            endingState.stingerRevealed = true;
+            const finalBoss = endingState.finalBoss || { kind: 'inspector', name: 'Unknown Bureaucrat' };
+            const stingers = {
+                inspector: {
+                    title: 'Post-Credits Stinger',
+                    body: 'Deep inside a forgotten office cubicle, a tiny clerk stamps a fresh folder: BANANA INCIDENT // REOPEN CASE.',
+                },
+                sobzilla: {
+                    title: 'Post-Credits Stinger',
+                    body: 'Somewhere in the dark, a single tear floats through space and gently powers on a neglected war console.',
+                },
+                embargo: {
+                    title: 'Post-Credits Stinger',
+                    body: 'A damaged cargo drone blinks awake, scans one surviving peel, and whispers: "Embargo 2.0 pending..."',
+                },
+            };
+            const current = stingers[finalBoss.kind] || stingers.inspector;
+            postCreditsTitle.textContent = current.title;
+            postCreditsText.textContent = current.body;
+            postCreditsCard.classList.add('active');
+            updateEndingButton();
+            triggerScreenFlash(getBossFlashColor(finalBoss.kind, 'defeat'), 0.5, 260, 'screen');
+            playBossIntroStinger(finalBoss.kind);
+            setMascotMood('celebrate', 1800);
+        }
+
+        function startEndingSequence(finalBoss) {
+            clearEndingSequenceTimeout();
+            endingState.active = true;
+            endingState.finalBoss = finalBoss;
+            endingState.stingerRevealed = false;
+            gameRunning = false;
+            paused = false;
+            levelTransition = false;
+            bossRewardPending = null;
+            bossRewardScreen.style.display = 'none';
+            setCabinetState('reward');
+            const endings = {
+                inspector: {
+                    art: '🐵📋',
+                    stamp: 'Audit Extinguished',
+                    title: 'Game Clear // Produce Justice',
+                    subtitle: 'The Galactic Produce Inspector has been banished to a department where fruit can no longer be weaponized.',
+                },
+                sobzilla: {
+                    art: '🐵💧',
+                    stamp: 'Tantrum Resolved',
+                    title: 'Game Clear // Tear Economy Crashed',
+                    subtitle: 'Sobzilla cried so hard she flooded her own invasion plans and quietly drifted out of the broadcast.',
+                },
+                embargo: {
+                    art: '🐵🚀',
+                    stamp: 'Embargo Broken',
+                    title: 'Game Clear // Fruitkind Prevails',
+                    subtitle: 'The Banana Embargo collapsed under overwhelming nonsense, brilliant slips, and one deeply committed monkey.',
+                },
+            };
+            const current = endings[finalBoss.kind] || endings.inspector;
+            endingArt.textContent = current.art;
+            endingStamp.textContent = current.stamp;
+            endingTitle.textContent = current.title;
+            endingSubtitle.textContent = current.subtitle;
+            endingCreditsRoll.innerHTML = buildEndingCredits(finalBoss);
+            endingCreditsRoll.classList.remove('run');
+            void endingCreditsRoll.offsetWidth;
+            endingCreditsRoll.classList.add('run');
+            postCreditsCard.classList.remove('active');
+            endingSequenceScreen.style.display = 'flex';
+            updateEndingButton();
+            triggerScreenFlash(getBossFlashColor(finalBoss.kind, 'defeat'), 0.75, 360, 'screen');
+            setMascotMood('celebrate', 2500);
+            endingState.timeoutId = setTimeout(revealPostCreditsStinger, 10500);
+        }
+
+        function closeEndingSequence() {
+            clearEndingSequenceTimeout();
+            endingState.active = false;
+            endingState.finalBoss = null;
+            endingState.stingerRevealed = false;
+            endingSequenceScreen.style.display = 'none';
+            postCreditsCard.classList.remove('active');
+            endingCreditsRoll.classList.remove('run');
+            updateEndingButton();
+        }
+
+        function advanceEndingSequence() {
+            if (!endingState.active) return;
+            if (!endingState.stingerRevealed) {
+                revealPostCreditsStinger();
+                return;
+            }
+            closeEndingSequence();
+            returnToTitle();
         }
 
         function getAudioConstructor() {
@@ -4113,13 +4398,16 @@
         }
 
         function showBossReward(defeatedBoss) {
+            closeOperatorMenu(true);
             const rank = getBossRank();
             const bounty = 1500 * level;
             const rewardTheme = getBossRewardTheme(defeatedBoss.kind);
+            const finale = level >= FINAL_BOSS_LEVEL;
             bossRewardPending = {
                 boss: defeatedBoss,
                 rank,
                 bounty,
+                finale,
             };
             levelTransition = true;
             paused = true;
@@ -4135,7 +4423,9 @@
             document.getElementById('rewardCombo').textContent = `x${combo.best}`;
             document.getElementById('rewardDifficulty').textContent = difficultyPresets[difficulty].label;
             document.getElementById('rewardBounty').textContent = formatScore(bounty);
+            continueBossButton.textContent = finale ? 'Roll Credits' : 'Continue';
             setCabinetState('reward');
+            setMascotMood('celebrate', 2200);
             bossRewardScreen.style.display = 'flex';
             playRewardRankStinger(rank.letter);
             triggerHaptic('reward');
@@ -4143,8 +4433,14 @@
 
         function continueBossReward() {
             if (!bossRewardPending) return;
+            const finalReward = bossRewardPending;
             bossRewardPending = null;
             bossRewardScreen.style.display = 'none';
+            continueBossButton.textContent = 'Continue';
+            if (finalReward.finale) {
+                startEndingSequence(finalReward.boss);
+                return;
+            }
             paused = false;
             lastTime = performance.now();
             setCabinetState('game');
@@ -4347,6 +4643,7 @@
 
         function updateAttractMode(dt) {
             const step = dt / 16.6667;
+            operatorState.fps = 1000 / Math.max(dt, 1);
             attractState.phase += dt;
             attractState.monkeyX += attractState.monkeyDir * 2.4 * step;
             if (attractState.monkeyX < 96 || attractState.monkeyX > canvas.width - 156) {
@@ -4410,6 +4707,8 @@
             }
             cycleAttractPanel(dt);
             updateFloatingTexts(dt);
+            updateMascotMood(dt);
+            if (operatorState.open) updateOperatorMenu();
             updateScreenFlash(dt);
             updateMusicBed(dt);
         }
@@ -4487,6 +4786,7 @@
             combo.pressure = Math.min(100, combo.pressure + pressureGain);
             if (combo.count === 3 || combo.count === 5 || combo.count === 8) {
                 announce('combo', { color: '#ffd24a' });
+                setMascotMood('hype', 900);
             }
             if (combo.count >= 3) {
                 addFloatingText(x, y, `POTASSIUM x${combo.count}`, '#ffd24a', 900, 14, 0.25);
@@ -4802,6 +5102,8 @@
             bossPuddles = [];
             bossRewardPending = null;
             bossRewardScreen.style.display = 'none';
+            closeEndingSequence();
+            closeOperatorMenu(true);
             closeInitialsEntry();
             announcerState.bossCueCooldown = 0;
             flashState.timer = 0;
@@ -4820,6 +5122,7 @@
             updateBossHUD();
             updateBossVisualOverlay();
             updateScreenFlash(0);
+            setMascotMood('idle');
         }
 
         function createBoss(levelValue) {
@@ -4845,6 +5148,7 @@
             bossAttacks = [];
             bossPuddles = [];
             setCabinetState('boss');
+            setMascotMood('alarm', 1800);
             triggerScreenFlash(getBossFlashColor(profile.kind, 'intro'), 0.42, 260, 'screen');
             updateBossHUD();
             updateBossVisualOverlay();
@@ -5612,6 +5916,7 @@
         }
 
         function updateMonkey(dt) {
+            if (levelTransition) return;
             const step = dt / 16.6667;
             const speedMult = sillyFX.turbo > 0 ? 1.45 : 1;
             const speed = monkey.speed * speedMult * step;
@@ -5982,15 +6287,22 @@
         }
 
         function loseLife() {
+            if (cheats.invincible) {
+                addFloatingText(monkey.x + monkey.width / 2, monkey.y - 18, 'INVINCIBLE', '#8cc0ff', 900, 16, 0);
+                setMascotMood('cheat', 1000);
+                return;
+            }
             if (!gameRunning || levelTransition) return;
             lives -= 1;
             updateUI();
             announce('lifeLost');
             resetCombo();
+            setMascotMood('pain', 1200);
             if (lives === 1) {
                 announce('nearDeath', { color: '#ff8a8f' });
             }
             if (lives <= 0) {
+                setMascotMood('sad', 2200);
                 gameOver();
                 return;
             }
@@ -6014,6 +6326,7 @@
             if (!gameRunning || paused || levelTransition || bossRewardPending) return;
             paused = true;
             setCabinetState('pause');
+            setMascotMood('idle', 1200);
             pauseOverlay.style.display = 'flex';
             if (!silent) announce('pause');
         }
@@ -6023,6 +6336,7 @@
             paused = false;
             pauseOverlay.style.display = 'none';
             setCabinetState(boss ? 'boss' : 'game');
+            setMascotMood(boss ? 'alarm' : 'hype', 1200);
             announce('unpause');
             lastTime = performance.now();
             requestAnimationFrame(gameLoop);
@@ -6040,6 +6354,8 @@
             levelScreen.style.display = 'none';
             pauseOverlay.style.display = 'none';
             bossRewardScreen.style.display = 'none';
+            closeEndingSequence();
+            closeOperatorMenu(true);
             closeInitialsEntry();
             resetTransientState();
             currentTickerIndex = 0;
@@ -6050,6 +6366,7 @@
             initBackground();
             resetAttractMode();
             setCabinetState('title');
+            setMascotMood('attract');
             startAttractMode();
         }
 
@@ -6059,6 +6376,8 @@
             gameOverScreen.style.display = 'none';
             pauseOverlay.style.display = 'none';
             bossRewardScreen.style.display = 'none';
+            closeEndingSequence();
+            closeOperatorMenu(true);
             closeInitialsEntry();
             await consumeCreditForStart();
             score = 0;
@@ -6080,6 +6399,7 @@
             updateUI();
             initBackground();
             createAliens();
+            setMascotMood('hype', 1500);
             lastTime = performance.now();
             requestAnimationFrame(gameLoop);
         }
@@ -6087,6 +6407,11 @@
         function nextLevel() {
             level += 1;
             levelTransition = true;
+            keys.ArrowLeft = false;
+            keys.ArrowRight = false;
+            keys.KeyA = false;
+            keys.KeyD = false;
+            keys.Space = false;
             let bossProfile = null;
             if (isBossLevel(level)) {
                 bossProfile = getBossProfile(level);
@@ -6098,7 +6423,9 @@
             }
             levelScreen.style.display = 'flex';
             bananas = [];
+            groundBananas = [];
             powerups = [];
+            absurdDrops = [];
             if (isBossLevel(level)) {
                 announce('bossIntro');
                 playBossIntroStinger(bossProfile.kind);
@@ -6108,6 +6435,10 @@
             setTimeout(() => {
                 levelScreen.style.display = 'none';
                 levelTransition = false;
+                bananas = [];
+                groundBananas = [];
+                powerups = [];
+                absurdDrops = [];
                 initBackground();
                 createAliens();
                 updateUI();
@@ -6196,6 +6527,7 @@
             if (!gameRunning || paused) return;
             const dt = Math.min(currentTime - lastTime, 34);
             lastTime = currentTime;
+            operatorState.fps = 1000 / Math.max(dt, 1);
             let shakeX = 0;
             let shakeY = 0;
             if (sillyFX.shake > 0 && visualState.shakeEnabled) {
@@ -6210,6 +6542,7 @@
             updateCombo(dt);
             updateTicker(dt);
             updateScreenFlash(dt);
+            updateMascotMood(dt);
             updateMonkey(dt);
             updateBoss(dt);
             updateAliens(dt);
@@ -6220,6 +6553,7 @@
             updateExplosions(dt);
             updateParticles(dt);
             updateFloatingTexts(dt);
+            if (operatorState.open) updateOperatorMenu();
 
             const aliveAliens = aliens.filter(alien => alien.alive).length;
             if (!boss && aliveAliens === 0 && !levelTransition) nextLevel();
@@ -6288,6 +6622,51 @@
             await armArcadeFeedback('button');
             returnToTitle();
         });
+        opInvincibleButton.addEventListener('click', async () => {
+            await armArcadeFeedback('button');
+            cheats.invincible = !cheats.invincible;
+            updateSettingButtons();
+        });
+        opArsenalButton.addEventListener('click', async () => {
+            await armArcadeFeedback('button');
+            grantOperatorArsenal();
+            updateSettingButtons();
+        });
+        opMonkeyModeButton.addEventListener('click', async () => {
+            await armArcadeFeedback('button');
+            triggerMonkeyModeCheat();
+            updateSettingButtons();
+        });
+        opSkipButton.addEventListener('click', async () => {
+            await armArcadeFeedback('button');
+            skipEncounter();
+            updateSettingButtons();
+        });
+        opEndlessCreditsButton.addEventListener('click', async () => {
+            await armArcadeFeedback('button');
+            cheats.endlessCredits = !cheats.endlessCredits;
+            updateSettingButtons();
+        });
+        opMascotPartyButton.addEventListener('click', async () => {
+            await armArcadeFeedback('button');
+            cheats.mascotParty = !cheats.mascotParty;
+            updateSettingButtons();
+            renderMascots();
+        });
+        opCreditButton.addEventListener('click', async () => {
+            await armArcadeFeedback('button');
+            await insertCoin(false);
+            updateSettingButtons();
+        });
+        opTitleButton.addEventListener('click', async () => {
+            await armArcadeFeedback('button');
+            closeOperatorMenu(true);
+            returnToTitle();
+        });
+        operatorCloseButton.addEventListener('click', async () => {
+            await armArcadeFeedback('button');
+            closeOperatorMenu();
+        });
         insertCoinButton.addEventListener('click', async () => {
             await ensureAudio();
             await insertCoin(false);
@@ -6295,6 +6674,10 @@
         document.getElementById('continueBossButton').addEventListener('click', async () => {
             await armArcadeFeedback('button');
             continueBossReward();
+        });
+        endingAdvanceButton.addEventListener('click', async () => {
+            await armArcadeFeedback('button');
+            advanceEndingSequence();
         });
 
         document.querySelectorAll('.initial-step').forEach(button => {
@@ -6340,6 +6723,40 @@
             button.addEventListener('click', toggleShakeSetting);
         });
 
+        [opAudioButton].forEach(button => {
+            button.addEventListener('click', toggleAudioSetting);
+        });
+
+        [opHapticsButton].forEach(button => {
+            button.addEventListener('click', toggleHapticsSetting);
+        });
+
+        [opShakeButton].forEach(button => {
+            button.addEventListener('click', toggleShakeSetting);
+        });
+
+        const clearOperatorHold = () => {
+            if (operatorState.holdTimer) {
+                clearTimeout(operatorState.holdTimer);
+                operatorState.holdTimer = null;
+            }
+        };
+
+        if (brandChip) {
+            brandChip.addEventListener('pointerdown', () => {
+                clearOperatorHold();
+                operatorState.holdTimer = setTimeout(() => {
+                    ensureAudio();
+                    openOperatorMenu();
+                    playUiBlip();
+                    triggerHaptic('button');
+                }, 950);
+            });
+            ['pointerup', 'pointercancel', 'pointerleave', 'lostpointercapture'].forEach(name => {
+                brandChip.addEventListener(name, clearOperatorHold);
+            });
+        }
+
         document.getElementById('fullscreenBtn').addEventListener('click', async () => {
             await armArcadeFeedback('button');
             try {
@@ -6351,6 +6768,26 @@
         });
 
         window.addEventListener('keydown', event => {
+            if (event.ctrlKey && event.altKey && event.code === 'KeyO') {
+                event.preventDefault();
+                ensureAudio().then(() => {
+                    if (operatorState.open) closeOperatorMenu();
+                    else openOperatorMenu();
+                });
+                return;
+            }
+            if (event.code === 'Escape') {
+                if (operatorState.open) {
+                    event.preventDefault();
+                    closeOperatorMenu();
+                    return;
+                }
+                if (endingState.active) {
+                    event.preventDefault();
+                    advanceEndingSequence();
+                    return;
+                }
+            }
             if ((event.code === 'Digit5' || event.code === 'KeyC') && !gameRunning && !initialsState.active) {
                 event.preventDefault();
                 ensureAudio().then(() => insertCoin(false));
@@ -6382,6 +6819,20 @@
                     saveInitialsEntry();
                     return;
                 }
+            }
+            if (operatorState.open) {
+                if (event.code === 'Enter' && document.activeElement === operatorCloseButton) {
+                    event.preventDefault();
+                    closeOperatorMenu();
+                }
+                return;
+            }
+            if (endingState.active) {
+                if (event.code === 'Enter' || event.code === 'Space') {
+                    event.preventDefault();
+                    advanceEndingSequence();
+                }
+                return;
             }
             if (!gameRunning && startScreen.style.display !== 'none' && (event.code === 'Enter' || event.code === 'Space')) {
                 event.preventDefault();
@@ -6437,6 +6888,8 @@
         initBackground();
         resetAttractMode();
         setCabinetState('title');
+        setMascotMood('attract');
+        updateOperatorMenu();
         startAttractMode();
     </script>
 </body>

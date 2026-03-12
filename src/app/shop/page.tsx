@@ -64,25 +64,25 @@ function AddonCard({
 
   return (
     <article
-      className={`group flex h-full flex-col gap-3 rounded-2xl border ${styles.border} bg-gradient-to-b ${styles.glow} to-slate-900/80 p-4 shadow-lg shadow-black/20 transition hover:-translate-y-0.5 hover:border-white/20`}
+      className={`group flex h-full flex-col gap-3 rounded-2xl border ${styles.border} bg-gradient-to-b ${styles.glow} to-slate-900/80 p-3.5 shadow-lg shadow-black/20 transition hover:-translate-y-0.5 hover:border-white/20 sm:p-4`}
     >
       {addon.visual.previewAsset ? (
         <div className="overflow-hidden rounded-xl border border-white/10 bg-black/20">
           <img
             src={addon.visual.previewAsset}
             alt={addon.name}
-            className="h-40 w-full object-cover"
+            className="h-32 w-full object-cover sm:h-40"
             loading="lazy"
           />
         </div>
       ) : null}
 
       <div className="flex items-start justify-between gap-2">
-        <div>
+        <div className="min-w-0">
           <p className="text-[10px] uppercase tracking-wider text-zinc-500">
             {addon.id}
           </p>
-          <h3 className="text-sm font-semibold leading-snug text-zinc-100">
+          <h3 className="text-sm font-semibold leading-snug text-zinc-100 break-words">
             {addon.name}
           </h3>
         </div>
@@ -160,14 +160,14 @@ export default function ShopPage() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8 text-zinc-100">
-      <section className="mb-8 rounded-3xl border border-white/10 bg-[radial-gradient(circle_at_top_right,#7c3aed33,#020617)] p-6 md:p-8">
+    <main className="mx-auto w-full max-w-6xl px-3 py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] text-zinc-100 sm:px-4 sm:py-8">
+      <section className="mb-8 overflow-hidden rounded-3xl border border-white/10 bg-[radial-gradient(circle_at_top_right,#7c3aed33,#020617)] p-5 md:p-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
+          <div className="min-w-0">
             <p className="text-xs uppercase tracking-[0.2em] text-violet-300">
               Meta-Pet Workshop
             </p>
-            <h1 className="mt-2 text-3xl font-bold md:text-4xl">
+            <h1 className="mt-2 text-2xl font-bold leading-tight sm:text-3xl md:text-4xl">
               Use your custom addons now
             </h1>
             <p className="mt-2 max-w-2xl text-sm text-zinc-300">
@@ -176,7 +176,7 @@ export default function ShopPage() {
               panel.
             </p>
           </div>
-          <div className="flex gap-2 text-xs">
+          <div className="flex flex-wrap gap-2 text-xs md:justify-end">
             <span className="rounded-full border border-violet-400/40 bg-violet-500/20 px-3 py-1">
               {CUSTOM_COLLECTION_ADDONS.length} custom addons
             </span>
@@ -186,25 +186,25 @@ export default function ShopPage() {
           </div>
         </div>
 
-        <div className="mt-5 flex flex-wrap gap-3">
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <button
             type="button"
             onClick={handleUnlock}
             disabled={unlocking}
-            className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
           >
-            {unlocking ? "Unlocking…" : "Unlock to Inventory"}
+            {unlocking ? "Unlocking..." : "Unlock to Inventory"}
           </button>
           <Link
             href="/pet"
-            className="rounded-xl border border-zinc-500/50 bg-zinc-900/70 px-4 py-2 text-sm font-semibold text-zinc-200 transition hover:border-zinc-300"
+            className="w-full rounded-xl border border-zinc-500/50 bg-zinc-900/70 px-4 py-2 text-center text-sm font-semibold text-zinc-200 transition hover:border-zinc-300 sm:w-auto"
           >
             Go to Pet & Equip →
           </Link>
           {subscription.planId === "free" && (
             <Link
               href="/pricing"
-              className="rounded-xl border border-cyan-400/40 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-200 transition hover:border-cyan-300"
+              className="w-full rounded-xl border border-cyan-400/40 bg-cyan-500/10 px-4 py-2 text-center text-sm font-semibold text-cyan-200 transition hover:border-cyan-300 sm:w-auto"
             >
               Compare Pro Plan
             </Link>
@@ -219,7 +219,7 @@ export default function ShopPage() {
       </section>
 
       <section className="mb-10">
-        <div className="mb-4 flex items-end justify-between">
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="text-xl font-semibold">Custom Collection</h2>
             <p className="text-sm text-zinc-500">
@@ -240,12 +240,17 @@ export default function ShopPage() {
 
       {/* Earnable Addons */}
       <section className="mb-10">
-        <div className="mb-4 flex items-end justify-between">
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="text-xl font-semibold">Premium Addons</h2>
-            <p className="text-sm text-zinc-500">Available with Companion Pass or Teacher Pro.</p>
+            <p className="text-sm text-zinc-500">
+              Available with Companion Pass or Teacher Pro.
+            </p>
           </div>
-          <Link href="/pricing" className="text-xs text-cyan-400 hover:text-cyan-300 underline underline-offset-2">
+          <Link
+            href="/pricing"
+            className="text-xs text-cyan-400 underline underline-offset-2 hover:text-cyan-300"
+          >
             View plans →
           </Link>
         </div>
@@ -261,32 +266,41 @@ export default function ShopPage() {
       </section>
 
       {/* Addon Marketplace Coming Soon */}
-      <section className="mb-10 rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-950/30 to-slate-900/60 p-6 md:p-8">
+      <section className="mb-10 overflow-hidden rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-950/30 to-slate-900/60 p-5 md:p-8">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
+          <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wider text-amber-300">
               Addon Marketplace — Coming Soon
             </p>
-            <h3 className="mt-1 text-lg font-bold text-zinc-100">
+            <h3 className="mt-1 text-lg font-bold leading-tight text-zinc-100 sm:text-xl">
               Individual drops · Creator revenue share · Limited editions
             </h3>
             <p className="mt-2 max-w-xl text-sm text-zinc-400 leading-relaxed">
-              Buy individual addon packs from $1.99. Creators earn 70% of each sale.
-              Limited-edition mythic drops with on-chain scarcity. Educators can share
-              curriculum-themed addon bundles. The marketplace opens when the ecosystem is ready.
+              Buy individual addon packs from $1.99. Creators earn 70% of each
+              sale. Limited-edition mythic drops with on-chain scarcity.
+              Educators can share curriculum-themed addon bundles. The
+              marketplace opens when the ecosystem is ready.
             </p>
           </div>
-          <div className="shrink-0">
-            <span className="inline-flex rounded-xl border border-amber-400/30 bg-amber-950/40 px-4 py-2 text-sm font-semibold text-amber-200">
+          <div className="w-full shrink-0 md:w-auto">
+            <span className="inline-flex w-full justify-center rounded-xl border border-amber-400/30 bg-amber-950/40 px-4 py-2 text-sm font-semibold text-amber-200 md:w-auto">
               Notify me
             </span>
           </div>
         </div>
         <div className="mt-4 flex flex-wrap gap-2 text-[11px] text-zinc-500">
-          <span className="rounded-md border border-zinc-700 bg-zinc-900/70 px-2 py-0.5">Drop pricing: $1.99–$9.99</span>
-          <span className="rounded-md border border-zinc-700 bg-zinc-900/70 px-2 py-0.5">Creator cut: 70%</span>
-          <span className="rounded-md border border-zinc-700 bg-zinc-900/70 px-2 py-0.5">Cryptographically signed editions</span>
-          <span className="rounded-md border border-zinc-700 bg-zinc-900/70 px-2 py-0.5">Curriculum addon bundles</span>
+          <span className="rounded-md border border-zinc-700 bg-zinc-900/70 px-2 py-0.5">
+            Drop pricing: $1.99–$9.99
+          </span>
+          <span className="rounded-md border border-zinc-700 bg-zinc-900/70 px-2 py-0.5">
+            Creator cut: 70%
+          </span>
+          <span className="rounded-md border border-zinc-700 bg-zinc-900/70 px-2 py-0.5">
+            Cryptographically signed editions
+          </span>
+          <span className="rounded-md border border-zinc-700 bg-zinc-900/70 px-2 py-0.5">
+            Curriculum addon bundles
+          </span>
         </div>
       </section>
     </main>
