@@ -16,7 +16,7 @@ const ConstellationDome = dynamic(
     ),
   {
     ssr: false,
-    loading: () => <section className="rounded-xl border border-slate-700 bg-slate-900/70 p-4 text-sm text-slate-200">Loading constellation dome...</section>,
+    loading: () => <section className="rounded-xl border border-slate-800 p-4 text-xs text-slate-400">Loading constellation dome...</section>,
   },
 );
 
@@ -27,7 +27,7 @@ const ResonanceArena = dynamic(
     ),
   {
     ssr: false,
-    loading: () => <section className="rounded-xl border border-slate-700 bg-slate-900/70 p-4 text-sm text-slate-200">Loading resonance arena...</section>,
+    loading: () => <section className="rounded-xl border border-slate-800 p-4 text-xs text-slate-400">Loading resonance arena...</section>,
   },
 );
 
@@ -38,7 +38,7 @@ const ExplainerPanel = dynamic(
     ),
   {
     ssr: false,
-    loading: () => <section className="rounded-xl border border-slate-700 bg-slate-900/70 p-4 text-sm text-slate-200">Loading explainer...</section>,
+    loading: () => <section className="rounded-xl border border-slate-800 p-4 text-xs text-slate-400">Loading explainer...</section>,
   },
 );
 
@@ -49,7 +49,7 @@ const SonificationCompareMode = dynamic(
     ),
   {
     ssr: false,
-    loading: () => <section className="rounded-xl border border-slate-700 bg-slate-900/70 p-4 text-sm text-slate-200">Loading sonification...</section>,
+    loading: () => <section className="rounded-xl border border-slate-800 p-4 text-xs text-slate-400">Loading sonification...</section>,
   },
 );
 
@@ -60,7 +60,7 @@ const GenomeTimeline = dynamic(
     ),
   {
     ssr: false,
-    loading: () => <section className="rounded-xl border border-slate-700 bg-slate-900/70 p-4 text-sm text-slate-200">Loading timeline...</section>,
+    loading: () => <section className="rounded-xl border border-slate-800 p-4 text-xs text-slate-400">Loading timeline...</section>,
   },
 );
 
@@ -71,7 +71,7 @@ const WhatIfLab = dynamic(
     ),
   {
     ssr: false,
-    loading: () => <section className="rounded-xl border border-slate-700 bg-slate-900/70 p-4 text-sm text-slate-200">Loading simulation lab...</section>,
+    loading: () => <section className="rounded-xl border border-slate-800 p-4 text-xs text-slate-400">Loading simulation lab...</section>,
   },
 );
 
