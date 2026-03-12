@@ -25,7 +25,7 @@ body {
 }
 
 /* Custom animations */
-@keyframes pulse {
+@keyframes scorePulse {
   0%, 100% {
     opacity: 1;
   }
@@ -63,7 +63,7 @@ body {
 
 /* Custom utility classes */
 .animate-pulse-slow {
-  animation: pulse 3s infinite;
+  animation: scorePulse 3s infinite;
 }
 
 .animate-rotate-slow {
