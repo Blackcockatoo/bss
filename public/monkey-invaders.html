@@ -1096,6 +1096,7 @@
 
         #startScreen,
         #gameOverScreen,
+        #settingsScreen,
         #levelScreen,
         #pauseOverlay,
         #bossRewardScreen {
@@ -1114,6 +1115,7 @@
         }
 
         #gameOverScreen,
+        #settingsScreen,
         #levelScreen,
         #pauseOverlay,
         #bossRewardScreen {
@@ -1854,7 +1856,6 @@
             line-height: 1.6;
         }
 
-        #operatorMenu,
         #endingSequenceScreen {
             position: absolute;
             inset: 0;
@@ -2667,7 +2668,7 @@
                 <div class="screen-note">Rapid fire and bazooka bounty approved by Blue Snake Studios</div>
             </div>
 
-            <div id="operatorMenu">
+            <div id="settingsScreen">
                 <div class="operator-shell">
                     <div class="brand-kicker">B$S Operator Console</div>
                     <h2>Hidden Operator Menu</h2>
@@ -2800,7 +2801,7 @@
         const gameOverScreen = document.getElementById('gameOverScreen');
         const levelScreen = document.getElementById('levelScreen');
         const bossRewardScreen = document.getElementById('bossRewardScreen');
-        const operatorMenu = document.getElementById('operatorMenu');
+        const operatorMenu = document.getElementById('settingsScreen');
         const endingSequenceScreen = document.getElementById('endingSequenceScreen');
         const initialsEntryScreen = document.getElementById('initialsEntryScreen');
         const levelTextElement = document.getElementById('levelText');
