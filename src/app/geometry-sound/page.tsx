@@ -10,12 +10,21 @@ export default function GeometrySoundPage() {
 
   const iframeSrc = useMemo(() => {
     const params = new URLSearchParams();
-    const keys = ['petId', 'petName', 'petType', 'seed', 'elementProfile', 'resonanceIndex'];
+    const keys = [
+      'petId',
+      'petName',
+      'petType',
+      'seed',
+      'elementProfile',
+      'resonanceIndex',
+      'session',
+    ];
     keys.forEach(key => {
       const value = searchParams.get(key);
       if (value) params.set(key, value);
     });
-    return `/geometry-sound.html?${params.toString()}`;
+    const query = params.toString();
+    return query ? `/geometry-sound.html?${query}` : '/geometry-sound.html';
   }, [searchParams]);
 
   useEffect(() => {
