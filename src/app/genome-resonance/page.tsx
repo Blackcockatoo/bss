@@ -1,18 +1,79 @@
 "use client";
 
 import { useState } from "react";
-import { ConstellationDome } from "../../../frontend/src/features/genome/ConstellationDome";
-import { ResonanceArena } from "../../../frontend/src/features/genome/arena/ResonanceArena";
-import { ExplainerPanel } from "../../../frontend/src/features/genome/explainer/ExplainerPanel";
-import { SonificationCompareMode } from "../../../frontend/src/features/genome/sonification/CompareMode";
-import { GenomeTimeline } from "../../../frontend/src/features/genome/timeline/GenomeTimeline";
-import { WhatIfLab } from "../../../frontend/src/features/genome/whatIf/WhatIfLab";
+import dynamic from "next/dynamic";
 import type {
   ExplanationBlock,
   ExplanationResponse,
   SimulationResponse,
   SimulationResult,
 } from "../../../shared/contracts/genomeResonance";
+
+const ConstellationDome = dynamic(
+  () =>
+    import("../../../frontend/src/features/genome/ConstellationDome").then(
+      (module) => module.ConstellationDome,
+    ),
+  {
+    ssr: false,
+    loading: () => <section className="rounded-xl border border-slate-800 p-4 text-xs text-slate-400">Loading constellation dome...</section>,
+  },
+);
+
+const ResonanceArena = dynamic(
+  () =>
+    import("../../../frontend/src/features/genome/arena/ResonanceArena").then(
+      (module) => module.ResonanceArena,
+    ),
+  {
+    ssr: false,
+    loading: () => <section className="rounded-xl border border-slate-800 p-4 text-xs text-slate-400">Loading resonance arena...</section>,
+  },
+);
+
+const ExplainerPanel = dynamic(
+  () =>
+    import("../../../frontend/src/features/genome/explainer/ExplainerPanel").then(
+      (module) => module.ExplainerPanel,
+    ),
+  {
+    ssr: false,
+    loading: () => <section className="rounded-xl border border-slate-800 p-4 text-xs text-slate-400">Loading explainer...</section>,
+  },
+);
+
+const SonificationCompareMode = dynamic(
+  () =>
+    import("../../../frontend/src/features/genome/sonification/CompareMode").then(
+      (module) => module.SonificationCompareMode,
+    ),
+  {
+    ssr: false,
+    loading: () => <section className="rounded-xl border border-slate-800 p-4 text-xs text-slate-400">Loading sonification...</section>,
+  },
+);
+
+const GenomeTimeline = dynamic(
+  () =>
+    import("../../../frontend/src/features/genome/timeline/GenomeTimeline").then(
+      (module) => module.GenomeTimeline,
+    ),
+  {
+    ssr: false,
+    loading: () => <section className="rounded-xl border border-slate-800 p-4 text-xs text-slate-400">Loading timeline...</section>,
+  },
+);
+
+const WhatIfLab = dynamic(
+  () =>
+    import("../../../frontend/src/features/genome/whatIf/WhatIfLab").then(
+      (module) => module.WhatIfLab,
+    ),
+  {
+    ssr: false,
+    loading: () => <section className="rounded-xl border border-slate-800 p-4 text-xs text-slate-400">Loading simulation lab...</section>,
+  },
+);
 
 const nodes = [
   {
