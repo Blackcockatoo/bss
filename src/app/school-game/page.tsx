@@ -10,6 +10,15 @@ import { EducationQueuePanel } from '@/components/EducationQueuePanel';
 import { EduVibeBoard } from '@/components/EduVibeBoard';
 import DigitalDNAHub from '@/components/DigitalDNAHub';
 import type { LessonContext } from '@/components/DigitalDNAHub';
+import { TEACHER_HUB_MENU_ACTIONS } from './menuActions';
+
+const PAIRING_STORAGE_KEY = 'teacher-hub-pairing-state';
+
+type PairingState = {
+  pairedPetAlias: string | null;
+  crestConfirmedAt: number | null;
+  questLaunchedAt: number | null;
+};
 
 const PILLAR_DNA_MODES: Record<string, DnaMode[]> = {
   'Pattern Detective': ['spiral', 'mandala'],
@@ -37,6 +46,37 @@ const PILLARS = [
     icon: ClipboardList,
   },
 ];
+
+
+function loadPersistedPairingState(): PairingState {
+  if (typeof window === 'undefined') {
+    return {
+      pairedPetAlias: null,
+      crestConfirmedAt: null,
+      questLaunchedAt: null,
+    };
+  }
+
+  const saved = window.localStorage.getItem(PAIRING_STORAGE_KEY);
+  if (!saved) {
+    return {
+      pairedPetAlias: null,
+      crestConfirmedAt: null,
+      questLaunchedAt: null,
+    };
+  }
+
+  try {
+    return JSON.parse(saved) as PairingState;
+  } catch {
+    window.localStorage.removeItem(PAIRING_STORAGE_KEY);
+    return {
+      pairedPetAlias: null,
+      crestConfirmedAt: null,
+      questLaunchedAt: null,
+    };
+  }
+}
 
 const DIRECTION_ICONS = [ArrowUp, ArrowRight, ArrowDown, ArrowLeft];
 const DIRECTION_LABELS = ['Up', 'Right', 'Down', 'Left'];
@@ -218,7 +258,18 @@ export default function SchoolGamePage() {
   const lessonProgress = useEducationStore((s) => s.lessonProgress);
 
   const [activeDnaView, setActiveDnaView] = useState<LessonContext | null>(null);
-  const [studentAlias, setStudentAlias] = useState('');
+  const [pairingState, setPairingState] = useState<PairingState>(() => loadPersistedPairingState());
+  const [studentAlias, setStudentAlias] = useState(() => loadPersistedPairingState().pairedPetAlias ?? '');
+  const [selectedActionId, setSelectedActionId] = useState<'pair-qr' | 'confirm-crest' | 'launch-quest'>('pair-qr');
+  const [qrInput, setQrInput] = useState('');
+  const [flowError, setFlowError] = useState<string | null>(null);
+  const [flowSuccess, setFlowSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(PAIRING_STORAGE_KEY, JSON.stringify(pairingState));
+    window.sessionStorage.setItem(PAIRING_STORAGE_KEY, JSON.stringify(pairingState));
+  }, [pairingState]);
 
   const completedCount = useMemo(
     () => lessonProgress.filter((p) => p.status === 'completed').length,
@@ -231,9 +282,23 @@ export default function SchoolGamePage() {
   );
 
   const handleStartQuest = () => {
+    if (!pairingState.pairedPetAlias) {
+      setFlowError('Pair with a pet via QR before launching Classroom Quest.');
+      setFlowSuccess(null);
+      return;
+    }
+    if (!pairingState.crestConfirmedAt) {
+      setFlowError('Confirm the bonded crest before launching Classroom Quest.');
+      setFlowSuccess(null);
+      return;
+    }
     const firstLesson = queue[0];
     if (firstLesson) {
       activateLesson(firstLesson.id);
+      const launchTime = Date.now();
+      setPairingState((prev) => ({ ...prev, questLaunchedAt: launchTime }));
+      setFlowError(null);
+      setFlowSuccess('Classroom Quest launched successfully.');
       if (studentAlias.trim() && firstLesson.dnaMode) {
         setActiveDnaView({
           lessonId: firstLesson.id,
@@ -244,6 +309,36 @@ export default function SchoolGamePage() {
       }
     }
   };
+
+  const handlePairViaQr = useCallback(() => {
+    const match = qrInput.trim().match(/^PET:([A-Za-z0-9\s-]{2,40})$/i);
+    if (!match) {
+      setFlowError('QR payload invalid. Use format PET:Student Alias (example: PET:Bluebird 4).');
+      setFlowSuccess(null);
+      return;
+    }
+    const pairedPetAlias = match[1].trim();
+    setStudentAlias(pairedPetAlias);
+    setPairingState({
+      pairedPetAlias,
+      crestConfirmedAt: null,
+      questLaunchedAt: null,
+    });
+    setFlowError(null);
+    setFlowSuccess(`Paired with ${pairedPetAlias}. Crest confirmation is now available.`);
+  }, [qrInput]);
+
+  const handleConfirmCrest = useCallback(() => {
+    if (!pairingState.pairedPetAlias) {
+      setFlowError('No paired pet found. Pair with a pet via QR first.');
+      setFlowSuccess(null);
+      return;
+    }
+    const crestConfirmedAt = Date.now();
+    setPairingState((prev) => ({ ...prev, crestConfirmedAt }));
+    setFlowError(null);
+    setFlowSuccess(`Bonded crest confirmed for ${pairingState.pairedPetAlias}.`);
+  }, [pairingState.pairedPetAlias]);
 
   const handlePillarStart = (pillarTitle: string) => {
     const modes = PILLAR_DNA_MODES[pillarTitle] ?? [];
@@ -301,6 +396,90 @@ export default function SchoolGamePage() {
             </header>
 
             {/* Queue Summary */}
+            <section className="rounded-2xl border border-emerald-400/30 bg-emerald-500/5 p-5 space-y-4">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-sm font-semibold text-emerald-200">Teacher Hub Menu</h2>
+                <span className="text-xs text-emerald-300">Pair → Crest → Quest</span>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {TEACHER_HUB_MENU_ACTIONS.map((action) => {
+                  const isLive = action.status === 'live';
+                  const isSelected = selectedActionId === action.id;
+                  return (
+                    <button
+                      key={action.id}
+                      type="button"
+                      onClick={() => isLive && setSelectedActionId(action.id as 'pair-qr' | 'confirm-crest' | 'launch-quest')}
+                      disabled={!isLive}
+                      className={`rounded-lg border px-3 py-2 text-left transition ${
+                        isSelected
+                          ? 'border-emerald-400/70 bg-emerald-400/10'
+                          : 'border-slate-700 bg-slate-900/50'
+                      } ${!isLive ? 'opacity-60 cursor-not-allowed' : 'hover:border-emerald-400/50 hover:bg-emerald-500/5'}`}
+                    >
+                      <p className="text-sm font-semibold text-zinc-100">
+                        {action.label}
+                        {!isLive && <span className="ml-2 text-xs text-amber-300">Coming soon</span>}
+                      </p>
+                      <p className="mt-1 text-xs text-zinc-400">
+                        {isLive ? action.description : `${action.description} Coming soon.`}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {selectedActionId === 'pair-qr' && (
+                <div className="rounded-lg border border-slate-700 bg-slate-950/60 p-3 space-y-2">
+                  <p className="text-xs text-zinc-400">Pair with pet via QR payload</p>
+                  <div className="flex gap-2">
+                    <input
+                      value={qrInput}
+                      onChange={(e) => setQrInput(e.target.value)}
+                      placeholder="PET:Bluebird 4"
+                      className="flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-zinc-100"
+                    />
+                    <button
+                      type="button"
+                      onClick={handlePairViaQr}
+                      className="px-3 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-sm font-semibold"
+                    >
+                      Pair
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {selectedActionId === 'confirm-crest' && (
+                <div className="rounded-lg border border-slate-700 bg-slate-950/60 p-3 space-y-2">
+                  <p className="text-xs text-zinc-400">
+                    Confirm bonded crest for {pairingState.pairedPetAlias ?? '— no pet paired yet —'}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleConfirmCrest}
+                    className="px-3 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-semibold"
+                  >
+                    Confirm Crest
+                  </button>
+                </div>
+              )}
+
+              {selectedActionId === 'launch-quest' && (
+                <div className="rounded-lg border border-slate-700 bg-slate-950/60 p-3 space-y-2 text-xs text-zinc-300">
+                  <p>Ready checks before launch:</p>
+                  <ul className="list-disc pl-5 space-y-1">
+                    <li>Pet paired: {pairingState.pairedPetAlias ? 'Yes' : 'No'}</li>
+                    <li>Crest confirmed: {pairingState.crestConfirmedAt ? 'Yes' : 'No'}</li>
+                    <li>Quest launched this session: {pairingState.questLaunchedAt ? 'Yes' : 'No'}</li>
+                  </ul>
+                </div>
+              )}
+
+              {flowError && <p className="text-xs text-red-300">{flowError}</p>}
+              {flowSuccess && <p className="text-xs text-emerald-300">{flowSuccess}</p>}
+            </section>
+
             {queue.length > 0 && (
               <section className="rounded-2xl border border-cyan-400/30 bg-cyan-500/5 p-5 space-y-4">
                 <div className="flex items-center justify-between">
