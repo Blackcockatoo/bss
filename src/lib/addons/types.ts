@@ -51,7 +51,7 @@ export interface AddonVisual {
   /** SVG path data or component reference */
   svgPath?: string;
   /** Optional custom equipped renderer */
-  customRenderer?: "seraphicPendantField";
+  customRenderer?: "seraphicPendantField" | "wizardStaffSoulEngine";
   /** Optional full preview asset for inventory/shop cards */
   previewAsset?: string;
   /** Color palette for the addon */

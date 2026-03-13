@@ -8,6 +8,7 @@ import type { Addon, AddonPositionOverride } from "@/lib/addons";
 import type React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { SeraphicPendantField } from "./SeraphicPendantField";
+import { WizardStaffSoulEngine } from "./WizardStaffSoulEngine";
 
 interface AddonRendererProps {
   addon: Addon;
@@ -316,6 +317,14 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
           red60={red60}
           blue60={blue60}
           black60={black60}
+        />
+      ) : visual.customRenderer === "wizardStaffSoulEngine" ? (
+        <WizardStaffSoulEngine
+          animationPhase={animationPhase}
+          mood={mood}
+          energy={energy}
+          curiosity={curiosity}
+          bond={bond}
         />
       ) : visual.svgPath ? (
         <g transform={animationTransform}>
