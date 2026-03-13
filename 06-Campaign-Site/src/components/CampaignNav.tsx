@@ -1,8 +1,8 @@
 import { Link, useLocation } from "wouter";
-import { TEACHER_HUB_URL, METAPET_APP_URL } from "../tokens";
+import { TEACHER_HUB_URL, tokens } from "../tokens";
 
 const NAV_LINKS = [
-  { label: "Parents", href: "/parents" },
+  { label: "App", href: "/app" },
   { label: "Schools", href: "/schools" },
   { label: "Investors", href: "/investors" },
   { label: "Elevator Pitch", href: "/elevator" },
@@ -47,7 +47,7 @@ export default function CampaignNav() {
               textDecoration: "none",
               padding: "8px 12px",
               borderRadius: "10px",
-              color: location === link.href ? "#e8eef7" : "#7a8da8",
+              color: location === link.href ? "#e8eef7" : tokens.muted,
               border: "1px solid transparent",
               background: location === link.href ? "rgba(255,255,255,.08)" : "transparent",
               cursor: "pointer",

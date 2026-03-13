@@ -9,7 +9,8 @@ export const tokens = {
   violet: "#a78bfa",
   violetDim: "rgba(167,139,250,.12)",
   text: "#e8eef7",
-  muted: "#7a8da8",
+  muted: "#a7b6cb",
+  focusRing: "#f8dd88",
 } as const;
 
 export const TEACHER_HUB_URL = "https://teachers-meta-pet-mr-brand.vercel.app";
