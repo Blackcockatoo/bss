@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npm run prepare:moss60-production && npx next build --webpack",
+  "buildCommand": "npm run build",
   "framework": "nextjs",
   "installCommand": "npm ci"
 }

@@ -131,13 +131,15 @@ meta-pet/
 ## Run It
 
 ```bash
-cd meta-pet
 npm ci
+
+# Optional: copy .env.example to .env.local and adjust NEXT_PUBLIC_SITE_URL
 npm run dev
 
 # Run checks
 npm run lint
 npm test
+npm run build
 ```
 
 Visit `http://localhost:3000`
@@ -425,7 +427,7 @@ Changing the preset regenerates the digits with a fresh nonce and stores the cho
 
 ## Tech Stack
 
-- **Next.js 15** + Turbopack
+- **Next.js 16** (Turbopack in dev, webpack for production parity)
 - **TypeScript** (ES2020 for BigInt)
 - **Zustand** (state)
 - **Tailwind** + shadcn/ui

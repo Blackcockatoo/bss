@@ -76,43 +76,70 @@
 
 // /// <reference types="@types/google.maps" />
 
-import { useEffect, useRef } from "react";
 import { usePersistFn } from "@/hooks/usePersistFn";
+import {
+  ENABLE_MAPS,
+  MAPS_API_KEY,
+  MAPS_FEATURE_READY,
+  MAPS_PROXY_URL,
+  getMapsConfigurationError,
+} from "@/lib/env/features";
 import { cn } from "@/lib/utils";
-import { ENABLE_MAPS } from "@/lib/env/features";
+import { useEffect, useRef, useState } from "react";
 
 declare global {
   interface Window {
-     
     google?: any;
   }
 }
 
-const API_KEY = process.env.NEXT_PUBLIC_FRONTEND_FORGE_API_KEY;
-const FORGE_BASE_URL =
-  process.env.NEXT_PUBLIC_FRONTEND_FORGE_API_URL ||
-  "https://forge.butterfly-effect.dev";
-const MAPS_PROXY_URL = `${FORGE_BASE_URL}/v1/maps/proxy`;
+let mapScriptPromise: Promise<void> | null = null;
 
 function loadMapScript() {
-  if (!ENABLE_MAPS) {
-    return Promise.resolve(null);
+  if (!ENABLE_MAPS || !MAPS_FEATURE_READY) {
+    return Promise.reject(
+      new Error(
+        getMapsConfigurationError() ??
+          "Maps are unavailable in this deployment.",
+      ),
+    );
   }
 
-  return new Promise(resolve => {
+  if (window.google?.maps) {
+    return Promise.resolve();
+  }
+
+  if (mapScriptPromise) {
+    return mapScriptPromise;
+  }
+
+  mapScriptPromise = new Promise<void>((resolve, reject) => {
     const script = document.createElement("script");
-    script.src = `${MAPS_PROXY_URL}/maps/api/js?key=${API_KEY}&v=weekly&libraries=marker,places,geocoding,geometry`;
+    script.src = `${MAPS_PROXY_URL}/maps/api/js?key=${MAPS_API_KEY}&v=weekly&libraries=marker,places,geocoding,geometry`;
     script.async = true;
     script.crossOrigin = "anonymous";
     script.onload = () => {
-      resolve(null);
-      script.remove(); // Clean up immediately
+      script.remove();
+
+      if (!window.google?.maps) {
+        mapScriptPromise = null;
+        reject(
+          new Error("Map library loaded, but google.maps is unavailable."),
+        );
+        return;
+      }
+
+      resolve();
     };
     script.onerror = () => {
-      console.error("Failed to load Google Maps script");
+      script.remove();
+      mapScriptPromise = null;
+      reject(new Error("Failed to load the Google Maps bridge script."));
     };
     document.head.appendChild(script);
   });
+
+  return mapScriptPromise;
 }
 
 interface MapViewProps {
@@ -130,26 +157,55 @@ export function MapView({
 }: MapViewProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<google.maps.Map | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(
+    getMapsConfigurationError(),
+  );
 
   const init = usePersistFn(async () => {
-    if (!ENABLE_MAPS) return;
-
-    await loadMapScript();
-    if (!mapContainer.current) {
-      console.error("Map container not found");
+    if (!ENABLE_MAPS) {
       return;
     }
-    map.current = new window.google.maps.Map(mapContainer.current, {
-      zoom: initialZoom,
-      center: initialCenter,
-      mapTypeControl: true,
-      fullscreenControl: true,
-      zoomControl: true,
-      streetViewControl: true,
-      mapId: "DEMO_MAP_ID",
-    });
-    if (onMapReady && map.current) {
-      onMapReady(map.current);
+
+    const configurationError = getMapsConfigurationError();
+    if (configurationError) {
+      setLoadError(configurationError);
+      return;
+    }
+
+    try {
+      await loadMapScript();
+
+      if (!mapContainer.current) {
+        setLoadError("Map container not found.");
+        return;
+      }
+
+      if (!window.google?.maps) {
+        setLoadError("Map library failed to initialize.");
+        return;
+      }
+
+      map.current = new window.google.maps.Map(mapContainer.current, {
+        zoom: initialZoom,
+        center: initialCenter,
+        mapTypeControl: true,
+        fullscreenControl: true,
+        zoomControl: true,
+        streetViewControl: true,
+        mapId: "DEMO_MAP_ID",
+      });
+      setLoadError(null);
+
+      if (onMapReady && map.current) {
+        onMapReady(map.current);
+      }
+    } catch (error) {
+      console.error("Map initialization failed", error);
+      setLoadError(
+        error instanceof Error
+          ? error.message
+          : "Failed to initialize the map.",
+      );
     }
   });
 
@@ -157,12 +213,20 @@ export function MapView({
     init();
   }, [init]);
 
-  if (!ENABLE_MAPS) {
+  if (!ENABLE_MAPS || loadError) {
     return (
-      <div className={cn("w-full h-[500px] rounded-lg border border-slate-800 bg-slate-950/70 p-4", className)}>
-        <p className="text-sm font-semibold text-zinc-200">Map is offline by default</p>
+      <div
+        className={cn(
+          "w-full h-[500px] rounded-lg border border-slate-800 bg-slate-950/70 p-4",
+          className,
+        )}
+      >
+        <p className="text-sm font-semibold text-zinc-200">
+          {ENABLE_MAPS ? "Map unavailable" : "Map is offline by default"}
+        </p>
         <p className="mt-2 text-xs text-zinc-400">
-          External map providers are disabled in this deployment to keep the app offline-first and zero-transmit by default.
+          {loadError ??
+            "External map providers are disabled in this deployment to keep the app offline-first and zero-transmit by default."}
         </p>
       </div>
     );

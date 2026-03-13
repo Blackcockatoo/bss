@@ -5,7 +5,7 @@
   "scripts": {
     "predev": "node -e \"require('fs').rmSync('.next',{recursive:true,force:true})\"",
     "dev": "next dev -H 0.0.0.0",
-    "build": "npm run prepare:moss60-production && next build",
+    "build": "npm run prepare:moss60-production && next build --webpack",
     "start": "next start",
     "lint": "tsc --noEmit && eslint src",
     "format": "npx biome format --write",

@@ -84,6 +84,7 @@ import {
   exportPetToJSON,
   getAllPets,
   importPetFromJSON,
+  isPersistenceAvailable,
   loadPet,
   savePet,
   setupAutoSave,
@@ -173,50 +174,101 @@ function slugify(value: string | undefined, fallback: string): string {
   return base.replace(/[^a-z0-9\-\s]/g, "").replace(/\s+/g, "-");
 }
 
-function createDebouncedSave(delay: number) {
+function getErrorMessage(error: unknown, fallback: string): string {
+  return error instanceof Error ? error.message : fallback;
+}
+
+function createSaveController(delay: number) {
   let timeout: ReturnType<typeof setTimeout> | null = null;
   let latest: PetSaveData | null = null;
-  let pending: Array<{
+  let listeners: Array<{
     resolve: () => void;
     reject: (error: unknown) => void;
   }> = [];
 
+  const clearTimer = () => {
+    if (timeout) {
+      clearTimeout(timeout);
+      timeout = null;
+    }
+  };
+
+  const resolveListeners = (
+    queuedListeners: Array<{
+      resolve: () => void;
+      reject: (error: unknown) => void;
+    }>,
+  ) => {
+    queuedListeners.forEach((listener) => listener.resolve());
+  };
+
+  const rejectListeners = (
+    queuedListeners: Array<{
+      resolve: () => void;
+      reject: (error: unknown) => void;
+    }>,
+    error: unknown,
+  ) => {
+    queuedListeners.forEach((listener) => listener.reject(error));
+  };
+
   const flush = async () => {
+    clearTimer();
+
     const snapshot = latest;
-    const listeners = pending;
-    pending = [];
+    const queuedListeners = listeners;
+    listeners = [];
     latest = null;
 
     if (!snapshot) {
-      listeners.forEach((listener) => listener.resolve());
+      resolveListeners(queuedListeners);
       return;
     }
 
     try {
       await savePet(snapshot);
-      listeners.forEach((listener) => listener.resolve());
+      resolveListeners(queuedListeners);
     } catch (error) {
-      listeners.forEach((listener) => listener.reject(error));
+      rejectListeners(queuedListeners, error);
       throw error;
     }
   };
 
-  return (data: PetSaveData) =>
-    new Promise<void>((resolve, reject) => {
+  return {
+    schedule(data: PetSaveData) {
       latest = data;
-      pending.push({ resolve, reject });
 
-      if (timeout) {
-        clearTimeout(timeout);
+      return new Promise<void>((resolve, reject) => {
+        listeners.push({ resolve, reject });
+
+        clearTimer();
+        timeout = setTimeout(() => {
+          void flush().catch(() => undefined);
+        }, delay);
+      });
+    },
+
+    flush,
+
+    cancel(targetPetId?: string) {
+      if (targetPetId && latest && latest.id !== targetPetId) {
+        return false;
       }
 
-      timeout = setTimeout(() => {
-        timeout = null;
-        flush().catch((err) => {
-          console.warn("Debounced save flush failed:", err);
-        });
-      }, delay);
-    });
+      const hadPending = Boolean(timeout || latest || listeners.length > 0);
+      clearTimer();
+
+      if (!hadPending) {
+        return false;
+      }
+
+      latest = null;
+      const queuedListeners = listeners;
+      listeners = [];
+      resolveListeners(queuedListeners);
+      return true;
+    },
+  };
 }
 
 const PET_ID = "metapet-primary";
@@ -564,7 +616,10 @@ export default function Home() {
   const [petSummaries, setPetSummaries] = useState<PetSummary[]>([]);
   const [currentPetId, setCurrentPetId] = useState<string | null>(null);
   const [petName, setPetName] = useState("");
-  const [importError, setImportError] = useState<string | null>(null);
+  const [archiveError, setArchiveError] = useState<string | null>(null);
+  const [persistenceNotice, setPersistenceNotice] = useState<string | null>(
+    null,
+  );
   const [breedingMode, setBreedingMode] = useState<
     "BALANCED" | "DOMINANT" | "MUTATION"
   >("BALANCED");
@@ -786,7 +841,7 @@ export default function Home() {
     Math.ceil((brewCooldownUntil - Date.now()) / 1000),
   );
 
-  const debouncedSave = useMemo(() => createDebouncedSave(1_000), []);
+  const saveController = useMemo(() => createSaveController(1_000), []);
 
   const crestRef = useRef<PrimeTailID | null>(null);
   const heptaRef = useRef<HeptaDigits | null>(null);
@@ -864,6 +919,33 @@ export default function Home() {
   const autoSaveCleanupRef = useRef<(() => void) | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  const clearArchiveFeedback = useCallback(() => {
+    setArchiveError(null);
+    if (persistenceSupportedRef.current) {
+      setPersistenceNotice(null);
+    }
+  }, []);
+
+  const disablePersistenceSession = useCallback(
+    (message: string) => {
+      if (autoSaveCleanupRef.current) {
+        autoSaveCleanupRef.current();
+        autoSaveCleanupRef.current = null;
+      }
+
+      saveController.cancel();
+      persistenceSupportedRef.current = false;
+      setPersistenceSupported(false);
+      setPersistenceActive(false);
+      setPetSummaries([]);
+      setBreedingPartnerId("");
+      setBreedingPartner(null);
+      setBreedingPreview(null);
+      setPersistenceNotice(message);
+    },
+    [saveController],
+  );
+
   const genomeToDna = useCallback((value: Genome): string => {
     const alphabet = ["A", "C", "G", "T"];
     const flatten = [...value.red60, ...value.blue60, ...value.black60];
@@ -935,8 +1017,10 @@ export default function Home() {
         autoSaveCleanupRef.current();
         autoSaveCleanupRef.current = null;
       }
+
+      saveController.cancel();
     };
-  }, []);
+  }, [saveController]);
 
   useEffect(() => {
     let cancelled = false;
@@ -1030,57 +1114,66 @@ export default function Home() {
     };
   }, []);
 
+  const persistSnapshotNow = useCallback(
+    async (snapshot: PetSaveData) => {
+      if (!persistenceSupportedRef.current) {
+        return;
+      }
+
+      saveController.cancel();
+      await savePet(snapshot);
+    },
+    [saveController],
+  );
+
+  const persistCurrentPetNow = useCallback(async () => {
+    if (!persistenceSupportedRef.current || !petIdRef.current) {
+      return;
+    }
+
+    await persistSnapshotNow(buildSnapshot());
+  }, [buildSnapshot, persistSnapshotNow]);
+
+  const scheduleSnapshotSave = useCallback(
+    async (snapshot: PetSaveData) => {
+      if (!persistenceSupportedRef.current) {
+        return;
+      }
+
+      await saveController.schedule(snapshot);
+    },
+    [saveController],
+  );
+
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (typeof indexedDB === "undefined") return;
+    if (typeof window === "undefined" || typeof document === "undefined") {
+      return;
+    }
 
-    const handleBeforeUnload = () => {
-      try {
-        const state = useStore.getState();
-        if (!state.genome || !state.traits) return;
-        if (!crestRef.current || !heptaRef.current || !genomeHashRef.current)
-          return;
+    if (!persistenceSupported) {
+      return;
+    }
 
-        const snapshot: PetSaveData = {
-          id: PET_ID,
-          vitals: state.vitals,
-          petType: state.petType,
-          mirrorMode: state.mirrorMode,
-          witness: state.witness,
-          petOntology: state.petOntology,
-          systemState: state.systemState,
-          sealedAt: state.sealedAt,
-          invariantIssues: state.invariantIssues,
-          genome: state.genome,
-          genomeHash: genomeHashRef.current,
-          traits: state.traits,
-          evolution: state.evolution,
-          ritualProgress: state.ritualProgress,
-          essence: state.essence,
-          lastRewardSource: state.lastRewardSource,
-          lastRewardAmount: state.lastRewardAmount,
-          achievements: state.achievements.map((entry) => ({ ...entry })),
-          battle: { ...state.battle },
-          miniGames: { ...state.miniGames },
-          vimana: {
-            ...state.vimana,
-            cells: state.vimana.cells.map((cell) => ({ ...cell })),
-          },
-          crest: crestRef.current,
-          heptaDigits: Array.from(heptaRef.current) as HeptaDigits,
-          lastSaved: Date.now(),
-          createdAt: createdAtRef.current ?? Date.now(),
-        };
+    const flushOnBackground = () => {
+      void persistCurrentPetNow().catch((error) => {
+        console.warn("Failed to persist pet on pagehide:", error);
+      });
+    };
 
-        void savePet(snapshot);
-      } catch (error) {
-        console.warn("Failed to persist pet on unload:", error);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        flushOnBackground();
       }
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [buildSnapshot]);
+    window.addEventListener("pagehide", flushOnBackground);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("pagehide", flushOnBackground);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [persistCurrentPetNow, persistenceSupported]);
 
   const refreshPetSummaries = useCallback(async () => {
     if (!persistenceSupportedRef.current) {
@@ -1101,6 +1194,9 @@ export default function Home() {
       setPetSummaries(summaries);
     } catch (error) {
       console.warn("Failed to load pet archive list:", error);
+      setArchiveError(
+        getErrorMessage(error, "Failed to refresh local archives."),
+      );
       setPetSummaries([]);
     }
   }, []);
@@ -1174,15 +1270,36 @@ export default function Home() {
       const cleanup = setupAutoSave(
         () => buildSnapshot(),
         60_000,
-        debouncedSave,
+        scheduleSnapshotSave,
+        {
+          onSuccess: () => {
+            clearArchiveFeedback();
+            setPersistenceActive(true);
+          },
+          onError: (error) => {
+            const message =
+              "Autosave is paused until local archive access recovers.";
+            setPersistenceActive(false);
+            setPersistenceNotice(message);
+            setArchiveError(getErrorMessage(error, message));
+          },
+        },
       );
       autoSaveCleanupRef.current = cleanup;
       setPersistenceActive(true);
+      clearArchiveFeedback();
     } catch (error) {
       console.warn("Failed to start autosave:", error);
       setPersistenceActive(false);
+      setPersistenceNotice("Autosave could not be started for local archives.");
+      setArchiveError(
+        getErrorMessage(
+          error,
+          "Autosave could not be started for local archives.",
+        ),
+      );
     }
-  }, [buildSnapshot, debouncedSave]);
+  }, [buildSnapshot, clearArchiveFeedback, scheduleSnapshotSave]);
 
   const createFreshPet = useCallback(async (): Promise<PetSaveData> => {
     const ensureKey = async () => {
@@ -1425,18 +1542,40 @@ export default function Home() {
     traits,
   ]);
 
+  const downloadPetArchive = useCallback((pet: PetSaveData) => {
+    const json = exportPetToJSON(pet);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const nameSlug = slugify(pet.name, "meta-pet");
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${nameSlug}-${pet.id}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, []);
+
   const initializeIdentity = useCallback(async () => {
     try {
       const hmacKey = await getDeviceHmacKey();
       hmacKeyRef.current = hmacKey;
 
-      const supported = typeof indexedDB !== "undefined";
+      const supported = await isPersistenceAvailable();
       persistenceSupportedRef.current = supported;
       setPersistenceSupported(supported);
 
+      if (supported) {
+        setPersistenceNotice(null);
+      } else {
+        disablePersistenceSession(
+          "IndexedDB is unavailable. This session is temporary, but you can still export the active companion.",
+        );
+      }
+
       let activePet: PetSaveData | null = null;
 
-      if (supported) {
+      if (persistenceSupportedRef.current) {
         try {
           const pets = await getAllPets();
           const sorted = [...pets].sort((a, b) => b.lastSaved - a.lastSaved);
@@ -1450,20 +1589,27 @@ export default function Home() {
             lastSaved: pet.lastSaved,
           }));
           setPetSummaries(summaries);
+          clearArchiveFeedback();
         } catch (error) {
           console.warn("Failed to load existing pet save:", error);
-          setPetSummaries([]);
+          disablePersistenceSession(
+            "Local archives could not be opened. Continuing in session-only mode.",
+          );
         }
       }
 
       if (!activePet) {
         const freshPet = await createFreshPet();
         activePet = freshPet;
-        if (supported) {
+        if (persistenceSupportedRef.current) {
           try {
             await savePet(freshPet);
+            clearArchiveFeedback();
           } catch (error) {
             console.warn("Failed to persist initial pet snapshot:", error);
+            disablePersistenceSession(
+              "Local archives could not store the initial companion. Continuing in session-only mode.",
+            );
           }
         }
       }
@@ -1472,7 +1618,7 @@ export default function Home() {
         applyPetData(activePet);
       }
 
-      if (supported) {
+      if (persistenceSupportedRef.current) {
         await refreshPetSummaries();
         activateAutoSave();
       } else {
@@ -1480,12 +1626,30 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Identity init failed:", error);
-      setPersistenceActive(false);
-      setPetSummaries([]);
+      disablePersistenceSession(
+        "Local persistence could not be initialized. Continuing in session-only mode.",
+      );
+      setArchiveError(
+        getErrorMessage(error, "Failed to initialize the active companion."),
+      );
+
+      try {
+        const freshPet = await createFreshPet();
+        applyPetData(freshPet);
+      } catch (fallbackError) {
+        console.error("Fallback pet creation failed:", fallbackError);
+      }
     } finally {
       setLoading(false);
     }
-  }, [activateAutoSave, applyPetData, createFreshPet, refreshPetSummaries]);
+  }, [
+    activateAutoSave,
+    applyPetData,
+    clearArchiveFeedback,
+    createFreshPet,
+    disablePersistenceSession,
+    refreshPetSummaries,
+  ]);
 
   const handlePlayHepta = useCallback(async () => {
     if (!heptaCode) return;
@@ -1509,111 +1673,210 @@ export default function Home() {
     try {
       const snapshot = buildSnapshot();
       snapshot.name = petName.trim() ? petName.trim() : undefined;
-      await savePet(snapshot);
+      await persistSnapshotNow(snapshot);
       await refreshPetSummaries();
+      clearArchiveFeedback();
     } catch (error) {
       console.warn("Failed to save pet name:", error);
+      setPersistenceNotice(
+        "Local archive sync failed while saving the pet name.",
+      );
+      setArchiveError(getErrorMessage(error, "Failed to save the pet name."));
     }
-  }, [buildSnapshot, currentPetId, petName, refreshPetSummaries]);
+  }, [
+    buildSnapshot,
+    clearArchiveFeedback,
+    currentPetId,
+    persistSnapshotNow,
+    petName,
+    refreshPetSummaries,
+  ]);
 
   const handleCreateNewPet = useCallback(async () => {
+    if (!persistenceSupportedRef.current) {
+      setArchiveError(
+        "Session-only mode is active. Export the current companion before minting a new one.",
+      );
+      return;
+    }
+
     try {
+      await persistCurrentPetNow();
+
       const newPet = await createFreshPet();
       let petToApply: PetSaveData = newPet;
 
-      if (persistenceSupportedRef.current) {
-        try {
-          await savePet(newPet);
-          const stored = await loadPet(newPet.id);
-          if (stored) {
-            petToApply = stored;
-          }
-          await refreshPetSummaries();
-        } catch (error) {
-          console.warn("Failed to store new pet:", error);
-        }
-        activateAutoSave();
-      } else {
-        setPersistenceActive(false);
+      await savePet(newPet);
+      const stored = await loadPet(newPet.id);
+      if (stored) {
+        petToApply = stored;
       }
 
       applyPetData(petToApply);
-      setImportError(null);
+      activateAutoSave();
+      await refreshPetSummaries();
+      clearArchiveFeedback();
     } catch (error) {
       console.error("Failed to create new pet:", error);
+      setArchiveError(
+        getErrorMessage(error, "Failed to mint a new companion."),
+      );
     }
-  }, [activateAutoSave, applyPetData, createFreshPet, refreshPetSummaries]);
+  }, [
+    activateAutoSave,
+    applyPetData,
+    clearArchiveFeedback,
+    createFreshPet,
+    persistCurrentPetNow,
+    refreshPetSummaries,
+  ]);
 
   const handleSelectPet = useCallback(
     async (id: string) => {
       if (id === currentPetId) return;
+
+      if (!persistenceSupportedRef.current) {
+        setArchiveError(
+          "Session-only mode is active. Archived companions are unavailable right now.",
+        );
+        return;
+      }
+
       try {
+        await persistCurrentPetNow();
+
         const pet = await loadPet(id);
-        if (!pet) return;
-        applyPetData(pet);
-        if (persistenceSupportedRef.current) {
-          activateAutoSave();
+        if (!pet) {
+          setArchiveError("That archived companion is no longer available.");
+          await refreshPetSummaries();
+          return;
         }
-        setImportError(null);
+
+        applyPetData(pet);
+        activateAutoSave();
+        await refreshPetSummaries();
+        clearArchiveFeedback();
       } catch (error) {
         console.error("Failed to load pet:", error);
+        setArchiveError(
+          getErrorMessage(error, "Failed to load the selected companion."),
+        );
       }
     },
-    [activateAutoSave, applyPetData, currentPetId],
+    [
+      activateAutoSave,
+      applyPetData,
+      clearArchiveFeedback,
+      currentPetId,
+      persistCurrentPetNow,
+      refreshPetSummaries,
+    ],
   );
 
-  const handleExportPet = useCallback(async (id: string) => {
+  const handleExportCurrentPet = useCallback(async () => {
     try {
-      const pet = await loadPet(id);
-      if (!pet) return;
-
-      const json = exportPetToJSON(pet);
-      const blob = new Blob([json], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const nameSlug = slugify(pet.name, "meta-pet");
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${nameSlug}-${id}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      downloadPetArchive(buildSnapshot());
+      clearArchiveFeedback();
     } catch (error) {
-      console.error("Failed to export pet archive:", error);
+      console.error("Failed to export current pet:", error);
+      setArchiveError(
+        getErrorMessage(error, "Failed to export the active companion."),
+      );
     }
-  }, []);
+  }, [buildSnapshot, clearArchiveFeedback, downloadPetArchive]);
+
+  const handleExportPet = useCallback(
+    async (id: string) => {
+      try {
+        if (id === currentPetId) {
+          downloadPetArchive(buildSnapshot());
+          clearArchiveFeedback();
+          return;
+        }
+
+        if (!persistenceSupportedRef.current) {
+          setArchiveError(
+            "Session-only mode is active. Only the active companion can be exported.",
+          );
+          return;
+        }
+
+        const pet = await loadPet(id);
+        if (!pet) {
+          setArchiveError("That archived companion is no longer available.");
+          await refreshPetSummaries();
+          return;
+        }
+
+        downloadPetArchive(pet);
+        clearArchiveFeedback();
+      } catch (error) {
+        console.error("Failed to export pet archive:", error);
+        setArchiveError(
+          getErrorMessage(error, "Failed to export the selected companion."),
+        );
+      }
+    },
+    [
+      buildSnapshot,
+      clearArchiveFeedback,
+      currentPetId,
+      downloadPetArchive,
+      refreshPetSummaries,
+    ],
+  );
 
   const handleImportFile = useCallback(
     async (file: File) => {
+      if (!persistenceSupportedRef.current) {
+        setArchiveError(
+          "Session-only mode is active. Import requires local archives to be available.",
+        );
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        return;
+      }
+
       try {
+        await persistCurrentPetNow();
+
         const text = await file.text();
         const imported = importPetFromJSON(text);
         await savePet(imported);
         const stored = await loadPet(imported.id);
         const petToApply = stored ?? imported;
         applyPetData(petToApply);
+        activateAutoSave();
         await refreshPetSummaries();
-        if (persistenceSupportedRef.current) {
-          activateAutoSave();
-        }
-        setImportError(null);
+        clearArchiveFeedback();
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Import failed";
-        setImportError(message);
         console.error("Failed to import pet archive:", error);
+        setArchiveError(getErrorMessage(error, "Import failed."));
       } finally {
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
         }
       }
     },
-    [activateAutoSave, applyPetData, refreshPetSummaries],
+    [
+      activateAutoSave,
+      applyPetData,
+      clearArchiveFeedback,
+      persistCurrentPetNow,
+      refreshPetSummaries,
+    ],
   );
 
   const handleDeletePet = useCallback(
     async (id: string) => {
-      if (!persistenceSupportedRef.current) return;
+      if (!persistenceSupportedRef.current) {
+        setArchiveError(
+          "Session-only mode is active. Archived companions are unavailable right now.",
+        );
+        return;
+      }
+
       if (
         !window.confirm(
           "Archive this companion from local archives? A trace will remain.",
@@ -1622,8 +1885,23 @@ export default function Home() {
         return;
 
       try {
+        if (id === currentPetId) {
+          saveController.cancel(id);
+          if (autoSaveCleanupRef.current) {
+            autoSaveCleanupRef.current();
+            autoSaveCleanupRef.current = null;
+          }
+        }
+
         await deletePet(id);
         await refreshPetSummaries();
+
+        if (breedingPartnerId === id) {
+          setBreedingPartnerId("");
+          setBreedingPartner(null);
+          setBreedingPreview(null);
+        }
+
         if (id === currentPetId) {
           const pets = await getAllPets();
           const sorted = pets.sort((a, b) => b.lastSaved - a.lastSaved);
@@ -1639,25 +1917,37 @@ export default function Home() {
               if (stored) {
                 petToApply = stored;
               }
-              await refreshPetSummaries();
             } catch (error) {
               console.warn("Failed to persist replacement pet:", error);
+              setArchiveError(
+                getErrorMessage(
+                  error,
+                  "Failed to persist the replacement companion.",
+                ),
+              );
             }
             applyPetData(petToApply);
             activateAutoSave();
           }
+          await refreshPetSummaries();
         }
-        setImportError(null);
+        clearArchiveFeedback();
       } catch (error) {
         console.error("Failed to archive pet:", error);
+        setArchiveError(
+          getErrorMessage(error, "Failed to archive the selected companion."),
+        );
       }
     },
     [
       activateAutoSave,
       applyPetData,
+      breedingPartnerId,
+      clearArchiveFeedback,
       createFreshPet,
       currentPetId,
       refreshPetSummaries,
+      saveController,
     ],
   );
 
@@ -1725,14 +2015,15 @@ export default function Home() {
     }
     return "Prerequisite: meet all breeding requirements to unlock this.";
   })();
-  const mintDisabled = !persistenceSupported && petSummaries.length > 0;
+  const mintDisabled = !persistenceSupported;
   const mintHint = mintDisabled
-    ? "Prerequisite: enable IndexedDB persistence to mint additional companions."
+    ? "Session-only mode keeps one temporary companion at a time. Export the active companion before leaving this page."
     : null;
   const importDisabled = !persistenceSupported;
   const importHint = importDisabled
-    ? "Prerequisite: enable IndexedDB persistence to import archived companions."
+    ? "Importing archived companions requires IndexedDB local archives."
     : null;
+  const exportCurrentDisabled = !currentPetId || !crest || !heptaCode;
 
   return (
     <AmbientBackground>
@@ -2657,6 +2948,16 @@ export default function Home() {
                 <Button
                   type="button"
                   variant="outline"
+                  onClick={() => void handleExportCurrentPet()}
+                  disabled={exportCurrentDisabled}
+                  className="flex-1 h-12 border-slate-700 touch-manipulation"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Export Current
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={importDisabled}
                   className="flex-1 h-12 border-slate-700 touch-manipulation"
@@ -2683,8 +2984,12 @@ export default function Home() {
                 </div>
               )}
 
-              {importError && (
-                <p className="text-xs text-rose-400">{importError}</p>
+              {persistenceNotice && (
+                <p className="text-xs text-amber-300">{persistenceNotice}</p>
+              )}
+
+              {archiveError && (
+                <p className="text-xs text-rose-400">{archiveError}</p>
               )}
 
               <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -2692,7 +2997,7 @@ export default function Home() {
                   <div className="rounded-lg border border-dashed border-slate-700 bg-slate-950/50 p-4 text-sm text-zinc-500">
                     {persistenceSupported
                       ? "No archived companions yet."
-                      : "IndexedDB is unavailable."}
+                      : "Session-only mode is active. Export the current companion before closing this tab."}
                   </div>
                 ) : (
                   petSummaries.map((summary) => {
@@ -2809,7 +3114,7 @@ export default function Home() {
               ? persistenceActive
                 ? "Autosave active"
                 : "Autosave paused"
-              : "Offline unavailable"}
+              : "Session-only mode"}
           </p>
           <div className="max-w-sm mx-auto space-y-1 pt-2 border-t border-slate-800/60">
             <p className="text-zinc-700 leading-relaxed">
