@@ -4,6 +4,11 @@ import { useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
+export function buildGeometrySoundIframeSrc(searchParams: { toString: () => string }) {
+  const query = new URLSearchParams(searchParams.toString()).toString();
+  return query ? `/geometry-sound.html?${query}` : '/geometry-sound.html';
+}
+
 export default function GeometrySoundPage() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const searchParams = useSearchParams();
