@@ -59,6 +59,13 @@ export const WizardStaffSoulEngine: React.FC<WizardStaffSoulEngineProps> = ({
     1 + Math.sin(time * (1.25 + energy * 0.01)) * (0.06 + bond * 0.0006);
   const hue =
     (200 + mood * 0.65 + curiosity * 0.85 + time * (18 + energy * 0.05)) % 360;
+  const sway = Math.sin(time * 1.7) * 3.5;
+  const driftY = Math.sin(time * 2.1) * 1.8;
+  const outerSpin = time * 22;
+  const innerSpin = -time * 30;
+  const glyphSpin = time * 14;
+  const spokeSpin = time * 80;
+  const corePulse = 1 + Math.sin(time * 3.2) * 0.08;
   const id = useId().replace(/:/g, "");
 
   const woodGradientId = `wizardStaffWood-${id}`;
@@ -221,7 +228,9 @@ export const WizardStaffSoulEngine: React.FC<WizardStaffSoulEngineProps> = ({
   );
 
   return (
-    <g>
+    <g
+      transform={`translate(0 ${driftY.toFixed(2)}) rotate(${sway.toFixed(2)})`}
+    >
       <defs>
         <linearGradient
           id={woodGradientId}
@@ -299,15 +308,28 @@ export const WizardStaffSoulEngine: React.FC<WizardStaffSoulEngineProps> = ({
       />
 
       <g transform="translate(0 -8)">
-        {ringPaths.map((ring) => (
-          <path
-            key={ring.key}
-            d={ring.d}
-            fill="none"
-            stroke={ring.stroke}
-            strokeWidth={ring.width}
-          />
-        ))}
+        <g transform={`rotate(${outerSpin.toFixed(2)})`}>
+          {ringPaths.slice(0, 3).map((ring) => (
+            <path
+              key={ring.key}
+              d={ring.d}
+              fill="none"
+              stroke={ring.stroke}
+              strokeWidth={ring.width}
+            />
+          ))}
+        </g>
+        <g transform={`rotate(${innerSpin.toFixed(2)})`}>
+          {ringPaths.slice(3).map((ring) => (
+            <path
+              key={ring.key}
+              d={ring.d}
+              fill="none"
+              stroke={ring.stroke}
+              strokeWidth={ring.width}
+            />
+          ))}
+        </g>
 
         <ellipse
           cx="0"
@@ -340,21 +362,23 @@ export const WizardStaffSoulEngine: React.FC<WizardStaffSoulEngineProps> = ({
           />
         ))}
 
-        {orbitGlyphs.map((glyph) => (
-          <text
-            key={glyph.key}
-            x={glyph.x}
-            y={glyph.y}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fontFamily="'Courier New', monospace"
-            fontSize="5"
-            letterSpacing="0.4"
-            fill={glyph.fill}
-          >
-            {glyph.glyph}
-          </text>
-        ))}
+        <g transform={`rotate(${glyphSpin.toFixed(2)})`}>
+          {orbitGlyphs.map((glyph) => (
+            <text
+              key={glyph.key}
+              x={glyph.x}
+              y={glyph.y}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fontFamily="'Courier New', monospace"
+              fontSize="5"
+              letterSpacing="0.4"
+              fill={glyph.fill}
+            >
+              {glyph.glyph}
+            </text>
+          ))}
+        </g>
 
         {helixRails.map((strand) => (
           <g key={strand.key}>
@@ -417,32 +441,34 @@ export const WizardStaffSoulEngine: React.FC<WizardStaffSoulEngineProps> = ({
         <circle
           cx="0"
           cy="0"
-          r={18 * pulse}
+          r={18 * pulse * corePulse}
           fill={`url(#${singularityGradientId})`}
           opacity="0.98"
         />
         <circle
           cx="0"
           cy="0"
-          r={13.5 * pulse}
+          r={13.5 * pulse * corePulse}
           fill={hsla(hue + 12, 100, 92, 0.92)}
           filter="url(#addonGlow)"
         />
         <circle cx="0" cy="0" r="6" fill="#020412" />
-        {Array.from({ length: 7 }, (_, index) => {
-          const angle = (TAU * index) / 7 + time * 1.45;
-          return (
-            <line
-              key={`spoke-${index}`}
-              x1="0"
-              y1="0"
-              x2={(Math.cos(angle) * 7).toFixed(2)}
-              y2={(Math.sin(angle) * 7).toFixed(2)}
-              stroke={hsla(hue + 180, 100, 82, 0.72)}
-              strokeWidth="0.72"
-            />
-          );
-        })}
+        <g transform={`rotate(${spokeSpin.toFixed(2)})`}>
+          {Array.from({ length: 7 }, (_, index) => {
+            const angle = (TAU * index) / 7;
+            return (
+              <line
+                key={`spoke-${index}`}
+                x1="0"
+                y1="0"
+                x2={(Math.cos(angle) * 7).toFixed(2)}
+                y2={(Math.sin(angle) * 7).toFixed(2)}
+                stroke={hsla(hue + 180, 100, 82, 0.72)}
+                strokeWidth="0.72"
+              />
+            );
+          })}
+        </g>
       </g>
 
       <text
