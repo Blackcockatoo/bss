@@ -4,33 +4,16 @@ import { useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
-export function buildGeometrySoundIframeSrc(searchParams: { toString: () => string }) {
-  const query = new URLSearchParams(searchParams.toString()).toString();
-  return query ? `/geometry-sound.html?${query}` : '/geometry-sound.html';
-}
+import { buildGeometrySoundIframeSrc } from './iframe-src';
 
 export default function GeometrySoundPage() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const searchParams = useSearchParams();
 
-  const iframeSrc = useMemo(() => {
-    const params = new URLSearchParams();
-    const keys = [
-      'petId',
-      'petName',
-      'petType',
-      'seed',
-      'elementProfile',
-      'resonanceIndex',
-      'session',
-    ];
-    keys.forEach(key => {
-      const value = searchParams.get(key);
-      if (value) params.set(key, value);
-    });
-    const query = params.toString();
-    return query ? `/geometry-sound.html?${query}` : '/geometry-sound.html';
-  }, [searchParams]);
+  const iframeSrc = useMemo(
+    () => buildGeometrySoundIframeSrc(searchParams),
+    [searchParams],
+  );
 
   useEffect(() => {
     const handleResize = () => {
