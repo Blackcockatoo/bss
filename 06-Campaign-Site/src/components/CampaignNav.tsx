@@ -6,6 +6,7 @@ const NAV_LINKS = [
   { label: "Schools", href: "/schools" },
   { label: "Investors", href: "/investors" },
   { label: "Elevator Pitch", href: "/elevator" },
+  { label: "References", href: "/references" },
 ];
 
 const navStyle: React.CSSProperties = {
