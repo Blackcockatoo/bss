@@ -1,6 +1,7 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import CampaignLayout from "../components/CampaignLayout";
 import StatBlock from "../components/StatBlock";
+import { tokens } from "../tokens";
 
 const btnGold: React.CSSProperties = {
   display: "inline-flex",
@@ -34,8 +35,8 @@ const btnGhost: React.CSSProperties = {
 
 const audienceCards = [
   {
-    href: "/parents",
-    label: "For Parents",
+    href: "/app",
+    label: "For App Users",
     color: "#f5c84c",
     dim: "rgba(245,200,76,.12)",
     border: "rgba(245,200,76,.25)",
@@ -60,6 +61,8 @@ const audienceCards = [
 ];
 
 export default function IndexPage() {
+  const [, navigate] = useLocation();
+
   return (
     <CampaignLayout>
       {/* Hero */}
@@ -81,7 +84,7 @@ export default function IndexPage() {
             padding: "6px 14px",
             borderRadius: "999px",
             border: "1px solid rgba(255,255,255,.10)",
-            color: "#7a8da8",
+            color: tokens.muted,
             marginBottom: "20px",
           }}>
             Zero-Collection Educational Architecture
@@ -106,7 +109,7 @@ export default function IndexPage() {
 
           <p style={{
             fontSize: "clamp(15px,2.4vw,20px)",
-            color: "#7a8da8",
+            color: "#a7b6cb",
             lineHeight: 1.65,
             maxWidth: "680px",
             margin: "0 auto 32px",
@@ -122,8 +125,8 @@ export default function IndexPage() {
             <Link href="/elevator">
               <span style={btnGold}>Watch the Pitch →</span>
             </Link>
-            <Link href="/schools">
-              <span style={btnGhost}>For Schools</span>
+            <Link href="/app">
+              <span style={btnGhost}>Explore the App</span>
             </Link>
           </div>
         </div>
@@ -152,14 +155,18 @@ export default function IndexPage() {
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: "14px" }}>
           {audienceCards.map((card) => (
-            <Link key={card.href} href={card.href}>
-              <div style={{
+            <button
+              key={card.href}
+              onClick={() => navigate(card.href)}
+              style={{
                 background: "#111f3a",
                 border: `1px solid ${card.border}`,
                 borderRadius: "16px",
                 padding: "24px",
                 cursor: "pointer",
                 transition: "transform .15s",
+                textAlign: "left",
+                width: "100%",
               }}>
                 <div style={{
                   position: "absolute" as const,
@@ -173,12 +180,11 @@ export default function IndexPage() {
                 <p style={{ fontSize: "11px", letterSpacing: "2px", textTransform: "uppercase", color: card.color, marginBottom: "8px" }}>
                   {card.label}
                 </p>
-                <p style={{ color: "#7a8da8", fontSize: "14px", lineHeight: 1.65 }}>{card.desc}</p>
+                <p style={{ color: tokens.muted, fontSize: "14px", lineHeight: 1.65 }}>{card.desc}</p>
                 <p style={{ color: card.color, fontSize: "13px", marginTop: "16px", fontWeight: 700 }}>
                   Read more →
                 </p>
-              </div>
-            </Link>
+            </button>
           ))}
         </div>
       </section>

@@ -27,9 +27,9 @@ export default function SchoolsPage() {
               Privacy-first. Learning-focused.
             </span>
           </h1>
-          <p style={{ fontSize: "clamp(15px,2.2vw,19px)", color: "#7a8da8", lineHeight: 1.65, maxWidth: "680px", margin: "0 auto 32px" }}>
-            A 7-session wellbeing and STEM pilot designed to integrate with your existing program.
-            No student accounts, no student logins, and minimal IT lift.
+          <p style={{ fontSize: "clamp(15px,2.2vw,19px)", color: "#a7b6cb", lineHeight: 1.65, maxWidth: "680px", margin: "0 auto 32px" }}>
+            A 7-session wellbeing and STEM pilot designed to drop into your existing program without disrupting it.
+            No accounts, no logins, no IT headaches.
           </p>
           <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
             <a href={TEACHER_HUB_URL} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "13px 24px", borderRadius: "14px", background: "#f5c84c", color: "#0a0a0a", fontWeight: 700, textDecoration: "none", fontSize: "14px" }}>
@@ -60,7 +60,7 @@ export default function SchoolsPage() {
         <h2 style={{ fontSize: "clamp(26px,4vw,44px)", fontWeight: 850, letterSpacing: "-1px", marginBottom: "8px" }}>
           7 sessions. Ready to implement.
         </h2>
-        <p style={{ color: "#7a8da8", lineHeight: 1.7, fontSize: "16px", maxWidth: "680px", marginBottom: "28px" }}>
+        <p style={{ color: "#a7b6cb", lineHeight: 1.7, fontSize: "16px", maxWidth: "680px", marginBottom: "28px" }}>
           Each session includes a learning intention, I Do / We Do / You Do structure, facilitation scripts,
           reflection prompts, and explicit KPPS values language. Click each session in the Teacher Hub for the full plan.
         </p>
@@ -73,7 +73,7 @@ export default function SchoolsPage() {
                 {s.n}
               </div>
               <p style={{ fontWeight: 700, fontSize: "14px", color: "#e8eef7", marginBottom: "4px" }}>{s.title}</p>
-              <p style={{ color: "#7a8da8", fontSize: "12px" }}>{s.focus}</p>
+              <p style={{ color: "#a7b6cb", fontSize: "12px" }}>{s.focus}</p>
             </div>
           ))}
         </div>
@@ -94,10 +94,10 @@ export default function SchoolsPage() {
           <h2 style={{ fontSize: "clamp(22px,3.5vw,36px)", fontWeight: 850, letterSpacing: "-0.5px", marginBottom: "16px" }}>
             No student accounts. No student data collection. By design.
           </h2>
-          <p style={{ color: "#7a8da8", lineHeight: 1.7, fontSize: "15px", maxWidth: "680px", marginBottom: "24px" }}>
-            Privacy protection is built into the architecture, not added as an afterthought.
-            The pilot runs on-device with no student profiles and no student data transmission.
-            This reduces operational risk and simplifies school privacy governance.
+          <p style={{ color: "#a7b6cb", lineHeight: 1.7, fontSize: "15px", maxWidth: "680px", marginBottom: "24px" }}>
+            Unlike every other edtech tool, the privacy protection isn't a checkbox or a policy.
+            It's structural. The app has no server. There's nothing to breach. No accounts to phish.
+            No data to leak. Your ICT Coordinator will thank you.
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: "12px" }}>
             {[
@@ -108,7 +108,7 @@ export default function SchoolsPage() {
             ].map((item) => (
               <div key={item.t} style={{ padding: "14px", borderRadius: "12px", background: "rgba(77,214,200,.06)", border: "1px solid rgba(77,214,200,.15)" }}>
                 <p style={{ fontWeight: 700, color: "#4dd6c8", marginBottom: "4px", fontSize: "13px" }}>{item.t}</p>
-                <p style={{ color: "#7a8da8", fontSize: "12px" }}>{item.d}</p>
+                <p style={{ color: "#a7b6cb", fontSize: "12px" }}>{item.d}</p>
               </div>
             ))}
           </div>
@@ -120,7 +120,7 @@ export default function SchoolsPage() {
         <h2 style={{ fontSize: "clamp(24px,4vw,40px)", fontWeight: 850, letterSpacing: "-1px", marginBottom: "12px" }}>
           Ready to pilot?
         </h2>
-        <p style={{ color: "#7a8da8", lineHeight: 1.7, marginBottom: "24px" }}>
+        <p style={{ color: "#a7b6cb", lineHeight: 1.7, marginBottom: "24px" }}>
           The full implementation package — 7 session guides, facilitation scripts, parent communication templates,
           values alignment maps, and ICT brief — is available now on the Teacher Hub.
         </p>

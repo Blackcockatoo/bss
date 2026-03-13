@@ -1,5 +1,32 @@
 import { useState, useEffect, useRef } from "react";
 
+const SOURCE_ENTRIES = {
+  dataSharing: {
+    id: "S1",
+    claim: "94% of top children's apps share data with third parties.",
+    title: "How Many Apps on Children's Smartphones Are Privacy Label Compliant?",
+    publication: "JMIR Pediatrics and Parenting",
+    date: "2022-09-22",
+    url: "https://pediatrics.jmir.org/2022/3/e37173",
+  },
+  copcConsultation: {
+    id: "S2",
+    claim: "Australia's Children's Online Privacy Code consultation is open.",
+    title: "Children's Online Privacy Code consultation",
+    publication: "eSafety Commissioner (Australia)",
+    date: "2025",
+    url: "https://www.esafety.gov.au/industry/tech-trends-and-challenges/childrens-online-privacy-code",
+  },
+  schoolMarket: {
+    id: "S3",
+    claim: "1,200+ independent and Catholic schools in Australia.",
+    title: "Non-Government Schools Census Collection",
+    publication: "Australian Curriculum, Assessment and Reporting Authority (ACARA)",
+    date: "2024",
+    url: "https://www.acara.edu.au/reporting/national-report-on-schooling-in-australia/non-government-schools-census-collection",
+  },
+};
+
 const FLOORS = [
   {
     level: "LOBBY",
@@ -12,9 +39,10 @@ const FLOORS = [
   {
     level: "FLOOR 01",
     sublabel: "Ding.",
-    headline: "Most children's apps still depend on data collection.",
-    body: "Clicks, dwell time, and behavioural signals are often captured and shared. Many products optimize engagement using extensive tracking rather than educational outcomes.",
-    stat: "94% of top children's apps share data with third parties (external benchmark).",
+    headline: "Big Tech has been farming your children.",
+    body: "Every click. Every dwell time. Every emotional reaction. Packaged, sold, optimised against. The entire kids app market is a data extraction operation dressed in primary colours.",
+    stat: "94% of top children's apps share data with third parties.",
+    claimSources: ["dataSharing"],
     color: "#ff6b35",
   },
   {
@@ -37,8 +65,9 @@ const FLOORS = [
     level: "FLOOR 04",
     sublabel: "Ding.",
     headline: "The regulators are writing the rules right now.",
-    body: "Australia's Children's Online Privacy Code process is active. Our architecture is already aligned with privacy-by-design principles schools are preparing to operationalize.",
-    stat: "COPC 2025 alignment: implementation-ready for school compliance teams.",
+    body: "Australia's Children's Online Privacy Code consultation is open. We're not scrambling to comply — we're the reference implementation. We wrote a compliance framework before the law exists. When the law catches up, we're already the answer.",
+    stat: "COPC 2025. We're not a case study. We're the blueprint.",
+    claimSources: ["copcConsultation"],
     color: "#38bdf8",
   },
   {
@@ -47,6 +76,7 @@ const FLOORS = [
     headline: "Schools are actively seeking this model.",
     body: "Independent and Catholic school systems need digital tools that are practical for classrooms and clear for governance. This model minimizes consent and data-processing complexity while supporting strong communication with families.",
     stat: "1,200+ independent and Catholic schools. Zero friction onboarding.",
+    claimSources: ["schoolMarket"],
     color: "#fb923c",
   },
   {
@@ -67,7 +97,6 @@ const FLOORS = [
   },
 ];
 
-// 7-pointed star path (hepta) as SVG
 const HeptaStar = ({ size = 120, color = "#FFD700", opacity = 0.07 }) => {
   const points = [];
   const cx = size / 2, cy = size / 2, r = size * 0.45, r2 = size * 0.2;
@@ -100,6 +129,7 @@ export default function JewbleElevator() {
   const [revealed, setRevealed] = useState(false);
   const [started, setStarted] = useState(false);
   const [scanline, setScanline] = useState(0);
+  const [showSources, setShowSources] = useState(false);
   const intervalRef = useRef(null);
 
   useEffect(() => {
@@ -113,6 +143,7 @@ export default function JewbleElevator() {
     if (traveling) return;
     setDoorsOpen(false);
     setRevealed(false);
+    setShowSources(false);
     setTraveling(true);
     setTimeout(() => {
       setCurrentFloor(f => Math.min(f + 1, FLOORS.length - 1));
@@ -127,6 +158,7 @@ export default function JewbleElevator() {
   const restart = () => {
     setDoorsOpen(false);
     setRevealed(false);
+    setShowSources(false);
     setCurrentFloor(0);
     setTimeout(() => {
       setDoorsOpen(true);
@@ -144,36 +176,31 @@ export default function JewbleElevator() {
 
   const floor = FLOORS[currentFloor];
   const isLast = currentFloor === FLOORS.length - 1;
+  const floorSources = (floor.claimSources || []).map((sourceKey) => SOURCE_ENTRIES[sourceKey]);
 
   return (
     <div style={{
       minHeight: "100vh",
-      background: "#04071a",
+      background: "radial-gradient(circle at 20% 30%, #0f172a 0%, #04071a 55%, #000 100%)",
+      color: "#fff",
+      fontFamily: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      fontFamily: "'Courier New', 'Lucida Console', monospace",
-      overflow: "hidden",
       position: "relative",
+      overflow: "hidden",
+      padding: "1rem",
     }}>
-      {/* Background geometry */}
-      <div style={{ position: "fixed", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
-        <div style={{ position: "absolute", top: "10%", left: "5%", transform: "rotate(13deg)" }}>
-          <HeptaStar size={200} opacity={0.06} />
-        </div>
-        <div style={{ position: "absolute", bottom: "15%", right: "8%" }}>
-          <OuroborosRing size={350} opacity={0.05} />
-        </div>
-        <div style={{ position: "absolute", top: "40%", right: "20%", transform: "rotate(-7deg)" }}>
-          <HeptaStar size={120} color="#a78bfa" opacity={0.05} />
-        </div>
-        {/* Grid lines */}
-        <svg width="100%" height="100%" style={{ position: "absolute", opacity: 0.03 }}>
-          {Array.from({ length: 20 }).map((_, i) => (
-            <line key={i} x1={`${i * 5.26}%`} y1="0" x2={`${i * 5.26}%`} y2="100%" stroke="#FFD700" strokeWidth="1" />
-          ))}
-          {Array.from({ length: 20 }).map((_, i) => (
-            <line key={i} x1="0" y1={`${i * 5.26}%`} x2="100%" y2={`${i * 5.26}%`} stroke="#FFD700" strokeWidth="1" />
+      {/* Background ambience */}
+      <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+        <HeptaStar size={180} color="#FFD700" opacity={0.03} style={{ top: "10%", left: "8%" }} />
+        <HeptaStar size={120} color="#7fffb2" opacity={0.04} style={{ top: "70%", right: "12%" }} />
+        <OuroborosRing size={360} color="#FFD700" opacity={0.03} style={{ top: "15%", right: "5%" }} />
+        <OuroborosRing size={280} color="#ff6b35" opacity={0.02} style={{ bottom: "10%", left: "12%" }} />
+        {/* subtle animated scan lines */}
+        <svg width="100%" height="100%" style={{ position: "absolute", inset: 0, opacity: 0.05 }}>
+          {Array.from({ length: 60 }).map((_, i) => (
+            <line key={i} x1="0" y1={`${i * 2}%`} x2="100%" y2={`${i * 2}%`} stroke="#FFD700" strokeWidth="1" />
           ))}
         </svg>
         {/* Scanline */}
@@ -186,7 +213,6 @@ export default function JewbleElevator() {
       </div>
 
       {!started ? (
-        // Intro screen
         <div style={{
           display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
           gap: "2rem", padding: "2rem", textAlign: "center", zIndex: 10,
@@ -238,7 +264,6 @@ export default function JewbleElevator() {
           </button>
         </div>
       ) : (
-        // Elevator
         <div style={{
           width: "min(520px, 95vw)",
           position: "relative",
@@ -282,26 +307,6 @@ export default function JewbleElevator() {
             transition: "border-top-color 0.5s",
             boxShadow: `0 0 40px rgba(4,7,26,0.8), inset 0 0 80px rgba(0,0,0,0.5)`,
           }}>
-            {/* Corner brackets */}
-            {[["0,0","20px,0","0,20px"],["0,0","0,20px","20px,0"].map(v=>v)].map((_, qi) => (
-              ["top-left","top-right","bottom-left","bottom-right"].map(corner => (
-                <div key={corner} style={{
-                  position: "absolute",
-                  [corner.includes("top") ? "top" : "bottom"]: 0,
-                  [corner.includes("left") ? "left" : "right"]: 0,
-                  width: "20px", height: "20px",
-                  borderTop: corner.includes("top") ? `2px solid ${floor.color}` : "none",
-                  borderBottom: corner.includes("bottom") ? `2px solid ${floor.color}` : "none",
-                  borderLeft: corner.includes("left") ? `2px solid ${floor.color}` : "none",
-                  borderRight: corner.includes("right") ? `2px solid ${floor.color}` : "none",
-                  opacity: 0.6,
-                  transition: "border-color 0.5s",
-                  zIndex: 5,
-                  pointerEvents: "none",
-                }} />
-              ))
-            ))}
-
             {/* Door panels - slide left and right */}
             <div style={{
               position: "absolute", inset: 0, zIndex: 4, pointerEvents: "none",
@@ -313,64 +318,42 @@ export default function JewbleElevator() {
                 borderRight: "1px solid rgba(255,215,0,0.1)",
                 transform: doorsOpen ? "translateX(-100%)" : "translateX(0)",
                 transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
-                display: "flex", alignItems: "center", justifyContent: "flex-end",
-                paddingRight: "10px",
-              }}>
-                {!doorsOpen && (
-                  <div style={{ opacity: 0.2 }}>
-                    <HeptaStar size={60} />
-                  </div>
-                )}
-              </div>
+              }} />
               <div style={{
                 width: "50%", height: "100%",
                 background: "linear-gradient(225deg, #0d1433 0%, #060c24 100%)",
                 borderLeft: "1px solid rgba(255,215,0,0.1)",
                 transform: doorsOpen ? "translateX(100%)" : "translateX(0)",
                 transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
-                display: "flex", alignItems: "center", justifyContent: "flex-start",
-                paddingLeft: "10px",
-              }}>
-                {!doorsOpen && (
-                  <div style={{ opacity: 0.2 }}>
-                    <HeptaStar size={60} />
-                  </div>
-                )}
-              </div>
+              }} />
             </div>
 
-            {/* Content */}
+            {/* Floor content */}
             <div style={{
-              padding: "clamp(1.5rem, 5vw, 2.5rem)",
-              minHeight: "320px",
+              padding: "1.5rem",
+              minHeight: "420px",
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
-              gap: "1.5rem",
+              gap: "1rem",
             }}>
-              <div>
+              <div style={{ display: "grid", gap: "1rem" }}>
                 <div style={{
-                  color: "rgba(255,255,255,0.3)",
-                  fontSize: "0.65rem",
-                  letterSpacing: "0.3em",
+                  color: "rgba(255,255,255,0.45)",
+                  fontSize: "0.68rem",
+                  letterSpacing: "0.2em",
                   textTransform: "uppercase",
-                  marginBottom: "1rem",
-                  opacity: revealed ? 1 : 0,
-                  transition: "opacity 0.4s 0.1s",
                 }}>
                   {floor.sublabel}
                 </div>
 
                 <h2 style={{
                   color: floor.color,
-                  fontSize: "clamp(1.2rem, 4vw, 1.7rem)",
-                  fontWeight: 900,
-                  lineHeight: 1.2,
+                  fontSize: "clamp(1.5rem, 4.5vw, 2.15rem)",
+                  lineHeight: 1.15,
                   margin: 0,
-                  marginBottom: "1rem",
-                  textShadow: `0 0 30px ${floor.color}60`,
                   opacity: revealed ? 1 : 0,
-                  transform: revealed ? "translateY(0)" : "translateY(10px)",
+                  transform: revealed ? "translateY(0)" : "translateY(8px)",
                   transition: "opacity 0.5s 0.2s, transform 0.5s 0.2s, color 0.5s, text-shadow 0.5s",
                 }}>
                   {floor.headline}
@@ -408,10 +391,52 @@ export default function JewbleElevator() {
                   }}>
                     {floor.stat}
                   </p>
+                  {floorSources.length > 0 && (
+                    <div style={{ marginTop: "0.7rem" }}>
+                      <button
+                        type="button"
+                        onClick={() => setShowSources((open) => !open)}
+                        style={{
+                          background: "transparent",
+                          border: `1px solid ${floor.color}77`,
+                          color: floor.color,
+                          fontSize: "0.62rem",
+                          letterSpacing: "0.16em",
+                          textTransform: "uppercase",
+                          padding: "0.4rem 0.65rem",
+                          cursor: "pointer",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        {showSources ? "Hide Sources" : "Show Sources"}
+                      </button>
+                      {showSources && (
+                        <div style={{ marginTop: "0.7rem", display: "grid", gap: "0.6rem" }}>
+                          {floorSources.map((source) => (
+                            <div key={source.id} style={{
+                              border: "1px solid rgba(255,255,255,0.14)",
+                              background: "rgba(255,255,255,0.03)",
+                              borderRadius: "6px",
+                              padding: "0.6rem",
+                            }}>
+                              <div style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.67rem", marginBottom: "0.25rem" }}>
+                                [{source.id}] {source.title}
+                              </div>
+                              <div style={{ color: "rgba(255,255,255,0.58)", fontSize: "0.62rem", marginBottom: "0.25rem" }}>
+                                {source.publication} · {source.date}
+                              </div>
+                              <a href={source.url} target="_blank" rel="noopener noreferrer" style={{ color: floor.color, fontSize: "0.64rem" }}>
+                                {source.url}
+                              </a>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
 
-              {/* CTA */}
               <div style={{
                 opacity: revealed ? 1 : 0,
                 transform: revealed ? "translateY(0)" : "translateY(8px)",
@@ -430,6 +455,25 @@ export default function JewbleElevator() {
                     }}>
                       — JEWBLE.APP —
                     </div>
+                    <a
+                      href="/references"
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        padding: "0.75rem",
+                        textAlign: "center",
+                        background: "rgba(56,189,248,0.08)",
+                        border: "1px solid rgba(56,189,248,0.35)",
+                        color: "#7dd3fc",
+                        fontSize: "0.65rem",
+                        letterSpacing: "0.2em",
+                        textTransform: "uppercase",
+                        textDecoration: "none",
+                        borderRadius: "4px",
+                      }}
+                    >
+                      View Evidence & Sources
+                    </a>
                     <button
                       onClick={restart}
                       style={{
@@ -444,14 +488,6 @@ export default function JewbleElevator() {
                         cursor: "pointer",
                         fontFamily: "inherit",
                         transition: "all 0.2s",
-                      }}
-                      onMouseEnter={e => {
-                        e.target.style.borderColor = "rgba(255,215,0,0.6)";
-                        e.target.style.color = "rgba(255,255,255,0.7)";
-                      }}
-                      onMouseLeave={e => {
-                        e.target.style.borderColor = "rgba(255,215,0,0.3)";
-                        e.target.style.color = "rgba(255,255,255,0.4)";
                       }}
                     >
                       Ride Again
@@ -497,16 +533,6 @@ export default function JewbleElevator() {
                       transition: "all 0.3s",
                       opacity: traveling ? 0.5 : 1,
                     }}
-                    onMouseEnter={e => {
-                      if (!traveling) {
-                        e.target.style.background = floor.color;
-                        e.target.style.color = "#04071a";
-                      }
-                    }}
-                    onMouseLeave={e => {
-                      e.target.style.background = "transparent";
-                      e.target.style.color = floor.color;
-                    }}
                   >
                     {traveling ? "▲  Moving..." : "▲  Next Floor"}
                   </button>
@@ -515,16 +541,15 @@ export default function JewbleElevator() {
             </div>
           </div>
 
-          {/* Floor sublabel */}
           <div style={{
             textAlign: "center",
             marginTop: "0.75rem",
-            color: "rgba(255,255,255,0.2)",
-            fontSize: "0.6rem",
-            letterSpacing: "0.3em",
+            color: "rgba(255,255,255,0.35)",
+            fontSize: "0.62rem",
+            letterSpacing: "0.18em",
             textTransform: "uppercase",
           }}>
-            Blue Snake Studios · Jewble Meta-Pet Platform · Melbourne
+            {floor.sublabel}
           </div>
         </div>
       )}

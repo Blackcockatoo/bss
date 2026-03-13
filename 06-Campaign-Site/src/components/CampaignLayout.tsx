@@ -47,7 +47,7 @@ export default function CampaignLayout({ children }: CampaignLayoutProps) {
         <div style={{ fontWeight: 900, fontSize: "clamp(18px,3vw,30px)", marginBottom: "6px" }}>
           JEWBLE<span style={{ color: "#f5c84c" }}>.</span>
         </div>
-        <p style={{ color: "#7a8da8", fontSize: "13px", marginBottom: "18px" }}>
+        <p style={{ color: "#a7b6cb", fontSize: "13px", marginBottom: "18px" }}>
           Zero-Collection Educational Architecture · Blue Snake Studios
         </p>
         <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap", fontSize: "13px" }}>
@@ -61,7 +61,7 @@ export default function CampaignLayout({ children }: CampaignLayoutProps) {
             Elevator Pitch →
           </a>
         </div>
-        <p style={{ color: "#7a8da8", fontSize: "11px", marginTop: "24px", opacity: 0.6 }}>
+        <p style={{ color: "#a7b6cb", fontSize: "11px", marginTop: "24px" }}>
           The first companion that keeps its mouth shut. © 2026 Blue Snake Studios.
         </p>
       </footer>
