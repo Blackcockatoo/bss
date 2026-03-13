@@ -31,8 +31,8 @@ const FLOORS = [
   {
     level: "LOBBY",
     sublabel: "Ground floor. Doors opening.",
-    headline: "There's an app being built.",
-    body: "It doesn't know your name. It doesn't want your data. It can't sell your kid to an algorithm. You're already intrigued. You just don't know it yet.",
+    headline: "A different kind of student companion is here.",
+    body: "It does not require a student profile. It does not collect personal student data. It cannot monetize student behaviour. It is designed for trust from day one.",
     stat: null,
     color: "#FFD700",
   },
@@ -48,16 +48,16 @@ const FLOORS = [
   {
     level: "FLOOR 02",
     sublabel: "Ding.",
-    headline: "We built the opposite.",
-    body: "Zero-Collection Educational Architecture. No account. No server. No profile. The app runs entirely on-device. The only thing it knows about your kid is what your kid chooses to tell it — and that never leaves the phone.",
-    stat: "ZCEA: Zero data collected. Full stop.",
+    headline: "We built a privacy-first alternative.",
+    body: "Zero-Collection Educational Architecture: no student account, no student profile, and no student data transmission. The pilot runs on-device to reduce privacy risk and compliance overhead.",
+    stat: "ZCEA: Zero student data collected in pilot scope.",
     color: "#7fffb2",
   },
   {
     level: "FLOOR 03",
     sublabel: "Ding.",
     headline: "The pet has a 180-digit genome.",
-    body: "Every Jewble is genetically unique. Cryptographically born. Its personality, appearance, and growth emerge from a mathematical signature that belongs to the child who hatched it. No two have ever existed. No two ever will.",
+    body: "Each Jewble is generated from a 180-digit genome. Personality cues, appearance, and growth emerge from deterministic rules students can explore as part of systems and data literacy.",
     stat: "180-digit genetic architecture. More combinations than atoms in the observable universe.",
     color: "#a78bfa",
   },
@@ -73,8 +73,8 @@ const FLOORS = [
   {
     level: "FLOOR 05",
     sublabel: "Ding.",
-    headline: "Schools are desperate for this.",
-    body: "MACS. ISV. The independent and Catholic school systems across Australia. They need digital tools that don't require consent forms, data processing agreements, or explaining to a parent why their 8-year-old has a behavioural advertising profile. We fit without friction.",
+    headline: "Schools are actively seeking this model.",
+    body: "Independent and Catholic school systems need digital tools that are practical for classrooms and clear for governance. This model minimizes consent and data-processing complexity while supporting strong communication with families.",
     stat: "1,200+ independent and Catholic schools. Zero friction onboarding.",
     claimSources: ["schoolMarket"],
     color: "#fb923c",
@@ -82,17 +82,17 @@ const FLOORS = [
   {
     level: "FLOOR 06",
     sublabel: "Ding.",
-    headline: "It teaches. It heals. It remembers.",
-    body: "The Mirror System reflects emotional patterns back to children through their pet's behaviour. Dream Archaeology. Genome Sonification. Constellation Mapping. This isn't a game — it's a consciousness development tool wearing the disguise of something adorable.",
-    stat: "Therapeutic framework embedded in gameplay loop.",
+    headline: "It supports learning, reflection, and student agency.",
+    body: "Core classroom experiences include reflection prompts, systems-thinking loops, and creative STEM extensions such as genome sonification and pattern mapping. The result is engaging, structured practice tied to classroom outcomes.",
+    stat: "Wellbeing-informed design embedded in a classroom-ready experience.",
     color: "#f472b6",
   },
   {
     level: "PENTHOUSE",
     sublabel: "End of the line.",
-    headline: "You're not investing in an app.",
-    body: "You're investing in the idea that children deserve digital companions who are loyal to them — not to the platform. Blue Snake Studios built something that couldn't exist inside a VC model. Now you get to be part of how it reaches the world.",
-    stat: "Jewble. The first companion that keeps its mouth shut.",
+    headline: "This is more than a standalone app.",
+    body: "You're backing a model where digital companions serve students, educators, and families first. Blue Snake Studios is building a scalable, trust-centered foundation for responsible educational technology.",
+    stat: "Jewble: a privacy-first companion designed for schools and families.",
     color: "#FFD700",
   },
 ];
@@ -231,8 +231,8 @@ export default function JewbleElevator() {
           <div style={{ color: "#fff", fontSize: "clamp(0.9rem, 2.5vw, 1.1rem)", opacity: 0.7, maxWidth: "400px", lineHeight: 1.6 }}>
             An elevator pitch.<br />
             Except the doors keep opening.<br />
-            And each floor makes you feel<br />
-            <span style={{ color: "#ff6b35" }}>stupider for not already being in.</span>
+            And each floor shows how bold design<br />
+            <span style={{ color: "#ff6b35" }}>can stay student-safe and school-ready.</span>
           </div>
           <button
             onClick={handleStart}

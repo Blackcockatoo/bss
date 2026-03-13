@@ -40,7 +40,7 @@ const audienceCards = [
     color: "#f5c84c",
     dim: "rgba(245,200,76,.12)",
     border: "rgba(245,200,76,.25)",
-    desc: "Why your kid's digital companion is different from everything else they use.",
+    desc: "Why your child's digital companion is different from typical apps.",
   },
   {
     href: "/schools",
@@ -48,7 +48,7 @@ const audienceCards = [
     color: "#4dd6c8",
     dim: "rgba(77,214,200,.12)",
     border: "rgba(77,214,200,.25)",
-    desc: "7 sessions. Aligned to curriculum. Zero data. Full teacher support.",
+    desc: "7 sessions. Curriculum aligned. Privacy-first architecture. Full teacher support.",
   },
   {
     href: "/investors",
@@ -56,7 +56,7 @@ const audienceCards = [
     color: "#a78bfa",
     dim: "rgba(167,139,250,.12)",
     border: "rgba(167,139,250,.25)",
-    desc: "The privacy-first edtech thesis. Why loyal beats viral.",
+    desc: "The privacy-first edtech thesis. Why trust and retention outperform hype cycles.",
   },
 ];
 
@@ -103,7 +103,7 @@ export default function IndexPage() {
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
             }}>
-              that keeps its mouth shut.
+              built to protect student privacy.
             </span>
           </h1>
 
@@ -117,8 +117,8 @@ export default function IndexPage() {
             Jewble Meta-Pet — a digital companion with{" "}
             <em style={{ fontStyle: "normal", color: "#e8eef7", fontWeight: 650 }}>180-digit DNA</em>,{" "}
             <em style={{ fontStyle: "normal", color: "#e8eef7", fontWeight: 650 }}>15 emotional states</em>, and{" "}
-            <em style={{ fontStyle: "normal", color: "#e8eef7", fontWeight: 650 }}>zero data collection.</em>{" "}
-            Built for classrooms. Designed without compromise.
+            <em style={{ fontStyle: "normal", color: "#e8eef7", fontWeight: 650 }}>zero student data collection.</em>{" "}
+            Built for classrooms. Designed for learning, safety, and trust.
           </p>
 
           <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
@@ -138,7 +138,7 @@ export default function IndexPage() {
           <StatBlock stat="94%" label="of children's apps share data with third parties" color="gold" />
           <StatBlock stat="180-digit" label="cryptographic genome — more unique than your fingerprint" color="teal" />
           <StatBlock stat="1,200+" label="independent & Catholic schools in target market" color="violet" />
-          <StatBlock stat="Zero" label="accounts, logins, or data ever transmitted" color="gold" />
+          <StatBlock stat="Zero" label="student accounts, logins, or personal data transmitted" color="gold" />
         </div>
       </section>
 
