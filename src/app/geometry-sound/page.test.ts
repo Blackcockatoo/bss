@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildGeometrySoundIframeSrc } from './page';
+import { buildGeometrySoundIframeSrc } from './iframe-src';
 
 describe('buildGeometrySoundIframeSrc', () => {
   it('returns plain html path when no query params exist', () => {
