@@ -22,12 +22,12 @@ export default function SchoolsPage() {
             For School Leaders, Teachers & ICT Coordinators
           </div>
           <h1 style={{ fontSize: "clamp(38px,6vw,72px)", lineHeight: 0.96, letterSpacing: "-1.5px", fontWeight: 900, marginBottom: "16px" }}>
-            Zero friction.<br />
+            Low friction.<br />
             <span style={{ background: "linear-gradient(135deg,#4dd6c8,#f5c84c)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              Zero data. Just learning.
+              Privacy-first. Learning-focused.
             </span>
           </h1>
-          <p style={{ fontSize: "clamp(15px,2.2vw,19px)", color: "#7a8da8", lineHeight: 1.65, maxWidth: "680px", margin: "0 auto 32px" }}>
+          <p style={{ fontSize: "clamp(15px,2.2vw,19px)", color: "#a7b6cb", lineHeight: 1.65, maxWidth: "680px", margin: "0 auto 32px" }}>
             A 7-session wellbeing and STEM pilot designed to drop into your existing program without disrupting it.
             No accounts, no logins, no IT headaches.
           </p>
@@ -47,8 +47,8 @@ export default function SchoolsPage() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: "14px" }}>
           <StatBlock stat="7" label="structured sessions — fully scripted and ready to teach" color="teal" />
           <StatBlock stat="20min" label="per session — fits inside any existing wellbeing slot" color="gold" />
-          <StatBlock stat="Zero" label="accounts, passwords, or IT support required" color="violet" />
-          <StatBlock stat="COPC 2025" label="reference implementation — ahead of compliance curve" color="teal" />
+          <StatBlock stat="Zero" label="student accounts or passwords required" color="violet" />
+          <StatBlock stat="COPC 2025" label="privacy-by-design reference aligned to emerging guidance" color="teal" />
         </div>
       </section>
 
@@ -58,9 +58,9 @@ export default function SchoolsPage() {
           The Curriculum
         </p>
         <h2 style={{ fontSize: "clamp(26px,4vw,44px)", fontWeight: 850, letterSpacing: "-1px", marginBottom: "8px" }}>
-          7 sessions. Plug-and-play.
+          7 sessions. Ready to implement.
         </h2>
-        <p style={{ color: "#7a8da8", lineHeight: 1.7, fontSize: "16px", maxWidth: "680px", marginBottom: "28px" }}>
+        <p style={{ color: "#a7b6cb", lineHeight: 1.7, fontSize: "16px", maxWidth: "680px", marginBottom: "28px" }}>
           Each session includes a learning intention, I Do / We Do / You Do structure, facilitation scripts,
           reflection prompts, and explicit KPPS values language. Click each session in the Teacher Hub for the full plan.
         </p>
@@ -73,7 +73,7 @@ export default function SchoolsPage() {
                 {s.n}
               </div>
               <p style={{ fontWeight: 700, fontSize: "14px", color: "#e8eef7", marginBottom: "4px" }}>{s.title}</p>
-              <p style={{ color: "#7a8da8", fontSize: "12px" }}>{s.focus}</p>
+              <p style={{ color: "#a7b6cb", fontSize: "12px" }}>{s.focus}</p>
             </div>
           ))}
         </div>
@@ -92,9 +92,9 @@ export default function SchoolsPage() {
             Zero-Collection Educational Architecture
           </p>
           <h2 style={{ fontSize: "clamp(22px,3.5vw,36px)", fontWeight: 850, letterSpacing: "-0.5px", marginBottom: "16px" }}>
-            No accounts. No data. By design.
+            No student accounts. No student data collection. By design.
           </h2>
-          <p style={{ color: "#7a8da8", lineHeight: 1.7, fontSize: "15px", maxWidth: "680px", marginBottom: "24px" }}>
+          <p style={{ color: "#a7b6cb", lineHeight: 1.7, fontSize: "15px", maxWidth: "680px", marginBottom: "24px" }}>
             Unlike every other edtech tool, the privacy protection isn't a checkbox or a policy.
             It's structural. The app has no server. There's nothing to breach. No accounts to phish.
             No data to leak. Your ICT Coordinator will thank you.
@@ -102,13 +102,13 @@ export default function SchoolsPage() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: "12px" }}>
             {[
               { t: "No accounts", d: "Zero credentials to manage" },
-              { t: "No transmission", d: "Data never leaves the device" },
-              { t: "No tracking", d: "No analytics, no SDKs" },
-              { t: "No mechanics", d: "No timers, streaks, or FOMO" },
+              { t: "No student-data transmission", d: "Student data remains on-device" },
+              { t: "No behavioural tracking", d: "No third-party analytics SDKs" },
+              { t: "Calm interaction design", d: "No streak pressure or urgency loops" },
             ].map((item) => (
               <div key={item.t} style={{ padding: "14px", borderRadius: "12px", background: "rgba(77,214,200,.06)", border: "1px solid rgba(77,214,200,.15)" }}>
                 <p style={{ fontWeight: 700, color: "#4dd6c8", marginBottom: "4px", fontSize: "13px" }}>{item.t}</p>
-                <p style={{ color: "#7a8da8", fontSize: "12px" }}>{item.d}</p>
+                <p style={{ color: "#a7b6cb", fontSize: "12px" }}>{item.d}</p>
               </div>
             ))}
           </div>
@@ -120,7 +120,7 @@ export default function SchoolsPage() {
         <h2 style={{ fontSize: "clamp(24px,4vw,40px)", fontWeight: 850, letterSpacing: "-1px", marginBottom: "12px" }}>
           Ready to pilot?
         </h2>
-        <p style={{ color: "#7a8da8", lineHeight: 1.7, marginBottom: "24px" }}>
+        <p style={{ color: "#a7b6cb", lineHeight: 1.7, marginBottom: "24px" }}>
           The full implementation package — 7 session guides, facilitation scripts, parent communication templates,
           values alignment maps, and ICT brief — is available now on the Teacher Hub.
         </p>

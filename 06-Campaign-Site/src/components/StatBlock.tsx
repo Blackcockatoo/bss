@@ -23,7 +23,7 @@ export default function StatBlock({ stat, label, color = "gold" }: StatBlockProp
       <div style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 900, color: c.text, letterSpacing: "-1px" }}>
         {stat}
       </div>
-      <div style={{ fontSize: "13px", color: "#7a8da8", marginTop: "6px", lineHeight: 1.5 }}>
+      <div style={{ fontSize: "13px", color: "#a7b6cb", marginTop: "6px", lineHeight: 1.5 }}>
         {label}
       </div>
     </div>
