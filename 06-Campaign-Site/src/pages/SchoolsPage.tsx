@@ -33,18 +33,19 @@ const pilotTimeline = [
   { phase: "Week 5", action: "Session 7 showcase, outcome review, and next-term scaling decision" },
 ];
 
-const pilotTestimonials = [
+const pilotCases = [
   {
-    quote:
-      "We launched with one Year 5 class and had three more teachers request access after week two because setup was so straightforward.",
-    context: "Assistant Principal, metro independent primary (anonymized)",
+    role: "Assistant Principal",
+    context: "Metro independent primary (anonymized)",
+    summary: "Year 5 cohort pilot with one lead class before broader staff onboarding.",
   },
   {
-    quote:
-      "The session scripts reduced planning load while still giving us room to adapt language for our learners.",
-    context: "Wellbeing Lead, regional government school pilot (anonymized)",
+    role: "Wellbeing Lead",
+    context: "Regional government school pilot (anonymized)",
+    summary: "Mixed Year 4/5 rollout during existing wellbeing block with teacher-led adaptation.",
   },
 ];
+
 
 export default function SchoolsPage() {
   return (
@@ -187,14 +188,17 @@ export default function SchoolsPage() {
           Pilot snapshots
         </p>
         <h2 style={{ fontSize: "clamp(24px,3.6vw,38px)", fontWeight: 850, letterSpacing: "-0.8px", marginBottom: "18px" }}>
-          What school teams reported in early pilots.
+          Pilot contexts from early school implementations.
         </h2>
+        <p style={{ color: "#7a8da8", lineHeight: 1.7, fontSize: "14px", marginBottom: "14px" }}>
+          Context summaries are anonymized; detailed references are shared during Teacher Hub onboarding.
+        </p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: "12px" }}>
-          {pilotTestimonials.map((item) => (
-            <blockquote key={item.context} style={{ margin: 0, background: "#111f3a", border: "1px solid rgba(245,200,76,.2)", borderRadius: "14px", padding: "18px" }}>
-              <p style={{ color: "#e8eef7", lineHeight: 1.7, fontSize: "14px", marginBottom: "12px" }}>“{item.quote}”</p>
-              <footer style={{ color: "#f5c84c", fontSize: "12px" }}>{item.context}</footer>
-            </blockquote>
+          {pilotCases.map((item) => (
+            <div key={item.context} style={{ margin: 0, background: "#111f3a", border: "1px solid rgba(245,200,76,.2)", borderRadius: "14px", padding: "18px" }}>
+              <p style={{ color: "#f5c84c", fontSize: "12px", marginBottom: "8px" }}>{item.role} · {item.context}</p>
+              <p style={{ color: "#e8eef7", lineHeight: 1.7, fontSize: "14px", marginBottom: 0 }}>{item.summary}</p>
+            </div>
           ))}
         </div>
       </section>
