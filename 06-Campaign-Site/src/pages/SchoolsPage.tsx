@@ -12,6 +12,40 @@ const session7 = [
   { n: 7, title: "The Showcase", focus: "Metacognition + Celebration" },
 ];
 
+const resourcePack = [
+  { title: "Sample lesson plan", detail: "Session 2 exemplar with facilitation notes and extension prompts", type: "DOCX" },
+  { title: "Session overview PDF", detail: "Printable 7-session snapshot for leadership and team briefings", type: "PDF" },
+  { title: "Classroom setup checklist", detail: "Room setup, device prep, and pre-session readiness checks", type: "Checklist" },
+  { title: "Privacy one-pager", detail: "Zero-data architecture summary for ICT and parent communication", type: "PDF" },
+];
+
+const curriculumMapping = [
+  { session: "1–2", outcome: "Establish shared language for needs, care routines, and values-led decision making" },
+  { session: "3–4", outcome: "Strengthen self-regulation, reflection habits, and restorative feedback cycles" },
+  { session: "5–6", outcome: "Apply data literacy and systems thinking to wellbeing-focused STEM inquiry" },
+  { session: "7", outcome: "Demonstrate metacognition through showcase artefacts and student voice reflections" },
+];
+
+const pilotTimeline = [
+  { phase: "Week 0", action: "Teacher hub onboarding + resource download + classroom readiness check" },
+  { phase: "Weeks 1–2", action: "Deliver sessions 1–3 and collect short facilitator reflections" },
+  { phase: "Weeks 3–4", action: "Deliver sessions 4–6 with light-touch coaching checkpoint" },
+  { phase: "Week 5", action: "Session 7 showcase, outcome review, and next-term scaling decision" },
+];
+
+const pilotTestimonials = [
+  {
+    quote:
+      "We launched with one Year 5 class and had three more teachers request access after week two because setup was so straightforward.",
+    context: "Assistant Principal, metro independent primary (anonymized)",
+  },
+  {
+    quote:
+      "The session scripts reduced planning load while still giving us room to adapt language for our learners.",
+    context: "Wellbeing Lead, regional government school pilot (anonymized)",
+  },
+];
+
 export default function SchoolsPage() {
   return (
     <CampaignLayout>
@@ -82,6 +116,86 @@ export default function SchoolsPage() {
           <a href={TEACHER_HUB_URL} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "12px 20px", borderRadius: "12px", border: "1px solid rgba(245,200,76,.3)", color: "#f5c84c", background: "rgba(245,200,76,.06)", fontWeight: 700, textDecoration: "none", fontSize: "13px" }}>
             Ready to pilot? Visit the Teacher Hub →
           </a>
+        </div>
+      </section>
+
+      {/* Download resources */}
+      <section style={{ maxWidth: "1100px", margin: "0 auto", padding: "0 18px 72px" }}>
+        <p style={{ fontFamily: "ui-monospace, 'Courier New', monospace", fontSize: "11px", letterSpacing: "3px", textTransform: "uppercase", color: "#4dd6c8", marginBottom: "10px" }}>
+          Download resources
+        </p>
+        <h2 style={{ fontSize: "clamp(24px,3.8vw,40px)", fontWeight: 850, letterSpacing: "-1px", marginBottom: "10px" }}>
+          Everything needed to launch a low-friction pilot.
+        </h2>
+        <p style={{ color: "#7a8da8", lineHeight: 1.7, fontSize: "16px", maxWidth: "730px", marginBottom: "22px" }}>
+          Download and share these files with teaching teams, leadership, and ICT before day one.
+        </p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: "12px", marginBottom: "20px" }}>
+          {resourcePack.map((resource) => (
+            <div key={resource.title} style={{ background: "#111f3a", border: "1px solid rgba(77,214,200,.2)", borderRadius: "14px", padding: "16px" }}>
+              <p style={{ fontWeight: 700, color: "#e8eef7", marginBottom: "6px", fontSize: "14px" }}>{resource.title}</p>
+              <p style={{ color: "#7a8da8", fontSize: "12px", lineHeight: 1.6, marginBottom: "10px" }}>{resource.detail}</p>
+              <span style={{ display: "inline-block", fontFamily: "ui-monospace, 'Courier New', monospace", fontSize: "10px", letterSpacing: "1.8px", textTransform: "uppercase", color: "#4dd6c8" }}>{resource.type}</span>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ marginBottom: "28px" }}>
+          <a href={TEACHER_HUB_URL} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "10px", padding: "13px 24px", borderRadius: "14px", background: "#f5c84c", color: "#0a0a0a", fontWeight: 700, textDecoration: "none", fontSize: "14px" }}>
+            Start Teacher Hub onboarding →
+          </a>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: "16px" }}>
+          <div style={{ background: "#111f3a", border: "1px solid rgba(77,214,200,.2)", borderRadius: "16px", padding: "18px" }}>
+            <h3 style={{ fontSize: "18px", marginBottom: "12px" }}>Curriculum alignment mapping</h3>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr>
+                  <th style={{ textAlign: "left", fontSize: "12px", color: "#4dd6c8", paddingBottom: "8px", borderBottom: "1px solid rgba(122,141,168,.25)" }}>Session band</th>
+                  <th style={{ textAlign: "left", fontSize: "12px", color: "#4dd6c8", paddingBottom: "8px", borderBottom: "1px solid rgba(122,141,168,.25)" }}>Learning outcome</th>
+                </tr>
+              </thead>
+              <tbody>
+                {curriculumMapping.map((item) => (
+                  <tr key={item.session}>
+                    <td style={{ fontSize: "12px", color: "#e8eef7", padding: "10px 10px 10px 0", borderBottom: "1px solid rgba(122,141,168,.15)" }}>{item.session}</td>
+                    <td style={{ fontSize: "12px", color: "#7a8da8", lineHeight: 1.6, padding: "10px 0", borderBottom: "1px solid rgba(122,141,168,.15)" }}>{item.outcome}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div style={{ background: "#111f3a", border: "1px solid rgba(77,214,200,.2)", borderRadius: "16px", padding: "18px" }}>
+            <h3 style={{ fontSize: "18px", marginBottom: "12px" }}>Pilot implementation timeline</h3>
+            <div style={{ display: "grid", gap: "10px" }}>
+              {pilotTimeline.map((step) => (
+                <div key={step.phase} style={{ padding: "10px", borderRadius: "10px", background: "rgba(77,214,200,.06)", border: "1px solid rgba(77,214,200,.14)" }}>
+                  <p style={{ color: "#4dd6c8", fontWeight: 700, fontSize: "12px", marginBottom: "4px" }}>{step.phase}</p>
+                  <p style={{ color: "#7a8da8", fontSize: "12px", lineHeight: 1.6 }}>{step.action}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pilot testimonials */}
+      <section style={{ maxWidth: "1100px", margin: "0 auto", padding: "0 18px 72px" }}>
+        <p style={{ fontFamily: "ui-monospace, 'Courier New', monospace", fontSize: "11px", letterSpacing: "3px", textTransform: "uppercase", color: "#4dd6c8", marginBottom: "10px" }}>
+          Pilot snapshots
+        </p>
+        <h2 style={{ fontSize: "clamp(24px,3.6vw,38px)", fontWeight: 850, letterSpacing: "-0.8px", marginBottom: "18px" }}>
+          What school teams reported in early pilots.
+        </h2>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: "12px" }}>
+          {pilotTestimonials.map((item) => (
+            <blockquote key={item.context} style={{ margin: 0, background: "#111f3a", border: "1px solid rgba(245,200,76,.2)", borderRadius: "14px", padding: "18px" }}>
+              <p style={{ color: "#e8eef7", lineHeight: 1.7, fontSize: "14px", marginBottom: "12px" }}>“{item.quote}”</p>
+              <footer style={{ color: "#f5c84c", fontSize: "12px" }}>{item.context}</footer>
+            </blockquote>
+          ))}
         </div>
       </section>
 
