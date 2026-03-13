@@ -104,13 +104,14 @@ export const WIZARD_STAFF: AddonTemplate = {
   rarity: "legendary",
   attachment: {
     anchorPoint: "right-hand",
-    offset: { x: 15, y: 10, z: 0 },
-    scale: 1.5,
-    rotation: -30,
+    offset: { x: 12, y: 6, z: 0 },
+    scale: 1.3,
+    rotation: -18,
     followAnimation: true,
   },
   visual: {
     customRenderer: "wizardStaffSoulEngine",
+    previewAsset: "/addons/epic/wizard-staff-001-soul-engine.svg",
     svgPath: `
       M 48 5 L 52 5 L 52 85 L 48 85 Z
       M 50 2 A 5 5 0 1 1 50 8 A 5 5 0 1 1 50 2

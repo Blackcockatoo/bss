@@ -1,0 +1,112 @@
+<svg width="1200" height="1200" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="44%" r="62%" fx="50%" fy="44%">
+      <stop offset="0%" stop-color="#11203A"/>
+      <stop offset="46%" stop-color="#091121"/>
+      <stop offset="100%" stop-color="#03060D"/>
+    </radialGradient>
+    <linearGradient id="staffWood" x1="545" y1="300" x2="615" y2="1020" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#8A5728"/>
+      <stop offset="52%" stop-color="#4A2F1A"/>
+      <stop offset="100%" stop-color="#25140C"/>
+    </linearGradient>
+    <linearGradient id="crystal" x1="470" y1="210" x2="710" y2="470" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ECFEFF"/>
+      <stop offset="42%" stop-color="#7DD3FC"/>
+      <stop offset="78%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#6D28D9"/>
+    </linearGradient>
+    <radialGradient id="core" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F0FDFF" stop-opacity="0.96"/>
+      <stop offset="38%" stop-color="#7DD3FC" stop-opacity="0.84"/>
+      <stop offset="78%" stop-color="#1D4ED8" stop-opacity="0.42"/>
+      <stop offset="100%" stop-color="#0F172A" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softGlow" x="-60%" y="-60%" width="220%" height="220%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="strongGlow" x="-80%" y="-80%" width="260%" height="260%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="22" result="blur1"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur2"/>
+      <feMerge>
+        <feMergeNode in="blur1"/>
+        <feMergeNode in="blur2"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="1200" fill="url(#bg)"/>
+
+  <g opacity="0.4" filter="url(#softGlow)">
+    <circle cx="600" cy="400" r="280" stroke="#1D4ED8" stroke-opacity="0.32" stroke-width="8"/>
+    <circle cx="600" cy="400" r="215" stroke="#67E8F9" stroke-opacity="0.28" stroke-width="5"/>
+    <path d="M600 138L717 225L860 205L791 330L860 456L717 435L600 522L483 435L340 456L409 330L340 205L483 225L600 138Z" stroke="#93C5FD" stroke-opacity="0.22" stroke-width="5"/>
+  </g>
+
+  <g filter="url(#strongGlow)">
+    <path d="M555 350L507 515L600 592L693 515L645 350L600 260Z" fill="url(#crystal)" stroke="#E0F2FE" stroke-width="10" stroke-linejoin="round"/>
+    <circle cx="600" cy="405" r="170" fill="url(#core)"/>
+  </g>
+
+  <g opacity="0.92">
+    <path d="M560 401L522 331L600 275L678 331L640 401L718 461L688 553L600 593L512 553L482 461L560 401Z" stroke="#7DD3FC" stroke-opacity="0.3" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M600 207L755 320L711 503L600 579L489 503L445 320L600 207Z" stroke="#C4B5FD" stroke-opacity="0.2" stroke-width="4" stroke-linejoin="round"/>
+  </g>
+
+  <g opacity="0.55">
+    <path d="M600 215L600 575" stroke="#E0F2FE" stroke-width="4" stroke-linecap="round"/>
+    <path d="M420 400H780" stroke="#E0F2FE" stroke-opacity="0.68" stroke-width="4" stroke-linecap="round"/>
+    <path d="M480 281L720 519" stroke="#BAE6FD" stroke-opacity="0.5" stroke-width="3" stroke-linecap="round"/>
+    <path d="M720 281L480 519" stroke="#BAE6FD" stroke-opacity="0.5" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <g opacity="0.38">
+    <path d="M438 400C477 312 541 256 600 256C659 256 723 312 762 400C723 488 659 544 600 544C541 544 477 488 438 400Z" stroke="#67E8F9" stroke-width="4"/>
+    <path d="M392 400C444 280 520 211 600 211C680 211 756 280 808 400C756 520 680 589 600 589C520 589 444 520 392 400Z" stroke="#A78BFA" stroke-opacity="0.48" stroke-width="3"/>
+  </g>
+
+  <g>
+    <circle cx="600" cy="400" r="62" fill="#06101F"/>
+    <circle cx="600" cy="400" r="108" fill="none" stroke="#E0F2FE" stroke-opacity="0.5" stroke-width="4"/>
+    <g stroke="#DBEAFE" stroke-opacity="0.72" stroke-width="3" stroke-linecap="round">
+      <path d="M600 342V400"/>
+      <path d="M645 363L600 400"/>
+      <path d="M656 415L600 400"/>
+      <path d="M625 459L600 400"/>
+      <path d="M575 459L600 400"/>
+      <path d="M544 415L600 400"/>
+      <path d="M555 363L600 400"/>
+    </g>
+  </g>
+
+  <g filter="url(#softGlow)">
+    <circle cx="447" cy="309" r="13" fill="#7DD3FC"/>
+    <circle cx="600" cy="244" r="14" fill="#F0FDFF"/>
+    <circle cx="753" cy="309" r="13" fill="#A78BFA"/>
+    <circle cx="806" cy="450" r="11" fill="#38BDF8"/>
+    <circle cx="700" cy="578" r="10" fill="#BAE6FD"/>
+    <circle cx="500" cy="578" r="10" fill="#C4B5FD"/>
+    <circle cx="394" cy="450" r="11" fill="#38BDF8"/>
+  </g>
+
+  <g>
+    <path d="M578 507L560 1010" stroke="url(#staffWood)" stroke-width="26" stroke-linecap="round"/>
+    <path d="M600 500L600 1038" stroke="url(#staffWood)" stroke-width="34" stroke-linecap="round"/>
+    <path d="M622 507L640 1010" stroke="url(#staffWood)" stroke-width="26" stroke-linecap="round"/>
+    <path d="M590 540C614 684 620 840 614 1018" stroke="#D6A56B" stroke-opacity="0.35" stroke-width="6" stroke-linecap="round"/>
+    <path d="M564 955C585 982 615 982 636 955" stroke="#D6A56B" stroke-width="7" stroke-linecap="round"/>
+  </g>
+
+  <g opacity="0.7" filter="url(#softGlow)">
+    <circle cx="455" cy="640" r="9" fill="#67E8F9"/>
+    <circle cx="742" cy="688" r="8" fill="#A78BFA"/>
+    <circle cx="388" cy="760" r="6" fill="#E0F2FE"/>
+    <circle cx="800" cy="828" r="7" fill="#7DD3FC"/>
+    <circle cx="520" cy="875" r="6" fill="#BAE6FD"/>
+  </g>
+</svg>
