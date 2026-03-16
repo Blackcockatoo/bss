@@ -117,6 +117,8 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
     return defaultPosition;
   }, [positionOverride, defaultPosition]);
 
+  const previewAssetFrame = useMemo(() => ({ x: 200, y: 120, size: 620 }), []);
+
   const isLocked = positionOverride?.locked ?? false;
 
   const handlePointerDown = useCallback(
@@ -326,6 +328,55 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
           curiosity={curiosity}
           bond={bond}
         />
+      ) : visual.previewAsset ? (
+        <g transform={animationTransform}>
+          <rect
+            x="2"
+            y="2"
+            width="96"
+            height="96"
+            rx="18"
+            fill="rgba(2, 6, 23, 0.55)"
+            stroke={
+              visual.colors.accent ||
+              visual.colors.secondary ||
+              visual.colors.primary
+            }
+            strokeWidth="1.2"
+            opacity="0.8"
+          />
+          <svg
+            x="6"
+            y="6"
+            width="88"
+            height="88"
+            viewBox={`${previewAssetFrame.x} ${previewAssetFrame.y} ${previewAssetFrame.size} ${previewAssetFrame.size}`}
+          >
+            <image
+              href={visual.previewAsset}
+              x="0"
+              y="0"
+              width="1024"
+              height="1024"
+              preserveAspectRatio="xMidYMid slice"
+            />
+          </svg>
+
+          {visual.colors.glow && (
+            <rect
+              x="2"
+              y="2"
+              width="96"
+              height="96"
+              rx="18"
+              fill="none"
+              stroke={visual.colors.glow}
+              strokeWidth="3"
+              filter="url(#addonGlow)"
+              opacity="0.45"
+            />
+          )}
+        </g>
       ) : visual.svgPath ? (
         <g transform={animationTransform}>
           <path
