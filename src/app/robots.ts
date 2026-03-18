@@ -1,11 +1,11 @@
 import type { MetadataRoute } from "next";
-import { getSiteUrl } from "@/lib/env/siteUrl";
+import { findSiteUrl } from "@/lib/env/siteUrl";
 
 export default function robots(): MetadataRoute.Robots {
-  const siteUrl = getSiteUrl();
+  const siteUrl = findSiteUrl();
 
   return {
     rules: [{ userAgent: "*", allow: "/" }],
-    sitemap: `${siteUrl}/sitemap.xml`,
+    ...(siteUrl ? { sitemap: `${siteUrl}/sitemap.xml` } : {}),
   };
 }

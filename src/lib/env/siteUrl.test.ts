@@ -1,6 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { getSiteUrl, getSiteUrlObject } from "./siteUrl";
+import {
+  findSiteUrl,
+  findSiteUrlObject,
+  getSiteUrl,
+  getSiteUrlObject,
+} from "./siteUrl";
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -25,12 +30,15 @@ describe("siteUrl", () => {
   it("uses localhost in non-production without env", () => {
     vi.stubEnv("NODE_ENV", "development");
 
+    expect(findSiteUrl()).toBe("http://localhost:3000");
     expect(getSiteUrl()).toBe("http://localhost:3000");
   });
 
   it("throws in production when no site url is available", () => {
     vi.stubEnv("NODE_ENV", "production");
 
+    expect(findSiteUrl()).toBeNull();
+    expect(findSiteUrlObject()).toBeNull();
     expect(() => getSiteUrl()).toThrow(
       "NEXT_PUBLIC_SITE_URL must be set in production when no deployment URL is available.",
     );

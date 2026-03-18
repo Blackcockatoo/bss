@@ -3,7 +3,7 @@ import type { CSSProperties } from "react";
 import "./globals.css";
 import ClientBody from "./ClientBody";
 import { LEGAL_NOTICE_TEXT, getLegalNoticeYear } from "@/lib/legalNotice";
-import { getSiteUrl, getSiteUrlObject } from "@/lib/env/siteUrl";
+import { findSiteUrl, findSiteUrlObject } from "@/lib/env/siteUrl";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -12,10 +12,11 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-const siteUrl = getSiteUrl();
+const siteUrl = findSiteUrl();
+const siteUrlObject = findSiteUrlObject();
 
 export const metadata: Metadata = {
-  metadataBase: getSiteUrlObject(),
+  ...(siteUrlObject ? { metadataBase: siteUrlObject } : {}),
   title: "Blue Snake Studios",
   description:
     "Blue Snake Studios builds privacy-first digital learning experiences for schools and families.",
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
     title: "Blue Snake Studios",
     description:
       "Blue Snake Studios builds privacy-first digital learning experiences for schools and families.",
-    url: siteUrl,
+    ...(siteUrl ? { url: siteUrl } : {}),
     siteName: "Blue Snake Studios",
     type: "website",
   },

@@ -13,7 +13,7 @@ function normalizeDeploymentUrl(url: string): string {
   return normalizeBaseUrl(`https://${trimmed}`);
 }
 
-export function getSiteUrl(): string {
+export function findSiteUrl(): string | null {
   const configured = process.env.NEXT_PUBLIC_SITE_URL;
   if (configured && configured.trim().length > 0) {
     return normalizeBaseUrl(configured);
@@ -33,6 +33,15 @@ export function getSiteUrl(): string {
     return LOCAL_FALLBACK;
   }
 
+  return null;
+}
+
+export function getSiteUrl(): string {
+  const siteUrl = findSiteUrl();
+  if (siteUrl) {
+    return siteUrl;
+  }
+
   throw new Error(
     "NEXT_PUBLIC_SITE_URL must be set in production when no deployment URL is available.",
   );
@@ -40,4 +49,9 @@ export function getSiteUrl(): string {
 
 export function getSiteUrlObject(): URL {
   return new URL(getSiteUrl());
+}
+
+export function findSiteUrlObject(): URL | null {
+  const siteUrl = findSiteUrl();
+  return siteUrl ? new URL(siteUrl) : null;
 }
