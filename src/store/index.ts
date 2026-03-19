@@ -18,6 +18,7 @@ import type {
 } from '../progression/types';
 import {
   ACHIEVEMENT_CATALOG,
+  ACHIEVEMENT_TARGETS,
   createDefaultBattleStats,
   createDefaultMiniGameProgress,
   createDefaultVimanaState,
@@ -125,6 +126,7 @@ export interface MetaPetState {
   recordVimanaRun: (score: number, lines: number, level: number) => void;
   exploreCell: (cellId: string) => void;
   resolveAnomaly: (cellId: string) => void;
+  recordBreeding: () => void;
   recordReward: (payload: RewardPayloadInput) => void;
   addRitualRewards: (payload: {
     resonanceDelta: number;
@@ -536,7 +538,7 @@ export function createMetaPetWebStore(
           const firstWin = unlockAchievementWithReward(achievements, 'battle-first-win');
           achievements = firstWin.achievements;
           if (firstWin.reward) rewardPayloads.push(firstWin.reward);
-          if (next.streak >= 3) {
+          if (next.streak >= ACHIEVEMENT_TARGETS['battle-streak']) {
             const streakWin = unlockAchievementWithReward(achievements, 'battle-streak');
             achievements = streakWin.achievements;
             if (streakWin.reward) rewardPayloads.push(streakWin.reward);
@@ -575,22 +577,22 @@ export function createMetaPetWebStore(
         }
 
         let achievements = state.achievements;
-        if (game === 'memory' && next.memoryHighScore >= 10) {
+        if (game === 'memory' && next.memoryHighScore >= ACHIEVEMENT_TARGETS['minigame-memory']) {
           const result = unlockAchievementWithReward(achievements, 'minigame-memory');
           achievements = result.achievements;
           if (result.reward) rewardPayloads.push(result.reward);
         }
-        if (game === 'rhythm' && next.rhythmHighScore >= 12) {
+        if (game === 'rhythm' && next.rhythmHighScore >= ACHIEVEMENT_TARGETS['minigame-rhythm']) {
           const result = unlockAchievementWithReward(achievements, 'minigame-rhythm');
           achievements = result.achievements;
           if (result.reward) rewardPayloads.push(result.reward);
         }
-        if (game === 'memory' && next.memoryHighScore >= 20) {
+        if (game === 'memory' && next.memoryHighScore >= ACHIEVEMENT_TARGETS['minigame-memory-ace']) {
           const result = unlockAchievementWithReward(achievements, 'minigame-memory-ace');
           achievements = result.achievements;
           if (result.reward) rewardPayloads.push(result.reward);
         }
-        if (game === 'rhythm' && next.rhythmHighScore >= 20) {
+        if (game === 'rhythm' && next.rhythmHighScore >= ACHIEVEMENT_TARGETS['minigame-rhythm-ace']) {
           const result = unlockAchievementWithReward(achievements, 'minigame-rhythm-ace');
           achievements = result.achievements;
           if (result.reward) rewardPayloads.push(result.reward);
@@ -631,22 +633,22 @@ export function createMetaPetWebStore(
         };
 
         let achievements = state.achievements;
-        if (next.vimanaHighScore >= 1500) {
+        if (next.vimanaHighScore >= ACHIEVEMENT_TARGETS['minigame-vimana-score']) {
           const result = unlockAchievementWithReward(achievements, 'minigame-vimana-score');
           achievements = result.achievements;
           if (result.reward) rewardPayloads.push(result.reward);
         }
-        if (next.vimanaMaxLines >= 20) {
+        if (next.vimanaMaxLines >= ACHIEVEMENT_TARGETS['minigame-vimana-lines']) {
           const result = unlockAchievementWithReward(achievements, 'minigame-vimana-lines');
           achievements = result.achievements;
           if (result.reward) rewardPayloads.push(result.reward);
         }
-        if (next.vimanaMaxLevel >= 5) {
+        if (next.vimanaMaxLevel >= ACHIEVEMENT_TARGETS['minigame-vimana-level']) {
           const result = unlockAchievementWithReward(achievements, 'minigame-vimana-level');
           achievements = result.achievements;
           if (result.reward) rewardPayloads.push(result.reward);
         }
-        if (next.focusStreak >= 5) {
+        if (next.focusStreak >= ACHIEVEMENT_TARGETS['minigame-focus-streak']) {
           const result = unlockAchievementWithReward(achievements, 'minigame-focus-streak');
           achievements = result.achievements;
           if (result.reward) rewardPayloads.push(result.reward);
@@ -766,7 +768,7 @@ export function createMetaPetWebStore(
         }
 
         let achievements = state.achievements;
-        if (anomaliesResolved >= 3) {
+        if (anomaliesResolved >= ACHIEVEMENT_TARGETS['explorer-anomaly-hunter']) {
           const result = unlockAchievementWithReward(achievements, 'explorer-anomaly-hunter');
           achievements = result.achievements;
           if (result.reward) {
@@ -802,6 +804,25 @@ export function createMetaPetWebStore(
       });
 
       rewardPayloads.forEach(payload => get().recordReward(payload));
+    },
+
+    recordBreeding() {
+      if (get().systemState === 'sealed') return;
+      let rewardPayload: RewardPayloadInput | undefined;
+
+      set(state => {
+        const result = unlockAchievementWithReward(state.achievements, 'breeding-first');
+        rewardPayload = result.reward;
+
+        return {
+          achievements: result.achievements,
+          evolution: gainExperience(state.evolution, 20),
+        };
+      });
+
+      if (rewardPayload) {
+        get().recordReward(rewardPayload);
+      }
     },
 
     recordReward(payload) {

@@ -40,13 +40,6 @@ import {
 import { QuickMoodButton, WellnessSync } from "@/components/WellnessSync";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   type BreedingResult,
   breedPets,
   calculateSimilarity,
@@ -114,7 +107,6 @@ import {
   Hash,
   HeartHandshake,
   Lock,
-  Orbit,
   Plus,
   Shield,
   Sparkles,
@@ -123,7 +115,6 @@ import {
   Volume2,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 interface PetSummary {
   id: string;
@@ -273,7 +264,6 @@ function createSaveController(delay: number) {
 const PET_ID = "metapet-primary";
 const SESSION_ANALYTICS_KEY = "metapet-analytics";
 
-type SessionGoal = "Calm" | "Focus" | "Recovery" | "Creative";
 type AlchemyBase = "vitality" | "focus" | "harmony";
 type AlchemyCatalyst = "sunpetal" | "moondew" | "stardust";
 
@@ -307,29 +297,8 @@ const ALCHEMY_CATALYST_EFFECTS: Record<AlchemyCatalyst, string> = {
   stardust: "sharpens attention and amplifies curiosity",
 };
 
-interface GeometrySessionProfile {
-  goal: SessionGoal;
-  intensity: number | null;
-  dna: "fire" | "water" | "earth";
-  harmony: number;
-  awareness: number;
-  tempo: number;
-  mode: "helix" | "mandala" | "particles" | "temple";
-  lockFirstRun: boolean;
-}
-
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
-}
-
-function encodeSessionProfile(profile: GeometrySessionProfile): string {
-  const json = JSON.stringify(profile);
-  if (typeof window === "undefined") return "";
-  return window
-    .btoa(json)
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
 }
 
 function createBrewResult(
@@ -584,7 +553,6 @@ function CurriculumQueueSection() {
 }
 
 export default function Home() {
-  const router = useRouter();
   const startTick = useStore((s) => s.startTick);
   const stopTick = useStore((s) => s.stopTick);
   const setGenome = useStore((s) => s.setGenome);
@@ -597,6 +565,7 @@ export default function Home() {
   const evolution = useStore((s) => s.evolution);
   const ritualProgress = useStore((s) => s.ritualProgress);
   const addRitualRewards = useStore((s) => s.addRitualRewards);
+  const recordBreeding = useStore((s) => s.recordBreeding);
   const [crest, setCrest] = useState<PrimeTailID | null>(null);
   const [heptaCode, setHeptaCode] = useState<HeptaDigits | null>(null);
   const [loading, setLoading] = useState(true);
@@ -646,10 +615,6 @@ export default function Home() {
   const [anxietyOpen, setAnxietyOpen] = useState(false);
   const [wellnessSettingsOpen, setWellnessSettingsOpen] = useState(false);
   const [lowBandwidthMode, setLowBandwidthMode] = useState(false);
-  const [sessionSheetOpen, setSessionSheetOpen] = useState(false);
-  const [sessionGoal, setSessionGoal] = useState<SessionGoal>("Calm");
-  const [sessionIntensityEnabled, setSessionIntensityEnabled] = useState(false);
-  const [sessionIntensity, setSessionIntensity] = useState(55);
   const [alchemyRecipe, setAlchemyRecipe] = useState<AlchemyRecipe>({
     base: "vitality",
     catalyst: "sunpetal",
@@ -658,100 +623,6 @@ export default function Home() {
   const [brewHistory, setBrewHistory] = useState<BrewResult[]>([]);
   const [brewCooldownUntil, setBrewCooldownUntil] = useState(0);
   const { locale, setLocale, strings } = useLocale();
-
-  const deriveGeometrySessionProfile =
-    useCallback((): GeometrySessionProfile | null => {
-      if (!traits) {
-        return null;
-      }
-
-      const personalityFire =
-        traits.personality.energy +
-        traits.personality.playfulness +
-        traits.personality.curiosity;
-      const personalityWater =
-        traits.personality.social +
-        traits.personality.affection +
-        traits.personality.loyalty;
-      const personalityEarth =
-        traits.personality.discipline + traits.latent.potential.physical;
-      const dnaScores = {
-        fire: personalityFire,
-        water: personalityWater,
-        earth: personalityEarth,
-      };
-      const dna = (Object.entries(dnaScores).sort(
-        (a, b) => b[1] - a[1],
-      )[0]?.[0] ?? "fire") as "fire" | "water" | "earth";
-
-      const goalBias: Record<
-        SessionGoal,
-        {
-          awareness: number;
-          tempo: number;
-          harmony: number;
-          mode: GeometrySessionProfile["mode"];
-        }
-      > = {
-        Calm: { awareness: 20, tempo: -24, harmony: 2, mode: "mandala" },
-        Focus: { awareness: 8, tempo: -8, harmony: 0, mode: "helix" },
-        Recovery: { awareness: 14, tempo: -18, harmony: 3, mode: "particles" },
-        Creative: { awareness: -4, tempo: 14, harmony: -1, mode: "temple" },
-      };
-
-      const intensity = sessionIntensityEnabled ? sessionIntensity : null;
-      const intensityFactor = intensity === null ? 0 : (intensity - 50) / 50;
-      const bias = goalBias[sessionGoal];
-      const baseHarmony =
-        5 + Math.round((traits.elementWeb.bridgeCount / 10) * 4);
-      const harmony = clamp(
-        baseHarmony + bias.harmony + Math.round(intensityFactor * 2),
-        3,
-        12,
-      );
-      const awareness = clamp(
-        Math.round(
-          (traits.personality.curiosity + traits.personality.affection) / 2 +
-            bias.awareness +
-            intensityFactor * 20,
-        ),
-        0,
-        100,
-      );
-      const tempo = clamp(
-        Math.round(
-          traits.personality.energy * 0.9 +
-            traits.personality.playfulness * 0.6 +
-            65 +
-            bias.tempo +
-            intensityFactor * 22,
-        ),
-        60,
-        180,
-      );
-
-      return {
-        goal: sessionGoal,
-        intensity,
-        dna,
-        harmony,
-        awareness,
-        tempo,
-        mode: bias.mode,
-        lockFirstRun: true,
-      };
-    }, [sessionGoal, sessionIntensity, sessionIntensityEnabled, traits]);
-
-  const launchGeometrySession = useCallback(() => {
-    const profile = deriveGeometrySessionProfile();
-    if (!profile) {
-      router.push("/geometry-sound");
-      return;
-    }
-    const encoded = encodeSessionProfile(profile);
-    setSessionSheetOpen(false);
-    router.push(`/geometry-sound?session=${encodeURIComponent(encoded)}`);
-  }, [deriveGeometrySessionProfile, router]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -810,25 +681,6 @@ export default function Home() {
       4;
     return Math.max(0, Math.min(100, Math.round(blend)));
   }, [traits]);
-
-  const geometrySoundHref = useMemo(() => {
-    const params = new URLSearchParams({
-      petId: currentPetId ?? PET_ID,
-      petName: petName.trim() || "Meta Pet",
-      petType,
-      seed: genomeHash?.redHash?.slice(0, 24) ?? "origin-seed",
-      elementProfile,
-      resonanceIndex: String(resonanceIndex),
-    });
-    return `/geometry-sound?${params.toString()}`;
-  }, [
-    currentPetId,
-    petName,
-    petType,
-    genomeHash,
-    elementProfile,
-    resonanceIndex,
-  ]);
 
   const brewCooldownSeconds = Math.max(
     0,
@@ -1414,10 +1266,6 @@ export default function Home() {
         name: buildOffspringName(result.lineageKey, partnerName),
         vitals: {
           ...DEFAULT_VITALS,
-          hunger: 40,
-          hygiene: 70,
-          mood: 70,
-          energy: 75,
         },
         petType: "geometric",
         mirrorMode: {
@@ -1505,6 +1353,7 @@ export default function Home() {
         createdAt: offspring.createdAt,
         lastSaved: offspring.lastSaved,
       });
+      recordBreeding();
     } catch (error) {
       const message =
         error instanceof Error
@@ -1521,6 +1370,7 @@ export default function Home() {
     createOffspringFromResult,
     evolution,
     genome,
+    recordBreeding,
     refreshPetSummaries,
     traits,
   ]);
@@ -2659,41 +2509,8 @@ export default function Home() {
             </div>
           </CollapsibleSection>
 
-          {/* Sacred Geometry & Sound */}
           {!ENABLE_CHILD_SAFE_BASELINE && (
             <>
-              <div className="bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-cyan-500/10 rounded-2xl border border-amber-500/20 p-4">
-                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                  <div className="flex items-center gap-3">
-                    <Orbit className="w-6 h-6 text-amber-400" />
-                    <div>
-                      <h2 className="text-lg font-bold text-white">
-                        Sacred Geometry &amp; Sound
-                      </h2>
-                      <p className="text-xs text-zinc-400">
-                        Experience DNA as living geometry, music, and light â€”
-                        the same mathematical patterns found in nature, from
-                        sunflower spirals to seashells
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Link
-                      href={geometrySoundHref}
-                      className="px-4 py-2 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-200 text-sm font-medium hover:bg-amber-500/30 hover:border-amber-400 transition-colors touch-manipulation"
-                    >
-                      Generate My Pet Resonance
-                    </Link>
-                    <Link
-                      href="/time-calculator"
-                      className="px-4 py-2 rounded-xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-200 text-sm font-medium hover:bg-cyan-500/30 hover:border-cyan-400 transition-colors touch-manipulation"
-                    >
-                      MetaPet Time Calculator
-                    </Link>
-                  </div>
-                </div>
-              </div>
-
               {/* Steering Wheel â€” Central Navigator */}
               <div className="bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 rounded-2xl border border-cyan-500/20 p-4">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -2701,12 +2518,12 @@ export default function Home() {
                     <Compass className="w-6 h-6 text-cyan-400" />
                     <div>
                       <h2 className="text-lg font-bold text-white">
-                        Steering Wheel
+                        Compass Wheel
                       </h2>
                       <p className="text-xs text-zinc-400">
-                        Navigate every corner of the Meta-Pet universe from one
-                        place â€” features, tools, and future expansions all
-                        radiate from here
+                        The navigator now lives inside the dashboard so you can
+                        jump between tools, games, and core learning spaces
+                        from one place
                       </p>
                     </div>
                   </div>
@@ -2718,103 +2535,22 @@ export default function Home() {
                       Launch Monkey Invaders
                     </Link>
                     <Link
-                      href="/compass"
+                      href="/app/activities"
                       className="px-4 py-2 rounded-xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-200 text-sm font-medium hover:bg-cyan-500/30 hover:border-cyan-400 transition-colors touch-manipulation"
                     >
-                      Open Compass
+                      Open Dashboard Compass
+                    </Link>
+                    <Link
+                      href="/app/moss60"
+                      className="px-4 py-2 rounded-xl bg-violet-500/20 border border-violet-500/40 text-violet-200 text-sm font-medium hover:bg-violet-500/30 hover:border-violet-400 transition-colors touch-manipulation"
+                    >
+                      Open MOSS60 Studio
                     </Link>
                   </div>
                 </div>
               </div>
             </>
           )}
-
-          <Dialog open={sessionSheetOpen} onOpenChange={setSessionSheetOpen}>
-            <DialogContent className="bg-zinc-900/95 border-amber-500/30 max-w-md">
-              <DialogHeader>
-                <DialogTitle className="text-amber-300">
-                  Prepare your geometry session
-                </DialogTitle>
-              </DialogHeader>
-              <DialogClose onClick={() => setSessionSheetOpen(false)} />
-              <div className="px-6 pb-6 space-y-4">
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-zinc-500 mb-2">
-                    Session goal
-                  </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {(["Calm", "Focus", "Recovery", "Creative"] as const).map(
-                      (goal) => (
-                        <button
-                          key={goal}
-                          type="button"
-                          onClick={() => setSessionGoal(goal)}
-                          className={`rounded-lg border px-3 py-2 text-sm transition-colors ${
-                            sessionGoal === goal
-                              ? "border-amber-400 bg-amber-400/20 text-amber-100"
-                              : "border-slate-700 bg-slate-900/80 text-zinc-300 hover:border-amber-500/50"
-                          }`}
-                        >
-                          {goal}
-                        </button>
-                      ),
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="flex items-center justify-between text-sm text-zinc-200">
-                    <span>Include intensity</span>
-                    <input
-                      type="checkbox"
-                      checked={sessionIntensityEnabled}
-                      onChange={(event) =>
-                        setSessionIntensityEnabled(event.target.checked)
-                      }
-                      className="h-4 w-4 accent-amber-400"
-                    />
-                  </label>
-                  {sessionIntensityEnabled && (
-                    <div className="rounded-lg border border-slate-700 bg-slate-900/60 p-3">
-                      <div className="flex items-center justify-between text-xs text-zinc-400 mb-2">
-                        <span>Intensity</span>
-                        <span className="font-semibold text-amber-300">
-                          {sessionIntensity}%
-                        </span>
-                      </div>
-                      <input
-                        type="range"
-                        min={20}
-                        max={100}
-                        step={5}
-                        value={sessionIntensity}
-                        onChange={(event) =>
-                          setSessionIntensity(Number(event.target.value))
-                        }
-                        className="w-full accent-amber-400"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex gap-2 pt-1">
-                  <Button
-                    variant="secondary"
-                    className="flex-1"
-                    onClick={() => setSessionSheetOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    className="flex-1 bg-amber-500 hover:bg-amber-400 text-zinc-950"
-                    onClick={launchGeometrySession}
-                  >
-                    Start Session
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
 
           {/* Genome Traits */}
           <CollapsibleSection

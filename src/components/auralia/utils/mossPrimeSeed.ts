@@ -5,13 +5,18 @@
  * Provides PRNG, Fibonacci/Lucas numbers, and cryptographic hash
  */
 
-import type { Field, Bigish } from '../types';
+import type { Field, Bigish } from "../types";
+import {
+  MOSS_BLACK_STRAND,
+  MOSS_BLUE_STRAND,
+  MOSS_RED_STRAND,
+} from "@/lib/moss60/strandSequences";
 
 // ===== CONSTANTS =====
 
-export const RED = '113031491493585389543778774590997079619617525721567332336510';
-export const BLACK = '011235831459437077415617853819099875279651673033695493257291';
-export const BLUE = '012776329785893036118967145479098334781325217074992143965631';
+export const RED = MOSS_RED_STRAND;
+export const BLACK = MOSS_BLACK_STRAND;
+export const BLUE = MOSS_BLUE_STRAND;
 
 // ===== UTILITIES =====
 
@@ -19,7 +24,7 @@ export const BLUE = '01277632978589303611896714547909833478132521707499214396563
  * Convert string of digits to number array
  */
 function toDigits(s: string): number[] {
-  return s.split('').map((ch) => {
+  return s.split("").map((ch) => {
     const d = ch.charCodeAt(0) - 48;
     if (d < 0 || d > 9) throw new Error(`Non-digit character: ${ch}`);
     return d;
@@ -44,7 +49,7 @@ function mix64(x0: Bigish): bigint {
  */
 function interleave3(a: string, b: string, c: string): string {
   const n = Math.min(a.length, b.length, c.length);
-  let out = '';
+  let out = "";
   for (let i = 0; i < n; i++) {
     out += a[i] + b[i] + c[i];
   }
@@ -55,8 +60,8 @@ function interleave3(a: string, b: string, c: string): string {
  * Convert base-10 digit string to hex using simple mixing
  */
 function base10ToHex(digitStr: string): string {
-  const table = '0123456789abcdef'.split('');
-  let h = '';
+  const table = "0123456789abcdef".split("");
+  let h = "";
   let acc = 0;
 
   for (let i = 0; i < digitStr.length; i++) {
@@ -82,9 +87,12 @@ function fibFast(n: Bigish): [bigint, bigint] {
     return [d, c + d];
   };
 
-  const index = typeof n === "bigint"
-    ? (n < 0n ? 0n : n)
-    : BigInt(Math.max(0, Math.floor(n)));
+  const index =
+    typeof n === "bigint"
+      ? n < 0n
+        ? 0n
+        : n
+      : BigInt(Math.max(0, Math.floor(n)));
   return fn(index);
 }
 
@@ -96,7 +104,7 @@ function fibFast(n: Bigish): [bigint, bigint] {
  * @param seedName - Guardian's unique identifier
  * @returns Field object with PRNG, hash, fib, lucas functions
  */
-export function initField(seedName = 'AURALIA'): Field {
+export function initField(seedName = "AURALIA"): Field {
   const red = RED;
   const black = BLACK;
   const blue = BLUE;
@@ -106,14 +114,16 @@ export function initField(seedName = 'AURALIA'): Field {
   const b = toDigits(blue);
 
   // Generate pulse sequence (chaotic)
-  const pulse = r.map((rv, i) => (rv ^ k[(i * 7) % 60] ^ b[(i * 13) % 60]) % 10);
+  const pulse = r.map(
+    (rv, i) => (rv ^ k[(i * 7) % 60] ^ b[(i * 13) % 60]) % 10,
+  );
 
   // Generate ring sequence (harmonic)
   const ring = Array.from({ length: 60 }, (_, i) => (r[i] + k[i] + b[i]) % 10);
 
   // Seed initialization
   const seedStr = interleave3(red, black, blue);
-  const seedBI = BigInt('0x' + base10ToHex(seedStr + seedName));
+  const seedBI = BigInt("0x" + base10ToHex(seedStr + seedName));
 
   // Xorshift128+ state
   let s0 = mix64(seedBI);
@@ -182,7 +192,7 @@ export function initField(seedName = 'AURALIA'): Field {
 export function generateSigilPoints(
   field: Field,
   seed: string,
-  count = 7
+  count = 7,
 ): Array<{ x: number; y: number; hash: string }> {
   const h = field.hash(seed);
   const points: Array<{ x: number; y: number; hash: string }> = [];

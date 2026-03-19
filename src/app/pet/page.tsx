@@ -130,7 +130,7 @@ export default function PetPage() {
                   <div className="flex flex-wrap gap-2">
                     {!ENABLE_CHILD_SAFE_BASELINE && (
                       <>
-                        <Link href="/compass">
+                        <Link href="/app/activities">
                           <Button
                             variant="outline"
                             size="sm"

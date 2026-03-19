@@ -8,7 +8,7 @@
  * Crypto functions reuse src/lib/qr-messaging/crypto.ts
  */
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { QRGenerator } from './QRMessaging/QRGenerator';
@@ -21,12 +21,32 @@ import {
   decrypt,
   PHI,
   PRIMES,
-  R as DNA_R,
 } from '@/lib/qr-messaging/crypto';
-import { Download, RefreshCw, Lock, Unlock, Key, Orbit, Layers, ShieldCheck, BookOpen } from 'lucide-react';
+import {
+  Download,
+  RefreshCw,
+  Lock,
+  Unlock,
+  Key,
+  Orbit,
+  Layers,
+  ShieldCheck,
+  BookOpen,
+  Dna,
+  Sparkles,
+} from 'lucide-react';
 import { CrystallineNetwork } from './CrystallineNetwork';
 import { CrystallineLattice } from './CrystallineLattice';
 import { trackEvent } from '@/lib/analytics';
+import type { PetSaveData } from '@/lib/persistence/indexeddb';
+import { getAllPets } from '@/lib/persistence/indexeddb';
+import { useStore } from '@/lib/store';
+import {
+  deriveMoss60PetProfile,
+  matchMoss60Genome,
+  type Moss60PetProfile,
+  type Moss60PetStrandKey,
+} from '@/lib/moss60/petProfile';
 import {
   createMoss60VerifiablePayload,
   createShareUrl,
@@ -50,12 +70,54 @@ const STUDIO_PRESETS: Array<{
   name: string;
   scheme: string;
   variant: (typeof GLYPH_VARIANTS)[number];
-  seed: string;
+  focus: Moss60PetStrandKey;
 }> = [
-  { name: 'Aurora School', scheme: 'Spectral', variant: 'Pulse', seed: 'aurora-classroom' },
-  { name: 'Cyber Conservatory', scheme: 'Cyberpunk', variant: 'Prism', seed: 'cyber-conservatory' },
-  { name: 'Ocean Memory', scheme: 'Ocean', variant: 'Cascade', seed: 'ocean-memory-thread' },
+  { name: 'Core Glyph', scheme: 'Consciousness', variant: 'Pulse', focus: 'combined' },
+  { name: 'Fire Thread', scheme: 'Fire', variant: 'Prism', focus: 'red' },
+  { name: 'Water Thread', scheme: 'Ocean', variant: 'Cascade', focus: 'blue' },
 ];
+
+const GLYPH_FOCUS_OPTIONS: Array<{
+  key: Moss60PetStrandKey;
+  label: string;
+  helper: string;
+}> = [
+  { key: 'combined', label: 'Combined', helper: 'All three pet strands braided together.' },
+  { key: 'red', label: 'Red strand', helper: 'Action and motion layer from the pet genome.' },
+  { key: 'blue', label: 'Blue strand', helper: 'Pattern and memory layer from the pet genome.' },
+  { key: 'black', label: 'Black strand', helper: 'Grounding and archive layer from the pet genome.' },
+  { key: 'security', label: 'Security braid', helper: 'Pet genome mixed with crest + hepta proof layers.' },
+];
+
+type Projection =
+  | 'flat'
+  | 'sphere'
+  | 'torus'
+  | 'hyperbolic'
+  | 'helix'
+  | 'cube'
+  | 'petal';
+
+const PROJECTION_OPTIONS: Array<{
+  value: Projection;
+  label: string;
+  helper: string;
+}> = [
+  { value: 'sphere', label: 'Sphere', helper: 'Wrap the pet code over a globe.' },
+  { value: 'torus', label: 'Torus', helper: 'Thread the code through a donut loop.' },
+  { value: 'hyperbolic', label: 'Hyperbolic', helper: 'Spread the structure into a curved disk.' },
+  { value: 'helix', label: 'Helix tower', helper: 'Stack the pet code into a vertical coil.' },
+  { value: 'cube', label: 'Crystal cube', helper: 'Pin the sequence to six mirrored faces.' },
+  { value: 'petal', label: 'Petal bloom', helper: 'Turn the code into a living floral field.' },
+  { value: 'flat', label: 'Flat spiral', helper: 'See the raw spiral before projection.' },
+];
+
+function formatCodeLine(value: string, groupSize = 5, maxGroups = 6): string {
+  return (
+    value.match(new RegExp(`.{1,${groupSize}}`, 'g'))?.slice(0, maxGroups).join(' ') ??
+    value
+  );
+}
 
 function lerpColor(a: string, b: string, t: number): string {
   const ah = parseInt(a.slice(1), 16);
@@ -102,30 +164,51 @@ function GlyphCanvas({
       Prism: { speed: 0.001, wobble: 0.18, alpha: 0.72 },
       Cascade: { speed: 0.00045, wobble: 0.08, alpha: 0.45 },
     }[variant];
-    const baseR = Math.min(W, H) * 0.38;
-
-    // Trail effect
-    ctx.fillStyle = 'rgba(0,0,0,0.18)';
-    ctx.fillRect(0, 0, W, H);
+    const baseR = Math.min(W, H) * 0.34;
 
     const pairs = COLOR_SCHEMES[scheme] ?? COLOR_SCHEMES['Spectral'];
     const hash = seedHashOverride ?? (seed ? moss60Hash(seed) : 'deadbeef');
     const hashVal = parseInt(hash.slice(0, 4), 16) / 0xffff;
+    const hashDigits = Array.from(hash.slice(0, 12), char => Number.parseInt(char, 16) || 0);
+
+    const backdrop = ctx.createRadialGradient(cx, cy, baseR * 0.1, cx, cy, baseR * 1.45);
+    backdrop.addColorStop(0, 'rgba(10, 18, 32, 0.96)');
+    backdrop.addColorStop(0.55, 'rgba(4, 13, 28, 0.88)');
+    backdrop.addColorStop(1, 'rgba(2, 6, 23, 0.18)');
+    ctx.fillStyle = backdrop;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.fillStyle = 'rgba(2, 6, 23, 0.15)';
+    ctx.fillRect(0, 0, W, H);
 
     // Generate 60 points along a PHI spiral
     const points: { x: number; y: number }[] = [];
     for (let i = 0; i < 60; i++) {
       const angle = (i / 60) * 2 * Math.PI * PHI + time * variantConfig.speed;
-      const wobble = 1 + variantConfig.wobble * Math.sin(i * PHI * 0.5 + time * 0.001);
+      const wobble =
+        1 +
+        variantConfig.wobble * Math.sin(i * PHI * 0.5 + time * 0.001) +
+        (hashDigits[i % hashDigits.length] / 40) * Math.cos(i * 0.7 + time * 0.0004);
       const r = baseR * wobble;
       points.push({ x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) });
     }
+
+    for (let ring = 0; ring < 3; ring++) {
+      const ringRadius = baseR * (0.48 + ring * 0.22);
+      ctx.beginPath();
+      ctx.arc(cx, cy, ringRadius, 0, Math.PI * 2);
+      ctx.strokeStyle = pairs[ring % pairs.length][0];
+      ctx.globalAlpha = 0.08 + ring * 0.05;
+      ctx.lineWidth = 1 + ring * 0.35;
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
 
     // Draw connections between prime-indexed points
     for (let i = 0; i < 60; i++) {
       if (!PRIMES.has(i)) continue;
       for (let step = 1; step <= 3; step++) {
-        const j = (i + step * 7) % 60;
+        const j = (i + step * (5 + (hashDigits[i % hashDigits.length] % 4))) % 60;
         const t = (i / 60 + hashVal) % 1;
         const pairIdx = Math.floor(t * pairs.length) % pairs.length;
         const [ca, cb] = pairs[pairIdx];
@@ -133,9 +216,9 @@ function GlyphCanvas({
         ctx.beginPath();
         ctx.moveTo(points[i].x, points[i].y);
         ctx.lineTo(points[j].x, points[j].y);
-        ctx.strokeStyle = lerpColor(ca, cb, t) ;
+        ctx.strokeStyle = lerpColor(ca, cb, t);
         ctx.globalAlpha = alpha;
-        ctx.lineWidth = step === 1 ? 1.2 : 0.6;
+        ctx.lineWidth = step === 1 ? 2.1 : 0.95;
         ctx.stroke();
         ctx.globalAlpha = 1;
       }
@@ -148,12 +231,25 @@ function GlyphCanvas({
       const pairIdx = Math.floor(t * pairs.length) % pairs.length;
       const [ca, cb] = pairs[pairIdx];
       ctx.beginPath();
-      ctx.arc(points[i].x, points[i].y, isPrime ? 3 : 1.5, 0, Math.PI * 2);
+      ctx.arc(points[i].x, points[i].y, isPrime ? 5.2 : 2.6, 0, Math.PI * 2);
       ctx.fillStyle = lerpColor(ca, cb, t);
       ctx.globalAlpha = isPrime ? 0.9 : 0.4;
       ctx.fill();
       ctx.globalAlpha = 1;
     }
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, 28 + hashDigits[0], 0, Math.PI * 2);
+    ctx.strokeStyle = lerpColor(pairs[0][0], pairs[pairs.length - 1][1], hashVal);
+    ctx.lineWidth = 2.4;
+    ctx.globalAlpha = 0.8;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    ctx.fillStyle = 'rgba(226, 232, 240, 0.9)';
+    ctx.beginPath();
+    ctx.arc(cx, cy, 4.5, 0, Math.PI * 2);
+    ctx.fill();
   }, [seed, scheme, seedHashOverride, variant]);
 
   useEffect(() => {
@@ -179,12 +275,12 @@ function GlyphCanvas({
   }, [animating, draw, onCanvasReady]);
 
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div className="flex flex-col items-center gap-4">
       <canvas
         ref={canvasRef}
-        width={320}
-        height={320}
-        className="rounded-xl border border-slate-700 bg-black"
+        width={420}
+        height={420}
+        className="h-auto w-full max-w-[440px] rounded-[28px] border border-cyan-400/20 bg-[#020612] shadow-[0_0_80px_rgba(34,211,238,0.12)]"
       />
     </div>
   );
@@ -316,11 +412,9 @@ function SerpentTab() {
 
 // ─── Reality Canvas (3D projections) ─────────────────────────────────────────
 
-type Projection = 'flat' | 'sphere' | 'torus' | 'hyperbolic';
-
 function RealityCanvas({ seed, projection }: { seed: string; projection: Projection }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const rafRef    = useRef<number>(0);
+  const rafRef = useRef<number>(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -335,11 +429,18 @@ function RealityCanvas({ seed, projection }: { seed: string; projection: Project
 
     let rotX = 0;
     let rotY = 0;
+    const digits = seed
+      .split('')
+      .map(value => Number.parseInt(value, 10))
+      .filter(value => Number.isFinite(value));
+    const safeDigits = digits.length > 0 ? digits : [0, 1, 2, 3, 4, 5];
+    const petalCount = 4 + (safeDigits[0] % 5);
 
     function project(x: number, y: number, z: number): { x: number; y: number; alpha: number } {
-      // Apply rotation
-      const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
-      const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+      const cosX = Math.cos(rotX);
+      const sinX = Math.sin(rotX);
+      const cosY = Math.cos(rotY);
+      const sinY = Math.sin(rotY);
       const y1 = y * cosX - z * sinX;
       const z1 = y * sinX + z * cosX;
       const x2 = x * cosY + z1 * sinY;
@@ -351,38 +452,101 @@ function RealityCanvas({ seed, projection }: { seed: string; projection: Project
 
     function flatPoint(i: number, t: number) {
       const angle = (i / 60) * 2 * Math.PI * PHI + t * 0.0006;
-      const r = 120 * (1 + 0.12 * Math.sin(i * 0.5));
+      const r = 95 + safeDigits[i % safeDigits.length] * 6 + 18 * Math.sin(i * 0.5 + t * 0.0008);
       return { x: r * Math.cos(angle), y: r * Math.sin(angle), z: 0 };
     }
 
     function spherePoint(i: number, t: number) {
-      const theta = (i / 60) * Math.PI;
-      const phi   = (i / 60) * 2 * Math.PI * PHI + t * 0.0006;
-      const R = 130;
-      return { x: R * Math.sin(theta) * Math.cos(phi), y: R * Math.sin(theta) * Math.sin(phi), z: R * Math.cos(theta) };
+      const theta = ((i + safeDigits[(i + 7) % safeDigits.length]) / 60) * Math.PI;
+      const phi = (i / 60) * 2 * Math.PI * PHI + t * 0.0006;
+      const radius = 110 + safeDigits[(i + 13) % safeDigits.length] * 2.5;
+      return {
+        x: radius * Math.sin(theta) * Math.cos(phi),
+        y: radius * Math.sin(theta) * Math.sin(phi),
+        z: radius * Math.cos(theta),
+      };
     }
 
     function torusPoint(i: number, t: number) {
       const u = (i / 60) * 2 * Math.PI + t * 0.0006;
-      const v = (i / 60) * 2 * Math.PI * 3;
-      const R = 90, r = 40;
-      return { x: (R + r * Math.cos(v)) * Math.cos(u), y: (R + r * Math.cos(v)) * Math.sin(u), z: r * Math.sin(v) };
+      const v = (i / 60) * 2 * Math.PI * (2 + (safeDigits[1] % 4));
+      const outer = 78 + safeDigits[(i + 5) % safeDigits.length] * 2.2;
+      const inner = 26 + safeDigits[(i + 11) % safeDigits.length] * 1.3;
+      return {
+        x: (outer + inner * Math.cos(v)) * Math.cos(u),
+        y: (outer + inner * Math.cos(v)) * Math.sin(u),
+        z: inner * Math.sin(v),
+      };
     }
 
     function hyperbolicPoint(i: number, t: number) {
       const angle = (i / 60) * 2 * Math.PI * PHI + t * 0.0006;
-      const rPoincare = 0.85 * (1 - 1 / (1 + i / 10));
+      const rPoincare = 0.86 * (1 - 1 / (1 + (i + safeDigits[i % safeDigits.length]) / 10));
       const x = rPoincare * Math.cos(angle);
       const y = rPoincare * Math.sin(angle);
-      return { x: x * 140, y: y * 140, z: (i / 60 - 0.5) * 60 };
+      return { x: x * 145, y: y * 145, z: (i / 60 - 0.5) * 90 };
+    }
+
+    function helixPoint(i: number, t: number) {
+      const angle = i * 0.48 + t * 0.0007;
+      const radius = 42 + safeDigits[i % safeDigits.length] * 5;
+      return {
+        x: radius * Math.cos(angle),
+        y: ((i / 60) - 0.5) * 220,
+        z: radius * Math.sin(angle) + Math.sin(angle * 1.6) * 14,
+      };
+    }
+
+    function cubePoint(i: number, t: number) {
+      const face = i % 6;
+      const u = (safeDigits[i % safeDigits.length] / 9 - 0.5) * 2;
+      const v = (safeDigits[(i + 9) % safeDigits.length] / 9 - 0.5) * 2;
+      const offset = 102 + Math.sin(t * 0.0006 + i * 0.5) * 4;
+      switch (face) {
+        case 0:
+          return { x: offset, y: u * offset, z: v * offset };
+        case 1:
+          return { x: -offset, y: u * offset, z: v * offset };
+        case 2:
+          return { x: u * offset, y: offset, z: v * offset };
+        case 3:
+          return { x: u * offset, y: -offset, z: v * offset };
+        case 4:
+          return { x: u * offset, y: v * offset, z: offset };
+        default:
+          return { x: u * offset, y: v * offset, z: -offset };
+      }
+    }
+
+    function petalPoint(i: number, t: number) {
+      const angle = (i / 60) * 2 * Math.PI + t * 0.0004;
+      const bloom =
+        72 +
+        safeDigits[(i + 3) % safeDigits.length] * 3.5 +
+        38 * Math.sin(petalCount * angle + safeDigits[(i + 17) % safeDigits.length] * 0.12);
+      return {
+        x: bloom * Math.cos(angle),
+        y: bloom * Math.sin(angle),
+        z: 42 * Math.cos(angle * petalCount * 0.5 + safeDigits[i % safeDigits.length] * 0.18),
+      };
     }
 
     function getPoint(i: number, t: number) {
       switch (projection) {
-        case 'sphere':     return spherePoint(i, t);
-        case 'torus':      return torusPoint(i, t);
-        case 'hyperbolic': return hyperbolicPoint(i, t);
-        default:           return flatPoint(i, t);
+        case 'sphere':
+          return spherePoint(i, t);
+        case 'torus':
+          return torusPoint(i, t);
+        case 'hyperbolic':
+          return hyperbolicPoint(i, t);
+        case 'helix':
+          return helixPoint(i, t);
+        case 'cube':
+          return cubePoint(i, t);
+        case 'petal':
+          return petalPoint(i, t);
+        default:
+          return flatPoint(i, t);
       }
     }
 
@@ -390,7 +554,11 @@ function RealityCanvas({ seed, projection }: { seed: string; projection: Project
       rotX = time * 0.0003;
       rotY = time * 0.0005;
 
-      ctx.fillStyle = 'rgba(0,0,0,0.2)';
+      const background = ctx.createRadialGradient(cx, cy, 20, cx, cy, 220);
+      background.addColorStop(0, 'rgba(11, 17, 32, 0.98)');
+      background.addColorStop(0.55, 'rgba(5, 10, 22, 0.78)');
+      background.addColorStop(1, 'rgba(2, 6, 18, 0.18)');
+      ctx.fillStyle = background;
       ctx.fillRect(0, 0, W, H);
 
       const pts = Array.from({ length: 60 }, (_, i) => {
@@ -401,22 +569,24 @@ function RealityCanvas({ seed, projection }: { seed: string; projection: Project
 
       for (let i = 0; i < 60; i++) {
         if (!PRIMES.has(i)) continue;
-        const j = (i + 7) % 60;
-        const t = i / 60;
+        const j =
+          (i + 1 + safeDigits[(i + 7) % safeDigits.length] + safeDigits[(i + 13) % safeDigits.length]) % 60;
+        const hue = (i * 9 + safeDigits[i % safeDigits.length] * 18) % 360;
         ctx.beginPath();
         ctx.moveTo(pts[i].x, pts[i].y);
         ctx.lineTo(pts[j].x, pts[j].y);
-        ctx.strokeStyle = `hsl(${t * 360},70%,60%)`;
-        ctx.globalAlpha = (pts[i].alpha + pts[j].alpha) * 0.3;
-        ctx.lineWidth = 0.8;
+        ctx.strokeStyle = `hsl(${hue}, 82%, 66%)`;
+        ctx.globalAlpha = (pts[i].alpha + pts[j].alpha) * 0.32;
+        ctx.lineWidth = 1.1;
         ctx.stroke();
         ctx.globalAlpha = 1;
       }
 
       for (let i = 0; i < 60; i++) {
+        const hue = (safeDigits[(i + 5) % safeDigits.length] * 26 + i * 5) % 360;
         ctx.beginPath();
-        ctx.arc(pts[i].x, pts[i].y, PRIMES.has(i) ? 3 : 1.5, 0, Math.PI * 2);
-        ctx.fillStyle = `hsl(${(i / 60) * 360},70%,65%)`;
+        ctx.arc(pts[i].x, pts[i].y, PRIMES.has(i) ? 4.8 : 2.2, 0, Math.PI * 2);
+        ctx.fillStyle = `hsl(${hue}, 84%, 70%)`;
         ctx.globalAlpha = pts[i].alpha * 0.8;
         ctx.fill();
         ctx.globalAlpha = 1;
@@ -434,9 +604,9 @@ function RealityCanvas({ seed, projection }: { seed: string; projection: Project
   return (
     <canvas
       ref={canvasRef}
-      width={320}
-      height={320}
-      className="rounded-xl border border-slate-700 bg-black mx-auto block"
+      width={420}
+      height={420}
+      className="mx-auto block h-auto w-full max-w-[440px] rounded-[28px] border border-cyan-400/20 bg-[#020612] shadow-[0_0_70px_rgba(34,211,238,0.10)]"
     />
   );
 }
@@ -447,118 +617,168 @@ const SECURITY_LAYERS = [
   {
     id: 'hashing',
     icon: '🔐',
-    title: 'MOSS60 Hashing',
-    summary: 'Core 60-digit mixing with prime-indexed rotations',
+    title: 'Hash Avalanche',
+    summary: 'One tiny edit scrambles the full 60-step fingerprint.',
     detail:
-      'Every input passes through a 60-step mixing loop. At each step the hash state is XOR-folded against three independent DNA sequences (R, K, B), bit-rotated, and multiplied by a prime. The 60-step structure means even a single-character difference avalanches through all three sequences before the final output.',
-    strength: 'Avalanche + triple-sequence mixing',
+      'MOSS60 hashing keeps remixing the input across 60 positions. Each round folds the message into multiple strand states, rotates the bits, and multiplies by primes. That repeated remixing is why even a one-character edit produces a radically different final digest.',
+    strength: 'Diffusion',
+  },
+  {
+    id: 'signatures',
+    icon: '🪪',
+    title: 'Crest Signatures',
+    summary: 'The pet crest signs vault, rotation, tail, and timestamp together.',
+    detail:
+      'A crest is not just decoration. It packages the pet identity fields and signs them with an HMAC. If any part of the crest changes after signing, verification fails. This teaches integrity: the receiver can check whether the identity packet stayed intact in transit.',
+    strength: 'Integrity',
+  },
+  {
+    id: 'hepta',
+    icon: '⑦',
+    title: 'Hepta Redundancy',
+    summary: 'The 42-digit hepta layer adds structured error correction.',
+    detail:
+      'The hepta code is encoded in base 7 and carries extra redundancy. That means the system can often detect or repair small transcription mistakes instead of silently accepting a damaged packet. In classroom terms: it behaves like a checksum plus correction hints wrapped into the code itself.',
+    strength: 'Error checks',
   },
   {
     id: 'keypair',
     icon: '🗝️',
     title: 'Key Derivation',
-    summary: 'Extended-hash key pairs with prime-indexed spiral generation',
+    summary: 'Keys are stretched through repeated one-way hashing rounds.',
     detail:
-      'Key pairs are generated by running the seed through 8 iterated hashing rounds, producing a 60-element private spiral. The public key is a separate 8-round hash of the spiral — knowledge of the public hash does not reveal the private spiral without inverting the iterated chain.',
-    strength: 'Iterated one-way derivation',
+      'Key material is not taken straight from the phrase. MOSS60 pushes the seed through several rounds of hashing and reshaping before a public key is exposed. That makes the public output useful for exchange while keeping the private spiral hidden.',
+    strength: 'One-way stretch',
   },
   {
     id: 'exchange',
     icon: '🤝',
-    title: 'Key Exchange',
-    summary: 'Shared secret via conditional prime-bridge mixing',
+    title: 'Prime-Aware Exchange',
+    summary: 'Shared secrets change their math at prime-indexed positions.',
     detail:
-      'Shared secrets are computed element-wise: at prime-indexed positions the combination uses golden-ratio scaling (val × φ + partner), at other positions a simpler modular sum. The prime-conditional branching means an attacker must identify which indices are prime to reconstruct the mixing — information that depends on the private spiral.',
-    strength: 'Conditional prime-bridge mixing',
+      'Key exchange does not treat every index equally. Prime positions use a stronger golden-ratio mix while non-prime positions use a simpler modular blend. This gives the same secret only to both valid participants while making reverse engineering harder from public data alone.',
+    strength: 'Layered mix',
   },
   {
     id: 'temporal',
     icon: '⏳',
-    title: 'Temporal Evolution',
-    summary: 'Lucas-sequence key rotation per message',
+    title: 'Temporal Rotation',
+    summary: 'Message keys evolve so old ciphertext does not stay reusable.',
     detail:
-      'Each message can use temporal mode, evolving the key by the Lucas sequence value at the current message index. Since Lucas numbers grow superlinearly, late messages have significantly different keystreams from early ones — replaying an old key for a new message index produces garbage.',
-    strength: 'Non-repeating keystream evolution',
+      'Each message can advance the key using the Lucas sequence. That means message 10 is encrypted with a different keystream from message 1 even if the shared secret started the same. Replay attacks become less useful because the timeline itself changes the cipher.',
+    strength: 'Freshness',
   },
   {
     id: 'topology',
     icon: '🕸️',
-    title: 'Network Topology',
-    summary: '60-node small-world graph with prime-bridge shortcuts',
+    title: 'Small-World Topology',
+    summary: 'Prime bridges let information spread quickly across the whole system.',
     detail:
-      'The crystalline network models MOSS60\'s algebraic structure: 60 nodes on a ring with Watts-Strogatz rewiring (β = 0.28) and prime-distance shortcuts. The resulting graph has O(log N) average path length — information can traverse the full structure in very few hops, making coordinated multi-node attacks extremely difficult to isolate.',
-    strength: 'Small-world routing resilience',
+      'The 60-node graph is deliberately wired so that local neighborhoods stay coherent while prime-distance bridges jump far across the structure. That balance gives strong mixing: local detail is preserved, but changes can still ripple everywhere in only a few hops.',
+    strength: 'Coverage',
   },
   {
     id: 'philosophy',
     icon: '🧬',
-    title: 'Depth over Claims',
-    summary: 'Layered mixing strategy rather than single-primitive reliance',
+    title: 'Defence in Depth',
+    summary: 'No single layer carries the entire trust model.',
     detail:
-      'MOSS60 deliberately avoids depending on a single hardness assumption. Instead it layers prime-residue orbits, golden-ratio frequency separation, Lucas-sequence evolution, and multi-round hashing. Compromise of any individual layer does not expose the full keystream. This mirrors biological defence — redundancy and diversity over single points of failure.',
-    strength: 'Defence-in-depth by design',
+      'The safest lesson here is architectural: hashing, signatures, redundancy, topology, and temporal evolution all do different jobs. A robust system does not ask one clever trick to do everything. It stacks narrower mechanisms so failure in one place does not collapse the whole design.',
+    strength: 'Architecture',
   },
 ] as const;
 
-function SecurityLearningPanel() {
+function SecurityLearningPanel({ profile }: { profile: Moss60PetProfile }) {
   const [expanded, setExpanded] = useState<string | null>(null);
-  const [demoInput, setDemoInput] = useState('');
-  const [demoHash, setDemoHash]   = useState('');
+  const [demoInput, setDemoInput] = useState(profile.securityLessonInput);
+  const [demoHash, setDemoHash] = useState('');
   const [demoHash2, setDemoHash2] = useState('');
 
+  useEffect(() => {
+    setDemoInput(profile.securityLessonInput);
+    setDemoHash('');
+    setDemoHash2('');
+  }, [profile.securityLessonInput]);
+
   function runHashDemo() {
-    if (!demoInput.trim()) return;
-    setDemoHash(moss60Hash(demoInput.trim()));
-    const flipped = demoInput.trim().slice(0, -1) + String.fromCharCode(
-      demoInput.trim().charCodeAt(demoInput.trim().length - 1) ^ 1
-    );
+    const trimmed = demoInput.trim();
+    if (!trimmed) return;
+
+    setDemoHash(moss60Hash(trimmed));
+    const lastChar = trimmed.slice(-1);
+    const flippedChar = String.fromCharCode(lastChar.charCodeAt(0) ^ 1);
+    const flipped = trimmed.length > 1 ? `${trimmed.slice(0, -1)}${flippedChar}` : flippedChar;
     setDemoHash2(moss60Hash(flipped));
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div className="flex items-center gap-2">
         <ShieldCheck className="w-5 h-5 text-cyan-300" />
         <div>
-          <h3 className="text-sm font-bold text-white">Security Model</h3>
-          <p className="text-[10px] text-zinc-500">How MOSS60 layers independent mixing strategies for depth</p>
+          <h3 className="text-base font-semibold text-white">Security Model</h3>
+          <p className="text-sm text-zinc-300">
+            Learn the protection stack using the active pet&apos;s own code instead of a generic demo string.
+          </p>
         </div>
       </div>
 
-      {/* Interactive hash demo */}
-      <div className="rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-4 space-y-3">
+      <div className="grid gap-3 lg:grid-cols-3">
+        <div className="rounded-2xl border border-cyan-500/25 bg-cyan-950/20 p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200">Pet Proof Trail</p>
+          <p className="mt-3 text-sm font-medium text-white">{profile.crestLine}</p>
+          <p className="mt-2 text-sm text-zinc-200">{profile.heptaLine}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-700/70 bg-slate-900/60 p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">Verify In Order</p>
+          <p className="mt-3 text-sm text-zinc-100">1. Confirm the digest changes when the message changes.</p>
+          <p className="mt-2 text-sm text-zinc-100">2. Confirm the crest still matches the signed identity fields.</p>
+          <p className="mt-2 text-sm text-zinc-100">3. Confirm the hepta layer still decodes cleanly after transport.</p>
+        </div>
+        <div className="rounded-2xl border border-emerald-500/25 bg-emerald-950/20 p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200">Key Idea</p>
+          <p className="mt-3 text-sm leading-6 text-zinc-100">
+            Security here is a chain of checks. Hashing shows change, signatures show integrity, and hepta redundancy
+            shows transport reliability.
+          </p>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-cyan-500/30 bg-cyan-950/20 p-4 space-y-4">
         <div className="flex items-center gap-2">
           <BookOpen className="w-4 h-4 text-cyan-300" />
-          <p className="text-xs font-semibold text-cyan-200">Live: Avalanche Effect</p>
+          <p className="text-sm font-semibold text-cyan-100">Live Lesson: Avalanche Effect</p>
         </div>
-        <p className="text-[11px] text-zinc-400">
-          Type anything, then see how flipping a single bit in the last character produces a completely different hash.
+        <p className="text-sm leading-6 text-zinc-200">
+          Start from the active pet-derived string below. Hash it once, then compare that result with the version that
+          flips just one bit in the last character. The outputs should look unrelated even though the edit is tiny.
         </p>
         <div className="flex gap-2">
           <input
             value={demoInput}
             onChange={e => setDemoInput(e.target.value)}
-            placeholder="Type a message..."
-            className="flex-1 rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            placeholder="Pet proof message..."
+            className="flex-1 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
           />
-          <Button size="sm" onClick={runHashDemo} disabled={!demoInput.trim()}>Hash</Button>
+          <Button size="sm" onClick={runHashDemo} disabled={!demoInput.trim()}>
+            Hash
+          </Button>
         </div>
         {demoHash && (
-          <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
-            <div className="rounded-lg border border-slate-700 bg-slate-950/60 p-2">
-              <p className="text-zinc-500 mb-1">Original</p>
-              <p className="text-cyan-300 break-all">{demoHash}</p>
+          <div className="grid gap-3 lg:grid-cols-2 text-sm font-mono">
+            <div className="rounded-xl border border-slate-700 bg-slate-950/70 p-3">
+              <p className="mb-2 text-xs uppercase tracking-[0.18em] text-zinc-500">Original</p>
+              <p className="break-all text-cyan-300">{demoHash}</p>
             </div>
-            <div className="rounded-lg border border-slate-700 bg-slate-950/60 p-2">
-              <p className="text-zinc-500 mb-1">1-bit flip</p>
-              <p className="text-amber-300 break-all">{demoHash2}</p>
+            <div className="rounded-xl border border-slate-700 bg-slate-950/70 p-3">
+              <p className="mb-2 text-xs uppercase tracking-[0.18em] text-zinc-500">1-bit flip</p>
+              <p className="break-all text-amber-300">{demoHash2}</p>
             </div>
           </div>
         )}
       </div>
 
-      {/* Security layers */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         {SECURITY_LAYERS.map(layer => {
           const isOpen = expanded === layer.id;
           return (
@@ -567,27 +787,27 @@ function SecurityLearningPanel() {
               onClick={() => setExpanded(isOpen ? null : layer.id)}
               className={`w-full text-left rounded-xl border transition-all ${
                 isOpen
-                  ? 'border-cyan-500/40 bg-cyan-950/20'
-                  : 'border-slate-700/60 bg-slate-900/40 hover:border-slate-600/60'
-              } p-3`}
+                  ? 'border-cyan-500/45 bg-cyan-950/25'
+                  : 'border-slate-700/60 bg-slate-900/55 hover:border-slate-600/60'
+              } p-4`}
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">{layer.icon}</span>
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl leading-none">{layer.icon}</span>
                   <div>
-                    <p className="text-xs font-semibold text-zinc-100">{layer.title}</p>
-                    <p className="text-[10px] text-zinc-500">{layer.summary}</p>
+                    <p className="text-base font-semibold text-zinc-50">{layer.title}</p>
+                    <p className="mt-1 text-sm leading-6 text-zinc-300">{layer.summary}</p>
                   </div>
                 </div>
-                <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
-                  isOpen ? 'bg-cyan-500/20 text-cyan-300' : 'bg-slate-800 text-zinc-500'
+                <span className={`text-xs font-mono px-3 py-1 rounded-full ${
+                  isOpen ? 'bg-cyan-500/20 text-cyan-200' : 'bg-slate-800 text-zinc-400'
                 }`}>
                   {layer.strength}
                 </span>
               </div>
               {isOpen && (
                 <div className="mt-3 pt-3 border-t border-slate-700/40">
-                  <p className="text-[11px] text-zinc-300 leading-relaxed">{layer.detail}</p>
+                  <p className="text-sm leading-6 text-zinc-200">{layer.detail}</p>
                 </div>
               )}
             </button>
@@ -595,10 +815,10 @@ function SecurityLearningPanel() {
         })}
       </div>
 
-      <p className="text-[10px] text-zinc-600 text-center leading-relaxed">
-        Each layer operates independently — compromising one does not weaken the others.
-        <br />
-        The 60-element structure mirrors natural prime distribution within the first 60 integers.
+      <p className="text-sm leading-6 text-zinc-400">
+        Read the layers as separate lessons, not marketing claims. The useful takeaway is how each mechanism solves a
+        different problem: detecting change, proving identity, catching errors, refreshing keys, and spreading mixing
+        across the full 60-position structure.
       </p>
     </div>
   );

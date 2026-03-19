@@ -388,6 +388,12 @@ describe('Store State Management', () => {
       expect(achievements.some(a => a.id === 'minigame-focus-streak')).toBe(true);
     });
 
+    it('should unlock rhythm ace at an attainable score', () => {
+      useStore.getState().updateMiniGameScore('rhythm', 15);
+
+      const achievements = useStore.getState().achievements;
+      expect(achievements.some(a => a.id === 'minigame-rhythm-ace')).toBe(true);
+    });
   });
 
   describe('Hydration', () => {
@@ -491,6 +497,13 @@ describe('Store State Management', () => {
       expect(firstWin?.earnedAt).toBeDefined();
       expect(firstWin!.earnedAt).toBeGreaterThanOrEqual(before);
       expect(firstWin!.earnedAt).toBeLessThanOrEqual(after);
+    });
+
+    it('should unlock the breeding achievement', () => {
+      useStore.getState().recordBreeding();
+
+      const achievements = useStore.getState().achievements;
+      expect(achievements.some(a => a.id === 'breeding-first')).toBe(true);
     });
   });
 });

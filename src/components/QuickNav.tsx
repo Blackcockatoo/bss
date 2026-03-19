@@ -4,7 +4,7 @@ import {
   ArrowDownToLine,
   ArrowLeft,
   BookOpen,
-  Dna,
+  Compass,
   Home,
   PawPrint,
   UserCircle,
@@ -28,7 +28,7 @@ const NAV_ITEMS = [
   { href: "/pet", label: "Pet", icon: PawPrint },
   { href: "/school-game", label: "School", icon: BookOpen },
   { href: "/identity", label: "Identity", icon: UserCircle },
-  { href: "/genome-explorer", label: "Genome", icon: Dna },
+  { href: "/moss60", label: "MOSS60", icon: Compass },
 ];
 
 export function QuickNav() {
