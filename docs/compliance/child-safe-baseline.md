@@ -3,6 +3,7 @@
 This document defines the strict child-safe baseline for default student deployments of Meta-Pet.
 
 Set `NEXT_PUBLIC_CHILD_SAFE_BASELINE=true` to enforce the route guard for student deployments.
+In CI, set `STUDENT_DEPLOYMENT=true` as well to make the deployment assertion fail fast if the baseline flag is missing.
 
 ## Core Rules
 

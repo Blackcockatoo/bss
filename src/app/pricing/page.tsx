@@ -1,5 +1,6 @@
 "use client";
 
+import { useEnforceChildSafeClientRoute } from "@/lib/childSafeRoute.client";
 import { PLAN_CATALOG } from "@/lib/pricing/hooks";
 import { useSubscription } from "@/lib/pricing/hooks";
 import type { PlanAudience, PlanDefinition, PlanId } from "@/lib/pricing/types";
@@ -125,11 +126,16 @@ function PlanCard({
 }
 
 export default function PricingPage() {
+  const childSafeBlocked = useEnforceChildSafeClientRoute("/pricing");
   const [interval, setInterval] = useState<"monthly" | "yearly">("monthly");
   const [audience, setAudience] = useState<PlanAudience>("consumer");
   const [comingSoon, setComingSoon] = useState(false);
   const [contactShown, setContactShown] = useState(false);
   const subscription = useSubscription();
+
+  if (childSafeBlocked) {
+    return null;
+  }
 
   const audiencePlans = Object.values(PLAN_CATALOG).filter(
     (p) => p.audience === audience,

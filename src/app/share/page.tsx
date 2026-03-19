@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
+
 export const metadata = {
   title: "Rewards & Share — Meta-Pet",
   description:
@@ -69,6 +71,8 @@ const REWARD_TIERS = [
 ];
 
 export default function ShareLandingPage() {
+  enforceChildSafeServerRoute("/share");
+
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 p-6 space-y-8">
       <div className="max-w-2xl mx-auto space-y-8">

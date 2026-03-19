@@ -17,6 +17,10 @@ const CHILD_SAFE_ALLOWED_PREFIXES = ["/app/", "/docs/"];
 
 export const CHILD_SAFE_NAV_ROUTES = new Set(["/", "/pet", "/school-game"]);
 
+export function getChildSafeFallbackPathname(pathname: string): string {
+  return pathname.startsWith("/docs") ? "/legal" : "/app";
+}
+
 export function isChildSafeAllowedPathname(pathname: string): boolean {
   if (CHILD_SAFE_ALLOWED_EXACT.has(pathname)) {
     return true;

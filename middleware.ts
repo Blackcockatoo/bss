@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-import { isChildSafeAllowedPathname } from "./src/lib/childSafeBaseline";
+import {
+  getChildSafeFallbackPathname,
+  isChildSafeAllowedPathname,
+} from "./src/lib/childSafeBaseline";
 
 function isEnabled(value: string | undefined): boolean {
   if (typeof value !== "string") {
@@ -27,7 +30,7 @@ export function middleware(request: NextRequest) {
   }
 
   const redirectUrl = request.nextUrl.clone();
-  redirectUrl.pathname = pathname.startsWith("/docs") ? "/legal" : "/app";
+  redirectUrl.pathname = getChildSafeFallbackPathname(pathname);
   redirectUrl.search = "";
 
   return NextResponse.redirect(redirectUrl);

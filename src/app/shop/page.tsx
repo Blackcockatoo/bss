@@ -11,6 +11,7 @@ import {
 import type { AddonTemplate } from "@/lib/addons/catalog";
 import { CUSTOM_ADDONS } from "@/lib/addons/customAddons";
 import { initializeStarterAddons } from "@/lib/addons/starter";
+import { useEnforceChildSafeClientRoute } from "@/lib/childSafeRoute.client";
 import { useSubscription } from "@/lib/pricing/hooks";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -131,6 +132,7 @@ function AddonCard({
 }
 
 export default function ShopPage() {
+  const childSafeBlocked = useEnforceChildSafeClientRoute("/shop");
   const subscription = useSubscription();
   const [unlocking, setUnlocking] = useState(false);
   const [unlockMessage, setUnlockMessage] = useState<string | null>(null);
@@ -141,6 +143,10 @@ export default function ShopPage() {
         .length,
     [],
   );
+
+  if (childSafeBlocked) {
+    return null;
+  }
 
   const handleUnlock = async () => {
     setUnlocking(true);

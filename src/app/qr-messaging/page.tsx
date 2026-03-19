@@ -1,19 +1,29 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { ArrowLeft, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { QRMessagingPage } from '@/components/QRMessaging';
-import { moss60MessagingContent } from '@/lib/qr-messaging/content';
+import { QRMessagingPage } from "@/components/QRMessaging";
+import { Button } from "@/components/ui/button";
+import { useEnforceChildSafeClientRoute } from "@/lib/childSafeRoute.client";
+import { moss60MessagingContent } from "@/lib/qr-messaging/content";
+import { ArrowLeft, Sparkles } from "lucide-react";
+import Link from "next/link";
 
 export default function QRMessagingRoute() {
+  const childSafeBlocked = useEnforceChildSafeClientRoute("/qr-messaging");
+
+  if (childSafeBlocked) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 p-6">
       <div className="max-w-5xl mx-auto">
         {/* Navigation */}
         <div className="flex items-center justify-between mb-8">
           <Link href="/">
-            <Button variant="ghost" className="gap-2 text-zinc-400 hover:text-white">
+            <Button
+              variant="ghost"
+              className="gap-2 text-zinc-400 hover:text-white"
+            >
               <ArrowLeft className="w-4 h-4" />
               Back to Meta-Pet
             </Button>

@@ -2,16 +2,39 @@
 
 import LegalNotice from "@/components/LegalNotice";
 import { QuickNav } from "@/components/QuickNav";
-import { useEffect } from "react";
+import {
+  getChildSafeFallbackPathname,
+  isChildSafeAllowedPathname,
+} from "@/lib/childSafeBaseline";
+import { ENABLE_CHILD_SAFE_BASELINE } from "@/lib/env/features";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useMemo } from "react";
 
 export default function ClientBody({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const childSafeBlocked = useMemo(
+    () =>
+      ENABLE_CHILD_SAFE_BASELINE &&
+      !isChildSafeAllowedPathname(pathname ?? "/"),
+    [pathname],
+  );
+
   useEffect(() => {
     document.body.classList.add("antialiased");
   }, []);
+
+  useEffect(() => {
+    if (!childSafeBlocked || !pathname) {
+      return;
+    }
+
+    router.replace(getChildSafeFallbackPathname(pathname));
+  }, [childSafeBlocked, pathname, router]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
@@ -28,6 +51,22 @@ export default function ClientBody({
 
     registerServiceWorker();
   }, []);
+
+  if (childSafeBlocked) {
+    return (
+      <div className="flex min-h-screen items-center justify-center px-4 text-center text-zinc-200">
+        <div className="max-w-md space-y-3">
+          <p className="text-sm font-semibold text-emerald-300">
+            Child-safe local mode is active.
+          </p>
+          <p className="text-sm text-zinc-400">
+            This route is disabled in the student baseline and is redirecting to
+            a classroom-safe path.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="antialiased min-h-screen pb-[calc(6rem+env(safe-area-inset-bottom))] flex flex-col">

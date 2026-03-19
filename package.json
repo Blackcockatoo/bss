@@ -13,6 +13,7 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "check:moss60-copy": "node scripts/check-moss60-copy.mjs",
+    "check:child-safe-deployment": "node scripts/assert-child-safe-deployment.mjs",
     "prepare:moss60-production": "node scripts/prepare-moss60-production.mjs",
     "sync:kpps-exports": "node scripts/sync-kpps-package-exports.mjs"
   },

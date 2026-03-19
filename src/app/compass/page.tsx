@@ -1,9 +1,16 @@
 "use client";
 
 import { SteeringWheel } from "@/components/steering";
+import { useEnforceChildSafeClientRoute } from "@/lib/childSafeRoute.client";
 import Link from "next/link";
 
 export default function CompassPage() {
+  const childSafeBlocked = useEnforceChildSafeClientRoute("/compass");
+
+  if (childSafeBlocked) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
       {/* Back button */}

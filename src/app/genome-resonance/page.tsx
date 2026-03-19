@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEnforceChildSafeClientRoute } from "@/lib/childSafeRoute.client";
 import dynamic from "next/dynamic";
+import { useState } from "react";
 import type {
   ExplanationBlock,
   ExplanationResponse,
@@ -16,7 +17,11 @@ const ConstellationDome = dynamic(
     ),
   {
     ssr: false,
-    loading: () => <section className="rounded-xl border border-slate-800 p-4 text-xs text-slate-400">Loading constellation dome...</section>,
+    loading: () => (
+      <section className="rounded-xl border border-slate-800 p-4 text-xs text-slate-400">
+        Loading constellation dome...
+      </section>
+    ),
   },
 );
 
@@ -27,40 +32,56 @@ const ResonanceArena = dynamic(
     ),
   {
     ssr: false,
-    loading: () => <section className="rounded-xl border border-slate-800 p-4 text-xs text-slate-400">Loading resonance arena...</section>,
+    loading: () => (
+      <section className="rounded-xl border border-slate-800 p-4 text-xs text-slate-400">
+        Loading resonance arena...
+      </section>
+    ),
   },
 );
 
 const ExplainerPanel = dynamic(
   () =>
-    import("../../../frontend/src/features/genome/explainer/ExplainerPanel").then(
-      (module) => module.ExplainerPanel,
-    ),
+    import(
+      "../../../frontend/src/features/genome/explainer/ExplainerPanel"
+    ).then((module) => module.ExplainerPanel),
   {
     ssr: false,
-    loading: () => <section className="rounded-xl border border-slate-800 p-4 text-xs text-slate-400">Loading explainer...</section>,
+    loading: () => (
+      <section className="rounded-xl border border-slate-800 p-4 text-xs text-slate-400">
+        Loading explainer...
+      </section>
+    ),
   },
 );
 
 const SonificationCompareMode = dynamic(
   () =>
-    import("../../../frontend/src/features/genome/sonification/CompareMode").then(
-      (module) => module.SonificationCompareMode,
-    ),
+    import(
+      "../../../frontend/src/features/genome/sonification/CompareMode"
+    ).then((module) => module.SonificationCompareMode),
   {
     ssr: false,
-    loading: () => <section className="rounded-xl border border-slate-800 p-4 text-xs text-slate-400">Loading sonification...</section>,
+    loading: () => (
+      <section className="rounded-xl border border-slate-800 p-4 text-xs text-slate-400">
+        Loading sonification...
+      </section>
+    ),
   },
 );
 
 const GenomeTimeline = dynamic(
   () =>
-    import("../../../frontend/src/features/genome/timeline/GenomeTimeline").then(
-      (module) => module.GenomeTimeline,
-    ),
+    import(
+      "../../../frontend/src/features/genome/timeline/GenomeTimeline"
+    ).then((module) => module.GenomeTimeline),
   {
     ssr: false,
-    loading: () => <section className="rounded-xl border border-slate-800 p-4 text-xs text-slate-400">Loading timeline...</section>,
+    loading: () => (
+      <section className="rounded-xl border border-slate-800 p-4 text-xs text-slate-400">
+        Loading timeline...
+      </section>
+    ),
   },
 );
 
@@ -71,7 +92,11 @@ const WhatIfLab = dynamic(
     ),
   {
     ssr: false,
-    loading: () => <section className="rounded-xl border border-slate-800 p-4 text-xs text-slate-400">Loading simulation lab...</section>,
+    loading: () => (
+      <section className="rounded-xl border border-slate-800 p-4 text-xs text-slate-400">
+        Loading simulation lab...
+      </section>
+    ),
   },
 );
 
@@ -157,10 +182,15 @@ async function parseJsonSafely<T>(response: Response): Promise<T | null> {
 }
 
 export default function GenomeResonancePage() {
+  const childSafeBlocked = useEnforceChildSafeClientRoute("/genome-resonance");
   const [selectedTraitId, setSelectedTraitId] = useState<string>(nodes[0].id);
   const [lastSimulation, setLastSimulation] = useState<SimulationResult[]>([]);
   const [blocks, setBlocks] = useState<ExplanationBlock[]>(initialBlocks);
   const [requestError, setRequestError] = useState<string | null>(null);
+
+  if (childSafeBlocked) {
+    return null;
+  }
 
   async function runSimulation(deltas: Record<string, number>) {
     setRequestError(null);
@@ -239,7 +269,9 @@ export default function GenomeResonancePage() {
   return (
     <main className="space-y-4 p-4">
       <section className="rounded-xl border border-slate-700 bg-slate-950 p-4 text-slate-100">
-        <h1 className="text-xl font-semibold tracking-tight">Genome Resonance v1 Loop</h1>
+        <h1 className="text-xl font-semibold tracking-tight">
+          Genome Resonance v1 Loop
+        </h1>
         <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-sm text-slate-200">
           <li>Select a trait node in the Constellation Dome.</li>
           <li>Adjust What-If sliders and run a simulation.</li>
