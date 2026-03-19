@@ -20,6 +20,10 @@ export const ENABLE_AUTH = toEnabled(
   process.env.NEXT_PUBLIC_ENABLE_AUTH,
   false,
 );
+export const ENABLE_CHILD_SAFE_BASELINE = toEnabled(
+  process.env.NEXT_PUBLIC_CHILD_SAFE_BASELINE,
+  false,
+);
 export const ENABLE_MAPS = toEnabled(
   process.env.NEXT_PUBLIC_ENABLE_MAPS,
   false,

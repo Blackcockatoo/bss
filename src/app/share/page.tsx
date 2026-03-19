@@ -52,7 +52,7 @@ const REWARD_TIERS = [
     tier: "Silver",
     color: "border-zinc-500/50 bg-zinc-900/50 text-zinc-300",
     essence: 25,
-    desc: "Sustained effort — 25 battles, 50 samples collected, streak runs.",
+    desc: "Sustained effort — 25 battles, 50 samples collected, consistent practice.",
   },
   {
     tier: "Gold",
@@ -64,7 +64,7 @@ const REWARD_TIERS = [
     tier: "Platinum",
     color: "border-cyan-500/50 bg-cyan-950/30 text-cyan-300",
     essence: 100,
-    desc: "Legendary — perfect care, unstoppable streak, full map, speciation.",
+    desc: "Legendary — perfect care, full map, deep exploration, speciation.",
   },
 ];
 

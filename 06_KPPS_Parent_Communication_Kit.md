@@ -4,6 +4,8 @@
 **Use these templates directly or adapt to your school's voice**  
 **All messages written for Sentral, newsletter, or parent portal**
 
+These templates describe the **strict child-safe pilot baseline**: default student use is local-first, zero-account, and separate from any adult-only admin or billing tooling.
+
 ---
 
 ## Message 1: Initial Pilot Announcement
@@ -23,7 +25,7 @@ A privacy-first "Meta-Pet" system designed by a KPPS parent in collaboration wit
 This tool aligns with our KPPS values (Respect, Resilience, Excellence, Cooperation, Community) and supports our wellbeing curriculum. It's also a hands-on way to teach homeostasis, feedback loops, and data literacy — core STEM concepts.
 
 **What makes it different:**  
-Unlike most classroom apps, this one is **offline-first** with **no accounts required** and **no student data transmission**. Your child's Meta-Pet lives entirely on their device. We never see it, track it, or store any information about it. There are no timers, no notifications, and no addictive mechanics — just calm, thoughtful interaction.
+Unlike most classroom apps, this pilot build is **offline-first** with **no student accounts required** and **no default student data transmission**. Your child's Meta-Pet lives entirely on their device during normal classroom use. We do not see it, profile it, or store it on a server. The child-safe baseline avoids countdown pressure, streak pressure, notifications, and public leaderboards — just calm, thoughtful interaction.
 
 **What students will do:**  
 Seven 20-minute sessions exploring care routines, emotional awareness, systems thinking, and data patterns. Students will reflect on what they observe and connect it to real-life self-regulation strategies.
@@ -56,13 +58,13 @@ We're halfway through our Meta-Pet pilot, and we wanted to share what we're noti
 Students are practising observation skills, connecting cause and effect, and using wellbeing language like "My pet feels Anxious, so I'm focusing on Rest first." They're also applying STEM concepts like homeostasis and feedback loops in real time.
 
 **What teachers are noticing:**  
-[Teacher Name] reports that students are engaged without needing timers or reward systems. The offline-first design means no login issues, no forgotten passwords, and no "it won't load" frustrations. Students can close the app without anxiety because there are no streaks or countdowns.
+[Teacher Name] reports that students are engaged without needing daily-pressure loops. The offline-first design means no login issues, no forgotten passwords, and no "it won't load" frustrations. Students can close the app without anxiety because the pilot build avoids streak pressure and countdown pressure.
 
 **What you might hear at home:**  
 Your child might talk about their Meta-Pet's "mood" or mention trying different strategies to help it feel balanced. This is intentional — we're teaching systems thinking through a relatable, low-stakes simulation.
 
 **Privacy reminder:**  
-Your child's Meta-Pet data never leaves their device. No accounts, no tracking, no uploads. This is structurally safe by design.
+Your child's Meta-Pet data stays on their device during normal classroom use. No student accounts, no third-party tracking, no default uploads. This is structurally safer by design.
 
 **Next week:**  
 We'll shift into the STEM lens — students will analyse patterns, test hypotheses, and present their learning. We'll share a summary when the pilot concludes.
@@ -135,7 +137,7 @@ A: It's a digital companion that students care for using four vitals (Nutrition,
 ---
 
 **Q: Is this a game?**  
-A: No. It's a **systems simulation** — the same kind of modelling used in science class to explore ecosystems or the human body. There are no points, no leaderboards, no achievements, and no timers. Students engage because the system is interesting, not because they're chasing rewards.
+A: It's best understood as a **systems simulation** — the same kind of modelling used in science class to explore ecosystems or the human body. The child-safe pilot baseline avoids leaderboards, countdown pressure, and daily check-in pressure. Students engage because the system is interesting, not because they're being pushed into compulsive use.
 
 ---
 
@@ -150,7 +152,7 @@ A: A KPPS parent (who is also a developer) in collaboration with their child, a 
 ---
 
 **Q: What data does it collect?**  
-A: **None.** The Meta-Pet's "DNA" (a 180-digit genetic code) and all interaction data stay entirely on your child's device. The system is **offline-first** — it doesn't need internet to function. There are no accounts, no logins, and no data uploads. We (the school and the developer) never see what happens in your child's Meta-Pet.
+A: In the **pilot baseline**, nothing leaves your child's device during normal classroom use. The Meta-Pet's "DNA" (a 180-digit genetic code) and interaction data stay local. The system is **offline-first** and does not require a student account or routine data uploads. We (the school and the developer) do not see what happens inside your child's Meta-Pet during pilot use.
 
 ---
 
@@ -161,17 +163,17 @@ A: No. Each student's Meta-Pet is private to their device. Students might share 
 
 **Q: Is it safe?**  
 A: Yes. The offline-first architecture removes most digital risks:
-- No accounts = no passwords to leak
-- No data transmission = no information to breach
-- No third-party trackers = no hidden data collection
-- No timers or notifications = no addictive manipulation
+- No student accounts = no passwords for children to leak
+- No default cloud transmission = much less information available to breach
+- No third-party trackers = no hidden adtech or profiling layer in child mode
+- No countdown or streak pressure = less manipulative engagement design
 
 Additionally, the UX is designed to be **calm** (meditation mechanics, gentle pacing, no dopamine exploitation). Students can close the app without anxiety.
 
 ---
 
 **Q: Will my child's Meta-Pet "die" if they don't check it constantly?**  
-A: No. This is not a Tamagotchi. Vitals pause when the app is closed. There are no countdowns, no streak systems, and no penalties for not checking in. Students engage during class time (20 minutes per session) and can ignore it outside of that without consequence.
+A: No. This is not a Tamagotchi. Vitals pause when the app is closed. The child-safe pilot baseline avoids countdowns, daily streak penalties, and missed-day punishments. Students engage during class time (20 minutes per session) and can ignore it outside of that without consequence.
 
 ---
 
@@ -208,7 +210,7 @@ A: Email [Principal Name] or [Wellbeing Coordinator] with your thoughts. Anonymo
 A: The tool is designed with flexibility:
 - Pair/group work options (no solo requirement)
 - Visual clarity (colour-coded vitals, large text)
-- Calm pacing (no timers, no pressure)
+- Calm pacing (no countdown pressure, no missed-day pressure)
 - Scaffolded reflection prompts (simpler vs. more complex options)
 
 If your child needs specific accommodations, please discuss with [Teacher Name] before the pilot begins.

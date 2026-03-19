@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { triggerHaptic } from '@/lib/haptics';
+import { triggerHaptic } from "@/lib/haptics";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 interface SafeCrackMiniProps {
   petName?: string;
@@ -10,9 +10,9 @@ interface SafeCrackMiniProps {
   onGameOver?: (success: boolean, score: number, attempts: number) => void;
 }
 
-type Band = 'COOL' | 'NEUTRAL' | 'HOT';
-type Direction = 'R' | 'L'; // R = clockwise, L = counter-clockwise
-type GameState = 'S1_R' | 'S2_L' | 'S3_R' | 'UNLOCK' | 'FAIL' | 'IDLE';
+type Band = "COOL" | "NEUTRAL" | "HOT";
+type Direction = "R" | "L"; // R = clockwise, L = counter-clockwise
+type GameState = "S1_R" | "S2_L" | "S3_R" | "UNLOCK" | "FAIL" | "IDLE";
 
 interface Combo {
   n1: number;
@@ -104,13 +104,17 @@ function generateCombo(rng: () => number): Combo {
 // Generate band from seed
 function generateBand(rng: () => number): Band {
   const roll = rng();
-  if (roll < 0.33) return 'COOL';
-  if (roll < 0.66) return 'NEUTRAL';
-  return 'HOT';
+  if (roll < 0.33) return "COOL";
+  if (roll < 0.66) return "NEUTRAL";
+  return "HOT";
 }
 
 // Generate decoy positions
-function generateDecoys(combo: Combo, band: Band, rng: () => number): DecoyPosition[] {
+function generateDecoys(
+  combo: Combo,
+  band: Band,
+  rng: () => number,
+): DecoyPosition[] {
   const config = BAND_CONFIGS[band];
   const decoys: DecoyPosition[] = [];
   const targetTicks = new Set([combo.n1, combo.n2, combo.n3]);
@@ -121,11 +125,11 @@ function generateDecoys(combo: Combo, band: Band, rng: () => number): DecoyPosit
   for (const gate of RED_GATES) {
     if (targetTicks.has(gate)) continue;
 
-    if (band === 'HOT') {
+    if (band === "HOT") {
       // ±2 ticks for HOT
       decoys.push({ tick: (gate - 2 + TICKS) % TICKS, isDecoy: true });
       decoys.push({ tick: (gate + 2) % TICKS, isDecoy: true });
-    } else if (band === 'NEUTRAL' && rng() > 0.5) {
+    } else if (band === "NEUTRAL" && rng() > 0.5) {
       // Random ±1 or ±2 for NEUTRAL
       const offset = rng() > 0.5 ? 1 : 2;
       if (rng() > 0.5) {
@@ -151,12 +155,16 @@ function circularDistance(from: number, to: number): number {
 function effectiveTolerance(band: Band, speed: number): number {
   const config = BAND_CONFIGS[band];
   const speedInTicksPerSec = speed / DEGREES_PER_TICK;
-  const tolerance = config.baseTolerance - TOLERANCE_DECAY_K * Math.abs(speedInTicksPerSec);
-  return Math.max(config.minTolerance, Math.min(config.baseTolerance, tolerance));
+  const tolerance =
+    config.baseTolerance - TOLERANCE_DECAY_K * Math.abs(speedInTicksPerSec);
+  return Math.max(
+    config.minTolerance,
+    Math.min(config.baseTolerance, tolerance),
+  );
 }
 
 export function SafeCrackMini({
-  petName = 'Meta-Pet',
+  petName = "Meta-Pet",
   genomeSeed,
   onExit,
   onGameOver,
@@ -171,7 +179,9 @@ export function SafeCrackMini({
   const dialCenterRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const prevAngleRef = useRef<number>(0);
   const [wobbleAnimation, setWobbleAnimation] = useState(false);
-  const [successParticles, setSuccessParticles] = useState<{ id: number; x: number; y: number }[]>([]);
+  const [successParticles, setSuccessParticles] = useState<
+    { id: number; x: number; y: number }[]
+  >([]);
   const [nearMissGlow, setNearMissGlow] = useState(false);
   const [sessionStreak, setSessionStreak] = useState(0);
   const [bestSessionStreak, setBestSessionStreak] = useState(0);
@@ -188,7 +198,7 @@ export function SafeCrackMini({
     const decoys = generateDecoys(combo, band, rng);
 
     setGameState({
-      state: 'S1_R',
+      state: "S1_R",
       step: 1,
       strikes: 0,
       crossedZero: false,
@@ -223,20 +233,23 @@ export function SafeCrackMini({
   // Get required direction based on state
   const requiredDirection = useMemo((): Direction | null => {
     if (!gameState) return null;
-    if (gameState.state === 'S1_R') return 'R';
-    if (gameState.state === 'S2_L') return 'L';
-    if (gameState.state === 'S3_R') return 'R';
+    if (gameState.state === "S1_R") return "R";
+    if (gameState.state === "S2_L") return "L";
+    if (gameState.state === "S3_R") return "R";
     return null;
   }, [gameState]);
 
   // Update dial angle from mouse/touch position
-  const updateDialFromPointer = useCallback((clientX: number, clientY: number) => {
-    const dx = clientX - dialCenterRef.current.x;
-    const dy = clientY - dialCenterRef.current.y;
-    const angleRad = Math.atan2(dy, dx);
-    const angleDeg = ((angleRad * 180) / Math.PI + 90 + 360) % 360;
-    return angleDeg;
-  }, []);
+  const updateDialFromPointer = useCallback(
+    (clientX: number, clientY: number) => {
+      const dx = clientX - dialCenterRef.current.x;
+      const dy = clientY - dialCenterRef.current.y;
+      const angleRad = Math.atan2(dy, dx);
+      const angleDeg = ((angleRad * 180) / Math.PI + 90 + 360) % 360;
+      return angleDeg;
+    },
+    [],
+  );
 
   // Handle pointer down
   const handlePointerDown = useCallback(
@@ -250,7 +263,7 @@ export function SafeCrackMini({
       const angle = updateDialFromPointer(e.clientX, e.clientY);
       setLastMouseAngle(angle);
     },
-    [updateDialFromPointer]
+    [updateDialFromPointer],
   );
 
   // Handle pointer move
@@ -265,7 +278,7 @@ export function SafeCrackMini({
         if (delta > 180) delta -= 360;
         if (delta < -180) delta += 360;
 
-        setGameState(prev => {
+        setGameState((prev) => {
           if (!prev) return prev;
           const nextAngle = (prev.currentAngle + delta + 360) % 360;
           const prevTick = prev.currentTick;
@@ -291,7 +304,7 @@ export function SafeCrackMini({
 
       setLastMouseAngle(newAngle);
     },
-    [isDragging, gameState, lastMouseAngle, updateDialFromPointer]
+    [isDragging, gameState, lastMouseAngle, updateDialFromPointer],
   );
 
   // Handle pointer up
@@ -305,14 +318,14 @@ export function SafeCrackMini({
     const handleKey = (event: KeyboardEvent) => {
       if (!gameState) return;
 
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         event.preventDefault();
         onExit?.();
         return;
       }
 
-      if (gameState.state === 'UNLOCK' || gameState.state === 'FAIL') {
-        if (event.key === 'Enter' || event.key.toLowerCase() === 'r') {
+      if (gameState.state === "UNLOCK" || gameState.state === "FAIL") {
+        if (event.key === "Enter" || event.key.toLowerCase() === "r") {
           event.preventDefault();
           resetGame();
         }
@@ -320,53 +333,66 @@ export function SafeCrackMini({
       }
 
       // Nudge dial with arrow keys
-      if (event.key === 'ArrowLeft') {
+      if (event.key === "ArrowLeft") {
         event.preventDefault();
-        setGameState(prev => {
+        setGameState((prev) => {
           if (!prev) return prev;
           const nextAngle = (prev.currentAngle - DEGREES_PER_TICK + 360) % 360;
           const prevTick = prev.currentTick;
           const nextTick = Math.floor(nextAngle / DEGREES_PER_TICK);
           let crossedZero = prev.crossedZero;
           if (prevTick === 0 && nextTick === TICKS - 1) crossedZero = true;
-          return { ...prev, currentAngle: nextAngle, currentTick: nextTick, crossedZero };
+          return {
+            ...prev,
+            currentAngle: nextAngle,
+            currentTick: nextTick,
+            crossedZero,
+          };
         });
-      } else if (event.key === 'ArrowRight') {
+      } else if (event.key === "ArrowRight") {
         event.preventDefault();
-        setGameState(prev => {
+        setGameState((prev) => {
           if (!prev) return prev;
           const nextAngle = (prev.currentAngle + DEGREES_PER_TICK) % 360;
           const prevTick = prev.currentTick;
           const nextTick = Math.floor(nextAngle / DEGREES_PER_TICK);
           let crossedZero = prev.crossedZero;
           if (prevTick === TICKS - 1 && nextTick === 0) crossedZero = true;
-          return { ...prev, currentAngle: nextAngle, currentTick: nextTick, crossedZero };
+          return {
+            ...prev,
+            currentAngle: nextAngle,
+            currentTick: nextTick,
+            crossedZero,
+          };
         });
       }
 
       // Commit with Space or Enter
-      if (event.key === ' ' || event.key === 'Enter') {
+      if (event.key === " " || event.key === "Enter") {
         event.preventDefault();
-        setGameState(prev => {
+        setGameState((prev) => {
           if (!prev) return prev;
 
           // Check if in decoy zone
-          const inDecoyZone = prev.decoys.some(decoy => {
+          const inDecoyZone = prev.decoys.some((decoy) => {
             const distance = circularDistance(prev.currentTick, decoy.tick);
-            const tolerance = effectiveTolerance(prev.band, Math.abs(prev.angularVelocity));
+            const tolerance = effectiveTolerance(
+              prev.band,
+              Math.abs(prev.angularVelocity),
+            );
             return distance <= tolerance;
           });
 
           if (inDecoyZone) {
             // False click - add strike and reset
             const nextStrikes = prev.strikes + 1;
-            triggerHaptic('error');
+            triggerHaptic("error");
             setWobbleAnimation(true);
             setTimeout(() => setWobbleAnimation(false), 500);
             if (nextStrikes >= MAX_STRIKES) {
               onGameOver?.(false, 0, nextStrikes);
               setSessionStreak(0);
-              return { ...prev, state: 'FAIL', strikes: nextStrikes };
+              return { ...prev, state: "FAIL", strikes: nextStrikes };
             }
             return {
               ...prev,
@@ -381,7 +407,7 @@ export function SafeCrackMini({
             // Success - advance step
             if (prev.step === 3) {
               // UNLOCK!
-              triggerHaptic('success');
+              triggerHaptic("success");
               // Generate success particles
               const particles = Array.from({ length: 20 }, (_, i) => ({
                 id: Date.now() + i,
@@ -394,23 +420,24 @@ export function SafeCrackMini({
               const totalTime = (performance.now() - prev.startTime) / 1000;
               const avgDistance =
                 prev.distanceLog.length > 0
-                  ? prev.distanceLog.reduce((a, b) => a + b, 0) / prev.distanceLog.length
+                  ? prev.distanceLog.reduce((a, b) => a + b, 0) /
+                    prev.distanceLog.length
                   : 0;
               const score = calculateScore(prev.band, avgDistance, totalTime);
               onGameOver?.(true, score, prev.strikes);
-              setSessionStreak(current => {
+              setSessionStreak((current) => {
                 const next = current + 1;
-                setBestSessionStreak(best => Math.max(best, next));
+                setBestSessionStreak((best) => Math.max(best, next));
                 return next;
               });
-              return { ...prev, state: 'UNLOCK' };
+              return { ...prev, state: "UNLOCK" };
             } else {
               // Advance to next step
-              triggerHaptic('medium');
+              triggerHaptic("medium");
               const nextStep = (prev.step + 1) as 1 | 2 | 3;
-              let nextState: GameState = 'IDLE';
-              if (nextStep === 2) nextState = 'S2_L';
-              if (nextStep === 3) nextState = 'S3_R';
+              let nextState: GameState = "IDLE";
+              if (nextStep === 2) nextState = "S2_L";
+              if (nextStep === 3) nextState = "S3_R";
 
               return {
                 ...prev,
@@ -424,15 +451,15 @@ export function SafeCrackMini({
             }
           } else {
             // Failed commit - add strike
-            triggerHaptic('warning');
+            triggerHaptic("warning");
             setWobbleAnimation(true);
             setTimeout(() => setWobbleAnimation(false), 500);
             const nextStrikes = prev.strikes + 1;
             if (nextStrikes >= MAX_STRIKES) {
-              triggerHaptic('error');
+              triggerHaptic("error");
               onGameOver?.(false, 0, nextStrikes);
               setSessionStreak(0);
-              return { ...prev, state: 'FAIL', strikes: nextStrikes };
+              return { ...prev, state: "FAIL", strikes: nextStrikes };
             }
             return {
               ...prev,
@@ -445,14 +472,18 @@ export function SafeCrackMini({
       }
     };
 
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
   }, [gameState, onExit, onGameOver, resetGame]);
 
   // Game loop: update velocity, check cone conditions, dwell timing
   useEffect(() => {
     const loop = (timestamp: number) => {
-      if (!gameState || gameState.state === 'UNLOCK' || gameState.state === 'FAIL') {
+      if (
+        !gameState ||
+        gameState.state === "UNLOCK" ||
+        gameState.state === "FAIL"
+      ) {
         frameRef.current = requestAnimationFrame(loop);
         return;
       }
@@ -464,7 +495,7 @@ export function SafeCrackMini({
       }
       lastFrameTimeRef.current = timestamp;
 
-      setGameState(prev => {
+      setGameState((prev) => {
         if (!prev || currentTarget === null || !requiredDirection) return prev;
 
         // Calculate angular velocity from angle delta
@@ -475,13 +506,20 @@ export function SafeCrackMini({
         const instantVelocity = (angleDelta / dt) * 1000; // degrees per second
         prevAngleRef.current = prev.currentAngle;
 
-        const newVelocityHistory = [...velocityHistory.slice(1), instantVelocity];
+        const newVelocityHistory = [
+          ...velocityHistory.slice(1),
+          instantVelocity,
+        ];
         setVelocityHistory(newVelocityHistory);
         const smoothedVelocity =
-          newVelocityHistory.reduce((a, b) => a + b, 0) / newVelocityHistory.length;
+          newVelocityHistory.reduce((a, b) => a + b, 0) /
+          newVelocityHistory.length;
 
         const distance = circularDistance(prev.currentTick, currentTarget);
-        const tolerance = effectiveTolerance(prev.band, Math.abs(smoothedVelocity));
+        const tolerance = effectiveTolerance(
+          prev.band,
+          Math.abs(smoothedVelocity),
+        );
         const insideCone = distance <= tolerance;
 
         const config = BAND_CONFIGS[prev.band];
@@ -500,12 +538,12 @@ export function SafeCrackMini({
         if (insideCone && prev.crossedZero && speedOk) {
           if (dwellStart === null) {
             dwellStart = timestamp;
-            triggerHaptic('light'); // Haptic when entering target zone
+            triggerHaptic("light"); // Haptic when entering target zone
           } else {
             const dwellDuration = timestamp - dwellStart;
             if (dwellDuration >= config.dwellTime) {
               if (!readyToCommit) {
-                triggerHaptic('success'); // Haptic when ready to commit
+                triggerHaptic("success"); // Haptic when ready to commit
               }
               readyToCommit = true;
               // Log distance for scoring
@@ -516,7 +554,7 @@ export function SafeCrackMini({
           }
         } else {
           if (dwellStart !== null) {
-            triggerHaptic('selection'); // Haptic when leaving target zone
+            triggerHaptic("selection"); // Haptic when leaving target zone
           }
           dwellStart = null;
           readyToCommit = false;
@@ -543,25 +581,28 @@ export function SafeCrackMini({
 
   // Commit function for mobile button - must be before early return to follow React rules of hooks
   const handleCommit = useCallback(() => {
-    setGameState(prev => {
+    setGameState((prev) => {
       if (!prev) return prev;
-      if (prev.state === 'UNLOCK' || prev.state === 'FAIL') return prev;
+      if (prev.state === "UNLOCK" || prev.state === "FAIL") return prev;
 
       // Check if in decoy zone
-      const inDecoyZone = prev.decoys.some(decoy => {
+      const inDecoyZone = prev.decoys.some((decoy) => {
         const distance = circularDistance(prev.currentTick, decoy.tick);
-        const tolerance = effectiveTolerance(prev.band, Math.abs(prev.angularVelocity));
+        const tolerance = effectiveTolerance(
+          prev.band,
+          Math.abs(prev.angularVelocity),
+        );
         return distance <= tolerance;
       });
 
       if (inDecoyZone) {
-        triggerHaptic('error');
+        triggerHaptic("error");
         setWobbleAnimation(true);
         setTimeout(() => setWobbleAnimation(false), 500);
         const nextStrikes = prev.strikes + 1;
         if (nextStrikes >= MAX_STRIKES) {
           onGameOver?.(false, 0, nextStrikes);
-          return { ...prev, state: 'FAIL', strikes: nextStrikes };
+          return { ...prev, state: "FAIL", strikes: nextStrikes };
         }
         return {
           ...prev,
@@ -573,7 +614,7 @@ export function SafeCrackMini({
 
       if (prev.readyToCommit) {
         if (prev.step === 3) {
-          triggerHaptic('success');
+          triggerHaptic("success");
           const particles = Array.from({ length: 20 }, (_, i) => ({
             id: Date.now() + i,
             x: 200 + (Math.random() - 0.5) * 100,
@@ -585,17 +626,18 @@ export function SafeCrackMini({
           const totalTime = (performance.now() - prev.startTime) / 1000;
           const avgDistance =
             prev.distanceLog.length > 0
-              ? prev.distanceLog.reduce((a, b) => a + b, 0) / prev.distanceLog.length
+              ? prev.distanceLog.reduce((a, b) => a + b, 0) /
+                prev.distanceLog.length
               : 0;
           const score = calculateScore(prev.band, avgDistance, totalTime);
           onGameOver?.(true, score, prev.strikes);
-          return { ...prev, state: 'UNLOCK' };
+          return { ...prev, state: "UNLOCK" };
         } else {
-          triggerHaptic('medium');
+          triggerHaptic("medium");
           const nextStep = (prev.step + 1) as 1 | 2 | 3;
-          let nextState: GameState = 'IDLE';
-          if (nextStep === 2) nextState = 'S2_L';
-          if (nextStep === 3) nextState = 'S3_R';
+          let nextState: GameState = "IDLE";
+          if (nextStep === 2) nextState = "S2_L";
+          if (nextStep === 3) nextState = "S3_R";
 
           return {
             ...prev,
@@ -608,14 +650,14 @@ export function SafeCrackMini({
           };
         }
       } else {
-        triggerHaptic('warning');
+        triggerHaptic("warning");
         setWobbleAnimation(true);
         setTimeout(() => setWobbleAnimation(false), 500);
         const nextStrikes = prev.strikes + 1;
         if (nextStrikes >= MAX_STRIKES) {
-          triggerHaptic('error');
+          triggerHaptic("error");
           onGameOver?.(false, 0, nextStrikes);
-          return { ...prev, state: 'FAIL', strikes: nextStrikes };
+          return { ...prev, state: "FAIL", strikes: nextStrikes };
         }
         return {
           ...prev,
@@ -629,28 +671,40 @@ export function SafeCrackMini({
 
   // Nudge functions for mobile - must be before early return
   const nudgeLeft = useCallback(() => {
-    triggerHaptic('selection');
-    setGameState(prev => {
-      if (!prev || prev.state === 'UNLOCK' || prev.state === 'FAIL') return prev;
+    triggerHaptic("selection");
+    setGameState((prev) => {
+      if (!prev || prev.state === "UNLOCK" || prev.state === "FAIL")
+        return prev;
       const nextAngle = (prev.currentAngle - DEGREES_PER_TICK + 360) % 360;
       const prevTick = prev.currentTick;
       const nextTick = Math.floor(nextAngle / DEGREES_PER_TICK);
       let crossedZero = prev.crossedZero;
       if (prevTick === 0 && nextTick === TICKS - 1) crossedZero = true;
-      return { ...prev, currentAngle: nextAngle, currentTick: nextTick, crossedZero };
+      return {
+        ...prev,
+        currentAngle: nextAngle,
+        currentTick: nextTick,
+        crossedZero,
+      };
     });
   }, []);
 
   const nudgeRight = useCallback(() => {
-    triggerHaptic('selection');
-    setGameState(prev => {
-      if (!prev || prev.state === 'UNLOCK' || prev.state === 'FAIL') return prev;
+    triggerHaptic("selection");
+    setGameState((prev) => {
+      if (!prev || prev.state === "UNLOCK" || prev.state === "FAIL")
+        return prev;
       const nextAngle = (prev.currentAngle + DEGREES_PER_TICK) % 360;
       const prevTick = prev.currentTick;
       const nextTick = Math.floor(nextAngle / DEGREES_PER_TICK);
       let crossedZero = prev.crossedZero;
       if (prevTick === TICKS - 1 && nextTick === 0) crossedZero = true;
-      return { ...prev, currentAngle: nextAngle, currentTick: nextTick, crossedZero };
+      return {
+        ...prev,
+        currentAngle: nextAngle,
+        currentTick: nextTick,
+        crossedZero,
+      };
     });
   }, []);
 
@@ -671,31 +725,48 @@ export function SafeCrackMini({
             Auralia Vault Lockpick
           </span>
           <span className="text-slate-200">
-            Operator: <span className="font-semibold text-amber-300">{petName}</span>
+            Operator:{" "}
+            <span className="font-semibold text-amber-300">{petName}</span>
           </span>
         </div>
         <div className="flex gap-4">
           <div className="flex flex-col items-end">
-            <span className="text-[11px] uppercase tracking-wide text-slate-400">Heat</span>
-            <span className={`font-mono text-base ${
-              gameState.band === 'COOL' ? 'text-blue-300' :
-              gameState.band === 'NEUTRAL' ? 'text-yellow-300' :
-              'text-red-300'
-            }`}>
+            <span className="text-[11px] uppercase tracking-wide text-slate-400">
+              Heat
+            </span>
+            <span
+              className={`font-mono text-base ${
+                gameState.band === "COOL"
+                  ? "text-blue-300"
+                  : gameState.band === "NEUTRAL"
+                    ? "text-yellow-300"
+                    : "text-red-300"
+              }`}
+            >
               {gameState.band}
             </span>
           </div>
           <div className="flex flex-col items-end">
-            <span className="text-[11px] uppercase tracking-wide text-slate-400">Step</span>
+            <span className="text-[11px] uppercase tracking-wide text-slate-400">
+              Step
+            </span>
             <span className="font-mono text-base">{gameState.step}/3</span>
           </div>
           <div className="flex flex-col items-end">
-            <span className="text-[11px] uppercase tracking-wide text-slate-400">Strikes</span>
-            <span className="font-mono text-base text-red-400">{gameState.strikes}/{MAX_STRIKES}</span>
+            <span className="text-[11px] uppercase tracking-wide text-slate-400">
+              Strikes
+            </span>
+            <span className="font-mono text-base text-red-400">
+              {gameState.strikes}/{MAX_STRIKES}
+            </span>
           </div>
           <div className="flex flex-col items-end">
-            <span className="text-[11px] uppercase tracking-wide text-slate-400">Streak</span>
-            <span className="font-mono text-base text-cyan-300">{sessionStreak} / {bestSessionStreak}</span>
+            <span className="text-[11px] uppercase tracking-wide text-slate-400">
+              Flow
+            </span>
+            <span className="font-mono text-base text-cyan-300">
+              {sessionStreak} / {bestSessionStreak}
+            </span>
           </div>
         </div>
       </header>
@@ -706,14 +777,16 @@ export function SafeCrackMini({
           {/* Dial */}
           <div
             className={`relative aspect-square max-h-full w-full max-w-[400px] cursor-pointer transition-transform ${
-              wobbleAnimation ? 'animate-[wobble_0.5s_ease-in-out]' : ''
+              wobbleAnimation ? "animate-[wobble_0.5s_ease-in-out]" : ""
             }`}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerLeave={handlePointerUp}
             style={{
-              filter: nearMissGlow ? 'drop-shadow(0 0 10px rgba(251, 191, 36, 0.8))' : 'none',
+              filter: nearMissGlow
+                ? "drop-shadow(0 0 10px rgba(251, 191, 36, 0.8))"
+                : "none",
             }}
           >
             <svg viewBox="0 0 400 400" className="w-full h-full">
@@ -731,7 +804,14 @@ export function SafeCrackMini({
                 />
               )}
               {/* Background circle */}
-              <circle cx="200" cy="200" r="180" fill="#0f172a" stroke="#334155" strokeWidth="2" />
+              <circle
+                cx="200"
+                cy="200"
+                r="180"
+                fill="#0f172a"
+                stroke="#334155"
+                strokeWidth="2"
+              />
 
               {/* Tick marks */}
               {Array.from({ length: TICKS }).map((_, i) => {
@@ -751,17 +831,20 @@ export function SafeCrackMini({
                     y1={y1}
                     x2={x2}
                     y2={y2}
-                    stroke={isRedGate ? '#ef4444' : isMajor ? '#94a3b8' : '#475569'}
+                    stroke={
+                      isRedGate ? "#ef4444" : isMajor ? "#94a3b8" : "#475569"
+                    }
                     strokeWidth={isRedGate ? 3 : isMajor ? 2 : 1}
                   />
                 );
               })}
 
               {/* Decoy indicators (visible during gameplay) */}
-              {gameState.state !== 'UNLOCK' && gameState.state !== 'FAIL' && (
+              {gameState.state !== "UNLOCK" && gameState.state !== "FAIL" && (
                 <>
                   {gameState.decoys.map((decoy, idx) => {
-                    const angle = (decoy.tick * DEGREES_PER_TICK - 90) * (Math.PI / 180);
+                    const angle =
+                      (decoy.tick * DEGREES_PER_TICK - 90) * (Math.PI / 180);
                     const r = 140;
                     const x = 200 + r * Math.cos(angle);
                     const y = 200 + r * Math.sin(angle);
@@ -783,10 +866,15 @@ export function SafeCrackMini({
               )}
 
               {/* Target indicators (after unlock, show combo) */}
-              {gameState.state === 'UNLOCK' && (
+              {gameState.state === "UNLOCK" && (
                 <>
-                  {[gameState.combo.n1, gameState.combo.n2, gameState.combo.n3].map((tick, idx) => {
-                    const angle = (tick * DEGREES_PER_TICK - 90) * (Math.PI / 180);
+                  {[
+                    gameState.combo.n1,
+                    gameState.combo.n2,
+                    gameState.combo.n3,
+                  ].map((tick, idx) => {
+                    const angle =
+                      (tick * DEGREES_PER_TICK - 90) * (Math.PI / 180);
                     const r = 140;
                     const x = 200 + r * Math.cos(angle);
                     const y = 200 + r * Math.sin(angle);
@@ -796,7 +884,13 @@ export function SafeCrackMini({
                         cx={x}
                         cy={y}
                         r="8"
-                        fill={idx === 0 ? '#22c55e' : idx === 1 ? '#3b82f6' : '#a855f7'}
+                        fill={
+                          idx === 0
+                            ? "#22c55e"
+                            : idx === 1
+                              ? "#3b82f6"
+                              : "#a855f7"
+                        }
                         stroke="#fff"
                         strokeWidth="2"
                       />
@@ -825,18 +919,26 @@ export function SafeCrackMini({
                   y1="200"
                   x2="200"
                   y2="50"
-                  stroke={gameState.readyToCommit ? '#22c55e' : '#fbbf24'}
+                  stroke={gameState.readyToCommit ? "#22c55e" : "#fbbf24"}
                   strokeWidth="4"
-                  className={gameState.readyToCommit ? 'transition-colors duration-300' : ''}
+                  className={
+                    gameState.readyToCommit
+                      ? "transition-colors duration-300"
+                      : ""
+                  }
                 />
                 <circle
                   cx="200"
                   cy="200"
                   r="12"
-                  fill={gameState.readyToCommit ? '#22c55e' : '#fbbf24'}
+                  fill={gameState.readyToCommit ? "#22c55e" : "#fbbf24"}
                   stroke="#fff"
                   strokeWidth="2"
-                  className={gameState.readyToCommit ? 'transition-colors duration-300' : ''}
+                  className={
+                    gameState.readyToCommit
+                      ? "transition-colors duration-300"
+                      : ""
+                  }
                 />
               </g>
 
@@ -868,13 +970,18 @@ export function SafeCrackMini({
             </svg>
 
             {/* Overlays */}
-            {gameState.state === 'UNLOCK' && (
+            {gameState.state === "UNLOCK" && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70">
                 <div className="px-4 py-3 rounded-xl border border-green-700 bg-slate-900/90 text-center">
-                  <div className="text-xs uppercase tracking-wide text-green-400">Success</div>
-                  <div className="mt-1 text-lg font-semibold text-green-300">Vault Opened!</div>
+                  <div className="text-xs uppercase tracking-wide text-green-400">
+                    Success
+                  </div>
+                  <div className="mt-1 text-lg font-semibold text-green-300">
+                    Vault Opened!
+                  </div>
                   <div className="mt-2 text-xs text-slate-400">
-                    Cipher: {gameState.combo.n1} → {gameState.combo.n2} → {gameState.combo.n3}
+                    Cipher: {gameState.combo.n1} → {gameState.combo.n2} →{" "}
+                    {gameState.combo.n3}
                   </div>
                   <button
                     onClick={resetGame}
@@ -886,11 +993,15 @@ export function SafeCrackMini({
               </div>
             )}
 
-            {gameState.state === 'FAIL' && (
+            {gameState.state === "FAIL" && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70">
                 <div className="px-4 py-3 rounded-xl border border-red-700 bg-slate-900/90 text-center">
-                  <div className="text-xs uppercase tracking-wide text-red-400">Failed</div>
-                  <div className="mt-1 text-lg font-semibold text-red-300">Tumblers Seized</div>
+                  <div className="text-xs uppercase tracking-wide text-red-400">
+                    Failed
+                  </div>
+                  <div className="mt-1 text-lg font-semibold text-red-300">
+                    Tumblers Seized
+                  </div>
                   <div className="mt-2 text-xs text-slate-400">
                     Too many strikes: {gameState.strikes}/{MAX_STRIKES}
                   </div>
@@ -909,29 +1020,40 @@ export function SafeCrackMini({
         {/* Sidebar - hidden on mobile */}
         <aside className="hidden sm:flex w-32 flex-col gap-3 text-xs">
           <div className="rounded-xl border border-slate-800/80 bg-slate-950/70 px-3 py-2">
-            <div className="text-[10px] uppercase tracking-wide text-slate-500 mb-1">Lockpick Flow</div>
+            <div className="text-[10px] uppercase tracking-wide text-slate-500 mb-1">
+              Lockpick Flow
+            </div>
             <div className="space-y-1 text-[11px]">
-              <div>Step {gameState.step}: Rotate {requiredDirection === 'R' ? '→ CW' : '← CCW'}</div>
+              <div>
+                Step {gameState.step}: Rotate{" "}
+                {requiredDirection === "R" ? "→ CW" : "← CCW"}
+              </div>
               <div className="text-slate-400">Must cross 0</div>
               <div className="text-slate-400">Hold steady</div>
             </div>
           </div>
 
           <div className="rounded-xl border border-slate-800/80 bg-slate-950/70 px-3 py-2">
-            <div className="text-[10px] uppercase tracking-wide text-slate-500 mb-1">Status</div>
+            <div className="text-[10px] uppercase tracking-wide text-slate-500 mb-1">
+              Status
+            </div>
             <div className="space-y-1 text-[11px]">
-              <div>0-cross: {gameState.crossedZero ? '✓' : '✗'}</div>
-              <div>Speed: {Math.abs(gameState.angularVelocity).toFixed(1)}°/s</div>
+              <div>0-cross: {gameState.crossedZero ? "✓" : "✗"}</div>
+              <div>
+                Speed: {Math.abs(gameState.angularVelocity).toFixed(1)}°/s
+              </div>
             </div>
           </div>
 
           <div className="rounded-xl border border-slate-800/80 bg-slate-950/70 px-3 py-2 space-y-1">
-            <div className="text-[10px] uppercase tracking-wide text-slate-500 mb-1">Controls</div>
+            <div className="text-[10px] uppercase tracking-wide text-slate-500 mb-1">
+              Controls
+            </div>
             <div>← / → — nudge dial</div>
             <div>Drag — spin dial</div>
             <div>Space/Enter — commit</div>
             <div>Esc — exit</div>
-            <div className="text-cyan-300">Chain clears to build streak.</div>
+            <div className="text-cyan-300">Chain clears to build flow.</div>
           </div>
         </aside>
 
@@ -941,10 +1063,15 @@ export function SafeCrackMini({
           <div className="flex items-center justify-between gap-2 px-2 text-xs">
             <div className="flex items-center gap-3">
               <span className="text-slate-400">
-                Step {gameState.step}: {requiredDirection === 'R' ? '→ CW' : '← CCW'}
+                Step {gameState.step}:{" "}
+                {requiredDirection === "R" ? "→ CW" : "← CCW"}
               </span>
-              <span className={gameState.crossedZero ? 'text-green-400' : 'text-slate-500'}>
-                0-cross: {gameState.crossedZero ? '✓' : '✗'}
+              <span
+                className={
+                  gameState.crossedZero ? "text-green-400" : "text-slate-500"
+                }
+              >
+                0-cross: {gameState.crossedZero ? "✓" : "✗"}
               </span>
             </div>
             <button
@@ -958,25 +1085,37 @@ export function SafeCrackMini({
           {/* Touch control buttons */}
           <div className="flex justify-center items-center gap-4 px-2">
             <button
-              onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); nudgeLeft(); }}
+              onTouchStart={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                nudgeLeft();
+              }}
               onClick={nudgeLeft}
               className="w-20 h-20 rounded-xl bg-slate-800/90 border-2 border-slate-700 flex items-center justify-center text-3xl active:bg-slate-700 active:scale-95 transition-all select-none shadow-lg touch-manipulation"
             >
               ◀
             </button>
             <button
-              onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); handleCommit(); }}
+              onTouchStart={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleCommit();
+              }}
               onClick={handleCommit}
               className={`w-24 h-20 rounded-xl border-2 flex items-center justify-center text-base font-bold select-none shadow-lg active:scale-95 transition-all touch-manipulation ${
                 gameState.readyToCommit
-                  ? 'bg-green-600/90 border-green-500 text-white active:bg-green-500 animate-pulse'
-                  : 'bg-amber-600/90 border-amber-500 text-slate-900 active:bg-amber-500'
+                  ? "bg-green-600/90 border-green-500 text-white active:bg-green-500 animate-pulse"
+                  : "bg-amber-600/90 border-amber-500 text-slate-900 active:bg-amber-500"
               }`}
             >
-              {gameState.readyToCommit ? 'SET PIN' : 'PROBE'}
+              {gameState.readyToCommit ? "SET PIN" : "PROBE"}
             </button>
             <button
-              onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); nudgeRight(); }}
+              onTouchStart={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                nudgeRight();
+              }}
               onClick={nudgeRight}
               className="w-20 h-20 rounded-xl bg-slate-800/90 border-2 border-slate-700 flex items-center justify-center text-3xl active:bg-slate-700 active:scale-95 transition-all select-none shadow-lg touch-manipulation"
             >
@@ -990,7 +1129,11 @@ export function SafeCrackMini({
 }
 
 // Calculate final score based on precision, tempo, and band
-function calculateScore(band: Band, avgDistance: number, totalTime: number): number {
+function calculateScore(
+  band: Band,
+  avgDistance: number,
+  totalTime: number,
+): number {
   const config = BAND_CONFIGS[band];
   const precisionScore = Math.max(0, 1 - avgDistance / config.baseTolerance);
   const timeLimit = 30; // 30 seconds ideal

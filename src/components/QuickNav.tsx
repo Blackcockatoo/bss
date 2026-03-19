@@ -5,10 +5,8 @@ import {
   ArrowLeft,
   BookOpen,
   Dna,
-  FlaskConical,
   Home,
   PawPrint,
-  QrCode,
   UserCircle,
 } from "lucide-react";
 import Link from "next/link";
@@ -16,6 +14,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { CHILD_SAFE_NAV_ROUTES } from "@/lib/childSafeBaseline";
+import { ENABLE_CHILD_SAFE_BASELINE } from "@/lib/env/features";
 import { triggerHaptic } from "@/lib/haptics";
 
 type BeforeInstallPromptEvent = Event & {
@@ -31,20 +31,14 @@ const NAV_ITEMS = [
   { href: "/genome-explorer", label: "Genome", icon: Dna },
 ];
 
-const LAB_ITEMS = [
-  { href: "/qr-messaging", label: "QR (Experimental)", icon: QrCode },
-];
-
 export function QuickNav() {
   const pathname = usePathname();
   const router = useRouter();
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const [isLabsOpen, setIsLabsOpen] = useState(false);
   const [prevPathname, setPrevPathname] = useState(pathname);
   if (prevPathname !== pathname) {
     setPrevPathname(pathname);
-    setIsLabsOpen(false);
   }
 
   const handleBack = useCallback(() => {
@@ -79,6 +73,13 @@ export function QuickNav() {
   }, []);
 
   const showInstall = useMemo(() => installPrompt !== null, [installPrompt]);
+  const visibleNavItems = useMemo(
+    () =>
+      ENABLE_CHILD_SAFE_BASELINE
+        ? NAV_ITEMS.filter((item) => CHILD_SAFE_NAV_ROUTES.has(item.href))
+        : NAV_ITEMS,
+    [],
+  );
 
   const handleInstall = useCallback(async () => {
     if (!installPrompt) {
@@ -94,11 +95,6 @@ export function QuickNav() {
 
   const handleNavClick = useCallback(() => {
     triggerHaptic("selection");
-  }, []);
-
-  const handleLabsToggle = useCallback(() => {
-    triggerHaptic("selection");
-    setIsLabsOpen((open) => !open);
   }, []);
 
   return (
@@ -122,7 +118,7 @@ export function QuickNav() {
 
           {/* Nav Items */}
           <div className="flex-1 flex items-center justify-around">
-            {NAV_ITEMS.map((item) => {
+            {visibleNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
               return (
@@ -155,48 +151,6 @@ export function QuickNav() {
                 </Link>
               );
             })}
-            <div className="relative">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={handleLabsToggle}
-                className={`h-12 w-12 rounded-xl text-slate-400 hover:bg-slate-800/60 hover:text-white touch-manipulation ${
-                  isLabsOpen ? "bg-slate-800/70 text-white" : ""
-                }`}
-                aria-label="Toggle labs navigation"
-              >
-                <FlaskConical className="h-5 w-5" />
-              </Button>
-              {isLabsOpen && (
-                <div className="absolute bottom-14 right-0 w-44 rounded-xl border border-slate-700/70 bg-slate-950/95 p-2 shadow-lg shadow-slate-950/60 backdrop-blur-lg">
-                  <div className="px-2 pb-1 text-[10px] uppercase tracking-wide text-slate-500">
-                    Labs
-                  </div>
-                  <div className="space-y-1">
-                    {LAB_ITEMS.map((item) => {
-                      const Icon = item.icon;
-                      const isActive = pathname === item.href;
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          onClick={handleNavClick}
-                          className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-slate-300 hover:bg-slate-800/70 hover:text-white"
-                        >
-                          <Icon className="h-4 w-4" />
-                          <span
-                            className={isActive ? "text-cyan-300" : undefined}
-                          >
-                            {item.label}
-                          </span>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
 
           {/* Install button */}

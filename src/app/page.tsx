@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 
-import { AchievementShelf } from "@/components/AchievementShelf";
 import { AmbientBackground } from "@/components/AmbientBackground";
 import { AmbientParticles } from "@/components/AmbientParticles";
 import {
@@ -26,7 +25,6 @@ import {
 import { OnboardingTutorial } from "@/components/OnboardingTutorial";
 import { PetHero } from "@/components/PetHero";
 import { PetResponseOverlay } from "@/components/PetResponseOverlay";
-import { QRQuickPanel } from "@/components/QRMessaging";
 import {
   CertificateButton,
   RegistrationCertificate,
@@ -56,6 +54,7 @@ import {
   predictOffspring,
 } from "@/lib/breeding";
 import { useEducationStore } from "@/lib/education";
+import { ENABLE_CHILD_SAFE_BASELINE } from "@/lib/env/features";
 import { initializeEvolution } from "@/lib/evolution";
 import {
   type Genome,
@@ -442,10 +441,7 @@ function CurriculumQueueSection() {
   const recentRewards = rewardHistory.filter(
     (entry) => mountTime - entry.createdAt <= 7 * 24 * 60 * 60 * 1000,
   );
-  const rewardMomentum = Math.min(
-    100,
-    recentRewards.length * 12 + eduXP.streak * 6,
-  );
+  const rewardMomentum = Math.min(100, recentRewards.length * 12);
   const trustScore = clamp(
     Math.round(
       explanationCoverage * 30 +
@@ -577,8 +573,7 @@ function CurriculumQueueSection() {
           <p className="mt-1 text-[11px] text-zinc-400">
             Includes standards transparency, explanation prompts, progress
             outcomes, class energy, and reward cadence.
-            {` `}XP Level {eduXP.level}, streak {eduXP.streak}, vibe reactions{" "}
-            {vibeReactionCount}.
+            {` `}XP Level {eduXP.level}, vibe reactions {vibeReactionCount}.
           </p>
         </div>
       </div>
@@ -793,7 +788,6 @@ export default function Home() {
   const wellnessSetupCompleted = useWellnessStore(
     (state) => state.setupCompletedAt,
   );
-  const checkStreaks = useWellnessStore((state) => state.checkStreaks);
 
   const elementProfile = useMemo(() => {
     if (!traits) return "fire";
@@ -846,18 +840,7 @@ export default function Home() {
   const crestRef = useRef<PrimeTailID | null>(null);
   const heptaRef = useRef<HeptaDigits | null>(null);
   const sessionStartRef = useRef<number | null>(null);
-  const hasCheckedWellnessRef = useRef(false);
   const hasInitializedAppRef = useRef(false);
-
-  // Check wellness streaks on mount
-  useEffect(() => {
-    if (hasCheckedWellnessRef.current) {
-      return;
-    }
-
-    hasCheckedWellnessRef.current = true;
-    checkStreaks();
-  }, [checkStreaks]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -2677,70 +2660,74 @@ export default function Home() {
           </CollapsibleSection>
 
           {/* Sacred Geometry & Sound */}
-          <div className="bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-cyan-500/10 rounded-2xl border border-amber-500/20 p-4">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-center gap-3">
-                <Orbit className="w-6 h-6 text-amber-400" />
-                <div>
-                  <h2 className="text-lg font-bold text-white">
-                    Sacred Geometry &amp; Sound
-                  </h2>
-                  <p className="text-xs text-zinc-400">
-                    Experience DNA as living geometry, music, and light â€” the
-                    same mathematical patterns found in nature, from sunflower
-                    spirals to seashells
-                  </p>
+          {!ENABLE_CHILD_SAFE_BASELINE && (
+            <>
+              <div className="bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-cyan-500/10 rounded-2xl border border-amber-500/20 p-4">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div className="flex items-center gap-3">
+                    <Orbit className="w-6 h-6 text-amber-400" />
+                    <div>
+                      <h2 className="text-lg font-bold text-white">
+                        Sacred Geometry &amp; Sound
+                      </h2>
+                      <p className="text-xs text-zinc-400">
+                        Experience DNA as living geometry, music, and light â€”
+                        the same mathematical patterns found in nature, from
+                        sunflower spirals to seashells
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Link
+                      href={geometrySoundHref}
+                      className="px-4 py-2 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-200 text-sm font-medium hover:bg-amber-500/30 hover:border-amber-400 transition-colors touch-manipulation"
+                    >
+                      Generate My Pet Resonance
+                    </Link>
+                    <Link
+                      href="/time-calculator"
+                      className="px-4 py-2 rounded-xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-200 text-sm font-medium hover:bg-cyan-500/30 hover:border-cyan-400 transition-colors touch-manipulation"
+                    >
+                      MetaPet Time Calculator
+                    </Link>
+                  </div>
                 </div>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <Link
-                  href={geometrySoundHref}
-                  className="px-4 py-2 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-200 text-sm font-medium hover:bg-amber-500/30 hover:border-amber-400 transition-colors touch-manipulation"
-                >
-                  Generate My Pet Resonance
-                </Link>
-                <Link
-                  href="/time-calculator"
-                  className="px-4 py-2 rounded-xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-200 text-sm font-medium hover:bg-cyan-500/30 hover:border-cyan-400 transition-colors touch-manipulation"
-                >
-                  MetaPet Time Calculator
-                </Link>
-              </div>
-            </div>
-          </div>
 
-          {/* Steering Wheel â€” Central Navigator */}
-          <div className="bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 rounded-2xl border border-cyan-500/20 p-4">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-center gap-3">
-                <Compass className="w-6 h-6 text-cyan-400" />
-                <div>
-                  <h2 className="text-lg font-bold text-white">
-                    Steering Wheel
-                  </h2>
-                  <p className="text-xs text-zinc-400">
-                    Navigate every corner of the Meta-Pet universe from one
-                    place â€” features, tools, and future expansions all radiate
-                    from here
-                  </p>
+              {/* Steering Wheel â€” Central Navigator */}
+              <div className="bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 rounded-2xl border border-cyan-500/20 p-4">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div className="flex items-center gap-3">
+                    <Compass className="w-6 h-6 text-cyan-400" />
+                    <div>
+                      <h2 className="text-lg font-bold text-white">
+                        Steering Wheel
+                      </h2>
+                      <p className="text-xs text-zinc-400">
+                        Navigate every corner of the Meta-Pet universe from one
+                        place â€” features, tools, and future expansions all
+                        radiate from here
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Link
+                      href="/monkey-invaders"
+                      className="px-4 py-2 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-200 text-sm font-medium hover:bg-amber-500/30 hover:border-amber-300 transition-colors touch-manipulation"
+                    >
+                      Launch Monkey Invaders
+                    </Link>
+                    <Link
+                      href="/compass"
+                      className="px-4 py-2 rounded-xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-200 text-sm font-medium hover:bg-cyan-500/30 hover:border-cyan-400 transition-colors touch-manipulation"
+                    >
+                      Open Compass
+                    </Link>
+                  </div>
                 </div>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <Link
-                  href="/monkey-invaders"
-                  className="px-4 py-2 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-200 text-sm font-medium hover:bg-amber-500/30 hover:border-amber-300 transition-colors touch-manipulation"
-                >
-                  Launch Monkey Invaders
-                </Link>
-                <Link
-                  href="/compass"
-                  className="px-4 py-2 rounded-xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-200 text-sm font-medium hover:bg-cyan-500/30 hover:border-cyan-400 transition-colors touch-manipulation"
-                >
-                  Open Compass
-                </Link>
-              </div>
-            </div>
-          </div>
+            </>
+          )}
 
           <Dialog open={sessionSheetOpen} onOpenChange={setSessionSheetOpen}>
             <DialogContent className="bg-zinc-900/95 border-amber-500/30 max-w-md">
@@ -3073,21 +3060,6 @@ export default function Home() {
               intermediaries.
             </p>
             <DigitalKeyPanel />
-          </CollapsibleSection>
-
-          {/* QR Messaging */}
-          <QRQuickPanel />
-
-          {/* Achievements */}
-          <CollapsibleSection
-            title="Achievements"
-            icon={<Sparkles className="w-5 h-5 text-amber-400" />}
-          >
-            <p className="text-xs text-zinc-500 mb-3">
-              Milestones earned through genuine care and curiosity. Nothing is
-              pay-gated â€” every achievement can be reached through play alone.
-            </p>
-            <AchievementShelf />
           </CollapsibleSection>
 
           {/* Classroom Modes */}

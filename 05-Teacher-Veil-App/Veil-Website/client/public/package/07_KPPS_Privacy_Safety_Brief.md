@@ -11,10 +11,12 @@
 
 The Jewble Meta-Pet is architected with **privacy-by-design** and **offline-first** principles. Unlike typical classroom apps:
 
-- **No accounts** (zero credentials to manage or leak)
-- **No data transmission** (pet DNA and interaction history stay on device)
-- **No tracking** (no analytics, no third-party SDKs, no cookies)
-- **No addictive mechanics** (no timers, no FOMO, no streaks, no notifications)
+- **No student accounts in the pilot baseline** (zero credentials for children to manage or leak)
+- **No default cloud transmission in the pilot baseline** (pet DNA and interaction history stay on device during normal classroom use)
+- **No third-party tracking or adtech in the pilot baseline** (no external analytics SDKs, ad pixels, or cookies for student use)
+- **No countdown pressure, streak pressure, notifications, or leaderboards in the pilot baseline**
+
+For clarity: this brief describes the **strict child-safe baseline** for default student deployments. Any adult-only billing, admin, or experimental online tooling sits outside that baseline and must be disclosed separately.
 
 This brief explains **how** these protections work at a technical level.
 
@@ -26,14 +28,14 @@ This brief explains **how** these protections work at a technical level.
 
 **Standard classroom apps:** Require continuous internet connection; data syncs to cloud servers; offline mode is degraded or non-functional.
 
-**Jewble Meta-Pet:** Fully functional **without internet**. All core mechanics (vitals, mood, genetics, care actions) execute locally on the device. Internet is optional for non-core features (future: community challenges, teacher dashboards — but not implemented in pilot).
+**Jewble Meta-Pet:** Fully functional **without internet** for the pilot baseline. All core mechanics (vitals, mood, genetics, care actions) execute locally on the device. Internet is optional only for separate non-core adult or experimental features, not for classroom pilot use.
 
 ### How This Protects Privacy
 
 | Risk in Cloud-Based Apps | How Offline-First Mitigates |
 |---|---|
 | **Data breach** (server hacked, credentials leaked) | No server = no breach vector. Data never leaves device. |
-| **Third-party tracking** (analytics SDKs, ad networks) | No network calls = no trackers can piggyback on connections. |
+| **Third-party tracking** (analytics SDKs, ad networks) | No default cloud transmission in student care loops means trackers cannot piggyback on routine classroom use. |
 | **Downtime / service outages** | App works regardless of network status. No "server down" interruptions. |
 | **Compliance overhead** (GDPR, COPPA, Victorian privacy laws) | No data collection = minimal compliance burden. |
 
@@ -41,7 +43,7 @@ This brief explains **how** these protections work at a technical level.
 
 - **Local storage:** Pet state (vitals, mood, DNA) stored in device-native database (e.g., IndexedDB for web, Core Data for iOS)
 - **No API calls during care loops:** All vitals calculations, mood transitions, and genetic expression happen client-side
-- **Optional sync** (not in pilot): If future versions include teacher dashboards, sync is **opt-in** and **anonymized** (no student names, only aggregate class patterns)
+- **Optional adult sync** (not in pilot): If future versions include teacher dashboards, sync is **opt-in**, **separate from student mode**, and limited to aggregate class patterns
 
 ---
 
@@ -51,7 +53,7 @@ This brief explains **how** these protections work at a technical level.
 
 **Standard edtech:** Requires username/password or SSO (Google/Microsoft) to track progress, enforce permissions, and personalise experience.
 
-**Jewble Meta-Pet:** No login. Students open the app and start. Each device instance is self-contained.
+**Jewble Meta-Pet:** No student login in the pilot baseline. Students open the app and start. Each device instance is self-contained.
 
 ### How This Reduces Risk
 
@@ -103,7 +105,7 @@ If future versions include **optional** community features (e.g., "compare your 
 ### Technical Implementation
 
 - **Local-only DNA storage:** Genome stored in device database, encrypted at rest (OS-level encryption)
-- **No network transmission:** DNA never included in API payloads (because there are no API calls)
+- **No default network transmission:** DNA is never included in student-mode payloads during the pilot baseline
 - **No "cloud backup" of DNA:** Even if student backs up their device to iCloud/Google Drive, DNA is flagged as non-syncing sensitive data (optional: can be implemented with platform-specific exclusion flags)
 
 ---
@@ -114,13 +116,13 @@ If future versions include **optional** community features (e.g., "compare your 
 
 | Addictive Mechanic | Purpose (from app dev perspective) | Jewble Meta-Pet Approach |
 |---|---|---|
-| **Countdown timers** | Create urgency, force check-ins | Vitals pause when app is closed. No countdowns. |
-| **Streak systems** | Punish missed days, enforce daily habits | No streaks. No penalties for not checking in. |
+| **Countdown timers** | Create urgency, force check-ins | Child-safe mode avoids countdown pressure. Vitals pause when app is closed. |
+| **Streak systems** | Punish missed days, enforce daily habits | Child-safe mode avoids daily-pressure streak mechanics and missed-day penalties. |
 | **Push notifications** | Pull students back into app | No notifications. App is silent. |
 | **Reward schedules** | Variable reinforcement (slot machine psychology) | No random rewards. Outcomes are deterministic (cause-effect). |
 | **Leaderboards** | Social comparison, status anxiety | No leaderboards. No comparative metrics. |
 | **Limited-time events** | FOMO (fear of missing out) | No time-gated content. Pet is always the same. |
-| **In-app purchases** | Monetisation through impulse spending | No purchases. App is free, no upsells. |
+| **In-app purchases** | Monetisation through impulse spending | None in the classroom pilot baseline. |
 
 ### Positive Design: "Meditation Mechanics"
 
@@ -133,7 +135,7 @@ Instead of exploiting dopamine loops, Jewble uses **calm interaction patterns**:
 
 ### Technical Implementation
 
-- **No timer APIs:** Code does not use `setInterval()` for countdown mechanics
+- **No countdown or urgency loops in child-safe mode:** the pilot baseline avoids time-pressure mechanics and missed-day penalties
 - **Paused state management:** When app is backgrounded, vitals freeze (no "pet suffers while you're away")
 - **No notification permissions:** App never requests OS-level notification access
 - **Deterministic outcomes:** Mood calculations use fixed formulas, not randomness (no gambling-like unpredictability)
@@ -153,8 +155,8 @@ Typical classroom apps collect:
 
 ### Jewble Meta-Pet Data Collection
 
-**Collected:**
-- Nothing. Literally zero data leaves the device during normal use.
+**Collected by default student deployment:**
+- Nothing leaves the device during normal classroom use.
 
 **Stored locally (never transmitted):**
 - Pet DNA (180-digit genome)
@@ -167,12 +169,12 @@ Typical classroom apps collect:
 - Student email or ID
 - Device ID or IP address
 - Location
-- Usage analytics
-- Crash reports (optional: can be enabled with explicit consent for debugging, but off by default)
+- Third-party usage analytics
+- Crash reports (off by default in the pilot baseline)
 
 ### Developer Transparency
 
-**The developer (me) cannot see:**
+**During pilot-baseline use, the developer (me) cannot see:**
 - Who is using the app
 - How many users exist
 - What students are doing in the app
@@ -183,7 +185,7 @@ Typical classroom apps collect:
 - Source code review (open for inspection)
 - Architecture diagrams
 - Walkthrough of local storage structure
-- Confirmation that no network calls occur during pilot
+- Confirmation that no default outbound calls occur during pilot routes
 
 ---
 
@@ -195,7 +197,7 @@ Typical classroom apps collect:
 | **Kahoot** | Yes (teacher account; students join via code) | Yes (quiz answers, leaderboards) | No | Yes (timers, leaderboards, music, FOMO) |
 | **Seesaw** | Yes (student accounts) | Yes (portfolios synced to cloud) | Limited | No (portfolio tool, not game-like) |
 | **Prodigy / ABCmouse** | Yes | Yes (progress tracking, adaptive algorithms) | No | Yes (rewards, avatars, in-app purchases) |
-| **Jewble Meta-Pet** | **No** | **No** (local-only) | **Yes** (fully functional offline) | **No** (calm meditation mechanics) |
+| **Jewble Meta-Pet** | **No student accounts** | **No default cloud transmission** (local-first) | **Yes** (fully functional offline) | **No daily-pressure loops** |
 
 ### Key Differentiator
 
@@ -203,7 +205,7 @@ Most edtech either:
 1. Collects data to personalise learning (adaptive algorithms), OR
 2. Uses addictive mechanics to boost engagement (gamification)
 
-Jewble does **neither**. It teaches systems thinking through **intrinsic complexity** (emergent mood states from vitals interactions), not extrinsic rewards (points, badges).
+Jewble prioritizes **intrinsic complexity** (emergent mood states from vitals interactions) over attention-maximizing loops. In the child-safe baseline, the focus is calm reflection, local-first use, and teacher-guided pacing rather than daily-pressure retention mechanics.
 
 ---
 
