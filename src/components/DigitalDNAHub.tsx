@@ -984,10 +984,13 @@ export default function DigitalDNAHub({
 
     return getQuestPackById("pattern-basics");
   }, [activeLessonEntry, activeMode]);
-  const persistedCompletedQuestIds =
-    lessonProgressEntry?.questSummary?.packId === selectedQuestPack.id
-      ? lessonProgressEntry.questSummary.completedQuestIds
-      : [];
+  const persistedCompletedQuestIds = useMemo(
+    () =>
+      lessonProgressEntry?.questSummary?.packId === selectedQuestPack.id
+        ? lessonProgressEntry.questSummary.completedQuestIds
+        : [],
+    [lessonProgressEntry?.questSummary, selectedQuestPack.id],
+  );
   const questProgress = useMemo(
     () =>
       evaluateQuestPack(
@@ -2106,8 +2109,8 @@ export default function DigitalDNAHub({
               </h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">
                 Mini paths are the smaller strings you can swap fast, stretch to
-                any length, and feed into the triangle instrument, loop station,
-                and sound tools without losing the main DNA strand.
+                any length, and feed into the triangle instrument, phrase
+                builder, and sound tools without losing the main DNA strand.
               </p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-slate-200">
@@ -2336,6 +2339,7 @@ export default function DigitalDNAHub({
                   ))}
                 </div>
               </div>
+            </div>
           </div>
         </section>
 
@@ -3180,7 +3184,6 @@ export default function DigitalDNAHub({
                 </div>
               </div>
             </div>
-          </div>
         </section>
 
         {/* ══════════════════════════════════════════════════════════════════
@@ -3832,16 +3835,7 @@ export default function DigitalDNAHub({
           <div className="fixed right-4 z-50 bottom-[calc(1.5rem+env(safe-area-inset-bottom))] sm:right-6">
             <button
               type="button"
-              onClick={() => {
-                if (lessonContext.postPrompt) {
-                  setShowPostPrompt(true);
-                } else {
-                  completeLesson(
-                    lessonContext.lessonId,
-                    lessonContext.studentAlias,
-                  );
-                }
-              }}
+              onClick={() => completeLesson()}
               className="px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-sm shadow-lg shadow-emerald-500/30 transition-all active:scale-95"
             >
               Finish Lesson
@@ -3890,19 +3884,9 @@ export default function DigitalDNAHub({
               <button
                 type="button"
                 onClick={() => {
-                  if (postResponse.trim()) {
-                    recordPostResponse(
-                      lessonContext.lessonId,
-                      lessonContext.studentAlias,
-                      postResponse.trim(),
-                    );
-                  }
-                  completeLesson(
-                    lessonContext.lessonId,
-                    lessonContext.studentAlias,
-                  );
-                  setShowPostPrompt(false);
+                  completeLesson(postResponse);
                 }}
+                disabled={!postResponse.trim()}
                 className="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-sm transition-all active:scale-95"
               >
                 Submit &amp; Complete
