@@ -79,6 +79,7 @@ function buildSpiroPath(cfg: ControlState) {
 }
 
 export default function SpirogrophLab() {
+  const genome = useStore((state) => state.genome);
   const svgRef = useRef<SVGSVGElement>(null);
   const filterRef = useRef<SVGFEGaussianBlurElement>(null);
   const gradientRef = useRef<SVGLinearGradientElement>(null);
@@ -109,8 +110,24 @@ export default function SpirogrophLab() {
   }, []);
 
   const randomize = useCallback(() => {
+    // Use pet genome as seed for deterministic randomness per pet
+    let seed = 12345;
+    if (genome) {
+      // Create a simple numeric seed from the genome
+      for (let i = 0; i < Math.min(60, genome.red60?.length || 0); i++) {
+        seed = ((seed << 5) - seed) + (genome.red60?.[i] || 0);
+        seed = seed & seed; // Convert to 32bit integer
+      }
+    }
+
+    // Seeded random function
+    const seededRandom = () => {
+      seed = (seed * 9301 + 49297) % 233280;
+      return seed / 233280;
+    };
+
     const randomBetween = (min: number, max: number, step = 1) => {
-      const v = min + Math.random() * (max - min);
+      const v = min + seededRandom() * (max - min);
       return Math.round(v / step) * step;
     };
     const modes: ControlState["shapeMode"][] = ["classic", "star", "gear", "flower", "crystal"];
@@ -123,12 +140,12 @@ export default function SpirogrophLab() {
       pointCount: randomBetween(3, 20),
       toothDepth: randomBetween(8, 78),
       density: randomBetween(2200, 9200, 50),
-      strokeWidth: Math.random() * 2.6 + 0.7,
+      strokeWidth: randomBetween(0.4, 4, 0.1),
       glow: randomBetween(2, 16),
       hueSpin: randomBetween(0, 360),
-      shapeMode: modes[Math.floor(Math.random() * modes.length)],
+      shapeMode: modes[Math.floor(seededRandom() * modes.length)],
     }));
-  }, []);
+  }, [genome]);
 
   const toggleAnimate = useCallback(() => {
     if (animating) {
