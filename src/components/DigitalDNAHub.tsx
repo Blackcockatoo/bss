@@ -27,6 +27,7 @@ import {
   type ReactNode,
 } from "react";
 import { PatternQuestBoard } from "@/components/PatternQuestBoard";
+import SpirogrophLab from "@/components/SpirogrophLab";
 import * as THREE from "three";
 import * as Tone from "tone";
 import {
@@ -37,6 +38,7 @@ import {
   getQuestPackById,
   selectQuestPack,
   useEducationStore,
+  type QuestMode,
 } from "@/lib/education";
 import {
   MOSS_DIGIT_COLORS as COLORS,
@@ -59,7 +61,7 @@ export interface LessonContext {
 }
 
 type SeedKey = MossStrandKey;
-type ModeKey = "spiral" | "mandala" | "sound" | "triangle" | "journey";
+type ModeKey = "spiral" | "mandala" | "sound" | "triangle" | "spirograph" | "journey";
 type ToolTransform = "raw" | "reverse" | "orbit";
 type SequenceSource = "core" | "packet";
 type MiniPathMode = "story" | "build";
@@ -981,6 +983,7 @@ export default function DigitalDNAHub({
     if (activeMode === "mandala") return getQuestPackById("symmetry-studio");
     if (activeMode === "triangle") return getQuestPackById("triangle-trace");
     if (activeMode === "sound") return getQuestPackById("sound-path");
+    if (activeMode === "spirograph") return getQuestPackById("symmetry-studio");
 
     return getQuestPackById("pattern-basics");
   }, [activeLessonEntry, activeMode]);
@@ -992,12 +995,20 @@ export default function DigitalDNAHub({
     [lessonProgressEntry?.questSummary, selectedQuestPack.id],
   );
   const questProgress = useMemo(
-    () =>
-      evaluateQuestPack(
+    () => {
+      // Map activeMode to valid QuestMode, handling spirograph as symmetry-studio
+      let questMode: QuestMode = "journey";
+      if (activeMode === "spiral" || activeMode === "mandala" || activeMode === "triangle" || activeMode === "sound") {
+        questMode = activeMode;
+      } else if (activeMode === "spirograph") {
+        questMode = "mandala"; // spirograph uses same quest pack as mandala
+      }
+
+      return evaluateQuestPack(
         selectedQuestPack,
         {
-          activeMode,
-          visitedModes,
+          activeMode: questMode,
+          visitedModes: visitedModes.filter((m): m is QuestMode => m !== "spirograph" && m !== "journey"),
           sessionInteractions,
           playCount,
           modeInteractions,
@@ -1012,8 +1023,8 @@ export default function DigitalDNAHub({
           reflectionSubmitted: Boolean(lessonProgressEntry?.postResponse?.trim()),
         },
         persistedCompletedQuestIds,
-      ),
-    [
+      );
+    }, [
       activeMode,
       lessonProgressEntry?.postResponse,
       mandalaHarmonyChangeCount,
@@ -1919,6 +1930,12 @@ export default function DigitalDNAHub({
       icon: "🎵",
       label: "Sound Lab",
       desc: "Tap bars to play notes",
+    },
+    {
+      id: "spirograph",
+      icon: "✨",
+      label: "Spirograph",
+      desc: "Live geometry spirals",
     },
     {
       id: "journey",
@@ -2947,7 +2964,7 @@ export default function DigitalDNAHub({
 
         <PatternQuestBoard
           progress={questProgress}
-          activeMode={activeMode}
+          activeMode={(activeMode === "spirograph" ? "mandala" : activeMode) as QuestMode}
           isLessonMode={Boolean(lessonContext)}
           isCompleted={Boolean(isLessonCompleted)}
           missingRequirements={lessonCompletionRequirements.missingRequirements}
@@ -3656,6 +3673,24 @@ export default function DigitalDNAHub({
                   </button>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* ── Spirograph ──────────────────────────────────────────────── */}
+          {activeMode === "spirograph" && (
+            <div className="bg-slate-900/60 rounded-3xl p-4 sm:p-8 border border-cyan-800/30">
+              <div className="text-center mb-5">
+                <h2 className="text-2xl sm:text-3xl font-bold text-amber-300 mb-1">
+                  ✨ Spirograph Geometry
+                </h2>
+                <p className="text-cyan-300 text-sm sm:text-base">
+                  Watch mathematical spirals unfold. Adjust gear ratios, pen offset, and symmetry to discover infinite patterns.
+                </p>
+                <p className="text-slate-500 text-xs mt-2 italic">
+                  Guide tip: your pet's DNA seeds the spirograph, so each animal has a unique signature pattern
+                </p>
+              </div>
+              <SpirogrophLab />
             </div>
           )}
 
