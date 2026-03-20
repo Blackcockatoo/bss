@@ -694,12 +694,6 @@ function SecurityLearningPanel({ profile }: { profile: Moss60PetProfile }) {
   const [demoHash, setDemoHash] = useState('');
   const [demoHash2, setDemoHash2] = useState('');
 
-  useEffect(() => {
-    setDemoInput(profile.securityLessonInput);
-    setDemoHash('');
-    setDemoHash2('');
-  }, [profile.securityLessonInput]);
-
   function runHashDemo() {
     const trimmed = demoInput.trim();
     if (!trimmed) return;
@@ -827,25 +821,107 @@ function SecurityLearningPanel({ profile }: { profile: Moss60PetProfile }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function Moss60Hub() {
-  const [activeTab, setActiveTab]   = useState('glyph');
-  const [glyphSeed, setGlyphSeed]   = useState('');
-  const [scheme, setScheme]         = useState('Spectral');
-  const [animating, setAnimating]   = useState(true);
+  const liveGenome = useStore(state => state.genome);
+  const livePetType = useStore(state => state.petType);
+  const [activeTab, setActiveTab] = useState('glyph');
+  const [scheme, setScheme] = useState('Consciousness');
+  const [animating, setAnimating] = useState(true);
   const [variant, setVariant] = useState<(typeof GLYPH_VARIANTS)[number]>('Pulse');
   const [projection, setProjection] = useState<Projection>('sphere');
-  const [realitySeed, setRealitySeed] = useState('');
+  const [glyphFocus, setGlyphFocus] = useState<Moss60PetStrandKey>('combined');
+  const [realityFocus, setRealityFocus] = useState<Moss60PetStrandKey>('combined');
   const [canvasEl, setCanvasEl] = useState<HTMLCanvasElement | null>(null);
   const [shareUrl, setShareUrl] = useState('');
+  const [archivedPet, setArchivedPet] = useState<PetSaveData | null>(null);
+  const [archiveLookupComplete, setArchiveLookupComplete] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    getAllPets()
+      .then(pets => {
+        if (cancelled) return;
+        const latest = [...pets].sort((a, b) => b.lastSaved - a.lastSaved)[0] ?? null;
+        setArchivedPet(latest);
+        setArchiveLookupComplete(true);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setArchivedPet(null);
+        setArchiveLookupComplete(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const matchingArchive = useMemo(() => {
+    if (!liveGenome || !archivedPet) return null;
+    return matchMoss60Genome(liveGenome, archivedPet.genome) ? archivedPet : null;
+  }, [archivedPet, liveGenome]);
+
+  const petSource = useMemo(() => {
+    if (liveGenome) {
+      return {
+        id: matchingArchive?.id,
+        name: matchingArchive?.name,
+        petType: matchingArchive?.petType ?? livePetType,
+        genome: liveGenome,
+        genomeHash: matchingArchive?.genomeHash,
+        crest: matchingArchive?.crest,
+        heptaDigits: matchingArchive?.heptaDigits,
+        source: 'live' as const,
+      };
+    }
+
+    if (archivedPet) {
+      return {
+        id: archivedPet.id,
+        name: archivedPet.name,
+        petType: archivedPet.petType,
+        genome: archivedPet.genome,
+        genomeHash: archivedPet.genomeHash,
+        crest: archivedPet.crest,
+        heptaDigits: archivedPet.heptaDigits,
+        source: 'archive' as const,
+      };
+    }
+
+    return {
+      petType: livePetType,
+      source: 'fallback' as const,
+    };
+  }, [archivedPet, liveGenome, livePetType, matchingArchive]);
+
+  const petProfile = useMemo(() => deriveMoss60PetProfile(petSource), [petSource]);
+  const glyphFocusMeta =
+    GLYPH_FOCUS_OPTIONS.find(option => option.key === glyphFocus) ?? GLYPH_FOCUS_OPTIONS[0];
+  const projectionMeta =
+    PROJECTION_OPTIONS.find(option => option.value === projection) ?? PROJECTION_OPTIONS[0];
+  const glyphSeed = `${petProfile.glyphSeed}|${glyphFocus}|${petProfile.strands[glyphFocus]}`;
+  const glyphHash = moss60Hash(`${petProfile.glyphHash}|${glyphFocus}|${petProfile.digest}`);
+  const realitySeed = petProfile.strands[realityFocus];
+  const sourceSummary = liveGenome
+    ? matchingArchive
+      ? 'Live genome with archived crest and hepta proof layers.'
+      : 'Live genome detected. Save or load the current companion archive to surface crest and hepta proof details here too.'
+    : archivedPet
+      ? 'Loaded from the most recent local archive because no live pet is mounted in the store on this route.'
+      : archiveLookupComplete
+        ? 'No saved companion was found, so the studio is using a deterministic fallback teaching profile.'
+        : 'Looking for the most recent saved companion now.';
+  const hasProofLayers = Boolean(petSource.crest && petSource.heptaDigits);
 
   const baseMetadata = useCallback((): Moss60ShareMetadata => ({
-    id: moss60Hash(`${glyphSeed}:${scheme}:${variant}:${Date.now()}`).slice(0, 16),
+    id: moss60Hash(`${petProfile.digest}:${glyphFocus}:${scheme}:${variant}:${projection}`).slice(0, 16),
     seed: glyphSeed,
     scheme,
     variant,
     projection,
     timestamp: Date.now(),
     source: 'moss60-studio',
-  }), [glyphSeed, projection, scheme, variant]);
+  }), [glyphFocus, glyphSeed, petProfile.digest, projection, scheme, variant]);
 
   const exportJSON = useCallback(() => {
     const payload = createMoss60VerifiablePayload(baseMetadata());
@@ -871,7 +947,7 @@ export function Moss60Hub() {
 
   const exportSVG = useCallback(() => {
     const payload = createMoss60VerifiablePayload(baseMetadata());
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320"><rect width="320" height="320" fill="#020617"/><text x="22" y="48" fill="#e2e8f0" font-family="sans-serif" font-size="15">MOSS60 ${payload.metadata.id}</text><text x="22" y="76" fill="#94a3b8" font-family="sans-serif" font-size="12">Scheme ${scheme} · Variant ${variant}</text><text x="22" y="104" fill="#67e8f9" font-family="monospace" font-size="11">${moss60Hash(payload.metadata.seed || 'seedless').slice(0, 28)}</text></svg>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 420"><rect width="420" height="420" fill="#020617"/><text x="26" y="48" fill="#e2e8f0" font-family="ui-sans-serif,system-ui" font-size="20" font-weight="700">${petProfile.label}</text><text x="26" y="76" fill="#94a3b8" font-family="ui-sans-serif,system-ui" font-size="13">${petProfile.sourceLabel}</text><text x="26" y="106" fill="#67e8f9" font-family="ui-monospace,SFMono-Regular,monospace" font-size="12">${payload.metadata.id}</text><text x="26" y="136" fill="#cbd5e1" font-family="ui-sans-serif,system-ui" font-size="13">Scheme ${scheme} · Variant ${variant} · ${glyphFocusMeta.label}</text><text x="26" y="166" fill="#f8fafc" font-family="ui-monospace,SFMono-Regular,monospace" font-size="11">${formatCodeLine(petProfile.strands[glyphFocus], 5, 8)}</text><text x="26" y="196" fill="#94a3b8" font-family="ui-sans-serif,system-ui" font-size="12">Digest ${petProfile.digest.slice(0, 24)}</text></svg>`;
     const blob = new Blob([svg], { type: 'image/svg+xml' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -881,7 +957,7 @@ export function Moss60Hub() {
     URL.revokeObjectURL(url);
     trackEvent('moss60_export', { format: 'svg', variant, scheme });
     setShareUrl(createShareUrl(payload));
-  }, [baseMetadata, scheme, variant]);
+  }, [baseMetadata, glyphFocus, glyphFocusMeta.label, petProfile.digest, petProfile.label, petProfile.sourceLabel, petProfile.strands, scheme, variant]);
 
   const kpi = useCallback(() => {
     if (typeof window === 'undefined') return { imports: 0, reimports: 0, rate: 0 };
@@ -899,252 +975,393 @@ export function Moss60Hub() {
 
   const growth = kpi();
 
-
-
-
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
+    <div className="space-y-5">
+      <div className="space-y-2">
+        <h2 className="flex items-center gap-2 text-2xl font-semibold text-white">
           <Layers className="w-5 h-5 text-cyan-300" />
-          MOSS60
+          MOSS60 Studio
         </h2>
-        <p className="text-xs text-zinc-500 mt-0.5">Layered cryptographic platform — depth through algebraic complexity</p>
+        <p className="max-w-4xl text-sm leading-6 text-zinc-300">
+          This studio now reads from the active companion&apos;s code path first. The glyph, reality shapes, security
+          lessons, network, and lattice all derive from pet strands instead of a generic sequence.
+        </p>
       </div>
 
-      {/* Plain-language intro — what is MOSS60? */}
-      <div className="rounded-xl border border-cyan-500/20 bg-cyan-950/20 p-4 space-y-2">
-        <p className="text-sm font-semibold text-cyan-200">What is MOSS60?</p>
-        <p className="text-xs text-zinc-300 leading-relaxed">
-          MOSS60 is a visual + cryptographic system built on the number 60. Why 60? It&apos;s the smallest number
-          divisible by 1 through 6 and contains more prime-indexed positions than any smaller base — giving it a
-          natural richness for mixing and encoding information.
+      <div className="grid gap-3 lg:grid-cols-3">
+        <div className="rounded-2xl border border-cyan-500/25 bg-cyan-950/20 p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200">Companion Source</p>
+          <p className="mt-3 text-lg font-semibold text-white">{petProfile.label}</p>
+          <p className="mt-1 text-sm text-zinc-200">{petProfile.sourceLabel}</p>
+          <p className="mt-3 text-sm leading-6 text-zinc-300">{sourceSummary}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-700/70 bg-slate-900/65 p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-400">Pet Code Snapshot</p>
+          <p className="mt-3 text-sm font-medium text-white">{petProfile.petTypeLabel}</p>
+          <p className="mt-2 font-mono text-sm leading-6 text-cyan-200">
+            {formatCodeLine(petProfile.strands.combined, 5, 8)}
+          </p>
+          <p className="mt-2 text-sm text-zinc-300">
+            Digest {petProfile.digest.slice(0, 24)} · signature {petProfile.signaturePreview}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-emerald-500/25 bg-emerald-950/20 p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-200">What To Explore</p>
+          <div className="mt-3 grid gap-2">
+            {[
+              'Glyph shows the pet code as the main visual fingerprint.',
+              'Reality remaps the same pet code across seven geometric surfaces.',
+              'Security explains how crest, hepta, and hashing protect identity.',
+            ].map(item => (
+              <p key={item} className="text-sm leading-6 text-zinc-100">
+                {item}
+              </p>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-cyan-500/20 bg-cyan-950/15 p-4">
+        <p className="text-base font-semibold text-cyan-100">What is MOSS60?</p>
+        <p className="mt-2 text-sm leading-6 text-zinc-200">
+          MOSS60 is a visual and cryptographic system built around 60 positions. In this version, those positions are
+          driven by your companion&apos;s genome strands and, when available, by its crest and hepta proof layers.
         </p>
-        <p className="text-xs text-zinc-400 leading-relaxed">
-          Think of it like a secret language made of geometry. Each tab below shows a different face of the same
-          underlying idea — from animated glyphs to encrypted messages to 3D projections. You don&apos;t need to
-          understand the math to explore it; start with <span className="text-cyan-300 font-medium">Glyph</span> and
-          follow your curiosity.
-        </p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
+        <div className="mt-4 grid gap-2 sm:grid-cols-3">
           {[
-            { tab: 'Glyph',    desc: 'Animated visual fingerprint of any word or phrase' },
-            { tab: 'QR',       desc: 'Encode messages into scannable QR ciphers' },
-            { tab: 'Serpent',  desc: 'Two-way encrypted chat via key exchange' },
-            { tab: 'Reality',  desc: '3D projections of the 60-point structure' },
-            { tab: 'Network',  desc: 'See how nodes connect in the MOSS60 graph' },
-            { tab: 'Security', desc: 'Learn how each layer of protection works' },
+            { tab: 'Glyph', desc: 'Pet-coded sigil and export bundle' },
+            { tab: 'Reality', desc: 'Seven geometric projections of the same code' },
+            { tab: 'Security', desc: 'Readable lessons on hashing, signatures, and redundancy' },
+            { tab: 'Network', desc: 'Combined pet strand routed as a small-world graph' },
+            { tab: 'QR', desc: 'Encrypted QR workflows for messages and payloads' },
+            { tab: 'Serpent', desc: 'Key exchange and private message flow' },
           ].map(({ tab, desc }) => (
             <button
               key={tab}
               type="button"
               onClick={() => setActiveTab(tab.toLowerCase())}
-              className="text-left rounded-lg border border-slate-700/60 bg-slate-900/40 hover:border-cyan-500/40 hover:bg-cyan-950/20 p-2 transition-colors"
+              className="text-left rounded-xl border border-slate-700/60 bg-slate-900/45 p-3 transition-colors hover:border-cyan-500/40 hover:bg-cyan-950/20"
             >
-              <p className="text-[11px] font-semibold text-cyan-300">{tab}</p>
-              <p className="text-[10px] text-zinc-500 mt-0.5 leading-tight">{desc}</p>
+              <p className="text-sm font-semibold text-cyan-200">{tab}</p>
+              <p className="mt-1 text-sm leading-6 text-zinc-300">{desc}</p>
             </button>
           ))}
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-6 h-auto">
-          <TabsTrigger value="glyph"    className="text-xs py-2">Glyph</TabsTrigger>
-          <TabsTrigger value="qr"       className="text-xs py-2">QR</TabsTrigger>
-          <TabsTrigger value="serpent"  className="text-xs py-2">Serpent</TabsTrigger>
-          <TabsTrigger value="reality"  className="text-xs py-2">Reality</TabsTrigger>
-          <TabsTrigger value="network"  className="text-xs py-2">Network</TabsTrigger>
-          <TabsTrigger value="security" className="text-xs py-2">Security</TabsTrigger>
+        <TabsList className="grid h-auto w-full grid-cols-3 gap-1 sm:grid-cols-6">
+          <TabsTrigger value="glyph" className="py-2 text-xs">Glyph</TabsTrigger>
+          <TabsTrigger value="qr" className="py-2 text-xs">QR</TabsTrigger>
+          <TabsTrigger value="serpent" className="py-2 text-xs">Serpent</TabsTrigger>
+          <TabsTrigger value="reality" className="py-2 text-xs">Reality</TabsTrigger>
+          <TabsTrigger value="network" className="py-2 text-xs">Network</TabsTrigger>
+          <TabsTrigger value="security" className="py-2 text-xs">Security</TabsTrigger>
         </TabsList>
 
-        {/* ── Glyph ── */}
         <TabsContent value="glyph" className="mt-4 space-y-3">
-          <div className="rounded-lg border border-slate-700/50 bg-slate-900/30 p-3">
-            <p className="text-xs font-semibold text-zinc-200 mb-1">Visual DNA fingerprint</p>
-            <p className="text-[11px] text-zinc-400 leading-relaxed">
-              Type any word, phrase, or name below and watch it become a unique animated glyph.
-              Two different inputs will always produce two completely different glyphs — this is the
-              &ldquo;avalanche effect&rdquo; at work. Think of it as your personal sigil generated from MOSS60 mathematics.
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <input
-              value={glyphSeed}
-              onChange={e => setGlyphSeed(e.target.value)}
-              placeholder="Type anything — your name, a word, a phrase…"
-              className="flex-1 rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-            />
-          </div>
-          <div className="flex items-center gap-3 flex-wrap">
-            <select
-              value={scheme}
-              onChange={e => setScheme(e.target.value)}
-              className="rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-            >
-              {Object.keys(COLOR_SCHEMES).map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-            <button
-              onClick={() => setAnimating(a => !a)}
-              className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors"
-            >
-              <RefreshCw className={`w-3 h-3 ${animating ? 'animate-spin' : ''}`} />
-              {animating ? 'Pause' : 'Animate'}
-            </button>
-            <select
-              value={variant}
-              onChange={event => setVariant(event.target.value as (typeof GLYPH_VARIANTS)[number])}
-              className="rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-            >
-              {GLYPH_VARIANTS.map(item => (
-                <option key={item} value={item}>{item} variant</option>
-              ))}
-            </select>
-          </div>
-          <GlyphCanvas seed={glyphSeed} scheme={scheme} animating={animating} variant={variant} onCanvasReady={setCanvasEl} />
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.95fr)]">
+            <div className="rounded-[28px] border border-cyan-500/25 bg-gradient-to-br from-cyan-950/30 via-slate-950/80 to-slate-950/95 p-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.26em] text-cyan-200">Pet-Coded Glyph</p>
+                  <h3 className="mt-2 flex items-center gap-2 text-2xl font-semibold text-white">
+                    <Sparkles className="h-5 w-5 text-cyan-300" />
+                    {petProfile.label}
+                  </h3>
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-200">
+                    This glyph is now anchored to the companion&apos;s code stack. The pet strands choose the structure,
+                    and the crest or hepta layers, when available, deepen the proof braid.
+                  </p>
+                </div>
+                <span className="rounded-full border border-cyan-400/25 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-100">
+                  {petProfile.sourceLabel}
+                </span>
+              </div>
 
-          <div className="rounded-xl border border-slate-700 bg-slate-900/40 p-3 space-y-3">
-            <p className="text-sm font-semibold text-zinc-200">MOSS60 Studio</p>
-            <p className="text-xs text-zinc-500">Theme presets · animated glyph variants · export bundles (PNG/SVG/JSON).</p>
+              <div className="mt-5 rounded-[32px] border border-cyan-400/20 bg-slate-950/75 p-4">
+                <GlyphCanvas
+                  seed={glyphSeed}
+                  scheme={scheme}
+                  animating={animating}
+                  variant={variant}
+                  seedHashOverride={glyphHash}
+                  onCanvasReady={setCanvasEl}
+                />
+              </div>
 
-            <div className="flex flex-wrap gap-2">
-              {STUDIO_PRESETS.map(preset => (
-                <Button
-                  key={preset.name}
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    setScheme(preset.scheme);
-                    setVariant(preset.variant);
-                    setGlyphSeed(preset.seed);
-                  }}
-                >
-                  {preset.name}
-                </Button>
-              ))}
+              <div className="mt-5 grid gap-3 lg:grid-cols-2">
+                <div className="rounded-2xl border border-slate-700/70 bg-slate-900/60 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">Glyph Focus</p>
+                  <p className="mt-2 text-base font-semibold text-white">{glyphFocusMeta.label}</p>
+                  <p className="mt-2 text-sm leading-6 text-zinc-200">{glyphFocusMeta.helper}</p>
+                  <p className="mt-3 font-mono text-sm leading-6 text-cyan-200">
+                    {formatCodeLine(petProfile.strands[glyphFocus], 5, 8)}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-slate-700/70 bg-slate-900/60 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">Proof Digest</p>
+                  <p className="mt-2 text-base font-semibold text-white">{petProfile.petTypeLabel}</p>
+                  <p className="mt-2 font-mono text-sm leading-6 text-emerald-200">{petProfile.digest.slice(0, 36)}</p>
+                  <p className="mt-3 text-sm leading-6 text-zinc-200">
+                    {hasProofLayers
+                      ? 'Signed proof layers are available for this pet.'
+                      : 'Only the genome strands are available right now; crest and hepta proof layers appear once the pet archive is loaded.'}
+                  </p>
+                </div>
+              </div>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              <Button size="sm" onClick={exportPNG}><Download className="w-3 h-3 mr-1" />Export PNG</Button>
-              <Button size="sm" onClick={exportSVG}><Download className="w-3 h-3 mr-1" />Export SVG</Button>
-              <Button size="sm" onClick={exportJSON}><Download className="w-3 h-3 mr-1" />Export JSON</Button>
-            </div>
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-slate-700/70 bg-slate-900/70 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">Companion Layers</p>
+                <p className="mt-3 text-sm font-medium text-white">{petProfile.crestLine}</p>
+                <p className="mt-3 text-sm leading-6 text-zinc-200">{petProfile.heptaLine}</p>
+                <div className="mt-4 space-y-2 text-sm">
+                  <div className="rounded-xl border border-slate-700/70 bg-slate-950/60 p-3">
+                    <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Red</p>
+                    <p className="mt-1 font-mono text-cyan-200">{formatCodeLine(petProfile.strands.red, 5, 6)}</p>
+                  </div>
+                  <div className="rounded-xl border border-slate-700/70 bg-slate-950/60 p-3">
+                    <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Blue</p>
+                    <p className="mt-1 font-mono text-cyan-200">{formatCodeLine(petProfile.strands.blue, 5, 6)}</p>
+                  </div>
+                  <div className="rounded-xl border border-slate-700/70 bg-slate-950/60 p-3">
+                    <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Black</p>
+                    <p className="mt-1 font-mono text-cyan-200">{formatCodeLine(petProfile.strands.black, 5, 6)}</p>
+                  </div>
+                </div>
+              </div>
 
-            <div className="rounded-lg border border-emerald-800/60 bg-emerald-950/30 p-2">
-              <p className="text-xs text-emerald-300">Primary growth KPI: verified re-import rate</p>
-              <p className="text-sm text-zinc-100 mt-1">{growth.rate}% ({growth.reimports} verified re-imports / {growth.imports} imports)</p>
-              {shareUrl && <p className="text-[11px] text-zinc-400 mt-1">Share route: {shareUrl}</p>}
+              <div className="rounded-2xl border border-slate-700/70 bg-slate-900/70 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">Visual Controls</p>
+                <div className="mt-4 grid gap-3">
+                  <label className="space-y-2">
+                    <span className="text-sm font-medium text-white">Color scheme</span>
+                    <select
+                      value={scheme}
+                      onChange={e => setScheme(e.target.value)}
+                      className="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-3 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                    >
+                      {Object.keys(COLOR_SCHEMES).map(item => (
+                        <option key={item} value={item}>
+                          {item}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="space-y-2">
+                    <span className="text-sm font-medium text-white">Glyph variant</span>
+                    <select
+                      value={variant}
+                      onChange={event => setVariant(event.target.value as (typeof GLYPH_VARIANTS)[number])}
+                      className="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-3 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                    >
+                      {GLYPH_VARIANTS.map(item => (
+                        <option key={item} value={item}>
+                          {item}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <button
+                    onClick={() => setAnimating(value => !value)}
+                    className="flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-zinc-200 transition-colors hover:border-cyan-500/40 hover:text-white"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${animating ? 'animate-spin' : ''}`} />
+                    {animating ? 'Pause glyph motion' : 'Resume glyph motion'}
+                  </button>
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {STUDIO_PRESETS.map(preset => (
+                    <Button
+                      key={preset.name}
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setScheme(preset.scheme);
+                        setVariant(preset.variant);
+                        setGlyphFocus(preset.focus);
+                      }}
+                    >
+                      {preset.name}
+                    </Button>
+                  ))}
+                </div>
+
+                <div className="mt-4 grid gap-2">
+                  {GLYPH_FOCUS_OPTIONS.map(option => (
+                    <button
+                      key={option.key}
+                      type="button"
+                      onClick={() => setGlyphFocus(option.key)}
+                      className={`rounded-xl border px-3 py-3 text-left transition-colors ${
+                        glyphFocus === option.key
+                          ? 'border-cyan-400/45 bg-cyan-950/25'
+                          : 'border-slate-700/70 bg-slate-950/60 hover:border-slate-600'
+                      }`}
+                    >
+                      <p className="text-sm font-semibold text-white">{option.label}</p>
+                      <p className="mt-1 text-sm leading-6 text-zinc-300">{option.helper}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-emerald-500/25 bg-emerald-950/20 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200">Export Bundle</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Button size="sm" onClick={exportPNG}>
+                    <Download className="mr-1 h-3 w-3" />
+                    PNG
+                  </Button>
+                  <Button size="sm" onClick={exportSVG}>
+                    <Download className="mr-1 h-3 w-3" />
+                    SVG
+                  </Button>
+                  <Button size="sm" onClick={exportJSON}>
+                    <Download className="mr-1 h-3 w-3" />
+                    JSON
+                  </Button>
+                </div>
+                <p className="mt-4 text-sm leading-6 text-zinc-100">
+                  Verified re-import rate: {growth.rate}% ({growth.reimports}/{growth.imports})
+                </p>
+                {shareUrl && <p className="mt-2 text-sm break-all text-zinc-300">Share route: {shareUrl}</p>}
+              </div>
             </div>
           </div>
         </TabsContent>
 
-        {/* ── QR Cipher ── */}
         <TabsContent value="qr" className="mt-4 space-y-3">
-          <div className="rounded-lg border border-slate-700/50 bg-slate-900/30 p-3">
-            <p className="text-xs font-semibold text-zinc-200 mb-1">Hide messages inside QR codes</p>
-            <p className="text-[11px] text-zinc-400 leading-relaxed">
+          <div className="rounded-2xl border border-slate-700/60 bg-slate-900/50 p-4">
+            <p className="text-base font-semibold text-white">Hide messages inside QR codes</p>
+            <p className="mt-2 text-sm leading-6 text-zinc-200">
               Type a message, generate a QR code, and that QR carries a MOSS60-encrypted version of your
               text. Only someone with the matching key (or the same app) can read what&apos;s inside —
               anyone else just sees a normal-looking QR code.
-              Great for sharing pet data, notes, or just exploring how QR + encryption combine.
+              Use this for pet data, notes, or teaching how scannable transport can coexist with encryption.
             </p>
           </div>
           <QRGenerator />
         </TabsContent>
 
-        {/* ── Serpent ── */}
         <TabsContent value="serpent" className="mt-4 space-y-3">
-          <div className="rounded-lg border border-slate-700/50 bg-slate-900/30 p-3">
-            <p className="text-xs font-semibold text-zinc-200 mb-1">Encrypted two-way messaging</p>
-            <p className="text-[11px] text-zinc-400 leading-relaxed">
+          <div className="rounded-2xl border border-slate-700/60 bg-slate-900/50 p-4">
+            <p className="text-base font-semibold text-white">Encrypted two-way messaging</p>
+            <p className="mt-2 text-sm leading-6 text-zinc-200">
               Serpent lets two people create a private shared secret without ever sending their private key.
               Here&apos;s the idea: you both generate your own keypair from a secret phrase, share only your
               <span className="text-cyan-300"> public key</span>, then combine it with the other person&apos;s
               public key to arrive at the <span className="text-emerald-300">same shared secret</span> — independently.
               From that point, messages can be encrypted and decrypted by either party.
             </p>
-            <p className="text-[10px] text-zinc-500 mt-1">
-              Step 1 → generate keys &nbsp;·&nbsp; Step 2 → share your public key &nbsp;·&nbsp; Step 3 → paste their public key &amp; handshake &nbsp;·&nbsp; Step 4 → encrypt / decrypt
+            <p className="mt-2 text-sm text-zinc-400">
+              Step 1: generate keys. Step 2: share your public key. Step 3: paste the partner key and handshake.
+              Step 4: encrypt or decrypt.
             </p>
           </div>
           <SerpentTab />
         </TabsContent>
 
-        {/* ── Reality ── */}
         <TabsContent value="reality" className="mt-4 space-y-3">
-          <div className="rounded-lg border border-slate-700/50 bg-slate-900/30 p-3">
-            <p className="text-xs font-semibold text-zinc-200 mb-1">60-point geometry in 3D space</p>
-            <p className="text-[11px] text-zinc-400 leading-relaxed">
-              The 60 MOSS60 nodes aren&apos;t just numbers — they can be mapped onto any surface.
-              Switch between projections to see the same underlying prime-indexed structure take different shapes:
-              a flat spiral, a sphere, a torus (donut), or a hyperbolic disk.
-              All four are the same 60 points — just viewed through different geometric lenses.
+          <div className="rounded-2xl border border-slate-700/60 bg-slate-900/50 p-4">
+            <p className="text-base font-semibold text-white">60-point geometry in shaped reality</p>
+            <p className="mt-2 text-sm leading-6 text-zinc-200">
+              The same pet code can be projected across multiple geometric surfaces. Switch shapes to see how one
+              companion strand behaves as a sphere, torus, hyperbolic disk, helix tower, crystal cube, petal bloom, or
+              flat spiral.
+            </p>
+            <p className="mt-2 text-sm text-zinc-400">
+              Current source: {GLYPH_FOCUS_OPTIONS.find(option => option.key === realityFocus)?.label} · auto-rotates
             </p>
           </div>
-          <div className="flex items-center gap-3 flex-wrap">
-            <select
-              value={projection}
-              onChange={e => setProjection(e.target.value as Projection)}
-              className="rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-            >
-              <option value="flat">Flat Spiral</option>
-              <option value="sphere">Sphere</option>
-              <option value="torus">Torus</option>
-              <option value="hyperbolic">Hyperbolic</option>
-            </select>
-            <Orbit className="w-4 h-4 text-zinc-500" />
-            <span className="text-xs text-zinc-500">Auto-rotates</span>
+
+          <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+            {PROJECTION_OPTIONS.map(option => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setProjection(option.value)}
+                className={`rounded-xl border p-3 text-left transition-colors ${
+                  projection === option.value
+                    ? 'border-cyan-400/45 bg-cyan-950/25'
+                    : 'border-slate-700/70 bg-slate-900/55 hover:border-slate-600'
+                }`}
+              >
+                <p className="text-sm font-semibold text-white">{option.label}</p>
+                <p className="mt-1 text-sm leading-6 text-zinc-300">{option.helper}</p>
+              </button>
+            ))}
           </div>
-          <div className="flex gap-2">
-            <input
-              value={realitySeed}
-              onChange={e => setRealitySeed(e.target.value)}
-              placeholder="Optional seed..."
-              className="flex-1 rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-            />
+
+          <div className="grid gap-2 md:grid-cols-3 xl:grid-cols-5">
+            {GLYPH_FOCUS_OPTIONS.map(option => (
+              <button
+                key={option.key}
+                type="button"
+                onClick={() => setRealityFocus(option.key)}
+                className={`rounded-xl border px-3 py-3 text-sm transition-colors ${
+                  realityFocus === option.key
+                    ? 'border-emerald-400/45 bg-emerald-950/25 text-emerald-100'
+                    : 'border-slate-700/70 bg-slate-900/55 text-zinc-300 hover:border-slate-600'
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
           </div>
-          <RealityCanvas seed={realitySeed} projection={projection} />
+
+          <div className="rounded-[28px] border border-cyan-500/25 bg-gradient-to-br from-slate-950/95 via-slate-950/85 to-cyan-950/20 p-4">
+            <RealityCanvas seed={realitySeed} projection={projection} />
+          </div>
+
+          <div className="grid gap-3 lg:grid-cols-2">
+            <div className="rounded-2xl border border-slate-700/70 bg-slate-900/60 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">Selected Shape</p>
+              <p className="mt-2 text-base font-semibold text-white">{projectionMeta.label}</p>
+              <p className="mt-2 text-sm leading-6 text-zinc-200">{projectionMeta.helper}</p>
+            </div>
+            <div className="rounded-2xl border border-slate-700/70 bg-slate-900/60 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">Reality Code Slice</p>
+              <p className="mt-2 font-mono text-sm leading-6 text-cyan-200">{formatCodeLine(realitySeed, 5, 8)}</p>
+            </div>
+          </div>
         </TabsContent>
 
-        {/* ── Network ── */}
         <TabsContent value="network" className="mt-4 space-y-3">
-          <div className="rounded-lg border border-slate-700/50 bg-slate-900/30 p-3">
-            <p className="text-xs font-semibold text-zinc-200 mb-1">The crystalline node graph</p>
-            <p className="text-[11px] text-zinc-400 leading-relaxed">
-              This shows MOSS60 as a network of 60 nodes — like a map of how information flows.
-              Nodes at <span className="text-cyan-300">prime-indexed positions</span> (2, 3, 5, 7, 11…) act as
-              &ldquo;bridges&rdquo; with extra long-range connections, making the network small-world: any node can
-              reach any other in just a few hops. This structure is why MOSS60 mixing is so thorough —
-              a single input change ripples everywhere quickly.
+          <div className="rounded-2xl border border-slate-700/60 bg-slate-900/50 p-4">
+            <p className="text-base font-semibold text-white">The crystalline node graph</p>
+            <p className="mt-2 text-sm leading-6 text-zinc-200">
+              The network now routes the combined pet strand instead of the fixed crypto fallback string. Prime-indexed
+              bridge nodes still create the small-world effect, but the topology is now visibly shaped by the companion
+              code you loaded into the studio.
             </p>
           </div>
-          <CrystallineNetwork dna={DNA_R.join('')} />
-          <div className="rounded-lg border border-slate-700/50 bg-slate-900/30 p-3 mt-4">
-            <p className="text-xs font-semibold text-zinc-200 mb-1">3D crystal lattice scaffold</p>
-            <p className="text-[11px] text-zinc-400 leading-relaxed">
-              The DNA blueprint generates a 3-dimensional lattice structure — a scaffold that holds
-              the crystalline network in physical space. Watch it grow intelligently from a single seed,
-              choosing each new node by structural support and DNA affinity. Platonic sub-shells
-              (tetrahedra, octahedra) emerge as the geometry self-organises.
+          {/* Keep both network views anchored to the current pet-derived strands. */}
+          <CrystallineNetwork dna={petProfile.strands.combined} />
+          <div className="rounded-2xl border border-slate-700/60 bg-slate-900/50 p-4 mt-4">
+            <p className="text-base font-semibold text-white">3D crystal lattice scaffold</p>
+            <p className="mt-2 text-sm leading-6 text-zinc-200">
+              The lattice uses the security braid so the structural view responds not only to genome strands but also to
+              the pet&apos;s proof-oriented mix. Growth, resonance, and memory all stay deterministic for that same
+              companion snapshot.
             </p>
           </div>
-          <CrystallineLattice dna={DNA_R.join('')} />
+          <CrystallineLattice dna={petProfile.strands.security} />
         </TabsContent>
 
-        {/* ── Security Learning ── */}
         <TabsContent value="security" className="mt-4 space-y-3">
-          <div className="rounded-lg border border-slate-700/50 bg-slate-900/30 p-3">
-            <p className="text-xs font-semibold text-zinc-200 mb-1">How the protection layers stack</p>
-            <p className="text-[11px] text-zinc-400 leading-relaxed">
-              MOSS60&apos;s security comes from layering <em>many independent mixing strategies</em> rather than
-              relying on a single algorithm. Even if one layer were cracked, the others would still hold.
-              Tap each layer below to see a plain-English explanation of what it does — and use the live
-              hash demo to see the &ldquo;avalanche effect&rdquo; in action: one tiny change scrambles everything.
+          <div className="rounded-2xl border border-slate-700/60 bg-slate-900/50 p-4">
+            <p className="text-base font-semibold text-white">How the protection layers stack</p>
+            <p className="mt-2 text-sm leading-6 text-zinc-200">
+              This tab is now more explicit about what each layer teaches. It ties the lessons back to the active pet
+              code so hashing, signatures, hepta redundancy, and time-based key rotation feel like parts of one readable
+              system.
             </p>
           </div>
-          <SecurityLearningPanel />
+          <SecurityLearningPanel key={petProfile.digest} profile={petProfile} />
         </TabsContent>
       </Tabs>
     </div>

@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import type { SteeringViewProps } from './types';
-import { NAVIGATION_TARGETS } from './types';
+import { COMPASS_NAVIGATION_TARGETS, getNavigationTargetByPosition } from './types';
 
 const COLOR_VARIANTS = {
   red: { primary: '#FF5555', secondary: '#FF9999', bg: 'rgba(255,85,85,0.05)' },
@@ -41,10 +41,15 @@ export function GeometryView({
 
   // Feature vertex positions (12 points on outer ring, overlaid on geometry)
   const featureVertices = useMemo(() => {
-    return NAVIGATION_TARGETS.map((target, i) => {
+    return COMPASS_NAVIGATION_TARGETS.map((target) => {
       const angle = target.angle * (Math.PI / 180);
       const r = 210;
-      return { x: Math.sin(angle) * r, y: -Math.cos(angle) * r, label: target.label };
+      return {
+        position: target.position,
+        x: Math.sin(angle) * r,
+        y: -Math.cos(angle) * r,
+        label: target.label,
+      };
     });
   }, []);
 
@@ -184,12 +189,12 @@ export function GeometryView({
           </g>
 
           {/* Feature labels around the outer ring (fixed, not rotating) */}
-          {featureVertices.map((v, i) => {
-            const isSelected = selectedFeature === i;
+          {featureVertices.map((v) => {
+            const isSelected = selectedFeature === v.position;
             return (
-              <g key={`fv-${i}`}
+              <g key={`fv-${v.position}`}
                 className="cursor-pointer"
-                onClick={() => onFeatureActivate(i)}
+                onClick={() => onFeatureActivate(v.position)}
               >
                 <circle
                   cx={v.x} cy={v.y} r={isSelected ? 16 : 12}
@@ -220,7 +225,7 @@ export function GeometryView({
             fontWeight="bold"
             textAnchor="middle"
           >
-            {NAVIGATION_TARGETS[selectedFeature]?.label ?? ''}
+            {getNavigationTargetByPosition(selectedFeature)?.label ?? ''}
           </text>
         </svg>
       </div>

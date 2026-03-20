@@ -11,8 +11,9 @@ export default function AppMoss60Page() {
           <h1 className="mt-2 text-2xl font-semibold text-white">
             MOSS60 Studio
           </h1>
-          <p className="mt-2 text-sm text-zinc-300">
-            Visualize, export, and inspect the MOSS60 tools already in the repo.
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-300">
+            Read the active companion through pet-coded glyphs, shaped reality projections,
+            readable security lessons, and deterministic MOSS60 exports.
           </p>
         </div>
 

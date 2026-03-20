@@ -30,6 +30,28 @@ export type LessonStatus = "queued" | "active" | "paused" | "completed";
 
 export type SessionMode = "teacher" | "student";
 
+export type QuestMode =
+  | "spiral"
+  | "mandala"
+  | "triangle"
+  | "sound"
+  | "journey";
+
+export type QuestPackId =
+  | "pattern-basics"
+  | "symmetry-studio"
+  | "triangle-trace"
+  | "sound-path";
+
+export interface LessonQuestSummary {
+  packId: QuestPackId;
+  completedQuestIds: string[];
+  requiredCoreQuests: number;
+  completedCoreQuests: number;
+  totalCompletedQuests: number;
+  updatedAt: number;
+}
+
 /** A single queued lesson/activity created by a teacher */
 export interface QueuedLesson {
   id: string;
@@ -68,6 +90,7 @@ export interface LessonProgress {
   dnaInteractions: number;
   /** SHA-256 hash of their exploration pattern (privacy-safe) */
   patternHash: string | null;
+  questSummary: LessonQuestSummary | null;
 }
 
 /** Full education queue state */

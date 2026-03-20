@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import type { SteeringViewProps } from './types';
-import { NAVIGATION_TARGETS } from './types';
+import { COMPASS_NAVIGATION_TARGETS, getNavigationTargetByPosition } from './types';
 
 const COLOR_VARIANTS = {
   red: { primary: '#FF5555', secondary: '#FF9999', tertiary: '#FFCCCC' },
@@ -253,9 +253,9 @@ export function CompassNav({
             <circle cx="0" cy="0" r="120" stroke={colors.secondary} strokeWidth="1" fill="none" strokeOpacity="0.4" />
 
             {/* 12 clickable sectors */}
-            {NAVIGATION_TARGETS.map((target, i) => {
-              const isSelected = selectedFeature === i;
-              const isHovered = hoveredSector === i;
+            {COMPASS_NAVIGATION_TARGETS.map((target) => {
+              const isSelected = selectedFeature === target.position;
+              const isHovered = hoveredSector === target.position;
               const selectedFill = isCompact ? `${colors.primary}3a` : `${colors.primary}4d`;
               const hoverFill = isCompact ? `${colors.primary}20` : `${colors.primary}29`;
               const selectedStrokeOpacity = isCompact ? 0.88 : 0.95;
@@ -263,23 +263,23 @@ export function CompassNav({
               const hoverStrokeOpacity = isCompact ? 0.64 : 0.72;
               const hoverStrokeWidth = isCompact ? 1 : 1.2;
               return (
-                <g key={i}>
+                <g key={target.position}>
                   <path
-                    d={sectorPath(i)}
+                    d={sectorPath(target.position)}
                     fill="rgba(255, 255, 255, 0.001)"
                     stroke="transparent"
-                    onPointerEnter={() => setHoveredSector(i)}
+                    onPointerEnter={() => setHoveredSector(target.position)}
                     onPointerLeave={() => setHoveredSector(null)}
                     onPointerDown={(e) => e.stopPropagation()}
                     onPointerUp={(e) => {
                       e.stopPropagation();
-                      onFeatureActivate(i);
+                      onFeatureActivate(target.position);
                     }}
                     data-sector-hit="true"
                     style={{ cursor: 'pointer' }}
                   />
                   <path
-                    d={sectorPath(i)}
+                    d={sectorPath(target.position)}
                     fill={isSelected ? selectedFill : isHovered ? hoverFill : 'transparent'}
                     stroke={isSelected ? colors.primary : isHovered ? `${colors.secondary}` : 'transparent'}
                     strokeOpacity={isSelected ? selectedStrokeOpacity : isHovered ? hoverStrokeOpacity : 0}
@@ -319,15 +319,15 @@ export function CompassNav({
             })}
 
             {/* Feature labels at each sector */}
-            {NAVIGATION_TARGETS.map((target, i) => {
+            {COMPASS_NAVIGATION_TARGETS.map((target) => {
               const angle = target.angle * (Math.PI / 180);
               const isLongCompactLabel = isCompact && target.label.length >= 12;
               const compactLabelInset = isLongCompactLabel ? 6 : 0;
               const labelR = (isCompact ? 154 : 157) - compactLabelInset;
               const x = Math.sin(angle) * labelR;
               const y = -Math.cos(angle) * labelR;
-              const isSelected = selectedFeature === i;
-              const isHovered = hoveredSector === i;
+              const isSelected = selectedFeature === target.position;
+              const isHovered = hoveredSector === target.position;
               const labelLines = getLabelLines(target.label);
               const baseFontSize = isSelected ? (isCompact ? 10.8 : 11) : isHovered ? (isCompact ? 10.2 : 9.8) : (isCompact ? 9.8 : 9.2);
               const maxLineChars = Math.max(...labelLines.map((line) => line.length));
@@ -355,7 +355,7 @@ export function CompassNav({
                   ? `${colors.secondary}8a`
                   : 'rgba(210, 221, 244, 0.2)';
               return (
-                <g key={`label-${i}`}>
+                <g key={`label-${target.position}`}>
                   {selectedCompactBoost ? (
                     <rect
                       x={x - plateWidth / 2 - 1}
@@ -467,7 +467,7 @@ export function CompassNav({
             strokeWidth="1.6"
             paintOrder="stroke"
           >
-            {NAVIGATION_TARGETS[selectedFeature]?.label ?? ''}
+            {getNavigationTargetByPosition(selectedFeature)?.label ?? ''}
           </text>
         </svg>
       </div>

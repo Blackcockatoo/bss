@@ -26,9 +26,18 @@ import {
   useMemo,
   type ReactNode,
 } from "react";
+import { PatternQuestBoard } from "@/components/PatternQuestBoard";
 import * as THREE from "three";
 import * as Tone from "tone";
-import { useEducationStore } from "@/lib/education";
+import {
+  buildLessonQuestSummary,
+  createEmptyQuestModeCounts,
+  evaluateQuestPack,
+  getLessonCompletionRequirements,
+  getQuestPackById,
+  selectQuestPack,
+  useEducationStore,
+} from "@/lib/education";
 import {
   MOSS_DIGIT_COLORS as COLORS,
   MOSS_DIGIT_SHAPES,
@@ -54,9 +63,6 @@ type ModeKey = "spiral" | "mandala" | "sound" | "triangle" | "journey";
 type ToolTransform = "raw" | "reverse" | "orbit";
 type SequenceSource = "core" | "packet";
 type MiniPathMode = "story" | "build";
-type LoopDirection = "forward" | "reverse" | "pingpong";
-type LoopMixMode = "solo" | "add" | "weave";
-type LoopShape = "triangle" | "rectangle" | "square";
 type TriangleSide = "vertical" | "base" | "diagonal";
 
 interface ToolkitSettingsSnapshot {
@@ -181,46 +187,6 @@ function getWrappedDigits(
   });
 }
 
-function applyLoopDirection(
-  digits: number[],
-  direction: LoopDirection,
-): number[] {
-  if (direction === "reverse") return [...digits].reverse();
-  if (direction === "pingpong") {
-    if (digits.length <= 1) return digits;
-    return [...digits, ...digits.slice(1, -1).reverse()];
-  }
-  return digits;
-}
-
-function mixLoopDigits(
-  windows: number[][],
-  mixMode: LoopMixMode,
-  targetLength: number,
-): number[] {
-  if (!windows.length || targetLength <= 0) return [];
-
-  if (mixMode === "solo") return windows[0]?.slice(0, targetLength) ?? [];
-
-  if (mixMode === "add") {
-    return Array.from({ length: targetLength }, (_, index) => {
-      return (
-        windows.reduce(
-          (sum, window) => sum + (window[index % window.length] ?? 0),
-          0,
-        ) % 10
-      );
-    });
-  }
-
-  return Array.from({ length: targetLength * windows.length }, (_, index) => {
-    const sourceIndex = index % windows.length;
-    const digitIndex =
-      Math.floor(index / windows.length) % windows[sourceIndex].length;
-    return windows[sourceIndex][digitIndex] ?? 0;
-  });
-}
-
 function buildMiniPathString(
   seed: SeedKey,
   mode: MiniPathMode,
@@ -241,38 +207,6 @@ function buildMiniPathString(
     chamberSet.chambers[clamp(chamberIndex, 0, chamberSet.chambers.length - 1)]
       ?.pentad ?? chamberSet.strand
   );
-}
-
-function getStackNumberSeries(shape: LoopShape, count: number): number[] {
-  return Array.from({ length: count }, (_, index) => {
-    const step = index + 1;
-
-    if (shape === "triangle") return (step * (step + 1)) / 2;
-    if (shape === "rectangle") return step * (step + 1);
-    return step * step;
-  });
-}
-
-function buildStackRows(digits: number[], shape: LoopShape): number[][] {
-  if (!digits.length) return [];
-
-  const rows: number[][] = [];
-  let cursor = 0;
-  let step = 1;
-
-  while (cursor < digits.length) {
-    const targetWidth =
-      shape === "triangle"
-        ? step
-        : shape === "rectangle"
-          ? step * 2
-          : step * 2 - 1;
-    rows.push(digits.slice(cursor, cursor + targetWidth));
-    cursor += targetWidth;
-    step += 1;
-  }
-
-  return rows;
 }
 
 function pointBetween(start: TrianglePoint, end: TrianglePoint, t: number) {
@@ -398,23 +332,9 @@ export default function DigitalDNAHub({
     SavedToolkitPreset[]
   >([]);
   const [toolkitHydrated, setToolkitHydrated] = useState(false);
-  const [loopSeedEnabled, setLoopSeedEnabled] = useState<
-    Record<SeedKey, boolean>
-  >({
-    red: true,
-    black: false,
-    blue: false,
-  });
-  const [loopMixMode, setLoopMixMode] = useState<LoopMixMode>("add");
-  const [loopDirection, setLoopDirection] = useState<LoopDirection>("forward");
-  const [loopShape, setLoopShape] = useState<LoopShape>("triangle");
-  const [loopStartIndex, setLoopStartIndex] = useState(0);
-  const [loopLength, setLoopLength] = useState(8);
-  const [loopStep, setLoopStep] = useState(1);
-  const [loopScale, setLoopScale] = useState(100);
-  const [soundSource, setSoundSource] = useState<
-    "toolkit" | "loop" | "triangle"
-  >("toolkit");
+  const [soundSource, setSoundSource] = useState<"toolkit" | "triangle">(
+    "toolkit",
+  );
   const [triangleTrace, setTriangleTrace] = useState<number[]>([]);
   const [triangleHoveredStep, setTriangleHoveredStep] = useState<number | null>(
     null,
@@ -440,17 +360,39 @@ export default function DigitalDNAHub({
     !lessonContext?.prePrompt,
   );
 
-  // Mission tracking
+  // Session tracking
   const [sessionInteractions, setSessionInteractions] = useState(0);
   const [playCount, setPlayCount] = useState(0);
   const [visitedModes, setVisitedModes] = useState<ModeKey[]>(["spiral"]);
+  const [modeInteractions, setModeInteractions] = useState(() =>
+    createEmptyQuestModeCounts(),
+  );
+  const [mandalaStrokeCount, setMandalaStrokeCount] = useState(0);
+  const [mandalaHarmonyChangeCount, setMandalaHarmonyChangeCount] = useState(0);
+  const [triangleMaxTraceSteps, setTriangleMaxTraceSteps] = useState(0);
+  const [triangleVisitedSides, setTriangleVisitedSides] = useState<
+    TriangleSide[]
+  >([]);
+  const [trianglePlaybackCount, setTrianglePlaybackCount] = useState(0);
+  const [soundPlaybackCount, setSoundPlaybackCount] = useState(0);
+  const [soundTempoChangeCount, setSoundTempoChangeCount] = useState(0);
+  const [soundTransformChangeCount, setSoundTransformChangeCount] = useState(0);
+  const [completionFeedback, setCompletionFeedback] = useState<string | null>(
+    null,
+  );
 
   // ── Store actions ─────────────────────────────────────────────────────────
   const incrementDnaInteraction = useEducationStore(
     (s) => s.incrementDnaInteraction,
   );
+  const initProgress = useEducationStore((s) => s.initProgress);
   const recordPostResponse = useEducationStore((s) => s.recordPostResponse);
-  const completeLesson = useEducationStore((s) => s.completeLesson);
+  const saveQuestSummary = useEducationStore((s) => s.saveQuestSummary);
+  const completeLessonWithFlair = useEducationStore(
+    (s) => s.completeLessonWithFlair,
+  );
+  const lessonProgress = useEducationStore((s) => s.lessonProgress);
+  const queuedLessons = useEducationStore((s) => s.queue);
 
   // ── Refs ──────────────────────────────────────────────────────────────────
   const canvasRef = useRef<HTMLCanvasElement>(null); // Three.js spiral
@@ -516,9 +458,13 @@ export default function DigitalDNAHub({
       lastInteractionMsRef.current = now;
       sessionInteractionRef.current += 1;
       setSessionInteractions(sessionInteractionRef.current);
+      setModeInteractions((current) => ({
+        ...current,
+        [activeMode]: current[activeMode] + 1,
+      }));
       trackLessonInteraction();
     },
-    [trackLessonInteraction],
+    [activeMode, trackLessonInteraction],
   );
 
   const currentPacket = FULL_STRAND_PACKETS[selectedSeed];
@@ -567,9 +513,12 @@ export default function DigitalDNAHub({
     async (digit: number) => {
       await ensureAudio();
       playChord([digit]);
+      if (activeMode === "sound") {
+        setSoundPlaybackCount((count) => count + 1);
+      }
       registerInteraction();
     },
-    [ensureAudio, playChord, registerInteraction],
+    [activeMode, ensureAudio, playChord, registerInteraction],
   );
 
   // Initialise PolySynth + Reverb once on mount
@@ -584,7 +533,7 @@ export default function DigitalDNAHub({
     synthRef.current = synth;
   }, []);
 
-  // Track visited modes for mission card
+  // Track visited modes for quest progress
   useEffect(() => {
     setVisitedModes((prev) =>
       prev.includes(activeMode) ? prev : [...prev, activeMode],
@@ -601,11 +550,79 @@ export default function DigitalDNAHub({
     });
   }, [noteBoardCapacity]);
 
+  const lessonProgressEntry = useMemo(() => {
+    if (!lessonContext) return null;
+
+    return (
+      lessonProgress.find(
+        (progress) =>
+          progress.lessonId === lessonContext.lessonId &&
+          progress.studentAlias === lessonContext.studentAlias,
+      ) ?? null
+    );
+  }, [lessonContext, lessonProgress]);
+
+  useEffect(() => {
+    if (!lessonContext) return;
+    initProgress(lessonContext.lessonId, lessonContext.studentAlias);
+  }, [initProgress, lessonContext]);
+
+  useEffect(() => {
+    if (!lessonContext) return;
+    setPostResponse(lessonProgressEntry?.postResponse ?? "");
+  }, [lessonContext, lessonProgressEntry?.postResponse]);
+
+  const updateHarmony = useCallback(
+    (nextValue: number) => {
+      if (nextValue === harmony) return;
+
+      if (activeMode === "mandala") {
+        setMandalaHarmonyChangeCount((count) => count + 1);
+      }
+
+      setHarmony(nextValue);
+      registerInteraction(true);
+    },
+    [activeMode, harmony, registerInteraction],
+  );
+
+  const updateTempo = useCallback(
+    (nextValue: number) => {
+      if (nextValue === tempo) return;
+
+      if (activeMode === "sound") {
+        setSoundTempoChangeCount((count) => count + 1);
+      }
+
+      setTempo(nextValue);
+      registerInteraction(true);
+    },
+    [activeMode, registerInteraction, tempo],
+  );
+
+  const updateToolTransform = useCallback(
+    (nextValue: ToolTransform) => {
+      if (nextValue === toolTransform) return;
+
+      if (activeMode === "sound") {
+        setSoundTransformChangeCount((count) => count + 1);
+      }
+
+      setToolTransform(nextValue);
+      registerInteraction(true);
+    },
+    [activeMode, registerInteraction, toolTransform],
+  );
+
   /** Play the full 60-digit DNA sequence as a melody. */
   const playSequence = useCallback(async () => {
     await ensureAudio();
     setIsPlaying(true);
     setPlayCount((c) => c + 1);
+
+    if (activeMode === "sound") {
+      setSoundPlaybackCount((count) => count + 1);
+    }
 
     const sequence = getSequence();
     const now = Tone.now();
@@ -619,12 +636,12 @@ export default function DigitalDNAHub({
       );
     });
 
-    setTimeout(
-      () => setIsPlaying(false),
-      sequence.slice(0, 60).length * interval * 1000,
-    );
-    registerInteraction(true);
-  }, [ensureAudio, getSequence, tempo, registerInteraction]);
+      setTimeout(
+        () => setIsPlaying(false),
+        sequence.slice(0, 60).length * interval * 1000,
+      );
+      registerInteraction(true);
+  }, [activeMode, ensureAudio, getSequence, tempo, registerInteraction]);
 
   const playCustomSequence = useCallback(
     async (digits: number[]) => {
@@ -633,6 +650,14 @@ export default function DigitalDNAHub({
       await ensureAudio();
       setIsPlaying(true);
       setPlayCount((c) => c + 1);
+
+      if (activeMode === "sound") {
+        setSoundPlaybackCount((count) => count + 1);
+      }
+
+      if (activeMode === "triangle") {
+        setTrianglePlaybackCount((count) => count + 1);
+      }
 
       const now = Tone.now();
       const interval = 60 / tempo;
@@ -652,7 +677,7 @@ export default function DigitalDNAHub({
       );
       registerInteraction(true);
     },
-    [ensureAudio, tempo, registerInteraction],
+    [activeMode, ensureAudio, tempo, registerInteraction],
   );
 
   const clearNoteBoard = useCallback(() => {
@@ -879,83 +904,7 @@ export default function DigitalDNAHub({
     );
   }, [frequencyMap]);
   const currentSeedMeta = MOSS_STRAND_META[selectedSeed];
-  const activeLoopSeeds = useMemo(
-    () =>
-      (Object.entries(loopSeedEnabled) as [SeedKey, boolean][])
-        .filter(([, enabled]) => enabled)
-        .map(([seed]) => seed),
-    [loopSeedEnabled],
-  );
-  const effectiveLoopSeeds = useMemo(
-    () => (activeLoopSeeds.length ? activeLoopSeeds : [selectedSeed]),
-    [activeLoopSeeds, selectedSeed],
-  );
   const miniPathMaxLength = SEEDS[selectedSeed].length;
-  const activeLoopSourceLength =
-    sequenceSource === "packet" ? activeMiniPathString.length : sequence.length;
-  const loopStartMax = Math.max(activeLoopSourceLength - 1, 0);
-  const loopLengthMax = Math.min(Math.max(activeLoopSourceLength, 1), 24);
-  useEffect(() => {
-    setLoopStartIndex((current) => clamp(current, 0, loopStartMax));
-    setLoopLength((current) => clamp(current, 1, loopLengthMax));
-  }, [loopLengthMax, loopStartMax]);
-  const loopWindows = useMemo(
-    () =>
-      effectiveLoopSeeds.map((seed) =>
-        getWrappedDigits(
-          (sequenceSource === "packet"
-            ? buildMiniPathString(
-                seed,
-                miniPathMode,
-                selectedPacketIndex,
-                miniPathStartIndex,
-                miniPathLength,
-              )
-            : SEEDS[seed]
-          )
-            .split("")
-            .map(Number),
-          loopStartIndex,
-          loopLength,
-          loopStep,
-        ),
-      ),
-    [
-      effectiveLoopSeeds,
-      loopLength,
-      loopStartIndex,
-      loopStep,
-      miniPathLength,
-      miniPathMode,
-      miniPathStartIndex,
-      selectedPacketIndex,
-      sequenceSource,
-    ],
-  );
-  const loopCoreSequence = useMemo(
-    () => mixLoopDigits(loopWindows, loopMixMode, loopLength),
-    [loopWindows, loopMixMode, loopLength],
-  );
-  const loopStationSequence = useMemo(
-    () => applyLoopDirection(loopCoreSequence, loopDirection),
-    [loopCoreSequence, loopDirection],
-  );
-  const loopAverageSize = useMemo(() => {
-    if (!loopStationSequence.length) return 0;
-    return Math.round(
-      (loopStationSequence.reduce((sum, digit) => sum + digit, 0) /
-        loopStationSequence.length) *
-        (loopScale / 100),
-    );
-  }, [loopStationSequence, loopScale]);
-  const loopStackRows = useMemo(
-    () => buildStackRows(loopStationSequence, loopShape),
-    [loopStationSequence, loopShape],
-  );
-  const figurateSeries = useMemo(
-    () => getStackNumberSeries(loopShape, 5),
-    [loopShape],
-  );
   const trianglePerimeterDigits = useMemo(
     () => getWrappedDigits(sequence, 0, 60),
     [sequence],
@@ -996,15 +945,9 @@ export default function DigitalDNAHub({
   const soundLabSequence =
     soundSource === "triangle" && triangleTraceDigits.length
       ? triangleTraceDigits
-      : soundSource === "loop" && loopStationSequence.length
-        ? loopStationSequence
-        : toolkitSoundSequence;
+      : toolkitSoundSequence;
   const soundSourceLabel =
-    soundSource === "triangle"
-      ? "Triangle Trace"
-      : soundSource === "loop"
-        ? "Loop Station"
-        : "Toolkit Phrase";
+    soundSource === "triangle" ? "Triangle Trace" : "Toolkit Phrase";
   const noteBoardDigits = useMemo(
     () => noteBoard.filter((digit): digit is number => digit !== null),
     [noteBoard],
@@ -1019,6 +962,189 @@ export default function DigitalDNAHub({
         ? `Build your own mini path · start ${miniPathStartIndex + 1} · ${activeMiniPathString.length} digits · ${activeMiniPathString}`
         : `${activePacketChamber.positionLabel} o'clock · ${activePacketChamber.name} · ${activeMiniPathString}`
       : `${sequence.length} digit core strand`;
+  const activeLessonEntry = useMemo(() => {
+    if (!lessonContext) return null;
+
+    return (
+      queuedLessons.find((lesson) => lesson.id === lessonContext.lessonId) ??
+      null
+    );
+  }, [lessonContext, queuedLessons]);
+  const selectedQuestPack = useMemo(() => {
+    if (activeLessonEntry) {
+      return selectQuestPack({
+        focusArea: activeLessonEntry.focusArea,
+        dnaMode: activeLessonEntry.dnaMode,
+      });
+    }
+
+    if (activeMode === "mandala") return getQuestPackById("symmetry-studio");
+    if (activeMode === "triangle") return getQuestPackById("triangle-trace");
+    if (activeMode === "sound") return getQuestPackById("sound-path");
+
+    return getQuestPackById("pattern-basics");
+  }, [activeLessonEntry, activeMode]);
+  const persistedCompletedQuestIds =
+    lessonProgressEntry?.questSummary?.packId === selectedQuestPack.id
+      ? lessonProgressEntry.questSummary.completedQuestIds
+      : [];
+  const questProgress = useMemo(
+    () =>
+      evaluateQuestPack(
+        selectedQuestPack,
+        {
+          activeMode,
+          visitedModes,
+          sessionInteractions,
+          playCount,
+          modeInteractions,
+          mandalaStrokeCount,
+          mandalaHarmonyChangeCount,
+          triangleTraceSteps: triangleMaxTraceSteps,
+          triangleVisitedSides: triangleVisitedSides.length,
+          trianglePlaybackCount,
+          soundPlaybackCount,
+          soundTempoChangeCount,
+          soundTransformChangeCount,
+          reflectionSubmitted: Boolean(lessonProgressEntry?.postResponse?.trim()),
+        },
+        persistedCompletedQuestIds,
+      ),
+    [
+      activeMode,
+      lessonProgressEntry?.postResponse,
+      mandalaHarmonyChangeCount,
+      mandalaStrokeCount,
+      modeInteractions,
+      persistedCompletedQuestIds,
+      playCount,
+      selectedQuestPack,
+      sessionInteractions,
+      soundPlaybackCount,
+      soundTempoChangeCount,
+      soundTransformChangeCount,
+      triangleMaxTraceSteps,
+      trianglePlaybackCount,
+      triangleVisitedSides.length,
+      visitedModes,
+    ],
+  );
+  const currentQuestSummary = useMemo(
+    () => buildLessonQuestSummary(questProgress),
+    [questProgress],
+  );
+  const lessonCompletionRequirements = useMemo(() => {
+    if (!activeLessonEntry) {
+      return { ready: true, missingRequirements: [] };
+    }
+
+    return getLessonCompletionRequirements(activeLessonEntry, {
+      ...(lessonProgressEntry ?? {
+        lessonId: activeLessonEntry.id,
+        studentAlias: lessonContext?.studentAlias ?? "",
+        status: "active",
+        startedAt: null,
+        completedAt: null,
+        timeSpentMs: 0,
+        preResponse: null,
+        postResponse: null,
+        dnaInteractions: 0,
+        patternHash: null,
+        questSummary: null,
+      }),
+      questSummary: currentQuestSummary,
+    });
+  }, [
+    activeLessonEntry,
+    currentQuestSummary,
+    lessonContext?.studentAlias,
+    lessonProgressEntry,
+  ]);
+  const isLessonCompleted = lessonProgressEntry?.status === "completed";
+
+  useEffect(() => {
+    if (!lessonContext || isLessonCompleted) return;
+    saveQuestSummary(
+      lessonContext.lessonId,
+      lessonContext.studentAlias,
+      currentQuestSummary,
+    );
+  }, [
+    currentQuestSummary,
+    isLessonCompleted,
+    lessonContext,
+    saveQuestSummary,
+  ]);
+
+  const completeLesson = useCallback(
+    (nextResponse?: string) => {
+      if (!lessonContext) return;
+
+      const trimmedResponse = nextResponse?.trim();
+      const hasSavedReflection = Boolean(lessonProgressEntry?.postResponse?.trim());
+
+      setCompletionFeedback(null);
+
+      if (!questProgress.readyToComplete) {
+        setCompletionFeedback(
+          lessonCompletionRequirements.missingRequirements[0] ??
+            "Complete 2 core quests on the Pattern Quest Board.",
+        );
+        return;
+      }
+
+      if (lessonContext.postPrompt && !trimmedResponse && !hasSavedReflection) {
+        setShowPostPrompt(true);
+        return;
+      }
+
+      if (trimmedResponse) {
+        recordPostResponse(
+          lessonContext.lessonId,
+          lessonContext.studentAlias,
+          trimmedResponse,
+        );
+      }
+
+      saveQuestSummary(
+        lessonContext.lessonId,
+        lessonContext.studentAlias,
+        currentQuestSummary,
+      );
+
+      const result = completeLessonWithFlair(
+        lessonContext.lessonId,
+        lessonContext.studentAlias,
+      );
+
+      if (!result.completed) {
+        setCompletionFeedback(
+          result.missingRequirements.join(" ") ||
+            "Finish the required quest work before completing the lesson.",
+        );
+        if (
+          lessonContext.postPrompt &&
+          result.missingRequirements.includes("Submit the lesson reflection.")
+        ) {
+          setShowPostPrompt(true);
+        }
+        return;
+      }
+
+      setShowPostPrompt(false);
+      setCompletionFeedback("Lesson complete. Quest evidence saved.");
+    },
+    [
+      completeLessonWithFlair,
+      currentQuestSummary,
+      lessonCompletionRequirements.missingRequirements,
+      lessonContext,
+      lessonProgressEntry?.postResponse,
+      questProgress.readyToComplete,
+      recordPostResponse,
+      saveQuestSummary,
+    ],
+  );
 
   const strandRoster = useMemo(() => {
     return (Object.entries(SEEDS) as [SeedKey, string][]).map(
@@ -1065,24 +1191,6 @@ export default function DigitalDNAHub({
       };
     });
   }, [strandRoster]);
-
-  const toggleLoopSeed = useCallback(
-    (seed: SeedKey) => {
-      setLoopSeedEnabled((current) => {
-        const activeCount = Object.values(current).filter(Boolean).length;
-        if (current[seed] && activeCount === 1) {
-          return current;
-        }
-
-        return {
-          ...current,
-          [seed]: !current[seed],
-        };
-      });
-      registerInteraction(true);
-    },
-    [registerInteraction],
-  );
 
   const applyExplorationPreset = useCallback(
     (preset: "calm" | "spark" | "storm") => {
@@ -1167,6 +1275,10 @@ export default function DigitalDNAHub({
 
       triangleTraceRef.current = [stepIndex];
       setTriangleTrace([stepIndex]);
+      setTriangleMaxTraceSteps((count) => Math.max(count, 1));
+      setTriangleVisitedSides((current) =>
+        current.includes(step.side) ? current : [...current, step.side],
+      );
       setTriangleHoveredStep(stepIndex);
       setTriangleActiveStep(stepIndex);
       setIsTriangleTracing(true);
@@ -1188,6 +1300,10 @@ export default function DigitalDNAHub({
       const nextTrace = [...triangleTraceRef.current, stepIndex];
       triangleTraceRef.current = nextTrace;
       setTriangleTrace(nextTrace);
+      setTriangleMaxTraceSteps((count) => Math.max(count, nextTrace.length));
+      setTriangleVisitedSides((current) =>
+        current.includes(step.side) ? current : [...current, step.side],
+      );
       setTriangleHoveredStep(stepIndex);
       setTriangleActiveStep(stepIndex);
       registerInteraction();
@@ -1663,6 +1779,7 @@ export default function DigitalDNAHub({
       pointers.delete(e.pointerId);
       if (canvas.hasPointerCapture(e.pointerId))
         canvas.releasePointerCapture(e.pointerId);
+      setMandalaStrokeCount((count) => count + 1);
       setPaintedPattern([...paintedPatternRef.current]);
     };
 
@@ -1772,29 +1889,8 @@ export default function DigitalDNAHub({
   ]);
 
   // ══════════════════════════════════════════════════════════════════════════
-  // Mission cards & mode metadata
+  // Mode metadata
   // ══════════════════════════════════════════════════════════════════════════
-
-  const missionCards = [
-    {
-      id: "modes",
-      title: "Explore 3 Modes",
-      progress: `${Math.min(visitedModes.length, 3)}/3`,
-      done: visitedModes.length >= 3,
-    },
-    {
-      id: "touches",
-      title: "Make 40 Touches",
-      progress: `${Math.min(sessionInteractions, 40)}/40`,
-      done: sessionInteractions >= 40,
-    },
-    {
-      id: "melody",
-      title: "Play a DNA Melody",
-      progress: playCount > 0 ? "Done ✓" : "Pending",
-      done: playCount > 0,
-    },
-  ];
 
   const modes: { id: ModeKey; icon: string; label: string; desc: string }[] = [
     {
@@ -1878,30 +1974,6 @@ export default function DigitalDNAHub({
           </div>
         </div>
 
-        {/* ── Mission cards ────────────────────────────────────────────────── */}
-        <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {missionCards.map((m) => (
-            <div
-              key={m.id}
-              className={`rounded-xl border px-4 py-3 transition-colors ${
-                m.done
-                  ? "border-emerald-400/60 bg-emerald-500/10"
-                  : "border-slate-700/60 bg-slate-900/40"
-              }`}
-            >
-              <div className="text-[10px] uppercase tracking-widest text-slate-400 mb-0.5">
-                {m.done ? "✓ Completed" : "Learning Mission"}
-              </div>
-              <div className="text-sm font-semibold text-amber-100">
-                {m.title}
-              </div>
-              <div className="text-xs mt-1 text-cyan-300 font-mono">
-                {m.progress}
-              </div>
-            </div>
-          ))}
-        </div>
-
         {/* ── Mode selector ─────────────────────────────────────────────────── */}
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {modes.map((mode) => (
@@ -1971,7 +2043,7 @@ export default function DigitalDNAHub({
                   <button
                     key={value}
                     type="button"
-                    onClick={() => setHarmony(value)}
+                    onClick={() => updateHarmony(value)}
                     className={`h-10 w-10 rounded-full text-sm font-bold transition-colors ${
                       harmony === value
                         ? "bg-amber-400 text-slate-950"
@@ -1994,7 +2066,7 @@ export default function DigitalDNAHub({
                 min="60"
                 max="180"
                 value={tempo}
-                onChange={(e) => setTempo(parseInt(e.target.value, 10))}
+                onChange={(e) => updateTempo(parseInt(e.target.value, 10))}
                 className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-700 accent-amber-400"
               />
             </div>
@@ -2264,7 +2336,6 @@ export default function DigitalDNAHub({
                   ))}
                 </div>
               </div>
-            </div>
           </div>
         </section>
 
@@ -2600,7 +2671,7 @@ export default function DigitalDNAHub({
                       <button
                         key={value}
                         type="button"
-                        onClick={() => setToolTransform(value)}
+                        onClick={() => updateToolTransform(value)}
                         className={`rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${
                           toolTransform === value
                             ? "bg-amber-500 text-slate-950"
@@ -2870,387 +2941,52 @@ export default function DigitalDNAHub({
           </div>
         </section>
 
-        <section className="mb-8 rounded-[2rem] border border-cyan-500/20 bg-slate-900/45 p-4 sm:p-6">
-          <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <PatternQuestBoard
+          progress={questProgress}
+          activeMode={activeMode}
+          isLessonMode={Boolean(lessonContext)}
+          isCompleted={Boolean(isLessonCompleted)}
+          missingRequirements={lessonCompletionRequirements.missingRequirements}
+          onJumpToMode={(mode) => setActiveMode(mode as ModeKey)}
+        />
+
+        {completionFeedback && (
+          <div className="mb-8 rounded-2xl border border-cyan-400/25 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-100">
+            {completionFeedback}
+          </div>
+        )}
+
+        <section className="mb-8 rounded-[2rem] border border-amber-500/20 bg-slate-900/45 p-4 sm:p-6">
+          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.34em] text-cyan-200/70">
-                Geometric Loop Station
+              <p className="text-[11px] uppercase tracking-[0.34em] text-amber-200/70">
+                Phrase Builder
               </p>
               <h2 className="mt-2 text-2xl font-bold text-white sm:text-3xl">
-                Simple stacks that grow into bigger patterns
+                Capture a phrase, remix it, and stretch it into a longer board
               </h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">
-                Start with triangle, rectangle, or square number stacks, then
-                add red, black, and blue together, flip the direction, move the
-                start point, and grow the loop into a bigger playable pattern.
+                Pull in the toolkit phrase or the currently active sound path,
+                then drag digits around to build a custom playback board.
               </p>
             </div>
-            <div className="rounded-2xl border border-cyan-400/20 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-100">
-              {loopShape === "triangle" && "Triangle totals: "}
-              {loopShape === "rectangle" && "Rectangle totals: "}
-              {loopShape === "square" && "Square totals: "}
-              <strong>{figurateSeries.join(" · ")}</strong>
+            <div className="grid gap-2 text-sm text-slate-200 sm:text-right">
+              <div className="rounded-2xl border border-cyan-400/20 bg-cyan-500/10 px-4 py-3">
+                Toolkit phrase: <strong>{toolkitSoundSequence.length}</strong>
+              </div>
+              <div className="rounded-2xl border border-purple-400/20 bg-purple-500/10 px-4 py-3">
+                Active phrase: <strong>{soundLabSequence.length}</strong> ·{" "}
+                {soundSourceLabel}
+              </div>
             </div>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-[0.95fr_1.25fr]">
-            <div className="space-y-4">
-              <div className="rounded-2xl border border-slate-700/60 bg-slate-950/55 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-300/80">
-                  Strand inputs
-                </p>
-                <div className="mt-4 grid grid-cols-3 gap-2">
-                  {(["red", "black", "blue"] as SeedKey[]).map((seed) => (
-                    <button
-                      key={seed}
-                      type="button"
-                      onClick={() => toggleLoopSeed(seed)}
-                      className={`rounded-xl border px-3 py-3 text-sm font-semibold transition-colors ${
-                        loopSeedEnabled[seed]
-                          ? "border-white/20 text-white"
-                          : "border-slate-700 bg-slate-900/80 text-slate-400 hover:bg-slate-800"
-                      }`}
-                      style={
-                        loopSeedEnabled[seed]
-                          ? {
-                              backgroundColor: `${MOSS_STRAND_META[seed].accent}22`,
-                            }
-                          : undefined
-                      }
-                    >
-                      {MOSS_STRAND_META[seed].shortLabel}
-                    </button>
-                  ))}
-                </div>
-                <p className="mt-3 text-xs text-slate-500">
-                  Leave one on for a clean solo line, or stack more strands to
-                  build complexity.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-slate-700/60 bg-slate-950/55 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-300/80">
-                  Loop rules
-                </p>
-                <div className="mt-4 space-y-4">
-                  <div>
-                    <p className="mb-2 text-sm text-slate-300">Mix mode</p>
-                    <div className="grid grid-cols-3 gap-2">
-                      {(
-                        [
-                          ["solo", "Solo"],
-                          ["add", "Add"],
-                          ["weave", "Weave"],
-                        ] as [LoopMixMode, string][]
-                      ).map(([value, label]) => (
-                        <button
-                          key={value}
-                          type="button"
-                          onClick={() => setLoopMixMode(value)}
-                          className={`rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${
-                            loopMixMode === value
-                              ? "bg-amber-500 text-slate-950"
-                              : "bg-slate-800 text-slate-300 hover:bg-slate-700"
-                          }`}
-                        >
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="mb-2 text-sm text-slate-300">Direction</p>
-                    <div className="grid grid-cols-3 gap-2">
-                      {(
-                        [
-                          ["forward", "Forward"],
-                          ["reverse", "Reverse"],
-                          ["pingpong", "Ping-Pong"],
-                        ] as [LoopDirection, string][]
-                      ).map(([value, label]) => (
-                        <button
-                          key={value}
-                          type="button"
-                          onClick={() => setLoopDirection(value)}
-                          className={`rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${
-                            loopDirection === value
-                              ? "bg-cyan-500 text-slate-950"
-                              : "bg-slate-800 text-slate-300 hover:bg-slate-700"
-                          }`}
-                        >
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="mb-2 text-sm text-slate-300">Stack pattern</p>
-                    <div className="grid grid-cols-3 gap-2">
-                      {(
-                        [
-                          ["triangle", "Triangle"],
-                          ["rectangle", "Rectangle"],
-                          ["square", "Square"],
-                        ] as [LoopShape, string][]
-                      ).map(([value, label]) => (
-                        <button
-                          key={value}
-                          type="button"
-                          onClick={() => setLoopShape(value)}
-                          className={`rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${
-                            loopShape === value
-                              ? "bg-purple-500 text-white"
-                              : "bg-slate-800 text-slate-300 hover:bg-slate-700"
-                          }`}
-                        >
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-slate-700/60 bg-slate-950/55 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
-                  Movement
-                </p>
-                <div className="mt-4 space-y-4">
-                  <div>
-                    <div className="mb-2 flex items-center justify-between text-sm">
-                      <label htmlFor="loop-start" className="text-slate-300">
-                        Start point
-                      </label>
-                      <span className="font-mono text-cyan-300">
-                        {loopStartIndex + 1}
-                      </span>
-                    </div>
-                    <input
-                      id="loop-start"
-                      type="range"
-                      min="0"
-                      max={loopStartMax}
-                      value={loopStartIndex}
-                      onChange={(e) =>
-                        setLoopStartIndex(parseInt(e.target.value, 10))
-                      }
-                      className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-700 accent-cyan-400"
-                    />
-                  </div>
-
-                  <div>
-                    <div className="mb-2 flex items-center justify-between text-sm">
-                      <label htmlFor="loop-length" className="text-slate-300">
-                        Loop length
-                      </label>
-                      <span className="font-mono text-cyan-300">
-                        {loopLength}
-                      </span>
-                    </div>
-                    <input
-                      id="loop-length"
-                      type="range"
-                      min="1"
-                      max={loopLengthMax}
-                      value={loopLength}
-                      onChange={(e) =>
-                        setLoopLength(parseInt(e.target.value, 10))
-                      }
-                      className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-700 accent-amber-400"
-                    />
-                  </div>
-
-                  <div>
-                    <div className="mb-2 flex items-center justify-between text-sm">
-                      <label htmlFor="loop-step" className="text-slate-300">
-                        Step jump
-                      </label>
-                      <span className="font-mono text-cyan-300">
-                        {loopStep}
-                      </span>
-                    </div>
-                    <input
-                      id="loop-step"
-                      type="range"
-                      min="1"
-                      max="4"
-                      value={loopStep}
-                      onChange={(e) =>
-                        setLoopStep(parseInt(e.target.value, 10))
-                      }
-                      className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-700 accent-purple-400"
-                    />
-                  </div>
-
-                  <div>
-                    <div className="mb-2 flex items-center justify-between text-sm">
-                      <label htmlFor="loop-scale" className="text-slate-300">
-                        Stack size
-                      </label>
-                      <span className="font-mono text-cyan-300">
-                        {loopScale}%
-                      </span>
-                    </div>
-                    <input
-                      id="loop-scale"
-                      type="range"
-                      min="70"
-                      max="160"
-                      value={loopScale}
-                      onChange={(e) =>
-                        setLoopScale(parseInt(e.target.value, 10))
-                      }
-                      className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-700 accent-pink-400"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="rounded-2xl border border-slate-700/60 bg-slate-950/55 p-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-purple-300/80">
-                      Live stack
-                    </p>
-                    <h3 className="mt-2 text-xl font-bold text-white">
-                      Click or drag any tile from the stack
-                    </h3>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-xs text-slate-400 sm:grid-cols-3">
-                    <div className="rounded-xl border border-slate-800 bg-slate-900/80 px-3 py-2">
-                      <div>Seeds</div>
-                      <div className="mt-1 font-semibold text-white">
-                        {effectiveLoopSeeds
-                          .map((seed) => MOSS_STRAND_META[seed].shortLabel)
-                          .join(" + ")}
-                      </div>
-                    </div>
-                    <div className="rounded-xl border border-slate-800 bg-slate-900/80 px-3 py-2">
-                      <div>Output</div>
-                      <div className="mt-1 font-semibold text-white">
-                        {loopStationSequence.length} hits
-                      </div>
-                    </div>
-                    <div className="col-span-2 rounded-xl border border-slate-800 bg-slate-900/80 px-3 py-2 sm:col-span-1">
-                      <div>Avg size</div>
-                      <div className="mt-1 font-semibold text-white">
-                        {loopAverageSize}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-5 rounded-2xl border border-slate-800 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.12),_transparent_62%)] p-4">
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
-                    <span className="rounded-full border border-slate-700 px-3 py-1">
-                      Mix: {loopMixMode}
-                    </span>
-                    <span className="rounded-full border border-slate-700 px-3 py-1">
-                      Direction: {loopDirection}
-                    </span>
-                    <span className="rounded-full border border-slate-700 px-3 py-1">
-                      Stack: {loopShape}
-                    </span>
-                  </div>
-
-                  <div className="mt-5 space-y-3">
-                    {loopStackRows.map((row, rowIndex) => (
-                      <div
-                        key={`${loopShape}-row-${rowIndex}`}
-                        className={`flex gap-2 ${
-                          loopShape === "rectangle"
-                            ? "justify-start"
-                            : "justify-center"
-                        }`}
-                      >
-                        {row.map((digit, digitIndex) => {
-                          const tileSize = clamp(
-                            Math.round((28 + digit * 4) * (loopScale / 100)),
-                            24,
-                            76,
-                          );
-                          const height =
-                            loopShape === "rectangle"
-                              ? Math.round(tileSize * 0.72)
-                              : tileSize;
-
-                          return (
-                            <button
-                              key={`${digit}-${rowIndex}-${digitIndex}-${loopShape}`}
-                              type="button"
-                              draggable
-                              onDragStart={(event) => {
-                                dragDigitRef.current = digit;
-                                dragBoardIndexRef.current = null;
-                                event.dataTransfer.effectAllowed = "copy";
-                                event.dataTransfer.setData(
-                                  "text/plain",
-                                  `${digit}`,
-                                );
-                              }}
-                              onClick={() => void playDigit(digit)}
-                              className="group flex flex-col items-center justify-center rounded-2xl border border-white/10 px-2 text-center shadow-lg transition-transform hover:-translate-y-0.5 hover:border-cyan-400/40 active:scale-95"
-                              style={{
-                                width: `${tileSize}px`,
-                                height: `${height}px`,
-                                backgroundColor: `${digitToLearningColor(digit)}CC`,
-                                boxShadow: `0 0 20px ${digitToLearningColor(digit)}22`,
-                              }}
-                              title={`Digit ${digit} · ${digitToNote(digit)}`}
-                            >
-                              <div className="text-base font-bold text-slate-950">
-                                {digit}
-                              </div>
-                              <div className="text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-950/80">
-                                {digitToNote(digit)}
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <p className="mt-4 font-mono text-xs text-slate-300">
-                  {loopStationSequence.join(" · ")}
-                </p>
-
-                <div className="mt-5 grid gap-2 sm:grid-cols-2">
-                  <button
-                    type="button"
-                    onClick={() => void playCustomSequence(loopStationSequence)}
-                    disabled={isPlaying || loopStationSequence.length === 0}
-                    className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
-                      isPlaying || loopStationSequence.length === 0
-                        ? "bg-slate-800 text-slate-500"
-                        : "bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 hover:brightness-110"
-                    }`}
-                  >
-                    {isPlaying ? "Loop playing..." : "Play geometric loop"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSoundSource("loop");
-                      setActiveMode("sound");
-                    }}
-                    className="rounded-xl border border-pink-500/30 bg-pink-500/10 px-4 py-3 text-sm font-semibold text-pink-200 transition-colors hover:bg-pink-500/20"
-                  >
-                    Send loop to Sound Lab
-                  </button>
-                </div>
-              </div>
-
+          <div className="space-y-4">
               <div className="rounded-2xl border border-slate-700/60 bg-slate-950/55 p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-300/80">
-                      180-note builder
+                      Remix bench
                     </p>
                     <h3 className="mt-2 text-xl font-bold text-white">
                       Drag notes into your own play board
@@ -3289,24 +3025,24 @@ export default function DigitalDNAHub({
                       />
                       <p className="mt-3 text-xs leading-5 text-slate-500">
                         Start small, then scale the board up to 180 notes when
-                        you want a longer pattern.
+                        you want a longer phrase.
                       </p>
                     </div>
 
                     <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
                       <button
                         type="button"
-                        onClick={() => loadNoteBoard(loopStationSequence)}
+                        onClick={() => loadNoteBoard(toolkitSoundSequence)}
                         className="rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-sm font-semibold text-cyan-100 transition-colors hover:bg-cyan-500/20"
                       >
-                        Fill from loop
+                        Load toolkit phrase
                       </button>
                       <button
                         type="button"
                         onClick={() => loadNoteBoard(soundLabSequence)}
                         className="rounded-xl border border-purple-500/30 bg-purple-500/10 px-4 py-3 text-sm font-semibold text-purple-100 transition-colors hover:bg-purple-500/20"
                       >
-                        Fill from phrase
+                        Load active phrase
                       </button>
                       <button
                         type="button"
@@ -3367,8 +3103,9 @@ export default function DigitalDNAHub({
                         Drop zone
                       </p>
                       <p className="text-xs text-slate-500">
-                        Drag from the stack or phrase. Drag between slots to
-                        reorder. Double click a slot to clear it.
+                        Drag from the toolkit palette or active phrase. Drag
+                        between slots to reorder. Double click a slot to clear
+                        it.
                       </p>
                     </div>
 
@@ -3872,18 +3609,6 @@ export default function DigitalDNAHub({
                       </span>
                       .
                     </>
-                  ) : soundSource === "loop" ? (
-                    <>
-                      Showing {soundLabSequence.length} digits with{" "}
-                      <span className="font-semibold text-cyan-200">
-                        {loopMixMode}
-                      </span>{" "}
-                      mixing and{" "}
-                      <span className="font-semibold text-cyan-200">
-                        {loopDirection}
-                      </span>{" "}
-                      flow.
-                    </>
                   ) : (
                     <>
                       Showing {soundLabSequence.length} digits with the{" "}
@@ -3987,7 +3712,7 @@ export default function DigitalDNAHub({
                         min="60"
                         max="180"
                         value={tempo}
-                        onChange={(e) => setTempo(parseInt(e.target.value, 10))}
+                        onChange={(e) => updateTempo(parseInt(e.target.value, 10))}
                         className="w-full h-3 rounded-lg appearance-none cursor-pointer bg-slate-700 accent-amber-400"
                       />
                       <div className="text-center text-2xl font-bold text-amber-400 font-mono">
@@ -4006,7 +3731,7 @@ export default function DigitalDNAHub({
                       {[3, 5, 7, 9, 12].map((num) => (
                         <button
                           key={num}
-                          onClick={() => setHarmony(num)}
+                          onClick={() => updateHarmony(num)}
                           className={`w-14 h-14 rounded-full font-bold text-lg transition-all ${
                             harmony === num
                               ? "bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-lg shadow-purple-500/40 scale-110"

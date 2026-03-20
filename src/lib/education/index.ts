@@ -6,6 +6,19 @@ export {
   deriveStudentDNA,
   compareStudentDNA,
 } from './student-dna';
+export {
+  QUEST_PACKS,
+  QUEST_PACK_ORDER,
+  buildLessonQuestSummary,
+  createEmptyQuestModeCounts,
+  evaluateQuestPack,
+  getLessonCompletionRequirements,
+  getQuestPackById,
+  getQuestPackLabel,
+  lessonNeedsQuestBoard,
+  normalizeLessonDnaMode,
+  selectQuestPack,
+} from './quests';
 
 // Re-export specific gamification types for convenience
 export type {
@@ -17,6 +30,9 @@ export type {
   QuickFireChallenge,
   VibeReaction,
   AchievementTier,
+  LessonQuestSummary,
+  QuestMode,
+  QuestPackId,
 } from './types';
 
 export {

@@ -6,9 +6,19 @@ import {
   useVisualEffects,
 } from "@/components/VisualEffects";
 import { Button } from "@/components/ui/button";
-import { VIBE_EMOJI, useEducationStore } from "@/lib/education";
-import type { QueuedLesson, VibeReaction } from "@/lib/education";
-import { DNA_MODE_LABELS, FOCUS_AREA_LABELS } from "@/lib/education";
+import {
+  DNA_MODE_LABELS,
+  FOCUS_AREA_LABELS,
+  VIBE_EMOJI,
+  lessonNeedsQuestBoard,
+  selectQuestPack,
+  useEducationStore,
+} from "@/lib/education";
+import type {
+  LessonProgress,
+  QueuedLesson,
+  VibeReaction,
+} from "@/lib/education";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   CheckCircle2,
@@ -86,6 +96,10 @@ export function EducationQueuePanel({
   const handleComplete = useCallback(
     (lessonId: string, alias: string) => {
       const result = completeLessonWithFlair(lessonId, alias);
+
+      if (!result.completed) {
+        return;
+      }
 
       // Fire confetti + star effects
       triggerEffect(
@@ -242,7 +256,7 @@ function TeacherQueue({
   queue: QueuedLesson[];
   activeLesson: string | null;
   completedLessonIds: Set<string>;
-  lessonProgress: { lessonId: string; status: string }[];
+  lessonProgress: LessonProgress[];
   onRemove: (id: string) => void;
   onReorder: (id: string, dir: "up" | "down") => void;
   onActivate: (id: string) => void;
@@ -260,12 +274,28 @@ function TeacherQueue({
           {queue.map((lesson, idx) => {
             const isActive = lesson.id === activeLesson;
             const isCompleted = completedLessonIds.has(lesson.id);
-            const progressCount = lessonProgress.filter(
-              (p) => p.lessonId === lesson.id && p.status === "completed",
-            ).length;
-            const totalCount = lessonProgress.filter(
+            const lessonProgressEntries = lessonProgress.filter(
               (p) => p.lessonId === lesson.id,
+            );
+            const progressCount = lessonProgressEntries.filter(
+              (p) => p.status === "completed",
             ).length;
+            const totalCount = lessonProgressEntries.length;
+            const usesQuestBoard = lessonNeedsQuestBoard(lesson);
+            const questReadyCount = lessonProgressEntries.filter((progress) => {
+              const summary = progress.questSummary;
+              return Boolean(
+                summary &&
+                  summary.requiredCoreQuests > 0 &&
+                  summary.completedCoreQuests >= summary.requiredCoreQuests,
+              );
+            }).length;
+            const questPackLabel = usesQuestBoard
+              ? selectQuestPack({
+                  focusArea: lesson.focusArea,
+                  dnaMode: lesson.dnaMode,
+                }).name
+              : null;
 
             return (
               <motion.div
@@ -314,6 +344,13 @@ function TeacherQueue({
                       {lesson.dnaMode &&
                         ` · ${DNA_MODE_LABELS[lesson.dnaMode]}`}
                     </p>
+                    {questPackLabel && (
+                      <p className="mt-1 text-[11px] text-cyan-300/80">
+                        Quest pack: {questPackLabel}
+                        {totalCount > 0 &&
+                          ` · ${questReadyCount}/${totalCount} quest-ready`}
+                      </p>
+                    )}
                     {totalCount > 0 && (
                       <motion.p
                         className="text-[11px] text-zinc-500 mt-1"
@@ -417,6 +454,7 @@ function StudentQueue({
             const isCompleted = completedLessonIds.has(lesson.id);
             const isNext = idx === nextLessonIdx && !isActive;
             const isLocked = !isCompleted && !isActive && !isNext;
+            const usesQuestBoard = lessonNeedsQuestBoard(lesson);
 
             return (
               <motion.div
@@ -490,7 +528,13 @@ function StudentQueue({
                       }`}
                       onClick={() => onActivate(lesson.id)}
                     >
-                      {isActive ? "Continue" : "Start"}
+                      {isActive
+                        ? usesQuestBoard
+                          ? "Continue Quest"
+                          : "Continue"
+                        : usesQuestBoard
+                          ? "Open Quest"
+                          : "Start"}
                     </Button>
                   )}
                 </div>
@@ -523,8 +567,13 @@ function StudentQueue({
                         </motion.button>
                       ))}
                     </div>
+                    {usesQuestBoard && (
+                      <p className="mt-3 text-[11px] text-cyan-300/80">
+                        Finish this lesson inside the Pattern Quest Board.
+                      </p>
+                    )}
                     {/* Complete button */}
-                    {studentAlias && (
+                    {studentAlias && !usesQuestBoard && (
                       <Button
                         type="button"
                         size="sm"

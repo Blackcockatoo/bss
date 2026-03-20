@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import type { SteeringViewProps } from './types';
-import { NAVIGATION_TARGETS } from './types';
+import { COMPASS_NAVIGATION_TARGETS, getNavigationTargetByPosition } from './types';
 
 const COLOR_VARIANTS = {
   red: { stroke: '#FF5555', node: '#FF9999', dim: '#FF555533' },
@@ -13,11 +13,11 @@ const COLOR_VARIANTS = {
 // Connections between feature nodes based on system relationships
 const FEATURE_CONNECTIONS: [number, number][] = [
   [0, 1], [0, 2], [0, 3],       // Home connects to Explore, Pet, Studio Site
-  [6, 7], [6, 10], [6, 11],     // MOSS60 connects to DNA, Network, QR
+  [6, 7], [6, 10],              // Shop connects to DNA and QR
   [7, 8], [8, 9],               // DNA → Identity → Lineage
   [1, 3],                        // Explore ↔ Games
   [4, 5],                        // Style ↔ Rewards
-  [10, 6],                       // Network ↔ MOSS60
+  [9, 10],                       // Lineage ↔ QR
   [2, 5],                        // Pet ↔ Rewards
 ];
 
@@ -48,11 +48,15 @@ export function NetworkView({
 
   // Generate node positions: 12 feature nodes in a ring + data-driven inner nodes
   const featureNodes = useMemo(() => {
-    return NAVIGATION_TARGETS.map((target, i) => {
+    return Object.fromEntries(COMPASS_NAVIGATION_TARGETS.map((target) => {
       const angle = target.angle * (Math.PI / 180);
       const r = 160;
-      return { x: Math.sin(angle) * r, y: -Math.cos(angle) * r, label: target.label };
-    });
+      return [target.position, {
+        x: Math.sin(angle) * r,
+        y: -Math.cos(angle) * r,
+        label: target.label,
+      }];
+    }));
   }, []);
 
   // Inner data nodes derived from number string
@@ -73,12 +77,15 @@ export function NetworkView({
     return FEATURE_CONNECTIONS.map(([a, b]) => {
       const na = featureNodes[a];
       const nb = featureNodes[b];
+      if (!na || !nb) {
+        return null;
+      }
       const t = (animPhase + a * 0.08) % 1;
       return {
         x: na.x + (nb.x - na.x) * t,
         y: na.y + (nb.y - na.y) * t,
       };
-    });
+    }).filter((particle): particle is { x: number; y: number } => particle !== null);
   }, [featureNodes, animPhase]);
 
   return (
@@ -126,6 +133,9 @@ export function NetworkView({
           {FEATURE_CONNECTIONS.map(([a, b], i) => {
             const na = featureNodes[a];
             const nb = featureNodes[b];
+            if (!na || !nb) {
+              return null;
+            }
             const isHighlighted = a === selectedFeature || b === selectedFeature;
             return (
               <line
@@ -151,17 +161,21 @@ export function NetworkView({
           ))}
 
           {/* Feature nodes */}
-          {featureNodes.map((node, i) => {
-            const isSelected = selectedFeature === i;
-            const isHovered = hoveredNode === i;
+          {COMPASS_NAVIGATION_TARGETS.map((target) => {
+            const node = featureNodes[target.position];
+            if (!node) {
+              return null;
+            }
+            const isSelected = selectedFeature === target.position;
+            const isHovered = hoveredNode === target.position;
             const r = isSelected ? 14 : isHovered ? 12 : 10;
             return (
               <g
-                key={`fn-${i}`}
+                key={`fn-${target.position}`}
                 className="cursor-pointer"
-                onPointerEnter={() => setHoveredNode(i)}
+                onPointerEnter={() => setHoveredNode(target.position)}
                 onPointerLeave={() => setHoveredNode(null)}
-                onClick={() => onFeatureActivate(i)}
+                onClick={() => onFeatureActivate(target.position)}
               >
                 <circle
                   cx={node.x} cy={node.y}
@@ -199,7 +213,7 @@ export function NetworkView({
             fontWeight="bold"
             textAnchor="middle"
           >
-            {NAVIGATION_TARGETS[selectedFeature]?.label ?? ''}
+            {getNavigationTargetByPosition(selectedFeature)?.label ?? ''}
           </text>
         </svg>
       </div>

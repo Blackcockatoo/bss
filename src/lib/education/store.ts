@@ -11,6 +11,7 @@ import { generateMeditationPattern, validatePattern } from "@/lib/minigames";
 import { PLAN_LIMITS, UNLIMITED } from "@/lib/pricing/plans";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { getLessonCompletionRequirements } from "./quests";
 import {
   DnaMode,
   EDU_ACHIEVEMENTS_CATALOG,
@@ -19,6 +20,7 @@ import {
   type EducationQueueState,
   FocusArea,
   type LessonProgress,
+  type LessonQuestSummary,
   type LessonStatus,
   type QueueAnalytics,
   type QueuedLesson,
@@ -62,7 +64,76 @@ function generateId(): string {
 }
 
 interface CompleteLessonFlairResult {
+  completed: boolean;
+  missingRequirements: string[];
   newAchievements: EduAchievementId[];
+}
+
+function createLessonProgressRecord(
+  lessonId: string,
+  studentAlias: string,
+): LessonProgress {
+  return {
+    lessonId,
+    studentAlias,
+    status: "queued",
+    startedAt: null,
+    completedAt: null,
+    timeSpentMs: 0,
+    preResponse: null,
+    postResponse: null,
+    dnaInteractions: 0,
+    patternHash: null,
+    questSummary: null,
+  };
+}
+
+function updateLessonProgressRecord(
+  lessonProgress: LessonProgress[],
+  lessonId: string,
+  studentAlias: string,
+  updater: (progress: LessonProgress) => LessonProgress,
+): LessonProgress[] {
+  const recordIndex = lessonProgress.findIndex(
+    (progress) =>
+      progress.lessonId === lessonId && progress.studentAlias === studentAlias,
+  );
+
+  if (recordIndex === -1) {
+    return [
+      ...lessonProgress,
+      updater(createLessonProgressRecord(lessonId, studentAlias)),
+    ];
+  }
+
+  return lessonProgress.map((progress, index) =>
+    index === recordIndex ? updater(progress) : progress,
+  );
+}
+
+function findLessonProgressRecord(
+  lessonProgress: LessonProgress[],
+  lessonId: string,
+  studentAlias: string,
+): LessonProgress | undefined {
+  return lessonProgress.find(
+    (progress) =>
+      progress.lessonId === lessonId && progress.studentAlias === studentAlias,
+  );
+}
+
+function areQuestSummariesEqual(
+  current: LessonQuestSummary | null,
+  next: LessonQuestSummary,
+): boolean {
+  return (
+    current?.packId === next.packId &&
+    current?.requiredCoreQuests === next.requiredCoreQuests &&
+    current?.completedCoreQuests === next.completedCoreQuests &&
+    current?.totalCompletedQuests === next.totalCompletedQuests &&
+    JSON.stringify(current?.completedQuestIds ?? []) ===
+      JSON.stringify(next.completedQuestIds)
+  );
 }
 
 interface EducationActions {
@@ -96,7 +167,10 @@ interface EducationActions {
   endSession: () => void;
   activateLesson: (lessonId: string) => void;
   pauseLesson: (lessonId: string, studentAlias: string) => void;
-  completeLesson: (lessonId: string, studentAlias: string) => void;
+  completeLesson: (
+    lessonId: string,
+    studentAlias: string,
+  ) => { ready: boolean; missingRequirements: string[] };
 
   // Student progress
   initProgress: (lessonId: string, studentAlias: string) => void;
@@ -115,6 +189,11 @@ interface EducationActions {
     lessonId: string,
     studentAlias: string,
     hash: string,
+  ) => void;
+  saveQuestSummary: (
+    lessonId: string,
+    studentAlias: string,
+    summary: LessonQuestSummary,
   ) => void;
   addTimeSpent: (lessonId: string, studentAlias: string, ms: number) => void;
 
@@ -237,25 +316,48 @@ export const useEducationStore = create<EducationStore>()(
 
       pauseLesson: (lessonId, studentAlias) =>
         set((state) => ({
-          lessonProgress: state.lessonProgress.map((p) =>
-            p.lessonId === lessonId && p.studentAlias === studentAlias
-              ? { ...p, status: "paused" as LessonStatus }
-              : p,
+          lessonProgress: updateLessonProgressRecord(
+            state.lessonProgress,
+            lessonId,
+            studentAlias,
+            (progress) => ({
+              ...progress,
+              status: "paused" as LessonStatus,
+              startedAt: progress.startedAt ?? Date.now(),
+            }),
           ),
         })),
 
-      completeLesson: (lessonId, studentAlias) =>
-        set((state) => ({
-          lessonProgress: state.lessonProgress.map((p) =>
-            p.lessonId === lessonId && p.studentAlias === studentAlias
-              ? {
-                  ...p,
-                  status: "completed" as LessonStatus,
-                  completedAt: Date.now(),
-                }
-              : p,
+      completeLesson: (lessonId, studentAlias) => {
+        const state = get();
+        const lesson = state.queue.find((entry) => entry.id === lessonId);
+        const progress = findLessonProgressRecord(
+          state.lessonProgress,
+          lessonId,
+          studentAlias,
+        );
+        const requirements = getLessonCompletionRequirements(lesson, progress);
+
+        if (!requirements.ready) {
+          return requirements;
+        }
+
+        set((current) => ({
+          lessonProgress: updateLessonProgressRecord(
+            current.lessonProgress,
+            lessonId,
+            studentAlias,
+            (record) => ({
+              ...record,
+              status: "completed" as LessonStatus,
+              startedAt: record.startedAt ?? Date.now(),
+              completedAt: record.completedAt ?? Date.now(),
+            }),
           ),
-        })),
+        }));
+
+        return requirements;
+      },
 
       // ---------- Student progress ----------
 
@@ -266,70 +368,123 @@ export const useEducationStore = create<EducationStore>()(
           );
           if (exists) return state;
 
-          const progress: LessonProgress = {
-            lessonId,
-            studentAlias,
-            status: "queued",
-            startedAt: null,
-            completedAt: null,
-            timeSpentMs: 0,
-            preResponse: null,
-            postResponse: null,
-            dnaInteractions: 0,
-            patternHash: null,
+          return {
+            lessonProgress: [
+              ...state.lessonProgress,
+              createLessonProgressRecord(lessonId, studentAlias),
+            ],
           };
-          return { lessonProgress: [...state.lessonProgress, progress] };
         }),
 
       recordPreResponse: (lessonId, studentAlias, response) =>
         set((state) => ({
-          lessonProgress: state.lessonProgress.map((p) =>
-            p.lessonId === lessonId && p.studentAlias === studentAlias
-              ? {
-                  ...p,
-                  preResponse: response,
-                  status: "active" as LessonStatus,
-                  startedAt: p.startedAt ?? Date.now(),
-                }
-              : p,
+          lessonProgress: updateLessonProgressRecord(
+            state.lessonProgress,
+            lessonId,
+            studentAlias,
+            (progress) => ({
+              ...progress,
+              preResponse: response,
+              status:
+                progress.status === "completed"
+                  ? progress.status
+                  : ("active" as LessonStatus),
+              startedAt: progress.startedAt ?? Date.now(),
+            }),
           ),
           promptResponseCount: state.promptResponseCount + 1,
         })),
 
       recordPostResponse: (lessonId, studentAlias, response) =>
         set((state) => ({
-          lessonProgress: state.lessonProgress.map((p) =>
-            p.lessonId === lessonId && p.studentAlias === studentAlias
-              ? { ...p, postResponse: response }
-              : p,
+          lessonProgress: updateLessonProgressRecord(
+            state.lessonProgress,
+            lessonId,
+            studentAlias,
+            (progress) => ({
+              ...progress,
+              postResponse: response,
+              status:
+                progress.status === "completed"
+                  ? progress.status
+                  : ("active" as LessonStatus),
+              startedAt: progress.startedAt ?? Date.now(),
+            }),
           ),
           promptResponseCount: state.promptResponseCount + 1,
         })),
 
       incrementDnaInteraction: (lessonId, studentAlias) =>
         set((state) => ({
-          lessonProgress: state.lessonProgress.map((p) =>
-            p.lessonId === lessonId && p.studentAlias === studentAlias
-              ? { ...p, dnaInteractions: p.dnaInteractions + 1 }
-              : p,
+          lessonProgress: updateLessonProgressRecord(
+            state.lessonProgress,
+            lessonId,
+            studentAlias,
+            (progress) => ({
+              ...progress,
+              dnaInteractions: progress.dnaInteractions + 1,
+              status:
+                progress.status === "completed"
+                  ? progress.status
+                  : ("active" as LessonStatus),
+              startedAt: progress.startedAt ?? Date.now(),
+            }),
           ),
         })),
 
       recordPatternHash: (lessonId, studentAlias, hash) =>
         set((state) => ({
-          lessonProgress: state.lessonProgress.map((p) =>
-            p.lessonId === lessonId && p.studentAlias === studentAlias
-              ? { ...p, patternHash: hash }
-              : p,
+          lessonProgress: updateLessonProgressRecord(
+            state.lessonProgress,
+            lessonId,
+            studentAlias,
+            (progress) => ({
+              ...progress,
+              patternHash: hash,
+              startedAt: progress.startedAt ?? Date.now(),
+            }),
+          ),
+        })),
+
+      saveQuestSummary: (lessonId, studentAlias, summary) =>
+        set((state) => ({
+          lessonProgress: updateLessonProgressRecord(
+            state.lessonProgress,
+            lessonId,
+            studentAlias,
+            (progress) => {
+              if (areQuestSummariesEqual(progress.questSummary, summary)) {
+                return progress;
+              }
+
+              return {
+                ...progress,
+                questSummary: summary,
+                status:
+                  progress.status === "completed"
+                    ? progress.status
+                    : ("active" as LessonStatus),
+                startedAt: progress.startedAt ?? Date.now(),
+              };
+            },
           ),
         })),
 
       addTimeSpent: (lessonId, studentAlias, ms) =>
         set((state) => ({
-          lessonProgress: state.lessonProgress.map((p) =>
-            p.lessonId === lessonId && p.studentAlias === studentAlias
-              ? { ...p, timeSpentMs: p.timeSpentMs + ms }
-              : p,
+          lessonProgress: updateLessonProgressRecord(
+            state.lessonProgress,
+            lessonId,
+            studentAlias,
+            (progress) => ({
+              ...progress,
+              timeSpentMs: progress.timeSpentMs + ms,
+              status:
+                progress.status === "completed"
+                  ? progress.status
+                  : ("active" as LessonStatus),
+              startedAt: progress.startedAt ?? Date.now(),
+            }),
           ),
         })),
 
@@ -440,20 +595,32 @@ export const useEducationStore = create<EducationStore>()(
       },
 
       completeLessonWithFlair: (lessonId, studentAlias) => {
-        const state = get();
+        const beforeCompletion = get();
+        const existingProgress = findLessonProgressRecord(
+          beforeCompletion.lessonProgress,
+          lessonId,
+          studentAlias,
+        );
+        const wasAlreadyCompleted = existingProgress?.status === "completed";
+        const completion = get().completeLesson(lessonId, studentAlias);
 
-        // Call existing completeLesson
-        set((s) => ({
-          lessonProgress: s.lessonProgress.map((p) =>
-            p.lessonId === lessonId && p.studentAlias === studentAlias
-              ? {
-                  ...p,
-                  status: "completed" as LessonStatus,
-                  completedAt: Date.now(),
-                }
-              : p,
-          ),
-        }));
+        if (!completion.ready) {
+          return {
+            completed: false,
+            missingRequirements: completion.missingRequirements,
+            newAchievements: [],
+          };
+        }
+
+        if (wasAlreadyCompleted) {
+          return {
+            completed: true,
+            missingRequirements: [],
+            newAchievements: [],
+          };
+        }
+
+        const state = get();
 
         // Award 25 XP
         const newXP = state.eduXP.xp + 25;
@@ -493,7 +660,11 @@ export const useEducationStore = create<EducationStore>()(
         // Check achievements
         const newAchievements = get().checkEduAchievements();
 
-        return { newAchievements };
+        return {
+          completed: true,
+          missingRequirements: [],
+          newAchievements,
+        };
       },
 
       checkEduAchievements: () => {

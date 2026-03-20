@@ -13,7 +13,7 @@ import { NetworkView } from './NetworkView';
 import { GeometryView } from './GeometryView';
 import { WheelModeSelector } from './WheelModeSelector';
 import type { SteeringMode, SteeringColor, DataSource, SteeringViewProps } from './types';
-import { NAVIGATION_TARGETS } from './types';
+import { getNavigationTargetByPosition } from './types';
 
 // MossPrimeSeed canonical strings (from the original calculator)
 const SEED_STRINGS = {
@@ -51,7 +51,7 @@ export function SteeringWheel() {
 
   const handleFeatureActivate = useCallback((position: number) => {
     setSelectedFeature(position);
-    const target = NAVIGATION_TARGETS[position];
+    const target = getNavigationTargetByPosition(position);
     if (target) {
       if (target.route.startsWith('http')) {
         window.location.href = target.route;
@@ -70,8 +70,7 @@ export function SteeringWheel() {
     onFeatureActivate: handleFeatureActivate,
   };
 
-  const selectedTarget = NAVIGATION_TARGETS[selectedFeature];
-  const showGenomeResonanceNote = mode === 'network' || selectedTarget?.route === '/genome-resonance';
+  const selectedTarget = getNavigationTargetByPosition(selectedFeature);
 
   return (
     <div className="flex flex-col items-center gap-6 w-full max-w-2xl mx-auto">
@@ -100,14 +99,6 @@ export function SteeringWheel() {
         <div className="w-full max-w-lg flex items-center justify-between rounded-lg border border-zinc-600 bg-zinc-900/80 px-4 py-2">
           <span className="text-sm font-medium text-zinc-200">{selectedTarget.label}</span>
           <span className="text-xs text-zinc-300 font-mono">{selectedTarget.route}</span>
-        </div>
-      )}
-
-      {showGenomeResonanceNote && (
-        <div className="w-full max-w-lg rounded-lg border border-cyan-500/30 bg-cyan-950/30 p-3 text-center">
-          <p className="text-xs text-cyan-200">
-            <span className="font-semibold">Genome Resonance:</span> Selecting this node opens the Genome Resonance v1 Loop page for simulation and explanation tools.
-          </p>
         </div>
       )}
 

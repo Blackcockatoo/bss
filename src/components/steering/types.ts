@@ -10,6 +10,8 @@ export interface NavigationTarget {
   icon: string;
 }
 
+export const GENOME_RESONANCE_ROUTE = "/genome-resonance";
+
 export const NAVIGATION_TARGETS: NavigationTarget[] = [
   { position: 0, angle: 0, label: "Home", route: "/", icon: "Home" },
   { position: 1, angle: 30, label: "Explore", route: "/scaffold", icon: "Map" },
@@ -67,7 +69,7 @@ export const NAVIGATION_TARGETS: NavigationTarget[] = [
     position: 10,
     angle: 300,
     label: "Genome Resonance",
-    route: "/genome-resonance",
+    route: GENOME_RESONANCE_ROUTE,
     icon: "Network",
   },
   {
@@ -78,6 +80,13 @@ export const NAVIGATION_TARGETS: NavigationTarget[] = [
     icon: "QrCode",
   },
 ];
+
+export const COMPASS_NAVIGATION_TARGETS = NAVIGATION_TARGETS.filter(
+  (target) => target.route !== GENOME_RESONANCE_ROUTE,
+);
+
+export const getNavigationTargetByPosition = (position: number) =>
+  NAVIGATION_TARGETS.find((target) => target.position === position);
 
 export interface SteeringViewProps {
   color: SteeringColor;
