@@ -59,11 +59,12 @@ export interface LessonContext {
 }
 
 type SeedKey = MossStrandKey;
-type ModeKey = "spiral" | "mandala" | "sound" | "triangle" | "journey";
+type ModeKey = "spiral" | "mandala" | "sound" | "triangle" | "pentagon" | "hexagon" | "decagon" | "circle" | "journey";
 type ToolTransform = "raw" | "reverse" | "orbit";
 type SequenceSource = "core" | "packet";
 type MiniPathMode = "story" | "build";
 type TriangleSide = "vertical" | "base" | "diagonal";
+type PolygonSide = "side" | number; // Generic for pentagon, hexagon, decagon
 
 interface ToolkitSettingsSnapshot {
   selectedSeed: SeedKey;
@@ -104,6 +105,19 @@ interface TrianglePerimeterStep {
   y: number;
 }
 
+interface PolygonPoint {
+  x: number;
+  y: number;
+}
+
+interface PolygonPerimeterStep {
+  index: number;
+  unit: number;
+  side: number;
+  x: number;
+  y: number;
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const MAX_PIXEL_RATIO = 2;
@@ -130,6 +144,50 @@ const TRIANGLE_SIDE_ACCENTS = {
   base: "#F59E0B",
   diagonal: "#A855F7",
 } as const satisfies Record<TriangleSide, string>;
+
+// Pentagon: 5 sides × 12 steps = 60
+const PENTAGON_VIEWBOX = { width: 900, height: 900 } as const;
+const PENTAGON_CENTER = { x: 450, y: 450 } as const;
+const PENTAGON_RADIUS = 300;
+const PENTAGON_STEPS_PER_SIDE = 12;
+const PENTAGON_COLORS = [
+  "#38BDF8", // cyan
+  "#EC4899", // pink
+  "#F59E0B", // amber
+  "#10B981", // emerald
+  "#8B5CF6", // violet
+] as const;
+
+// Hexagon: 6 sides × 10 steps = 60
+const HEXAGON_VIEWBOX = { width: 900, height: 900 } as const;
+const HEXAGON_CENTER = { x: 450, y: 450 } as const;
+const HEXAGON_RADIUS = 300;
+const HEXAGON_STEPS_PER_SIDE = 10;
+const HEXAGON_COLORS = [
+  "#38BDF8", // cyan
+  "#F59E0B", // amber
+  "#EC4899", // pink
+  "#10B981", // emerald
+  "#8B5CF6", // violet
+  "#F97316", // orange
+] as const;
+
+// Decagon: 10 sides × 6 steps = 60
+const DECAGON_VIEWBOX = { width: 900, height: 900 } as const;
+const DECAGON_CENTER = { x: 450, y: 450 } as const;
+const DECAGON_RADIUS = 300;
+const DECAGON_STEPS_PER_SIDE = 6;
+const DECAGON_COLORS = [
+  "#38BDF8", "#EC4899", "#F59E0B", "#10B981", "#8B5CF6",
+  "#F97316", "#06B6D4", "#EF4444", "#14B8A6", "#6366F1",
+] as const;
+
+// Circle: 60 points around the circumference
+const CIRCLE_VIEWBOX = { width: 900, height: 900 } as const;
+const CIRCLE_CENTER = { x: 450, y: 450 } as const;
+const CIRCLE_RADIUS = 300;
+const CIRCLE_POINTS = 60;
+const CIRCLE_COLOR = "#06B6D4"; // cyan
 
 // ─── Pure helpers ─────────────────────────────────────────────────────────────
 
@@ -264,6 +322,108 @@ function buildTrianglePerimeterSteps(): TrianglePerimeterStep[] {
 
 const TRIANGLE_PERIMETER_STEPS = buildTrianglePerimeterSteps();
 
+function buildPentagonPerimeterSteps(): PolygonPerimeterStep[] {
+  const vertices: PolygonPoint[] = Array.from({ length: 5 }, (_, i) => {
+    const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+    return {
+      x: PENTAGON_CENTER.x + PENTAGON_RADIUS * Math.cos(angle),
+      y: PENTAGON_CENTER.y + PENTAGON_RADIUS * Math.sin(angle),
+    };
+  });
+
+  let index = 0;
+  return vertices.flatMap((start, sideIndex) => {
+    const end = vertices[(sideIndex + 1) % vertices.length];
+    return Array.from({ length: PENTAGON_STEPS_PER_SIDE }, (_, stepIndex) => {
+      const t = (stepIndex + 0.5) / PENTAGON_STEPS_PER_SIDE;
+      const point = pointBetween(start as TrianglePoint, end as TrianglePoint, t);
+      const step: PolygonPerimeterStep = {
+        index,
+        unit: index + 1,
+        side: sideIndex,
+        x: point.x,
+        y: point.y,
+      };
+      index += 1;
+      return step;
+    });
+  });
+}
+
+function buildHexagonPerimeterSteps(): PolygonPerimeterStep[] {
+  const vertices: PolygonPoint[] = Array.from({ length: 6 }, (_, i) => {
+    const angle = (i * 2 * Math.PI) / 6;
+    return {
+      x: HEXAGON_CENTER.x + HEXAGON_RADIUS * Math.cos(angle),
+      y: HEXAGON_CENTER.y + HEXAGON_RADIUS * Math.sin(angle),
+    };
+  });
+
+  let index = 0;
+  return vertices.flatMap((start, sideIndex) => {
+    const end = vertices[(sideIndex + 1) % vertices.length];
+    return Array.from({ length: HEXAGON_STEPS_PER_SIDE }, (_, stepIndex) => {
+      const t = (stepIndex + 0.5) / HEXAGON_STEPS_PER_SIDE;
+      const point = pointBetween(start as TrianglePoint, end as TrianglePoint, t);
+      const step: PolygonPerimeterStep = {
+        index,
+        unit: index + 1,
+        side: sideIndex,
+        x: point.x,
+        y: point.y,
+      };
+      index += 1;
+      return step;
+    });
+  });
+}
+
+function buildDecagonPerimeterSteps(): PolygonPerimeterStep[] {
+  const vertices: PolygonPoint[] = Array.from({ length: 10 }, (_, i) => {
+    const angle = (i * 2 * Math.PI) / 10;
+    return {
+      x: DECAGON_CENTER.x + DECAGON_RADIUS * Math.cos(angle),
+      y: DECAGON_CENTER.y + DECAGON_RADIUS * Math.sin(angle),
+    };
+  });
+
+  let index = 0;
+  return vertices.flatMap((start, sideIndex) => {
+    const end = vertices[(sideIndex + 1) % vertices.length];
+    return Array.from({ length: DECAGON_STEPS_PER_SIDE }, (_, stepIndex) => {
+      const t = (stepIndex + 0.5) / DECAGON_STEPS_PER_SIDE;
+      const point = pointBetween(start as TrianglePoint, end as TrianglePoint, t);
+      const step: PolygonPerimeterStep = {
+        index,
+        unit: index + 1,
+        side: sideIndex,
+        x: point.x,
+        y: point.y,
+      };
+      index += 1;
+      return step;
+    });
+  });
+}
+
+function buildCirclePerimeterSteps(): PolygonPerimeterStep[] {
+  return Array.from({ length: CIRCLE_POINTS }, (_, i) => {
+    const angle = (i * 2 * Math.PI) / CIRCLE_POINTS;
+    return {
+      index: i,
+      unit: i + 1,
+      side: 0,
+      x: CIRCLE_CENTER.x + CIRCLE_RADIUS * Math.cos(angle),
+      y: CIRCLE_CENTER.y + CIRCLE_RADIUS * Math.sin(angle),
+    };
+  });
+}
+
+const PENTAGON_PERIMETER_STEPS = buildPentagonPerimeterSteps();
+const HEXAGON_PERIMETER_STEPS = buildHexagonPerimeterSteps();
+const DECAGON_PERIMETER_STEPS = buildDecagonPerimeterSteps();
+const CIRCLE_PERIMETER_STEPS = buildCirclePerimeterSteps();
+
 /**
  * Set up a canvas for HiDPI/Retina screens.
  * Sets both the CSS display size (style) and the physical pixel buffer (width/height attrs).
@@ -335,6 +495,7 @@ export default function DigitalDNAHub({
   const [soundSource, setSoundSource] = useState<"toolkit" | "triangle">(
     "toolkit",
   );
+  // Triangle state
   const [triangleTrace, setTriangleTrace] = useState<number[]>([]);
   const [triangleHoveredStep, setTriangleHoveredStep] = useState<number | null>(
     null,
@@ -343,6 +504,42 @@ export default function DigitalDNAHub({
     null,
   );
   const [isTriangleTracing, setIsTriangleTracing] = useState(false);
+  // Pentagon state
+  const [pentagonTrace, setPentagonTrace] = useState<number[]>([]);
+  const [pentagonHoveredStep, setPentagonHoveredStep] = useState<number | null>(
+    null,
+  );
+  const [pentagonActiveStep, setPentagonActiveStep] = useState<number | null>(
+    null,
+  );
+  const [isPentagonTracing, setIsPentagonTracing] = useState(false);
+  // Hexagon state
+  const [hexagonTrace, setHexagonTrace] = useState<number[]>([]);
+  const [hexagonHoveredStep, setHexagonHoveredStep] = useState<number | null>(
+    null,
+  );
+  const [hexagonActiveStep, setHexagonActiveStep] = useState<number | null>(
+    null,
+  );
+  const [isHexagonTracing, setIsHexagonTracing] = useState(false);
+  // Decagon state
+  const [decagonTrace, setDecagonTrace] = useState<number[]>([]);
+  const [decagonHoveredStep, setDecagonHoveredStep] = useState<number | null>(
+    null,
+  );
+  const [decagonActiveStep, setDecagonActiveStep] = useState<number | null>(
+    null,
+  );
+  const [isDecagonTracing, setIsDecagonTracing] = useState(false);
+  // Circle state
+  const [circleTrace, setCircleTrace] = useState<number[]>([]);
+  const [circleHoveredStep, setCircleHoveredStep] = useState<number | null>(
+    null,
+  );
+  const [circleActiveStep, setCircleActiveStep] = useState<number | null>(
+    null,
+  );
+  const [isCircleTracing, setIsCircleTracing] = useState(false);
   const [noteBoardCapacity, setNoteBoardCapacity] = useState(
     DEFAULT_NOTE_BOARD_CAPACITY,
   );
@@ -374,6 +571,14 @@ export default function DigitalDNAHub({
     TriangleSide[]
   >([]);
   const [trianglePlaybackCount, setTrianglePlaybackCount] = useState(0);
+  const [pentagonMaxTraceSteps, setPentagonMaxTraceSteps] = useState(0);
+  const [pentagonPlaybackCount, setPentagonPlaybackCount] = useState(0);
+  const [hexagonMaxTraceSteps, setHexagonMaxTraceSteps] = useState(0);
+  const [hexagonPlaybackCount, setHexagonPlaybackCount] = useState(0);
+  const [decagonMaxTraceSteps, setDecagonMaxTraceSteps] = useState(0);
+  const [decagonPlaybackCount, setDecagonPlaybackCount] = useState(0);
+  const [circleMaxTraceSteps, setCircleMaxTraceSteps] = useState(0);
+  const [circlePlaybackCount, setCirclePlaybackCount] = useState(0);
   const [soundPlaybackCount, setSoundPlaybackCount] = useState(0);
   const [soundTempoChangeCount, setSoundTempoChangeCount] = useState(0);
   const [soundTransformChangeCount, setSoundTransformChangeCount] = useState(0);
@@ -405,6 +610,10 @@ export default function DigitalDNAHub({
   const dragDigitRef = useRef<number | null>(null);
   const dragBoardIndexRef = useRef<number | null>(null);
   const triangleTraceRef = useRef<number[]>([]);
+  const pentagonTraceRef = useRef<number[]>([]);
+  const hexagonTraceRef = useRef<number[]>([]);
+  const decagonTraceRef = useRef<number[]>([]);
+  const circleTraceRef = useRef<number[]>([]);
 
   /**
    * FIX: audioInitialized is tracked in a ref (not only state) so that
@@ -657,6 +866,22 @@ export default function DigitalDNAHub({
 
       if (activeMode === "triangle") {
         setTrianglePlaybackCount((count) => count + 1);
+      }
+
+      if (activeMode === "pentagon") {
+        setPentagonPlaybackCount((count) => count + 1);
+      }
+
+      if (activeMode === "hexagon") {
+        setHexagonPlaybackCount((count) => count + 1);
+      }
+
+      if (activeMode === "decagon") {
+        setDecagonPlaybackCount((count) => count + 1);
+      }
+
+      if (activeMode === "circle") {
+        setCirclePlaybackCount((count) => count + 1);
       }
 
       const now = Tone.now();
@@ -980,6 +1205,10 @@ export default function DigitalDNAHub({
 
     if (activeMode === "mandala") return getQuestPackById("symmetry-studio");
     if (activeMode === "triangle") return getQuestPackById("triangle-trace");
+    if (activeMode === "pentagon") return getQuestPackById("pentagon-trace");
+    if (activeMode === "hexagon") return getQuestPackById("hexagon-trace");
+    if (activeMode === "decagon") return getQuestPackById("decagon-trace");
+    if (activeMode === "circle") return getQuestPackById("circle-trace");
     if (activeMode === "sound") return getQuestPackById("sound-path");
 
     return getQuestPackById("pattern-basics");
@@ -1259,9 +1488,31 @@ export default function DigitalDNAHub({
   }, [triangleTrace]);
 
   useEffect(() => {
-    if (!isTriangleTracing) return;
+    pentagonTraceRef.current = pentagonTrace;
+  }, [pentagonTrace]);
 
-    const stopTrace = () => setIsTriangleTracing(false);
+  useEffect(() => {
+    hexagonTraceRef.current = hexagonTrace;
+  }, [hexagonTrace]);
+
+  useEffect(() => {
+    decagonTraceRef.current = decagonTrace;
+  }, [decagonTrace]);
+
+  useEffect(() => {
+    circleTraceRef.current = circleTrace;
+  }, [circleTrace]);
+
+  useEffect(() => {
+    if (!isTriangleTracing && !isPentagonTracing && !isHexagonTracing && !isDecagonTracing && !isCircleTracing) return;
+
+    const stopTrace = () => {
+      setIsTriangleTracing(false);
+      setIsPentagonTracing(false);
+      setIsHexagonTracing(false);
+      setIsDecagonTracing(false);
+      setIsCircleTracing(false);
+    };
 
     window.addEventListener("pointerup", stopTrace);
     window.addEventListener("pointercancel", stopTrace);
@@ -1269,7 +1520,7 @@ export default function DigitalDNAHub({
       window.removeEventListener("pointerup", stopTrace);
       window.removeEventListener("pointercancel", stopTrace);
     };
-  }, [isTriangleTracing]);
+  }, [isTriangleTracing, isPentagonTracing, isHexagonTracing, isDecagonTracing, isCircleTracing]);
 
   const startTriangleTrace = useCallback(
     (stepIndex: number) => {
@@ -1321,6 +1572,242 @@ export default function DigitalDNAHub({
     setTriangleHoveredStep(null);
     setTriangleActiveStep(null);
     setIsTriangleTracing(false);
+    registerInteraction(true);
+  }, [registerInteraction]);
+
+  // Pentagon handlers
+  const pentagonSteps = useMemo(
+    () =>
+      PENTAGON_PERIMETER_STEPS.map((step, index) => ({
+        ...step,
+        digit: trianglePerimeterDigits[index] ?? 0,
+        note: digitToNote(trianglePerimeterDigits[index] ?? 0),
+        color: digitToLearningColor(trianglePerimeterDigits[index] ?? 0),
+      })),
+    [trianglePerimeterDigits],
+  );
+
+  const startPentagonTrace = useCallback(
+    (stepIndex: number) => {
+      const step = pentagonSteps[stepIndex];
+      if (!step) return;
+
+      pentagonTraceRef.current = [stepIndex];
+      setPentagonTrace([stepIndex]);
+      setPentagonMaxTraceSteps((count) => Math.max(count, 1));
+      setPentagonHoveredStep(stepIndex);
+      setPentagonActiveStep(stepIndex);
+      setIsPentagonTracing(true);
+      pulseHaptic(8);
+      registerInteraction(true);
+      void playDigit(step.digit);
+    },
+    [playDigit, pulseHaptic, registerInteraction, pentagonSteps],
+  );
+
+  const extendPentagonTrace = useCallback(
+    (stepIndex: number) => {
+      if (!isPentagonTracing) return;
+      const step = pentagonSteps[stepIndex];
+      const lastStep =
+        pentagonTraceRef.current[pentagonTraceRef.current.length - 1];
+      if (!step || lastStep === stepIndex) return;
+
+      const nextTrace = [...pentagonTraceRef.current, stepIndex];
+      pentagonTraceRef.current = nextTrace;
+      setPentagonTrace(nextTrace);
+      setPentagonMaxTraceSteps((count) => Math.max(count, nextTrace.length));
+      setPentagonHoveredStep(stepIndex);
+      setPentagonActiveStep(stepIndex);
+      registerInteraction();
+      void playDigit(step.digit);
+    },
+    [isPentagonTracing, playDigit, registerInteraction, pentagonSteps],
+  );
+
+  const clearPentagonTrace = useCallback(() => {
+    pentagonTraceRef.current = [];
+    setPentagonTrace([]);
+    setPentagonHoveredStep(null);
+    setPentagonActiveStep(null);
+    setIsPentagonTracing(false);
+    registerInteraction(true);
+  }, [registerInteraction]);
+
+  // Hexagon handlers
+  const hexagonSteps = useMemo(
+    () =>
+      HEXAGON_PERIMETER_STEPS.map((step, index) => ({
+        ...step,
+        digit: trianglePerimeterDigits[index] ?? 0,
+        note: digitToNote(trianglePerimeterDigits[index] ?? 0),
+        color: digitToLearningColor(trianglePerimeterDigits[index] ?? 0),
+      })),
+    [trianglePerimeterDigits],
+  );
+
+  const startHexagonTrace = useCallback(
+    (stepIndex: number) => {
+      const step = hexagonSteps[stepIndex];
+      if (!step) return;
+
+      hexagonTraceRef.current = [stepIndex];
+      setHexagonTrace([stepIndex]);
+      setHexagonMaxTraceSteps((count) => Math.max(count, 1));
+      setHexagonHoveredStep(stepIndex);
+      setHexagonActiveStep(stepIndex);
+      setIsHexagonTracing(true);
+      pulseHaptic(8);
+      registerInteraction(true);
+      void playDigit(step.digit);
+    },
+    [playDigit, pulseHaptic, registerInteraction, hexagonSteps],
+  );
+
+  const extendHexagonTrace = useCallback(
+    (stepIndex: number) => {
+      if (!isHexagonTracing) return;
+      const step = hexagonSteps[stepIndex];
+      const lastStep =
+        hexagonTraceRef.current[hexagonTraceRef.current.length - 1];
+      if (!step || lastStep === stepIndex) return;
+
+      const nextTrace = [...hexagonTraceRef.current, stepIndex];
+      hexagonTraceRef.current = nextTrace;
+      setHexagonTrace(nextTrace);
+      setHexagonMaxTraceSteps((count) => Math.max(count, nextTrace.length));
+      setHexagonHoveredStep(stepIndex);
+      setHexagonActiveStep(stepIndex);
+      registerInteraction();
+      void playDigit(step.digit);
+    },
+    [isHexagonTracing, playDigit, registerInteraction, hexagonSteps],
+  );
+
+  const clearHexagonTrace = useCallback(() => {
+    hexagonTraceRef.current = [];
+    setHexagonTrace([]);
+    setHexagonHoveredStep(null);
+    setHexagonActiveStep(null);
+    setIsHexagonTracing(false);
+    registerInteraction(true);
+  }, [registerInteraction]);
+
+  // Decagon handlers
+  const decagonSteps = useMemo(
+    () =>
+      DECAGON_PERIMETER_STEPS.map((step, index) => ({
+        ...step,
+        digit: trianglePerimeterDigits[index] ?? 0,
+        note: digitToNote(trianglePerimeterDigits[index] ?? 0),
+        color: digitToLearningColor(trianglePerimeterDigits[index] ?? 0),
+      })),
+    [trianglePerimeterDigits],
+  );
+
+  const startDecagonTrace = useCallback(
+    (stepIndex: number) => {
+      const step = decagonSteps[stepIndex];
+      if (!step) return;
+
+      decagonTraceRef.current = [stepIndex];
+      setDecagonTrace([stepIndex]);
+      setDecagonMaxTraceSteps((count) => Math.max(count, 1));
+      setDecagonHoveredStep(stepIndex);
+      setDecagonActiveStep(stepIndex);
+      setIsDecagonTracing(true);
+      pulseHaptic(8);
+      registerInteraction(true);
+      void playDigit(step.digit);
+    },
+    [playDigit, pulseHaptic, registerInteraction, decagonSteps],
+  );
+
+  const extendDecagonTrace = useCallback(
+    (stepIndex: number) => {
+      if (!isDecagonTracing) return;
+      const step = decagonSteps[stepIndex];
+      const lastStep =
+        decagonTraceRef.current[decagonTraceRef.current.length - 1];
+      if (!step || lastStep === stepIndex) return;
+
+      const nextTrace = [...decagonTraceRef.current, stepIndex];
+      decagonTraceRef.current = nextTrace;
+      setDecagonTrace(nextTrace);
+      setDecagonMaxTraceSteps((count) => Math.max(count, nextTrace.length));
+      setDecagonHoveredStep(stepIndex);
+      setDecagonActiveStep(stepIndex);
+      registerInteraction();
+      void playDigit(step.digit);
+    },
+    [isDecagonTracing, playDigit, registerInteraction, decagonSteps],
+  );
+
+  const clearDecagonTrace = useCallback(() => {
+    decagonTraceRef.current = [];
+    setDecagonTrace([]);
+    setDecagonHoveredStep(null);
+    setDecagonActiveStep(null);
+    setIsDecagonTracing(false);
+    registerInteraction(true);
+  }, [registerInteraction]);
+
+  // Circle handlers
+  const circleSteps = useMemo(
+    () =>
+      CIRCLE_PERIMETER_STEPS.map((step, index) => ({
+        ...step,
+        digit: trianglePerimeterDigits[index] ?? 0,
+        note: digitToNote(trianglePerimeterDigits[index] ?? 0),
+        color: digitToLearningColor(trianglePerimeterDigits[index] ?? 0),
+      })),
+    [trianglePerimeterDigits],
+  );
+
+  const startCircleTrace = useCallback(
+    (stepIndex: number) => {
+      const step = circleSteps[stepIndex];
+      if (!step) return;
+
+      circleTraceRef.current = [stepIndex];
+      setCircleTrace([stepIndex]);
+      setCircleMaxTraceSteps((count) => Math.max(count, 1));
+      setCircleHoveredStep(stepIndex);
+      setCircleActiveStep(stepIndex);
+      setIsCircleTracing(true);
+      pulseHaptic(8);
+      registerInteraction(true);
+      void playDigit(step.digit);
+    },
+    [playDigit, pulseHaptic, registerInteraction, circleSteps],
+  );
+
+  const extendCircleTrace = useCallback(
+    (stepIndex: number) => {
+      if (!isCircleTracing) return;
+      const step = circleSteps[stepIndex];
+      const lastStep =
+        circleTraceRef.current[circleTraceRef.current.length - 1];
+      if (!step || lastStep === stepIndex) return;
+
+      const nextTrace = [...circleTraceRef.current, stepIndex];
+      circleTraceRef.current = nextTrace;
+      setCircleTrace(nextTrace);
+      setCircleMaxTraceSteps((count) => Math.max(count, nextTrace.length));
+      setCircleHoveredStep(stepIndex);
+      setCircleActiveStep(stepIndex);
+      registerInteraction();
+      void playDigit(step.digit);
+    },
+    [isCircleTracing, playDigit, registerInteraction, circleSteps],
+  );
+
+  const clearCircleTrace = useCallback(() => {
+    circleTraceRef.current = [];
+    setCircleTrace([]);
+    setCircleHoveredStep(null);
+    setCircleActiveStep(null);
+    setIsCircleTracing(false);
     registerInteraction(true);
   }, [registerInteraction]);
 
@@ -1913,6 +2400,30 @@ export default function DigitalDNAHub({
       icon: "📐",
       label: "Triangle Instrument",
       desc: "Trace the 60-step edge",
+    },
+    {
+      id: "pentagon",
+      icon: "⬠",
+      label: "Pentagon Instrument",
+      desc: "5 sides × 12 steps",
+    },
+    {
+      id: "hexagon",
+      icon: "⬡",
+      label: "Hexagon Instrument",
+      desc: "6 sides × 10 steps",
+    },
+    {
+      id: "decagon",
+      icon: "🔟",
+      label: "Decagon Instrument",
+      desc: "10 sides × 6 steps",
+    },
+    {
+      id: "circle",
+      icon: "⭕",
+      label: "Circle Instrument",
+      desc: "60 points on circle",
     },
     {
       id: "sound",
@@ -3562,6 +4073,490 @@ export default function DigitalDNAHub({
                     <button
                       type="button"
                       onClick={clearTriangleTrace}
+                      className="rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-3 text-sm font-semibold text-slate-200 transition-colors hover:bg-slate-800"
+                    >
+                      Clear trace
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Pentagon Instrument ──────────────────────────────────────── */}
+          {activeMode === "pentagon" && (
+            <div className="rounded-3xl border border-pink-800/30 bg-slate-900/60 p-4 sm:p-8">
+              <div className="text-center mb-5">
+                <h2 className="text-2xl sm:text-3xl font-bold text-amber-300 mb-1">
+                  ⬠ Pentagon Instrument
+                </h2>
+                <p className="text-cyan-300 text-sm sm:text-base">
+                  Trace the 60-step edge of a regular pentagon to turn shape into melody.
+                </p>
+                <p className="text-slate-500 text-xs mt-1 italic">
+                  5 sides × 12 steps each = 60 total points
+                </p>
+              </div>
+
+              <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_320px]">
+                <div className="rounded-3xl border border-slate-700/60 bg-slate-950/55 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
+                    <span className="rounded-full border border-slate-700 px-3 py-1">
+                      5 Sides
+                    </span>
+                    <span className="rounded-full border border-slate-700 px-3 py-1">
+                      12 Steps Each
+                    </span>
+                    <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-cyan-100">
+                      Perimeter 60
+                    </span>
+                  </div>
+
+                  <div className="mt-5 overflow-hidden rounded-[2rem] border border-slate-800 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.16),_transparent_60%)] p-4">
+                    <svg
+                      viewBox={`0 0 ${PENTAGON_VIEWBOX.width} ${PENTAGON_VIEWBOX.height}`}
+                      className="w-full"
+                      style={{ touchAction: "none" }}
+                      onPointerLeave={() => setPentagonHoveredStep(null)}
+                      onPointerUp={() => setIsPentagonTracing(false)}
+                    >
+                      {pentagonSteps.map((step) => {
+                        const isHovered = pentagonHoveredStep === step.index;
+                        const isActive = pentagonActiveStep === step.index;
+                        const isTraced = pentagonTrace.includes(step.index);
+                        const radius = isActive ? 13 : isHovered ? 12 : isTraced ? 11 : 9.5;
+
+                        return (
+                          <g
+                            key={`pentagon-step-${step.index}`}
+                            className="cursor-pointer"
+                            onPointerDown={(event) => {
+                              event.preventDefault();
+                              startPentagonTrace(step.index);
+                            }}
+                            onPointerEnter={() => {
+                              setPentagonHoveredStep(step.index);
+                              extendPentagonTrace(step.index);
+                            }}
+                            onPointerMove={() => {
+                              setPentagonHoveredStep(step.index);
+                              extendPentagonTrace(step.index);
+                            }}
+                            onPointerLeave={() => {
+                              setPentagonHoveredStep((current) =>
+                                current === step.index ? null : current,
+                              );
+                            }}
+                          >
+                            <circle cx={step.x} cy={step.y} r={radius + 8} fill="transparent" />
+                            <circle
+                              cx={step.x}
+                              cy={step.y}
+                              r={radius}
+                              fill={step.color}
+                              stroke={isActive || isTraced ? "#F8FAFC" : "rgba(15,23,42,0.8)"}
+                              strokeWidth={isActive ? 3 : 2}
+                              opacity={isHovered || isActive ? 1 : 0.94}
+                            />
+                            <text
+                              x={step.x}
+                              y={step.y + 2.5}
+                              textAnchor="middle"
+                              fontSize="8.5"
+                              fontWeight="700"
+                              fill="#020617"
+                            >
+                              {step.digit}
+                            </text>
+                          </g>
+                        );
+                      })}
+                    </svg>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="rounded-2xl border border-slate-700/60 bg-slate-950/55 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-300/80">
+                      Pentagon phrase
+                    </p>
+                    <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/80 p-3">
+                      <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
+                        Active phrase
+                      </div>
+                      <p className="mt-2 min-h-[3rem] font-mono text-xs leading-6 text-cyan-200">
+                        {pentagonTrace.length ? pentagonTrace.map(i => pentagonSteps[i]?.digit).join(" · ") : "Trace the pentagon to capture a phrase."}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <button
+                      type="button"
+                      onClick={clearPentagonTrace}
+                      className="rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-3 text-sm font-semibold text-slate-200 transition-colors hover:bg-slate-800"
+                    >
+                      Clear trace
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Hexagon Instrument ───────────────────────────────────────── */}
+          {activeMode === "hexagon" && (
+            <div className="rounded-3xl border border-emerald-800/30 bg-slate-900/60 p-4 sm:p-8">
+              <div className="text-center mb-5">
+                <h2 className="text-2xl sm:text-3xl font-bold text-amber-300 mb-1">
+                  ⬡ Hexagon Instrument
+                </h2>
+                <p className="text-cyan-300 text-sm sm:text-base">
+                  Trace the 60-step edge of a regular hexagon to turn shape into melody.
+                </p>
+                <p className="text-slate-500 text-xs mt-1 italic">
+                  6 sides × 10 steps each = 60 total points
+                </p>
+              </div>
+
+              <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_320px]">
+                <div className="rounded-3xl border border-slate-700/60 bg-slate-950/55 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
+                    <span className="rounded-full border border-slate-700 px-3 py-1">
+                      6 Sides
+                    </span>
+                    <span className="rounded-full border border-slate-700 px-3 py-1">
+                      10 Steps Each
+                    </span>
+                    <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-cyan-100">
+                      Perimeter 60
+                    </span>
+                  </div>
+
+                  <div className="mt-5 overflow-hidden rounded-[2rem] border border-slate-800 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.16),_transparent_60%)] p-4">
+                    <svg
+                      viewBox={`0 0 ${HEXAGON_VIEWBOX.width} ${HEXAGON_VIEWBOX.height}`}
+                      className="w-full"
+                      style={{ touchAction: "none" }}
+                      onPointerLeave={() => setHexagonHoveredStep(null)}
+                      onPointerUp={() => setIsHexagonTracing(false)}
+                    >
+                      {hexagonSteps.map((step) => {
+                        const isHovered = hexagonHoveredStep === step.index;
+                        const isActive = hexagonActiveStep === step.index;
+                        const isTraced = hexagonTrace.includes(step.index);
+                        const radius = isActive ? 13 : isHovered ? 12 : isTraced ? 11 : 9.5;
+
+                        return (
+                          <g
+                            key={`hexagon-step-${step.index}`}
+                            className="cursor-pointer"
+                            onPointerDown={(event) => {
+                              event.preventDefault();
+                              startHexagonTrace(step.index);
+                            }}
+                            onPointerEnter={() => {
+                              setHexagonHoveredStep(step.index);
+                              extendHexagonTrace(step.index);
+                            }}
+                            onPointerMove={() => {
+                              setHexagonHoveredStep(step.index);
+                              extendHexagonTrace(step.index);
+                            }}
+                            onPointerLeave={() => {
+                              setHexagonHoveredStep((current) =>
+                                current === step.index ? null : current,
+                              );
+                            }}
+                          >
+                            <circle cx={step.x} cy={step.y} r={radius + 8} fill="transparent" />
+                            <circle
+                              cx={step.x}
+                              cy={step.y}
+                              r={radius}
+                              fill={step.color}
+                              stroke={isActive || isTraced ? "#F8FAFC" : "rgba(15,23,42,0.8)"}
+                              strokeWidth={isActive ? 3 : 2}
+                              opacity={isHovered || isActive ? 1 : 0.94}
+                            />
+                            <text
+                              x={step.x}
+                              y={step.y + 2.5}
+                              textAnchor="middle"
+                              fontSize="8.5"
+                              fontWeight="700"
+                              fill="#020617"
+                            >
+                              {step.digit}
+                            </text>
+                          </g>
+                        );
+                      })}
+                    </svg>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="rounded-2xl border border-slate-700/60 bg-slate-950/55 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-300/80">
+                      Hexagon phrase
+                    </p>
+                    <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/80 p-3">
+                      <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
+                        Active phrase
+                      </div>
+                      <p className="mt-2 min-h-[3rem] font-mono text-xs leading-6 text-cyan-200">
+                        {hexagonTrace.length ? hexagonTrace.map(i => hexagonSteps[i]?.digit).join(" · ") : "Trace the hexagon to capture a phrase."}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <button
+                      type="button"
+                      onClick={clearHexagonTrace}
+                      className="rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-3 text-sm font-semibold text-slate-200 transition-colors hover:bg-slate-800"
+                    >
+                      Clear trace
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Decagon Instrument ───────────────────────────────────────── */}
+          {activeMode === "decagon" && (
+            <div className="rounded-3xl border border-purple-800/30 bg-slate-900/60 p-4 sm:p-8">
+              <div className="text-center mb-5">
+                <h2 className="text-2xl sm:text-3xl font-bold text-amber-300 mb-1">
+                  🔟 Decagon Instrument
+                </h2>
+                <p className="text-cyan-300 text-sm sm:text-base">
+                  Trace the 60-step edge of a regular decagon to turn shape into melody.
+                </p>
+                <p className="text-slate-500 text-xs mt-1 italic">
+                  10 sides × 6 steps each = 60 total points
+                </p>
+              </div>
+
+              <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_320px]">
+                <div className="rounded-3xl border border-slate-700/60 bg-slate-950/55 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
+                    <span className="rounded-full border border-slate-700 px-3 py-1">
+                      10 Sides
+                    </span>
+                    <span className="rounded-full border border-slate-700 px-3 py-1">
+                      6 Steps Each
+                    </span>
+                    <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-cyan-100">
+                      Perimeter 60
+                    </span>
+                  </div>
+
+                  <div className="mt-5 overflow-hidden rounded-[2rem] border border-slate-800 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.16),_transparent_60%)] p-4">
+                    <svg
+                      viewBox={`0 0 ${DECAGON_VIEWBOX.width} ${DECAGON_VIEWBOX.height}`}
+                      className="w-full"
+                      style={{ touchAction: "none" }}
+                      onPointerLeave={() => setDecagonHoveredStep(null)}
+                      onPointerUp={() => setIsDecagonTracing(false)}
+                    >
+                      {decagonSteps.map((step) => {
+                        const isHovered = decagonHoveredStep === step.index;
+                        const isActive = decagonActiveStep === step.index;
+                        const isTraced = decagonTrace.includes(step.index);
+                        const radius = isActive ? 13 : isHovered ? 12 : isTraced ? 11 : 9.5;
+
+                        return (
+                          <g
+                            key={`decagon-step-${step.index}`}
+                            className="cursor-pointer"
+                            onPointerDown={(event) => {
+                              event.preventDefault();
+                              startDecagonTrace(step.index);
+                            }}
+                            onPointerEnter={() => {
+                              setDecagonHoveredStep(step.index);
+                              extendDecagonTrace(step.index);
+                            }}
+                            onPointerMove={() => {
+                              setDecagonHoveredStep(step.index);
+                              extendDecagonTrace(step.index);
+                            }}
+                            onPointerLeave={() => {
+                              setDecagonHoveredStep((current) =>
+                                current === step.index ? null : current,
+                              );
+                            }}
+                          >
+                            <circle cx={step.x} cy={step.y} r={radius + 8} fill="transparent" />
+                            <circle
+                              cx={step.x}
+                              cy={step.y}
+                              r={radius}
+                              fill={step.color}
+                              stroke={isActive || isTraced ? "#F8FAFC" : "rgba(15,23,42,0.8)"}
+                              strokeWidth={isActive ? 3 : 2}
+                              opacity={isHovered || isActive ? 1 : 0.94}
+                            />
+                            <text
+                              x={step.x}
+                              y={step.y + 2.5}
+                              textAnchor="middle"
+                              fontSize="8.5"
+                              fontWeight="700"
+                              fill="#020617"
+                            >
+                              {step.digit}
+                            </text>
+                          </g>
+                        );
+                      })}
+                    </svg>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="rounded-2xl border border-slate-700/60 bg-slate-950/55 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-300/80">
+                      Decagon phrase
+                    </p>
+                    <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/80 p-3">
+                      <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
+                        Active phrase
+                      </div>
+                      <p className="mt-2 min-h-[3rem] font-mono text-xs leading-6 text-cyan-200">
+                        {decagonTrace.length ? decagonTrace.map(i => decagonSteps[i]?.digit).join(" · ") : "Trace the decagon to capture a phrase."}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <button
+                      type="button"
+                      onClick={clearDecagonTrace}
+                      className="rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-3 text-sm font-semibold text-slate-200 transition-colors hover:bg-slate-800"
+                    >
+                      Clear trace
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Circle Instrument ────────────────────────────────────────── */}
+          {activeMode === "circle" && (
+            <div className="rounded-3xl border border-blue-800/30 bg-slate-900/60 p-4 sm:p-8">
+              <div className="text-center mb-5">
+                <h2 className="text-2xl sm:text-3xl font-bold text-amber-300 mb-1">
+                  ⭕ Circle Instrument
+                </h2>
+                <p className="text-cyan-300 text-sm sm:text-base">
+                  Trace 60 points around a circle to turn shape into melody.
+                </p>
+                <p className="text-slate-500 text-xs mt-1 italic">
+                  60 points equally spaced around the circumference
+                </p>
+              </div>
+
+              <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_320px]">
+                <div className="rounded-3xl border border-slate-700/60 bg-slate-950/55 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
+                    <span className="rounded-full border border-slate-700 px-3 py-1">
+                      1 Circle
+                    </span>
+                    <span className="rounded-full border border-slate-700 px-3 py-1">
+                      60 Points
+                    </span>
+                    <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-cyan-100">
+                      Perimeter 60
+                    </span>
+                  </div>
+
+                  <div className="mt-5 overflow-hidden rounded-[2rem] border border-slate-800 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.16),_transparent_60%)] p-4">
+                    <svg
+                      viewBox={`0 0 ${CIRCLE_VIEWBOX.width} ${CIRCLE_VIEWBOX.height}`}
+                      className="w-full"
+                      style={{ touchAction: "none" }}
+                      onPointerLeave={() => setCircleHoveredStep(null)}
+                      onPointerUp={() => setIsCircleTracing(false)}
+                    >
+                      {circleSteps.map((step) => {
+                        const isHovered = circleHoveredStep === step.index;
+                        const isActive = circleActiveStep === step.index;
+                        const isTraced = circleTrace.includes(step.index);
+                        const radius = isActive ? 13 : isHovered ? 12 : isTraced ? 11 : 9.5;
+
+                        return (
+                          <g
+                            key={`circle-step-${step.index}`}
+                            className="cursor-pointer"
+                            onPointerDown={(event) => {
+                              event.preventDefault();
+                              startCircleTrace(step.index);
+                            }}
+                            onPointerEnter={() => {
+                              setCircleHoveredStep(step.index);
+                              extendCircleTrace(step.index);
+                            }}
+                            onPointerMove={() => {
+                              setCircleHoveredStep(step.index);
+                              extendCircleTrace(step.index);
+                            }}
+                            onPointerLeave={() => {
+                              setCircleHoveredStep((current) =>
+                                current === step.index ? null : current,
+                              );
+                            }}
+                          >
+                            <circle cx={step.x} cy={step.y} r={radius + 8} fill="transparent" />
+                            <circle
+                              cx={step.x}
+                              cy={step.y}
+                              r={radius}
+                              fill={step.color}
+                              stroke={isActive || isTraced ? "#F8FAFC" : "rgba(15,23,42,0.8)"}
+                              strokeWidth={isActive ? 3 : 2}
+                              opacity={isHovered || isActive ? 1 : 0.94}
+                            />
+                            <text
+                              x={step.x}
+                              y={step.y + 2.5}
+                              textAnchor="middle"
+                              fontSize="8.5"
+                              fontWeight="700"
+                              fill="#020617"
+                            >
+                              {step.digit}
+                            </text>
+                          </g>
+                        );
+                      })}
+                    </svg>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="rounded-2xl border border-slate-700/60 bg-slate-950/55 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-300/80">
+                      Circle phrase
+                    </p>
+                    <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/80 p-3">
+                      <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
+                        Active phrase
+                      </div>
+                      <p className="mt-2 min-h-[3rem] font-mono text-xs leading-6 text-cyan-200">
+                        {circleTrace.length ? circleTrace.map(i => circleSteps[i]?.digit).join(" · ") : "Trace the circle to capture a phrase."}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <button
+                      type="button"
+                      onClick={clearCircleTrace}
                       className="rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-3 text-sm font-semibold text-slate-200 transition-colors hover:bg-slate-800"
                     >
                       Clear trace

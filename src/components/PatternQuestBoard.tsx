@@ -16,6 +16,10 @@ const MODE_LABELS: Record<QuestMode, string> = {
   spiral: "DNA Helix",
   mandala: "Symmetry Studio",
   triangle: "Triangle Instrument",
+  pentagon: "Pentagon Instrument",
+  hexagon: "Hexagon Instrument",
+  decagon: "Decagon Instrument",
+  circle: "Circle Instrument",
   sound: "Sound Lab",
   journey: "Guided Journey",
 };
