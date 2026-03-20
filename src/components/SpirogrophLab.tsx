@@ -17,7 +17,7 @@ interface ControlState {
   strokeWidth: number;
   glow: number;
   hueSpin: number;
-  shapeMode: "classic" | "star" | "gear" | "flower" | "crystal";
+  shapeMode: "classic" | "star" | "gear" | "flower" | "crystal" | "spiral" | "mandala" | "wave" | "hyperbolic" | "tribal" | "ethereal" | "cosmic";
   phase: number;
 }
 
@@ -45,6 +45,21 @@ function shapeWarp(theta: number, mode: string, points: number, depth: number) {
       return 1 + d * Math.cos(points * theta) * 0.5 + d * 0.1 * Math.cos(points * theta * 3);
     case "crystal":
       return 1 + d * Math.sign(Math.sin(points * theta)) * 0.24 + d * Math.cos(points * theta * 2) * 0.32;
+    case "spiral":
+      return 1 + d * Math.sin(points * theta * 0.5) * 0.35 + d * Math.cos(points * theta) * 0.15;
+    case "mandala":
+      return 1 + d * (Math.cos(points * theta) * 0.4 + Math.cos(points * theta * 3) * 0.2 + Math.cos(points * theta * 5) * 0.1);
+    case "wave":
+      return 1 + d * Math.sin(points * theta) * 0.45 + d * Math.sin(points * theta * 2.5) * 0.15;
+    case "hyperbolic":
+      return 1 + d * Math.tanh(Math.cos(points * theta) * 2.5) * 0.5;
+    case "tribal":
+      const tri = Math.sin(points * theta * Math.PI) > 0 ? 1 : -1;
+      return 1 + d * tri * (0.3 + 0.15 * Math.cos(points * theta * 3));
+    case "ethereal":
+      return 1 + d * Math.pow(Math.abs(Math.sin(points * theta)), 1.5) * 0.4 + d * Math.cos(points * theta * 0.5) * 0.15;
+    case "cosmic":
+      return 1 + d * (Math.sin(points * theta) * Math.cos(points * theta * 2) * 0.35 + Math.sin(points * theta * 3) * 0.2);
     default:
       return 1;
   }
@@ -130,7 +145,7 @@ export default function SpirogrophLab() {
       const v = min + seededRandom() * (max - min);
       return Math.round(v / step) * step;
     };
-    const modes: ControlState["shapeMode"][] = ["classic", "star", "gear", "flower", "crystal"];
+    const modes: ControlState["shapeMode"][] = ["classic", "star", "gear", "flower", "crystal", "spiral", "mandala", "wave", "hyperbolic", "tribal", "ethereal", "cosmic"];
 
     setControls((prev) => ({
       ...prev,
@@ -316,6 +331,13 @@ export default function SpirogrophLab() {
                 <option value="gear">Gear</option>
                 <option value="flower">Flower</option>
                 <option value="crystal">Crystal</option>
+                <option value="spiral">Spiral</option>
+                <option value="mandala">Mandala</option>
+                <option value="wave">Wave</option>
+                <option value="hyperbolic">Hyperbolic</option>
+                <option value="tribal">Tribal</option>
+                <option value="ethereal">Ethereal</option>
+                <option value="cosmic">Cosmic</option>
               </select>
             </div>
 
