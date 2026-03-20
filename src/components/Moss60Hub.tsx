@@ -37,6 +37,7 @@ import {
 } from 'lucide-react';
 import { CrystallineNetwork } from './CrystallineNetwork';
 import { CrystallineLattice } from './CrystallineLattice';
+import SpirogrophLab from './SpirogrophLab';
 import { trackEvent } from '@/lib/analytics';
 import type { PetSaveData } from '@/lib/persistence/indexeddb';
 import { getAllPets } from '@/lib/persistence/indexeddb';
@@ -1050,10 +1051,11 @@ export function Moss60Hub() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid h-auto w-full grid-cols-3 gap-1 sm:grid-cols-6">
+        <TabsList className="grid h-auto w-full grid-cols-4 gap-1 sm:grid-cols-7">
           <TabsTrigger value="glyph" className="py-2 text-xs">Glyph</TabsTrigger>
           <TabsTrigger value="qr" className="py-2 text-xs">QR</TabsTrigger>
           <TabsTrigger value="serpent" className="py-2 text-xs">Serpent</TabsTrigger>
+          <TabsTrigger value="spirograph" className="py-2 text-xs">Spiral</TabsTrigger>
           <TabsTrigger value="reality" className="py-2 text-xs">Reality</TabsTrigger>
           <TabsTrigger value="network" className="py-2 text-xs">Network</TabsTrigger>
           <TabsTrigger value="security" className="py-2 text-xs">Security</TabsTrigger>
@@ -1245,6 +1247,17 @@ export function Moss60Hub() {
             </p>
           </div>
           <QRGenerator />
+        </TabsContent>
+
+        <TabsContent value="spirograph" className="mt-4">
+          <div className="rounded-2xl border border-slate-700/60 bg-slate-900/50 p-4 mb-4">
+            <p className="text-base font-semibold text-white">Live spirograph geometry</p>
+            <p className="mt-2 text-sm leading-6 text-zinc-200">
+              Watch a mathematical spirograph unfold in real time. Adjust the gear ratios, pen offset, and point symmetry to create ornate geometric patterns.
+              Every spiral is a dance of the outer ring against the inner one — a quiet little engine of beauty hiding in the ratio between them.
+            </p>
+          </div>
+          <SpirogrophLab />
         </TabsContent>
 
         <TabsContent value="serpent" className="mt-4 space-y-3">
