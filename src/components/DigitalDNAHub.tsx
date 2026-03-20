@@ -1164,6 +1164,88 @@ export default function DigitalDNAHub({
         .join(" "),
     [triangleSteps, triangleTrace],
   );
+
+  // Pentagon, Hexagon, Decagon, Circle shape step definitions
+  const pentagonSteps = useMemo(
+    () =>
+      PENTAGON_PERIMETER_STEPS.map((step, index) => ({
+        ...step,
+        digit: trianglePerimeterDigits[index] ?? 0,
+        note: digitToNote(trianglePerimeterDigits[index] ?? 0),
+        color: digitToLearningColor(trianglePerimeterDigits[index] ?? 0),
+      })),
+    [trianglePerimeterDigits],
+  );
+
+  const hexagonSteps = useMemo(
+    () =>
+      HEXAGON_PERIMETER_STEPS.map((step, index) => ({
+        ...step,
+        digit: trianglePerimeterDigits[index] ?? 0,
+        note: digitToNote(trianglePerimeterDigits[index] ?? 0),
+        color: digitToLearningColor(trianglePerimeterDigits[index] ?? 0),
+      })),
+    [trianglePerimeterDigits],
+  );
+
+  const decagonSteps = useMemo(
+    () =>
+      DECAGON_PERIMETER_STEPS.map((step, index) => ({
+        ...step,
+        digit: trianglePerimeterDigits[index] ?? 0,
+        note: digitToNote(trianglePerimeterDigits[index] ?? 0),
+        color: digitToLearningColor(trianglePerimeterDigits[index] ?? 0),
+      })),
+    [trianglePerimeterDigits],
+  );
+
+  const circleSteps = useMemo(
+    () =>
+      CIRCLE_PERIMETER_STEPS.map((step, index) => ({
+        ...step,
+        digit: trianglePerimeterDigits[index] ?? 0,
+        note: digitToNote(trianglePerimeterDigits[index] ?? 0),
+        color: digitToLearningColor(trianglePerimeterDigits[index] ?? 0),
+      })),
+    [trianglePerimeterDigits],
+  );
+
+  // Pentagon computed properties
+  const pentagonTraceDigits = useMemo(
+    () =>
+      pentagonTrace
+        .map((stepIndex) => pentagonSteps[stepIndex]?.digit)
+        .filter((digit): digit is number => typeof digit === "number"),
+    [pentagonSteps, pentagonTrace],
+  );
+
+  // Hexagon computed properties
+  const hexagonTraceDigits = useMemo(
+    () =>
+      hexagonTrace
+        .map((stepIndex) => hexagonSteps[stepIndex]?.digit)
+        .filter((digit): digit is number => typeof digit === "number"),
+    [hexagonSteps, hexagonTrace],
+  );
+
+  // Decagon computed properties
+  const decagonTraceDigits = useMemo(
+    () =>
+      decagonTrace
+        .map((stepIndex) => decagonSteps[stepIndex]?.digit)
+        .filter((digit): digit is number => typeof digit === "number"),
+    [decagonSteps, decagonTrace],
+  );
+
+  // Circle computed properties
+  const circleTraceDigits = useMemo(
+    () =>
+      circleTrace
+        .map((stepIndex) => circleSteps[stepIndex]?.digit)
+        .filter((digit): digit is number => typeof digit === "number"),
+    [circleSteps, circleTrace],
+  );
+
   const toolkitSoundSequence = transformedWindow.length
     ? transformedWindow
     : sequence.slice(0, 60);
@@ -1576,17 +1658,6 @@ export default function DigitalDNAHub({
   }, [registerInteraction]);
 
   // Pentagon handlers
-  const pentagonSteps = useMemo(
-    () =>
-      PENTAGON_PERIMETER_STEPS.map((step, index) => ({
-        ...step,
-        digit: trianglePerimeterDigits[index] ?? 0,
-        note: digitToNote(trianglePerimeterDigits[index] ?? 0),
-        color: digitToLearningColor(trianglePerimeterDigits[index] ?? 0),
-      })),
-    [trianglePerimeterDigits],
-  );
-
   const startPentagonTrace = useCallback(
     (stepIndex: number) => {
       const step = pentagonSteps[stepIndex];
@@ -1635,17 +1706,6 @@ export default function DigitalDNAHub({
   }, [registerInteraction]);
 
   // Hexagon handlers
-  const hexagonSteps = useMemo(
-    () =>
-      HEXAGON_PERIMETER_STEPS.map((step, index) => ({
-        ...step,
-        digit: trianglePerimeterDigits[index] ?? 0,
-        note: digitToNote(trianglePerimeterDigits[index] ?? 0),
-        color: digitToLearningColor(trianglePerimeterDigits[index] ?? 0),
-      })),
-    [trianglePerimeterDigits],
-  );
-
   const startHexagonTrace = useCallback(
     (stepIndex: number) => {
       const step = hexagonSteps[stepIndex];
@@ -1694,17 +1754,6 @@ export default function DigitalDNAHub({
   }, [registerInteraction]);
 
   // Decagon handlers
-  const decagonSteps = useMemo(
-    () =>
-      DECAGON_PERIMETER_STEPS.map((step, index) => ({
-        ...step,
-        digit: trianglePerimeterDigits[index] ?? 0,
-        note: digitToNote(trianglePerimeterDigits[index] ?? 0),
-        color: digitToLearningColor(trianglePerimeterDigits[index] ?? 0),
-      })),
-    [trianglePerimeterDigits],
-  );
-
   const startDecagonTrace = useCallback(
     (stepIndex: number) => {
       const step = decagonSteps[stepIndex];
@@ -1753,17 +1802,6 @@ export default function DigitalDNAHub({
   }, [registerInteraction]);
 
   // Circle handlers
-  const circleSteps = useMemo(
-    () =>
-      CIRCLE_PERIMETER_STEPS.map((step, index) => ({
-        ...step,
-        digit: trianglePerimeterDigits[index] ?? 0,
-        note: digitToNote(trianglePerimeterDigits[index] ?? 0),
-        color: digitToLearningColor(trianglePerimeterDigits[index] ?? 0),
-      })),
-    [trianglePerimeterDigits],
-  );
-
   const startCircleTrace = useCallback(
     (stepIndex: number) => {
       const step = circleSteps[stepIndex];
@@ -4193,6 +4231,63 @@ export default function DigitalDNAHub({
                   <div className="grid gap-2">
                     <button
                       type="button"
+                      onClick={() =>
+                        void playCustomSequence(
+                          getWrappedDigits(sequence, 0, 60),
+                        )
+                      }
+                      disabled={isPlaying}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        isPlaying
+                          ? "bg-slate-800 text-slate-500"
+                          : "bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 hover:brightness-110"
+                      }`}
+                    >
+                      {isPlaying ? "Playing..." : "Play perimeter"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void playCustomSequence(pentagonTraceDigits)
+                      }
+                      disabled={isPlaying || pentagonTraceDigits.length === 0}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        isPlaying || pentagonTraceDigits.length === 0
+                          ? "bg-slate-800 text-slate-500"
+                          : "bg-gradient-to-r from-amber-400 to-orange-400 text-slate-950 hover:brightness-110"
+                      }`}
+                    >
+                      {isPlaying ? "Playing..." : "Play traced path"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => loadNoteBoard(pentagonTraceDigits)}
+                      disabled={pentagonTraceDigits.length === 0}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        pentagonTraceDigits.length === 0
+                          ? "bg-slate-800 text-slate-500"
+                          : "border border-emerald-400/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20"
+                      }`}
+                    >
+                      Send traced path to note board
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSoundSource("triangle");
+                        setActiveMode("sound");
+                      }}
+                      disabled={pentagonTraceDigits.length === 0}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        pentagonTraceDigits.length === 0
+                          ? "bg-slate-800 text-slate-500"
+                          : "border border-pink-500/30 bg-pink-500/10 text-pink-100 hover:bg-pink-500/20"
+                      }`}
+                    >
+                      Send traced path to Sound Lab
+                    </button>
+                    <button
+                      type="button"
                       onClick={clearPentagonTrace}
                       className="rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-3 text-sm font-semibold text-slate-200 transition-colors hover:bg-slate-800"
                     >
@@ -4312,6 +4407,63 @@ export default function DigitalDNAHub({
                   </div>
 
                   <div className="grid gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void playCustomSequence(
+                          getWrappedDigits(sequence, 0, 60),
+                        )
+                      }
+                      disabled={isPlaying}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        isPlaying
+                          ? "bg-slate-800 text-slate-500"
+                          : "bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 hover:brightness-110"
+                      }`}
+                    >
+                      {isPlaying ? "Playing..." : "Play perimeter"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void playCustomSequence(hexagonTraceDigits)
+                      }
+                      disabled={isPlaying || hexagonTraceDigits.length === 0}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        isPlaying || hexagonTraceDigits.length === 0
+                          ? "bg-slate-800 text-slate-500"
+                          : "bg-gradient-to-r from-amber-400 to-orange-400 text-slate-950 hover:brightness-110"
+                      }`}
+                    >
+                      {isPlaying ? "Playing..." : "Play traced path"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => loadNoteBoard(hexagonTraceDigits)}
+                      disabled={hexagonTraceDigits.length === 0}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        hexagonTraceDigits.length === 0
+                          ? "bg-slate-800 text-slate-500"
+                          : "border border-emerald-400/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20"
+                      }`}
+                    >
+                      Send traced path to note board
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSoundSource("triangle");
+                        setActiveMode("sound");
+                      }}
+                      disabled={hexagonTraceDigits.length === 0}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        hexagonTraceDigits.length === 0
+                          ? "bg-slate-800 text-slate-500"
+                          : "border border-pink-500/30 bg-pink-500/10 text-pink-100 hover:bg-pink-500/20"
+                      }`}
+                    >
+                      Send traced path to Sound Lab
+                    </button>
                     <button
                       type="button"
                       onClick={clearHexagonTrace}
@@ -4435,6 +4587,63 @@ export default function DigitalDNAHub({
                   <div className="grid gap-2">
                     <button
                       type="button"
+                      onClick={() =>
+                        void playCustomSequence(
+                          getWrappedDigits(sequence, 0, 60),
+                        )
+                      }
+                      disabled={isPlaying}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        isPlaying
+                          ? "bg-slate-800 text-slate-500"
+                          : "bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 hover:brightness-110"
+                      }`}
+                    >
+                      {isPlaying ? "Playing..." : "Play perimeter"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void playCustomSequence(decagonTraceDigits)
+                      }
+                      disabled={isPlaying || decagonTraceDigits.length === 0}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        isPlaying || decagonTraceDigits.length === 0
+                          ? "bg-slate-800 text-slate-500"
+                          : "bg-gradient-to-r from-amber-400 to-orange-400 text-slate-950 hover:brightness-110"
+                      }`}
+                    >
+                      {isPlaying ? "Playing..." : "Play traced path"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => loadNoteBoard(decagonTraceDigits)}
+                      disabled={decagonTraceDigits.length === 0}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        decagonTraceDigits.length === 0
+                          ? "bg-slate-800 text-slate-500"
+                          : "border border-emerald-400/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20"
+                      }`}
+                    >
+                      Send traced path to note board
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSoundSource("triangle");
+                        setActiveMode("sound");
+                      }}
+                      disabled={decagonTraceDigits.length === 0}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        decagonTraceDigits.length === 0
+                          ? "bg-slate-800 text-slate-500"
+                          : "border border-pink-500/30 bg-pink-500/10 text-pink-100 hover:bg-pink-500/20"
+                      }`}
+                    >
+                      Send traced path to Sound Lab
+                    </button>
+                    <button
+                      type="button"
                       onClick={clearDecagonTrace}
                       className="rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-3 text-sm font-semibold text-slate-200 transition-colors hover:bg-slate-800"
                     >
@@ -4554,6 +4763,63 @@ export default function DigitalDNAHub({
                   </div>
 
                   <div className="grid gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void playCustomSequence(
+                          getWrappedDigits(sequence, 0, 60),
+                        )
+                      }
+                      disabled={isPlaying}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        isPlaying
+                          ? "bg-slate-800 text-slate-500"
+                          : "bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 hover:brightness-110"
+                      }`}
+                    >
+                      {isPlaying ? "Playing..." : "Play perimeter"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void playCustomSequence(circleTraceDigits)
+                      }
+                      disabled={isPlaying || circleTraceDigits.length === 0}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        isPlaying || circleTraceDigits.length === 0
+                          ? "bg-slate-800 text-slate-500"
+                          : "bg-gradient-to-r from-amber-400 to-orange-400 text-slate-950 hover:brightness-110"
+                      }`}
+                    >
+                      {isPlaying ? "Playing..." : "Play traced path"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => loadNoteBoard(circleTraceDigits)}
+                      disabled={circleTraceDigits.length === 0}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        circleTraceDigits.length === 0
+                          ? "bg-slate-800 text-slate-500"
+                          : "border border-emerald-400/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20"
+                      }`}
+                    >
+                      Send traced path to note board
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSoundSource("triangle");
+                        setActiveMode("sound");
+                      }}
+                      disabled={circleTraceDigits.length === 0}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        circleTraceDigits.length === 0
+                          ? "bg-slate-800 text-slate-500"
+                          : "border border-pink-500/30 bg-pink-500/10 text-pink-100 hover:bg-pink-500/20"
+                      }`}
+                    >
+                      Send traced path to Sound Lab
+                    </button>
                     <button
                       type="button"
                       onClick={clearCircleTrace}
