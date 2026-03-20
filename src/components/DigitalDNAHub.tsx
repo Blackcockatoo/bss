@@ -2336,6 +2336,7 @@ export default function DigitalDNAHub({
                   ))}
                 </div>
               </div>
+            </div>
           </div>
         </section>
 
@@ -3179,7 +3180,6 @@ export default function DigitalDNAHub({
                   </div>
                 </div>
               </div>
-            </div>
           </div>
         </section>
 
@@ -3836,10 +3836,7 @@ export default function DigitalDNAHub({
                 if (lessonContext.postPrompt) {
                   setShowPostPrompt(true);
                 } else {
-                  completeLesson(
-                    lessonContext.lessonId,
-                    lessonContext.studentAlias,
-                  );
+                  completeLesson();
                 }
               }}
               className="px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-sm shadow-lg shadow-emerald-500/30 transition-all active:scale-95"
@@ -3897,10 +3894,7 @@ export default function DigitalDNAHub({
                       postResponse.trim(),
                     );
                   }
-                  completeLesson(
-                    lessonContext.lessonId,
-                    lessonContext.studentAlias,
-                  );
+                  completeLesson();
                   setShowPostPrompt(false);
                 }}
                 className="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-sm transition-all active:scale-95"
