@@ -1,27 +1,40 @@
 "use client";
 
-import { AuthDialog } from "@/components/AuthDialog";
 import LegalNotice from "@/components/LegalNotice";
-import { PlanBadge } from "@/components/PlanBadge";
 import { QuickNav } from "@/components/QuickNav";
-import { Button } from "@/components/ui/button";
-import { useAuthStore } from "@/lib/auth/store";
-import { ENABLE_AUTH } from "@/lib/env/features";
-import { useEffect, useState } from "react";
+import {
+  getChildSafeFallbackPathname,
+  isChildSafeAllowedPathname,
+} from "@/lib/childSafeBaseline";
+import { ENABLE_CHILD_SAFE_BASELINE } from "@/lib/env/features";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useMemo } from "react";
 
 export default function ClientBody({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [authOpen, setAuthOpen] = useState(false);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const currentUser = useAuthStore((state) => state.currentUser);
-  const logout = useAuthStore((state) => state.logout);
+  const pathname = usePathname();
+  const router = useRouter();
+  const childSafeBlocked = useMemo(
+    () =>
+      ENABLE_CHILD_SAFE_BASELINE &&
+      !isChildSafeAllowedPathname(pathname ?? "/"),
+    [pathname],
+  );
 
   useEffect(() => {
     document.body.classList.add("antialiased");
   }, []);
+
+  useEffect(() => {
+    if (!childSafeBlocked || !pathname) {
+      return;
+    }
+
+    router.replace(getChildSafeFallbackPathname(pathname));
+  }, [childSafeBlocked, pathname, router]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
@@ -39,46 +52,35 @@ export default function ClientBody({
     registerServiceWorker();
   }, []);
 
+  if (childSafeBlocked) {
+    return (
+      <div className="flex min-h-screen items-center justify-center px-4 text-center text-zinc-200">
+        <div className="max-w-md space-y-3">
+          <p className="text-sm font-semibold text-emerald-300">
+            Child-safe local mode is active.
+          </p>
+          <p className="text-sm text-zinc-400">
+            This route is disabled in the student baseline and is redirecting to
+            a classroom-safe path.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="antialiased min-h-screen pb-[calc(6rem+env(safe-area-inset-bottom))] flex flex-col">
       <div className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/90 px-4 py-3 backdrop-blur">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3">
           <div className="text-sm text-zinc-200">Meta-Pet</div>
-          <div className="flex items-center gap-2">
-            <PlanBadge />
-            {ENABLE_AUTH && isAuthenticated && currentUser ? (
-              <>
-                <span className="text-xs text-zinc-400">
-                  {currentUser.displayName}
-                </span>
-                <Button
-                  variant="ghost"
-                  onClick={logout}
-                  className="h-8 text-zinc-300"
-                >
-                  Logout
-                </Button>
-              </>
-            ) : ENABLE_AUTH ? (
-              <Button
-                onClick={() => setAuthOpen(true)}
-                className="h-8 bg-cyan-400 text-slate-950 hover:bg-cyan-300"
-              >
-                Login / Register
-              </Button>
-            ) : (
-              <span className="text-xs text-emerald-300">
-                Zero-account mode
-              </span>
-            )}
-          </div>
+          <span className="text-xs text-emerald-300">
+            Child-safe local mode
+          </span>
         </div>
-        {ENABLE_AUTH && !isAuthenticated && (
-          <p className="mx-auto mt-2 w-full max-w-6xl text-xs text-zinc-400">
-            Sign in to unlock subscription features like advanced analytics,
-            exports, and upcoming Pro tools.
-          </p>
-        )}
+        <p className="mx-auto mt-2 w-full max-w-6xl text-xs text-zinc-400">
+          Default student use stays local-first, zero-account, and free from
+          countdown or streak pressure.
+        </p>
       </div>
 
       <div className="flex-1">{children}</div>
@@ -86,9 +88,6 @@ export default function ClientBody({
         <LegalNotice />
       </footer>
       <QuickNav />
-      {ENABLE_AUTH ? (
-        <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
-      ) : null}
     </div>
   );
 }

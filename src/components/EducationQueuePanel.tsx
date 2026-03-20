@@ -1,40 +1,58 @@
-'use client';
+"use client";
 
-import { useMemo, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@/components/ui/button';
+import { ProgressRing } from "@/components/ProgressRing";
 import {
-  ChevronUp,
-  ChevronDown,
-  Trash2,
-  Play,
-  Pause,
+  VisualEffectsRenderer,
+  useVisualEffects,
+} from "@/components/VisualEffects";
+import { Button } from "@/components/ui/button";
+import {
+  DNA_MODE_LABELS,
+  FOCUS_AREA_LABELS,
+  VIBE_EMOJI,
+  lessonNeedsQuestBoard,
+  selectQuestPack,
+  useEducationStore,
+} from "@/lib/education";
+import type {
+  LessonProgress,
+  QueuedLesson,
+  VibeReaction,
+} from "@/lib/education";
+import { AnimatePresence, motion } from "framer-motion";
+import {
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   Circle,
   Lock,
+  Pause,
+  Play,
+  Trash2,
   Zap,
-} from 'lucide-react';
-import { useEducationStore, VIBE_EMOJI } from '@/lib/education';
-import type { QueuedLesson, VibeReaction } from '@/lib/education';
-import { FOCUS_AREA_LABELS, DNA_MODE_LABELS } from '@/lib/education';
-import { ProgressRing } from '@/components/ProgressRing';
-import { useVisualEffects, VisualEffectsRenderer } from '@/components/VisualEffects';
+} from "lucide-react";
+import { useCallback, useMemo } from "react";
 
 interface EducationQueuePanelProps {
-  mode: 'teacher' | 'student';
+  mode: "teacher" | "student";
   onLessonActivate?: (lessonId: string) => void;
   onLessonComplete?: (lessonId: string) => void;
   studentAlias?: string;
 }
 
 const VIBE_BUTTONS: { reaction: VibeReaction; label: string }[] = [
-  { reaction: 'fire', label: 'Fire' },
-  { reaction: 'brain', label: 'Brain' },
-  { reaction: 'sleeping', label: 'Sleepy' },
-  { reaction: 'mind-blown', label: 'Mind Blown' },
+  { reaction: "fire", label: "Fire" },
+  { reaction: "brain", label: "Brain" },
+  { reaction: "sleeping", label: "Sleepy" },
+  { reaction: "mind-blown", label: "Mind Blown" },
 ];
 
-export function EducationQueuePanel({ mode, onLessonActivate, onLessonComplete, studentAlias }: EducationQueuePanelProps) {
+export function EducationQueuePanel({
+  mode,
+  onLessonActivate,
+  onLessonComplete,
+  studentAlias,
+}: EducationQueuePanelProps) {
   const queue = useEducationStore((s) => s.queue);
   const activeLesson = useEducationStore((s) => s.activeLesson);
   const lessonProgress = useEducationStore((s) => s.lessonProgress);
@@ -45,14 +63,16 @@ export function EducationQueuePanel({ mode, onLessonActivate, onLessonComplete, 
   const classEnergy = useEducationStore((s) => s.classEnergy);
   const getClassEnergy = useEducationStore((s) => s.getClassEnergy);
   const sendVibeReaction = useEducationStore((s) => s.sendVibeReaction);
-  const completeLessonWithFlair = useEducationStore((s) => s.completeLessonWithFlair);
+  const completeLessonWithFlair = useEducationStore(
+    (s) => s.completeLessonWithFlair,
+  );
 
   const { effects, triggerEffect } = useVisualEffects();
 
   const completedLessonIds = useMemo(() => {
     const completed = new Set<string>();
     for (const p of lessonProgress) {
-      if (p.status === 'completed') {
+      if (p.status === "completed") {
         completed.add(p.lessonId);
       }
     }
@@ -64,31 +84,61 @@ export function EducationQueuePanel({ mode, onLessonActivate, onLessonComplete, 
     onLessonActivate?.(lessonId);
   };
 
-  const handleVibeReaction = useCallback((lessonId: string, reaction: VibeReaction, event: React.MouseEvent) => {
-    sendVibeReaction(lessonId, reaction);
-    // Trigger sparkle effect at click position
-    triggerEffect('sparkle', event.clientX, event.clientY, 800);
-  }, [sendVibeReaction, triggerEffect]);
+  const handleVibeReaction = useCallback(
+    (lessonId: string, reaction: VibeReaction, event: React.MouseEvent) => {
+      sendVibeReaction(lessonId, reaction);
+      // Trigger sparkle effect at click position
+      triggerEffect("sparkle", event.clientX, event.clientY, 800);
+    },
+    [sendVibeReaction, triggerEffect],
+  );
 
-  const handleComplete = useCallback((lessonId: string, alias: string) => {
-    const result = completeLessonWithFlair(lessonId, alias);
+  const handleComplete = useCallback(
+    (lessonId: string, alias: string) => {
+      const result = completeLessonWithFlair(lessonId, alias);
 
-    // Fire confetti + star effects
-    triggerEffect('confetti', window.innerWidth / 2, window.innerHeight / 2, 1500);
-    setTimeout(() => {
-      triggerEffect('star', window.innerWidth / 2 - 50, window.innerHeight / 2 - 50, 1000);
-      triggerEffect('star', window.innerWidth / 2 + 50, window.innerHeight / 2 - 50, 1000);
-    }, 300);
+      if (!result.completed) {
+        return;
+      }
 
-    onLessonComplete?.(lessonId);
-
-    // Trigger burst for new achievements
-    if (result.newAchievements.length > 0) {
+      // Fire confetti + star effects
+      triggerEffect(
+        "confetti",
+        window.innerWidth / 2,
+        window.innerHeight / 2,
+        1500,
+      );
       setTimeout(() => {
-        triggerEffect('burst', window.innerWidth / 2, window.innerHeight / 3, 1200);
-      }, 800);
-    }
-  }, [completeLessonWithFlair, triggerEffect, onLessonComplete]);
+        triggerEffect(
+          "star",
+          window.innerWidth / 2 - 50,
+          window.innerHeight / 2 - 50,
+          1000,
+        );
+        triggerEffect(
+          "star",
+          window.innerWidth / 2 + 50,
+          window.innerHeight / 2 - 50,
+          1000,
+        );
+      }, 300);
+
+      onLessonComplete?.(lessonId);
+
+      // Trigger burst for new achievements
+      if (result.newAchievements.length > 0) {
+        setTimeout(() => {
+          triggerEffect(
+            "burst",
+            window.innerWidth / 2,
+            window.innerHeight / 3,
+            1200,
+          );
+        }, 800);
+      }
+    },
+    [completeLessonWithFlair, triggerEffect, onLessonComplete],
+  );
 
   const currentEnergy = getClassEnergy();
   const xpProgress = eduXP.xp % 100;
@@ -97,9 +147,9 @@ export function EducationQueuePanel({ mode, onLessonActivate, onLessonComplete, 
     return (
       <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
         <p className="text-xs text-zinc-500">
-          {mode === 'teacher'
-            ? 'No lessons in the queue yet. Create assignments and add them to the queue.'
-            : 'No lessons are queued right now. Ask your teacher to set up a lesson path.'}
+          {mode === "teacher"
+            ? "No lessons in the queue yet. Create assignments and add them to the queue."
+            : "No lessons are queued right now. Ask your teacher to set up a lesson path."}
         </p>
         <VisualEffectsRenderer effects={effects} />
       </div>
@@ -108,12 +158,19 @@ export function EducationQueuePanel({ mode, onLessonActivate, onLessonComplete, 
 
   return (
     <div className="space-y-4">
-      {/* XP/Streak Bar */}
+      {/* XP bar */}
       <div className="flex items-center gap-4 rounded-xl border border-amber-400/30 bg-amber-500/5 p-3">
-        <ProgressRing progress={xpProgress} size={32} strokeWidth={3} color="amber" />
+        <ProgressRing
+          progress={xpProgress}
+          size={32}
+          strokeWidth={3}
+          color="amber"
+        />
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-amber-200">Level {eduXP.level}</span>
+            <span className="text-sm font-bold text-amber-200">
+              Level {eduXP.level}
+            </span>
             <span className="text-xs text-zinc-500">{eduXP.xp} XP</span>
           </div>
           <div className="h-1.5 w-full rounded-full bg-slate-800 mt-1 overflow-hidden">
@@ -125,17 +182,6 @@ export function EducationQueuePanel({ mode, onLessonActivate, onLessonComplete, 
             />
           </div>
         </div>
-        {eduXP.streak > 0 && (
-          <motion.div
-            className="flex items-center gap-1 px-2 py-1 rounded-full bg-orange-500/20 border border-orange-400/30"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 500 }}
-          >
-            <span className="text-sm">🔥</span>
-            <span className="text-xs font-bold text-orange-300">{eduXP.streak}</span>
-          </motion.div>
-        )}
       </div>
 
       {/* Class Energy Meter */}
@@ -145,29 +191,31 @@ export function EducationQueuePanel({ mode, onLessonActivate, onLessonComplete, 
             <Zap className="h-3 w-3" />
             Class Energy
           </span>
-          <span className="text-sm font-bold text-cyan-200">{currentEnergy}%</span>
+          <span className="text-sm font-bold text-cyan-200">
+            {currentEnergy}%
+          </span>
         </div>
         <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
           <motion.div
             className={`h-full rounded-full transition-all ${
               currentEnergy > 60
-                ? 'bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400'
-                : 'bg-gradient-to-r from-cyan-500 to-cyan-400'
+                ? "bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400"
+                : "bg-gradient-to-r from-cyan-500 to-cyan-400"
             }`}
             initial={{ width: 0 }}
             animate={{
               width: `${currentEnergy}%`,
-              ...(currentEnergy > 60 ? { scale: [1, 1.02, 1] } : {})
+              ...(currentEnergy > 60 ? { scale: [1, 1.02, 1] } : {}),
             }}
             transition={{
               width: { duration: 0.5 },
-              scale: { repeat: Infinity, duration: 1.5 }
+              scale: { repeat: Number.POSITIVE_INFINITY, duration: 1.5 },
             }}
           />
         </div>
       </div>
 
-      {mode === 'teacher' ? (
+      {mode === "teacher" ? (
         <TeacherQueue
           queue={queue}
           activeLesson={activeLesson}
@@ -185,7 +233,7 @@ export function EducationQueuePanel({ mode, onLessonActivate, onLessonComplete, 
           onActivate={handleActivate}
           onVibeReaction={handleVibeReaction}
           onComplete={handleComplete}
-          studentAlias={studentAlias ?? ''}
+          studentAlias={studentAlias ?? ""}
         />
       )}
 
@@ -208,9 +256,9 @@ function TeacherQueue({
   queue: QueuedLesson[];
   activeLesson: string | null;
   completedLessonIds: Set<string>;
-  lessonProgress: { lessonId: string; status: string }[];
+  lessonProgress: LessonProgress[];
   onRemove: (id: string) => void;
-  onReorder: (id: string, dir: 'up' | 'down') => void;
+  onReorder: (id: string, dir: "up" | "down") => void;
   onActivate: (id: string) => void;
 }) {
   return (
@@ -226,12 +274,28 @@ function TeacherQueue({
           {queue.map((lesson, idx) => {
             const isActive = lesson.id === activeLesson;
             const isCompleted = completedLessonIds.has(lesson.id);
-            const progressCount = lessonProgress.filter(
-              (p) => p.lessonId === lesson.id && p.status === 'completed'
+            const lessonProgressEntries = lessonProgress.filter(
+              (p) => p.lessonId === lesson.id,
+            );
+            const progressCount = lessonProgressEntries.filter(
+              (p) => p.status === "completed",
             ).length;
-            const totalCount = lessonProgress.filter(
-              (p) => p.lessonId === lesson.id
-            ).length;
+            const totalCount = lessonProgressEntries.length;
+            const usesQuestBoard = lessonNeedsQuestBoard(lesson);
+            const questReadyCount = lessonProgressEntries.filter((progress) => {
+              const summary = progress.questSummary;
+              return Boolean(
+                summary &&
+                  summary.requiredCoreQuests > 0 &&
+                  summary.completedCoreQuests >= summary.requiredCoreQuests,
+              );
+            }).length;
+            const questPackLabel = usesQuestBoard
+              ? selectQuestPack({
+                  focusArea: lesson.focusArea,
+                  dnaMode: lesson.dnaMode,
+                }).name
+              : null;
 
             return (
               <motion.div
@@ -240,25 +304,32 @@ function TeacherQueue({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, x: -100 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 className={`rounded-lg border p-3 transition ${
                   isActive
-                    ? 'border-cyan-400/60 bg-cyan-500/10'
+                    ? "border-cyan-400/60 bg-cyan-500/10"
                     : isCompleted
-                    ? 'border-emerald-400/40 bg-emerald-500/5'
-                    : 'border-slate-800 bg-slate-950/50'
+                      ? "border-emerald-400/40 bg-emerald-500/5"
+                      : "border-slate-800 bg-slate-950/50"
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-zinc-500 font-mono">{idx + 1}.</span>
-                      <p className="text-sm font-semibold text-zinc-100 truncate">{lesson.title}</p>
+                      <span className="text-xs text-zinc-500 font-mono">
+                        {idx + 1}.
+                      </span>
+                      <p className="text-sm font-semibold text-zinc-100 truncate">
+                        {lesson.title}
+                      </p>
                       {isActive && (
                         <motion.span
                           className="px-1.5 py-0.5 rounded-full bg-cyan-500/20 text-[10px] text-cyan-200 font-semibold"
                           animate={{ scale: [1, 1.05, 1] }}
-                          transition={{ repeat: Infinity, duration: 2 }}
+                          transition={{
+                            repeat: Number.POSITIVE_INFINITY,
+                            duration: 2,
+                          }}
                         >
                           ACTIVE
                         </motion.span>
@@ -268,9 +339,18 @@ function TeacherQueue({
                       )}
                     </div>
                     <p className="text-xs text-zinc-500 mt-0.5">
-                      {FOCUS_AREA_LABELS[lesson.focusArea]} · {lesson.targetMinutes} min
-                      {lesson.dnaMode && ` · ${DNA_MODE_LABELS[lesson.dnaMode]}`}
+                      {FOCUS_AREA_LABELS[lesson.focusArea]} ·{" "}
+                      {lesson.targetMinutes} min
+                      {lesson.dnaMode &&
+                        ` · ${DNA_MODE_LABELS[lesson.dnaMode]}`}
                     </p>
+                    {questPackLabel && (
+                      <p className="mt-1 text-[11px] text-cyan-300/80">
+                        Quest pack: {questPackLabel}
+                        {totalCount > 0 &&
+                          ` · ${questReadyCount}/${totalCount} quest-ready`}
+                      </p>
+                    )}
                     {totalCount > 0 && (
                       <motion.p
                         className="text-[11px] text-zinc-500 mt-1"
@@ -287,7 +367,7 @@ function TeacherQueue({
                       type="button"
                       variant="ghost"
                       className="h-7 w-7 p-0 text-zinc-500 hover:text-zinc-200"
-                      onClick={() => onReorder(lesson.id, 'up')}
+                      onClick={() => onReorder(lesson.id, "up")}
                       disabled={idx === 0}
                       aria-label="Move up"
                     >
@@ -297,7 +377,7 @@ function TeacherQueue({
                       type="button"
                       variant="ghost"
                       className="h-7 w-7 p-0 text-zinc-500 hover:text-zinc-200"
-                      onClick={() => onReorder(lesson.id, 'down')}
+                      onClick={() => onReorder(lesson.id, "down")}
                       disabled={idx === queue.length - 1}
                       aria-label="Move down"
                     >
@@ -351,13 +431,17 @@ function StudentQueue({
   activeLesson: string | null;
   completedLessonIds: Set<string>;
   onActivate: (id: string) => void;
-  onVibeReaction: (lessonId: string, reaction: VibeReaction, event: React.MouseEvent) => void;
+  onVibeReaction: (
+    lessonId: string,
+    reaction: VibeReaction,
+    event: React.MouseEvent,
+  ) => void;
   onComplete: (lessonId: string, alias: string) => void;
   studentAlias: string;
 }) {
   // Find the first incomplete lesson
   const nextLessonIdx = queue.findIndex(
-    (l) => !completedLessonIds.has(l.id) && l.id !== activeLesson
+    (l) => !completedLessonIds.has(l.id) && l.id !== activeLesson,
   );
 
   return (
@@ -370,6 +454,7 @@ function StudentQueue({
             const isCompleted = completedLessonIds.has(lesson.id);
             const isNext = idx === nextLessonIdx && !isActive;
             const isLocked = !isCompleted && !isActive && !isNext;
+            const usesQuestBoard = lessonNeedsQuestBoard(lesson);
 
             return (
               <motion.div
@@ -378,15 +463,15 @@ function StudentQueue({
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 className={`rounded-lg p-3 transition ${
                   isActive
-                    ? 'border border-cyan-400/60 bg-cyan-500/10'
+                    ? "border border-cyan-400/60 bg-cyan-500/10"
                     : isCompleted
-                    ? 'bg-emerald-500/5'
-                    : isNext
-                    ? 'border border-slate-700 bg-slate-950/50'
-                    : 'opacity-50'
+                      ? "bg-emerald-500/5"
+                      : isNext
+                        ? "border border-slate-700 bg-slate-950/50"
+                        : "opacity-50"
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -395,14 +480,17 @@ function StudentQueue({
                       <motion.div
                         initial={{ scale: 0, rotate: -180 }}
                         animate={{ scale: 1, rotate: 0 }}
-                        transition={{ type: 'spring', stiffness: 500 }}
+                        transition={{ type: "spring", stiffness: 500 }}
                       >
                         <CheckCircle2 className="h-5 w-5 text-emerald-400" />
                       </motion.div>
                     ) : isActive ? (
                       <motion.div
                         animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ repeat: Infinity, duration: 1.5 }}
+                        transition={{
+                          repeat: Number.POSITIVE_INFINITY,
+                          duration: 1.5,
+                        }}
                       >
                         <Play className="h-5 w-5 text-cyan-300" />
                       </motion.div>
@@ -413,13 +501,20 @@ function StudentQueue({
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium ${
-                      isActive ? 'text-cyan-100' : isCompleted ? 'text-emerald-200' : 'text-zinc-300'
-                    }`}>
+                    <p
+                      className={`text-sm font-medium ${
+                        isActive
+                          ? "text-cyan-100"
+                          : isCompleted
+                            ? "text-emerald-200"
+                            : "text-zinc-300"
+                      }`}
+                    >
                       {lesson.title}
                     </p>
                     <p className="text-xs text-zinc-500">
-                      {FOCUS_AREA_LABELS[lesson.focusArea]} · {lesson.targetMinutes} min
+                      {FOCUS_AREA_LABELS[lesson.focusArea]} ·{" "}
+                      {lesson.targetMinutes} min
                     </p>
                   </div>
                   {(isActive || isNext) && (
@@ -428,12 +523,18 @@ function StudentQueue({
                       size="sm"
                       className={`h-8 px-3 text-xs ${
                         isActive
-                          ? 'bg-cyan-500/90 hover:bg-cyan-500 text-slate-950'
-                          : 'bg-slate-800 hover:bg-slate-700 text-zinc-200'
+                          ? "bg-cyan-500/90 hover:bg-cyan-500 text-slate-950"
+                          : "bg-slate-800 hover:bg-slate-700 text-zinc-200"
                       }`}
                       onClick={() => onActivate(lesson.id)}
                     >
-                      {isActive ? 'Continue' : 'Start'}
+                      {isActive
+                        ? usesQuestBoard
+                          ? "Continue Quest"
+                          : "Continue"
+                        : usesQuestBoard
+                          ? "Open Quest"
+                          : "Start"}
                     </Button>
                   )}
                 </div>
@@ -443,16 +544,20 @@ function StudentQueue({
                   <motion.div
                     className="mt-3 pt-3 border-t border-slate-700/50"
                     initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
+                    animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                   >
-                    <p className="text-[10px] text-zinc-500 uppercase tracking-wide mb-2">Vibe Check</p>
+                    <p className="text-[10px] text-zinc-500 uppercase tracking-wide mb-2">
+                      Vibe Check
+                    </p>
                     <div className="flex gap-2">
                       {VIBE_BUTTONS.map(({ reaction, label }) => (
                         <motion.button
                           key={reaction}
                           type="button"
-                          onClick={(e) => onVibeReaction(lesson.id, reaction, e)}
+                          onClick={(e) =>
+                            onVibeReaction(lesson.id, reaction, e)
+                          }
                           className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700 hover:border-slate-500 transition text-sm"
                           whileTap={{ scale: 1.4 }}
                           whileHover={{ scale: 1.05 }}
@@ -462,8 +567,13 @@ function StudentQueue({
                         </motion.button>
                       ))}
                     </div>
+                    {usesQuestBoard && (
+                      <p className="mt-3 text-[11px] text-cyan-300/80">
+                        Finish this lesson inside the Pattern Quest Board.
+                      </p>
+                    )}
                     {/* Complete button */}
-                    {studentAlias && (
+                    {studentAlias && !usesQuestBoard && (
                       <Button
                         type="button"
                         size="sm"

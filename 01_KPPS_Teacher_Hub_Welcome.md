@@ -40,7 +40,7 @@ The veil makes **abstract concepts tangible** without dumbing them down. That's 
 
 **Your teaching model:** Gradual Release (I do / We do / You do) + explicit instruction.
 
-**Jewble's design:** offline-first privacy architecture + calm "meditation mechanics" + observable emotional systems + reflection-before-action loops.
+**Jewble's design:** offline-first privacy architecture for the default student deployment + calm interaction patterns + observable emotional systems + reflection-before-action loops.
 
 This package shows you **exactly where they connect** — and gives you the scripts to make it work in a classroom tomorrow.
 
@@ -54,7 +54,7 @@ This package shows you **exactly where they connect** — and gives you the scri
 
 **Outcome:** engagement data + wellbeing language evidence + a clear digital safety story you can report to leadership.
 
-**Teacher load:** ~20 minutes per session. No new accounts to manage. No data to export. No parent opt-in complexity (offline-first = structurally safe).
+**Teacher load:** ~20 minutes per session. No new student accounts to manage. No routine student data exports. No parent opt-in complexity from cloud logins (offline-first = structurally safer).
 
 ---
 

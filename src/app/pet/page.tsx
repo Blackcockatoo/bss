@@ -7,6 +7,7 @@ import { AddonInventoryPanel } from "@/components/addons/AddonInventoryPanel";
 import { PetProfilePanel } from "@/components/addons/PetProfilePanel";
 import { Button } from "@/components/ui/button";
 import { initializeStarterAddons } from "@/lib/addons/starter";
+import { ENABLE_CHILD_SAFE_BASELINE } from "@/lib/env/features";
 import { useStore } from "@/lib/store";
 import {
   ChevronDown,
@@ -127,26 +128,30 @@ export default function PetPage() {
               {showAdvanced && (
                 <div className="mt-4 space-y-4 rounded-2xl border border-slate-800/80 bg-slate-950/60 p-4">
                   <div className="flex flex-wrap gap-2">
-                    <Link href="/compass">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-2 border-cyan-700 bg-cyan-900/80 text-cyan-200 hover:bg-cyan-800"
-                      >
-                        <Compass className="w-4 h-4" />
-                        Compass Wheel
-                      </Button>
-                    </Link>
-                    <Link href="/identity">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-2 border-indigo-700 bg-indigo-900/80 text-indigo-200 hover:bg-indigo-800"
-                      >
-                        <UserCircle className="w-4 h-4" />
-                        Identity
-                      </Button>
-                    </Link>
+                    {!ENABLE_CHILD_SAFE_BASELINE && (
+                      <>
+                        <Link href="/app/activities">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-2 border-cyan-700 bg-cyan-900/80 text-cyan-200 hover:bg-cyan-800"
+                          >
+                            <Compass className="w-4 h-4" />
+                            Compass Wheel
+                          </Button>
+                        </Link>
+                        <Link href="/identity">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-2 border-indigo-700 bg-indigo-900/80 text-indigo-200 hover:bg-indigo-800"
+                          >
+                            <UserCircle className="w-4 h-4" />
+                            Identity
+                          </Button>
+                        </Link>
+                      </>
+                    )}
                     <Button
                       variant="outline"
                       size="sm"

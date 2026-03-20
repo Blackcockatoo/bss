@@ -7,22 +7,50 @@
  * Privacy contract:
  * - Aliases only (no real names or student IDs)
  * - Hashes for exploration patterns (never raw interaction data)
- * - Analytics aggregated as counts/percentages
+ * - Local class summaries aggregated as counts/percentages
  * - All data localStorage-only
  */
 
 export type FocusArea =
-  | 'pattern-recognition'
-  | 'sound-exploration'
-  | 'geometry-creation'
-  | 'reflection'
-  | 'collaboration';
+  | "pattern-recognition"
+  | "sound-exploration"
+  | "geometry-creation"
+  | "reflection"
+  | "collaboration";
 
-export type DnaMode = 'spiral' | 'mandala' | 'particles' | 'sound' | 'journey' | null;
+export type DnaMode =
+  | "spiral"
+  | "mandala"
+  | "particles"
+  | "sound"
+  | "journey"
+  | null;
 
-export type LessonStatus = 'queued' | 'active' | 'paused' | 'completed';
+export type LessonStatus = "queued" | "active" | "paused" | "completed";
 
-export type SessionMode = 'teacher' | 'student';
+export type SessionMode = "teacher" | "student";
+
+export type QuestMode =
+  | "spiral"
+  | "mandala"
+  | "triangle"
+  | "sound"
+  | "journey";
+
+export type QuestPackId =
+  | "pattern-basics"
+  | "symmetry-studio"
+  | "triangle-trace"
+  | "sound-path";
+
+export interface LessonQuestSummary {
+  packId: QuestPackId;
+  completedQuestIds: string[];
+  requiredCoreQuests: number;
+  completedCoreQuests: number;
+  totalCompletedQuests: number;
+  updatedAt: number;
+}
 
 /** A single queued lesson/activity created by a teacher */
 export interface QueuedLesson {
@@ -62,6 +90,7 @@ export interface LessonProgress {
   dnaInteractions: number;
   /** SHA-256 hash of their exploration pattern (privacy-safe) */
   patternHash: string | null;
+  questSummary: LessonQuestSummary | null;
 }
 
 /** Full education queue state */
@@ -106,7 +135,7 @@ export interface StudentDNAProfile {
   /** Derived numeric pattern from interactions */
   patternSignature: number[];
   /** Which DNA seed they gravitate toward */
-  soundPreference: 'fire' | 'water' | 'earth' | null;
+  soundPreference: "fire" | "water" | "earth" | null;
   /** Total patterns discovered */
   discoveryCount: number;
   /** Derived from reflection response depth (0-1) */
@@ -118,27 +147,36 @@ export interface StudentDNAProfile {
 
 /** Preset focus areas with kid-friendly labels */
 export const FOCUS_AREA_LABELS: Record<FocusArea, string> = {
-  'pattern-recognition': 'Find Patterns',
-  'sound-exploration': 'Explore Sounds',
-  'geometry-creation': 'Create Shapes',
-  'reflection': 'Think & Reflect',
-  'collaboration': 'Work Together',
+  "pattern-recognition": "Find Patterns",
+  "sound-exploration": "Explore Sounds",
+  "geometry-creation": "Create Shapes",
+  reflection: "Think & Reflect",
+  collaboration: "Work Together",
 };
 
 /** DNA mode labels for the teacher dropdown */
 export const DNA_MODE_LABELS: Record<Exclude<DnaMode, null>, string> = {
-  spiral: 'DNA Helix Spiral',
-  mandala: 'Sacred Mandala',
-  particles: 'Particle Field',
-  sound: 'Sound Temple',
-  journey: 'Guided Journey',
+  spiral: "DNA Helix Spiral",
+  mandala: "Sacred Mandala",
+  particles: "Particle Field",
+  sound: "Sound Temple",
+  journey: "Guided Journey",
 };
 
 /** Learning symbols kids can recognize */
 export const LEARNING_SYMBOLS = [
-  'star', 'moon', 'sun', 'flower', 'tree',
-  'heart', 'crown', 'crystal', 'flame', 'wave',
-  'mountain', 'feather',
+  "star",
+  "moon",
+  "sun",
+  "flower",
+  "tree",
+  "heart",
+  "crown",
+  "crystal",
+  "flame",
+  "wave",
+  "mountain",
+  "feather",
 ] as const;
 
 export function createDefaultQueueState(): EducationQueueState {
@@ -146,7 +184,7 @@ export function createDefaultQueueState(): EducationQueueState {
     queue: [],
     activeLesson: null,
     lessonProgress: [],
-    sessionMode: 'teacher',
+    sessionMode: "teacher",
     sessionStartedAt: null,
     sessionEndedAt: null,
     totalSessionsRun: 0,
@@ -156,11 +194,11 @@ export function createDefaultQueueState(): EducationQueueState {
     eduAchievements: [],
     vibeReactionCount: 0,
     completedFocusAreas: {
-      'pattern-recognition': 0,
-      'sound-exploration': 0,
-      'geometry-creation': 0,
-      'reflection': 0,
-      'collaboration': 0,
+      "pattern-recognition": 0,
+      "sound-exploration": 0,
+      "geometry-creation": 0,
+      reflection: 0,
+      collaboration: 0,
     },
     promptResponseCount: 0,
   };
@@ -169,14 +207,14 @@ export function createDefaultQueueState(): EducationQueueState {
 // ==================== GAMIFICATION TYPES ====================
 
 /** Vibe reaction types for classroom engagement */
-export type VibeReaction = 'fire' | 'brain' | 'sleeping' | 'mind-blown';
+export type VibeReaction = "fire" | "brain" | "sleeping" | "mind-blown";
 
 /** Emoji mappings for vibe reactions */
 export const VIBE_EMOJI: Record<VibeReaction, string> = {
-  fire: '🔥',
-  brain: '🧠',
-  sleeping: '😴',
-  'mind-blown': '🤯',
+  fire: "🔥",
+  brain: "🧠",
+  sleeping: "😴",
+  "mind-blown": "🤯",
 };
 
 /** XP and progression tracking */
@@ -204,17 +242,17 @@ export interface ClassEnergy {
 
 /** Achievement IDs for education milestones */
 export type EduAchievementId =
-  | 'first-steps'
-  | 'speedrunner'
-  | 'big-brain'
-  | 'streak-lord'
-  | 'vibe-king'
-  | 'class-catalyst'
-  | 'pattern-master'
-  | 'reflection-sage';
+  | "first-steps"
+  | "speedrunner"
+  | "big-brain"
+  | "streak-lord"
+  | "vibe-king"
+  | "class-catalyst"
+  | "pattern-master"
+  | "reflection-sage";
 
 /** Achievement tier levels */
-export type AchievementTier = 'bronze' | 'silver' | 'gold' | 'platinum';
+export type AchievementTier = "bronze" | "silver" | "gold" | "platinum";
 
 /** Education achievement definition */
 export interface EduAchievement {
@@ -229,67 +267,67 @@ export interface EduAchievement {
 /** Achievement catalog with all available achievements */
 export const EDU_ACHIEVEMENTS_CATALOG: EduAchievement[] = [
   {
-    id: 'first-steps',
-    name: 'First Steps',
-    description: 'Complete your first lesson',
-    emoji: '👣',
-    tier: 'bronze',
+    id: "first-steps",
+    name: "First Steps",
+    description: "Complete your first lesson",
+    emoji: "👣",
+    tier: "bronze",
     unlockedAt: null,
   },
   {
-    id: 'speedrunner',
-    name: 'Speedrunner',
-    description: 'Finish a lesson in under 50% of target time',
-    emoji: '⚡',
-    tier: 'silver',
+    id: "speedrunner",
+    name: "Steady Finisher",
+    description: "Finish a lesson within the suggested time window",
+    emoji: "⚡",
+    tier: "silver",
     unlockedAt: null,
   },
   {
-    id: 'big-brain',
-    name: 'Big Brain',
-    description: 'Max out DNA interactions in a single lesson',
-    emoji: '🧠',
-    tier: 'gold',
+    id: "big-brain",
+    name: "Big Brain",
+    description: "Max out DNA interactions in a single lesson",
+    emoji: "🧠",
+    tier: "gold",
     unlockedAt: null,
   },
   {
-    id: 'streak-lord',
-    name: 'Streak Lord',
-    description: 'Complete 5 lessons in a row',
-    emoji: '🔥',
-    tier: 'gold',
+    id: "streak-lord",
+    name: "Steady Practice",
+    description: "Complete 5 lessons",
+    emoji: "🔥",
+    tier: "gold",
     unlockedAt: null,
   },
   {
-    id: 'vibe-king',
-    name: 'Vibe King',
-    description: 'Send 20+ vibe reactions',
-    emoji: '👑',
-    tier: 'silver',
+    id: "vibe-king",
+    name: "Vibe King",
+    description: "Send 20+ vibe reactions",
+    emoji: "👑",
+    tier: "silver",
     unlockedAt: null,
   },
   {
-    id: 'class-catalyst',
-    name: 'Class Catalyst',
-    description: 'Push class energy above 80%',
-    emoji: '💫',
-    tier: 'gold',
+    id: "class-catalyst",
+    name: "Class Catalyst",
+    description: "Push class energy above 80%",
+    emoji: "💫",
+    tier: "gold",
     unlockedAt: null,
   },
   {
-    id: 'pattern-master',
-    name: 'Pattern Master',
-    description: 'Complete 3 pattern-recognition lessons',
-    emoji: '🎯',
-    tier: 'silver',
+    id: "pattern-master",
+    name: "Pattern Master",
+    description: "Complete 3 pattern-recognition lessons",
+    emoji: "🎯",
+    tier: "silver",
     unlockedAt: null,
   },
   {
-    id: 'reflection-sage',
-    name: 'Reflection Sage',
-    description: 'Answer all prompts for 5 lessons',
-    emoji: '🔮',
-    tier: 'platinum',
+    id: "reflection-sage",
+    name: "Reflection Sage",
+    description: "Answer all prompts for 5 lessons",
+    emoji: "🔮",
+    tier: "platinum",
     unlockedAt: null,
   },
 ];

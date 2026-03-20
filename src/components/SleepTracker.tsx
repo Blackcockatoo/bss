@@ -1,16 +1,20 @@
-'use client';
+"use client";
 
-import { useState, useMemo } from 'react';
-import { useWellnessStore, getTodaySleepHours, getDateKey } from '@/lib/wellness';
-import { triggerHaptic } from '@/lib/haptics';
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Moon, Sun, Flame, Clock, Star, Minus, Plus, Bed } from 'lucide-react';
+} from "@/components/ui/dialog";
+import { triggerHaptic } from "@/lib/haptics";
+import {
+  getDateKey,
+  getTodaySleepHours,
+  useWellnessStore,
+} from "@/lib/wellness";
+import { Bed, Clock, Flame, Minus, Moon, Plus, Star, Sun } from "lucide-react";
+import { useMemo, useState } from "react";
 
 interface SleepTrackerProps {
   isOpen: boolean;
@@ -18,12 +22,12 @@ interface SleepTrackerProps {
 }
 
 export function SleepTracker({ isOpen, onClose }: SleepTrackerProps) {
-  const sleep = useWellnessStore(state => state.sleep);
-  const startSleep = useWellnessStore(state => state.startSleep);
-  const endSleep = useWellnessStore(state => state.endSleep);
-  const logSleepManual = useWellnessStore(state => state.logSleepManual);
-  const setSleepGoal = useWellnessStore(state => state.setSleepGoal);
-  const enabledFeatures = useWellnessStore(state => state.enabledFeatures);
+  const sleep = useWellnessStore((state) => state.sleep);
+  const startSleep = useWellnessStore((state) => state.startSleep);
+  const endSleep = useWellnessStore((state) => state.endSleep);
+  const logSleepManual = useWellnessStore((state) => state.logSleepManual);
+  const setSleepGoal = useWellnessStore((state) => state.setSleepGoal);
+  const enabledFeatures = useWellnessStore((state) => state.enabledFeatures);
 
   const [showManualEntry, setShowManualEntry] = useState(false);
   const [manualSleepHour, setManualSleepHour] = useState(22);
@@ -41,7 +45,7 @@ export function SleepTracker({ isOpen, onClose }: SleepTrackerProps) {
     const days: { date: string; hours: number }[] = [];
     for (let i = 6; i >= 0; i--) {
       const date = getDateKey(mountTimestamp - i * 86400000);
-      const dayEntries = sleep.entries.filter(e => {
+      const dayEntries = sleep.entries.filter((e) => {
         const wakeDate = e.wakeTime ? getDateKey(e.wakeTime) : null;
         return wakeDate === date;
       });
@@ -56,19 +60,19 @@ export function SleepTracker({ isOpen, onClose }: SleepTrackerProps) {
 
   // Calculate average sleep
   const avgSleep = useMemo(() => {
-    const validDays = weekData.filter(d => d.hours > 0);
+    const validDays = weekData.filter((d) => d.hours > 0);
     if (validDays.length === 0) return 0;
     return validDays.reduce((sum, d) => sum + d.hours, 0) / validDays.length;
   }, [weekData]);
 
   const handleStartSleep = () => {
     startSleep();
-    triggerHaptic('medium');
+    triggerHaptic("medium");
   };
 
   const handleEndSleep = () => {
     endSleep(quality);
-    triggerHaptic('medium');
+    triggerHaptic("medium");
     setQuality(3);
   };
 
@@ -88,7 +92,7 @@ export function SleepTracker({ isOpen, onClose }: SleepTrackerProps) {
     }
 
     logSleepManual(sleepDate.getTime(), wakeDate.getTime(), quality);
-    triggerHaptic('medium');
+    triggerHaptic("medium");
     setShowManualEntry(false);
     setQuality(3);
   };
@@ -139,7 +143,13 @@ export function SleepTracker({ isOpen, onClose }: SleepTrackerProps) {
                   className="transition-all duration-500"
                 />
                 <defs>
-                  <linearGradient id="sleep-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <linearGradient
+                    id="sleep-gradient"
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="0%"
+                  >
                     <stop offset="0%" stopColor="#8b5cf6" />
                     <stop offset="100%" stopColor="#6366f1" />
                   </linearGradient>
@@ -151,7 +161,9 @@ export function SleepTracker({ isOpen, onClose }: SleepTrackerProps) {
                 {isSleeping ? (
                   <>
                     <Moon className="w-6 h-6 text-violet-400 animate-pulse" />
-                    <span className="text-xs text-violet-300 mt-1">Sleeping...</span>
+                    <span className="text-xs text-violet-300 mt-1">
+                      Sleeping...
+                    </span>
                   </>
                 ) : (
                   <>
@@ -191,11 +203,13 @@ export function SleepTracker({ isOpen, onClose }: SleepTrackerProps) {
                         onClick={() => setQuality(rating as 1 | 2 | 3 | 4 | 5)}
                         className={`p-2 rounded-lg transition-all ${
                           quality >= rating
-                            ? 'text-yellow-400'
-                            : 'text-zinc-600'
+                            ? "text-yellow-400"
+                            : "text-zinc-600"
                         }`}
                       >
-                        <Star className={`w-6 h-6 ${quality >= rating ? 'fill-current' : ''}`} />
+                        <Star
+                          className={`w-6 h-6 ${quality >= rating ? "fill-current" : ""}`}
+                        />
                       </button>
                     ))}
                   </div>
@@ -241,13 +255,15 @@ export function SleepTracker({ isOpen, onClose }: SleepTrackerProps) {
                     <Button
                       variant="outline"
                       size="icon"
-                      onClick={() => setManualSleepHour((h) => (h - 1 + 24) % 24)}
+                      onClick={() =>
+                        setManualSleepHour((h) => (h - 1 + 24) % 24)
+                      }
                       className="h-8 w-8"
                     >
                       <Minus className="w-3 h-3" />
                     </Button>
                     <span className="text-lg font-mono w-12 text-center">
-                      {manualSleepHour.toString().padStart(2, '0')}:00
+                      {manualSleepHour.toString().padStart(2, "0")}:00
                     </span>
                     <Button
                       variant="outline"
@@ -266,13 +282,15 @@ export function SleepTracker({ isOpen, onClose }: SleepTrackerProps) {
                     <Button
                       variant="outline"
                       size="icon"
-                      onClick={() => setManualWakeHour((h) => (h - 1 + 24) % 24)}
+                      onClick={() =>
+                        setManualWakeHour((h) => (h - 1 + 24) % 24)
+                      }
                       className="h-8 w-8"
                     >
                       <Minus className="w-3 h-3" />
                     </Button>
                     <span className="text-lg font-mono w-12 text-center">
-                      {manualWakeHour.toString().padStart(2, '0')}:00
+                      {manualWakeHour.toString().padStart(2, "0")}:00
                     </span>
                     <Button
                       variant="outline"
@@ -295,12 +313,12 @@ export function SleepTracker({ isOpen, onClose }: SleepTrackerProps) {
                       key={rating}
                       onClick={() => setQuality(rating as 1 | 2 | 3 | 4 | 5)}
                       className={`p-2 rounded-lg transition-all ${
-                        quality >= rating
-                          ? 'text-yellow-400'
-                          : 'text-zinc-600'
+                        quality >= rating ? "text-yellow-400" : "text-zinc-600"
                       }`}
                     >
-                      <Star className={`w-5 h-5 ${quality >= rating ? 'fill-current' : ''}`} />
+                      <Star
+                        className={`w-5 h-5 ${quality >= rating ? "fill-current" : ""}`}
+                      />
                     </button>
                   ))}
                 </div>
@@ -320,12 +338,6 @@ export function SleepTracker({ isOpen, onClose }: SleepTrackerProps) {
             <div className="flex items-center justify-between">
               <span className="text-xs text-zinc-500">This week</span>
               <div className="flex items-center gap-3 text-xs">
-                {sleep.streak > 0 && (
-                  <div className="flex items-center gap-1 text-orange-400">
-                    <Flame className="w-3 h-3" />
-                    <span>{sleep.streak}d streak</span>
-                  </div>
-                )}
                 <span className="text-zinc-400">
                   Avg: {formatHours(avgSleep)}
                 </span>
@@ -339,21 +351,30 @@ export function SleepTracker({ isOpen, onClose }: SleepTrackerProps) {
                 const metGoal = day.hours >= sleep.dailyGoal;
 
                 return (
-                  <div key={day.date} className="flex-1 flex flex-col items-center gap-1">
+                  <div
+                    key={day.date}
+                    className="flex-1 flex flex-col items-center gap-1"
+                  >
                     <div
                       className={`w-full rounded-t transition-all ${
                         metGoal
-                          ? 'bg-gradient-to-t from-violet-600 to-violet-400'
+                          ? "bg-gradient-to-t from-violet-600 to-violet-400"
                           : day.hours > 0
-                          ? 'bg-violet-500/50'
-                          : isToday
-                          ? 'bg-zinc-700'
-                          : 'bg-zinc-800'
+                            ? "bg-violet-500/50"
+                            : isToday
+                              ? "bg-zinc-700"
+                              : "bg-zinc-800"
                       }`}
                       style={{ height: `${Math.min(height, 100)}%` }}
                     />
-                    <span className={`text-[10px] ${isToday ? 'text-violet-400' : 'text-zinc-600'}`}>
-                      {['S', 'M', 'T', 'W', 'T', 'F', 'S'][new Date(day.date).getDay()]}
+                    <span
+                      className={`text-[10px] ${isToday ? "text-violet-400" : "text-zinc-600"}`}
+                    >
+                      {
+                        ["S", "M", "T", "W", "T", "F", "S"][
+                          new Date(day.date).getDay()
+                        ]
+                      }
                     </span>
                   </div>
                 );
@@ -373,7 +394,9 @@ export function SleepTracker({ isOpen, onClose }: SleepTrackerProps) {
               >
                 <Minus className="w-3 h-3" />
               </Button>
-              <span className="text-sm font-medium w-10 text-center">{sleep.dailyGoal}h</span>
+              <span className="text-sm font-medium w-10 text-center">
+                {sleep.dailyGoal}h
+              </span>
               <Button
                 variant="ghost"
                 size="sm"
@@ -392,8 +415,8 @@ export function SleepTracker({ isOpen, onClose }: SleepTrackerProps) {
 
 // Compact sleep status button
 export function SleepStatusButton({ onClick }: { onClick: () => void }) {
-  const sleep = useWellnessStore(state => state.sleep);
-  const enabledFeatures = useWellnessStore(state => state.enabledFeatures);
+  const sleep = useWellnessStore((state) => state.sleep);
+  const enabledFeatures = useWellnessStore((state) => state.enabledFeatures);
 
   const todayHours = useMemo(() => getTodaySleepHours(sleep), [sleep]);
   const isSleeping = sleep.currentSleep !== null;
@@ -401,7 +424,7 @@ export function SleepStatusButton({ onClick }: { onClick: () => void }) {
   if (!enabledFeatures.sleep) return null;
 
   const formatHours = (hours: number): string => {
-    if (hours === 0) return '--';
+    if (hours === 0) return "--";
     const h = Math.floor(hours);
     const m = Math.round((hours - h) * 60);
     return m > 0 ? `${h}h${m}m` : `${h}h`;
@@ -410,13 +433,13 @@ export function SleepStatusButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={() => {
-        triggerHaptic('light');
+        triggerHaptic("light");
         onClick();
       }}
       className={`flex items-center gap-2 px-3 py-2 rounded-full text-sm transition-all touch-manipulation ${
         isSleeping
-          ? 'bg-violet-500/30 border border-violet-500/50 text-violet-300 animate-pulse'
-          : 'bg-zinc-800/50 hover:bg-zinc-700/50 text-zinc-400'
+          ? "bg-violet-500/30 border border-violet-500/50 text-violet-300 animate-pulse"
+          : "bg-zinc-800/50 hover:bg-zinc-700/50 text-zinc-400"
       }`}
     >
       {isSleeping ? (

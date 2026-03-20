@@ -57,6 +57,22 @@ export interface Achievement {
   category?: 'vitals' | 'evolution' | 'battle' | 'exploration' | 'social' | 'minigame' | 'breeding';
 }
 
+export const ACHIEVEMENT_TARGETS = {
+  'explorer-first-step': 1,
+  'explorer-anomaly-hunter': 3,
+  'battle-first-win': 1,
+  'battle-streak': 3,
+  'minigame-memory': 10,
+  'minigame-rhythm': 12,
+  'minigame-vimana-score': 1500,
+  'minigame-vimana-lines': 20,
+  'breeding-first': 1,
+  'minigame-memory-ace': 20,
+  'minigame-rhythm-ace': 15,
+  'minigame-vimana-level': 5,
+  'minigame-focus-streak': 5,
+} as const;
+
 export const ACHIEVEMENT_CATALOG: Achievement[] = [
   {
     id: 'explorer-first-step',
@@ -67,7 +83,7 @@ export const ACHIEVEMENT_CATALOG: Achievement[] = [
   {
     id: 'explorer-anomaly-hunter',
     title: 'Anomaly Hunter',
-    description: 'Resolve three anomalies on the Vimana grid.',
+    description: `Resolve ${ACHIEVEMENT_TARGETS['explorer-anomaly-hunter']} anomalies on the Vimana grid.`,
     category: 'exploration',
   },
   {
@@ -79,31 +95,31 @@ export const ACHIEVEMENT_CATALOG: Achievement[] = [
   {
     id: 'battle-streak',
     title: 'Momentum Rising',
-    description: 'Achieve a win streak of three battles.',
+    description: `Achieve a win streak of ${ACHIEVEMENT_TARGETS['battle-streak']} battles.`,
     category: 'battle',
   },
   {
     id: 'minigame-memory',
     title: 'Pattern Master',
-    description: 'Score 10 or more in the memory mini-game.',
+    description: `Score ${ACHIEVEMENT_TARGETS['minigame-memory']} or more in the memory mini-game.`,
     category: 'minigame',
   },
   {
     id: 'minigame-rhythm',
     title: 'Rhythm Weaver',
-    description: 'Hit a rhythm score of 12 or higher.',
+    description: `Hit a rhythm score of ${ACHIEVEMENT_TARGETS['minigame-rhythm']} or higher.`,
     category: 'minigame',
   },
   {
     id: 'minigame-vimana-score',
     title: 'Grid Navigator',
-    description: 'Score 1,500 or more in the Vimana Tetris field.',
+    description: `Score ${ACHIEVEMENT_TARGETS['minigame-vimana-score'].toLocaleString()} or more in the Vimana Tetris field.`,
     category: 'minigame',
   },
   {
     id: 'minigame-vimana-lines',
     title: 'Line Harmonizer',
-    description: 'Clear 20 lines in a single Vimana Tetris run.',
+    description: `Clear ${ACHIEVEMENT_TARGETS['minigame-vimana-lines']} lines in a single Vimana Tetris run.`,
     category: 'minigame',
   },
   {
@@ -116,25 +132,25 @@ export const ACHIEVEMENT_CATALOG: Achievement[] = [
   {
     id: 'minigame-memory-ace',
     title: 'Memory Ace',
-    description: 'Score 20 or more in the memory mini-game.',
+    description: `Score ${ACHIEVEMENT_TARGETS['minigame-memory-ace']} or more in the memory mini-game.`,
     category: 'minigame',
   },
   {
     id: 'minigame-rhythm-ace',
     title: 'Rhythm Ace',
-    description: 'Hit a rhythm score of 20 or higher.',
+    description: `Hit a rhythm score of ${ACHIEVEMENT_TARGETS['minigame-rhythm-ace']} or higher.`,
     category: 'minigame',
   },
   {
     id: 'minigame-vimana-level',
     title: 'Sky Climber',
-    description: 'Reach level 5 in Vimana Tetris.',
+    description: `Reach level ${ACHIEVEMENT_TARGETS['minigame-vimana-level']} in Vimana Tetris.`,
     category: 'minigame',
   },
   {
     id: 'minigame-focus-streak',
     title: 'Focused Explorer',
-    description: 'Build a focus streak of 5 mini-game runs.',
+    description: `Build a focus streak of ${ACHIEVEMENT_TARGETS['minigame-focus-streak']} mini-game runs.`,
     category: 'minigame',
   },
 ];
@@ -177,6 +193,51 @@ export interface CreateVimanaStateOptions {
   random?: () => number;
 }
 
+function sampleIndices(length: number, count: number, random: () => number): number[] {
+  const pool = Array.from({ length }, (_, index) => index);
+  const picks: number[] = [];
+
+  while (picks.length < count && pool.length > 0) {
+    const poolIndex = Math.floor(random() * pool.length);
+    const [picked] = pool.splice(poolIndex, 1);
+    if (picked !== undefined) {
+      picks.push(picked);
+    }
+  }
+
+  return picks;
+}
+
+function ensureMinimumAnomalies(
+  cells: VimanaCell[],
+  minimum: number,
+  random: () => number,
+): VimanaCell[] {
+  const activeAnomalies = cells.filter((cell) => cell.anomaly).length;
+  if (activeAnomalies >= minimum) {
+    return cells;
+  }
+
+  const candidates = cells
+    .map((cell, index) => ({ cell, index }))
+    .filter(({ cell }) => !cell.discovered && !cell.anomaly);
+  const required = Math.min(minimum - activeAnomalies, candidates.length);
+
+  if (required <= 0) {
+    return cells;
+  }
+
+  const picks = new Set(
+    sampleIndices(candidates.length, required, random).map(
+      (pick) => candidates[pick]?.index,
+    ),
+  );
+
+  return cells.map((cell, index) =>
+    picks.has(index) ? { ...cell, anomaly: true } : cell,
+  );
+}
+
 function createPresetVimanaState(random: () => number): VimanaState {
   const baseCells: VimanaCell[] = [
     { id: 'calm-1', label: 'Calm Glade', field: 'calm', discovered: true, anomaly: false, energy: 60, reward: 'mood', visitedAt: Date.now() },
@@ -188,12 +249,17 @@ function createPresetVimanaState(random: () => number): VimanaState {
     { id: 'earth-1', label: 'Earth Anchor', field: 'earth', discovered: false, anomaly: random() < 0.2, energy: 50, reward: 'energy' },
     { id: 'earth-2', label: 'Crystal Vale', field: 'earth', discovered: false, anomaly: random() < 0.35, energy: 85, reward: 'hygiene' },
   ];
+  const cells = ensureMinimumAnomalies(
+    baseCells,
+    ACHIEVEMENT_TARGETS['explorer-anomaly-hunter'],
+    random,
+  );
 
-  const anomaliesFound = baseCells.filter(cell => cell.anomaly && cell.discovered).length;
+  const anomaliesFound = cells.filter(cell => cell.anomaly && cell.discovered).length;
 
   return {
-    cells: baseCells,
-    activeCellId: baseCells[0]?.id,
+    cells,
+    activeCellId: cells[0]?.id,
     anomaliesFound,
     anomaliesResolved: 0,
     scansPerformed: 0,
@@ -220,12 +286,17 @@ function createGridVimanaState(random: () => number): VimanaState {
       }
     }
   }
+  const normalizedCells = ensureMinimumAnomalies(
+    cells,
+    ACHIEVEMENT_TARGETS['explorer-anomaly-hunter'],
+    random,
+  );
 
   const centerId = '0,0,0';
-  const anomaliesFound = cells.filter(cell => cell.anomaly && cell.discovered).length;
+  const anomaliesFound = normalizedCells.filter(cell => cell.anomaly && cell.discovered).length;
 
   return {
-    cells,
+    cells: normalizedCells,
     activeCellId: centerId,
     anomaliesFound,
     anomaliesResolved: 0,

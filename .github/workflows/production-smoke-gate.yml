@@ -35,6 +35,12 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Assert child-safe deployment config
+        env:
+          STUDENT_DEPLOYMENT: ${{ vars.STUDENT_DEPLOYMENT }}
+          NEXT_PUBLIC_CHILD_SAFE_BASELINE: ${{ vars.NEXT_PUBLIC_CHILD_SAFE_BASELINE }}
+        run: npm run check:child-safe-deployment
+
       - name: Build
         run: npm run build
 

@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
+
 export const metadata = {
   title: "Rewards & Share — Meta-Pet",
   description:
@@ -52,7 +54,7 @@ const REWARD_TIERS = [
     tier: "Silver",
     color: "border-zinc-500/50 bg-zinc-900/50 text-zinc-300",
     essence: 25,
-    desc: "Sustained effort — 25 battles, 50 samples collected, streak runs.",
+    desc: "Sustained effort — 25 battles, 50 samples collected, consistent practice.",
   },
   {
     tier: "Gold",
@@ -64,11 +66,13 @@ const REWARD_TIERS = [
     tier: "Platinum",
     color: "border-cyan-500/50 bg-cyan-950/30 text-cyan-300",
     essence: 100,
-    desc: "Legendary — perfect care, unstoppable streak, full map, speciation.",
+    desc: "Legendary — perfect care, full map, deep exploration, speciation.",
   },
 ];
 
 export default function ShareLandingPage() {
+  enforceChildSafeServerRoute("/share");
+
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 p-6 space-y-8">
       <div className="max-w-2xl mx-auto space-y-8">

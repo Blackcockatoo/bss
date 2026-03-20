@@ -15,8 +15,8 @@
 
 | Mission Element | Meta-Pet Design Feature | Student Experience |
 |---|---|---|
-| **Happy** | Calm "meditation mechanics"; no timers, no FOMO, no punishment loops | Students report feeling relaxed, not stressed, during interactions |
-| **Safe** | Offline-first architecture; no accounts; DNA never transmitted; anti-addiction safeguards | Parents and students trust the digital environment |
+| **Happy** | Calm interaction patterns; no countdown pressure, no FOMO, no punishment loops | Students report feeling relaxed, not stressed, during interactions |
+| **Safe** | Offline-first default student deployment; no student accounts; DNA stays local during normal use; anti-addiction safeguards | Parents and students trust the digital environment |
 | **Inspiring** | Real complexity (15 emotional states, genetic variation) without chaos | Students engage with genuine systems thinking, not simplified "edutainment" |
 | **Ever-changing world** | Systems literacy (homeostasis, feedback loops, data patterns) transferable to any domain | Students build adaptable thinking skills, not rote responses |
 
@@ -184,7 +184,7 @@
 | **Offline-first core** | Pet functions fully without internet; no data transmission during normal use | Reduces exposure to network risks; works in low-connectivity environments |
 | **No account requirement** | No logins, no passwords, no identity capture | Zero risk of credential leaks; no compliance overhead for ICT team |
 | **DNA never transmitted** | Pet's genetic code (180-digit base-7 genome) stays on device | No central "profile" to breach; student data never leaves their device |
-| **Anti-addiction safeguards** | No timers, no FOMO notifications, no streak systems; vitals pause when backgrounded | Supports healthy screen time boundaries; students can close app without anxiety |
+| **Anti-addiction safeguards** | No countdown pressure, no FOMO notifications, no missed-day penalties; vitals pause when backgrounded | Supports healthy screen time boundaries; students can close app without anxiety |
 | **Age-appropriate UX** | Calm palette (midnight blue, sun-gold), meditation mechanics, gentle pace | Designed for focus, not dopamine exploitation |
 
 **Parent Trust:**
@@ -233,7 +233,7 @@
 
 **Response:**  
 - **20 minutes × 7 sessions** = 2 hours 20 minutes total over 2 weeks
-- No setup overhead (no accounts, no data exports, no parent opt-in forms)
+- No setup overhead (no student accounts, no routine cloud exports, no parent opt-in forms)
 - Fits existing STEM time or wellbeing blocks — doesn't require new schedule slots
 - Teacher scripts provided — minimal prep needed
 
@@ -248,7 +248,7 @@
 
 **Response:**  
 - Offline-first = structurally safer than cloud-based tools
-- No accounts = no data breach risk
+- No student accounts = far less credential risk in the classroom pilot
 - Open for ICT Coordinator review before pilot (developer available for technical questions)
 - Privacy & Safety Brief provided in this package
 
@@ -262,7 +262,7 @@
 **Concern 5:** "Is this just gamification?"
 
 **Response:**  
-- No points, no leaderboards, no achievements, no timers, no competition
+- No leaderboards, no countdown pressure, no missed-day pressure, no competition
 - **Systems simulation**, not game mechanics
 - Students engage because the system is **interesting** (emergent complexity), not because they're chasing rewards
 - STEM curriculum calls this "modelling" — that's what this is

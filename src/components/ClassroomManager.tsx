@@ -1,15 +1,22 @@
-'use client';
+"use client";
 
-import { useEffect, useMemo, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Trash2, Plus, RefreshCw, ClipboardList, ListOrdered } from 'lucide-react';
-import { useEducationStore, deriveStudentDNA } from '@/lib/education';
-import type { DnaMode, FocusArea } from '@/lib/education';
-import { DNA_MODE_LABELS, FOCUS_AREA_LABELS } from '@/lib/education';
-import { EducationQueuePanel } from '@/components/EducationQueuePanel';
-import { StudentDNACard } from '@/components/StudentDNACard';
-import { useQuota } from '@/lib/pricing/hooks';
-import { UpgradePrompt } from '@/components/UpgradePrompt';
+import { EducationQueuePanel } from "@/components/EducationQueuePanel";
+import { StudentDNACard } from "@/components/StudentDNACard";
+import { UpgradePrompt } from "@/components/UpgradePrompt";
+import { Button } from "@/components/ui/button";
+import { deriveStudentDNA, useEducationStore } from "@/lib/education";
+import type { DnaMode, FocusArea } from "@/lib/education";
+import { DNA_MODE_LABELS, FOCUS_AREA_LABELS } from "@/lib/education";
+import { ENABLE_CHILD_SAFE_BASELINE } from "@/lib/env/features";
+import { useQuota } from "@/lib/pricing/hooks";
+import {
+  ClipboardList,
+  ListOrdered,
+  Plus,
+  RefreshCw,
+  Trash2,
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 type Student = {
   id: string;
@@ -27,7 +34,7 @@ type Assignment = {
   standardsRef?: string;
 };
 
-type ProgressStatus = 'not-started' | 'in-progress' | 'complete';
+type ProgressStatus = "not-started" | "in-progress" | "complete";
 
 type ProgressMap = Record<string, Record<string, ProgressStatus>>;
 
@@ -45,12 +52,12 @@ type AggregatedAnalytics = {
   updatedAt: number;
 };
 
-const ROSTER_STORAGE_KEY = 'metapet-classroom-roster';
-const ASSIGNMENT_STORAGE_KEY = 'metapet-classroom-assignments';
-const PROGRESS_STORAGE_KEY = 'metapet-classroom-progress';
-const ANALYTICS_STORAGE_KEY = 'metapet-classroom-analytics';
+const ROSTER_STORAGE_KEY = "metapet-classroom-roster";
+const ASSIGNMENT_STORAGE_KEY = "metapet-classroom-assignments";
+const PROGRESS_STORAGE_KEY = "metapet-classroom-progress";
+const ANALYTICS_STORAGE_KEY = "metapet-classroom-analytics";
 
-const DEFAULT_STATUS: ProgressStatus = 'not-started';
+const DEFAULT_STATUS: ProgressStatus = "not-started";
 
 const sanitizeAlias = (value: string) => value.trim().slice(0, 32);
 const sanitizeTitle = (value: string) => value.trim().slice(0, 60);
@@ -61,7 +68,7 @@ const safeParse = <T,>(value: string | null, fallback: T): T => {
   try {
     return JSON.parse(value) as T;
   } catch (error) {
-    console.warn('Failed to parse classroom data:', error);
+    console.warn("Failed to parse classroom data:", error);
     return fallback;
   }
 };
@@ -72,25 +79,37 @@ export function ClassroomManager() {
   const [students, setStudents] = useState<Student[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [progress, setProgress] = useState<ProgressMap>({});
-  const [newAlias, setNewAlias] = useState('');
-  const [newTitle, setNewTitle] = useState('');
-  const [newFocus, setNewFocus] = useState('Mindfulness');
+  const [newAlias, setNewAlias] = useState("");
+  const [newTitle, setNewTitle] = useState("");
+  const [newFocus, setNewFocus] = useState("Mindfulness");
   const [newTargetMinutes, setNewTargetMinutes] = useState(10);
   const [newDnaMode, setNewDnaMode] = useState<DnaMode>(null);
-  const [newStandardsRef, setNewStandardsRef] = useState('');
+  const [newStandardsRef, setNewStandardsRef] = useState("");
   const [showQueue, setShowQueue] = useState(false);
   const [upgradeMessage, setUpgradeMessage] = useState<string | null>(null);
 
   const addLessonToQueue = useEducationStore((s) => s.addLesson);
   const lessonProgress = useEducationStore((s) => s.lessonProgress);
   const queue = useEducationStore((s) => s.queue);
-  const studentQuota = useQuota('students', students.length);
-  const assignmentQuota = useQuota('assignments', assignments.length);
+  const studentQuota = useQuota("students", students.length);
+  const assignmentQuota = useQuota("assignments", assignments.length);
 
   useEffect(() => {
-    setStudents(safeParse<Student[]>(window.localStorage.getItem(ROSTER_STORAGE_KEY), []));
-    setAssignments(safeParse<Assignment[]>(window.localStorage.getItem(ASSIGNMENT_STORAGE_KEY), []));
-    setProgress(safeParse<ProgressMap>(window.localStorage.getItem(PROGRESS_STORAGE_KEY), {}));
+    setStudents(
+      safeParse<Student[]>(window.localStorage.getItem(ROSTER_STORAGE_KEY), []),
+    );
+    setAssignments(
+      safeParse<Assignment[]>(
+        window.localStorage.getItem(ASSIGNMENT_STORAGE_KEY),
+        [],
+      ),
+    );
+    setProgress(
+      safeParse<ProgressMap>(
+        window.localStorage.getItem(PROGRESS_STORAGE_KEY),
+        {},
+      ),
+    );
   }, []);
 
   useEffect(() => {
@@ -98,7 +117,10 @@ export function ClassroomManager() {
   }, [students]);
 
   useEffect(() => {
-    window.localStorage.setItem(ASSIGNMENT_STORAGE_KEY, JSON.stringify(assignments));
+    window.localStorage.setItem(
+      ASSIGNMENT_STORAGE_KEY,
+      JSON.stringify(assignments),
+    );
   }, [assignments]);
 
   useEffect(() => {
@@ -106,16 +128,16 @@ export function ClassroomManager() {
   }, [progress]);
 
   const analytics = useMemo<AggregatedAnalytics>(() => {
-    const assignmentAnalytics = assignments.map(assignment => {
+    const assignmentAnalytics = assignments.map((assignment) => {
       const assignmentProgress = progress[assignment.id] ?? {};
       let completeCount = 0;
       let inProgressCount = 0;
       let notStartedCount = 0;
-      students.forEach(student => {
+      students.forEach((student) => {
         const status = assignmentProgress[student.id] ?? DEFAULT_STATUS;
-        if (status === 'complete') completeCount += 1;
-        if (status === 'in-progress') inProgressCount += 1;
-        if (status === 'not-started') notStartedCount += 1;
+        if (status === "complete") completeCount += 1;
+        if (status === "in-progress") inProgressCount += 1;
+        if (status === "not-started") notStartedCount += 1;
       });
       return {
         id: assignment.id,
@@ -129,7 +151,10 @@ export function ClassroomManager() {
     const totalStudents = students.length;
     const totalAssignments = assignments.length;
     const totalCells = totalStudents * totalAssignments;
-    const totalComplete = assignmentAnalytics.reduce((sum, entry) => sum + entry.completeCount, 0);
+    const totalComplete = assignmentAnalytics.reduce(
+      (sum, entry) => sum + entry.completeCount,
+      0,
+    );
     const completionRate = totalCells === 0 ? 0 : totalComplete / totalCells;
 
     return {
@@ -142,14 +167,21 @@ export function ClassroomManager() {
   }, [assignments, progress, students]);
 
   useEffect(() => {
-    window.localStorage.setItem(ANALYTICS_STORAGE_KEY, JSON.stringify(analytics));
+    window.localStorage.setItem(
+      ANALYTICS_STORAGE_KEY,
+      JSON.stringify(analytics),
+    );
   }, [analytics]);
 
   const handleAddStudent = () => {
     const alias = sanitizeAlias(newAlias);
     if (!alias) return;
     if (studentQuota.atLimit) {
-      setUpgradeMessage("You've reached the Free plan limit of 25 students in this class. Upgrade to Pro for unlimited students.");
+      setUpgradeMessage(
+        ENABLE_CHILD_SAFE_BASELINE
+          ? "You've reached the local learner limit for this child-safe deployment. Use an adult admin build if you need a larger roster."
+          : "You've reached the Free plan limit of 25 students in this class. Upgrade to Pro for unlimited students.",
+      );
       return;
     }
     const student: Student = {
@@ -157,10 +189,10 @@ export function ClassroomManager() {
       alias,
       addedAt: Date.now(),
     };
-    setStudents(prev => [...prev, student]);
-    setProgress(prev => {
+    setStudents((prev) => [...prev, student]);
+    setProgress((prev) => {
       const updated = { ...prev };
-      assignments.forEach(assignment => {
+      assignments.forEach((assignment) => {
         updated[assignment.id] = {
           ...updated[assignment.id],
           [student.id]: DEFAULT_STATUS,
@@ -168,12 +200,12 @@ export function ClassroomManager() {
       });
       return updated;
     });
-    setNewAlias('');
+    setNewAlias("");
   };
 
   const handleRemoveStudent = (studentId: string) => {
-    setStudents(prev => prev.filter(student => student.id !== studentId));
-    setProgress(prev => {
+    setStudents((prev) => prev.filter((student) => student.id !== studentId));
+    setProgress((prev) => {
       const updated: ProgressMap = {};
       Object.entries(prev).forEach(([assignmentId, assignmentProgress]) => {
         const { [studentId]: _removed, ...rest } = assignmentProgress;
@@ -187,40 +219,53 @@ export function ClassroomManager() {
     const title = sanitizeTitle(newTitle);
     if (!title) return;
     if (assignmentQuota.atLimit) {
-      setUpgradeMessage("You've reached the Free plan limit of 10 assignments. Upgrade to Pro for unlimited assignments.");
+      setUpgradeMessage(
+        ENABLE_CHILD_SAFE_BASELINE
+          ? "You've reached the local assignment limit for this child-safe deployment. Use an adult admin build if you need more assignments."
+          : "You've reached the Free plan limit of 10 assignments. Upgrade to Pro for unlimited assignments.",
+      );
       return;
     }
     const assignment: Assignment = {
       id: createId(),
       title,
-      focus: sanitizeFocus(newFocus) || 'Mindfulness',
+      focus: sanitizeFocus(newFocus) || "Mindfulness",
       targetMinutes: Math.max(1, Number(newTargetMinutes) || 1),
       createdAt: Date.now(),
       dnaMode: newDnaMode,
       standardsRef: newStandardsRef.trim() || undefined,
     };
-    setAssignments(prev => [...prev, assignment]);
-    setProgress(prev => {
+    setAssignments((prev) => [...prev, assignment]);
+    setProgress((prev) => {
       const updated = { ...prev };
-      updated[assignment.id] = students.reduce<Record<string, ProgressStatus>>((acc, student) => {
-        acc[student.id] = DEFAULT_STATUS;
-        return acc;
-      }, {});
+      updated[assignment.id] = students.reduce<Record<string, ProgressStatus>>(
+        (acc, student) => {
+          acc[student.id] = DEFAULT_STATUS;
+          return acc;
+        },
+        {},
+      );
       return updated;
     });
-    setNewTitle('');
+    setNewTitle("");
   };
 
   const handleRemoveAssignment = (assignmentId: string) => {
-    setAssignments(prev => prev.filter(assignment => assignment.id !== assignmentId));
-    setProgress(prev => {
+    setAssignments((prev) =>
+      prev.filter((assignment) => assignment.id !== assignmentId),
+    );
+    setProgress((prev) => {
       const { [assignmentId]: _removed, ...rest } = prev;
       return rest;
     });
   };
 
-  const updateStatus = (assignmentId: string, studentId: string, status: ProgressStatus) => {
-    setProgress(prev => ({
+  const updateStatus = (
+    assignmentId: string,
+    studentId: string,
+    status: ProgressStatus,
+  ) => {
+    setProgress((prev) => ({
       ...prev,
       [assignmentId]: {
         ...prev[assignmentId],
@@ -230,28 +275,31 @@ export function ClassroomManager() {
   };
 
   const resetProgress = () => {
-    if (!window.confirm('Reset all classroom progress?')) return;
-    setProgress(prev => {
+    if (!window.confirm("Reset all classroom progress?")) return;
+    setProgress((prev) => {
       const updated: ProgressMap = {};
-      Object.keys(prev).forEach(assignmentId => {
-        updated[assignmentId] = students.reduce<Record<string, ProgressStatus>>((acc, student) => {
-          acc[student.id] = DEFAULT_STATUS;
-          return acc;
-        }, {});
+      Object.keys(prev).forEach((assignmentId) => {
+        updated[assignmentId] = students.reduce<Record<string, ProgressStatus>>(
+          (acc, student) => {
+            acc[student.id] = DEFAULT_STATUS;
+            return acc;
+          },
+          {},
+        );
       });
       return updated;
     });
   };
 
   const resetClassroom = () => {
-    if (!window.confirm('Clear the roster, assignments, and progress?')) return;
+    if (!window.confirm("Clear the roster, assignments, and progress?")) return;
     setStudents([]);
     setAssignments([]);
     setProgress({});
   };
 
   const resetAnalytics = () => {
-    if (!window.confirm('Clear aggregated analytics?')) return;
+    if (!window.confirm("Clear the local class summary?")) return;
     window.localStorage.removeItem(ANALYTICS_STORAGE_KEY);
   };
 
@@ -265,14 +313,17 @@ export function ClassroomManager() {
             Class roster
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-xs uppercase tracking-wide text-zinc-500" htmlFor="classroom-alias">
+            <label
+              className="text-xs uppercase tracking-wide text-zinc-500"
+              htmlFor="classroom-alias"
+            >
               Learner alias
             </label>
             <div className="flex gap-2">
               <input
                 id="classroom-alias"
                 value={newAlias}
-                onChange={event => setNewAlias(event.target.value)}
+                onChange={(event) => setNewAlias(event.target.value)}
                 placeholder="e.g., Bluebird 4"
                 className="flex-1 rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-400"
               />
@@ -285,22 +336,28 @@ export function ClassroomManager() {
               </Button>
             </div>
             <p className="text-xs text-zinc-500">
-              Use classroom-friendly aliases only (no full names or student IDs).
+              Use classroom-friendly aliases only (no full names or student
+              IDs).
             </p>
           </div>
           <div className="space-y-2 max-h-56 overflow-y-auto">
             {students.length === 0 ? (
-              <p className="text-xs text-zinc-500">No learners yet. Add aliases to build the roster.</p>
+              <p className="text-xs text-zinc-500">
+                No learners yet. Add aliases to build the roster.
+              </p>
             ) : (
-              students.map(student => {
-                const studentProgress = lessonProgress.filter(p => p.studentAlias === student.alias);
+              students.map((student) => {
+                const studentProgress = lessonProgress.filter(
+                  (p) => p.studentAlias === student.alias,
+                );
                 const dnaModes: Record<string, DnaMode> = {};
                 for (const lesson of queue) {
                   dnaModes[lesson.id] = lesson.dnaMode;
                 }
-                const dnaProfile = studentProgress.length > 0
-                  ? deriveStudentDNA(student.alias, studentProgress, dnaModes)
-                  : null;
+                const dnaProfile =
+                  studentProgress.length > 0
+                    ? deriveStudentDNA(student.alias, studentProgress, dnaModes)
+                    : null;
                 return (
                   <div
                     key={student.id}
@@ -308,8 +365,13 @@ export function ClassroomManager() {
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-zinc-100">{student.alias}</p>
-                        <p className="text-[11px] text-zinc-500">Joined {new Date(student.addedAt).toLocaleDateString()}</p>
+                        <p className="font-medium text-zinc-100">
+                          {student.alias}
+                        </p>
+                        <p className="text-[11px] text-zinc-500">
+                          Joined{" "}
+                          {new Date(student.addedAt).toLocaleDateString()}
+                        </p>
                       </div>
                       <Button
                         type="button"
@@ -321,7 +383,9 @@ export function ClassroomManager() {
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
-                    {dnaProfile && <StudentDNACard profile={dnaProfile} compact />}
+                    {dnaProfile && (
+                      <StudentDNACard profile={dnaProfile} compact />
+                    )}
                   </div>
                 );
               })
@@ -335,31 +399,40 @@ export function ClassroomManager() {
             Activity assignments
           </div>
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-wide text-zinc-500" htmlFor="classroom-assignment">
+            <label
+              className="text-xs uppercase tracking-wide text-zinc-500"
+              htmlFor="classroom-assignment"
+            >
               Activity title
             </label>
             <input
               id="classroom-assignment"
               value={newTitle}
-              onChange={event => setNewTitle(event.target.value)}
+              onChange={(event) => setNewTitle(event.target.value)}
               placeholder="e.g., 5-minute breathing ritual"
               className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-400"
             />
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-xs uppercase tracking-wide text-zinc-500" htmlFor="classroom-focus">
+                <label
+                  className="text-xs uppercase tracking-wide text-zinc-500"
+                  htmlFor="classroom-focus"
+                >
                   Focus area
                 </label>
                 <input
                   id="classroom-focus"
                   value={newFocus}
-                  onChange={event => setNewFocus(event.target.value)}
+                  onChange={(event) => setNewFocus(event.target.value)}
                   placeholder="Mindfulness"
                   className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                 />
               </div>
               <div>
-                <label className="text-xs uppercase tracking-wide text-zinc-500" htmlFor="classroom-minutes">
+                <label
+                  className="text-xs uppercase tracking-wide text-zinc-500"
+                  htmlFor="classroom-minutes"
+                >
                   Target minutes
                 </label>
                 <input
@@ -367,36 +440,54 @@ export function ClassroomManager() {
                   type="number"
                   min={1}
                   value={newTargetMinutes}
-                  onChange={event => setNewTargetMinutes(Number(event.target.value))}
+                  onChange={(event) =>
+                    setNewTargetMinutes(Number(event.target.value))
+                  }
                   className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                 />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-xs uppercase tracking-wide text-zinc-500" htmlFor="classroom-dna-mode">
+                <label
+                  className="text-xs uppercase tracking-wide text-zinc-500"
+                  htmlFor="classroom-dna-mode"
+                >
                   DNA mode
                 </label>
                 <select
                   id="classroom-dna-mode"
-                  value={newDnaMode ?? ''}
-                  onChange={event => setNewDnaMode(event.target.value === '' ? null : event.target.value as DnaMode)}
+                  value={newDnaMode ?? ""}
+                  onChange={(event) =>
+                    setNewDnaMode(
+                      event.target.value === ""
+                        ? null
+                        : (event.target.value as DnaMode),
+                    )
+                  }
                   className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                 >
                   <option value="">None</option>
-                  {(Object.entries(DNA_MODE_LABELS) as [string, string][]).map(([key, label]) => (
-                    <option key={key} value={key}>{label}</option>
-                  ))}
+                  {(Object.entries(DNA_MODE_LABELS) as [string, string][]).map(
+                    ([key, label]) => (
+                      <option key={key} value={key}>
+                        {label}
+                      </option>
+                    ),
+                  )}
                 </select>
               </div>
               <div>
-                <label className="text-xs uppercase tracking-wide text-zinc-500" htmlFor="classroom-standards">
+                <label
+                  className="text-xs uppercase tracking-wide text-zinc-500"
+                  htmlFor="classroom-standards"
+                >
                   Standards (opt.)
                 </label>
                 <input
                   id="classroom-standards"
                   value={newStandardsRef}
-                  onChange={event => setNewStandardsRef(event.target.value)}
+                  onChange={(event) => setNewStandardsRef(event.target.value)}
                   placeholder="e.g., NGSS:MS-ETS1-1"
                   className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                 />
@@ -413,10 +504,12 @@ export function ClassroomManager() {
           </div>
           <div className="space-y-2 max-h-56 overflow-y-auto">
             {assignments.length === 0 ? (
-              <p className="text-xs text-zinc-500">Assignments appear here once created.</p>
+              <p className="text-xs text-zinc-500">
+                Assignments appear here once created.
+              </p>
             ) : (
-              assignments.map(assignment => {
-                const inQueue = queue.some(l => l.title === assignment.title);
+              assignments.map((assignment) => {
+                const inQueue = queue.some((l) => l.title === assignment.title);
                 return (
                   <div
                     key={assignment.id}
@@ -424,45 +517,55 @@ export function ClassroomManager() {
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <p className="font-semibold text-zinc-100">{assignment.title}</p>
+                        <p className="font-semibold text-zinc-100">
+                          {assignment.title}
+                        </p>
                         <p className="text-xs text-zinc-500">
                           {assignment.focus} · {assignment.targetMinutes} min
-                          {assignment.dnaMode && ` · ${DNA_MODE_LABELS[assignment.dnaMode]}`}
+                          {assignment.dnaMode &&
+                            ` · ${DNA_MODE_LABELS[assignment.dnaMode]}`}
                         </p>
                         {assignment.standardsRef && (
-                          <p className="text-[10px] text-emerald-400/70 mt-0.5">{assignment.standardsRef}</p>
+                          <p className="text-[10px] text-emerald-400/70 mt-0.5">
+                            {assignment.standardsRef}
+                          </p>
                         )}
                       </div>
                       <div className="flex items-center gap-1">
                         <Button
                           type="button"
                           variant="ghost"
-                          className={`h-8 px-2 text-xs ${inQueue ? 'text-emerald-400' : 'text-cyan-400 hover:bg-cyan-500/10'}`}
+                          className={`h-8 px-2 text-xs ${inQueue ? "text-emerald-400" : "text-cyan-400 hover:bg-cyan-500/10"}`}
                           onClick={() => {
                             if (!inQueue) {
                               const focusMap: Record<string, FocusArea> = {
-                                Mindfulness: 'reflection',
-                                'Pattern Recognition': 'pattern-recognition',
-                                'Sound Exploration': 'sound-exploration',
-                                Collaboration: 'collaboration',
+                                Mindfulness: "reflection",
+                                "Pattern Recognition": "pattern-recognition",
+                                "Sound Exploration": "sound-exploration",
+                                Collaboration: "collaboration",
                               };
                               addLessonToQueue({
                                 title: assignment.title,
                                 description: `${assignment.focus} activity`,
-                                focusArea: focusMap[assignment.focus] ?? 'reflection',
+                                focusArea:
+                                  focusMap[assignment.focus] ?? "reflection",
                                 dnaMode: assignment.dnaMode ?? null,
                                 targetMinutes: assignment.targetMinutes,
-                                standardsRef: assignment.standardsRef ? [assignment.standardsRef] : [],
+                                standardsRef: assignment.standardsRef
+                                  ? [assignment.standardsRef]
+                                  : [],
                                 prePrompt: null,
                                 postPrompt: null,
                               });
                             }
                           }}
                           disabled={inQueue}
-                          aria-label={inQueue ? 'Already in queue' : 'Add to queue'}
+                          aria-label={
+                            inQueue ? "Already in queue" : "Add to queue"
+                          }
                         >
                           <ListOrdered className="h-3.5 w-3.5 mr-1" />
-                          {inQueue ? 'Queued' : 'Queue'}
+                          {inQueue ? "Queued" : "Queue"}
                         </Button>
                         <Button
                           type="button"
@@ -486,8 +589,12 @@ export function ClassroomManager() {
       <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-4 space-y-4">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h3 className="text-sm font-semibold text-zinc-200">Progress tracking</h3>
-            <p className="text-xs text-zinc-500">Track progress without storing personal identifiers.</p>
+            <h3 className="text-sm font-semibold text-zinc-200">
+              Progress tracking
+            </h3>
+            <p className="text-xs text-zinc-500">
+              Track progress without storing personal identifiers.
+            </p>
           </div>
           <Button
             type="button"
@@ -500,32 +607,58 @@ export function ClassroomManager() {
           </Button>
         </div>
         {assignments.length === 0 ? (
-          <p className="text-xs text-zinc-500">Create assignments to start tracking progress.</p>
+          <p className="text-xs text-zinc-500">
+            Create assignments to start tracking progress.
+          </p>
         ) : (
           <div className="space-y-4">
-            {assignments.map(assignment => (
-              <div key={assignment.id} className="rounded-lg border border-slate-800 bg-slate-950/50 p-3">
+            {assignments.map((assignment) => (
+              <div
+                key={assignment.id}
+                className="rounded-lg border border-slate-800 bg-slate-950/50 p-3"
+              >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <p className="text-sm font-semibold text-zinc-100">{assignment.title}</p>
+                    <p className="text-sm font-semibold text-zinc-100">
+                      {assignment.title}
+                    </p>
                     <p className="text-xs text-zinc-500">
                       {assignment.focus} · {assignment.targetMinutes} min
                     </p>
                   </div>
                   <div className="text-xs text-zinc-400">
-                    {analytics.assignments.find(item => item.id === assignment.id)?.completeCount ?? 0} / {students.length} complete
+                    {analytics.assignments.find(
+                      (item) => item.id === assignment.id,
+                    )?.completeCount ?? 0}{" "}
+                    / {students.length} complete
                   </div>
                 </div>
                 <div className="mt-3 space-y-2">
                   {students.length === 0 ? (
-                    <p className="text-xs text-zinc-500">Add learners to capture progress.</p>
+                    <p className="text-xs text-zinc-500">
+                      Add learners to capture progress.
+                    </p>
                   ) : (
-                    students.map(student => (
-                      <div key={student.id} className="flex items-center justify-between gap-2">
-                        <span className="text-sm text-zinc-200">{student.alias}</span>
+                    students.map((student) => (
+                      <div
+                        key={student.id}
+                        className="flex items-center justify-between gap-2"
+                      >
+                        <span className="text-sm text-zinc-200">
+                          {student.alias}
+                        </span>
                         <select
-                          value={progress[assignment.id]?.[student.id] ?? DEFAULT_STATUS}
-                          onChange={event => updateStatus(assignment.id, student.id, event.target.value as ProgressStatus)}
+                          value={
+                            progress[assignment.id]?.[student.id] ??
+                            DEFAULT_STATUS
+                          }
+                          onChange={(event) =>
+                            updateStatus(
+                              assignment.id,
+                              student.id,
+                              event.target.value as ProgressStatus,
+                            )
+                          }
                           className="rounded-md border border-slate-700 bg-slate-950/60 px-2 py-1 text-xs text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                         >
                           <option value="not-started">Not started</option>
@@ -556,7 +689,7 @@ export function ClassroomManager() {
             className="border-slate-700 text-xs"
             onClick={() => setShowQueue(!showQueue)}
           >
-            {showQueue ? 'Hide' : 'Show'} Queue ({queue.length})
+            {showQueue ? "Hide" : "Show"} Queue ({queue.length})
           </Button>
         </div>
         {showQueue && <EducationQueuePanel mode="teacher" />}
@@ -564,33 +697,49 @@ export function ClassroomManager() {
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-4 space-y-3">
-          <h3 className="text-sm font-semibold text-zinc-200">Aggregated analytics</h3>
+          <h3 className="text-sm font-semibold text-zinc-200">
+            Local class summary
+          </h3>
           <p className="text-xs text-zinc-500">
-            Analytics are stored as anonymized totals (no names or IDs).
+            Summary data is stored as anonymized local totals (no names or IDs).
           </p>
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div className="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
               <p className="text-xs text-zinc-500">Learners</p>
-              <p className="text-lg font-semibold text-zinc-100">{analytics.totalStudents}</p>
+              <p className="text-lg font-semibold text-zinc-100">
+                {analytics.totalStudents}
+              </p>
             </div>
             <div className="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
               <p className="text-xs text-zinc-500">Assignments</p>
-              <p className="text-lg font-semibold text-zinc-100">{analytics.totalAssignments}</p>
+              <p className="text-lg font-semibold text-zinc-100">
+                {analytics.totalAssignments}
+              </p>
             </div>
             <div className="col-span-2 rounded-lg border border-slate-800 bg-slate-950/60 p-3">
               <p className="text-xs text-zinc-500">Completion rate</p>
-              <p className="text-lg font-semibold text-zinc-100">{Math.round(analytics.completionRate * 100)}%</p>
+              <p className="text-lg font-semibold text-zinc-100">
+                {Math.round(analytics.completionRate * 100)}%
+              </p>
             </div>
           </div>
           <div className="space-y-2">
             {analytics.assignments.length === 0 ? (
-              <p className="text-xs text-zinc-500">Analytics will appear after adding assignments.</p>
+              <p className="text-xs text-zinc-500">
+                Summary cards appear after adding assignments.
+              </p>
             ) : (
-              analytics.assignments.map(entry => (
-                <div key={entry.id} className="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                  <p className="text-sm font-medium text-zinc-100">{entry.title}</p>
+              analytics.assignments.map((entry) => (
+                <div
+                  key={entry.id}
+                  className="rounded-lg border border-slate-800 bg-slate-950/60 p-3"
+                >
+                  <p className="text-sm font-medium text-zinc-100">
+                    {entry.title}
+                  </p>
                   <p className="text-xs text-zinc-500">
-                    {entry.completeCount} complete · {entry.inProgressCount} in progress · {entry.notStartedCount} not started
+                    {entry.completeCount} complete · {entry.inProgressCount} in
+                    progress · {entry.notStartedCount} not started
                   </p>
                 </div>
               ))
@@ -599,9 +748,12 @@ export function ClassroomManager() {
         </div>
 
         <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-4 space-y-3">
-          <h3 className="text-sm font-semibold text-zinc-200">Reset controls</h3>
+          <h3 className="text-sm font-semibold text-zinc-200">
+            Reset controls
+          </h3>
           <p className="text-xs text-zinc-500">
-            Reset data locally if you are sharing a device or closing out a term.
+            Reset data locally if you are sharing a device or closing out a
+            term.
           </p>
           <div className="space-y-2">
             <Button
@@ -620,7 +772,7 @@ export function ClassroomManager() {
               onClick={resetAnalytics}
             >
               <RefreshCw className="h-4 w-4 mr-2" />
-              Clear aggregated analytics
+              Clear local class summary
             </Button>
             <Button
               type="button"

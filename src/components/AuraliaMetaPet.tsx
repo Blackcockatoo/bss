@@ -46,6 +46,11 @@ import { SubAtomicParticleField } from "./auralia/SubAtomicParticleField";
 import { TemporalEchoTrail } from "./auralia/TemporalEchoTrail";
 import { YantraMorphBackdrop } from "./auralia/YantraMorphBackdrop";
 import { YantraTileGenomeVisualizer } from "./auralia/YantraTileGenomeVisualizer";
+import {
+  MOSS_BLACK_STRAND,
+  MOSS_BLUE_STRAND,
+  MOSS_RED_STRAND,
+} from "@/lib/moss60/strandSequences";
 
 // ===== TYPE DEFINITIONS =====
 type Bigish = bigint | number;
@@ -124,9 +129,9 @@ type TetrisState = {
 };
 
 // ===== MOSSPRIMESEED CORE =====
-const RED = "113031491493585389543778774590997079619617525721567332336510";
-const BLACK = "011235831459437077415617853819099875279651673033695493257291";
-const BLUE = "012776329785893036118967145479098334781325217074992143965631";
+const RED = MOSS_RED_STRAND;
+const BLACK = MOSS_BLACK_STRAND;
+const BLUE = MOSS_BLUE_STRAND;
 
 const toDigits = (s: string): number[] =>
   s.split("").map((ch) => {

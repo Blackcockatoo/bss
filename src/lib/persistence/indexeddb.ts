@@ -4,24 +4,15 @@
  * Stores pet state, vitals, genome, and evolution data offline.
  */
 
-import type { PetType, Vitals, MirrorModeState } from '@/lib/store';
-import type { Genome, DerivedTraits, GenomeHash } from '@/lib/genome';
-import type { EvolutionData } from '@/lib/evolution';
-import type { HeptaDigits, PrimeTailID, PrivacyPreset, Rotation, Vault } from '@/lib/identity/types';
-import { createDefaultRitualProgress, type RitualProgress } from '@/lib/ritual/types';
-import {
-  createWitnessRecord,
-  createTraceFromWitness,
-  isDerivedWitnessMark,
-  isValidWitnessRecord,
-  type PetOntologyState,
-  type WitnessRecord,
-} from '@/lib/witness';
-import {
-  type InvariantIssue,
-  type SystemState,
-  shouldSealSystem,
-} from '@/lib/system/invariants';
+import type { EvolutionData } from "@/lib/evolution";
+import type { DerivedTraits, Genome, GenomeHash } from "@/lib/genome";
+import type {
+  HeptaDigits,
+  PrimeTailID,
+  PrivacyPreset,
+  Rotation,
+  Vault,
+} from "@/lib/identity/types";
 import {
   type Achievement,
   type BattleStats,
@@ -30,14 +21,32 @@ import {
   createDefaultBattleStats,
   createDefaultMiniGameProgress,
   createDefaultVimanaState,
-} from '@/lib/progression/types';
+} from "@/lib/progression/types";
+import {
+  type RitualProgress,
+  createDefaultRitualProgress,
+} from "@/lib/ritual/types";
+import type { MirrorModeState, PetType, Vitals } from "@/lib/store";
+import {
+  type InvariantIssue,
+  type SystemState,
+  shouldSealSystem,
+} from "@/lib/system/invariants";
+import {
+  type PetOntologyState,
+  type WitnessRecord,
+  createTraceFromWitness,
+  createWitnessRecord,
+  isDerivedWitnessMark,
+  isValidWitnessRecord,
+} from "@/lib/witness";
 
-const DB_NAME = 'MetaPetDB';
+const DB_NAME = "MetaPetDB";
 const DB_VERSION = 2;
-const STORE_NAME = 'pets';
-const HISTORY_STORE = 'petHistory';
-const VIMANA_FIELDS = ['calm', 'neuro', 'quantum', 'earth'] as const;
-const VIMANA_REWARDS = ['mood', 'energy', 'hygiene', 'mystery'] as const;
+const STORE_NAME = "pets";
+const HISTORY_STORE = "petHistory";
+const VIMANA_FIELDS = ["calm", "neuro", "quantum", "earth"] as const;
+const VIMANA_REWARDS = ["mood", "energy", "hygiene", "mystery"] as const;
 
 export interface PetSaveData {
   id: string; // pet ID from crest
@@ -70,19 +79,24 @@ export interface PetSaveData {
   createdAt: number;
 }
 
+type AutoSaveHandlers = {
+  onSuccess?: (savedAt: number) => void;
+  onError?: (error: unknown) => void;
+};
+
 type PetHistoryRecord =
   | {
       recordId: string;
       petId: string;
       recordedAt: number;
-      kind: 'snapshot';
+      kind: "snapshot";
       data: PetSaveData;
     }
   | {
       recordId: string;
       petId: string;
       recordedAt: number;
-      kind: 'tombstone';
+      kind: "tombstone";
       reason?: string;
     };
 
@@ -101,16 +115,22 @@ export async function initDB(): Promise<IDBDatabase> {
 
       // Create object store if it doesn't exist
       if (!db.objectStoreNames.contains(STORE_NAME)) {
-        const objectStore = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-        objectStore.createIndex('lastSaved', 'lastSaved', { unique: false });
-        objectStore.createIndex('createdAt', 'createdAt', { unique: false });
+        const objectStore = db.createObjectStore(STORE_NAME, { keyPath: "id" });
+        objectStore.createIndex("lastSaved", "lastSaved", { unique: false });
+        objectStore.createIndex("createdAt", "createdAt", { unique: false });
       }
 
       if (!db.objectStoreNames.contains(HISTORY_STORE)) {
-        const historyStore = db.createObjectStore(HISTORY_STORE, { keyPath: 'recordId' });
-        historyStore.createIndex('byPetId', 'petId', { unique: false });
-        historyStore.createIndex('byPetIdRecordedAt', ['petId', 'recordedAt'], { unique: false });
-        historyStore.createIndex('byRecordedAt', 'recordedAt', { unique: false });
+        const historyStore = db.createObjectStore(HISTORY_STORE, {
+          keyPath: "recordId",
+        });
+        historyStore.createIndex("byPetId", "petId", { unique: false });
+        historyStore.createIndex("byPetIdRecordedAt", ["petId", "recordedAt"], {
+          unique: false,
+        });
+        historyStore.createIndex("byRecordedAt", "recordedAt", {
+          unique: false,
+        });
       }
 
       if (event.oldVersion < 2 && db.objectStoreNames.contains(STORE_NAME)) {
@@ -120,15 +140,17 @@ export async function initDB(): Promise<IDBDatabase> {
         const historyStore = transaction.objectStore(HISTORY_STORE);
         const requestAll = legacyStore.getAll();
         requestAll.onsuccess = () => {
-          const items = Array.isArray(requestAll.result) ? requestAll.result : [];
-          items.forEach(item => {
+          const items = Array.isArray(requestAll.result)
+            ? requestAll.result
+            : [];
+          items.forEach((item) => {
             const data = normalizePetData(item);
             const recordedAt = data.lastSaved ?? Date.now();
             const record: PetHistoryRecord = {
               recordId: createRecordId(data.id, recordedAt),
               petId: data.id,
               recordedAt,
-              kind: 'snapshot',
+              kind: "snapshot",
               data,
             };
             historyStore.add(record);
@@ -139,6 +161,20 @@ export async function initDB(): Promise<IDBDatabase> {
   });
 }
 
+export async function isPersistenceAvailable(): Promise<boolean> {
+  if (typeof indexedDB === "undefined") {
+    return false;
+  }
+
+  try {
+    const db = await initDB();
+    db.close();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Save pet data
  */
@@ -146,15 +182,27 @@ export async function savePet(data: PetSaveData): Promise<void> {
   const db = await initDB();
 
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([HISTORY_STORE], 'readwrite');
+    const transaction = db.transaction([HISTORY_STORE], "readwrite");
     const store = transaction.objectStore(HISTORY_STORE);
+    let settled = false;
+
+    const closeDb = () => {
+      db.close();
+    };
+
+    const rejectOnce = (error: unknown) => {
+      if (settled) return;
+      settled = true;
+      closeDb();
+      reject(error);
+    };
 
     const recordedAt = Date.now();
     const record: PetHistoryRecord = {
       recordId: createRecordId(data.id, recordedAt),
       petId: data.id,
       recordedAt,
-      kind: 'snapshot',
+      kind: "snapshot",
       data: {
         ...data,
         genome: {
@@ -163,8 +211,8 @@ export async function savePet(data: PetSaveData): Promise<void> {
           black60: [...data.genome.black60],
         },
         witness: JSON.parse(JSON.stringify(data.witness)) as WitnessRecord,
-        invariantIssues: data.invariantIssues.map(issue => ({ ...issue })),
-        achievements: data.achievements.map(entry => ({ ...entry })),
+        invariantIssues: data.invariantIssues.map((issue) => ({ ...issue })),
+        achievements: data.achievements.map((entry) => ({ ...entry })),
         battle: { ...data.battle },
         miniGames: { ...data.miniGames },
         vimana: cloneVimana(data.vimana),
@@ -176,13 +224,31 @@ export async function savePet(data: PetSaveData): Promise<void> {
 
     const request = store.add(record);
 
-    request.onsuccess = () => {
-      db.close();
+    transaction.oncomplete = () => {
+      if (settled) return;
+      settled = true;
+      closeDb();
       resolve();
     };
+
+    transaction.onerror = () => {
+      rejectOnce(
+        transaction.error ??
+          request.error ??
+          new Error("Failed to save pet data."),
+      );
+    };
+
+    transaction.onabort = () => {
+      rejectOnce(
+        transaction.error ??
+          request.error ??
+          new Error("Saving pet data was aborted."),
+      );
+    };
+
     request.onerror = () => {
-      db.close();
-      reject(request.error);
+      rejectOnce(request.error ?? new Error("Failed to queue pet save."));
     };
   });
 }
@@ -194,11 +260,11 @@ export async function loadPet(id: string): Promise<PetSaveData | null> {
   const db = await initDB();
 
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([HISTORY_STORE], 'readonly');
+    const transaction = db.transaction([HISTORY_STORE], "readonly");
     const store = transaction.objectStore(HISTORY_STORE);
-    const index = store.index('byPetIdRecordedAt');
+    const index = store.index("byPetIdRecordedAt");
     const range = IDBKeyRange.bound([id, 0], [id, Number.MAX_SAFE_INTEGER]);
-    const request = index.openCursor(range, 'prev');
+    const request = index.openCursor(range, "prev");
 
     request.onsuccess = () => {
       db.close();
@@ -208,7 +274,7 @@ export async function loadPet(id: string): Promise<PetSaveData | null> {
         return;
       }
       const record = cursor.value as PetHistoryRecord;
-      if (record.kind === 'tombstone') {
+      if (record.kind === "tombstone") {
         resolve(null);
         return;
       }
@@ -228,10 +294,10 @@ export async function getAllPets(): Promise<PetSaveData[]> {
   const db = await initDB();
 
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([HISTORY_STORE], 'readonly');
+    const transaction = db.transaction([HISTORY_STORE], "readonly");
     const store = transaction.objectStore(HISTORY_STORE);
-    const index = store.index('byPetIdRecordedAt');
-    const request = index.openCursor(null, 'prev');
+    const index = store.index("byPetIdRecordedAt");
+    const request = index.openCursor(null, "prev");
     const latestById = new Map<string, PetSaveData>();
     const tombstoned = new Set<string>();
 
@@ -245,7 +311,7 @@ export async function getAllPets(): Promise<PetSaveData[]> {
 
       const record = cursor.value as PetHistoryRecord;
       if (!latestById.has(record.petId) && !tombstoned.has(record.petId)) {
-        if (record.kind === 'snapshot') {
+        if (record.kind === "snapshot") {
           latestById.set(record.petId, normalizePetData(record.data));
         } else {
           tombstoned.add(record.petId);
@@ -269,25 +335,56 @@ export async function deletePet(id: string): Promise<void> {
   const db = await initDB();
 
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([HISTORY_STORE], 'readwrite');
+    const transaction = db.transaction([HISTORY_STORE], "readwrite");
     const store = transaction.objectStore(HISTORY_STORE);
+    let settled = false;
+
+    const closeDb = () => {
+      db.close();
+    };
+
+    const rejectOnce = (error: unknown) => {
+      if (settled) return;
+      settled = true;
+      closeDb();
+      reject(error);
+    };
+
     const recordedAt = Date.now();
     const record: PetHistoryRecord = {
       recordId: createRecordId(id, recordedAt),
       petId: id,
       recordedAt,
-      kind: 'tombstone',
-      reason: 'archived-by-user',
+      kind: "tombstone",
+      reason: "archived-by-user",
     };
     const request = store.add(record);
 
-    request.onsuccess = () => {
-      db.close();
+    transaction.oncomplete = () => {
+      if (settled) return;
+      settled = true;
+      closeDb();
       resolve();
     };
+
+    transaction.onerror = () => {
+      rejectOnce(
+        transaction.error ??
+          request.error ??
+          new Error("Failed to archive pet data."),
+      );
+    };
+
+    transaction.onabort = () => {
+      rejectOnce(
+        transaction.error ??
+          request.error ??
+          new Error("Archiving pet data was aborted."),
+      );
+    };
+
     request.onerror = () => {
-      db.close();
-      reject(request.error);
+      rejectOnce(request.error ?? new Error("Failed to queue pet archive."));
     };
   });
 }
@@ -298,15 +395,18 @@ export async function deletePet(id: string): Promise<void> {
 export function setupAutoSave(
   getPetData: () => PetSaveData,
   intervalMs = 60000, // 1 minute
-  persist: (data: PetSaveData) => Promise<void> | void = savePet
+  persist: (data: PetSaveData) => Promise<void> | void = savePet,
+  handlers?: AutoSaveHandlers,
 ): () => void {
   const intervalId = setInterval(async () => {
     try {
       const data = getPetData();
       await persist(data);
-      console.log('[AutoSave] Pet data saved', new Date().toISOString());
+      handlers?.onSuccess?.(Date.now());
+      console.log("[AutoSave] Pet data saved", new Date().toISOString());
     } catch (error) {
-      console.error('[AutoSave] Failed to save:', error);
+      handlers?.onError?.(error);
+      console.error("[AutoSave] Failed to save:", error);
     }
   }, intervalMs);
 
@@ -323,7 +423,7 @@ export function exportPetToJSON(data: PetSaveData): string {
       blue60: [...data.genome.blue60],
       black60: [...data.genome.black60],
     },
-    achievements: data.achievements.map(entry => ({ ...entry })),
+    achievements: data.achievements.map((entry) => ({ ...entry })),
     battle: { ...data.battle },
     miniGames: { ...data.miniGames },
     vimana: cloneVimana(data.vimana),
@@ -332,76 +432,92 @@ export function exportPetToJSON(data: PetSaveData): string {
     petOntology: data.petOntology,
     systemState: data.systemState,
     sealedAt: data.sealedAt,
-    invariantIssues: data.invariantIssues.map(issue => ({ ...issue })),
+    invariantIssues: data.invariantIssues.map((issue) => ({ ...issue })),
     ritualProgress: {
       ...data.ritualProgress,
-      history: data.ritualProgress.history.map(entry => ({ ...entry })),
+      history: data.ritualProgress.history.map((entry) => ({ ...entry })),
     },
     traits: JSON.parse(JSON.stringify(data.traits)),
-    crest: { ...data.crest, tail: [...data.crest.tail] as [number, number, number, number] },
+    crest: {
+      ...data.crest,
+      tail: [...data.crest.tail] as [number, number, number, number],
+    },
     heptaDigits: Array.from(data.heptaDigits) as HeptaDigits,
   };
 
   return JSON.stringify(safeData, null, 2);
 }
 
-export function importPetFromJSON(json: string, options?: { skipGenomeValidation?: boolean }): PetSaveData {
+export function importPetFromJSON(
+  json: string,
+  options?: { skipGenomeValidation?: boolean },
+): PetSaveData {
   const parsed = JSON.parse(json) as Partial<PetSaveData> | null;
-  if (!parsed || typeof parsed !== 'object') {
-    throw new Error('Invalid pet file: expected JSON object');
+  if (!parsed || typeof parsed !== "object") {
+    throw new Error("Invalid pet file: expected JSON object");
   }
 
-  if (typeof parsed.id !== 'string' || parsed.id.trim() === '') {
-    throw new Error('Invalid pet file: missing id');
+  if (typeof parsed.id !== "string" || parsed.id.trim() === "") {
+    throw new Error("Invalid pet file: missing id");
   }
 
   if (!isValidVitals(parsed.vitals)) {
-    throw new Error('Invalid pet file: vitals are malformed');
+    throw new Error("Invalid pet file: vitals are malformed");
   }
 
-  if (!isValidGenome(parsed.genome)) {
-    throw new Error('Invalid pet file: genome is malformed');
+  const hasValidGenome = isValidGenome(parsed.genome);
+
+  if (!hasValidGenome && !options?.skipGenomeValidation) {
+    throw new Error("Invalid pet file: genome is malformed");
   }
 
   // If genome validation was skipped, provide a default empty genome
-  const genome: Genome = options?.skipGenomeValidation && !isValidGenome(parsed.genome)
-    ? { red60: Array(60).fill(0), blue60: Array(60).fill(0), black60: Array(60).fill(0) }
-    : parsed.genome!;
+  const genome: Genome =
+    options?.skipGenomeValidation && !hasValidGenome
+      ? {
+          red60: Array(60).fill(0),
+          blue60: Array(60).fill(0),
+          black60: Array(60).fill(0),
+        }
+      : parsed.genome!;
 
   // PetType validation and default
   const petType: PetType = (() => {
-    if (parsed.petType && ['organic', 'geometric', 'hybrid'].includes(parsed.petType)) {
+    if (
+      parsed.petType &&
+      ["organic", "geometric", "hybrid"].includes(parsed.petType)
+    ) {
       return parsed.petType as PetType;
     }
-    return 'geometric'; // Default to geometric if not specified
+    return "geometric"; // Default to geometric if not specified
   })();
 
   if (!parsed.genomeHash || !isValidGenomeHash(parsed.genomeHash)) {
-    throw new Error('Invalid pet file: genome hashes are malformed');
+    throw new Error("Invalid pet file: genome hashes are malformed");
   }
 
-  if (!parsed.traits || typeof parsed.traits !== 'object') {
-    throw new Error('Invalid pet file: traits missing');
+  if (!parsed.traits || typeof parsed.traits !== "object") {
+    throw new Error("Invalid pet file: traits missing");
   }
 
   if (!isValidEvolution(parsed.evolution)) {
-    throw new Error('Invalid pet file: evolution data is malformed');
+    throw new Error("Invalid pet file: evolution data is malformed");
   }
 
   if (!isValidCrest(parsed.crest)) {
-    throw new Error('Invalid pet file: crest data is malformed');
+    throw new Error("Invalid pet file: crest data is malformed");
   }
 
   if (!isValidHeptaDigits(parsed.heptaDigits)) {
-    throw new Error('Invalid pet file: HeptaCode digits malformed');
+    throw new Error("Invalid pet file: HeptaCode digits malformed");
   }
 
   const achievements = (() => {
     if (parsed.achievements === undefined) return [] as Achievement[];
     if (isValidAchievements(parsed.achievements)) {
-      return parsed.achievements.map(entry => ({ ...entry }));
+      return parsed.achievements.map((entry) => ({ ...entry }));
     }
-    throw new Error('Invalid pet file: achievements malformed');
+    throw new Error("Invalid pet file: achievements malformed");
   })();
 
   const battle = (() => {
@@ -409,7 +525,7 @@ export function importPetFromJSON(json: string, options?: { skipGenomeValidation
     if (isValidBattleStats(parsed.battle)) {
       return { ...parsed.battle };
     }
-    throw new Error('Invalid pet file: battle stats malformed');
+    throw new Error("Invalid pet file: battle stats malformed");
   })();
 
   const miniGames = (() => {
@@ -417,7 +533,7 @@ export function importPetFromJSON(json: string, options?: { skipGenomeValidation
     if (isValidMiniGameProgress(parsed.miniGames)) {
       return { ...parsed.miniGames };
     }
-    throw new Error('Invalid pet file: mini-game progress malformed');
+    throw new Error("Invalid pet file: mini-game progress malformed");
   })();
 
   const vimana = (() => {
@@ -425,7 +541,7 @@ export function importPetFromJSON(json: string, options?: { skipGenomeValidation
     if (isValidVimanaState(parsed.vimana)) {
       return cloneVimana(parsed.vimana);
     }
-    throw new Error('Invalid pet file: vimana state malformed');
+    throw new Error("Invalid pet file: vimana state malformed");
   })();
 
   const mirrorMode = (() => {
@@ -433,7 +549,7 @@ export function importPetFromJSON(json: string, options?: { skipGenomeValidation
     if (isValidMirrorMode(parsed.mirrorMode)) {
       return { ...parsed.mirrorMode };
     }
-    throw new Error('Invalid pet file: mirror mode malformed');
+    throw new Error("Invalid pet file: mirror mode malformed");
   })();
 
   const witness = (() => {
@@ -441,9 +557,12 @@ export function importPetFromJSON(json: string, options?: { skipGenomeValidation
     if (parsed.witness === undefined) return defaultWitness;
     if (isValidWitnessRecord(parsed.witness)) {
       if (!isDerivedWitnessMark(parsed.witness.mark)) {
-        throw new Error('Invalid pet file: witness mark does not match seed');
+        throw new Error("Invalid pet file: witness mark does not match seed");
       }
-      if (parsed.witness.state.presence === 'disappeared' && !parsed.witness.trace) {
+      if (
+        parsed.witness.state.presence === "disappeared" &&
+        !parsed.witness.trace
+      ) {
         return {
           ...parsed.witness,
           trace: createTraceFromWitness(parsed.witness),
@@ -451,38 +570,54 @@ export function importPetFromJSON(json: string, options?: { skipGenomeValidation
       }
       return parsed.witness;
     }
-    throw new Error('Invalid pet file: witness record malformed');
+    throw new Error("Invalid pet file: witness record malformed");
   })();
 
   const petOntology: PetOntologyState = (() => {
-    if (parsed.petOntology === 'living' || parsed.petOntology === 'unwitnessed' || parsed.petOntology === 'enduring') {
+    if (
+      parsed.petOntology === "living" ||
+      parsed.petOntology === "unwitnessed" ||
+      parsed.petOntology === "enduring"
+    ) {
       return parsed.petOntology;
     }
-    return 'living';
+    return "living";
   })();
 
-  const systemState: SystemState = parsed.systemState === 'sealed' ? 'sealed' : 'active';
-  const sealedAt = typeof parsed.sealedAt === 'number' ? parsed.sealedAt : null;
+  const systemState: SystemState =
+    parsed.systemState === "sealed" ? "sealed" : "active";
+  const sealedAt = typeof parsed.sealedAt === "number" ? parsed.sealedAt : null;
   const invariantIssues = (() => {
     if (!Array.isArray(parsed.invariantIssues)) return [] as InvariantIssue[];
-    const issues = parsed.invariantIssues.filter(isValidInvariantIssue).map(issue => ({ ...issue }));
+    const issues = parsed.invariantIssues
+      .filter(isValidInvariantIssue)
+      .map((issue) => ({ ...issue }));
     return issues;
   })();
 
-  const createdAt = typeof parsed.createdAt === 'number' ? parsed.createdAt : Date.now();
-  const lastSaved = typeof parsed.lastSaved === 'number' ? parsed.lastSaved : Date.now();
+  const createdAt =
+    typeof parsed.createdAt === "number" ? parsed.createdAt : Date.now();
+  const lastSaved =
+    typeof parsed.lastSaved === "number" ? parsed.lastSaved : Date.now();
 
-  const essence = typeof parsed.essence === 'number' ? parsed.essence : 0;
+  const essence = typeof parsed.essence === "number" ? parsed.essence : 0;
   const lastRewardSource =
-    typeof parsed.lastRewardSource === 'string' ? parsed.lastRewardSource : null;
-  const lastRewardAmount = typeof parsed.lastRewardAmount === 'number' ? parsed.lastRewardAmount : 0;
+    typeof parsed.lastRewardSource === "string"
+      ? parsed.lastRewardSource
+      : null;
+  const lastRewardAmount =
+    typeof parsed.lastRewardAmount === "number" ? parsed.lastRewardAmount : 0;
 
-  const resolvedSealed = systemState === 'sealed' || shouldSealSystem(invariantIssues);
-  const effectiveSealedAt = resolvedSealed ? sealedAt ?? Date.now() : null;
+  const resolvedSealed =
+    systemState === "sealed" || shouldSealSystem(invariantIssues);
+  const effectiveSealedAt = resolvedSealed ? (sealedAt ?? Date.now()) : null;
 
   return {
     id: parsed.id,
-    name: typeof parsed.name === 'string' && parsed.name.trim() !== '' ? parsed.name.trim() : undefined,
+    name:
+      typeof parsed.name === "string" && parsed.name.trim() !== ""
+        ? parsed.name.trim()
+        : undefined,
     vitals: normalizeVitals(parsed.vitals),
     petType,
     genome,
@@ -502,7 +637,7 @@ export function importPetFromJSON(json: string, options?: { skipGenomeValidation
     mirrorMode,
     witness,
     petOntology,
-    systemState: resolvedSealed ? 'sealed' : systemState,
+    systemState: resolvedSealed ? "sealed" : systemState,
     sealedAt: effectiveSealedAt,
     invariantIssues,
     crest: parsed.crest,
@@ -515,17 +650,17 @@ export function importPetFromJSON(json: string, options?: { skipGenomeValidation
 function cloneVimana(value: VimanaState): VimanaState {
   return {
     ...value,
-    cells: value.cells.map(cell => ({ ...cell })),
+    cells: value.cells.map((cell) => ({ ...cell })),
   };
 }
 
 function normalizePetData(raw: unknown): PetSaveData {
-  const base = raw && typeof raw === 'object' ? raw : {};
+  const base = raw && typeof raw === "object" ? raw : {};
 
   const typed = base as Partial<PetSaveData>;
 
   const achievements = isValidAchievements(typed.achievements)
-    ? typed.achievements.map(entry => ({ ...entry }))
+    ? typed.achievements.map((entry) => ({ ...entry }))
     : [];
   const battle = isValidBattleStats(typed.battle)
     ? { ...typed.battle }
@@ -542,30 +677,39 @@ function normalizePetData(raw: unknown): PetSaveData {
   const ritualProgress = isValidRitualProgress(typed.ritualProgress)
     ? normalizeRitualProgress(typed.ritualProgress)
     : createDefaultRitualProgress();
-  const essence = typeof typed.essence === 'number' ? typed.essence : 0;
+  const essence = typeof typed.essence === "number" ? typed.essence : 0;
   const lastRewardSource =
-    typeof typed.lastRewardSource === 'string' ? typed.lastRewardSource : null;
-  const lastRewardAmount = typeof typed.lastRewardAmount === 'number' ? typed.lastRewardAmount : 0;
-  const witnessSeed = typeof typed.id === 'string' ? typed.id : 'unknown';
+    typeof typed.lastRewardSource === "string" ? typed.lastRewardSource : null;
+  const lastRewardAmount =
+    typeof typed.lastRewardAmount === "number" ? typed.lastRewardAmount : 0;
+  const witnessSeed = typeof typed.id === "string" ? typed.id : "unknown";
   const witness = isValidWitnessRecord(typed.witness)
-    ? (isDerivedWitnessMark(typed.witness.mark) ? typed.witness : createWitnessRecord(witnessSeed))
+    ? isDerivedWitnessMark(typed.witness.mark)
+      ? typed.witness
+      : createWitnessRecord(witnessSeed)
     : createWitnessRecord(witnessSeed);
   const normalizedWitness =
-    witness.state.presence === 'disappeared' && !witness.trace
+    witness.state.presence === "disappeared" && !witness.trace
       ? { ...witness, trace: createTraceFromWitness(witness) }
       : witness;
   const petOntology: PetOntologyState =
-    typed.petOntology === 'unwitnessed' || typed.petOntology === 'enduring' || typed.petOntology === 'living'
+    typed.petOntology === "unwitnessed" ||
+    typed.petOntology === "enduring" ||
+    typed.petOntology === "living"
       ? typed.petOntology
-      : 'living';
+      : "living";
   const invariantIssues = Array.isArray(typed.invariantIssues)
-    ? typed.invariantIssues.filter(isValidInvariantIssue).map(issue => ({ ...issue }))
+    ? typed.invariantIssues
+        .filter(isValidInvariantIssue)
+        .map((issue) => ({ ...issue }))
     : [];
   const resolvedSealed =
-    typed.systemState === 'sealed' || shouldSealSystem(invariantIssues);
-  const systemState: SystemState = resolvedSealed ? 'sealed' : 'active';
+    typed.systemState === "sealed" || shouldSealSystem(invariantIssues);
+  const systemState: SystemState = resolvedSealed ? "sealed" : "active";
   const sealedAt =
-    resolvedSealed && typeof typed.sealedAt === 'number' ? typed.sealedAt : null;
+    resolvedSealed && typeof typed.sealedAt === "number"
+      ? typed.sealedAt
+      : null;
 
   // Normalize vitals to include new sickness properties with defaults
   const vitals = normalizeVitals(typed.vitals);
@@ -582,11 +726,11 @@ function normalizePetData(raw: unknown): PetSaveData {
     essence,
     lastRewardSource,
     lastRewardAmount,
-    petType: isValidPetType(typed.petType) ? typed.petType : 'geometric',
+    petType: isValidPetType(typed.petType) ? typed.petType : "geometric",
     witness: normalizedWitness,
     petOntology,
     systemState,
-    sealedAt: systemState === 'sealed' ? sealedAt ?? Date.now() : null,
+    sealedAt: systemState === "sealed" ? (sealedAt ?? Date.now()) : null,
     invariantIssues,
   } as PetSaveData;
 }
@@ -599,43 +743,70 @@ function normalizeVitals(value: unknown): Vitals {
     energy: 80,
     isSick: false,
     sicknessSeverity: 0,
-    sicknessType: 'none',
+    sicknessType: "none",
     deathCount: 0,
   };
 
-  if (!value || typeof value !== 'object') {
+  if (!value || typeof value !== "object") {
     return defaultVitals;
   }
 
   const v = value as Partial<Vitals>;
 
   return {
-    hunger: typeof v.hunger === 'number' && Number.isFinite(v.hunger) ? v.hunger : defaultVitals.hunger,
-    hygiene: typeof v.hygiene === 'number' && Number.isFinite(v.hygiene) ? v.hygiene : defaultVitals.hygiene,
-    mood: typeof v.mood === 'number' && Number.isFinite(v.mood) ? v.mood : defaultVitals.mood,
-    energy: typeof v.energy === 'number' && Number.isFinite(v.energy) ? v.energy : defaultVitals.energy,
-    isSick: typeof v.isSick === 'boolean' ? v.isSick : defaultVitals.isSick,
-    sicknessSeverity: typeof v.sicknessSeverity === 'number' && Number.isFinite(v.sicknessSeverity) ? v.sicknessSeverity : defaultVitals.sicknessSeverity,
-    sicknessType: isValidSicknessType(v.sicknessType) ? v.sicknessType : defaultVitals.sicknessType,
-    deathCount: typeof v.deathCount === 'number' && Number.isFinite(v.deathCount) ? v.deathCount : defaultVitals.deathCount,
+    hunger:
+      typeof v.hunger === "number" && Number.isFinite(v.hunger)
+        ? v.hunger
+        : defaultVitals.hunger,
+    hygiene:
+      typeof v.hygiene === "number" && Number.isFinite(v.hygiene)
+        ? v.hygiene
+        : defaultVitals.hygiene,
+    mood:
+      typeof v.mood === "number" && Number.isFinite(v.mood)
+        ? v.mood
+        : defaultVitals.mood,
+    energy:
+      typeof v.energy === "number" && Number.isFinite(v.energy)
+        ? v.energy
+        : defaultVitals.energy,
+    isSick: typeof v.isSick === "boolean" ? v.isSick : defaultVitals.isSick,
+    sicknessSeverity:
+      typeof v.sicknessSeverity === "number" &&
+      Number.isFinite(v.sicknessSeverity)
+        ? v.sicknessSeverity
+        : defaultVitals.sicknessSeverity,
+    sicknessType: isValidSicknessType(v.sicknessType)
+      ? v.sicknessType
+      : defaultVitals.sicknessType,
+    deathCount:
+      typeof v.deathCount === "number" && Number.isFinite(v.deathCount)
+        ? v.deathCount
+        : defaultVitals.deathCount,
   };
 }
 
-function isValidSicknessType(value: unknown): value is Vitals['sicknessType'] {
-  return value === 'none' || value === 'hungry' || value === 'dirty' || value === 'exhausted' || value === 'depressed';
+function isValidSicknessType(value: unknown): value is Vitals["sicknessType"] {
+  return (
+    value === "none" ||
+    value === "hungry" ||
+    value === "dirty" ||
+    value === "exhausted" ||
+    value === "depressed"
+  );
 }
 
 function isValidVitals(value: unknown): value is Vitals {
-  if (!value || typeof value !== 'object') return false;
+  if (!value || typeof value !== "object") return false;
   const vitals = value as Vitals;
-  return ['hunger', 'hygiene', 'mood', 'energy'].every(key => {
+  return ["hunger", "hygiene", "mood", "energy"].every((key) => {
     const num = vitals[key as keyof Vitals];
-    return typeof num === 'number' && Number.isFinite(num);
+    return typeof num === "number" && Number.isFinite(num);
   });
 }
 
 function isValidGenome(value: unknown): value is Genome {
-  if (!value || typeof value !== 'object') return false;
+  if (!value || typeof value !== "object") return false;
   const genome = value as Genome;
   return (
     isBase7Array(genome.red60, 60) &&
@@ -645,89 +816,103 @@ function isValidGenome(value: unknown): value is Genome {
 }
 
 function isValidGenomeHash(value: unknown): value is GenomeHash {
-  if (!value || typeof value !== 'object') return false;
+  if (!value || typeof value !== "object") return false;
   const hash = value as GenomeHash;
   return (
-    typeof hash.redHash === 'string' &&
-    typeof hash.blueHash === 'string' &&
-    typeof hash.blackHash === 'string'
+    typeof hash.redHash === "string" &&
+    typeof hash.blueHash === "string" &&
+    typeof hash.blackHash === "string"
   );
 }
 
 function isValidPetType(value: unknown): value is PetType {
-  return value === 'geometric' || value === 'auralia';
+  return value === "geometric" || value === "auralia";
 }
 
 function isValidInvariantIssue(value: unknown): value is InvariantIssue {
-  if (!value || typeof value !== 'object') return false;
+  if (!value || typeof value !== "object") return false;
   const issue = value as InvariantIssue;
   const typeOk =
-    issue.type === 'inability' ||
-    issue.type === 'ambiguity' ||
-    issue.type === 'contradiction';
-  return typeOk && typeof issue.message === 'string' && typeof issue.detectedAt === 'number';
+    issue.type === "inability" ||
+    issue.type === "ambiguity" ||
+    issue.type === "contradiction";
+  return (
+    typeOk &&
+    typeof issue.message === "string" &&
+    typeof issue.detectedAt === "number"
+  );
 }
 
-function isBase7Array(value: unknown, expectedLength: number): value is number[] {
+function isBase7Array(
+  value: unknown,
+  expectedLength: number,
+): value is number[] {
   return (
     Array.isArray(value) &&
     value.length === expectedLength &&
-    value.every(v => typeof v === 'number' && Number.isInteger(v) && v >= 0 && v < 7)
+    value.every(
+      (v) => typeof v === "number" && Number.isInteger(v) && v >= 0 && v < 7,
+    )
   );
 }
 
 function isValidEvolution(value: unknown): value is EvolutionData {
-  if (!value || typeof value !== 'object') return false;
+  if (!value || typeof value !== "object") return false;
   const evo = value as EvolutionData;
   return (
-    typeof evo.state === 'string' &&
-    typeof evo.birthTime === 'number' &&
-    typeof evo.lastEvolutionTime === 'number' &&
-    typeof evo.experience === 'number' &&
-    typeof evo.level === 'number' &&
-    typeof evo.currentLevelXp === 'number' &&
-    typeof evo.totalXp === 'number' &&
-    typeof evo.totalInteractions === 'number' &&
-    typeof evo.canEvolve === 'boolean'
+    typeof evo.state === "string" &&
+    typeof evo.birthTime === "number" &&
+    typeof evo.lastEvolutionTime === "number" &&
+    typeof evo.experience === "number" &&
+    typeof evo.level === "number" &&
+    typeof evo.currentLevelXp === "number" &&
+    typeof evo.totalXp === "number" &&
+    typeof evo.totalInteractions === "number" &&
+    typeof evo.canEvolve === "boolean"
   );
 }
 
 function isValidAchievements(value: unknown): value is Achievement[] {
   return (
     Array.isArray(value) &&
-    value.every(entry => {
-      if (!entry || typeof entry !== 'object') return false;
+    value.every((entry) => {
+      if (!entry || typeof entry !== "object") return false;
       const achievement = entry as Achievement;
       const earnedAt = achievement.earnedAt;
       return (
-        typeof achievement.id === 'string' &&
-        typeof achievement.title === 'string' &&
-        typeof achievement.description === 'string' &&
-        (earnedAt === undefined || typeof earnedAt === 'number')
+        typeof achievement.id === "string" &&
+        typeof achievement.title === "string" &&
+        typeof achievement.description === "string" &&
+        (earnedAt === undefined || typeof earnedAt === "number")
       );
     })
   );
 }
 
 function isValidBattleStats(value: unknown): value is BattleStats {
-  if (!value || typeof value !== 'object') return false;
+  if (!value || typeof value !== "object") return false;
   const stats = value as BattleStats;
-  const lastResultValid = stats.lastResult === null || stats.lastResult === 'win' || stats.lastResult === 'loss';
-  const lastOpponentValid = stats.lastOpponent === null || typeof stats.lastOpponent === 'string';
+  const lastResultValid =
+    stats.lastResult === null ||
+    stats.lastResult === "win" ||
+    stats.lastResult === "loss";
+  const lastOpponentValid =
+    stats.lastOpponent === null || typeof stats.lastOpponent === "string";
   return (
-    typeof stats.wins === 'number' &&
-    typeof stats.losses === 'number' &&
-    typeof stats.streak === 'number' &&
+    typeof stats.wins === "number" &&
+    typeof stats.losses === "number" &&
+    typeof stats.streak === "number" &&
     lastResultValid &&
     lastOpponentValid &&
-    typeof stats.energyShield === 'number'
+    typeof stats.energyShield === "number"
   );
 }
 
 function isValidMiniGameProgress(value: unknown): value is MiniGameProgress {
-  if (!value || typeof value !== 'object') return false;
+  if (!value || typeof value !== "object") return false;
   const progress = value as MiniGameProgress;
-  const lastPlayedValid = progress.lastPlayedAt === null || typeof progress.lastPlayedAt === 'number';
+  const lastPlayedValid =
+    progress.lastPlayedAt === null || typeof progress.lastPlayedAt === "number";
   const numericFields = [
     progress.memoryHighScore,
     progress.rhythmHighScore,
@@ -740,74 +925,88 @@ function isValidMiniGameProgress(value: unknown): value is MiniGameProgress {
     progress.vimanaLastLevel,
   ];
   const statsValid = numericFields.every(
-    field => typeof field === 'number' && Number.isFinite(field)
+    (field) => typeof field === "number" && Number.isFinite(field),
   );
 
   return statsValid && lastPlayedValid;
 }
 
 function isValidVimanaState(value: unknown): value is VimanaState {
-  if (!value || typeof value !== 'object') return false;
+  if (!value || typeof value !== "object") return false;
   const state = value as VimanaState;
-  const lastScanValid = state.lastScanAt === null || typeof state.lastScanAt === 'number';
+  const lastScanValid =
+    state.lastScanAt === null || typeof state.lastScanAt === "number";
   return (
     Array.isArray(state.cells) &&
     state.cells.every(isValidVimanaCell) &&
-    typeof state.activeCellId === 'string' &&
-    typeof state.anomaliesFound === 'number' &&
-    typeof state.anomaliesResolved === 'number' &&
-    typeof state.scansPerformed === 'number' &&
+    typeof state.activeCellId === "string" &&
+    typeof state.anomaliesFound === "number" &&
+    typeof state.anomaliesResolved === "number" &&
+    typeof state.scansPerformed === "number" &&
     lastScanValid
   );
 }
 
-function isValidVimanaCell(value: unknown): value is VimanaState['cells'][number] {
-  if (!value || typeof value !== 'object') return false;
-  const cell = value as VimanaState['cells'][number];
-  const fieldValid = VIMANA_FIELDS.includes(cell.field as (typeof VIMANA_FIELDS)[number]);
-  const rewardValid = VIMANA_REWARDS.includes(cell.reward as (typeof VIMANA_REWARDS)[number]);
+function isValidVimanaCell(
+  value: unknown,
+): value is VimanaState["cells"][number] {
+  if (!value || typeof value !== "object") return false;
+  const cell = value as VimanaState["cells"][number];
+  const fieldValid = VIMANA_FIELDS.includes(
+    cell.field as (typeof VIMANA_FIELDS)[number],
+  );
+  const rewardValid = VIMANA_REWARDS.includes(
+    cell.reward as (typeof VIMANA_REWARDS)[number],
+  );
   return (
-    typeof cell.id === 'string' &&
-    typeof cell.label === 'string' &&
-    typeof cell.field === 'string' &&
+    typeof cell.id === "string" &&
+    typeof cell.label === "string" &&
+    typeof cell.field === "string" &&
     fieldValid &&
-    typeof cell.discovered === 'boolean' &&
-    typeof cell.anomaly === 'boolean' &&
-    typeof cell.energy === 'number' &&
-    typeof cell.reward === 'string' &&
+    typeof cell.discovered === "boolean" &&
+    typeof cell.anomaly === "boolean" &&
+    typeof cell.energy === "number" &&
+    typeof cell.reward === "string" &&
     rewardValid &&
-    (cell.visitedAt === undefined || typeof cell.visitedAt === 'number')
+    (cell.visitedAt === undefined || typeof cell.visitedAt === "number")
   );
 }
 
 function isValidRitualProgress(value: unknown): value is RitualProgress {
-  if (!value || typeof value !== 'object') return false;
+  if (!value || typeof value !== "object") return false;
   const progress = value as RitualProgress;
-  const historyValid = Array.isArray(progress.history) && progress.history.every(isValidRitualHistoryEntry);
+  const historyValid =
+    Array.isArray(progress.history) &&
+    progress.history.every(isValidRitualHistoryEntry);
   return (
-    typeof progress.resonance === 'number' &&
-    typeof progress.nectar === 'number' &&
-    typeof progress.streak === 'number' &&
-    typeof progress.totalSessions === 'number' &&
-    (progress.lastDayKey === null || typeof progress.lastDayKey === 'number') &&
+    typeof progress.resonance === "number" &&
+    typeof progress.nectar === "number" &&
+    typeof progress.streak === "number" &&
+    typeof progress.totalSessions === "number" &&
+    (progress.lastDayKey === null || typeof progress.lastDayKey === "number") &&
     historyValid
   );
 }
 
-function isValidRitualHistoryEntry(value: unknown): value is RitualProgress['history'][number] {
-  if (!value || typeof value !== 'object') return false;
-  const entry = value as RitualProgress['history'][number];
-  const validInputType = entry.inputType === 'mood' || entry.inputType === 'intention' || entry.inputType === 'element';
+function isValidRitualHistoryEntry(
+  value: unknown,
+): value is RitualProgress["history"][number] {
+  if (!value || typeof value !== "object") return false;
+  const entry = value as RitualProgress["history"][number];
+  const validInputType =
+    entry.inputType === "mood" ||
+    entry.inputType === "intention" ||
+    entry.inputType === "element";
   const validRitual =
-    entry.ritual === 'tap' ||
-    entry.ritual === 'hold' ||
-    entry.ritual === 'breath' ||
-    entry.ritual === 'yantra';
+    entry.ritual === "tap" ||
+    entry.ritual === "hold" ||
+    entry.ritual === "breath" ||
+    entry.ritual === "yantra";
   return (
     validInputType &&
     validRitual &&
-    typeof entry.inputValue === 'string' &&
-    typeof entry.timestamp === 'number'
+    typeof entry.inputValue === "string" &&
+    typeof entry.timestamp === "number"
   );
 }
 
@@ -816,30 +1015,36 @@ function normalizeRitualProgress(value: RitualProgress): RitualProgress {
     resonance: Number.isFinite(value.resonance) ? value.resonance : 0,
     nectar: Number.isFinite(value.nectar) ? value.nectar : 0,
     streak: Number.isFinite(value.streak) ? value.streak : 0,
-    totalSessions: Number.isFinite(value.totalSessions) ? value.totalSessions : 0,
+    totalSessions: Number.isFinite(value.totalSessions)
+      ? value.totalSessions
+      : 0,
     lastDayKey: value.lastDayKey ?? null,
-    history: Array.isArray(value.history) ? value.history.map(entry => ({ ...entry })) : [],
+    history: Array.isArray(value.history)
+      ? value.history.map((entry) => ({ ...entry }))
+      : [],
   };
 }
 
 function isValidCrest(value: unknown): value is PrimeTailID {
-  if (!value || typeof value !== 'object') return false;
+  if (!value || typeof value !== "object") return false;
   const crest = value as PrimeTailID & { tail: number[] };
-  const vaults: Vault[] = ['red', 'blue', 'black'];
-  const rotations: Rotation[] = ['CW', 'CCW'];
+  const vaults: Vault[] = ["red", "blue", "black"];
+  const rotations: Rotation[] = ["CW", "CCW"];
 
   return (
-    typeof crest.vault === 'string' &&
+    typeof crest.vault === "string" &&
     vaults.includes(crest.vault as Vault) &&
-    typeof crest.rotation === 'string' &&
+    typeof crest.rotation === "string" &&
     rotations.includes(crest.rotation as Rotation) &&
     Array.isArray(crest.tail) &&
     crest.tail.length === 4 &&
-    crest.tail.every(v => typeof v === 'number' && Number.isInteger(v) && v >= 0 && v < 60) &&
-    typeof crest.coronatedAt === 'number' &&
-    typeof crest.dnaHash === 'string' &&
-    typeof crest.mirrorHash === 'string' &&
-    typeof crest.signature === 'string'
+    crest.tail.every(
+      (v) => typeof v === "number" && Number.isInteger(v) && v >= 0 && v < 60,
+    ) &&
+    typeof crest.coronatedAt === "number" &&
+    typeof crest.dnaHash === "string" &&
+    typeof crest.mirrorHash === "string" &&
+    typeof crest.signature === "string"
   );
 }
 
@@ -847,51 +1052,57 @@ function isValidHeptaDigits(value: unknown): value is HeptaDigits {
   return (
     Array.isArray(value) &&
     value.length === 42 &&
-    value.every(v => typeof v === 'number' && Number.isInteger(v) && v >= 0 && v < 7)
+    value.every(
+      (v) => typeof v === "number" && Number.isInteger(v) && v >= 0 && v < 7,
+    )
   );
 }
 
 function isValidMirrorMode(value: unknown): value is MirrorModeState {
-  if (!value || typeof value !== 'object') return false;
+  if (!value || typeof value !== "object") return false;
   const mirror = value as MirrorModeState;
   const phaseOk =
-    mirror.phase === 'idle' ||
-    mirror.phase === 'entering' ||
-    mirror.phase === 'crossed' ||
-    mirror.phase === 'returning';
+    mirror.phase === "idle" ||
+    mirror.phase === "entering" ||
+    mirror.phase === "crossed" ||
+    mirror.phase === "returning";
   const presetOk =
     mirror.preset === null ||
-    mirror.preset === 'stealth' ||
-    mirror.preset === 'standard' ||
-    mirror.preset === 'radiant';
+    mirror.preset === "stealth" ||
+    mirror.preset === "standard" ||
+    mirror.preset === "radiant";
 
   const reflectionOk =
     mirror.lastReflection === null ||
-    (typeof mirror.lastReflection === 'object' &&
+    (typeof mirror.lastReflection === "object" &&
       mirror.lastReflection !== null &&
-      typeof mirror.lastReflection.id === 'string' &&
-      (mirror.lastReflection.outcome === 'anchor' || mirror.lastReflection.outcome === 'drift') &&
-      typeof mirror.lastReflection.moodDelta === 'number' &&
-      typeof mirror.lastReflection.energyDelta === 'number' &&
-      typeof mirror.lastReflection.timestamp === 'number' &&
-      (mirror.lastReflection.note === undefined || typeof mirror.lastReflection.note === 'string') &&
-      (mirror.lastReflection.preset === 'stealth' ||
-        mirror.lastReflection.preset === 'standard' ||
-        mirror.lastReflection.preset === 'radiant'));
+      typeof mirror.lastReflection.id === "string" &&
+      (mirror.lastReflection.outcome === "anchor" ||
+        mirror.lastReflection.outcome === "drift") &&
+      typeof mirror.lastReflection.moodDelta === "number" &&
+      typeof mirror.lastReflection.energyDelta === "number" &&
+      typeof mirror.lastReflection.timestamp === "number" &&
+      (mirror.lastReflection.note === undefined ||
+        typeof mirror.lastReflection.note === "string") &&
+      (mirror.lastReflection.preset === "stealth" ||
+        mirror.lastReflection.preset === "standard" ||
+        mirror.lastReflection.preset === "radiant"));
 
   return (
     phaseOk &&
     presetOk &&
-    (mirror.startedAt === null || typeof mirror.startedAt === 'number') &&
-    (mirror.consentExpiresAt === null || typeof mirror.consentExpiresAt === 'number') &&
-    (mirror.presenceToken === null || typeof mirror.presenceToken === 'string') &&
+    (mirror.startedAt === null || typeof mirror.startedAt === "number") &&
+    (mirror.consentExpiresAt === null ||
+      typeof mirror.consentExpiresAt === "number") &&
+    (mirror.presenceToken === null ||
+      typeof mirror.presenceToken === "string") &&
     reflectionOk
   );
 }
 
 function createDefaultMirrorMode(): MirrorModeState {
   return {
-    phase: 'idle',
+    phase: "idle",
     startedAt: null,
     consentExpiresAt: null,
     preset: null,
@@ -902,7 +1113,7 @@ function createDefaultMirrorMode(): MirrorModeState {
 
 function createRecordId(petId: string, recordedAt: number): string {
   const suffix =
-    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
       ? crypto.randomUUID()
       : Math.random().toString(16).slice(2, 10);
   return `${petId}-${recordedAt}-${suffix}`;

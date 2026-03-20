@@ -59,7 +59,7 @@ export function VimanaMap() {
         </div>
         <div className="text-xs text-zinc-400 text-right">
           <p>Scans: <span className="text-cyan-300 font-semibold">{vimana.scansPerformed}</span></p>
-          <p>Anomalies Resolved: <span className="text-emerald-300 font-semibold">{vimana.anomaliesFound}</span></p>
+          <p>Anomalies Resolved: <span className="text-emerald-300 font-semibold">{vimana.anomaliesResolved ?? 0}</span></p>
         </div>
       </div>
 

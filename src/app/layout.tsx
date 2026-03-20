@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import type { CSSProperties } from "react";
 import "./globals.css";
-import ClientBody from "./ClientBody";
+import { findSiteUrl, findSiteUrlObject } from "@/lib/env/siteUrl";
 import { LEGAL_NOTICE_TEXT, getLegalNoticeYear } from "@/lib/legalNotice";
-import { getSiteUrl, getSiteUrlObject } from "@/lib/env/siteUrl";
+import ClientBody from "./ClientBody";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -12,13 +12,14 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-const siteUrl = getSiteUrl();
+const siteUrl = findSiteUrl();
+const siteUrlObject = findSiteUrlObject();
 
 export const metadata: Metadata = {
-  metadataBase: getSiteUrlObject(),
+  ...(siteUrlObject ? { metadataBase: siteUrlObject } : {}),
   title: "Blue Snake Studios",
   description:
-    "Blue Snake Studios builds privacy-first digital learning experiences for schools and families.",
+    "Blue Snake Studios builds privacy-first digital learning experiences with a strict child-safe baseline for default student deployments.",
   manifest: "/manifest.json",
   icons: {
     icon: "/icon.svg",
@@ -32,8 +33,8 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Blue Snake Studios",
     description:
-      "Blue Snake Studios builds privacy-first digital learning experiences for schools and families.",
-    url: siteUrl,
+      "Blue Snake Studios builds privacy-first digital learning experiences with a strict child-safe baseline for default student deployments.",
+    ...(siteUrl ? { url: siteUrl } : {}),
     siteName: "Blue Snake Studios",
     type: "website",
   },
@@ -41,7 +42,7 @@ export const metadata: Metadata = {
     card: "summary",
     title: "Blue Snake Studios",
     description:
-      "Blue Snake Studios builds privacy-first digital learning experiences for schools and families.",
+      "Blue Snake Studios builds privacy-first digital learning experiences with a strict child-safe baseline for default student deployments.",
   },
 };
 
@@ -59,8 +60,10 @@ export default function RootLayout({
       className="font-sans"
       style={
         {
-          '--font-outfit': 'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-          '--font-mono': 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+          "--font-outfit":
+            'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+          "--font-mono":
+            'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
         } as CSSProperties
       }
     >

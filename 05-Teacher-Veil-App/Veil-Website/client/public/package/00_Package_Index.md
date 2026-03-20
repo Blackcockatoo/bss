@@ -71,7 +71,7 @@ Offered as partnership.
 ---
 
 ### 🟩 [7. Privacy & Safety Brief](07_KPPS_Privacy_Safety_Brief.md)
-**Technical transparency.** Detailed architecture explanation: offline-first design, zero-account model, DNA privacy, anti-addiction safeguards, data minimalism, regulatory compliance, and security audit readiness. For technical review.
+**Technical transparency.** Detailed architecture explanation: offline-first design for the strict child-safe baseline, zero-account student mode, DNA privacy, calm-use safeguards, data minimalism, regulatory compliance, and security audit readiness. For technical review.
 
 **Audience:** ICT Coordinator, Principal, School Council (technical subcommittee)  
 **Time to read:** 20 minutes  

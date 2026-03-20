@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 
-import { AchievementShelf } from "@/components/AchievementShelf";
 import { AmbientBackground } from "@/components/AmbientBackground";
 import { AmbientParticles } from "@/components/AmbientParticles";
 import {
@@ -26,7 +25,6 @@ import {
 import { OnboardingTutorial } from "@/components/OnboardingTutorial";
 import { PetHero } from "@/components/PetHero";
 import { PetResponseOverlay } from "@/components/PetResponseOverlay";
-import { QRQuickPanel } from "@/components/QRMessaging";
 import {
   CertificateButton,
   RegistrationCertificate,
@@ -42,13 +40,6 @@ import {
 import { QuickMoodButton, WellnessSync } from "@/components/WellnessSync";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   type BreedingResult,
   breedPets,
   calculateSimilarity,
@@ -56,6 +47,7 @@ import {
   predictOffspring,
 } from "@/lib/breeding";
 import { useEducationStore } from "@/lib/education";
+import { ENABLE_CHILD_SAFE_BASELINE } from "@/lib/env/features";
 import { initializeEvolution } from "@/lib/evolution";
 import {
   type Genome,
@@ -84,6 +76,7 @@ import {
   exportPetToJSON,
   getAllPets,
   importPetFromJSON,
+  isPersistenceAvailable,
   loadPet,
   savePet,
   setupAutoSave,
@@ -114,7 +107,6 @@ import {
   Hash,
   HeartHandshake,
   Lock,
-  Orbit,
   Plus,
   Shield,
   Sparkles,
@@ -123,7 +115,6 @@ import {
   Volume2,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 interface PetSummary {
   id: string;
@@ -173,56 +164,106 @@ function slugify(value: string | undefined, fallback: string): string {
   return base.replace(/[^a-z0-9\-\s]/g, "").replace(/\s+/g, "-");
 }
 
-function createDebouncedSave(delay: number) {
+function getErrorMessage(error: unknown, fallback: string): string {
+  return error instanceof Error ? error.message : fallback;
+}
+
+function createSaveController(delay: number) {
   let timeout: ReturnType<typeof setTimeout> | null = null;
   let latest: PetSaveData | null = null;
-  let pending: Array<{
+  let listeners: Array<{
     resolve: () => void;
     reject: (error: unknown) => void;
   }> = [];
 
+  const clearTimer = () => {
+    if (timeout) {
+      clearTimeout(timeout);
+      timeout = null;
+    }
+  };
+
+  const resolveListeners = (
+    queuedListeners: Array<{
+      resolve: () => void;
+      reject: (error: unknown) => void;
+    }>,
+  ) => {
+    queuedListeners.forEach((listener) => listener.resolve());
+  };
+
+  const rejectListeners = (
+    queuedListeners: Array<{
+      resolve: () => void;
+      reject: (error: unknown) => void;
+    }>,
+    error: unknown,
+  ) => {
+    queuedListeners.forEach((listener) => listener.reject(error));
+  };
+
   const flush = async () => {
+    clearTimer();
+
     const snapshot = latest;
-    const listeners = pending;
-    pending = [];
+    const queuedListeners = listeners;
+    listeners = [];
     latest = null;
 
     if (!snapshot) {
-      listeners.forEach((listener) => listener.resolve());
+      resolveListeners(queuedListeners);
       return;
     }
 
     try {
       await savePet(snapshot);
-      listeners.forEach((listener) => listener.resolve());
+      resolveListeners(queuedListeners);
     } catch (error) {
-      listeners.forEach((listener) => listener.reject(error));
+      rejectListeners(queuedListeners, error);
       throw error;
     }
   };
 
-  return (data: PetSaveData) =>
-    new Promise<void>((resolve, reject) => {
+  return {
+    schedule(data: PetSaveData) {
       latest = data;
-      pending.push({ resolve, reject });
 
-      if (timeout) {
-        clearTimeout(timeout);
+      return new Promise<void>((resolve, reject) => {
+        listeners.push({ resolve, reject });
+
+        clearTimer();
+        timeout = setTimeout(() => {
+          void flush().catch(() => undefined);
+        }, delay);
+      });
+    },
+
+    flush,
+
+    cancel(targetPetId?: string) {
+      if (targetPetId && latest && latest.id !== targetPetId) {
+        return false;
       }
 
-      timeout = setTimeout(() => {
-        timeout = null;
-        flush().catch((err) => {
-          console.warn("Debounced save flush failed:", err);
-        });
-      }, delay);
-    });
+      const hadPending = Boolean(timeout || latest || listeners.length > 0);
+      clearTimer();
+
+      if (!hadPending) {
+        return false;
+      }
+
+      latest = null;
+      const queuedListeners = listeners;
+      listeners = [];
+      resolveListeners(queuedListeners);
+      return true;
+    },
+  };
 }
 
 const PET_ID = "metapet-primary";
 const SESSION_ANALYTICS_KEY = "metapet-analytics";
 
-type SessionGoal = "Calm" | "Focus" | "Recovery" | "Creative";
 type AlchemyBase = "vitality" | "focus" | "harmony";
 type AlchemyCatalyst = "sunpetal" | "moondew" | "stardust";
 
@@ -256,29 +297,8 @@ const ALCHEMY_CATALYST_EFFECTS: Record<AlchemyCatalyst, string> = {
   stardust: "sharpens attention and amplifies curiosity",
 };
 
-interface GeometrySessionProfile {
-  goal: SessionGoal;
-  intensity: number | null;
-  dna: "fire" | "water" | "earth";
-  harmony: number;
-  awareness: number;
-  tempo: number;
-  mode: "helix" | "mandala" | "particles" | "temple";
-  lockFirstRun: boolean;
-}
-
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
-}
-
-function encodeSessionProfile(profile: GeometrySessionProfile): string {
-  const json = JSON.stringify(profile);
-  if (typeof window === "undefined") return "";
-  return window
-    .btoa(json)
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
 }
 
 function createBrewResult(
@@ -390,10 +410,7 @@ function CurriculumQueueSection() {
   const recentRewards = rewardHistory.filter(
     (entry) => mountTime - entry.createdAt <= 7 * 24 * 60 * 60 * 1000,
   );
-  const rewardMomentum = Math.min(
-    100,
-    recentRewards.length * 12 + eduXP.streak * 6,
-  );
+  const rewardMomentum = Math.min(100, recentRewards.length * 12);
   const trustScore = clamp(
     Math.round(
       explanationCoverage * 30 +
@@ -525,8 +542,7 @@ function CurriculumQueueSection() {
           <p className="mt-1 text-[11px] text-zinc-400">
             Includes standards transparency, explanation prompts, progress
             outcomes, class energy, and reward cadence.
-            {` `}XP Level {eduXP.level}, streak {eduXP.streak}, vibe reactions{" "}
-            {vibeReactionCount}.
+            {` `}XP Level {eduXP.level}, vibe reactions {vibeReactionCount}.
           </p>
         </div>
       </div>
@@ -537,7 +553,6 @@ function CurriculumQueueSection() {
 }
 
 export default function Home() {
-  const router = useRouter();
   const startTick = useStore((s) => s.startTick);
   const stopTick = useStore((s) => s.stopTick);
   const setGenome = useStore((s) => s.setGenome);
@@ -550,6 +565,7 @@ export default function Home() {
   const evolution = useStore((s) => s.evolution);
   const ritualProgress = useStore((s) => s.ritualProgress);
   const addRitualRewards = useStore((s) => s.addRitualRewards);
+  const recordBreeding = useStore((s) => s.recordBreeding);
   const [crest, setCrest] = useState<PrimeTailID | null>(null);
   const [heptaCode, setHeptaCode] = useState<HeptaDigits | null>(null);
   const [loading, setLoading] = useState(true);
@@ -564,7 +580,10 @@ export default function Home() {
   const [petSummaries, setPetSummaries] = useState<PetSummary[]>([]);
   const [currentPetId, setCurrentPetId] = useState<string | null>(null);
   const [petName, setPetName] = useState("");
-  const [importError, setImportError] = useState<string | null>(null);
+  const [archiveError, setArchiveError] = useState<string | null>(null);
+  const [persistenceNotice, setPersistenceNotice] = useState<string | null>(
+    null,
+  );
   const [breedingMode, setBreedingMode] = useState<
     "BALANCED" | "DOMINANT" | "MUTATION"
   >("BALANCED");
@@ -596,10 +615,6 @@ export default function Home() {
   const [anxietyOpen, setAnxietyOpen] = useState(false);
   const [wellnessSettingsOpen, setWellnessSettingsOpen] = useState(false);
   const [lowBandwidthMode, setLowBandwidthMode] = useState(false);
-  const [sessionSheetOpen, setSessionSheetOpen] = useState(false);
-  const [sessionGoal, setSessionGoal] = useState<SessionGoal>("Calm");
-  const [sessionIntensityEnabled, setSessionIntensityEnabled] = useState(false);
-  const [sessionIntensity, setSessionIntensity] = useState(55);
   const [alchemyRecipe, setAlchemyRecipe] = useState<AlchemyRecipe>({
     base: "vitality",
     catalyst: "sunpetal",
@@ -608,100 +623,6 @@ export default function Home() {
   const [brewHistory, setBrewHistory] = useState<BrewResult[]>([]);
   const [brewCooldownUntil, setBrewCooldownUntil] = useState(0);
   const { locale, setLocale, strings } = useLocale();
-
-  const deriveGeometrySessionProfile =
-    useCallback((): GeometrySessionProfile | null => {
-      if (!traits) {
-        return null;
-      }
-
-      const personalityFire =
-        traits.personality.energy +
-        traits.personality.playfulness +
-        traits.personality.curiosity;
-      const personalityWater =
-        traits.personality.social +
-        traits.personality.affection +
-        traits.personality.loyalty;
-      const personalityEarth =
-        traits.personality.discipline + traits.latent.potential.physical;
-      const dnaScores = {
-        fire: personalityFire,
-        water: personalityWater,
-        earth: personalityEarth,
-      };
-      const dna = (Object.entries(dnaScores).sort(
-        (a, b) => b[1] - a[1],
-      )[0]?.[0] ?? "fire") as "fire" | "water" | "earth";
-
-      const goalBias: Record<
-        SessionGoal,
-        {
-          awareness: number;
-          tempo: number;
-          harmony: number;
-          mode: GeometrySessionProfile["mode"];
-        }
-      > = {
-        Calm: { awareness: 20, tempo: -24, harmony: 2, mode: "mandala" },
-        Focus: { awareness: 8, tempo: -8, harmony: 0, mode: "helix" },
-        Recovery: { awareness: 14, tempo: -18, harmony: 3, mode: "particles" },
-        Creative: { awareness: -4, tempo: 14, harmony: -1, mode: "temple" },
-      };
-
-      const intensity = sessionIntensityEnabled ? sessionIntensity : null;
-      const intensityFactor = intensity === null ? 0 : (intensity - 50) / 50;
-      const bias = goalBias[sessionGoal];
-      const baseHarmony =
-        5 + Math.round((traits.elementWeb.bridgeCount / 10) * 4);
-      const harmony = clamp(
-        baseHarmony + bias.harmony + Math.round(intensityFactor * 2),
-        3,
-        12,
-      );
-      const awareness = clamp(
-        Math.round(
-          (traits.personality.curiosity + traits.personality.affection) / 2 +
-            bias.awareness +
-            intensityFactor * 20,
-        ),
-        0,
-        100,
-      );
-      const tempo = clamp(
-        Math.round(
-          traits.personality.energy * 0.9 +
-            traits.personality.playfulness * 0.6 +
-            65 +
-            bias.tempo +
-            intensityFactor * 22,
-        ),
-        60,
-        180,
-      );
-
-      return {
-        goal: sessionGoal,
-        intensity,
-        dna,
-        harmony,
-        awareness,
-        tempo,
-        mode: bias.mode,
-        lockFirstRun: true,
-      };
-    }, [sessionGoal, sessionIntensity, sessionIntensityEnabled, traits]);
-
-  const launchGeometrySession = useCallback(() => {
-    const profile = deriveGeometrySessionProfile();
-    if (!profile) {
-      router.push("/geometry-sound");
-      return;
-    }
-    const encoded = encodeSessionProfile(profile);
-    setSessionSheetOpen(false);
-    router.push(`/geometry-sound?session=${encodeURIComponent(encoded)}`);
-  }, [deriveGeometrySessionProfile, router]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -738,7 +659,6 @@ export default function Home() {
   const wellnessSetupCompleted = useWellnessStore(
     (state) => state.setupCompletedAt,
   );
-  const checkStreaks = useWellnessStore((state) => state.checkStreaks);
 
   const elementProfile = useMemo(() => {
     if (!traits) return "fire";
@@ -762,47 +682,17 @@ export default function Home() {
     return Math.max(0, Math.min(100, Math.round(blend)));
   }, [traits]);
 
-  const geometrySoundHref = useMemo(() => {
-    const params = new URLSearchParams({
-      petId: currentPetId ?? PET_ID,
-      petName: petName.trim() || "Meta Pet",
-      petType,
-      seed: genomeHash?.redHash?.slice(0, 24) ?? "origin-seed",
-      elementProfile,
-      resonanceIndex: String(resonanceIndex),
-    });
-    return `/geometry-sound?${params.toString()}`;
-  }, [
-    currentPetId,
-    petName,
-    petType,
-    genomeHash,
-    elementProfile,
-    resonanceIndex,
-  ]);
-
   const brewCooldownSeconds = Math.max(
     0,
     Math.ceil((brewCooldownUntil - Date.now()) / 1000),
   );
 
-  const debouncedSave = useMemo(() => createDebouncedSave(1_000), []);
+  const saveController = useMemo(() => createSaveController(1_000), []);
 
   const crestRef = useRef<PrimeTailID | null>(null);
   const heptaRef = useRef<HeptaDigits | null>(null);
   const sessionStartRef = useRef<number | null>(null);
-  const hasCheckedWellnessRef = useRef(false);
   const hasInitializedAppRef = useRef(false);
-
-  // Check wellness streaks on mount
-  useEffect(() => {
-    if (hasCheckedWellnessRef.current) {
-      return;
-    }
-
-    hasCheckedWellnessRef.current = true;
-    checkStreaks();
-  }, [checkStreaks]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -863,6 +753,33 @@ export default function Home() {
   const persistenceSupportedRef = useRef(false);
   const autoSaveCleanupRef = useRef<(() => void) | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const clearArchiveFeedback = useCallback(() => {
+    setArchiveError(null);
+    if (persistenceSupportedRef.current) {
+      setPersistenceNotice(null);
+    }
+  }, []);
+
+  const disablePersistenceSession = useCallback(
+    (message: string) => {
+      if (autoSaveCleanupRef.current) {
+        autoSaveCleanupRef.current();
+        autoSaveCleanupRef.current = null;
+      }
+
+      saveController.cancel();
+      persistenceSupportedRef.current = false;
+      setPersistenceSupported(false);
+      setPersistenceActive(false);
+      setPetSummaries([]);
+      setBreedingPartnerId("");
+      setBreedingPartner(null);
+      setBreedingPreview(null);
+      setPersistenceNotice(message);
+    },
+    [saveController],
+  );
 
   const genomeToDna = useCallback((value: Genome): string => {
     const alphabet = ["A", "C", "G", "T"];
@@ -935,8 +852,10 @@ export default function Home() {
         autoSaveCleanupRef.current();
         autoSaveCleanupRef.current = null;
       }
+
+      saveController.cancel();
     };
-  }, []);
+  }, [saveController]);
 
   useEffect(() => {
     let cancelled = false;
@@ -1030,57 +949,66 @@ export default function Home() {
     };
   }, []);
 
+  const persistSnapshotNow = useCallback(
+    async (snapshot: PetSaveData) => {
+      if (!persistenceSupportedRef.current) {
+        return;
+      }
+
+      saveController.cancel();
+      await savePet(snapshot);
+    },
+    [saveController],
+  );
+
+  const persistCurrentPetNow = useCallback(async () => {
+    if (!persistenceSupportedRef.current || !petIdRef.current) {
+      return;
+    }
+
+    await persistSnapshotNow(buildSnapshot());
+  }, [buildSnapshot, persistSnapshotNow]);
+
+  const scheduleSnapshotSave = useCallback(
+    async (snapshot: PetSaveData) => {
+      if (!persistenceSupportedRef.current) {
+        return;
+      }
+
+      await saveController.schedule(snapshot);
+    },
+    [saveController],
+  );
+
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (typeof indexedDB === "undefined") return;
+    if (typeof window === "undefined" || typeof document === "undefined") {
+      return;
+    }
 
-    const handleBeforeUnload = () => {
-      try {
-        const state = useStore.getState();
-        if (!state.genome || !state.traits) return;
-        if (!crestRef.current || !heptaRef.current || !genomeHashRef.current)
-          return;
+    if (!persistenceSupported) {
+      return;
+    }
 
-        const snapshot: PetSaveData = {
-          id: PET_ID,
-          vitals: state.vitals,
-          petType: state.petType,
-          mirrorMode: state.mirrorMode,
-          witness: state.witness,
-          petOntology: state.petOntology,
-          systemState: state.systemState,
-          sealedAt: state.sealedAt,
-          invariantIssues: state.invariantIssues,
-          genome: state.genome,
-          genomeHash: genomeHashRef.current,
-          traits: state.traits,
-          evolution: state.evolution,
-          ritualProgress: state.ritualProgress,
-          essence: state.essence,
-          lastRewardSource: state.lastRewardSource,
-          lastRewardAmount: state.lastRewardAmount,
-          achievements: state.achievements.map((entry) => ({ ...entry })),
-          battle: { ...state.battle },
-          miniGames: { ...state.miniGames },
-          vimana: {
-            ...state.vimana,
-            cells: state.vimana.cells.map((cell) => ({ ...cell })),
-          },
-          crest: crestRef.current,
-          heptaDigits: Array.from(heptaRef.current) as HeptaDigits,
-          lastSaved: Date.now(),
-          createdAt: createdAtRef.current ?? Date.now(),
-        };
+    const flushOnBackground = () => {
+      void persistCurrentPetNow().catch((error) => {
+        console.warn("Failed to persist pet on pagehide:", error);
+      });
+    };
 
-        void savePet(snapshot);
-      } catch (error) {
-        console.warn("Failed to persist pet on unload:", error);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        flushOnBackground();
       }
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [buildSnapshot]);
+    window.addEventListener("pagehide", flushOnBackground);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("pagehide", flushOnBackground);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [persistCurrentPetNow, persistenceSupported]);
 
   const refreshPetSummaries = useCallback(async () => {
     if (!persistenceSupportedRef.current) {
@@ -1101,6 +1029,9 @@ export default function Home() {
       setPetSummaries(summaries);
     } catch (error) {
       console.warn("Failed to load pet archive list:", error);
+      setArchiveError(
+        getErrorMessage(error, "Failed to refresh local archives."),
+      );
       setPetSummaries([]);
     }
   }, []);
@@ -1174,15 +1105,36 @@ export default function Home() {
       const cleanup = setupAutoSave(
         () => buildSnapshot(),
         60_000,
-        debouncedSave,
+        scheduleSnapshotSave,
+        {
+          onSuccess: () => {
+            clearArchiveFeedback();
+            setPersistenceActive(true);
+          },
+          onError: (error) => {
+            const message =
+              "Autosave is paused until local archive access recovers.";
+            setPersistenceActive(false);
+            setPersistenceNotice(message);
+            setArchiveError(getErrorMessage(error, message));
+          },
+        },
       );
       autoSaveCleanupRef.current = cleanup;
       setPersistenceActive(true);
+      clearArchiveFeedback();
     } catch (error) {
       console.warn("Failed to start autosave:", error);
       setPersistenceActive(false);
+      setPersistenceNotice("Autosave could not be started for local archives.");
+      setArchiveError(
+        getErrorMessage(
+          error,
+          "Autosave could not be started for local archives.",
+        ),
+      );
     }
-  }, [buildSnapshot, debouncedSave]);
+  }, [buildSnapshot, clearArchiveFeedback, scheduleSnapshotSave]);
 
   const createFreshPet = useCallback(async (): Promise<PetSaveData> => {
     const ensureKey = async () => {
@@ -1314,10 +1266,6 @@ export default function Home() {
         name: buildOffspringName(result.lineageKey, partnerName),
         vitals: {
           ...DEFAULT_VITALS,
-          hunger: 40,
-          hygiene: 70,
-          mood: 70,
-          energy: 75,
         },
         petType: "geometric",
         mirrorMode: {
@@ -1405,6 +1353,7 @@ export default function Home() {
         createdAt: offspring.createdAt,
         lastSaved: offspring.lastSaved,
       });
+      recordBreeding();
     } catch (error) {
       const message =
         error instanceof Error
@@ -1421,22 +1370,45 @@ export default function Home() {
     createOffspringFromResult,
     evolution,
     genome,
+    recordBreeding,
     refreshPetSummaries,
     traits,
   ]);
+
+  const downloadPetArchive = useCallback((pet: PetSaveData) => {
+    const json = exportPetToJSON(pet);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const nameSlug = slugify(pet.name, "meta-pet");
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${nameSlug}-${pet.id}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, []);
 
   const initializeIdentity = useCallback(async () => {
     try {
       const hmacKey = await getDeviceHmacKey();
       hmacKeyRef.current = hmacKey;
 
-      const supported = typeof indexedDB !== "undefined";
+      const supported = await isPersistenceAvailable();
       persistenceSupportedRef.current = supported;
       setPersistenceSupported(supported);
 
+      if (supported) {
+        setPersistenceNotice(null);
+      } else {
+        disablePersistenceSession(
+          "IndexedDB is unavailable. This session is temporary, but you can still export the active companion.",
+        );
+      }
+
       let activePet: PetSaveData | null = null;
 
-      if (supported) {
+      if (persistenceSupportedRef.current) {
         try {
           const pets = await getAllPets();
           const sorted = [...pets].sort((a, b) => b.lastSaved - a.lastSaved);
@@ -1450,20 +1422,27 @@ export default function Home() {
             lastSaved: pet.lastSaved,
           }));
           setPetSummaries(summaries);
+          clearArchiveFeedback();
         } catch (error) {
           console.warn("Failed to load existing pet save:", error);
-          setPetSummaries([]);
+          disablePersistenceSession(
+            "Local archives could not be opened. Continuing in session-only mode.",
+          );
         }
       }
 
       if (!activePet) {
         const freshPet = await createFreshPet();
         activePet = freshPet;
-        if (supported) {
+        if (persistenceSupportedRef.current) {
           try {
             await savePet(freshPet);
+            clearArchiveFeedback();
           } catch (error) {
             console.warn("Failed to persist initial pet snapshot:", error);
+            disablePersistenceSession(
+              "Local archives could not store the initial companion. Continuing in session-only mode.",
+            );
           }
         }
       }
@@ -1472,7 +1451,7 @@ export default function Home() {
         applyPetData(activePet);
       }
 
-      if (supported) {
+      if (persistenceSupportedRef.current) {
         await refreshPetSummaries();
         activateAutoSave();
       } else {
@@ -1480,12 +1459,30 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Identity init failed:", error);
-      setPersistenceActive(false);
-      setPetSummaries([]);
+      disablePersistenceSession(
+        "Local persistence could not be initialized. Continuing in session-only mode.",
+      );
+      setArchiveError(
+        getErrorMessage(error, "Failed to initialize the active companion."),
+      );
+
+      try {
+        const freshPet = await createFreshPet();
+        applyPetData(freshPet);
+      } catch (fallbackError) {
+        console.error("Fallback pet creation failed:", fallbackError);
+      }
     } finally {
       setLoading(false);
     }
-  }, [activateAutoSave, applyPetData, createFreshPet, refreshPetSummaries]);
+  }, [
+    activateAutoSave,
+    applyPetData,
+    clearArchiveFeedback,
+    createFreshPet,
+    disablePersistenceSession,
+    refreshPetSummaries,
+  ]);
 
   const handlePlayHepta = useCallback(async () => {
     if (!heptaCode) return;
@@ -1509,111 +1506,210 @@ export default function Home() {
     try {
       const snapshot = buildSnapshot();
       snapshot.name = petName.trim() ? petName.trim() : undefined;
-      await savePet(snapshot);
+      await persistSnapshotNow(snapshot);
       await refreshPetSummaries();
+      clearArchiveFeedback();
     } catch (error) {
       console.warn("Failed to save pet name:", error);
+      setPersistenceNotice(
+        "Local archive sync failed while saving the pet name.",
+      );
+      setArchiveError(getErrorMessage(error, "Failed to save the pet name."));
     }
-  }, [buildSnapshot, currentPetId, petName, refreshPetSummaries]);
+  }, [
+    buildSnapshot,
+    clearArchiveFeedback,
+    currentPetId,
+    persistSnapshotNow,
+    petName,
+    refreshPetSummaries,
+  ]);
 
   const handleCreateNewPet = useCallback(async () => {
+    if (!persistenceSupportedRef.current) {
+      setArchiveError(
+        "Session-only mode is active. Export the current companion before minting a new one.",
+      );
+      return;
+    }
+
     try {
+      await persistCurrentPetNow();
+
       const newPet = await createFreshPet();
       let petToApply: PetSaveData = newPet;
 
-      if (persistenceSupportedRef.current) {
-        try {
-          await savePet(newPet);
-          const stored = await loadPet(newPet.id);
-          if (stored) {
-            petToApply = stored;
-          }
-          await refreshPetSummaries();
-        } catch (error) {
-          console.warn("Failed to store new pet:", error);
-        }
-        activateAutoSave();
-      } else {
-        setPersistenceActive(false);
+      await savePet(newPet);
+      const stored = await loadPet(newPet.id);
+      if (stored) {
+        petToApply = stored;
       }
 
       applyPetData(petToApply);
-      setImportError(null);
+      activateAutoSave();
+      await refreshPetSummaries();
+      clearArchiveFeedback();
     } catch (error) {
       console.error("Failed to create new pet:", error);
+      setArchiveError(
+        getErrorMessage(error, "Failed to mint a new companion."),
+      );
     }
-  }, [activateAutoSave, applyPetData, createFreshPet, refreshPetSummaries]);
+  }, [
+    activateAutoSave,
+    applyPetData,
+    clearArchiveFeedback,
+    createFreshPet,
+    persistCurrentPetNow,
+    refreshPetSummaries,
+  ]);
 
   const handleSelectPet = useCallback(
     async (id: string) => {
       if (id === currentPetId) return;
+
+      if (!persistenceSupportedRef.current) {
+        setArchiveError(
+          "Session-only mode is active. Archived companions are unavailable right now.",
+        );
+        return;
+      }
+
       try {
+        await persistCurrentPetNow();
+
         const pet = await loadPet(id);
-        if (!pet) return;
-        applyPetData(pet);
-        if (persistenceSupportedRef.current) {
-          activateAutoSave();
+        if (!pet) {
+          setArchiveError("That archived companion is no longer available.");
+          await refreshPetSummaries();
+          return;
         }
-        setImportError(null);
+
+        applyPetData(pet);
+        activateAutoSave();
+        await refreshPetSummaries();
+        clearArchiveFeedback();
       } catch (error) {
         console.error("Failed to load pet:", error);
+        setArchiveError(
+          getErrorMessage(error, "Failed to load the selected companion."),
+        );
       }
     },
-    [activateAutoSave, applyPetData, currentPetId],
+    [
+      activateAutoSave,
+      applyPetData,
+      clearArchiveFeedback,
+      currentPetId,
+      persistCurrentPetNow,
+      refreshPetSummaries,
+    ],
   );
 
-  const handleExportPet = useCallback(async (id: string) => {
+  const handleExportCurrentPet = useCallback(async () => {
     try {
-      const pet = await loadPet(id);
-      if (!pet) return;
-
-      const json = exportPetToJSON(pet);
-      const blob = new Blob([json], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const nameSlug = slugify(pet.name, "meta-pet");
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${nameSlug}-${id}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      downloadPetArchive(buildSnapshot());
+      clearArchiveFeedback();
     } catch (error) {
-      console.error("Failed to export pet archive:", error);
+      console.error("Failed to export current pet:", error);
+      setArchiveError(
+        getErrorMessage(error, "Failed to export the active companion."),
+      );
     }
-  }, []);
+  }, [buildSnapshot, clearArchiveFeedback, downloadPetArchive]);
+
+  const handleExportPet = useCallback(
+    async (id: string) => {
+      try {
+        if (id === currentPetId) {
+          downloadPetArchive(buildSnapshot());
+          clearArchiveFeedback();
+          return;
+        }
+
+        if (!persistenceSupportedRef.current) {
+          setArchiveError(
+            "Session-only mode is active. Only the active companion can be exported.",
+          );
+          return;
+        }
+
+        const pet = await loadPet(id);
+        if (!pet) {
+          setArchiveError("That archived companion is no longer available.");
+          await refreshPetSummaries();
+          return;
+        }
+
+        downloadPetArchive(pet);
+        clearArchiveFeedback();
+      } catch (error) {
+        console.error("Failed to export pet archive:", error);
+        setArchiveError(
+          getErrorMessage(error, "Failed to export the selected companion."),
+        );
+      }
+    },
+    [
+      buildSnapshot,
+      clearArchiveFeedback,
+      currentPetId,
+      downloadPetArchive,
+      refreshPetSummaries,
+    ],
+  );
 
   const handleImportFile = useCallback(
     async (file: File) => {
+      if (!persistenceSupportedRef.current) {
+        setArchiveError(
+          "Session-only mode is active. Import requires local archives to be available.",
+        );
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        return;
+      }
+
       try {
+        await persistCurrentPetNow();
+
         const text = await file.text();
         const imported = importPetFromJSON(text);
         await savePet(imported);
         const stored = await loadPet(imported.id);
         const petToApply = stored ?? imported;
         applyPetData(petToApply);
+        activateAutoSave();
         await refreshPetSummaries();
-        if (persistenceSupportedRef.current) {
-          activateAutoSave();
-        }
-        setImportError(null);
+        clearArchiveFeedback();
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Import failed";
-        setImportError(message);
         console.error("Failed to import pet archive:", error);
+        setArchiveError(getErrorMessage(error, "Import failed."));
       } finally {
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
         }
       }
     },
-    [activateAutoSave, applyPetData, refreshPetSummaries],
+    [
+      activateAutoSave,
+      applyPetData,
+      clearArchiveFeedback,
+      persistCurrentPetNow,
+      refreshPetSummaries,
+    ],
   );
 
   const handleDeletePet = useCallback(
     async (id: string) => {
-      if (!persistenceSupportedRef.current) return;
+      if (!persistenceSupportedRef.current) {
+        setArchiveError(
+          "Session-only mode is active. Archived companions are unavailable right now.",
+        );
+        return;
+      }
+
       if (
         !window.confirm(
           "Archive this companion from local archives? A trace will remain.",
@@ -1622,8 +1718,23 @@ export default function Home() {
         return;
 
       try {
+        if (id === currentPetId) {
+          saveController.cancel(id);
+          if (autoSaveCleanupRef.current) {
+            autoSaveCleanupRef.current();
+            autoSaveCleanupRef.current = null;
+          }
+        }
+
         await deletePet(id);
         await refreshPetSummaries();
+
+        if (breedingPartnerId === id) {
+          setBreedingPartnerId("");
+          setBreedingPartner(null);
+          setBreedingPreview(null);
+        }
+
         if (id === currentPetId) {
           const pets = await getAllPets();
           const sorted = pets.sort((a, b) => b.lastSaved - a.lastSaved);
@@ -1639,25 +1750,37 @@ export default function Home() {
               if (stored) {
                 petToApply = stored;
               }
-              await refreshPetSummaries();
             } catch (error) {
               console.warn("Failed to persist replacement pet:", error);
+              setArchiveError(
+                getErrorMessage(
+                  error,
+                  "Failed to persist the replacement companion.",
+                ),
+              );
             }
             applyPetData(petToApply);
             activateAutoSave();
           }
+          await refreshPetSummaries();
         }
-        setImportError(null);
+        clearArchiveFeedback();
       } catch (error) {
         console.error("Failed to archive pet:", error);
+        setArchiveError(
+          getErrorMessage(error, "Failed to archive the selected companion."),
+        );
       }
     },
     [
       activateAutoSave,
       applyPetData,
+      breedingPartnerId,
+      clearArchiveFeedback,
       createFreshPet,
       currentPetId,
       refreshPetSummaries,
+      saveController,
     ],
   );
 
@@ -1725,14 +1848,15 @@ export default function Home() {
     }
     return "Prerequisite: meet all breeding requirements to unlock this.";
   })();
-  const mintDisabled = !persistenceSupported && petSummaries.length > 0;
+  const mintDisabled = !persistenceSupported;
   const mintHint = mintDisabled
-    ? "Prerequisite: enable IndexedDB persistence to mint additional companions."
+    ? "Session-only mode keeps one temporary companion at a time. Export the active companion before leaving this page."
     : null;
   const importDisabled = !persistenceSupported;
   const importHint = importDisabled
-    ? "Prerequisite: enable IndexedDB persistence to import archived companions."
+    ? "Importing archived companions requires IndexedDB local archives."
     : null;
+  const exportCurrentDisabled = !currentPetId || !crest || !heptaCode;
 
   return (
     <AmbientBackground>
@@ -2385,158 +2509,48 @@ export default function Home() {
             </div>
           </CollapsibleSection>
 
-          {/* Sacred Geometry & Sound */}
-          <div className="bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-cyan-500/10 rounded-2xl border border-amber-500/20 p-4">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-center gap-3">
-                <Orbit className="w-6 h-6 text-amber-400" />
-                <div>
-                  <h2 className="text-lg font-bold text-white">
-                    Sacred Geometry &amp; Sound
-                  </h2>
-                  <p className="text-xs text-zinc-400">
-                    Experience DNA as living geometry, music, and light â€” the
-                    same mathematical patterns found in nature, from sunflower
-                    spirals to seashells
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <Link
-                  href={geometrySoundHref}
-                  className="px-4 py-2 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-200 text-sm font-medium hover:bg-amber-500/30 hover:border-amber-400 transition-colors touch-manipulation"
-                >
-                  Generate My Pet Resonance
-                </Link>
-                <Link
-                  href="/time-calculator"
-                  className="px-4 py-2 rounded-xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-200 text-sm font-medium hover:bg-cyan-500/30 hover:border-cyan-400 transition-colors touch-manipulation"
-                >
-                  MetaPet Time Calculator
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          {/* Steering Wheel â€” Central Navigator */}
-          <div className="bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 rounded-2xl border border-cyan-500/20 p-4">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-center gap-3">
-                <Compass className="w-6 h-6 text-cyan-400" />
-                <div>
-                  <h2 className="text-lg font-bold text-white">
-                    Steering Wheel
-                  </h2>
-                  <p className="text-xs text-zinc-400">
-                    Navigate every corner of the Meta-Pet universe from one
-                    place â€” features, tools, and future expansions all radiate
-                    from here
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <Link
-                  href="/monkey-invaders"
-                  className="px-4 py-2 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-200 text-sm font-medium hover:bg-amber-500/30 hover:border-amber-300 transition-colors touch-manipulation"
-                >
-                  Launch Monkey Invaders
-                </Link>
-                <Link
-                  href="/compass"
-                  className="px-4 py-2 rounded-xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-200 text-sm font-medium hover:bg-cyan-500/30 hover:border-cyan-400 transition-colors touch-manipulation"
-                >
-                  Open Compass
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          <Dialog open={sessionSheetOpen} onOpenChange={setSessionSheetOpen}>
-            <DialogContent className="bg-zinc-900/95 border-amber-500/30 max-w-md">
-              <DialogHeader>
-                <DialogTitle className="text-amber-300">
-                  Prepare your geometry session
-                </DialogTitle>
-              </DialogHeader>
-              <DialogClose onClick={() => setSessionSheetOpen(false)} />
-              <div className="px-6 pb-6 space-y-4">
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-zinc-500 mb-2">
-                    Session goal
-                  </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {(["Calm", "Focus", "Recovery", "Creative"] as const).map(
-                      (goal) => (
-                        <button
-                          key={goal}
-                          type="button"
-                          onClick={() => setSessionGoal(goal)}
-                          className={`rounded-lg border px-3 py-2 text-sm transition-colors ${
-                            sessionGoal === goal
-                              ? "border-amber-400 bg-amber-400/20 text-amber-100"
-                              : "border-slate-700 bg-slate-900/80 text-zinc-300 hover:border-amber-500/50"
-                          }`}
-                        >
-                          {goal}
-                        </button>
-                      ),
-                    )}
+          {!ENABLE_CHILD_SAFE_BASELINE && (
+            <>
+              {/* Steering Wheel â€” Central Navigator */}
+              <div className="bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 rounded-2xl border border-cyan-500/20 p-4">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div className="flex items-center gap-3">
+                    <Compass className="w-6 h-6 text-cyan-400" />
+                    <div>
+                      <h2 className="text-lg font-bold text-white">
+                        Compass Wheel
+                      </h2>
+                      <p className="text-xs text-zinc-400">
+                        The navigator now lives inside the dashboard so you can
+                        jump between tools, games, and core learning spaces
+                        from one place
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Link
+                      href="/monkey-invaders"
+                      className="px-4 py-2 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-200 text-sm font-medium hover:bg-amber-500/30 hover:border-amber-300 transition-colors touch-manipulation"
+                    >
+                      Launch Monkey Invaders
+                    </Link>
+                    <Link
+                      href="/app/activities"
+                      className="px-4 py-2 rounded-xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-200 text-sm font-medium hover:bg-cyan-500/30 hover:border-cyan-400 transition-colors touch-manipulation"
+                    >
+                      Open Dashboard Compass
+                    </Link>
+                    <Link
+                      href="/app/moss60"
+                      className="px-4 py-2 rounded-xl bg-violet-500/20 border border-violet-500/40 text-violet-200 text-sm font-medium hover:bg-violet-500/30 hover:border-violet-400 transition-colors touch-manipulation"
+                    >
+                      Open MOSS60 Studio
+                    </Link>
                   </div>
                 </div>
-
-                <div className="space-y-2">
-                  <label className="flex items-center justify-between text-sm text-zinc-200">
-                    <span>Include intensity</span>
-                    <input
-                      type="checkbox"
-                      checked={sessionIntensityEnabled}
-                      onChange={(event) =>
-                        setSessionIntensityEnabled(event.target.checked)
-                      }
-                      className="h-4 w-4 accent-amber-400"
-                    />
-                  </label>
-                  {sessionIntensityEnabled && (
-                    <div className="rounded-lg border border-slate-700 bg-slate-900/60 p-3">
-                      <div className="flex items-center justify-between text-xs text-zinc-400 mb-2">
-                        <span>Intensity</span>
-                        <span className="font-semibold text-amber-300">
-                          {sessionIntensity}%
-                        </span>
-                      </div>
-                      <input
-                        type="range"
-                        min={20}
-                        max={100}
-                        step={5}
-                        value={sessionIntensity}
-                        onChange={(event) =>
-                          setSessionIntensity(Number(event.target.value))
-                        }
-                        className="w-full accent-amber-400"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex gap-2 pt-1">
-                  <Button
-                    variant="secondary"
-                    className="flex-1"
-                    onClick={() => setSessionSheetOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    className="flex-1 bg-amber-500 hover:bg-amber-400 text-zinc-950"
-                    onClick={launchGeometrySession}
-                  >
-                    Start Session
-                  </Button>
-                </div>
               </div>
-            </DialogContent>
-          </Dialog>
+            </>
+          )}
 
           {/* Genome Traits */}
           <CollapsibleSection
@@ -2657,6 +2671,16 @@ export default function Home() {
                 <Button
                   type="button"
                   variant="outline"
+                  onClick={() => void handleExportCurrentPet()}
+                  disabled={exportCurrentDisabled}
+                  className="flex-1 h-12 border-slate-700 touch-manipulation"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Export Current
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={importDisabled}
                   className="flex-1 h-12 border-slate-700 touch-manipulation"
@@ -2683,8 +2707,12 @@ export default function Home() {
                 </div>
               )}
 
-              {importError && (
-                <p className="text-xs text-rose-400">{importError}</p>
+              {persistenceNotice && (
+                <p className="text-xs text-amber-300">{persistenceNotice}</p>
+              )}
+
+              {archiveError && (
+                <p className="text-xs text-rose-400">{archiveError}</p>
               )}
 
               <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -2692,7 +2720,7 @@ export default function Home() {
                   <div className="rounded-lg border border-dashed border-slate-700 bg-slate-950/50 p-4 text-sm text-zinc-500">
                     {persistenceSupported
                       ? "No archived companions yet."
-                      : "IndexedDB is unavailable."}
+                      : "Session-only mode is active. Export the current companion before closing this tab."}
                   </div>
                 ) : (
                   petSummaries.map((summary) => {
@@ -2770,21 +2798,6 @@ export default function Home() {
             <DigitalKeyPanel />
           </CollapsibleSection>
 
-          {/* QR Messaging */}
-          <QRQuickPanel />
-
-          {/* Achievements */}
-          <CollapsibleSection
-            title="Achievements"
-            icon={<Sparkles className="w-5 h-5 text-amber-400" />}
-          >
-            <p className="text-xs text-zinc-500 mb-3">
-              Milestones earned through genuine care and curiosity. Nothing is
-              pay-gated â€” every achievement can be reached through play alone.
-            </p>
-            <AchievementShelf />
-          </CollapsibleSection>
-
           {/* Classroom Modes */}
           <CollapsibleSection
             title="Classroom Modes"
@@ -2809,7 +2822,7 @@ export default function Home() {
               ? persistenceActive
                 ? "Autosave active"
                 : "Autosave paused"
-              : "Offline unavailable"}
+              : "Session-only mode"}
           </p>
           <div className="max-w-sm mx-auto space-y-1 pt-2 border-t border-slate-800/60">
             <p className="text-zinc-700 leading-relaxed">

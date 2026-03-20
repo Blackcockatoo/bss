@@ -1,5 +1,9 @@
-import { redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
+
+import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
 
 export default function DNAHubAliasPage() {
-  redirect('/digital-dna');
+  enforceChildSafeServerRoute("/dna-hub");
+
+  redirect("/digital-dna");
 }

@@ -1,16 +1,20 @@
-'use client';
+"use client";
 
-import { useState, useMemo } from 'react';
-import { useWellnessStore, getTodayHydration, getDateKey } from '@/lib/wellness';
-import { triggerHaptic } from '@/lib/haptics';
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Droplets, Plus, Minus, Flame, TrendingUp } from 'lucide-react';
+} from "@/components/ui/dialog";
+import { triggerHaptic } from "@/lib/haptics";
+import {
+  getDateKey,
+  getTodayHydration,
+  useWellnessStore,
+} from "@/lib/wellness";
+import { Droplets, Flame, Minus, Plus, TrendingUp } from "lucide-react";
+import { useMemo, useState } from "react";
 
 interface HydrationTrackerProps {
   isOpen: boolean;
@@ -18,10 +22,10 @@ interface HydrationTrackerProps {
 }
 
 export function HydrationTracker({ isOpen, onClose }: HydrationTrackerProps) {
-  const hydration = useWellnessStore(state => state.hydration);
-  const logWater = useWellnessStore(state => state.logWater);
-  const setHydrationGoal = useWellnessStore(state => state.setHydrationGoal);
-  const enabledFeatures = useWellnessStore(state => state.enabledFeatures);
+  const hydration = useWellnessStore((state) => state.hydration);
+  const logWater = useWellnessStore((state) => state.logWater);
+  const setHydrationGoal = useWellnessStore((state) => state.setHydrationGoal);
+  const enabledFeatures = useWellnessStore((state) => state.enabledFeatures);
 
   const [quickAdd, setQuickAdd] = useState(1);
   const [mountTimestamp] = useState(() => Date.now());
@@ -36,7 +40,7 @@ export function HydrationTracker({ isOpen, onClose }: HydrationTrackerProps) {
     for (let i = 6; i >= 0; i--) {
       const date = getDateKey(mountTimestamp - i * 86400000);
       const total = hydration.entries
-        .filter(e => getDateKey(e.timestamp) === date)
+        .filter((e) => getDateKey(e.timestamp) === date)
         .reduce((sum, e) => sum + e.amount, 0);
       days.push({ date, total });
     }
@@ -45,7 +49,7 @@ export function HydrationTracker({ isOpen, onClose }: HydrationTrackerProps) {
 
   const handleLogWater = () => {
     logWater(quickAdd);
-    triggerHaptic('medium');
+    triggerHaptic("medium");
   };
 
   if (!enabledFeatures.hydration) return null;
@@ -88,7 +92,13 @@ export function HydrationTracker({ isOpen, onClose }: HydrationTrackerProps) {
                   className="transition-all duration-500"
                 />
                 <defs>
-                  <linearGradient id="hydration-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <linearGradient
+                    id="hydration-gradient"
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="0%"
+                  >
                     <stop offset="0%" stopColor="#06b6d4" />
                     <stop offset="100%" stopColor="#3b82f6" />
                   </linearGradient>
@@ -128,7 +138,9 @@ export function HydrationTracker({ isOpen, onClose }: HydrationTrackerProps) {
 
             <div className="flex items-center gap-2 px-4 py-2 bg-cyan-500/20 rounded-lg min-w-[80px] justify-center">
               <Droplets className="w-5 h-5 text-cyan-400" />
-              <span className="text-xl font-bold text-cyan-300">{quickAdd}</span>
+              <span className="text-xl font-bold text-cyan-300">
+                {quickAdd}
+              </span>
             </div>
 
             <Button
@@ -146,41 +158,50 @@ export function HydrationTracker({ isOpen, onClose }: HydrationTrackerProps) {
             className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-medium"
           >
             <Droplets className="w-4 h-4 mr-2" />
-            Log {quickAdd} glass{quickAdd > 1 ? 'es' : ''}
+            Log {quickAdd} glass{quickAdd > 1 ? "es" : ""}
           </Button>
 
           {/* Week overview */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs text-zinc-500">This week</span>
-              {hydration.streak > 0 && (
-                <div className="flex items-center gap-1 text-xs text-orange-400">
-                  <Flame className="w-3 h-3" />
-                  <span>{hydration.streak} day streak</span>
-                </div>
-              )}
+              <span className="text-xs text-zinc-500">
+                Local weekly snapshot
+              </span>
             </div>
 
             <div className="flex items-end justify-between gap-1 h-12">
               {weekData.map((day, i) => {
-                const height = Math.max(4, (day.total / hydration.dailyGoal) * 100);
+                const height = Math.max(
+                  4,
+                  (day.total / hydration.dailyGoal) * 100,
+                );
                 const isToday = i === 6;
                 const metGoal = day.total >= hydration.dailyGoal;
 
                 return (
-                  <div key={day.date} className="flex-1 flex flex-col items-center gap-1">
+                  <div
+                    key={day.date}
+                    className="flex-1 flex flex-col items-center gap-1"
+                  >
                     <div
                       className={`w-full rounded-t transition-all ${
                         metGoal
-                          ? 'bg-gradient-to-t from-cyan-600 to-cyan-400'
+                          ? "bg-gradient-to-t from-cyan-600 to-cyan-400"
                           : isToday
-                          ? 'bg-cyan-500/50'
-                          : 'bg-zinc-700'
+                            ? "bg-cyan-500/50"
+                            : "bg-zinc-700"
                       }`}
                       style={{ height: `${Math.min(height, 100)}%` }}
                     />
-                    <span className={`text-[10px] ${isToday ? 'text-cyan-400' : 'text-zinc-600'}`}>
-                      {['S', 'M', 'T', 'W', 'T', 'F', 'S'][new Date(day.date).getDay()]}
+                    <span
+                      className={`text-[10px] ${isToday ? "text-cyan-400" : "text-zinc-600"}`}
+                    >
+                      {
+                        ["S", "M", "T", "W", "T", "F", "S"][
+                          new Date(day.date).getDay()
+                        ]
+                      }
                     </span>
                   </div>
                 );
@@ -195,16 +216,22 @@ export function HydrationTracker({ isOpen, onClose }: HydrationTrackerProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setHydrationGoal(Math.max(4, hydration.dailyGoal - 1))}
+                onClick={() =>
+                  setHydrationGoal(Math.max(4, hydration.dailyGoal - 1))
+                }
                 className="h-7 w-7 p-0"
               >
                 <Minus className="w-3 h-3" />
               </Button>
-              <span className="text-sm font-medium w-8 text-center">{hydration.dailyGoal}</span>
+              <span className="text-sm font-medium w-8 text-center">
+                {hydration.dailyGoal}
+              </span>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setHydrationGoal(Math.min(16, hydration.dailyGoal + 1))}
+                onClick={() =>
+                  setHydrationGoal(Math.min(16, hydration.dailyGoal + 1))
+                }
                 className="h-7 w-7 p-0"
               >
                 <Plus className="w-3 h-3" />
@@ -219,9 +246,9 @@ export function HydrationTracker({ isOpen, onClose }: HydrationTrackerProps) {
 
 // Floating quick-add button
 export function HydrationQuickButton({ onClick }: { onClick: () => void }) {
-  const hydration = useWellnessStore(state => state.hydration);
-  const logWater = useWellnessStore(state => state.logWater);
-  const enabledFeatures = useWellnessStore(state => state.enabledFeatures);
+  const hydration = useWellnessStore((state) => state.hydration);
+  const logWater = useWellnessStore((state) => state.logWater);
+  const enabledFeatures = useWellnessStore((state) => state.enabledFeatures);
 
   const todayTotal = useMemo(() => getTodayHydration(hydration), [hydration]);
   const progress = Math.min((todayTotal / hydration.dailyGoal) * 100, 100);
@@ -231,7 +258,7 @@ export function HydrationQuickButton({ onClick }: { onClick: () => void }) {
   const handleQuickLog = (e: React.MouseEvent) => {
     e.stopPropagation();
     logWater(1);
-    triggerHaptic('medium');
+    triggerHaptic("medium");
   };
 
   return (
@@ -256,7 +283,9 @@ export function HydrationQuickButton({ onClick }: { onClick: () => void }) {
             style={{ width: `${progress}%` }}
           />
         </div>
-        <span className="text-cyan-400 font-medium">{todayTotal}/{hydration.dailyGoal}</span>
+        <span className="text-cyan-400 font-medium">
+          {todayTotal}/{hydration.dailyGoal}
+        </span>
       </button>
     </div>
   );

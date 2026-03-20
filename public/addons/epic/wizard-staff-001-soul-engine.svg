@@ -1,0 +1,137 @@
+<svg width="1200" height="1200" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="58%">
+      <stop offset="0%" stop-color="#11203A"/>
+      <stop offset="48%" stop-color="#091121"/>
+      <stop offset="100%" stop-color="#02050C"/>
+    </radialGradient>
+    <linearGradient id="wood" x1="600" y1="420" x2="600" y2="1090" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#8A5728"/>
+      <stop offset="52%" stop-color="#4A2F1A"/>
+      <stop offset="100%" stop-color="#25140C"/>
+    </linearGradient>
+    <linearGradient id="crystal" x1="480" y1="250" x2="720" y2="490" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F0FDFF"/>
+      <stop offset="40%" stop-color="#7DD3FC"/>
+      <stop offset="76%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#9BE7FF" stop-opacity="0.34"/>
+      <stop offset="48%" stop-color="#38BDF8" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#0F172A" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="singularity" cx="50%" cy="50%" r="66%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.97"/>
+      <stop offset="44%" stop-color="#000000" stop-opacity="0.92"/>
+      <stop offset="74%" stop-color="#38BDF8" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softGlow" x="-70%" y="-70%" width="240%" height="240%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="strongGlow" x="-90%" y="-90%" width="280%" height="280%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="20" result="blur1"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur2"/>
+      <feMerge>
+        <feMergeNode in="blur1"/>
+        <feMergeNode in="blur2"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="1200" fill="url(#bg)"/>
+
+  <g opacity="0.32" filter="url(#softGlow)">
+    <circle cx="600" cy="420" r="350" stroke="#38BDF8" stroke-opacity="0.18" stroke-width="8"/>
+    <circle cx="600" cy="420" r="284" stroke="#A78BFA" stroke-opacity="0.14" stroke-width="5"/>
+    <path d="M600 118L767 205L874 364L849 551L703 671L497 671L351 551L326 364L433 205L600 118Z" stroke="#93C5FD" stroke-opacity="0.16" stroke-width="4"/>
+  </g>
+
+  <g opacity="0.75">
+    <path d="M600 198L743 267L778 421L679 547L521 547L422 421L457 267L600 198Z" stroke="#7DD3FC" stroke-opacity="0.3" stroke-width="5"/>
+    <path d="M600 246L695 291L717 394L651 478L549 478L483 394L505 291L600 246Z" stroke="#DBEAFE" stroke-opacity="0.26" stroke-width="4"/>
+  </g>
+
+  <g filter="url(#strongGlow)">
+    <path d="M558 345L510 515L600 603L690 515L642 345L600 260Z" fill="url(#crystal)" stroke="#E0F2FE" stroke-width="10" stroke-linejoin="round"/>
+    <circle cx="600" cy="420" r="196" fill="url(#halo)"/>
+  </g>
+
+  <g opacity="0.64">
+    <path d="M377 420C440 280 514 214 600 214C686 214 760 280 823 420C760 560 686 626 600 626C514 626 440 560 377 420Z" stroke="#38BDF8" stroke-opacity="0.26" stroke-width="5"/>
+    <path d="M322 420C396 245 488 154 600 154C712 154 804 245 878 420C804 595 712 686 600 686C488 686 396 595 322 420Z" stroke="#A78BFA" stroke-opacity="0.18" stroke-width="4"/>
+  </g>
+
+  <g stroke-linecap="round">
+    <path d="M600 230L600 610" stroke="#E0F2FE" stroke-opacity="0.52" stroke-width="4"/>
+    <path d="M410 420H790" stroke="#E0F2FE" stroke-opacity="0.46" stroke-width="4"/>
+    <path d="M468 286L732 554" stroke="#BAE6FD" stroke-opacity="0.35" stroke-width="3"/>
+    <path d="M732 286L468 554" stroke="#BAE6FD" stroke-opacity="0.35" stroke-width="3"/>
+  </g>
+
+  <g opacity="0.52" stroke-width="3.5">
+    <path d="M460 305C520 343 575 438 600 420C625 402 680 306 740 345" stroke="#67E8F9"/>
+    <path d="M440 384C507 429 566 504 600 484C634 464 693 392 760 435" stroke="#A78BFA" stroke-opacity="0.7"/>
+    <path d="M440 455C507 410 566 335 600 355C634 375 693 447 760 404" stroke="#7DD3FC" stroke-opacity="0.68"/>
+    <path d="M460 536C520 498 575 403 600 420C625 437 680 534 740 495" stroke="#C4B5FD" stroke-opacity="0.62"/>
+  </g>
+
+  <g opacity="0.36" fill="#BAE6FD" font-size="28" font-family="'Courier New', monospace" text-anchor="middle">
+    <text x="600" y="122">A</text>
+    <text x="777" y="219">7</text>
+    <text x="868" y="421">D</text>
+    <text x="777" y="623">F</text>
+    <text x="600" y="718">0</text>
+    <text x="423" y="623">C</text>
+    <text x="332" y="421">9</text>
+    <text x="423" y="219">B</text>
+  </g>
+
+  <g filter="url(#softGlow)">
+    <circle cx="600" cy="420" r="162" fill="url(#singularity)"/>
+    <circle cx="600" cy="420" r="118" fill="#DFF8FF" fill-opacity="0.9"/>
+    <circle cx="600" cy="420" r="56" fill="#020412"/>
+  </g>
+
+  <g stroke="#DFF8FF" stroke-opacity="0.76" stroke-width="4" stroke-linecap="round">
+    <path d="M600 344V420"/>
+    <path d="M659 373L600 420"/>
+    <path d="M674 438L600 420"/>
+    <path d="M634 497L600 420"/>
+    <path d="M566 497L600 420"/>
+    <path d="M526 438L600 420"/>
+    <path d="M541 373L600 420"/>
+  </g>
+
+  <g filter="url(#softGlow)">
+    <circle cx="479" cy="268" r="14" fill="#7DD3FC"/>
+    <circle cx="600" cy="214" r="15" fill="#F0FDFF"/>
+    <circle cx="721" cy="268" r="14" fill="#A78BFA"/>
+    <circle cx="811" cy="420" r="12" fill="#38BDF8"/>
+    <circle cx="721" cy="572" r="11" fill="#C4B5FD"/>
+    <circle cx="479" cy="572" r="11" fill="#BAE6FD"/>
+    <circle cx="389" cy="420" r="12" fill="#38BDF8"/>
+  </g>
+
+  <g>
+    <path d="M578 560L558 1088" stroke="url(#wood)" stroke-width="28" stroke-linecap="round"/>
+    <path d="M600 548L600 1114" stroke="url(#wood)" stroke-width="36" stroke-linecap="round"/>
+    <path d="M622 560L642 1088" stroke="url(#wood)" stroke-width="28" stroke-linecap="round"/>
+    <path d="M589 602C616 748 621 916 615 1092" stroke="#D6A56B" stroke-opacity="0.34" stroke-width="6" stroke-linecap="round"/>
+    <path d="M562 1028C586 1058 614 1058 638 1028" stroke="#D6A56B" stroke-width="8" stroke-linecap="round"/>
+  </g>
+
+  <g opacity="0.66" fill="#7DD3FC" font-size="22" font-family="'Courier New', monospace" text-anchor="middle" filter="url(#softGlow)">
+    <text x="465" y="672">A</text>
+    <text x="734" y="724">7</text>
+    <text x="394" y="820">D</text>
+    <text x="804" y="902">F</text>
+    <text x="520" y="974">1</text>
+  </g>
+</svg>

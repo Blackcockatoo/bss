@@ -238,7 +238,7 @@ describe('Monkey Invaders smoke checks', () => {
   });
 
   it('freezes player input during level transitions before boss spawns', () => {
-    expect(script).toContain('function updateMonkey(dt) {\n            if (levelTransition) return;');
+    expect(script).toMatch(/function updateMonkey\(dt\) \{\r?\n\s+if \(levelTransition\) return;/);
     expect(script).toContain('keys.Space = false;');
     expect(script).toContain('groundBananas = [];');
   });

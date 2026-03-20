@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
+
 const campaignCtas = [
   {
     label: "Principal briefing",
@@ -22,6 +24,8 @@ const campaignCtas = [
 ];
 
 export default function SchoolsPage() {
+  enforceChildSafeServerRoute("/schools");
+
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-6 py-12 md:py-16">

@@ -1,16 +1,24 @@
-'use client';
+"use client";
 
-import { useEffect, useMemo, useRef } from 'react';
-import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef } from "react";
+
+import { useEnforceChildSafeClientRoute } from "@/lib/childSafeRoute.client";
+
+import { buildGeometrySoundIframeSrc } from "./iframe-src";
 
 import { buildGeometrySoundIframeSrc } from './buildGeometrySoundIframeSrc';
 
 export default function GeometrySoundPage() {
+  const childSafeBlocked = useEnforceChildSafeClientRoute("/geometry-sound");
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const searchParams = useSearchParams();
 
-  const iframeSrc = useMemo(() => buildGeometrySoundIframeSrc(searchParams), [searchParams]);
+  const iframeSrc = useMemo(
+    () => buildGeometrySoundIframeSrc(searchParams),
+    [searchParams],
+  );
 
   useEffect(() => {
     const handleResize = () => {
@@ -19,9 +27,13 @@ export default function GeometrySoundPage() {
       }
     };
     handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  if (childSafeBlocked) {
+    return null;
+  }
 
   return (
     <div className="relative w-full h-screen bg-[#0a0a1a]">
@@ -37,7 +49,7 @@ export default function GeometrySoundPage() {
         ref={iframeRef}
         src={iframeSrc}
         className="w-full border-none"
-        style={{ height: '100vh' }}
+        style={{ height: "100vh" }}
         title="Sacred Geometry &amp; Sonic Consciousness"
         allow="autoplay"
       />

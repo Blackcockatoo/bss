@@ -5,7 +5,7 @@
   "scripts": {
     "predev": "node -e \"require('fs').rmSync('.next',{recursive:true,force:true})\"",
     "dev": "next dev -H 0.0.0.0",
-    "build": "npm run prepare:moss60-production && next build",
+    "build": "npm run prepare:moss60-production && next build --webpack",
     "start": "next start",
     "lint": "tsc --noEmit && eslint src",
     "format": "npx biome format --write",
@@ -13,7 +13,9 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "check:moss60-copy": "node scripts/check-moss60-copy.mjs",
-    "prepare:moss60-production": "node scripts/prepare-moss60-production.mjs"
+    "check:child-safe-deployment": "node scripts/assert-child-safe-deployment.mjs",
+    "prepare:moss60-production": "node scripts/prepare-moss60-production.mjs",
+    "sync:kpps-exports": "node scripts/sync-kpps-package-exports.mjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
