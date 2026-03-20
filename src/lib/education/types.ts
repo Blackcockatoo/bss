@@ -34,6 +34,10 @@ export type QuestMode =
   | "spiral"
   | "mandala"
   | "triangle"
+  | "pentagon"
+  | "hexagon"
+  | "decagon"
+  | "circle"
   | "sound"
   | "journey";
 
@@ -41,6 +45,10 @@ export type QuestPackId =
   | "pattern-basics"
   | "symmetry-studio"
   | "triangle-trace"
+  | "pentagon-trace"
+  | "hexagon-trace"
+  | "decagon-trace"
+  | "circle-trace"
   | "sound-path";
 
 export interface LessonQuestSummary {

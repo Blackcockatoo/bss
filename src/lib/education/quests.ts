@@ -20,6 +20,14 @@ type QuestMetric =
   | "triangle-trace-steps"
   | "triangle-visited-sides"
   | "triangle-playback"
+  | "pentagon-trace-steps"
+  | "pentagon-playback"
+  | "hexagon-trace-steps"
+  | "hexagon-playback"
+  | "decagon-trace-steps"
+  | "decagon-playback"
+  | "circle-trace-steps"
+  | "circle-playback"
   | "sound-playback"
   | "sound-tempo-changes"
   | "sound-transform-changes"
@@ -208,6 +216,142 @@ export const QUEST_PACKS: Record<QuestPackId, QuestPack> = {
       },
     ],
   },
+  "pentagon-trace": {
+    id: "pentagon-trace",
+    name: "Pentagon Trace",
+    description: "Trace the five-sided shape perimeter to create melodies.",
+    requiredCoreQuests: 2,
+    quests: [
+      {
+        id: "pentagon-trace-steps",
+        kind: "core",
+        title: "Trace 10 pentagon steps",
+        description: "Capture at least ten points on the pentagon edge.",
+        target: 10,
+        metric: "pentagon-trace-steps",
+        mode: "pentagon",
+      },
+      {
+        id: "pentagon-trace-playback",
+        kind: "core",
+        title: "Play pentagon notes",
+        description: "Play back a traced phrase from the pentagon panel.",
+        target: 1,
+        metric: "pentagon-playback",
+        mode: "pentagon",
+      },
+      {
+        id: "pentagon-trace-reflection",
+        kind: "bonus",
+        title: "Reflect on the shape",
+        description: "Add a short note after pentagon tracing.",
+        target: 1,
+        metric: "reflection",
+      },
+    ],
+  },
+  "hexagon-trace": {
+    id: "hexagon-trace",
+    name: "Hexagon Trace",
+    description: "Trace the six-sided shape perimeter to create melodies.",
+    requiredCoreQuests: 2,
+    quests: [
+      {
+        id: "hexagon-trace-steps",
+        kind: "core",
+        title: "Trace 10 hexagon steps",
+        description: "Capture at least ten points on the hexagon edge.",
+        target: 10,
+        metric: "hexagon-trace-steps",
+        mode: "hexagon",
+      },
+      {
+        id: "hexagon-trace-playback",
+        kind: "core",
+        title: "Play hexagon notes",
+        description: "Play back a traced phrase from the hexagon panel.",
+        target: 1,
+        metric: "hexagon-playback",
+        mode: "hexagon",
+      },
+      {
+        id: "hexagon-trace-reflection",
+        kind: "bonus",
+        title: "Reflect on the shape",
+        description: "Add a short note after hexagon tracing.",
+        target: 1,
+        metric: "reflection",
+      },
+    ],
+  },
+  "decagon-trace": {
+    id: "decagon-trace",
+    name: "Decagon Trace",
+    description: "Trace the ten-sided shape perimeter to create melodies.",
+    requiredCoreQuests: 2,
+    quests: [
+      {
+        id: "decagon-trace-steps",
+        kind: "core",
+        title: "Trace 10 decagon steps",
+        description: "Capture at least ten points on the decagon edge.",
+        target: 10,
+        metric: "decagon-trace-steps",
+        mode: "decagon",
+      },
+      {
+        id: "decagon-trace-playback",
+        kind: "core",
+        title: "Play decagon notes",
+        description: "Play back a traced phrase from the decagon panel.",
+        target: 1,
+        metric: "decagon-playback",
+        mode: "decagon",
+      },
+      {
+        id: "decagon-trace-reflection",
+        kind: "bonus",
+        title: "Reflect on the shape",
+        description: "Add a short note after decagon tracing.",
+        target: 1,
+        metric: "reflection",
+      },
+    ],
+  },
+  "circle-trace": {
+    id: "circle-trace",
+    name: "Circle Trace",
+    description: "Trace 60 points around a circle perimeter to create melodies.",
+    requiredCoreQuests: 2,
+    quests: [
+      {
+        id: "circle-trace-steps",
+        kind: "core",
+        title: "Trace 10 circle points",
+        description: "Capture at least ten points on the circle.",
+        target: 10,
+        metric: "circle-trace-steps",
+        mode: "circle",
+      },
+      {
+        id: "circle-trace-playback",
+        kind: "core",
+        title: "Play circle notes",
+        description: "Play back a traced phrase from the circle panel.",
+        target: 1,
+        metric: "circle-playback",
+        mode: "circle",
+      },
+      {
+        id: "circle-trace-reflection",
+        kind: "bonus",
+        title: "Reflect on the shape",
+        description: "Add a short note after circle tracing.",
+        target: 1,
+        metric: "reflection",
+      },
+    ],
+  },
   "sound-path": {
     id: "sound-path",
     name: "Sound Path",
@@ -257,6 +401,10 @@ export const QUEST_PACK_ORDER: QuestPackId[] = [
   "pattern-basics",
   "symmetry-studio",
   "triangle-trace",
+  "pentagon-trace",
+  "hexagon-trace",
+  "decagon-trace",
+  "circle-trace",
   "sound-path",
 ];
 
@@ -265,6 +413,10 @@ export function createEmptyQuestModeCounts(): Record<QuestMode, number> {
     spiral: 0,
     mandala: 0,
     triangle: 0,
+    pentagon: 0,
+    hexagon: 0,
+    decagon: 0,
+    circle: 0,
     sound: 0,
     journey: 0,
   };
