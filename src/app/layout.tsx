@@ -57,7 +57,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className="font-sans"
+      className="font-sans dark"
       style={
         {
           "--font-outfit":
