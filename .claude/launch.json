@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "BSS (Next.js root)",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "npm", "run", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "Veil Website (Vite)",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "cd", "05-Teacher-Veil-App/Veil-Website", "&&", "pnpm", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "SuiteMaster (Next.js)",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "cd", "07-SuiteMaster", "&&", "npm", "run", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "Time Calculator (Vite)",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "cd", "time-calculator-compass/time-calculator-compass", "&&", "npm", "run", "dev"],
+      "port": 5173
+    }
+  ]
+}

@@ -6,6 +6,7 @@
  */
 
 import { CUSTOM_ADDONS } from "./customAddons";
+import { GIRL_ADDONS } from "./girlAddons";
 import type {
   Addon,
   AddonAttachment,
@@ -704,6 +705,7 @@ export const ADDON_CATALOG: Record<string, AddonTemplate> = {
   "crystal-heart-001": CRYSTAL_HEART,
   "void-mask-001": VOID_MASK,
   ...CUSTOM_ADDONS,
+  ...GIRL_ADDONS,
 };
 
 /**
