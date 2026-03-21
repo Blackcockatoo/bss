@@ -1,5 +1,8 @@
 "use client";
 
+import { DigitalDNAReveal } from "@/components/DigitalDNAReveal";
+import { RouteProgressionCard } from "@/components/RouteProgressionCard";
+import { RouteShellLoading } from "@/components/RouteShellLoading";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
@@ -13,24 +16,18 @@ import { useEnforceChildSafeClientRoute } from "@/lib/childSafeRoute.client";
 const DigitalDNAHub = dynamic(() => import("@/components/DigitalDNAHub"), {
   ssr: false,
   loading: () => (
-    // role="status" + aria-live="polite" ensure screen readers announce this
-    // loading state without interrupting other content (WCAG perceivable principle).
     <div
       role="status"
       aria-live="polite"
-      aria-label="Loading Digital DNA"
-      className="min-h-screen bg-slate-950 flex flex-col items-center justify-center gap-4"
+      aria-label="Loading DNA exploration instruments"
+      className="rounded-[2rem] border border-slate-800 bg-slate-950/70"
     >
-      {/* Pulsing DNA icon while the bundle loads */}
-      <div className="text-6xl animate-pulse select-none" aria-hidden="true">
-        🧬
-      </div>
-      <p className="text-amber-300 text-xl font-semibold tracking-wide animate-pulse">
-        Loading Digital DNA…
-      </p>
-      <p className="text-slate-500 text-sm">
-        Initialising Three.js &amp; audio engine
-      </p>
+      <RouteShellLoading
+        eyebrow="Digital DNA"
+        title="Helix instruments are warming up"
+        detail="The decoded constellation above is already live. Three.js and the sound layer are loading underneath it."
+        compact
+      />
     </div>
   ),
 });
@@ -43,8 +40,7 @@ export default function DigitalDNAPage() {
   }
 
   return (
-    <div className="relative">
-      {/* Back button — fixed so it stays visible during scroll */}
+    <div className="relative min-h-screen bg-slate-950">
       <Link
         href="/"
         className="fixed z-50 rounded-full text-sm font-semibold
@@ -57,14 +53,9 @@ export default function DigitalDNAPage() {
         &larr; Back to Pet
       </Link>
 
-      {/* Subtle context for explorers */}
-      <div className="fixed z-40 bottom-4 right-4 max-w-[200px] opacity-60 hover:opacity-100 transition-opacity">
-        <p className="text-[10px] text-zinc-600 leading-relaxed bg-slate-950/80 backdrop-blur-sm rounded-lg px-3 py-2 border border-slate-800/40">
-          You&apos;re seeing your companion&apos;s genome rendered as 3D
-          structure and sound — the same data that determines every trait,
-          visualised through Three.js and Tone.js. This is the science layer
-          most users never see.
-        </p>
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 pb-8 pt-20 sm:px-6">
+        <RouteProgressionCard route="dna" showAdvanced />
+        <DigitalDNAReveal />
       </div>
 
       <DigitalDNAHub />

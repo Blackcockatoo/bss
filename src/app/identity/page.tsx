@@ -1,5 +1,6 @@
 "use client";
 
+import { RouteProgressionCard } from "@/components/RouteProgressionCard";
 import { Button } from "@/components/ui/button";
 import { useEnforceChildSafeClientRoute } from "@/lib/childSafeRoute.client";
 import {
@@ -131,6 +132,8 @@ export default function IdentityPage() {
             Quick Access
           </div>
         </div>
+
+        <RouteProgressionCard route="identity" showAdvanced className="mb-6" />
 
         <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-6">
           <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-6">

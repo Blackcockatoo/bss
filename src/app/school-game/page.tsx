@@ -4,6 +4,7 @@ import DigitalDNAHub from "@/components/DigitalDNAHub";
 import type { LessonContext } from "@/components/DigitalDNAHub";
 import { EduVibeBoard } from "@/components/EduVibeBoard";
 import { EducationQueuePanel } from "@/components/EducationQueuePanel";
+import { RouteProgressionCard } from "@/components/RouteProgressionCard";
 import { FOCUS_AREA_LABELS, useEducationStore } from "@/lib/education";
 import type { DnaMode, QuickFireChallenge } from "@/lib/education";
 import { AnimatePresence, motion } from "framer-motion";
@@ -421,6 +422,8 @@ export default function SchoolGamePage() {
               </p>
             </header>
 
+            <RouteProgressionCard route="school" />
+
             {/* Queue Summary */}
             <section className="rounded-2xl border border-emerald-400/30 bg-emerald-500/5 p-5 space-y-4">
               <div className="flex items-center justify-between gap-3">
@@ -685,6 +688,12 @@ export default function SchoolGamePage() {
                 className="rounded-lg border border-slate-600 px-3 py-2 text-slate-200 hover:bg-slate-800"
               >
                 Back to Pet
+              </Link>
+              <Link
+                href="/identity"
+                className="rounded-lg border border-indigo-400/40 px-3 py-2 text-indigo-200 hover:bg-indigo-500/10"
+              >
+                Continue to Identity
               </Link>
               <Link
                 href="/digital-dna"

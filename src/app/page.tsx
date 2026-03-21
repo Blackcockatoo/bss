@@ -24,6 +24,7 @@ import {
 } from "@/components/HydrationTracker";
 import { OnboardingTutorial } from "@/components/OnboardingTutorial";
 import { PetHero } from "@/components/PetHero";
+import { MetaPetLoadingScreen } from "@/components/MetaPetLoadingScreen";
 import { PetResponseOverlay } from "@/components/PetResponseOverlay";
 import {
   CertificateButton,
@@ -1800,21 +1801,7 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 flex items-center justify-center">
-        <div className="text-center space-y-4 max-w-xs">
-          <div className="text-5xl animate-bounce" aria-hidden>
-            <Sparkles className="w-12 h-12 text-cyan-400 mx-auto" />
-          </div>
-          <div className="space-y-1">
-            <p className="text-white font-semibold">Initializing Meta-Pet...</p>
-            <p className="text-zinc-400 text-sm">Generating genome sequence</p>
-          </div>
-          <p className="text-zinc-600 text-xs leading-relaxed pt-2">
-            Every companion begins with a unique DNA strand â€” no two are
-            alike.
-          </p>
-        </div>
-      </div>
+      <MetaPetLoadingScreen statusMessage="Generating genome sequence" />
     );
   }
 

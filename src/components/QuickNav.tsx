@@ -4,7 +4,6 @@ import {
   ArrowDownToLine,
   ArrowLeft,
   BookOpen,
-  Compass,
   Home,
   PawPrint,
   UserCircle,
@@ -23,12 +22,11 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
-const NAV_ITEMS = [
+export const QUICK_NAV_ITEMS = [
   { href: "/", label: "Home", icon: Home },
   { href: "/pet", label: "Pet", icon: PawPrint },
   { href: "/school-game", label: "School", icon: BookOpen },
   { href: "/identity", label: "Identity", icon: UserCircle },
-  { href: "/moss60", label: "MOSS60", icon: Compass },
 ];
 
 export function QuickNav() {
@@ -76,8 +74,8 @@ export function QuickNav() {
   const visibleNavItems = useMemo(
     () =>
       ENABLE_CHILD_SAFE_BASELINE
-        ? NAV_ITEMS.filter((item) => CHILD_SAFE_NAV_ROUTES.has(item.href))
-        : NAV_ITEMS,
+        ? QUICK_NAV_ITEMS.filter((item) => CHILD_SAFE_NAV_ROUTES.has(item.href))
+        : QUICK_NAV_ITEMS,
     [],
   );
 

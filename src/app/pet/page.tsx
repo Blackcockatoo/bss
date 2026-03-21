@@ -3,6 +3,7 @@
 import AuraliaMetaPet from "@/components/AuraliaMetaPet";
 import { HUD, HUDAdvancedStats } from "@/components/HUD";
 import { PetResponseOverlay } from "@/components/PetResponseOverlay";
+import { RouteProgressionCard } from "@/components/RouteProgressionCard";
 import { AddonInventoryPanel } from "@/components/addons/AddonInventoryPanel";
 import { PetProfilePanel } from "@/components/addons/PetProfilePanel";
 import { Button } from "@/components/ui/button";
@@ -229,6 +230,8 @@ export default function PetPage() {
                   <HUDAdvancedStats />
                 </div>
               )}
+
+              <RouteProgressionCard route="pet" className="mt-4" />
             </div>
           </div>
         </div>
