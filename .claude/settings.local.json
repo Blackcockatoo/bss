@@ -1,7 +1,27 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(find /c/Users/Tom/OneDrive/Desktop/bss-main/bss -type f -name *sprite* -o -name *geometry* -o -name *pet* -o -name *beast* -o -name *creature* -o -name *avatar*)",
+      "Bash(xargs grep:*)",
+      "Bash(find /c/Users/Tom/OneDrive/Desktop/bss-main/bss -type f -path *shared* -name *sprite* -o -path *shared* -name *geometry* -o -path *shared* -name *pet*)",
+      "Bash(find /c/Users/Tom/OneDrive/Desktop/bss-main/bss/.claude/worktrees/fervent-germain/shared -type f -name *.ts -o -name *.tsx)",
+      "Bash(cp /tmp/tom_zip_extract/tom/src/components/SriYantraPetEngine.tsx \"C:/Users/Tom/OneDrive/Desktop/bss-main/bss/src/components/SriYantraPetEngine.tsx\")",
+      "Bash(cp /tmp/tom_zip_extract/tom/src/components/SriYantraPetDisplay.tsx \"C:/Users/Tom/OneDrive/Desktop/bss-main/bss/src/components/SriYantraPetDisplay.tsx\")",
+      "Bash(cp /tmp/tom_zip_extract/tom/src/components/PetGeometryHub.tsx \"C:/Users/Tom/OneDrive/Desktop/bss-main/bss/src/components/PetGeometryHub.tsx\")",
+      "Bash(npx tsc:*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(taskkill //F //IM node.exe)",
+      "Bash(node -e \"const m = require\\(''lucide-react''\\); console.log\\(typeof m.Hexagon\\)\")",
+      "Bash(curl -s http://localhost:3000/)",
+      "Bash(timeout 30 npx next dev -H 0.0.0.0 --port 3001)",
+      "Bash(curl -s http://localhost:3001/)",
+      "Bash(curl -sL http://localhost:3001/)",
+      "Bash(curl -s http://localhost:3000/_next/static/chunks/src_app_page_tsx_b4090435._.js)",
+      "Bash(grep -v \"import\\\\|//\")",
+      "Bash(curl -s http://localhost:3000/_next/static/chunks/src_app_page_tsx_48b0236f._.js)",
+      "Read(//tmp/**)"
     ]
   }
 }

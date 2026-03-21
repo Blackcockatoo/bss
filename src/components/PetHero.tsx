@@ -5,7 +5,7 @@ import { useStore } from '@/lib/store';
 import { triggerHaptic } from '@/lib/haptics';
 import { getEvolutionProgress } from '@/lib/evolution';
 import AuraliaSprite from './AuraliaSprite';
-import { PetSprite } from './PetSprite';
+import { SriYantraPetDisplay } from './SriYantraPetDisplay';
 import { ProgressRing } from './ProgressRing';
 
 interface PetHeroProps {
@@ -168,7 +168,7 @@ export function PetHero({ className = '', staticMode = false }: PetHeroProps) {
         {/* Pet Container */}
         <div className="relative w-64 h-64 flex items-center justify-center">
           {petType === 'geometric' ? (
-            <PetSprite staticMode={staticMode} />
+            <SriYantraPetDisplay animated={!staticMode} />
           ) : (
             <AuraliaSprite size="large" interactive staticMode={staticMode} />
           )}

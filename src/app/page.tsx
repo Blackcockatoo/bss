@@ -22,6 +22,7 @@ import {
   HydrationQuickButton,
   HydrationTracker,
 } from "@/components/HydrationTracker";
+import { PetGeometryHub } from "@/components/PetGeometryHub";
 import { PetHero } from "@/components/PetHero";
 import { MetaPetLoadingScreen } from "@/components/MetaPetLoadingScreen";
 import { PetResponseOverlay } from "@/components/PetResponseOverlay";
@@ -110,6 +111,7 @@ import {
   GraduationCap,
   Hash,
   HeartHandshake,
+  Hexagon,
   Lock,
   Plus,
   Shield,
@@ -2035,6 +2037,19 @@ export default function Home() {
               drives change.
             </p>
             <EvolutionPanel />
+          </CollapsibleSection>
+
+          {/* Sri Yantra Geometry Beast */}
+          <CollapsibleSection
+            title="Geometry Beast"
+            icon={<Hexagon className="w-5 h-5 text-fuchsia-400" />}
+          >
+            <p className="text-xs text-zinc-500 mb-3">
+              The Sri Yantra beast reacts to your red, blue, and black strand
+              packets. Touch its zones, forge new spreads, and cycle movement
+              rituals.
+            </p>
+            <PetGeometryHub />
           </CollapsibleSection>
 
           {/* Mini Games */}
