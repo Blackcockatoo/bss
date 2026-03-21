@@ -76,7 +76,7 @@ export function FloatingActions() {
   const isSealed = systemState === 'sealed';
 
   return (
-    <div className="flex items-center justify-center gap-3 py-4 px-4">
+    <div className="mx-auto grid w-full max-w-sm grid-cols-2 gap-3 px-4 py-4 sm:max-w-2xl sm:grid-cols-4">
       {actions.map(({ name, icon: Icon, action, color, activeColor, label, reward }) => (
         <button
           key={name}
@@ -85,7 +85,7 @@ export function FloatingActions() {
           disabled={isSealed}
           className={`
             relative flex flex-col items-center gap-1
-            min-w-[64px] min-h-[64px] p-3
+            w-full min-h-[72px] px-3 py-3
             rounded-2xl
             bg-gradient-to-br ${color}
             shadow-lg shadow-black/30

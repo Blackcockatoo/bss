@@ -1,12 +1,10 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useStore } from '@/lib/store';
 import { triggerHaptic } from '@/lib/haptics';
-import { getEvolutionProgress } from '@/lib/evolution';
 import AuraliaSprite from './AuraliaSprite';
 import { SriYantraPetDisplay } from './SriYantraPetDisplay';
-import { ProgressRing } from './ProgressRing';
 
 interface PetHeroProps {
   className?: string;
@@ -23,9 +21,6 @@ export function PetHero({ className = '', staticMode = false }: PetHeroProps) {
   const play = useStore(state => state.play);
   const clean = useStore(state => state.clean);
   const sleep = useStore(state => state.sleep);
-  const vitals = useStore(state => state.vitals);
-  const evolution = useStore(state => state.evolution);
-  const ritualProgress = useStore(state => state.ritualProgress);
   const systemState = useStore(state => state.systemState);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -33,20 +28,6 @@ export function PetHero({ className = '', staticMode = false }: PetHeroProps) {
   const [gestureIndicator, setGestureIndicator] = useState<string | null>(null);
   const [tapCount, setTapCount] = useState(0);
   const tapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Calculate overall progress for the ring
-  const overallProgress = useMemo(() => {
-    const avgVitals = (vitals.hunger + vitals.hygiene + vitals.mood + vitals.energy) / 4;
-    return avgVitals;
-  }, [vitals]);
-
-  // Evolution progress for secondary ring
-  const evolutionProgress = useMemo(() => {
-    if (!evolution) return 0;
-    // Use the evolution progress helper with vitals average
-    const avgVitals = (vitals.hunger + vitals.hygiene + vitals.mood + vitals.energy) / 4;
-    return getEvolutionProgress(evolution, avgVitals) * 100;
-  }, [evolution, vitals]);
 
   // Show gesture feedback
   const showGesture = useCallback((gesture: string) => {
@@ -145,43 +126,21 @@ export function PetHero({ className = '', staticMode = false }: PetHeroProps) {
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Progress Ring Container */}
-      <div className="relative">
-        {/* Outer Progress Ring - Overall Vitals */}
-        <ProgressRing
-          progress={overallProgress}
-          size={280}
-          strokeWidth={4}
-          color="cyan"
-          className="absolute inset-0 -m-4"
-        />
+      <div className="relative w-64 h-64 flex items-center justify-center">
+        {petType === 'geometric' ? (
+          <SriYantraPetDisplay animated={!staticMode} />
+        ) : (
+          <AuraliaSprite size="large" interactive staticMode={staticMode} />
+        )}
 
-        {/* Inner Progress Ring - Evolution */}
-        <ProgressRing
-          progress={evolutionProgress}
-          size={260}
-          strokeWidth={3}
-          color="purple"
-          className="absolute inset-0 -m-1"
-        />
-
-        {/* Pet Container */}
-        <div className="relative w-64 h-64 flex items-center justify-center">
-          {petType === 'geometric' ? (
-            <SriYantraPetDisplay animated={!staticMode} />
-          ) : (
-            <AuraliaSprite size="large" interactive staticMode={staticMode} />
-          )}
-
-          {/* Gesture Indicator Overlay */}
-          {gestureIndicator && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-              <div className="px-4 py-2 bg-black/70 backdrop-blur-sm rounded-xl border border-white/20 animate-bounce">
-                <span className="text-white font-semibold text-lg">{gestureIndicator}</span>
-              </div>
+        {/* Gesture Indicator Overlay */}
+        {gestureIndicator && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+            <div className="px-4 py-2 bg-black/70 backdrop-blur-sm rounded-xl border border-white/20 animate-bounce">
+              <span className="text-white font-semibold text-lg">{gestureIndicator}</span>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Gesture Hint */}

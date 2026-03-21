@@ -1962,7 +1962,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Pet Hero with Progress Rings */}
+          {/* Pet Hero */}
           <PetHero className="py-4" staticMode={lowBandwidthMode} />
 
           {/* Quick Actions */}
