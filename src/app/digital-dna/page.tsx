@@ -3,10 +3,12 @@
 import { DigitalDNAReveal } from "@/components/DigitalDNAReveal";
 import { RouteProgressionCard } from "@/components/RouteProgressionCard";
 import { RouteShellLoading } from "@/components/RouteShellLoading";
+import { RouteTutorialControls } from "@/components/RouteTutorialControls";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
 import { useEnforceChildSafeClientRoute } from "@/lib/childSafeRoute.client";
+import { useJourneyProgressTracker } from "@/lib/journeyProgress";
 
 /**
  * Digital DNA page — loads DigitalDNAHub as a client-only component
@@ -34,6 +36,7 @@ const DigitalDNAHub = dynamic(() => import("@/components/DigitalDNAHub"), {
 
 export default function DigitalDNAPage() {
   const childSafeBlocked = useEnforceChildSafeClientRoute("/digital-dna");
+  useJourneyProgressTracker("dna");
 
   if (childSafeBlocked) {
     return null;
@@ -54,6 +57,12 @@ export default function DigitalDNAPage() {
       </Link>
 
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 pb-8 pt-20 sm:px-6">
+        <div className="flex justify-end">
+          <RouteTutorialControls
+            scope="dna"
+            className="text-slate-300 hover:text-white"
+          />
+        </div>
         <RouteProgressionCard route="dna" showAdvanced />
         <DigitalDNAReveal />
       </div>

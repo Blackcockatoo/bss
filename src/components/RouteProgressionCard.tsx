@@ -47,6 +47,9 @@ export function RouteProgressionCard({
             })}
           </div>
           <div>
+            <p className="text-[11px] uppercase tracking-[0.22em] text-amber-200/75">
+              First move: {step.entryCta.label}
+            </p>
             <p className="text-sm font-semibold text-cyan-200">
               Step {step.step}: {step.shortLabel}
             </p>

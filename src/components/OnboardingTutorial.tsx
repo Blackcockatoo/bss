@@ -3,6 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import {
+  completeOnboarding,
+  hasCompletedOnboarding,
+  resetOnboarding as resetScopedOnboarding,
+  type OnboardingScope,
+} from '@/lib/onboarding';
+import {
   UtensilsCrossed,
   Heart,
   ClipboardList,
@@ -21,14 +27,17 @@ const ONBOARDING_ICONS = [
   <Save key="save" className="w-12 h-12 text-emerald-400" />,
 ];
 
-const STORAGE_KEY = 'metapet-onboarding-complete';
-
 interface OnboardingTutorialProps {
+  scope: OnboardingScope;
   onComplete?: () => void;
-  forceShow?: boolean;
+  forceShowToken?: number;
 }
 
-export function OnboardingTutorial({ onComplete, forceShow = false }: OnboardingTutorialProps) {
+export function OnboardingTutorial({
+  scope,
+  onComplete,
+  forceShowToken = 0,
+}: OnboardingTutorialProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [hasChecked, setHasChecked] = useState(false);
@@ -37,12 +46,12 @@ export function OnboardingTutorial({ onComplete, forceShow = false }: Onboarding
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const completed = localStorage.getItem(STORAGE_KEY);
     requestAnimationFrame(() => {
-      setIsVisible(forceShow || completed !== 'true');
+      setCurrentStep(0);
+      setIsVisible(forceShowToken > 0 || !hasCompletedOnboarding(scope));
       setHasChecked(true);
     });
-  }, [forceShow]);
+  }, [forceShowToken, scope]);
 
   const handleNext = () => {
     if (currentStep < strings.onboarding.steps.length - 1) {
@@ -57,9 +66,7 @@ export function OnboardingTutorial({ onComplete, forceShow = false }: Onboarding
   };
 
   const handleComplete = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_KEY, 'true');
-    }
+    completeOnboarding(scope);
     setIsVisible(false);
     onComplete?.();
   };
@@ -152,8 +159,6 @@ export function OnboardingTutorial({ onComplete, forceShow = false }: Onboarding
   );
 }
 
-export function resetOnboarding() {
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem(STORAGE_KEY);
-  }
+export function resetOnboarding(scope: OnboardingScope) {
+  resetScopedOnboarding(scope);
 }

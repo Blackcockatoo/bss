@@ -4,11 +4,14 @@ import AuraliaMetaPet from "@/components/AuraliaMetaPet";
 import { HUD, HUDAdvancedStats } from "@/components/HUD";
 import { PetResponseOverlay } from "@/components/PetResponseOverlay";
 import { RouteProgressionCard } from "@/components/RouteProgressionCard";
+import { RouteTutorialControls } from "@/components/RouteTutorialControls";
 import { AddonInventoryPanel } from "@/components/addons/AddonInventoryPanel";
 import { PetProfilePanel } from "@/components/addons/PetProfilePanel";
 import { Button } from "@/components/ui/button";
 import { initializeStarterAddons } from "@/lib/addons/starter";
+import { useDnaImprint } from "@/lib/dnaImprint";
 import { ENABLE_CHILD_SAFE_BASELINE } from "@/lib/env/features";
+import { useJourneyProgressTracker } from "@/lib/journeyProgress";
 import { useStore } from "@/lib/store";
 import {
   ChevronDown,
@@ -25,11 +28,22 @@ import { useEffect, useState } from "react";
 export default function PetPage() {
   const startTick = useStore((s) => s.startTick);
   const stopTick = useStore((s) => s.stopTick);
+  const dnaImprint = useDnaImprint();
   const [showAddonPanel, setShowAddonPanel] = useState(false);
   const [showProfilePanel, setShowProfilePanel] = useState(false);
   const [addonEditMode, setAddonEditMode] = useState(false);
   const [addonsInitialized, setAddonsInitialized] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  useJourneyProgressTracker("pet", { completeOnVisit: true });
+
+  const imprintAccentClass =
+    dnaImprint?.selectedSeed === "red"
+      ? "via-rose-950/50"
+      : dnaImprint?.selectedSeed === "blue"
+        ? "via-cyan-950/45"
+        : dnaImprint?.selectedSeed === "black"
+          ? "via-emerald-950/35"
+          : "via-purple-950/30";
 
   useEffect(() => {
     startTick();
@@ -86,15 +100,55 @@ export default function PetPage() {
   };
 
   return (
-    <div className="w-screen min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 flex flex-col overflow-auto pb-[calc(6rem+env(safe-area-inset-bottom))]">
+    <div
+      className={`min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-slate-950 ${imprintAccentClass} to-slate-900 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]`}
+    >
       {/* Real-time Response Overlay */}
       <PetResponseOverlay enableAudio={true} enableAnticipation={true} />
 
       {/* Main Pet Window - Full Screen */}
-      <div className="flex-1 flex flex-col items-center justify-center p-4">
-        <div className="w-full h-full max-w-4xl bg-slate-900/80 backdrop-blur-sm rounded-3xl border border-slate-700/50 shadow-2xl overflow-hidden flex flex-col">
+      <div className="flex min-h-[calc(100dvh-11rem)] flex-col items-center justify-start p-3 sm:p-4">
+        <div className="flex h-full w-full max-w-4xl flex-col overflow-hidden rounded-[1.75rem] border border-slate-700/50 bg-slate-900/80 shadow-2xl backdrop-blur-sm sm:rounded-3xl">
+          <div className="border-b border-slate-800/80 bg-slate-950/70 px-4 py-4 sm:px-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="space-y-2">
+                <p className="text-xs uppercase tracking-[0.28em] text-cyan-300/75">
+                  Bond Layer
+                </p>
+                <p className="text-sm text-zinc-200">
+                  Care is the first step in the main ladder. Bond with the pet
+                  here, then carry that context into school, identity, and DNA.
+                </p>
+                {dnaImprint ? (
+                  <div className="rounded-2xl border border-cyan-400/20 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-100">
+                    Latest DNA imprint:{" "}
+                    <strong>{dnaImprint.resonanceClass}</strong> from the{" "}
+                    <strong>{dnaImprint.selectedSeed}</strong> strand, last
+                    explored in <strong>{dnaImprint.completedMode}</strong> mode.
+                    <Link
+                      href="/digital-dna"
+                      className="ml-2 font-semibold text-cyan-200 underline underline-offset-4"
+                    >
+                      Re-open DNA Hub
+                    </Link>
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-500">
+                    No DNA imprint yet. Visit the DNA route after bonding here
+                    to unlock a genome readback.
+                  </p>
+                )}
+              </div>
+
+              <RouteTutorialControls
+                scope="pet"
+                className="self-start text-cyan-200 hover:text-white"
+              />
+            </div>
+          </div>
+
           {/* Pet Display Area */}
-          <div className="flex-1 bg-gradient-to-br from-slate-900 via-purple-950/30 to-slate-900 relative">
+          <div className={`flex-1 bg-gradient-to-br from-slate-900 ${imprintAccentClass} to-slate-900 relative`}>
             <AuraliaMetaPet
               addonEditMode={addonEditMode}
               onAddonEditModeChange={setAddonEditMode}
@@ -103,7 +157,7 @@ export default function PetPage() {
           </div>
 
           {/* Controls Bar */}
-          <div className="p-6 bg-slate-900/90 border-t border-slate-700/50 flex-shrink-0">
+          <div className="flex-shrink-0 border-t border-slate-700/50 bg-slate-900/90 p-4 sm:p-6">
             <HUD mode="simple" />
             <div className="mt-6 border-t border-slate-800/80 pt-4">
               <Button
@@ -212,7 +266,7 @@ export default function PetPage() {
                     )}
                     {showAddonPanel && <AddonInventoryPanel />}
                     {!showProfilePanel && !showAddonPanel && (
-                      <div className="rounded-lg border border-dashed border-slate-700/60 p-4 text-xs text-slate-400 space-y-2">
+                      <div className="space-y-2 rounded-lg border border-dashed border-slate-700/60 p-4 text-xs text-slate-400 md:col-span-2">
                         <p>
                           Use the controls above to open the profile or addon
                           panels.

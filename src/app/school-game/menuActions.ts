@@ -40,6 +40,14 @@ export const TEACHER_HUB_MENU_ACTIONS: TeacherHubMenuAction[] = [
   },
 ];
 
+export const PRIMARY_TEACHER_HUB_MENU_ACTIONS = TEACHER_HUB_MENU_ACTIONS.filter(
+  (action) => action.status === 'live',
+);
+
+export const PLANNED_TEACHER_HUB_MENU_ACTIONS = TEACHER_HUB_MENU_ACTIONS.filter(
+  (action) => action.status === 'coming-soon',
+);
+
 export function runTeacherHubMenuSmokeCheck(actions = TEACHER_HUB_MENU_ACTIONS): { ok: boolean; issues: string[] } {
   const issues: string[] = [];
 

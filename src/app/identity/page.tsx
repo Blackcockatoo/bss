@@ -1,6 +1,7 @@
 "use client";
 
 import { RouteProgressionCard } from "@/components/RouteProgressionCard";
+import { RouteTutorialControls } from "@/components/RouteTutorialControls";
 import { Button } from "@/components/ui/button";
 import { useEnforceChildSafeClientRoute } from "@/lib/childSafeRoute.client";
 import {
@@ -12,8 +13,10 @@ import {
   getUsernameError,
   useIdentityProfileStore,
 } from "@/lib/identity/profile";
+import { useJourneyProgressTracker } from "@/lib/journeyProgress";
 import { useQRMessagingStore } from "@/lib/qr-messaging";
 import { Image as ImageIcon, Save } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 const emptyProfile: IdentityProfile = {
@@ -25,6 +28,7 @@ const emptyProfile: IdentityProfile = {
 
 export default function IdentityPage() {
   const childSafeBlocked = useEnforceChildSafeClientRoute("/identity");
+  const { markCompleted } = useJourneyProgressTracker("identity");
   const { profile, saveProfile, refreshProfile } = useIdentityProfileStore();
   const setLocalIdentity = useQRMessagingStore(
     (state) => state.setLocalIdentity,
@@ -58,6 +62,7 @@ export default function IdentityPage() {
     [form.username],
   );
   const hasErrors = Boolean(emailError || usernameError || avatarError);
+  const lastSavedAt = form.updatedAt ?? profile.updatedAt;
 
   if (childSafeBlocked) {
     return null;
@@ -72,6 +77,7 @@ export default function IdentityPage() {
     setLocalIdentity(getPreferredIdentity(saved));
     setForm(saved);
     setSaveNotice("Profile saved successfully.");
+    markCompleted();
     if (noticeTimeoutRef.current) {
       clearTimeout(noticeTimeoutRef.current);
     }
@@ -128,9 +134,10 @@ export default function IdentityPage() {
               promise, not a feature toggle.
             </p>
           </div>
-          <div className="text-xs uppercase tracking-[0.3em] text-slate-500">
-            Quick Access
-          </div>
+          <RouteTutorialControls
+            scope="identity"
+            className="text-slate-400 hover:text-white"
+          />
         </div>
 
         <RouteProgressionCard route="identity" showAdvanced className="mb-6" />
@@ -245,6 +252,26 @@ export default function IdentityPage() {
                 </p>
               )}
             </div>
+
+            {lastSavedAt && (
+              <div className="rounded-2xl border border-emerald-400/25 bg-emerald-500/10 p-4">
+                <p className="text-xs uppercase tracking-[0.24em] text-emerald-200/80">
+                  Identity Locked In
+                </p>
+                <p className="mt-2 text-sm text-zinc-100">
+                  Your local profile is ready. The next step is the DNA route,
+                  where this owner record anchors the decoded genome story.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-3">
+                  <Button asChild className="bg-emerald-400 text-slate-950 hover:bg-emerald-300">
+                    <Link href="/digital-dna">Continue to DNA</Link>
+                  </Button>
+                  <p className="text-xs text-emerald-100/80 self-center">
+                    Last saved {new Date(lastSavedAt).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-4">

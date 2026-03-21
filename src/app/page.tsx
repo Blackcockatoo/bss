@@ -22,7 +22,6 @@ import {
   HydrationQuickButton,
   HydrationTracker,
 } from "@/components/HydrationTracker";
-import { OnboardingTutorial } from "@/components/OnboardingTutorial";
 import { PetHero } from "@/components/PetHero";
 import { MetaPetLoadingScreen } from "@/components/MetaPetLoadingScreen";
 import { PetResponseOverlay } from "@/components/PetResponseOverlay";
@@ -63,6 +62,10 @@ import {
   SUPPORTED_LOCALES,
   useLocale,
 } from "@/lib/i18n";
+import {
+  ROUTE_PROGRESSION_SEQUENCE,
+  getRouteProgression,
+} from "@/lib/routeProgression";
 import { getDeviceHmacKey, mintPrimeTailId } from "@/lib/identity/crest";
 import { heptaEncode42, playHepta } from "@/lib/identity/hepta";
 import type {
@@ -1844,24 +1847,84 @@ export default function Home() {
     ? "Importing archived companions requires IndexedDB local archives."
     : null;
   const exportCurrentDisabled = !currentPetId || !crest || !heptaCode;
+  const journeySteps = ROUTE_PROGRESSION_SEQUENCE.map((routeKey) =>
+    getRouteProgression(routeKey),
+  );
+  const launchStep = journeySteps[0];
+  const classroomStep = journeySteps[1];
 
   return (
     <AmbientBackground>
       {/* Ambient Particles */}
       <AmbientParticles enabled={!lowBandwidthMode} />
 
-      {/* Onboarding Tutorial for new users */}
-      <OnboardingTutorial />
-
       {/* Real-time Response Overlay */}
       <PetResponseOverlay enableAudio={true} enableAnticipation={true} />
 
-      <div className="min-h-screen pb-24">
+      <div className="min-h-screen pb-24 sm:pb-24">
+        <div className="px-4 pt-4 sm:pt-6">
+          <div className="mx-auto max-w-5xl rounded-[1.5rem] border border-cyan-500/20 bg-slate-950/75 p-4 shadow-[0_20px_80px_rgba(8,47,73,0.28)] sm:rounded-[2rem] sm:p-6">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+              <div className="max-w-2xl space-y-3">
+                <p className="text-xs uppercase tracking-[0.34em] text-cyan-300/80">
+                  Meta-Pet Launch Surface
+                </p>
+                <h1 className="text-3xl font-semibold text-white sm:text-4xl">
+                  Start with the companion, then climb into school, identity,
+                  and DNA.
+                </h1>
+                <p className="text-sm leading-7 text-slate-300 sm:text-base">
+                  This home route is now the plain-language launch point. Care
+                  builds the bond, school turns that bond into pattern learning,
+                  identity keeps ownership local, and DNA reveals the hidden
+                  engine underneath all three.
+                </p>
+                <div className="flex flex-wrap gap-3 pt-1">
+                  <Button asChild className="bg-cyan-500 text-slate-950 hover:bg-cyan-400">
+                    <Link href={launchStep.entryCta.href}>
+                      {launchStep.entryCta.label}
+                    </Link>
+                  </Button>
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="border-emerald-400/40 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/15"
+                  >
+                    <Link href={classroomStep.entryCta.href}>
+                      {classroomStep.entryCta.label}
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid w-full gap-3 sm:grid-cols-2 lg:max-w-xl">
+                {journeySteps.map((step) => (
+                  <Link
+                    key={step.key}
+                    href={step.href}
+                    className="rounded-[1.5rem] border border-slate-800 bg-slate-900/70 p-4 transition-colors hover:border-cyan-400/35 hover:bg-slate-900"
+                  >
+                    <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">
+                      Step {step.step}
+                    </p>
+                    <p className="mt-2 text-lg font-semibold text-white">
+                      {step.shortLabel}
+                    </p>
+                    <p className="mt-2 text-sm text-slate-300">
+                      {step.entryCta.description}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* ===== HERO SECTION: PET AT TOP ===== */}
         <div className="pt-6 pb-2">
           {/* Pet Name & Type Toggle */}
-          <div className="text-center px-4 mb-4">
-            <div className="flex items-center justify-center gap-2 mb-2">
+          <div className="mb-4 px-4 text-center">
+            <div className="mb-2 flex items-center justify-center gap-2">
               <label htmlFor="pet-name" className="sr-only">
                 {strings.core.nameLabel}
               </label>
@@ -1875,7 +1938,7 @@ export default function Home() {
                 className="w-full max-w-[280px] text-2xl font-bold text-center bg-transparent border-none text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-950 sm:max-w-[360px] md:max-w-[420px]"
               />
             </div>
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex flex-wrap items-center justify-center gap-2">
               <Button
                 variant={petType === "geometric" ? "default" : "ghost"}
                 size="sm"
@@ -1917,7 +1980,7 @@ export default function Home() {
           </div>
 
           {/* Wellness Quick Bar */}
-          <div className="flex flex-wrap items-center justify-center gap-2 pt-4 px-4">
+          <div className="flex flex-wrap items-center justify-center gap-2 px-4 pt-4">
             <QuickMoodButton onClick={() => setWellnessSyncOpen(true)} />
             <HydrationQuickButton onClick={() => setHydrationOpen(true)} />
             <SleepStatusButton onClick={() => setSleepOpen(true)} />
@@ -1932,7 +1995,7 @@ export default function Home() {
         <CompactVitalsBar />
 
         {/* ===== CONTENT SECTIONS ===== */}
-        <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
+        <div className="mx-auto max-w-2xl space-y-4 px-4 py-5 sm:py-6">
           {/* Ritual Loop - Important, keep expanded */}
           <div id="ritual">
             <RitualLoop
@@ -2157,7 +2220,7 @@ export default function Home() {
                       Compatibility Preview
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid gap-3 text-sm sm:grid-cols-2">
                     <div>
                       <span className="text-zinc-400">Partner:</span>
                       <span className="ml-2 text-white">
@@ -2411,7 +2474,7 @@ export default function Home() {
                 <p className="text-xs uppercase tracking-wide text-zinc-400">
                   {strings.classroom.languageLabel}
                 </p>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                <div className="grid grid-cols-2 gap-2 lg:grid-cols-5">
                   {SUPPORTED_LOCALES.map((option) => (
                     <Button
                       key={option}
@@ -2501,7 +2564,7 @@ export default function Home() {
               {/* Steering Wheel â€” Central Navigator */}
               <div className="bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 rounded-2xl border border-cyan-500/20 p-4">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-start gap-3">
                     <Compass className="w-6 h-6 text-cyan-400" />
                     <div>
                       <h2 className="text-lg font-bold text-white">
@@ -2565,7 +2628,7 @@ export default function Home() {
                   digits form a tamper-proof fingerprint that proves
                   authenticity without revealing the underlying DNA.
                 </p>
-                <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="grid gap-3 text-sm sm:grid-cols-2">
                   <div className="flex items-center gap-2">
                     <span className="text-zinc-400">Vault:</span>
                     <span className="text-blue-400 font-mono font-bold uppercase">

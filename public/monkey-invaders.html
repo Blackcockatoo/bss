@@ -330,6 +330,8 @@
             user-select: none;
             -webkit-user-select: none;
             filter: drop-shadow(0 34px 48px rgba(0, 0, 0, 0.42));
+            max-width: calc(100vw - 24px);
+            max-height: calc(100dvh - 24px);
         }
 
         #cabinetDecor {
@@ -1111,6 +1113,8 @@
             z-index: 100;
             text-align: center;
             padding: 30px;
+            overflow-y: auto;
+            overscroll-behavior: contain;
         }
 
         #gameOverScreen,
@@ -2289,6 +2293,33 @@
             filter: brightness(1.14);
         }
 
+        body[data-mobile-compact='true'] .room-cabinet,
+        body[data-mobile-compact='true'] .room-neon,
+        body[data-mobile-compact='true'] .room-light,
+        body[data-mobile-compact='true'] .cabinet-side-art,
+        body[data-mobile-compact='true'] .cabinet-speaker,
+        body[data-mobile-compact='true'] .cabinet-deck,
+        body[data-mobile-compact='true'] .cabinet-mascot,
+        body[data-mobile-compact='true'] #brandWatermark {
+            display: none !important;
+        }
+
+        body[data-mobile-compact='true'] .cabinet-marquee {
+            left: 9%;
+            right: 9%;
+            height: 12%;
+        }
+
+        body[data-mobile-compact='true'] #gameWrapper::before {
+            inset: -10px;
+            border-radius: 28px;
+        }
+
+        body[data-mobile-compact='true'] #gameWrapper::after {
+            inset: -4px;
+            border-radius: 24px;
+        }
+
         @media (max-width: 680px) {
             h1 { font-size: 34px; }
             h2 { font-size: 30px; }
@@ -2327,9 +2358,43 @@
                 line-height: 1.45;
                 letter-spacing: 0.05em;
             }
+            #gameWrapper {
+                max-width: calc(100vw - 16px);
+            }
+            #startScreen,
+            #gameOverScreen,
+            #levelScreen,
+            #pauseOverlay,
+            #bossRewardScreen,
+            #operatorMenu,
+            #endingSequenceScreen,
+            #initialsEntryScreen {
+                padding: 18px 14px;
+            }
         }
 
         @media (max-width: 430px) {
+            .brand-kicker {
+                margin-bottom: 14px;
+                padding: 6px 10px;
+                font-size: 10px;
+                letter-spacing: 0.12em;
+            }
+            .controls {
+                margin-top: 20px;
+                font-size: 13px;
+                line-height: 1.6;
+            }
+            .controls span {
+                margin: 2px 4px;
+            }
+            .attract-banner,
+            .pause-card,
+            .operator-shell,
+            .ending-shell,
+            .initials-frame {
+                width: 100%;
+            }
             #touchControls {
                 gap: 10px;
                 padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
@@ -2864,6 +2929,7 @@
         const keys = {};
         const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         const INITIAL_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const actionBindings = new WeakSet();
 
         let phoneHintTimer = null;
         let phoneHintShownOnce = false;
@@ -3375,6 +3441,11 @@
 
         function setCabinetState(state) {
             document.body.dataset.cabinet = state;
+        }
+
+        function updateMobileCabinetMode() {
+            const compact = hasTouch && (window.innerWidth < 920 || window.innerHeight < 760);
+            document.body.dataset.mobileCompact = compact ? 'true' : 'false';
         }
 
         function resolveCabinetState() {
@@ -4577,23 +4648,28 @@
         }
 
         function getTopReserve() {
-            return (floatingNav ? floatingNav.getBoundingClientRect().height : 0) + (phoneHint.style.display === 'block' ? 34 : 0) + 26;
+            const navHeight = floatingNav ? floatingNav.getBoundingClientRect().height : 0;
+            const hintHeight = phoneHint.style.display === 'block'
+                ? phoneHint.getBoundingClientRect().height + 10
+                : 0;
+            return navHeight + hintHeight + (window.innerWidth < 520 ? 12 : 24);
         }
 
         function getBottomReserve() {
-            if (!touchControls || touchControls.style.display === 'none') return 18;
-            return touchControls.getBoundingClientRect().height + 12;
+            if (!touchControls || touchControls.style.display === 'none') return hasTouch ? 12 : 18;
+            return touchControls.getBoundingClientRect().height + (window.innerHeight < 740 ? 6 : 12);
         }
 
         function fitGameToScreen() {
+            updateMobileCabinetMode();
             updatePhoneHint();
-            const pad = 24;
+            const pad = window.innerWidth < 520 ? 14 : 24;
             const availW = Math.max(220, window.innerWidth - pad);
-            const availH = Math.max(220, window.innerHeight - getTopReserve() - getBottomReserve() - 12);
+            const availH = Math.max(220, window.innerHeight - getTopReserve() - getBottomReserve() - (window.innerHeight < 740 ? 4 : 12));
             const scale = Math.min(availW / CABINET_WIDTH, availH / CABINET_HEIGHT, 1);
             window.currentScale = scale;
-            gameWrapper.style.width = `${Math.floor(BASE_WIDTH * scale)}px`;
-            gameWrapper.style.height = `${Math.floor(BASE_HEIGHT * scale)}px`;
+            gameWrapper.style.width = `${Math.max(220, Math.floor(BASE_WIDTH * scale))}px`;
+            gameWrapper.style.height = `${Math.max(180, Math.floor(BASE_HEIGHT * scale))}px`;
             gameContainer.style.transform = `translate(0px, 0px) scale(${scale})`;
         }
 
@@ -6523,6 +6599,54 @@
             button.addEventListener('contextmenu', event => event.preventDefault());
         }
 
+        function bindPressAction(button, handler, options = {}) {
+            if (!button || actionBindings.has(button)) return;
+            actionBindings.add(button);
+
+            const { feedback = 'button' } = options;
+            let activePointerId = null;
+
+            const clearPressed = () => {
+                activePointerId = null;
+                button.classList.remove('pressed');
+            };
+
+            const run = async event => {
+                if (event?.preventDefault) event.preventDefault();
+                if (event?.stopPropagation) event.stopPropagation();
+                clearPressed();
+                await armArcadeFeedback(feedback);
+                await handler(event);
+            };
+
+            if (window.PointerEvent) {
+                button.addEventListener('pointerdown', event => {
+                    if (event.pointerType === 'mouse' && event.button !== 0) return;
+                    activePointerId = event.pointerId;
+                    button.classList.add('pressed');
+                }, { passive: true });
+                button.addEventListener('pointerup', async event => {
+                    if (activePointerId !== null && event.pointerId !== activePointerId) return;
+                    await run(event);
+                }, { passive: false });
+                ['pointercancel', 'pointerleave', 'lostpointercapture'].forEach(name => {
+                    button.addEventListener(name, clearPressed, { passive: true });
+                });
+            } else {
+                button.addEventListener('touchstart', () => {
+                    button.classList.add('pressed');
+                }, { passive: true });
+                button.addEventListener('touchend', run, { passive: false });
+                button.addEventListener('touchcancel', clearPressed, { passive: true });
+                button.addEventListener('mousedown', () => button.classList.add('pressed'));
+                button.addEventListener('mouseup', run);
+                button.addEventListener('mouseleave', clearPressed);
+            }
+
+            button.addEventListener('click', event => event.preventDefault());
+            button.addEventListener('contextmenu', event => event.preventDefault());
+        }
+
         function gameLoop(currentTime) {
             if (!gameRunning || paused) return;
             const dt = Math.min(currentTime - lastTime, 34);
@@ -6596,92 +6720,75 @@
         }
 
         document.querySelectorAll('.difficulty-option').forEach(button => {
-            button.addEventListener('click', async () => {
-                await armArcadeFeedback('button');
+            bindPressAction(button, async () => {
                 setDifficulty(button.dataset.difficulty);
             });
         });
 
-        document.getElementById('startButton').addEventListener('click', async () => {
-            await armArcadeFeedback('button');
+        bindPressAction(document.getElementById('startButton'), async () => {
             await startGame();
         });
-        document.getElementById('playAgainButton').addEventListener('click', async () => {
-            await armArcadeFeedback('button');
+        bindPressAction(document.getElementById('playAgainButton'), async () => {
             await startGame();
         });
-        document.getElementById('resumeButton').addEventListener('click', async () => {
-            await armArcadeFeedback('button');
+        bindPressAction(document.getElementById('resumeButton'), async () => {
             unpauseGame();
         });
-        document.getElementById('pauseRestartBtn').addEventListener('click', async () => {
-            await armArcadeFeedback('button');
+        bindPressAction(document.getElementById('pauseRestartBtn'), async () => {
             await startGame();
         });
-        document.getElementById('pauseTitleBtn').addEventListener('click', async () => {
-            await armArcadeFeedback('button');
+        bindPressAction(document.getElementById('pauseTitleBtn'), async () => {
             returnToTitle();
         });
-        opInvincibleButton.addEventListener('click', async () => {
-            await armArcadeFeedback('button');
+        bindPressAction(opInvincibleButton, async () => {
             cheats.invincible = !cheats.invincible;
             updateSettingButtons();
         });
-        opArsenalButton.addEventListener('click', async () => {
-            await armArcadeFeedback('button');
+        bindPressAction(opArsenalButton, async () => {
             grantOperatorArsenal();
             updateSettingButtons();
         });
-        opMonkeyModeButton.addEventListener('click', async () => {
-            await armArcadeFeedback('button');
+        bindPressAction(opMonkeyModeButton, async () => {
             triggerMonkeyModeCheat();
             updateSettingButtons();
         });
-        opSkipButton.addEventListener('click', async () => {
-            await armArcadeFeedback('button');
+        bindPressAction(opSkipButton, async () => {
             skipEncounter();
             updateSettingButtons();
         });
-        opEndlessCreditsButton.addEventListener('click', async () => {
-            await armArcadeFeedback('button');
+        bindPressAction(opEndlessCreditsButton, async () => {
             cheats.endlessCredits = !cheats.endlessCredits;
             updateSettingButtons();
         });
-        opMascotPartyButton.addEventListener('click', async () => {
-            await armArcadeFeedback('button');
+        bindPressAction(opMascotPartyButton, async () => {
             cheats.mascotParty = !cheats.mascotParty;
             updateSettingButtons();
             renderMascots();
         });
-        opCreditButton.addEventListener('click', async () => {
-            await armArcadeFeedback('button');
+        bindPressAction(opCreditButton, async () => {
             await insertCoin(false);
             updateSettingButtons();
         });
-        opTitleButton.addEventListener('click', async () => {
-            await armArcadeFeedback('button');
+        bindPressAction(opTitleButton, async () => {
             closeOperatorMenu(true);
             returnToTitle();
         });
-        operatorCloseButton.addEventListener('click', async () => {
-            await armArcadeFeedback('button');
+        bindPressAction(operatorCloseButton, async () => {
             closeOperatorMenu();
         });
-        insertCoinButton.addEventListener('click', async () => {
+        bindPressAction(insertCoinButton, async () => {
             await ensureAudio();
             await insertCoin(false);
-        });
-        document.getElementById('continueBossButton').addEventListener('click', async () => {
-            await armArcadeFeedback('button');
+        }, { feedback: 'coin' });
+        bindPressAction(document.getElementById('continueBossButton'), async () => {
             continueBossReward();
         });
-        endingAdvanceButton.addEventListener('click', async () => {
-            await armArcadeFeedback('button');
+        bindPressAction(endingAdvanceButton, async () => {
             advanceEndingSequence();
         });
 
         document.querySelectorAll('.initial-step').forEach(button => {
-            button.addEventListener('click', async () => {
+            bindPressAction(button, async () => {
                 await ensureAudio();
                 initialsState.index = Number(button.dataset.slot);
                 shiftInitial(Number(button.dataset.slot), Number(button.dataset.step));
@@ -6689,24 +6796,24 @@
         });
 
         document.querySelectorAll('.initial-slot').forEach(slot => {
-            slot.addEventListener('click', () => {
+            bindPressAction(slot, async () => {
                 initialsState.index = Number(slot.dataset.slot);
                 renderInitialsEntry();
                 playUiBlip();
             });
         });
 
-        document.getElementById('initialPrev').addEventListener('click', async () => {
+        bindPressAction(document.getElementById('initialPrev'), async () => {
             await ensureAudio();
             moveInitialSelection(-1);
         });
 
-        document.getElementById('initialNext').addEventListener('click', async () => {
+        bindPressAction(document.getElementById('initialNext'), async () => {
             await ensureAudio();
             moveInitialSelection(1);
         });
 
-        document.getElementById('saveInitialsButton').addEventListener('click', async () => {
+        bindPressAction(document.getElementById('saveInitialsButton'), async () => {
             await ensureAudio();
             saveInitialsEntry();
         });
@@ -6757,8 +6864,7 @@
             });
         }
 
-        document.getElementById('fullscreenBtn').addEventListener('click', async () => {
-            await armArcadeFeedback('button');
+        bindPressAction(document.getElementById('fullscreenBtn'), async () => {
             try {
                 if (document.fullscreenElement) await document.exitFullscreen();
                 else await document.documentElement.requestFullscreen();

@@ -1,6 +1,7 @@
 "use client";
 
 import LegalNotice from "@/components/LegalNotice";
+import { JourneyProgressStrip } from "@/components/JourneyProgressStrip";
 import { QuickNav } from "@/components/QuickNav";
 import {
   getChildSafeFallbackPathname,
@@ -8,7 +9,7 @@ import {
 } from "@/lib/childSafeBaseline";
 import { ENABLE_CHILD_SAFE_BASELINE } from "@/lib/env/features";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function ClientBody({
   children,
@@ -17,6 +18,7 @@ export default function ClientBody({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [privacyOpen, setPrivacyOpen] = useState(false);
   const childSafeBlocked = useMemo(
     () =>
       ENABLE_CHILD_SAFE_BASELINE &&
@@ -69,22 +71,31 @@ export default function ClientBody({
   }
 
   return (
-    <div className="antialiased min-h-screen pb-[calc(6rem+env(safe-area-inset-bottom))] flex flex-col">
-      <div className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/90 px-4 py-3 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3">
+    <div className="antialiased flex min-h-screen flex-col pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]">
+      <div className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/90 px-3 py-2 backdrop-blur sm:px-4 sm:py-3">
+        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 sm:gap-3">
           <div className="text-sm text-zinc-200">Meta-Pet</div>
-          <span className="text-xs text-emerald-300">
-            Child-safe local mode
-          </span>
+          <button
+            type="button"
+            onClick={() => setPrivacyOpen((current) => !current)}
+            className="min-h-9 rounded-full border border-emerald-400/25 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-200 transition-colors hover:border-emerald-300/45 hover:bg-emerald-500/15"
+            aria-expanded={privacyOpen}
+          >
+            Local-first / child-safe
+          </button>
         </div>
-        <p className="mx-auto mt-2 w-full max-w-6xl text-xs text-zinc-400">
-          Default student use stays local-first, zero-account, and free from
-          countdown or streak pressure.
-        </p>
+        {privacyOpen && (
+          <div className="mx-auto mt-3 w-full max-w-6xl rounded-2xl border border-slate-800 bg-slate-900/60 p-3 text-xs leading-5 text-zinc-300 sm:leading-6">
+            Default student use stays local-first, zero-account, and free from
+            countdown or streak pressure. Identity, class progress, and pet
+            records stay on this device unless you deliberately export them.
+          </div>
+        )}
+        <JourneyProgressStrip />
       </div>
 
-      <div className="flex-1">{children}</div>
-      <footer className="px-4 pb-6 pt-4 text-center">
+      <div className="flex-1 pb-2">{children}</div>
+      <footer className="px-4 pb-24 pt-4 text-center sm:pb-6">
         <LegalNotice />
       </footer>
       <QuickNav />

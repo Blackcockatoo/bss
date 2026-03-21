@@ -5,8 +5,10 @@ import type { LessonContext } from "@/components/DigitalDNAHub";
 import { EduVibeBoard } from "@/components/EduVibeBoard";
 import { EducationQueuePanel } from "@/components/EducationQueuePanel";
 import { RouteProgressionCard } from "@/components/RouteProgressionCard";
+import { RouteTutorialControls } from "@/components/RouteTutorialControls";
 import { FOCUS_AREA_LABELS, useEducationStore } from "@/lib/education";
 import type { DnaMode, QuickFireChallenge } from "@/lib/education";
+import { useJourneyProgressTracker } from "@/lib/journeyProgress";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowDown,
@@ -23,14 +25,24 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { TEACHER_HUB_MENU_ACTIONS } from "./menuActions";
+import {
+  PLANNED_TEACHER_HUB_MENU_ACTIONS,
+  PRIMARY_TEACHER_HUB_MENU_ACTIONS,
+} from "./menuActions";
 
 const PAIRING_STORAGE_KEY = "teacher-hub-pairing-state";
+const CLASSROOM_ROSTER_STORAGE_KEY = "metapet-classroom-roster";
+const CLASSROOM_ANALYTICS_STORAGE_KEY = "metapet-classroom-analytics";
 
 type PairingState = {
   pairedPetAlias: string | null;
   crestConfirmedAt: number | null;
   questLaunchedAt: number | null;
+};
+
+type TeacherSummary = {
+  rosterCount: number;
+  completionRate: number;
 };
 
 const PILLAR_DNA_MODES: Record<string, DnaMode[]> = {
@@ -59,6 +71,44 @@ const PILLARS = [
     icon: ClipboardList,
   },
 ];
+
+function loadTeacherSummary(): TeacherSummary {
+  if (typeof window === "undefined") {
+    return {
+      rosterCount: 0,
+      completionRate: 0,
+    };
+  }
+
+  let rosterCount = 0;
+  let completionRate = 0;
+
+  try {
+    const roster = JSON.parse(
+      window.localStorage.getItem(CLASSROOM_ROSTER_STORAGE_KEY) ?? "[]",
+    ) as Array<unknown>;
+    rosterCount = Array.isArray(roster) ? roster.length : 0;
+  } catch {
+    rosterCount = 0;
+  }
+
+  try {
+    const analytics = JSON.parse(
+      window.localStorage.getItem(CLASSROOM_ANALYTICS_STORAGE_KEY) ?? "{}",
+    ) as { completionRate?: number };
+    completionRate =
+      typeof analytics.completionRate === "number"
+        ? analytics.completionRate
+        : 0;
+  } catch {
+    completionRate = 0;
+  }
+
+  return {
+    rosterCount,
+    completionRate,
+  };
+}
 
 function loadPersistedPairingState(): PairingState {
   if (typeof window === "undefined") {
@@ -190,7 +240,7 @@ function QuickFireRound({ difficulty = 1 }: { difficulty?: number }) {
           </p>
           <p className="text-xs text-cyan-300">Take your time</p>
         </div>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {DIRECTION_ICONS.map((Icon, dir) => (
             <motion.button
               key={dir}
@@ -254,6 +304,7 @@ export default function SchoolGamePage() {
   const activeLesson = useEducationStore((s) => s.activeLesson);
   const activateLesson = useEducationStore((s) => s.activateLesson);
   const lessonProgress = useEducationStore((s) => s.lessonProgress);
+  useJourneyProgressTracker("school", { completeOnVisit: true });
 
   const [activeDnaView, setActiveDnaView] = useState<LessonContext | null>(
     null,
@@ -270,6 +321,9 @@ export default function SchoolGamePage() {
   const [qrInput, setQrInput] = useState("");
   const [flowError, setFlowError] = useState<string | null>(null);
   const [flowSuccess, setFlowSuccess] = useState<string | null>(null);
+  const [teacherSummary, setTeacherSummary] = useState<TeacherSummary>(() =>
+    loadTeacherSummary(),
+  );
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -283,6 +337,21 @@ export default function SchoolGamePage() {
     );
   }, [pairingState]);
 
+  useEffect(() => {
+    const syncSummary = () => {
+      setTeacherSummary(loadTeacherSummary());
+    };
+
+    syncSummary();
+    window.addEventListener("storage", syncSummary);
+    window.addEventListener("focus", syncSummary);
+
+    return () => {
+      window.removeEventListener("storage", syncSummary);
+      window.removeEventListener("focus", syncSummary);
+    };
+  }, []);
+
   const completedCount = useMemo(
     () => lessonProgress.filter((p) => p.status === "completed").length,
     [lessonProgress],
@@ -292,6 +361,8 @@ export default function SchoolGamePage() {
     () => queue.find((l) => l.id === activeLesson),
     [queue, activeLesson],
   );
+  const primaryMenuActions = PRIMARY_TEACHER_HUB_MENU_ACTIONS;
+  const plannedMenuActions = PLANNED_TEACHER_HUB_MENU_ACTIONS;
 
   const handleStartQuest = () => {
     if (!pairingState.pairedPetAlias) {
@@ -396,16 +467,22 @@ export default function SchoolGamePage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-950 via-indigo-950 to-slate-900 text-white px-6 py-8">
+    <main className="min-h-screen bg-gradient-to-b from-slate-950 via-indigo-950 to-slate-900 px-4 py-6 text-white sm:px-6 sm:py-8">
       <div className="mx-auto max-w-5xl">
         <div className="grid gap-8 lg:grid-cols-[1fr,300px]">
           {/* Main Content */}
           <div className="space-y-8">
             <header className="space-y-3">
-              <p className="inline-flex items-center gap-2 rounded-full border border-emerald-300/30 bg-emerald-400/10 px-3 py-1 text-xs text-emerald-200">
-                <Sparkles className="h-3.5 w-3.5" />
-                Classroom-ready
-              </p>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="inline-flex items-center gap-2 rounded-full border border-emerald-300/30 bg-emerald-400/10 px-3 py-1 text-xs text-emerald-200">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Classroom-ready
+                </p>
+                <RouteTutorialControls
+                  scope="school"
+                  className="text-slate-400 hover:text-white"
+                />
+              </div>
               <h1 className="text-3xl font-bold sm:text-4xl">
                 Classroom Quest
               </h1>
@@ -413,7 +490,7 @@ export default function SchoolGamePage() {
                 A calm, school-appropriate experience focused on teamwork,
                 pattern literacy, and short reflection loops.
               </p>
-              <p className="text-xs text-slate-600 leading-relaxed max-w-lg">
+                <p className="max-w-lg text-xs leading-relaxed text-slate-600">
                 Every activity here maps to real curriculum standards (NGSS,
                 ISTE). Pattern Detective builds observation skills. Team Story
                 Builder teaches collaboration without competition. Reflection
@@ -423,6 +500,51 @@ export default function SchoolGamePage() {
             </header>
 
             <RouteProgressionCard route="school" />
+
+            <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+              <div className="rounded-2xl border border-slate-700/60 bg-slate-900/70 p-4">
+                <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
+                  Local roster
+                </p>
+                <p className="mt-2 text-2xl font-semibold text-white">
+                  {teacherSummary.rosterCount}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-slate-700/60 bg-slate-900/70 p-4">
+                <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
+                  Queued lessons
+                </p>
+                <p className="mt-2 text-2xl font-semibold text-white">
+                  {queue.length}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-slate-700/60 bg-slate-900/70 p-4">
+                <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
+                  Completion rate
+                </p>
+                <p className="mt-2 text-2xl font-semibold text-white">
+                  {Math.round(teacherSummary.completionRate * 100)}%
+                </p>
+              </div>
+              <div className="rounded-2xl border border-slate-700/60 bg-slate-900/70 p-4">
+                <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
+                  Paired pet
+                </p>
+                <p className="mt-2 text-sm font-semibold text-white">
+                  {pairingState.pairedPetAlias ?? "Not paired yet"}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-slate-700/60 bg-slate-900/70 p-4">
+                <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
+                  Last launch
+                </p>
+                <p className="mt-2 text-sm font-semibold text-white">
+                  {pairingState.questLaunchedAt
+                    ? new Date(pairingState.questLaunchedAt).toLocaleString()
+                    : "No quest launched yet"}
+                </p>
+              </div>
+            </section>
 
             {/* Queue Summary */}
             <section className="rounded-2xl border border-emerald-400/30 bg-emerald-500/5 p-5 space-y-4">
@@ -435,15 +557,13 @@ export default function SchoolGamePage() {
                 </span>
               </div>
               <div className="grid gap-2 sm:grid-cols-2">
-                {TEACHER_HUB_MENU_ACTIONS.map((action) => {
-                  const isLive = action.status === "live";
+                {primaryMenuActions.map((action) => {
                   const isSelected = selectedActionId === action.id;
                   return (
                     <button
                       key={action.id}
                       type="button"
                       onClick={() =>
-                        isLive &&
                         setSelectedActionId(
                           action.id as
                             | "pair-qr"
@@ -451,37 +571,47 @@ export default function SchoolGamePage() {
                             | "launch-quest",
                         )
                       }
-                      disabled={!isLive}
                       className={`rounded-lg border px-3 py-2 text-left transition ${
                         isSelected
                           ? "border-emerald-400/70 bg-emerald-400/10"
                           : "border-slate-700 bg-slate-900/50"
-                      } ${!isLive ? "opacity-60 cursor-not-allowed" : "hover:border-emerald-400/50 hover:bg-emerald-500/5"}`}
+                      } hover:border-emerald-400/50 hover:bg-emerald-500/5`}
                     >
                       <p className="text-sm font-semibold text-zinc-100">
                         {action.label}
-                        {!isLive && (
-                          <span className="ml-2 text-xs text-amber-300">
-                            Coming soon
-                          </span>
-                        )}
                       </p>
                       <p className="mt-1 text-xs text-zinc-400">
-                        {isLive
-                          ? action.description
-                          : `${action.description} Coming soon.`}
+                        {action.description}
                       </p>
                     </button>
                   );
                 })}
               </div>
 
+              {plannedMenuActions.length > 0 && (
+                <div className="rounded-lg border border-slate-700 bg-slate-950/40 p-3">
+                  <p className="text-xs uppercase tracking-[0.24em] text-slate-500">
+                    Planned extensions
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-300">
+                    {plannedMenuActions.map((action) => (
+                      <span
+                        key={action.id}
+                        className="rounded-full border border-slate-700 bg-slate-900/70 px-3 py-1"
+                      >
+                        {action.label}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {selectedActionId === "pair-qr" && (
                 <div className="rounded-lg border border-slate-700 bg-slate-950/60 p-3 space-y-2">
                   <p className="text-xs text-zinc-400">
                     Pair with pet via QR payload
                   </p>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-2 sm:flex-row">
                     <input
                       value={qrInput}
                       onChange={(e) => setQrInput(e.target.value)}
@@ -566,7 +696,7 @@ export default function SchoolGamePage() {
                 )}
 
                 {/* Student alias input */}
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row">
                   <input
                     value={studentAlias}
                     onChange={(e) => setStudentAlias(e.target.value)}
@@ -606,7 +736,7 @@ export default function SchoolGamePage() {
             )}
 
             {/* Learning Pillars */}
-            <section className="grid gap-4 sm:grid-cols-3">
+            <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {PILLARS.map(({ title, description, icon: Icon }, index) => {
                 const modes = PILLAR_DNA_MODES[title] ?? [];
                 const hasMatchingLesson = queue.some(

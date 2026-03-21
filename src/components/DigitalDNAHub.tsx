@@ -29,6 +29,8 @@ import {
 import { PatternQuestBoard } from "@/components/PatternQuestBoard";
 import * as THREE from "three";
 import * as Tone from "tone";
+import { saveDnaImprint } from "@/lib/dnaImprint";
+import { buildDigitalDNARevealModel } from "@/lib/digitalDnaReveal";
 import {
   buildLessonQuestSummary,
   createEmptyQuestModeCounts,
@@ -38,6 +40,7 @@ import {
   selectQuestPack,
   useEducationStore,
 } from "@/lib/education";
+import { markJourneyRouteCompleted } from "@/lib/journeyProgress";
 import {
   MOSS_DIGIT_COLORS as COLORS,
   MOSS_DIGIT_SHAPES,
@@ -48,6 +51,7 @@ import {
   type MossStrandKey,
 } from "@/lib/moss60/strandSequences";
 import { FULL_STRAND_PACKETS } from "@/lib/moss60/strandPackets";
+import { detectWebGLSupport } from "@/lib/renderSupport";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -469,7 +473,9 @@ export default function DigitalDNAHub({
   lessonContext,
 }: { lessonContext?: LessonContext }) {
   // ── UI state ──────────────────────────────────────────────────────────────
-  const [activeMode, setActiveMode] = useState<ModeKey>("spiral");
+  const [webglSupport] = useState(() => detectWebGLSupport());
+  const initialMode: ModeKey = webglSupport.supported ? "spiral" : "journey";
+  const [activeMode, setActiveMode] = useState<ModeKey>(initialMode);
   const [selectedSeed, setSelectedSeed] = useState<SeedKey>("red");
   const [sequenceSource, setSequenceSource] = useState<SequenceSource>("core");
   const [selectedPacketIndex, setSelectedPacketIndex] = useState(0);
@@ -560,7 +566,7 @@ export default function DigitalDNAHub({
   // Session tracking
   const [sessionInteractions, setSessionInteractions] = useState(0);
   const [playCount, setPlayCount] = useState(0);
-  const [visitedModes, setVisitedModes] = useState<ModeKey[]>(["spiral"]);
+  const [visitedModes, setVisitedModes] = useState<ModeKey[]>([initialMode]);
   const [modeInteractions, setModeInteractions] = useState(() =>
     createEmptyQuestModeCounts(),
   );
@@ -748,6 +754,14 @@ export default function DigitalDNAHub({
       prev.includes(activeMode) ? prev : [...prev, activeMode],
     );
   }, [activeMode]);
+
+  useEffect(() => {
+    if (activeMode !== "spiral" || webglSupport.supported) {
+      return;
+    }
+
+    setActiveMode(webglSupport.fallbackMode);
+  }, [activeMode, webglSupport]);
 
   useEffect(() => {
     setNoteBoard((current) => {
@@ -1128,6 +1142,7 @@ export default function DigitalDNAHub({
       frequencyMap[0],
     );
   }, [frequencyMap]);
+  const revealModel = useMemo(() => buildDigitalDNARevealModel(), []);
   const currentSeedMeta = MOSS_STRAND_META[selectedSeed];
   const miniPathMaxLength = SEEDS[selectedSeed].length;
   const trianglePerimeterDigits = useMemo(
@@ -1173,6 +1188,7 @@ export default function DigitalDNAHub({
       : toolkitSoundSequence;
   const soundSourceLabel =
     soundSource === "triangle" ? "Triangle Trace" : "Toolkit Phrase";
+  const recommendedModeId = webglSupport.supported ? "spiral" : "journey";
   const noteBoardDigits = useMemo(
     () => noteBoard.filter((digit): digit is number => digit !== null),
     [noteBoard],
@@ -1306,6 +1322,24 @@ export default function DigitalDNAHub({
     isLessonCompleted,
     lessonContext,
     saveQuestSummary,
+  ]);
+
+  useEffect(() => {
+    saveDnaImprint({
+      selectedSeed,
+      resonanceClass: revealModel.resonanceClass,
+      liveMutationSeed: revealModel.liveMutationSeed,
+      dominantLattice: revealModel.dominantLattice,
+      completedMode: activeMode,
+      updatedAt: Date.now(),
+    });
+    markJourneyRouteCompleted("dna");
+  }, [
+    activeMode,
+    revealModel.dominantLattice,
+    revealModel.liveMutationSeed,
+    revealModel.resonanceClass,
+    selectedSeed,
   ]);
 
   const completeLesson = useCallback(
@@ -1815,7 +1849,8 @@ export default function DigitalDNAHub({
   // 3-D Spiral (Three.js WebGL)
   // ══════════════════════════════════════════════════════════════════════════
   useEffect(() => {
-    if (!canvasRef.current || activeMode !== "spiral") return;
+    if (!canvasRef.current || activeMode !== "spiral" || !webglSupport.supported)
+      return;
 
     const canvas = canvasRef.current;
     const scene = new THREE.Scene();
@@ -2171,6 +2206,7 @@ export default function DigitalDNAHub({
     ensureAudio,
     registerInteraction,
     pulseHaptic,
+    webglSupport.supported,
   ]);
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -2376,18 +2412,26 @@ export default function DigitalDNAHub({
     playChord,
     registerInteraction,
     pulseHaptic,
+    webglSupport.supported,
   ]);
 
   // ══════════════════════════════════════════════════════════════════════════
   // Mode metadata
   // ══════════════════════════════════════════════════════════════════════════
 
-  const modes: { id: ModeKey; icon: string; label: string; desc: string }[] = [
+  const modes: {
+    id: ModeKey;
+    icon: string;
+    label: string;
+    desc: string;
+    requiresWebgl?: boolean;
+  }[] = [
     {
       id: "spiral",
       icon: "🌀",
       label: "DNA Helix",
       desc: "Drag · pinch · tap nodes",
+      requiresWebgl: true,
     },
     {
       id: "mandala",
@@ -2438,6 +2482,19 @@ export default function DigitalDNAHub({
       desc: "All-ages setup guide",
     },
   ];
+  const recommendedMode =
+    modes.find((mode) => mode.id === recommendedModeId) ?? modes[modes.length - 1];
+  const handleModeSelect = useCallback(
+    (modeId: ModeKey) => {
+      if (modeId === "spiral" && !webglSupport.supported) {
+        setActiveMode(webglSupport.fallbackMode);
+        return;
+      }
+
+      setActiveMode(modeId);
+    },
+    [webglSupport],
+  );
 
   // ══════════════════════════════════════════════════════════════════════════
   // Render
@@ -2488,16 +2545,116 @@ export default function DigitalDNAHub({
           </div>
         </div>
 
+        <div className="mb-8 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+          <section className="rounded-[1.75rem] border border-slate-800 bg-slate-900/70 p-5">
+            <p className="text-xs uppercase tracking-[0.3em] text-cyan-300/80">
+              What can I do here?
+            </p>
+            <p className="mt-3 text-sm leading-6 text-slate-300">
+              Start with <strong className="text-white">{recommendedMode.label}</strong>,
+              then branch into the modes that fit your device. Every view reads
+              the same strand and turns it into geometry, rhythm, or a playable
+              path.
+            </p>
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              {modes.map((mode) => (
+                <div
+                  key={`summary-${mode.id}`}
+                  className={`rounded-2xl border px-4 py-3 ${
+                    mode.id === recommendedMode.id
+                      ? "border-emerald-400/25 bg-emerald-500/10"
+                      : "border-slate-800 bg-slate-950/45"
+                  }`}
+                >
+                  <p className="text-sm font-semibold text-white">
+                    {mode.icon} {mode.label}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-400">{mode.desc}</p>
+                  {mode.requiresWebgl && !webglSupport.supported && (
+                    <p className="mt-2 text-[11px] text-amber-200">
+                      3D helix unavailable on this device
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-[1.75rem] border border-cyan-500/20 bg-cyan-950/15 p-5">
+            <p className="text-xs uppercase tracking-[0.3em] text-cyan-200/80">
+              Decode Guide
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/55 p-4">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">
+                  Seed
+                </p>
+                <p className="mt-2 text-lg font-semibold text-white">
+                  {currentSeedMeta.label}
+                </p>
+                <p className="mt-2 text-sm text-slate-300">
+                  The seed chooses which strand story you are currently reading.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/55 p-4">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">
+                  Harmony
+                </p>
+                <p className="mt-2 text-lg font-semibold text-white">
+                  {harmony}
+                </p>
+                <p className="mt-2 text-sm text-slate-300">
+                  Harmony changes how many mirrored arms or repeating structures
+                  the strand uses in each instrument.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/55 p-4">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">
+                  Mutation seed
+                </p>
+                <p className="mt-2 font-mono text-lg font-semibold text-white">
+                  {revealModel.liveMutationSeed}
+                </p>
+                <p className="mt-2 text-sm text-slate-300">
+                  This short code is the visible handoff between the reveal card
+                  and the deeper instruments below.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/55 p-4">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">
+                  Dominant lattice
+                </p>
+                <p className="mt-2 text-lg font-semibold text-white">
+                  {revealModel.dominantLattice}
+                </p>
+                <p className="mt-2 text-sm text-slate-300">
+                  These anchors are the easiest places to start explaining what
+                  the scene is showing.
+                </p>
+              </div>
+            </div>
+            {!webglSupport.supported && webglSupport.reason && (
+              <div className="mt-4 rounded-2xl border border-amber-400/25 bg-amber-500/10 p-4 text-sm text-amber-100">
+                {webglSupport.reason}
+              </div>
+            )}
+          </section>
+        </div>
+
         {/* ── Mode selector ─────────────────────────────────────────────────── */}
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {modes.map((mode) => (
             <button
               key={mode.id}
-              onClick={() => setActiveMode(mode.id)}
+              type="button"
+              onClick={() => handleModeSelect(mode.id)}
+              disabled={mode.requiresWebgl && !webglSupport.supported}
               className={`group relative min-h-[104px] rounded-2xl px-3 py-3 transition-all duration-300 ${
                 activeMode === mode.id
                   ? "bg-gradient-to-br from-amber-500 to-amber-600 shadow-xl shadow-amber-500/35 scale-[1.03]"
-                  : "bg-slate-800/60 hover:bg-slate-700/60 border border-slate-600/40 hover:border-slate-500/60"
+                  : mode.requiresWebgl && !webglSupport.supported
+                    ? "cursor-not-allowed border border-slate-800 bg-slate-900/45 text-slate-500"
+                    : "bg-slate-800/60 hover:bg-slate-700/60 border border-slate-600/40 hover:border-slate-500/60"
               }`}
             >
               <div className="text-3xl mb-1">{mode.icon}</div>
@@ -2507,6 +2664,11 @@ export default function DigitalDNAHub({
               <div className="text-[11px] text-slate-300 mt-1 leading-tight">
                 {mode.desc}
               </div>
+              {mode.requiresWebgl && !webglSupport.supported && (
+                <div className="mt-2 text-[10px] uppercase tracking-[0.18em] text-amber-200">
+                  Guided fallback active
+                </div>
+              )}
               {activeMode === mode.id && (
                 <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-600 blur opacity-25 -z-10" />
               )}
