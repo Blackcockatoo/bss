@@ -33,6 +33,7 @@ export {
   getAddonsByRarity,
 } from './catalog';
 export { CUSTOM_ADDONS } from './customAddons';
+export { GIRL_ADDON_LIST } from './girlAddons';
 
 // Crypto functions
 export {

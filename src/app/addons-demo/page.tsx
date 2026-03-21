@@ -23,6 +23,7 @@ import {
   SHADOW_CLOAK,
   PRISMATIC_AURA,
   FLOATING_FAMILIAR,
+  GIRL_ADDON_LIST,
   verifyAddon,
 } from '@/lib/addons';
 
@@ -306,6 +307,23 @@ export default function AddonsDemoPage() {
                 />
               </div>
             </div>
+
+            {/* Girl Collection */}
+            <div className="bg-slate-900/50 border border-pink-800/50 rounded-lg p-6">
+              <h2 className="text-xl font-bold text-white mb-1">Girl Collection</h2>
+              <p className="text-xs text-pink-300 mb-4">Lips, hair, jewellery & accessories</p>
+              <div className="grid grid-cols-2 gap-3">
+                {GIRL_ADDON_LIST.map((template) => (
+                  <MintButton
+                    key={template.id}
+                    name={template.name}
+                    rarity={template.rarity}
+                    onClick={() => handleMintAddon(template)}
+                    loading={loading}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Right: Inventory */}
@@ -361,6 +379,8 @@ interface MintButtonProps {
 
 const MintButton: React.FC<MintButtonProps> = ({ name, rarity, onClick, loading }) => {
   const rarityColors = {
+    common: 'from-slate-600 to-slate-700',
+    uncommon: 'from-green-600 to-green-700',
     rare: 'from-blue-600 to-blue-700',
     epic: 'from-purple-600 to-purple-700',
     legendary: 'from-orange-600 to-orange-700',
