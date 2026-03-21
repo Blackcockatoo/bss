@@ -6722,6 +6722,9 @@
         document.querySelectorAll('.difficulty-option').forEach(button => {
             bindPressAction(button, async () => {
                 setDifficulty(button.dataset.difficulty);
+                if (hasTouch && !gameRunning && startScreen.style.display !== 'none') {
+                    await startGame();
+                }
             });
         });
 
@@ -6977,6 +6980,8 @@
 
         if (hasTouch && touchControls) {
             touchControls.style.display = 'flex';
+            const startButton = document.getElementById('startButton');
+            if (startButton) startButton.textContent = 'Tap Level To Start';
             bindHold(document.getElementById('btnLeft'), 'ArrowLeft');
             bindHold(document.getElementById('btnRight'), 'ArrowRight');
             bindHold(document.getElementById('btnFire'), 'Space');
