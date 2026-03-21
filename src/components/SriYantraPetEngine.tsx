@@ -1345,20 +1345,7 @@ function SvgPet({
           strokeWidth="2.2"
           opacity="0.18"
         />
-        <circle
-          cx={CX}
-          cy={CY}
-          r="218"
-          fill={`url(#${goldId})`}
-          fillOpacity="0.03"
-        />
-        <circle
-          cx={CX}
-          cy={CY}
-          r="152"
-          fill={`url(#${blueId})`}
-          fillOpacity="0.04"
-        />
+        {/* outer circles removed */}
         <circle
           cx={CX}
           cy={CY}
@@ -1798,115 +1785,20 @@ export function SriYantraPetEngine({
     };
   }, [red, blue, black]);
 
-  const meta = SM[pet.species];
-  const maxForce = Math.max(
-    pet.forces.red,
-    pet.forces.blue,
-    pet.forces.black,
-    1,
-  );
-
   return (
-    <div
-      className={`rounded-3xl border border-white/10 bg-white/[0.02] overflow-hidden ${compact ? "" : "p-6"}`}
-    >
-      {!compact && (
-        <div className="mb-6 space-y-3">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-3 h-3 rounded-full"
-              style={{
-                background: meta.color,
-                boxShadow: `0 0 8px ${meta.color}`,
-              }}
-            />
-            <div>
-              <div className="text-[10px] uppercase tracking-[0.3em] text-white/35 font-mono">
-                Living Geometry Beast
-              </div>
-              <div
-                className="text-lg font-semibold tracking-[0.15em]"
-                style={{ color: meta.color }}
-              >
-                {meta.label}
-              </div>
-            </div>
-          </div>
-          <p className="text-xs text-white/60 leading-5">{meta.desc}</p>
-        </div>
-      )}
-
-      <div
-        className={`rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden ${compact ? "h-96" : "h-[500px]"}`}
-      >
-        <SvgPet
-          pet={pet}
-          time={time}
-          showConstellation={showConstellation}
-          showScaffold={showScaffold}
-          idPrefix={svgId}
-          movement={movement}
-          interactive={interactive}
-          activeZone={activeZone}
-          reaction={reaction}
-          gazeTarget={gazeTarget}
-          onZoneHover={onZoneHover}
-          onZoneTap={onZoneTap}
-        />
-      </div>
-
-      {!compact && (
-        <div className="mt-6 grid grid-cols-3 gap-4">
-          <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
-            <div className="text-[10px] uppercase tracking-[0.2em] text-white/40">
-              Red Force
-            </div>
-            <div className="mt-2 h-1.5 rounded-full bg-white/10 overflow-hidden">
-              <div
-                className="h-full bg-yellow-500"
-                style={{
-                  width: `${Math.min(100, (pet.forces.red / maxForce) * 100)}%`,
-                }}
-              />
-            </div>
-            <div className="mt-1 text-xs text-white/60">
-              {pet.forces.red.toFixed(1)}
-            </div>
-          </div>
-          <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
-            <div className="text-[10px] uppercase tracking-[0.2em] text-white/40">
-              Blue Force
-            </div>
-            <div className="mt-2 h-1.5 rounded-full bg-white/10 overflow-hidden">
-              <div
-                className="h-full bg-cyan-400"
-                style={{
-                  width: `${Math.min(100, (pet.forces.blue / maxForce) * 100)}%`,
-                }}
-              />
-            </div>
-            <div className="mt-1 text-xs text-white/60">
-              {pet.forces.blue.toFixed(1)}
-            </div>
-          </div>
-          <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
-            <div className="text-[10px] uppercase tracking-[0.2em] text-white/40">
-              Black Force
-            </div>
-            <div className="mt-2 h-1.5 rounded-full bg-white/10 overflow-hidden">
-              <div
-                className="h-full bg-purple-500"
-                style={{
-                  width: `${Math.min(100, (pet.forces.black / maxForce) * 100)}%`,
-                }}
-              />
-            </div>
-            <div className="mt-1 text-xs text-white/60">
-              {pet.forces.black.toFixed(1)}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    <SvgPet
+      pet={pet}
+      time={time}
+      showConstellation={showConstellation}
+      showScaffold={showScaffold}
+      idPrefix={svgId}
+      movement={movement}
+      interactive={interactive}
+      activeZone={activeZone}
+      reaction={reaction}
+      gazeTarget={gazeTarget}
+      onZoneHover={onZoneHover}
+      onZoneTap={onZoneTap}
+    />
   );
 }

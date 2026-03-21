@@ -21,7 +21,19 @@
       "Bash(curl -s http://localhost:3000/_next/static/chunks/src_app_page_tsx_b4090435._.js)",
       "Bash(grep -v \"import\\\\|//\")",
       "Bash(curl -s http://localhost:3000/_next/static/chunks/src_app_page_tsx_48b0236f._.js)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(powershell -command \"Add-Type -Assembly System.IO.Compression.FileSystem; [IO.Compression.ZipFile]::OpenRead\\(''C:\\\\Users\\\\Tom\\\\OneDrive\\\\Desktop\\\\march26\\\\meta-beast\\\\meta-pet-beta-geometry-forge\\\\meta-pet-beta-main\\\\tom.zip''\\).Entries | Select-Object -Property FullName, Length | Format-Table -AutoSize\")",
+      "Bash(powershell -command \"Expand-Archive -Path ''C:\\\\Users\\\\Tom\\\\OneDrive\\\\Desktop\\\\march26\\\\meta-beast\\\\meta-pet-beta-geometry-forge\\\\meta-pet-beta-main\\\\tom.zip'' -DestinationPath ''C:\\\\Users\\\\Tom\\\\AppData\\\\Local\\\\Temp\\\\tom-extract'' -Force\")",
+      "Bash(powershell -command \"Get-Content ''C:\\\\Users\\\\Tom\\\\OneDrive\\\\Desktop\\\\bss-main\\\\bss\\\\src\\\\components\\\\PetHero.tsx'' | Select-Object -Skip 127 -First 5\")",
+      "Bash(powershell -command \"Get-Process -Name node -ErrorAction SilentlyContinue | Select-Object Id, ProcessName, StartTime\")",
+      "Bash(powershell -command \"Select-String -Path ''C:\\\\Users\\\\Tom\\\\OneDrive\\\\Desktop\\\\bss-main\\\\bss\\\\src\\\\components\\\\PetHero.tsx'' -Pattern ''w-64''\")",
+      "Bash(powershell -command \"Get-ChildItem ''C:\\\\Users\\\\Tom\\\\OneDrive\\\\Desktop\\\\bss-main\\\\bss\\\\src\\\\lib\\\\store'' -ErrorAction SilentlyContinue | Select-Object Name; Get-ChildItem ''C:\\\\Users\\\\Tom\\\\OneDrive\\\\Desktop\\\\bss-main\\\\bss\\\\src\\\\store'' -ErrorAction SilentlyContinue | Select-Object Name\")",
+      "Bash(powershell -command \"Remove-Item -Recurse -Force ''C:\\\\Users\\\\Tom\\\\OneDrive\\\\Desktop\\\\bss-main\\\\bss\\\\.next'' -ErrorAction SilentlyContinue; echo ''cleared''\")",
+      "Bash(powershell -command \"Start-Sleep -Seconds 10; curl -s -o /dev/null -w ''%{http_code}'' http://localhost:3000\")",
+      "Bash(powershell -command \"Start-Sleep -Seconds 15; \\(Invoke-WebRequest -Uri ''http://localhost:3000'' -UseBasicParsing\\).StatusCode\")",
+      "Bash(powershell -command \"Select-String -Path ''C:\\\\Users\\\\Tom\\\\OneDrive\\\\Desktop\\\\bss-main\\\\bss\\\\src\\\\components\\\\SriYantraPetEngine.tsx'' -Pattern ''compact'' | ForEach-Object { $_LineNumber.ToString\\(\\) + '': '' + $_Line.Trim\\(\\) }\")",
+      "Bash(powershell -command \"Test-Path ''C:\\\\Users\\\\Tom\\\\OneDrive\\\\Desktop\\\\bss-main\\\\bss\\\\.next''\")",
+      "Bash(powershell -command \"Start-Sleep -Seconds 5; echo ''done''\")"
     ]
   }
 }
