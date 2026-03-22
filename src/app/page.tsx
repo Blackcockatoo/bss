@@ -67,6 +67,7 @@ import {
   ROUTE_PROGRESSION_SEQUENCE,
   getRouteProgression,
 } from "@/lib/routeProgression";
+import { PORTAL_DESCRIPTION, PORTAL_TAGLINE } from "@/lib/portalTruth";
 import { getDeviceHmacKey, mintPrimeTailId } from "@/lib/identity/crest";
 import { heptaEncode42, playHepta } from "@/lib/identity/hepta";
 import type {
@@ -1872,14 +1873,11 @@ export default function Home() {
                   Meta-Pet Launch Surface
                 </p>
                 <h1 className="text-3xl font-semibold text-white sm:text-4xl">
-                  Start with the companion, then climb into school, identity,
-                  and DNA.
+                  {PORTAL_TAGLINE}
                 </h1>
                 <p className="text-sm leading-7 text-slate-300 sm:text-base">
-                  This home route is now the plain-language launch point. Care
-                  builds the bond, school turns that bond into pattern learning,
-                  identity keeps ownership local, and DNA reveals the hidden
-                  engine underneath all three.
+                  This home route is now the plain-language launch point.{" "}
+                  {PORTAL_DESCRIPTION}
                 </p>
                 <div className="flex flex-wrap gap-3 pt-1">
                   <Button asChild className="bg-cyan-500 text-slate-950 hover:bg-cyan-400">

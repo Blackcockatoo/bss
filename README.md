@@ -149,6 +149,8 @@ Visit `http://localhost:3000`
 ## Planning Docs
 
 - Success criteria planning gate + one-page template: `docs/planning/success-criteria.md`
+- Child-safe baseline for student deployments: `docs/compliance/child-safe-baseline.md`
+- Teacher-facing digital engagement taxonomy: `docs/compliance/digital-engagement-taxonomy.md`
 
 ## Curriculum OS Docs (School Pilot)
 

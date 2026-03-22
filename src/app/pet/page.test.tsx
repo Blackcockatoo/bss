@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import PetPage from "@/app/pet/page";
 import { saveDnaImprint } from "@/lib/dnaImprint";
+import { getRouteProgression } from "@/lib/routeProgression";
 
 const startTick = vi.fn();
 const stopTick = vi.fn();
@@ -90,6 +91,9 @@ describe("PetPage", () => {
       expect(initializeStarterAddons).toHaveBeenCalled();
     });
 
+    expect(
+      screen.getByText(getRouteProgression("pet").summary),
+    ).toBeInTheDocument();
     expect(screen.getByText(/Latest DNA imprint/i)).toBeInTheDocument();
     expect(screen.getByText(/Tidal Orbit/i)).toBeInTheDocument();
     expect(

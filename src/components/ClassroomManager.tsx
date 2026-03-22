@@ -4,9 +4,20 @@ import { EducationQueuePanel } from "@/components/EducationQueuePanel";
 import { StudentDNACard } from "@/components/StudentDNACard";
 import { UpgradePrompt } from "@/components/UpgradePrompt";
 import { Button } from "@/components/ui/button";
-import { deriveStudentDNA, useEducationStore } from "@/lib/education";
-import type { DnaMode, FocusArea } from "@/lib/education";
-import { DNA_MODE_LABELS, FOCUS_AREA_LABELS } from "@/lib/education";
+import {
+  DEFAULT_ENGAGEMENT_CATEGORY,
+  DNA_MODE_LABELS,
+  ENGAGEMENT_CATEGORY_DEFINITIONS,
+  ENGAGEMENT_CATEGORY_OPTIONS,
+  deriveStudentDNA,
+  normalizeEngagementCategory,
+  useEducationStore,
+} from "@/lib/education";
+import type {
+  DnaMode,
+  EngagementCategory,
+  FocusArea,
+} from "@/lib/education";
 import { ENABLE_CHILD_SAFE_BASELINE } from "@/lib/env/features";
 import { useQuota } from "@/lib/pricing/hooks";
 import {
@@ -27,6 +38,7 @@ type Student = {
 type Assignment = {
   id: string;
   title: string;
+  engagementCategory: EngagementCategory;
   focus: string;
   targetMinutes: number;
   createdAt: number;
@@ -75,12 +87,56 @@ const safeParse = <T,>(value: string | null, fallback: T): T => {
 
 const createId = () => crypto.randomUUID();
 
+const ENGAGEMENT_CATEGORY_BADGE_CLASSNAMES: Record<
+  EngagementCategory,
+  string
+> = {
+  "health-digital-use":
+    "border-emerald-400/30 bg-emerald-500/10 text-emerald-200",
+  learning: "border-cyan-400/30 bg-cyan-500/10 text-cyan-200",
+  exploring: "border-amber-400/30 bg-amber-500/10 text-amber-200",
+  "training-practice":
+    "border-violet-400/30 bg-violet-500/10 text-violet-200",
+  "mindfulness-regulation":
+    "border-teal-400/30 bg-teal-500/10 text-teal-200",
+  "vegging-passive-consumption":
+    "border-slate-400/30 bg-slate-500/10 text-slate-200",
+};
+
+function getEngagementCategoryBadgeClassName(
+  category: string | null | undefined,
+): string {
+  return ENGAGEMENT_CATEGORY_BADGE_CLASSNAMES[
+    normalizeEngagementCategory(category)
+  ];
+}
+
+function normalizeAssignment(
+  assignment: Partial<Assignment> &
+    Pick<Assignment, "id" | "title" | "createdAt">,
+): Assignment {
+  return {
+    id: assignment.id,
+    title: sanitizeTitle(assignment.title),
+    engagementCategory: normalizeEngagementCategory(
+      assignment.engagementCategory,
+    ),
+    focus: sanitizeFocus(assignment.focus ?? "Mindfulness") || "Mindfulness",
+    targetMinutes: Math.max(1, Number(assignment.targetMinutes) || 1),
+    createdAt: assignment.createdAt,
+    dnaMode: assignment.dnaMode ?? null,
+    standardsRef: assignment.standardsRef?.trim() || undefined,
+  };
+}
+
 export function ClassroomManager() {
   const [students, setStudents] = useState<Student[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [progress, setProgress] = useState<ProgressMap>({});
   const [newAlias, setNewAlias] = useState("");
   const [newTitle, setNewTitle] = useState("");
+  const [newEngagementCategory, setNewEngagementCategory] =
+    useState<EngagementCategory>(DEFAULT_ENGAGEMENT_CATEGORY);
   const [newFocus, setNewFocus] = useState("Mindfulness");
   const [newTargetMinutes, setNewTargetMinutes] = useState(10);
   const [newDnaMode, setNewDnaMode] = useState<DnaMode>(null);
@@ -99,10 +155,12 @@ export function ClassroomManager() {
       safeParse<Student[]>(window.localStorage.getItem(ROSTER_STORAGE_KEY), []),
     );
     setAssignments(
-      safeParse<Assignment[]>(
+      safeParse<
+        Array<Partial<Assignment> & Pick<Assignment, "id" | "title" | "createdAt">>
+      >(
         window.localStorage.getItem(ASSIGNMENT_STORAGE_KEY),
         [],
-      ),
+      ).map(normalizeAssignment),
     );
     setProgress(
       safeParse<ProgressMap>(
@@ -229,6 +287,7 @@ export function ClassroomManager() {
     const assignment: Assignment = {
       id: createId(),
       title,
+      engagementCategory: newEngagementCategory,
       focus: sanitizeFocus(newFocus) || "Mindfulness",
       targetMinutes: Math.max(1, Number(newTargetMinutes) || 1),
       createdAt: Date.now(),
@@ -248,6 +307,7 @@ export function ClassroomManager() {
       return updated;
     });
     setNewTitle("");
+    setNewEngagementCategory(DEFAULT_ENGAGEMENT_CATEGORY);
   };
 
   const handleRemoveAssignment = (assignmentId: string) => {
@@ -412,7 +472,31 @@ export function ClassroomManager() {
               placeholder="e.g., 5-minute breathing ritual"
               className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-400"
             />
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid gap-2 md:grid-cols-3">
+              <div>
+                <label
+                  className="text-xs uppercase tracking-wide text-zinc-500"
+                  htmlFor="classroom-category"
+                >
+                  Engagement category
+                </label>
+                <select
+                  id="classroom-category"
+                  value={newEngagementCategory}
+                  onChange={(event) =>
+                    setNewEngagementCategory(
+                      normalizeEngagementCategory(event.target.value),
+                    )
+                  }
+                  className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                >
+                  {ENGAGEMENT_CATEGORY_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div>
                 <label
                   className="text-xs uppercase tracking-wide text-zinc-500"
@@ -447,7 +531,31 @@ export function ClassroomManager() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid gap-2 md:grid-cols-3">
+              <div>
+                <label
+                  className="text-xs uppercase tracking-wide text-zinc-500"
+                  htmlFor="classroom-category"
+                >
+                  Engagement category
+                </label>
+                <select
+                  id="classroom-category"
+                  value={newEngagementCategory}
+                  onChange={(event) =>
+                    setNewEngagementCategory(
+                      normalizeEngagementCategory(event.target.value),
+                    )
+                  }
+                  className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                >
+                  {ENGAGEMENT_CATEGORY_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div>
                 <label
                   className="text-xs uppercase tracking-wide text-zinc-500"
@@ -493,6 +601,22 @@ export function ClassroomManager() {
                 />
               </div>
             </div>
+            <div className="rounded-lg border border-slate-800 bg-slate-950/50 px-3 py-2">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+                Category guide
+              </p>
+              <p className="mt-1 text-xs text-zinc-300">
+                {
+                  ENGAGEMENT_CATEGORY_DEFINITIONS[newEngagementCategory]
+                    .description
+                }
+              </p>
+              <p className="mt-1 text-[11px] text-zinc-500">
+                Taxonomy policy lives in
+                {" "}
+                docs/compliance/digital-engagement-taxonomy.md.
+              </p>
+            </div>
             <Button
               type="button"
               onClick={handleAddAssignment}
@@ -520,6 +644,17 @@ export function ClassroomManager() {
                         <p className="font-semibold text-zinc-100">
                           {assignment.title}
                         </p>
+                        <div className="mt-1 flex flex-wrap gap-2">
+                          <span
+                            className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${getEngagementCategoryBadgeClassName(assignment.engagementCategory)}`}
+                          >
+                            {
+                              ENGAGEMENT_CATEGORY_DEFINITIONS[
+                                assignment.engagementCategory
+                              ].shortLabel
+                            }
+                          </span>
+                        </div>
                         <p className="text-xs text-zinc-500">
                           {assignment.focus} · {assignment.targetMinutes} min
                           {assignment.dnaMode &&
@@ -547,6 +682,8 @@ export function ClassroomManager() {
                               addLessonToQueue({
                                 title: assignment.title,
                                 description: `${assignment.focus} activity`,
+                                engagementCategory:
+                                  assignment.engagementCategory,
                                 focusArea:
                                   focusMap[assignment.focus] ?? "reflection",
                                 dnaMode: assignment.dnaMode ?? null,
@@ -622,6 +759,17 @@ export function ClassroomManager() {
                     <p className="text-sm font-semibold text-zinc-100">
                       {assignment.title}
                     </p>
+                    <div className="mt-1 flex flex-wrap gap-2">
+                      <span
+                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${getEngagementCategoryBadgeClassName(assignment.engagementCategory)}`}
+                      >
+                        {
+                          ENGAGEMENT_CATEGORY_DEFINITIONS[
+                            assignment.engagementCategory
+                          ].shortLabel
+                        }
+                      </span>
+                    </div>
                     <p className="text-xs text-zinc-500">
                       {assignment.focus} · {assignment.targetMinutes} min
                     </p>

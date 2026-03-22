@@ -74,6 +74,7 @@ describe("education quests", () => {
       id: "lesson-1",
       title: "Triangle lesson",
       description: "Trace the triangle",
+      engagementCategory: "learning",
       focusArea: "pattern-recognition",
       dnaMode: "particles",
       targetMinutes: 15,

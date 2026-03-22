@@ -10,6 +10,7 @@ const educationStore = {
       id: "lesson-1",
       title: "Pattern Warmup",
       description: "Notice a simple strand pattern.",
+      engagementCategory: "learning",
       focusArea: "pattern-recognition",
       targetMinutes: 8,
       dnaMode: "journey",

@@ -12,6 +12,7 @@ import { initializeStarterAddons } from "@/lib/addons/starter";
 import { useDnaImprint } from "@/lib/dnaImprint";
 import { ENABLE_CHILD_SAFE_BASELINE } from "@/lib/env/features";
 import { useJourneyProgressTracker } from "@/lib/journeyProgress";
+import { getRouteProgression } from "@/lib/routeProgression";
 import { useStore } from "@/lib/store";
 import {
   ChevronDown,
@@ -29,6 +30,7 @@ export default function PetPage() {
   const startTick = useStore((s) => s.startTick);
   const stopTick = useStore((s) => s.stopTick);
   const dnaImprint = useDnaImprint();
+  const petStep = getRouteProgression("pet");
   const [showAddonPanel, setShowAddonPanel] = useState(false);
   const [showProfilePanel, setShowProfilePanel] = useState(false);
   const [addonEditMode, setAddonEditMode] = useState(false);
@@ -115,10 +117,7 @@ export default function PetPage() {
                 <p className="text-xs uppercase tracking-[0.28em] text-cyan-300/75">
                   Bond Layer
                 </p>
-                <p className="text-sm text-zinc-200">
-                  Care is the first step in the main ladder. Bond with the pet
-                  here, then carry that context into school, identity, and DNA.
-                </p>
+                <p className="text-sm text-zinc-200">{petStep.summary}</p>
                 {dnaImprint ? (
                   <div className="rounded-2xl border border-cyan-400/20 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-100">
                     Latest DNA imprint:{" "}

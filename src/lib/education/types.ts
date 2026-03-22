@@ -1,3 +1,5 @@
+import type { EngagementCategory } from "./engagement";
+
 /**
  * Education Queue Types
  *
@@ -65,6 +67,8 @@ export interface QueuedLesson {
   id: string;
   title: string;
   description: string;
+  /** Teacher-facing classification of how learners engage digitally */
+  engagementCategory: EngagementCategory;
   focusArea: FocusArea;
   /** Which DNA Hub mode to launch for this lesson (null = no DNA mode) */
   dnaMode: DnaMode;

@@ -1,4 +1,5 @@
 export * from './types';
+export * from './engagement';
 export { useEducationStore } from './store';
 export {
   hashExplorationPattern,

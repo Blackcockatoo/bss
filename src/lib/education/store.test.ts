@@ -6,6 +6,7 @@ const DNA_LESSON: QueuedLesson = {
   id: "dna-lesson",
   title: "Triangle Quest",
   description: "Trace and reflect on the triangle path.",
+  engagementCategory: "learning",
   focusArea: "pattern-recognition",
   dnaMode: "particles",
   targetMinutes: 15,
@@ -91,5 +92,25 @@ describe("education store quest gating", () => {
     expect(progress?.status).toBe("completed");
     expect(progress?.questSummary?.completedCoreQuests).toBe(2);
     expect(progress?.postResponse).toContain("Crossing the sides");
+  });
+
+  it("stores the teacher-selected engagement category on queued lessons", () => {
+    useEducationStore.getState().addLesson({
+      title: "Breathing Reset",
+      description: "A calm breathing reflection.",
+      engagementCategory: "mindfulness-regulation",
+      focusArea: "reflection",
+      dnaMode: null,
+      targetMinutes: 5,
+      standardsRef: [],
+      prePrompt: null,
+      postPrompt: null,
+    });
+
+    const lesson = useEducationStore
+      .getState()
+      .queue.find((entry) => entry.title === "Breathing Reset");
+
+    expect(lesson?.engagementCategory).toBe("mindfulness-regulation");
   });
 });

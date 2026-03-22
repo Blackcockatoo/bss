@@ -8,13 +8,18 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   DNA_MODE_LABELS,
+  ENGAGEMENT_CATEGORY_DEFINITIONS,
+  ENGAGEMENT_CATEGORY_ORDER,
   FOCUS_AREA_LABELS,
   VIBE_EMOJI,
+  getEngagementCategoryDefinition,
   lessonNeedsQuestBoard,
+  normalizeEngagementCategory,
   selectQuestPack,
   useEducationStore,
 } from "@/lib/education";
 import type {
+  EngagementCategory,
   LessonProgress,
   QueuedLesson,
   VibeReaction,
@@ -31,7 +36,7 @@ import {
   Trash2,
   Zap,
 } from "lucide-react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 interface EducationQueuePanelProps {
   mode: "teacher" | "student";
@@ -46,6 +51,30 @@ const VIBE_BUTTONS: { reaction: VibeReaction; label: string }[] = [
   { reaction: "sleeping", label: "Sleepy" },
   { reaction: "mind-blown", label: "Mind Blown" },
 ];
+
+const ENGAGEMENT_CATEGORY_BADGE_CLASSNAMES: Record<
+  EngagementCategory,
+  string
+> = {
+  "health-digital-use":
+    "border-emerald-400/30 bg-emerald-500/10 text-emerald-200",
+  learning: "border-cyan-400/30 bg-cyan-500/10 text-cyan-200",
+  exploring: "border-amber-400/30 bg-amber-500/10 text-amber-200",
+  "training-practice":
+    "border-violet-400/30 bg-violet-500/10 text-violet-200",
+  "mindfulness-regulation":
+    "border-teal-400/30 bg-teal-500/10 text-teal-200",
+  "vegging-passive-consumption":
+    "border-slate-400/30 bg-slate-500/10 text-slate-200",
+};
+
+function getEngagementCategoryBadgeClassName(
+  lesson: Pick<QueuedLesson, "engagementCategory">,
+): string {
+  return ENGAGEMENT_CATEGORY_BADGE_CLASSNAMES[
+    normalizeEngagementCategory(lesson.engagementCategory)
+  ];
+}
 
 export function EducationQueuePanel({
   mode,
@@ -261,19 +290,101 @@ function TeacherQueue({
   onReorder: (id: string, dir: "up" | "down") => void;
   onActivate: (id: string) => void;
 }) {
+  const [categoryFilter, setCategoryFilter] = useState<
+    EngagementCategory | "all"
+  >("all");
+
+  const visibleQueue = useMemo(
+    () =>
+      queue.filter((lesson) =>
+        categoryFilter === "all"
+          ? true
+          : normalizeEngagementCategory(lesson.engagementCategory) ===
+            categoryFilter,
+      ),
+    [categoryFilter, queue],
+  );
+
+  const categoryCounts = useMemo(
+    () =>
+      ENGAGEMENT_CATEGORY_ORDER.map((category) => ({
+        category,
+        count: queue.filter(
+          (lesson) =>
+            normalizeEngagementCategory(lesson.engagementCategory) === category,
+        ).length,
+      })).filter((entry) => entry.count > 0),
+    [queue],
+  );
+
+  const completedVisibleCount = visibleQueue.filter((lesson) =>
+    completedLessonIds.has(lesson.id),
+  ).length;
+
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold text-zinc-200">Lesson Queue</p>
-        <p className="text-xs text-zinc-500">
-          {completedLessonIds.size} of {queue.length} completed
-        </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold text-zinc-200">Lesson Queue</p>
+          <p className="text-xs text-zinc-500">
+            {completedVisibleCount} of {visibleQueue.length} completed
+            {categoryFilter !== "all" && ` in ${ENGAGEMENT_CATEGORY_DEFINITIONS[categoryFilter].shortLabel.toLowerCase()}`}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <label
+            className="text-[11px] uppercase tracking-wide text-zinc-500"
+            htmlFor="teacher-queue-category-filter"
+          >
+            Filter
+          </label>
+          <select
+            id="teacher-queue-category-filter"
+            value={categoryFilter}
+            onChange={(event) =>
+              setCategoryFilter(
+                event.target.value === "all"
+                  ? "all"
+                  : normalizeEngagementCategory(event.target.value),
+              )
+            }
+            className="rounded-md border border-slate-700 bg-slate-950/70 px-2 py-1 text-xs text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+          >
+            <option value="all">All categories</option>
+            {ENGAGEMENT_CATEGORY_ORDER.map((category) => (
+              <option key={category} value={category}>
+                {ENGAGEMENT_CATEGORY_DEFINITIONS[category].label}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
+      {categoryCounts.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {categoryCounts.map(({ category, count }) => (
+            <span
+              key={category}
+              className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${ENGAGEMENT_CATEGORY_BADGE_CLASSNAMES[category]}`}
+            >
+              {ENGAGEMENT_CATEGORY_DEFINITIONS[category].shortLabel}: {count}
+            </span>
+          ))}
+        </div>
+      )}
       <div className="space-y-2">
+        {visibleQueue.length === 0 && (
+          <p className="rounded-lg border border-slate-800 bg-slate-950/50 px-3 py-2 text-xs text-zinc-500">
+            No lessons match the current engagement category filter.
+          </p>
+        )}
         <AnimatePresence mode="popLayout">
-          {queue.map((lesson, idx) => {
+          {visibleQueue.map((lesson, idx) => {
             const isActive = lesson.id === activeLesson;
             const isCompleted = completedLessonIds.has(lesson.id);
+            const engagement = getEngagementCategoryDefinition(
+              lesson.engagementCategory,
+            );
+            const fullIndex = queue.findIndex((entry) => entry.id === lesson.id);
             const lessonProgressEntries = lessonProgress.filter(
               (p) => p.lessonId === lesson.id,
             );
@@ -322,6 +433,11 @@ function TeacherQueue({
                       <p className="text-sm font-semibold text-zinc-100 truncate">
                         {lesson.title}
                       </p>
+                      <span
+                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${getEngagementCategoryBadgeClassName(lesson)}`}
+                      >
+                        {engagement.shortLabel}
+                      </span>
                       {isActive && (
                         <motion.span
                           className="px-1.5 py-0.5 rounded-full bg-cyan-500/20 text-[10px] text-cyan-200 font-semibold"
@@ -343,6 +459,9 @@ function TeacherQueue({
                       {lesson.targetMinutes} min
                       {lesson.dnaMode &&
                         ` · ${DNA_MODE_LABELS[lesson.dnaMode]}`}
+                    </p>
+                    <p className="mt-1 text-[11px] text-zinc-400">
+                      {engagement.description}
                     </p>
                     {questPackLabel && (
                       <p className="mt-1 text-[11px] text-cyan-300/80">
@@ -368,7 +487,7 @@ function TeacherQueue({
                       variant="ghost"
                       className="h-7 w-7 p-0 text-zinc-500 hover:text-zinc-200"
                       onClick={() => onReorder(lesson.id, "up")}
-                      disabled={idx === 0}
+                      disabled={fullIndex === 0 || categoryFilter !== "all"}
                       aria-label="Move up"
                     >
                       <ChevronUp className="h-3.5 w-3.5" />
@@ -378,7 +497,9 @@ function TeacherQueue({
                       variant="ghost"
                       className="h-7 w-7 p-0 text-zinc-500 hover:text-zinc-200"
                       onClick={() => onReorder(lesson.id, "down")}
-                      disabled={idx === queue.length - 1}
+                      disabled={
+                        fullIndex === queue.length - 1 || categoryFilter !== "all"
+                      }
                       aria-label="Move down"
                     >
                       <ChevronDown className="h-3.5 w-3.5" />
@@ -455,6 +576,9 @@ function StudentQueue({
             const isNext = idx === nextLessonIdx && !isActive;
             const isLocked = !isCompleted && !isActive && !isNext;
             const usesQuestBoard = lessonNeedsQuestBoard(lesson);
+            const engagement = getEngagementCategoryDefinition(
+              lesson.engagementCategory,
+            );
 
             return (
               <motion.div
@@ -512,9 +636,19 @@ function StudentQueue({
                     >
                       {lesson.title}
                     </p>
+                    <div className="mt-1 flex flex-wrap gap-2">
+                      <span
+                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${getEngagementCategoryBadgeClassName(lesson)}`}
+                      >
+                        {engagement.shortLabel}
+                      </span>
+                    </div>
                     <p className="text-xs text-zinc-500">
                       {FOCUS_AREA_LABELS[lesson.focusArea]} ·{" "}
                       {lesson.targetMinutes} min
+                    </p>
+                    <p className="mt-1 text-[11px] text-zinc-400">
+                      {engagement.description}
                     </p>
                   </div>
                   {(isActive || isNext) && (

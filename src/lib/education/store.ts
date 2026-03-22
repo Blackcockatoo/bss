@@ -11,6 +11,10 @@ import { generateMeditationPattern, validatePattern } from "@/lib/minigames";
 import { PLAN_LIMITS, UNLIMITED } from "@/lib/pricing/plans";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import {
+  DEFAULT_ENGAGEMENT_CATEGORY,
+  normalizeEngagementCategory,
+} from "./engagement";
 import { getLessonCompletionRequirements } from "./quests";
 import {
   DnaMode,
@@ -151,6 +155,7 @@ interface EducationActions {
         QueuedLesson,
         | "title"
         | "description"
+        | "engagementCategory"
         | "focusArea"
         | "dnaMode"
         | "targetMinutes"
@@ -243,6 +248,9 @@ export const useEducationStore = create<EducationStore>()(
 
           const newLesson: QueuedLesson = {
             ...lesson,
+            engagementCategory: normalizeEngagementCategory(
+              lesson.engagementCategory,
+            ),
             id: generateId(),
             position: state.queue.length,
             createdAt: Date.now(),
@@ -291,7 +299,15 @@ export const useEducationStore = create<EducationStore>()(
       updateLesson: (lessonId, updates) =>
         set((state) => ({
           queue: state.queue.map((l) =>
-            l.id === lessonId ? { ...l, ...updates } : l,
+            l.id === lessonId
+              ? {
+                  ...l,
+                  ...updates,
+                  engagementCategory: normalizeEngagementCategory(
+                    updates.engagementCategory ?? l.engagementCategory,
+                  ),
+                }
+              : l,
           ),
         })),
 
@@ -792,13 +808,17 @@ export const useEducationStore = create<EducationStore>()(
     }),
     {
       name: "metapet-education-queue",
-      version: 3,
+      version: 4,
       migrate: (persistedState: unknown, version: number) => {
         const state = persistedState as Partial<EducationQueueState>;
         const defaults = createDefaultQueueState();
+        let migrated: EducationQueueState = {
+          ...defaults,
+          ...state,
+        } as EducationQueueState;
 
         if (version < 2) {
-          const migrated = {
+          migrated = {
             ...defaults,
             ...state,
             eduXP: state.eduXP ?? defaults.eduXP,
@@ -811,9 +831,9 @@ export const useEducationStore = create<EducationStore>()(
               state.completedFocusAreas ?? defaults.completedFocusAreas,
             promptResponseCount:
               state.promptResponseCount ?? defaults.promptResponseCount,
-          };
+          } as EducationQueueState;
 
-          return {
+          migrated = {
             ...migrated,
             eduXP: {
               ...migrated.eduXP,
@@ -824,18 +844,37 @@ export const useEducationStore = create<EducationStore>()(
         }
 
         if (version < 3) {
-          return {
-            ...defaults,
-            ...state,
+          migrated = {
+            ...migrated,
             eduXP: {
-              ...(state.eduXP ?? defaults.eduXP),
+              ...migrated.eduXP,
               streak: 0,
               bestStreak: 0,
             },
           } as EducationQueueState;
         }
 
-        return state as EducationQueueState;
+        if (version < 4) {
+          migrated = {
+            ...migrated,
+            queue: (migrated.queue ?? defaults.queue).map((lesson) => ({
+              ...lesson,
+              engagementCategory: normalizeEngagementCategory(
+                lesson.engagementCategory ?? DEFAULT_ENGAGEMENT_CATEGORY,
+              ),
+            })),
+          } as EducationQueueState;
+        }
+
+        return {
+          ...migrated,
+          queue: (migrated.queue ?? defaults.queue).map((lesson) => ({
+            ...lesson,
+            engagementCategory: normalizeEngagementCategory(
+              lesson.engagementCategory,
+            ),
+          })),
+        };
       },
     },
   ),
