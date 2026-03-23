@@ -1,5 +1,12 @@
 export * from './types';
 export * from './engagement';
+export * from './curriculum-fit';
+export * from './lesson-cards';
+export {
+  hasCompletedTeacherOnboarding,
+  completeTeacherOnboarding,
+  resetTeacherOnboarding,
+} from './teacher-onboarding';
 export { useEducationStore } from './store';
 export {
   hashExplorationPattern,

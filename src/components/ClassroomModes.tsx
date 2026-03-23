@@ -24,9 +24,9 @@ type ModeResponses = {
 const MODES: ModeConfig[] = [
   {
     id: 'demo',
-    name: '10-minute demo',
-    duration: '10 minutes',
-    description: 'A rapid spark to introduce genome patterns, pet traits, and curiosity hooks.',
+    name: '15-minute guided intro',
+    duration: '15 minutes',
+    description: 'A quick guided session to introduce genome patterns, pet traits, and curiosity hooks. No prep needed.',
     preQuestions: [
       'What do you think a genome controls in a MetaPet?',
       'Which trait do you expect to be most visible at first glance? Why?',
@@ -39,9 +39,9 @@ const MODES: ModeConfig[] = [
   },
   {
     id: 'activity',
-    name: '30-minute activity',
-    duration: '30 minutes',
-    description: 'Hands-on investigation with guided checkpoints and peer discussion.',
+    name: '20-minute guided activity',
+    duration: '20 minutes',
+    description: 'Hands-on investigation with step-by-step checkpoints and peer discussion. Follow the script.',
     preQuestions: [
       'What patterns might appear if we compare two pets side by side?',
       'How could behavior connect to the genome readout?',

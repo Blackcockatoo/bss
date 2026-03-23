@@ -20,6 +20,10 @@ For clarity: this brief describes the **strict child-safe baseline** for default
 
 This brief explains **how** these protections work at a technical level.
 
+**Related repo policy docs:**
+- `docs/compliance/child-safe-baseline.md`
+- `docs/compliance/digital-engagement-taxonomy.md`
+
 ---
 
 ## 1. Offline-First Architecture

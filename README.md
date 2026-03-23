@@ -152,14 +152,14 @@ Visit `http://localhost:3000`
 - Child-safe baseline for student deployments: `docs/compliance/child-safe-baseline.md`
 - Teacher-facing digital engagement taxonomy: `docs/compliance/digital-engagement-taxonomy.md`
 
-## Curriculum OS Docs (School Pilot)
+## School Packaging Docs
 
-- Consolidated map: `docs/curriculum-os/README.md`
-- 7-session cards: `docs/curriculum-os/session-cards.md`
-- ICT/leadership audit checklist: `docs/curriculum-os/ict-leadership-audit-sheet.md`
-- 7-day execution checklists: `docs/curriculum-os/7-day-sprint-checklists.md`
-- Pilot v1 scope freeze (Day 1): `docs/curriculum-os/pilot-v1-scope.md`
-- Pilot v1 internal runbook (Day 1): `docs/curriculum-os/pilot-v1-runbook-internal.md`
+- Australia-wide overview and curriculum alignment: `docs/schools-au/01-overview-and-alignment.md`
+- Australia-wide 7 lesson cards: `docs/schools-au/02-lesson-cards.md`
+- Australia-wide assessment and reflection tools: `docs/schools-au/03-assessment-and-reflection.md`
+- Australia-wide privacy and implementation note: `docs/schools-au/04-privacy-and-implementation.md`
+- Public export target for school docs: `public/docs/schools-au/`
+- Export sync script: `npm run sync:kpps-exports`
 
 ## MOSS60 Network Docs
 

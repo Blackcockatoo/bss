@@ -3,7 +3,7 @@ import { dirname, resolve } from "node:path";
 
 const workspaceRoot = resolve(process.cwd());
 
-const docs = [
+const kppsDocs = [
   {
     id: "01_KPPS_Teacher_Hub_Welcome",
     filename: "01_KPPS_Teacher_Hub_Welcome.md",
@@ -46,6 +46,29 @@ const docs = [
   },
 ];
 
+const schoolsAuDocs = [
+  {
+    filename: "01-overview-and-alignment.md",
+    title: "Overview and Alignment",
+    sourceDir: resolve(workspaceRoot, "docs", "schools-au"),
+  },
+  {
+    filename: "02-lesson-cards.md",
+    title: "7 Lesson Cards",
+    sourceDir: resolve(workspaceRoot, "docs", "schools-au"),
+  },
+  {
+    filename: "03-assessment-and-reflection.md",
+    title: "Assessment and Reflection",
+    sourceDir: resolve(workspaceRoot, "docs", "schools-au"),
+  },
+  {
+    filename: "04-privacy-and-implementation.md",
+    title: "Privacy and Implementation Note",
+    sourceDir: resolve(workspaceRoot, "docs", "schools-au"),
+  },
+];
+
 const packageMarkdownDir = resolve(
   workspaceRoot,
   "05-Teacher-Veil-App",
@@ -76,11 +99,13 @@ const docsJsTargets = [
   ),
 ];
 
+const schoolsAuPublicDir = resolve(workspaceRoot, "public", "docs", "schools-au");
+
 function normalize(text) {
   return text.replace(/\r\n/g, "\n").trimEnd() + "\n";
 }
 
-const packagedDocs = docs.map((doc) => {
+const packagedDocs = kppsDocs.map((doc) => {
   const sourcePath = resolve(workspaceRoot, doc.filename);
   const markdown = normalize(readFileSync(sourcePath, "utf8"));
   const packagePath = resolve(packageMarkdownDir, doc.filename);
@@ -101,6 +126,20 @@ for (const target of docsJsTargets) {
   writeFileSync(target, docsJs, "utf8");
 }
 
+const schoolsAuExports = schoolsAuDocs.map((doc) => {
+  const sourcePath = resolve(doc.sourceDir, doc.filename);
+  const markdown = normalize(readFileSync(sourcePath, "utf8"));
+  const publicPath = resolve(schoolsAuPublicDir, doc.filename);
+
+  mkdirSync(dirname(publicPath), { recursive: true });
+  writeFileSync(publicPath, markdown, "utf8");
+
+  return {
+    filename: doc.filename,
+    title: doc.title,
+  };
+});
+
 console.log(
-  `Synced ${packagedDocs.length} KPPS documents into package markdown and docs.js exports.`,
+  `Synced ${packagedDocs.length} KPPS documents and ${schoolsAuExports.length} schools-au documents.`,
 );

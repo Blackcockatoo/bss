@@ -1,7 +1,7 @@
 export type MenuActionStatus = 'live' | 'coming-soon';
 
 export interface TeacherHubMenuAction {
-  id: 'pair-qr' | 'confirm-crest' | 'launch-quest' | 'dna-hub' | 'blessings';
+  id: 'pair-qr' | 'confirm-crest' | 'launch-quest' | 'scripted-lessons' | 'print-worksheet' | 'dna-hub' | 'blessings';
   label: string;
   description: string;
   status: MenuActionStatus;
@@ -24,6 +24,18 @@ export const TEACHER_HUB_MENU_ACTIONS: TeacherHubMenuAction[] = [
     id: 'launch-quest',
     label: 'Launch Classroom Quest',
     description: 'Start a guided classroom quest once pairing and crest verification are complete.',
+    status: 'live',
+  },
+  {
+    id: 'scripted-lessons',
+    label: 'Scripted Lessons',
+    description: '7 teacher-ready lessons with step-by-step scripts. 15-20 minutes each.',
+    status: 'live',
+  },
+  {
+    id: 'print-worksheet',
+    label: 'Print Backup Worksheet',
+    description: 'Print a 1-page student worksheet for any lesson. Works if tech fails.',
     status: 'live',
   },
   {

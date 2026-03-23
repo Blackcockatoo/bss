@@ -1,11 +1,16 @@
 "use client";
 
+import { CurriculumFitPanel } from "@/components/CurriculumFitPanel";
 import DigitalDNAHub from "@/components/DigitalDNAHub";
 import type { LessonContext } from "@/components/DigitalDNAHub";
 import { EduVibeBoard } from "@/components/EduVibeBoard";
 import { EducationQueuePanel } from "@/components/EducationQueuePanel";
+import { LessonCardGallery } from "@/components/LessonCardGallery";
 import { RouteProgressionCard } from "@/components/RouteProgressionCard";
 import { RouteTutorialControls } from "@/components/RouteTutorialControls";
+import { SafetyBadge } from "@/components/SafetyBadge";
+import { TeacherOnboarding } from "@/components/TeacherOnboarding";
+import { TimerBar } from "@/components/TimerBar";
 import { FOCUS_AREA_LABELS, useEducationStore } from "@/lib/education";
 import type { DnaMode, QuickFireChallenge } from "@/lib/education";
 import { useJourneyProgressTracker } from "@/lib/journeyProgress";
@@ -468,6 +473,7 @@ export default function SchoolGamePage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-950 via-indigo-950 to-slate-900 px-4 py-6 text-white sm:px-6 sm:py-8">
+      <TeacherOnboarding />
       <div className="mx-auto max-w-5xl">
         <div className="grid gap-8 lg:grid-cols-[1fr,300px]">
           {/* Main Content */}
@@ -487,11 +493,12 @@ export default function SchoolGamePage() {
                 Classroom Quest
               </h1>
               <p className="text-slate-300">
-                A calm, school-appropriate experience focused on teamwork,
-                pattern literacy, and short reflection loops.
+                A 15-20 minute guided classroom activity. No admin. No marking.
+                Follow the script.
               </p>
-                <p className="max-w-lg text-xs leading-relaxed text-slate-600">
-                Every activity here maps to real curriculum standards (NGSS,
+              <SafetyBadge />
+              <p className="max-w-lg text-xs leading-relaxed text-slate-600">
+                Every activity maps to real curriculum standards (NGSS,
                 ISTE). Pattern Detective builds observation skills. Team Story
                 Builder teaches collaboration without competition. Reflection
                 Checkpoints weave social-emotional learning into every session.
@@ -545,6 +552,17 @@ export default function SchoolGamePage() {
                 </p>
               </div>
             </section>
+
+            {/* Timer bar for active session */}
+            {pairingState.questLaunchedAt && activeLessonData && (
+              <TimerBar
+                durationMinutes={activeLessonData.targetMinutes}
+                startedAt={pairingState.questLaunchedAt}
+              />
+            )}
+
+            {/* Scripted Lesson Cards */}
+            <LessonCardGallery />
 
             {/* Queue Summary */}
             <section className="rounded-2xl border border-emerald-400/30 bg-emerald-500/5 p-5 space-y-4">
@@ -799,15 +817,8 @@ export default function SchoolGamePage() {
             {queue.length === 0 && (
               <section className="rounded-2xl border border-amber-400/20 bg-amber-500/5 p-5">
                 <p className="text-sm text-amber-200">
-                  No lessons queued yet. Ask your teacher to set up activities
-                  in the{" "}
-                  <Link
-                    href="/"
-                    className="underline text-amber-300 hover:text-amber-100"
-                  >
-                    Classroom Manager
-                  </Link>
-                  , or explore the DNA Hub directly.
+                  No lessons queued yet. Pick a scripted lesson above to get
+                  started in under 2 minutes — no setup required.
                 </p>
               </section>
             )}
@@ -836,6 +847,7 @@ export default function SchoolGamePage() {
 
           {/* Sidebar with EduVibeBoard */}
           <aside className="space-y-4">
+            <CurriculumFitPanel />
             <EduVibeBoard />
 
             {/* Quick stats */}
