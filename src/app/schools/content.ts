@@ -270,7 +270,7 @@ export const curriculumRows: CurriculumRow[] = [
     code: "AC9TDI4K01",
     focus: "Digital systems and their purposes",
     metapetUse:
-      "Students identify the device as a digital system that receives input and displays pet state.",
+      "Students identify the device as a digital system that receives input and displays companion state.",
   },
   {
     band: "Years 3-4",
@@ -294,7 +294,7 @@ export const curriculumRows: CurriculumRow[] = [
     code: "AC9TDI4P04",
     focus: "Input and simple visual programs",
     metapetUse:
-      "Students observe how one action changes the pet state and visible outputs.",
+      "Students observe how one action changes the companion state and visible outputs.",
   },
   {
     band: "Years 5-6",
@@ -302,7 +302,7 @@ export const curriculumRows: CurriculumRow[] = [
     code: "AC9TDI6K03",
     focus: "How systems represent data using numbers",
     metapetUse:
-      "Students connect visible pet state to tracked values and explain why outputs change over time.",
+      "Students connect visible companion state to tracked values and explain why outputs change over time.",
   },
   {
     band: "Years 5-6",
@@ -387,7 +387,7 @@ export const learningOutcomes: LearningOutcome[] = [
   },
   {
     statement:
-      "Read pet-state information and use it to make a reasoned action choice.",
+      "Read companion state information and use it to make a reasoned action choice.",
     lessons: "Sessions 1, 2 and 4",
     codes: ["AC9TDI4K03", "AC9TDI4P04", "AC9TDI6K03"],
   },
@@ -418,20 +418,20 @@ export const lessonCards: LessonCard[] = [
     outcome:
       "Students explain that a digital system changes when a user gives it input.",
     activity:
-      "Open the companion, check its pet state, try one action, and describe what changed.",
+      "Open the companion, check its companion state, try one action, and describe what changed.",
     prompt: "What changed after your action, and how do you know?",
     evidence:
-      'One sentence: "I chose __ and the pet state changed to __."',
+      'One sentence: "I chose __ and the companion state changed to __."',
     bestFit: "Digital Technologies mini-lesson",
   },
   {
     session: "Session 2",
-    title: "Read the Pet State",
+    title: "Read the Companion State",
     outcome:
       "Students read visible state information and make a reasoned action choice.",
     activity:
       "Check each state indicator, identify the most urgent state, and choose one response.",
-    prompt: "What does the pet state tell you to do next?",
+    prompt: "What does the companion state tell you to do next?",
     evidence: "Quick partner explanation using cause-and-effect language.",
     bestFit: "Digital Technologies mini-lesson",
   },
@@ -452,7 +452,7 @@ export const lessonCards: LessonCard[] = [
     outcome:
       "Students explain that recovery in a system is a skill, not a punishment.",
     activity:
-      "Start from an unstable pet state, test a repair sequence, and compare which order works best.",
+      "Start from an unstable companion state, test a repair sequence, and compare which order works best.",
     prompt: "What helped the system recover, and why did that order matter?",
     evidence: "Short verbal explanation or checklist note about the recovery sequence.",
     bestFit: "Relief lesson",
@@ -524,7 +524,7 @@ export const evidenceTools = [
   {
     title: "Teacher observation checklist",
     description:
-      "A quick circulation tool for noting whether students read pet state, explain patterns, suggest strategies and work collaboratively.",
+      "A quick circulation tool for noting whether students read companion state, explain patterns, suggest strategies and work collaboratively.",
   },
 ];
 

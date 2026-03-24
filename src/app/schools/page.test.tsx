@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { schoolPackageDocs } from "@/app/schools/content";
+import { reviewerPathways, schoolPackageDocs } from "@/app/schools/content";
 import SchoolsPage from "@/app/schools/page";
 
 vi.mock("next/link", () => ({
@@ -57,12 +57,19 @@ describe("SchoolsPage", () => {
       }),
     ).toBeInTheDocument();
 
+    for (const pathway of reviewerPathways) {
+      expect(
+        screen.getByRole("heading", { name: pathway.title }),
+      ).toBeInTheDocument();
+    }
+
     for (const doc of schoolPackageDocs) {
       expect(
         screen.getByRole("link", {
           name: new RegExp(`Download ${doc.title}`, "i"),
         }),
       ).toHaveAttribute("href", doc.href);
+      expect(doc.href).toMatch(/\.md$/);
     }
   });
 });

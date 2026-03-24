@@ -112,6 +112,11 @@ export default function SchoolGamePage() {
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white md:text-3xl">
               Download the school-facing materials first
             </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-400">
+              Use the school overview for reviewer-facing source materials and
+              governance docs. Use the links below when you need printable
+              classroom handouts in the runtime.
+            </p>
             <div className="mt-6 grid gap-4">
               {PRIMARY_TEACHER_HUB_MENU_ACTIONS.map((action) => (
                 <a

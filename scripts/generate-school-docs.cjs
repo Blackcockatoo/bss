@@ -343,14 +343,14 @@ function makeLessonCards() {
         spacer(),
         ...sessionCard(1, "Meet the Digital Companion",
           "Students explain that a digital system changes when a user gives it input.",
-          "Open the companion, check its pet state, try one action, and describe what changed.",
+          "Open the companion, check its companion state, try one action, and describe what changed.",
           "What changed after your action, and how do you know?",
-          "One sentence: \u201CI chose __ and the pet state changed to __.\u201D",
+          "One sentence: \u201CI chose __ and the companion state changed to __.\u201D",
           "Digital Technologies mini-lesson"),
-        ...sessionCard(2, "Read the Pet State",
+        ...sessionCard(2, "Read the Companion State",
           "Students read visible state information and make a reasoned action choice.",
           "Check each state indicator, identify the lowest or most urgent state, and choose one response.",
-          "What does the pet state tell you to do next?",
+          "What does the companion state tell you to do next?",
           "Quick partner explanation using cause-and-effect language.",
           "Digital Technologies mini-lesson"),
         ...sessionCard(3, "Feelings, Signals and Regulation",
@@ -361,7 +361,7 @@ function makeLessonCards() {
           "Wellbeing session"),
         ...sessionCard(4, "Repair and Reset",
           "Students explain that recovery in a system is a skill, not a punishment.",
-          "Start from an unstable pet state, test a repair sequence, and compare which order of actions works best.",
+          "Start from an unstable companion state, test a repair sequence, and compare which order of actions works best.",
           "What helped the system recover, and why did that order matter?",
           "Short verbal explanation or checklist note about the recovery sequence.",
           "Wellbeing session or relief lesson"),
@@ -398,7 +398,7 @@ function makeLessonCards() {
 // ──────────────────────────────────────
 function makeAssessment() {
   const blankW = [1600, 1500, 1500, 1500, 1786, 1500];
-  const headers = ["Student or pair", "Reads pet state", "Cause & effect", "Systems language", "Regulation strategy", "Collaborative"];
+  const headers = ["Student or pair", "Reads companion state", "Cause & effect", "Systems language", "Regulation strategy", "Collaborative"];
   function blankRow() {
     return new TableRow({
       children: blankW.map((w, i) =>
@@ -429,7 +429,7 @@ function makeAssessment() {
         boldP("Name or alias: ", "______________________________"),
         boldP("Session: ", "______________________________"),
         spacer(),
-        num("My digital companion was showing this pet state: __________"),
+        num("My digital companion was showing this visible state: __________"),
         num("I chose this action: __________"),
         num("The system changed in this way: __________"),
         num("This shows cause and effect because: __________"),

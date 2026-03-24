@@ -9,19 +9,19 @@ Each lesson card is written for a normal classroom slot: **20 minutes**, one cle
 
 **Time:** 20 minutes  
 **Clear outcome:** Students explain that a digital system changes when a user gives it input.  
-**Student activity:** Open the companion, check its pet state, try one action, and describe what changed.  
+**Student activity:** Open the companion, check its companion state, try one action, and describe what changed.  
 **Teacher prompt:** "What changed after your action, and how do you know?"  
-**Light evidence:** One sentence: "I chose __ and the pet state changed to __."  
+**Light evidence:** One sentence: "I chose __ and the companion state changed to __."  
 **Best-fit use case:** Digital Technologies mini-lesson
 
 ---
 
-## Session 2: Read the Pet State
+## Session 2: Read the Companion State
 
 **Time:** 20 minutes  
 **Clear outcome:** Students read visible state information and make a reasoned action choice.  
 **Student activity:** Check each state indicator, identify the lowest or most urgent state, and choose one response.  
-**Teacher prompt:** "What does the pet state tell you to do next?"  
+**Teacher prompt:** "What does the companion state tell you to do next?"  
 **Light evidence:** Quick partner explanation using cause-and-effect language.  
 **Best-fit use case:** Digital Technologies mini-lesson
 
@@ -42,7 +42,7 @@ Each lesson card is written for a normal classroom slot: **20 minutes**, one cle
 
 **Time:** 20 minutes  
 **Clear outcome:** Students explain that recovery in a system is a skill, not a punishment.  
-**Student activity:** Start from an unstable pet state, test a repair sequence, and compare which order of actions works best.  
+**Student activity:** Start from an unstable companion state, test a repair sequence, and compare which order of actions works best.  
 **Teacher prompt:** "What helped the system recover, and why did that order matter?"  
 **Light evidence:** Short verbal explanation or checklist note about the recovery sequence.  
 **Best-fit use case:** Wellbeing session or relief lesson

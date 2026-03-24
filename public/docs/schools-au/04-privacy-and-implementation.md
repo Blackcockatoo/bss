@@ -34,7 +34,7 @@ The app already contains more technical internal language and identity systems t
 For this Australia-wide school package, classroom users only need to know:
 
 - the companion runs as a digital system on a device
-- pet state and related information are stored locally for normal use
+- companion state and related information are stored locally for normal use
 - the classroom sequence does not depend on cloud logins
 
 ---

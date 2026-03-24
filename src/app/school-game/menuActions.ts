@@ -20,7 +20,7 @@ export const TEACHER_HUB_MENU_ACTIONS: TeacherHubMenuAction[] = [
     id: "teacher-guide",
     label: "Teacher Guide",
     description:
-      "Open the one-page teacher guide for setup, supervision, and lesson pacing.",
+      "Open the printable one-page teacher guide for setup, supervision, and lesson pacing.",
     href: "/docs/schools-au/teacher-pack/teacher-guide.docx",
     status: "live",
   },
@@ -28,7 +28,7 @@ export const TEACHER_HUB_MENU_ACTIONS: TeacherHubMenuAction[] = [
     id: "parent-note",
     label: "Parent Note",
     description:
-      "Download the parent/carer note used before a classroom pilot begins.",
+      "Download the printable parent/carer note used before a classroom pilot begins.",
     href: "/docs/schools-au/teacher-pack/parent-note.docx",
     status: "live",
   },
@@ -36,7 +36,7 @@ export const TEACHER_HUB_MENU_ACTIONS: TeacherHubMenuAction[] = [
     id: "staff-brief",
     label: "Staff Briefing",
     description:
-      "Use the one-slide staff briefing to explain the classroom use case and boundaries.",
+      "Use the printable one-slide staff briefing to explain the classroom use case and boundaries.",
     href: "/docs/schools-au/teacher-pack/staff-brief.docx",
     status: "live",
   },
@@ -60,7 +60,7 @@ export const TEACHER_HUB_MENU_ACTIONS: TeacherHubMenuAction[] = [
     id: "pilot-prospectus",
     label: "Pilot Prospectus",
     description:
-      "Share the pilot prospectus with school leadership before outreach.",
+      "Share the printable pilot prospectus with school leadership before outreach.",
     href: "/docs/schools-au/pilot/pilot-prospectus.docx",
     status: "live",
   },

@@ -25,7 +25,7 @@ Use this once near the end of the sequence, or after any lesson where you want a
 **Name or alias:** __________  
 **Session:** __________
 
-1. My digital companion was showing this pet state: __________
+1. My digital companion was showing this visible state: __________
 2. I chose this action: __________
 3. The system changed in this way: __________
 4. This shows cause and effect because: __________
@@ -48,7 +48,7 @@ Use this while circulating. It is intended as a quick classroom note, not a scor
 
 ### Observation checklist
 
-| Student or pair | Reads pet state before acting | Explains cause and effect | Uses systems language | Suggests a regulation strategy | Works collaboratively |
+| Student or pair | Reads companion state before acting | Explains cause and effect | Uses systems language | Suggests a regulation strategy | Works collaboratively |
 | --- | --- | --- | --- | --- | --- |
 | __________ | Yes / Not yet | Yes / Not yet | Yes / Not yet | Yes / Not yet | Yes / Not yet |
 | __________ | Yes / Not yet | Yes / Not yet | Yes / Not yet | Yes / Not yet | Yes / Not yet |

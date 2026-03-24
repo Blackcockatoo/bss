@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, render, screen } from "@testing-library/react";
 import {
   afterEach,
   beforeEach,
@@ -21,18 +21,22 @@ describe("ClassroomManager", () => {
   });
 
   afterEach(() => {
+    cleanup();
     consoleErrorSpy.mockRestore();
     window.localStorage.clear();
     useEducationStore.getState().reset();
   });
 
   it("keeps the school runtime local and does not render upgrade prompts", async () => {
-    render(<ClassroomManager />);
-
-    await waitFor(() => {
-      expect(screen.getByText(/Local classroom data only/i)).toBeInTheDocument();
+    await act(async () => {
+      render(<ClassroomManager />);
+      await Promise.resolve();
+      await Promise.resolve();
     });
 
+    expect(
+      await screen.findByText(/Local classroom data only/i),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /Delete local school data/i }),
     ).toBeInTheDocument();

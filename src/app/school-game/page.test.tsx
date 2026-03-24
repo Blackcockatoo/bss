@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { PRIMARY_TEACHER_HUB_MENU_ACTIONS } from "@/app/school-game/menuActions";
 import SchoolGamePage from "@/app/school-game/page";
 
 vi.mock("next/link", () => ({
@@ -34,10 +35,24 @@ describe("SchoolGamePage", () => {
     expect(
       screen.getByRole("link", { name: /Return to school overview/i }),
     ).toHaveAttribute("href", "/schools");
+    expect(
+      screen.getByText(
+        /Use the school overview for reviewer-facing source materials and governance docs/i,
+      ),
+    ).toBeInTheDocument();
     expect(screen.getAllByText(/No student sign-up/i).length).toBeGreaterThan(0);
     expect(screen.queryByText(/^No internet$/i)).not.toBeInTheDocument();
-    expect(screen.getByText("Teacher Guide")).toBeInTheDocument();
     expect(screen.getByText("Pilot Evidence")).toBeInTheDocument();
     expect(screen.getByText("Classroom Manager")).toBeInTheDocument();
+    expect(screen.queryByText(/pricing/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/upgrade/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/sign in/i)).not.toBeInTheDocument();
+
+    for (const action of PRIMARY_TEACHER_HUB_MENU_ACTIONS) {
+      expect(
+        screen.getByRole("link", { name: new RegExp(action.label, "i") }),
+      ).toHaveAttribute("href", action.href);
+      expect(action.href).toMatch(/\.docx$/);
+    }
   });
 });
