@@ -2,13 +2,13 @@ import { Link } from "wouter";
 import { Shield } from "lucide-react";
 
 const DOC_LINKS = [
-  { label: "Welcome & Overview", href: "/welcome" },
-  { label: "Implementation Guide", href: "/implementation" },
+  { label: "School Overview & Pilot Scope", href: "/welcome" },
+  { label: "Teacher Guide", href: "/implementation" },
   { label: "Facilitation Scripts", href: "/scripts" },
   { label: "Reflection Prompts", href: "/reflection-prompts" },
-  { label: "Values Integration Map", href: "/values-map" },
-  { label: "Parent Communication Kit", href: "/parent-kit" },
-  { label: "Privacy & Safety Brief", href: "/privacy-brief" },
+  { label: "Curriculum & School Fit", href: "/values-map" },
+  { label: "Parent/Carer Note", href: "/parent-kit" },
+  { label: "Governance, Privacy & Safety Pack", href: "/privacy-brief" },
 ];
 
 export default function SiteFooter() {
@@ -19,19 +19,18 @@ export default function SiteFooter() {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Shield className="w-5 h-5 text-primary-foreground/60" />
-              <span className="font-semibold">The Veil</span>
+              <span className="font-semibold">MetaPet Schools</span>
             </div>
             <p className="text-sm opacity-60">
-              Teacher Hub for the Meta-Pet educational ecosystem.
-              Kingsley Park Primary School.
+              School-facing review surface for a teacher-led, low-data classroom pilot.
             </p>
             <div className="text-xs opacity-40">
-              Zero-Collection Educational Architecture
+              Built for school review, pilot planning, and classroom delivery
             </div>
           </div>
 
           <div className="space-y-3">
-            <h4 className="font-semibold text-sm opacity-80">Curriculum Docs</h4>
+            <h4 className="font-semibold text-sm opacity-80">Review Packs</h4>
             <ul className="space-y-1.5">
               {DOC_LINKS.map((link) => (
                 <li key={link.href}>
@@ -46,27 +45,21 @@ export default function SiteFooter() {
           </div>
 
           <div className="space-y-3">
-            <h4 className="font-semibold text-sm opacity-80">Ecosystem</h4>
+            <h4 className="font-semibold text-sm opacity-80">Resources</h4>
             <ul className="space-y-1.5 text-sm">
               <li>
-                <a
-                  href="https://bluesnakestudios.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="opacity-60 hover:opacity-100 transition-opacity"
-                >
-                  MetaPet App ↗
-                </a>
+                <Link href="/privacy-brief">
+                  <span className="opacity-60 hover:opacity-100 transition-opacity cursor-pointer">
+                    Governance checklist
+                  </span>
+                </Link>
               </li>
               <li>
-                <a
-                  href="https://elevator-pitch-seven.vercel.app"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="opacity-60 hover:opacity-100 transition-opacity"
-                >
-                  Jewble Campaign ↗
-                </a>
+                <Link href="/parent-kit">
+                  <span className="opacity-60 hover:opacity-100 transition-opacity cursor-pointer">
+                    Family communication note
+                  </span>
+                </Link>
               </li>
               <li>
                 <a
@@ -74,7 +67,7 @@ export default function SiteFooter() {
                   download
                   className="opacity-60 hover:opacity-100 transition-opacity"
                 >
-                  Download Package ↓
+                  Download review pack ↓
                 </a>
               </li>
             </ul>
@@ -83,21 +76,18 @@ export default function SiteFooter() {
           <div className="space-y-3">
             <h4 className="font-semibold text-sm opacity-80">About</h4>
             <p className="text-sm opacity-60">
-              Built by Blue Snake Studios.
+              Built by Blue Snake Studios as a school-facing pilot surface.
               <br />
-              A gift to KPPS — no licensing fees, no vendor lock-in.
+              The public landing is intentionally separate from the broader MetaPet product.
             </p>
             <p className="text-xs opacity-40">
-              Faster than lightning.
-              <br />
-              Slower than moss.
+              Early co-design work began with a KPPS student and family.
             </p>
           </div>
         </div>
 
         <div className="border-t border-primary-foreground/10 pt-6 text-center text-xs opacity-40">
-          © 2026 Meta-Pet & The Veil. Zero-Collection Educational Architecture.
-          Built with a KPPS kid.
+          © 2026 MetaPet Schools. School-facing review surface for pilot conversations.
         </div>
       </div>
     </footer>
