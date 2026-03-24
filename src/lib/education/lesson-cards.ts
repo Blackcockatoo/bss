@@ -28,14 +28,18 @@ export interface ScriptedLessonCard {
   safetyNote: string;
 }
 
+const SCHOOLS_SAFETY_NOTE =
+  "Teacher-led classroom use. No student sign-up or public sharing. Local classroom records can be cleared on this device.";
+
 export const SCRIPTED_LESSONS: ScriptedLessonCard[] = [
   {
     id: "lesson-1-meet-your-pattern",
     number: 1,
-    title: "Meet Your Pattern",
-    subtitle: "Observe a spiral pattern and describe what you notice.",
+    title: "Meet the Digital Companion",
+    subtitle:
+      "Observe how the digital companion responds and describe what you notice.",
     durationMinutes: 15,
-    pillar: "Pattern Detective",
+    pillar: "Pattern investigation",
     dnaMode: "spiral",
     focusArea: "pattern-recognition",
     engagementCategory: "learning",
@@ -43,12 +47,12 @@ export const SCRIPTED_LESSONS: ScriptedLessonCard[] = [
     prePrompt: "What do you think a pattern is? Can you give an example?",
     postPrompt: "What surprised you about the pattern you saw?",
     rubricCriteria: ["Observation accuracy", "Evidence citation", "Curiosity"],
-    safetyNote: "No chat, no internet, no accounts. Runs entirely on this device.",
+    safetyNote: SCHOOLS_SAFETY_NOTE,
     steps: [
       {
         order: 1,
         durationMinutes: 2,
-        instruction: "Project the screen. Open the Spiral DNA mode.",
+        instruction: "Project the screen. Open the Pattern Spiral activity.",
         teacherSays: "Today we're going to look at a pattern together. Watch the screen carefully.",
         studentAction: "Watch the projected screen.",
       },
@@ -62,7 +66,8 @@ export const SCRIPTED_LESSONS: ScriptedLessonCard[] = [
       {
         order: 3,
         durationMinutes: 5,
-        instruction: "Let students observe the spiral on their own devices (or projected).",
+        instruction:
+          "Let students observe the pattern spiral on the projected screen or classroom devices.",
         teacherSays: "Now look closely. Count how many times the shape repeats. Notice the colours.",
         studentAction: "Observe and count silently. Note one thing that surprises them.",
       },
@@ -88,7 +93,7 @@ export const SCRIPTED_LESSONS: ScriptedLessonCard[] = [
     title: "Team Decode",
     subtitle: "Work in small groups to decode a particle pattern together.",
     durationMinutes: 20,
-    pillar: "Team Story Builder",
+    pillar: "Group discussion",
     dnaMode: "particles",
     focusArea: "collaboration",
     engagementCategory: "learning",
@@ -96,12 +101,13 @@ export const SCRIPTED_LESSONS: ScriptedLessonCard[] = [
     prePrompt: "What patterns might appear if we compare two views side by side?",
     postPrompt: "What did your group agree on? What did you disagree on?",
     rubricCriteria: ["Collaboration", "Pattern reasoning", "Communication clarity"],
-    safetyNote: "No chat, no internet, no accounts. Runs entirely on this device.",
+    safetyNote: SCHOOLS_SAFETY_NOTE,
     steps: [
       {
         order: 1,
         durationMinutes: 2,
-        instruction: "Split class into groups of 3-4. Open the Particles DNA mode.",
+        instruction:
+          "Split class into groups of 3-4. Open the Response Field activity.",
         teacherSays: "Get into your groups. Each group will decode a pattern together.",
         studentAction: "Form groups and settle.",
       },
@@ -141,7 +147,7 @@ export const SCRIPTED_LESSONS: ScriptedLessonCard[] = [
     title: "Calm Check-In",
     subtitle: "Use a guided journey to reflect on how you feel today.",
     durationMinutes: 15,
-    pillar: "Reflection Checkpoint",
+    pillar: "Reflection",
     dnaMode: "journey",
     focusArea: "reflection",
     engagementCategory: "mindfulness-regulation",
@@ -149,12 +155,13 @@ export const SCRIPTED_LESSONS: ScriptedLessonCard[] = [
     prePrompt: "On a scale of 1-5, how are you feeling right now?",
     postPrompt: "Did anything change after watching the journey? What did you notice?",
     rubricCriteria: ["Self-awareness", "Reflection depth", "Respectful sharing"],
-    safetyNote: "No chat, no internet, no accounts. Runs entirely on this device.",
+    safetyNote: SCHOOLS_SAFETY_NOTE,
     steps: [
       {
         order: 1,
         durationMinutes: 2,
-        instruction: "Ask students to sit comfortably. Open the Journey DNA mode.",
+        instruction:
+          "Ask students to sit comfortably. Open the Guided Walkthrough activity.",
         teacherSays: "Let's take a moment to check in. Sit comfortably and take a deep breath.",
         studentAction: "Settle and breathe.",
       },
@@ -194,7 +201,7 @@ export const SCRIPTED_LESSONS: ScriptedLessonCard[] = [
     title: "Shape Investigators",
     subtitle: "Identify and count geometric shapes in a mandala pattern.",
     durationMinutes: 20,
-    pillar: "Pattern Detective",
+    pillar: "Pattern investigation",
     dnaMode: "mandala",
     focusArea: "geometry-creation",
     engagementCategory: "learning",
@@ -202,12 +209,12 @@ export const SCRIPTED_LESSONS: ScriptedLessonCard[] = [
     prePrompt: "How many different shapes can you name?",
     postPrompt: "Which shape appeared most often? How did you count them?",
     rubricCriteria: ["Shape identification", "Counting accuracy", "Method explanation"],
-    safetyNote: "No chat, no internet, no accounts. Runs entirely on this device.",
+    safetyNote: SCHOOLS_SAFETY_NOTE,
     steps: [
       {
         order: 1,
         durationMinutes: 3,
-        instruction: "Open the Mandala DNA mode. Project on screen.",
+        instruction: "Open the Shape Studio activity. Project it on screen.",
         teacherSays: "Today you're shape investigators. Your job is to find and count every shape you can see.",
         studentAction: "Look at the screen.",
       },
@@ -247,7 +254,7 @@ export const SCRIPTED_LESSONS: ScriptedLessonCard[] = [
     title: "Story Relay",
     subtitle: "Build a group story inspired by particle movements.",
     durationMinutes: 20,
-    pillar: "Team Story Builder",
+    pillar: "Group discussion",
     dnaMode: "particles",
     focusArea: "collaboration",
     engagementCategory: "learning",
@@ -255,12 +262,13 @@ export const SCRIPTED_LESSONS: ScriptedLessonCard[] = [
     prePrompt: "If a particle could talk, what would it say?",
     postPrompt: "How did your story change when someone else added to it?",
     rubricCriteria: ["Creative contribution", "Active listening", "Story coherence"],
-    safetyNote: "No chat, no internet, no accounts. Runs entirely on this device.",
+    safetyNote: SCHOOLS_SAFETY_NOTE,
     steps: [
       {
         order: 1,
         durationMinutes: 2,
-        instruction: "Open the Particles DNA mode. Split into groups of 4-5.",
+        instruction:
+          "Open the Response Field activity. Split into groups of 4-5.",
         teacherSays: "We're going to build a story together. Each person adds one sentence at a time.",
         studentAction: "Form groups.",
       },
@@ -297,10 +305,10 @@ export const SCRIPTED_LESSONS: ScriptedLessonCard[] = [
   {
     id: "lesson-6-sound-and-focus",
     number: 6,
-    title: "Sound & Focus",
+    title: "Sound and Focus",
     subtitle: "Listen to generated sounds and connect them to how you feel.",
     durationMinutes: 15,
-    pillar: "Reflection Checkpoint",
+    pillar: "Reflection",
     dnaMode: "sound",
     focusArea: "sound-exploration",
     engagementCategory: "mindfulness-regulation",
@@ -308,12 +316,13 @@ export const SCRIPTED_LESSONS: ScriptedLessonCard[] = [
     prePrompt: "What sounds help you concentrate? What sounds distract you?",
     postPrompt: "Which sound felt the calmest? Why do you think that is?",
     rubricCriteria: ["Active listening", "Self-awareness", "Thoughtful comparison"],
-    safetyNote: "No chat, no internet, no accounts. Runs entirely on this device.",
+    safetyNote: SCHOOLS_SAFETY_NOTE,
     steps: [
       {
         order: 1,
         durationMinutes: 2,
-        instruction: "Open the Sound DNA mode. Ask students to close their eyes briefly.",
+        instruction:
+          "Open the Sound Lab activity. Ask students to close their eyes briefly.",
         teacherSays: "We're going to listen to some sounds. Close your eyes for a moment if you're comfortable.",
         studentAction: "Settle and prepare to listen.",
       },
@@ -353,7 +362,7 @@ export const SCRIPTED_LESSONS: ScriptedLessonCard[] = [
     title: "Pattern Showcase",
     subtitle: "Present your favourite pattern and explain why it's interesting.",
     durationMinutes: 20,
-    pillar: "Pattern Detective",
+    pillar: "Pattern investigation",
     dnaMode: "spiral",
     focusArea: "pattern-recognition",
     engagementCategory: "learning",
@@ -361,12 +370,13 @@ export const SCRIPTED_LESSONS: ScriptedLessonCard[] = [
     prePrompt: "What's the most interesting pattern you've seen so far?",
     postPrompt: "What would you investigate next if you had more time?",
     rubricCriteria: ["Presentation clarity", "Evidence quality", "Curiosity extension"],
-    safetyNote: "No chat, no internet, no accounts. Runs entirely on this device.",
+    safetyNote: SCHOOLS_SAFETY_NOTE,
     steps: [
       {
         order: 1,
         durationMinutes: 2,
-        instruction: "Explain the task. Open the Spiral DNA mode as a backdrop.",
+        instruction:
+          "Explain the task. Open the Pattern Spiral activity as a backdrop.",
         teacherSays: "Today you're the expert. You'll pick your favourite pattern and explain why it's interesting.",
         studentAction: "Listen to instructions.",
       },

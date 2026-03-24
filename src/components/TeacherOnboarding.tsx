@@ -21,19 +21,19 @@ const STEPS = [
     lines: [
       "Each session takes 15-20 minutes.",
       "Fits into a 30 or 50 minute block.",
-      "No marking required. No login. No tracking.",
+      "No student sign-up. No marking. Alias-based setup.",
       "No ongoing maintenance or homework.",
     ],
   },
   {
     icon: ShieldCheck,
-    title: "Safe and predictable",
+    title: "Bounded school use",
     lines: [
       "No chat or messaging between students.",
-      "No internet interaction — runs on-device.",
-      "No accounts or sign-ups needed.",
-      "No AI content generation.",
-      "Nothing follows students home.",
+      "Routine classroom use keeps records local to this device.",
+      "No student account setup or public sharing.",
+      "No open-ended AI chat.",
+      "Nothing follows students home without adult action.",
     ],
   },
   {
@@ -41,9 +41,9 @@ const STEPS = [
     title: "First time? Start here",
     lines: [
       "1. Open the site and project it on the board.",
-      "2. Pick Lesson #1 — \"Meet Your Pattern\".",
+      "2. Pick Lesson #1 — \"Meet the Digital Companion\".",
       "3. Follow the script step by step.",
-      "4. Ask the 3 questions shown on screen.",
+      "4. Ask the pre and post prompts shown on screen.",
       "5. Done in 15 minutes.",
     ],
   },

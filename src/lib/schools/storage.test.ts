@@ -4,6 +4,7 @@ import {
   SCHOOLS_CLASSROOM_ROSTER_STORAGE_KEY,
   SCHOOLS_LOCAL_DATA_RETENTION_MS,
   SCHOOLS_LOCAL_STATE_META_STORAGE_KEY,
+  SCHOOLS_TEACHER_ONBOARDING_STORAGE_KEY,
   SCHOOLS_STORAGE_KEYS,
   clearSchoolsLocalState,
   purgeExpiredSchoolsLocalState,
@@ -63,6 +64,7 @@ describe("schools storage helpers", () => {
       }),
     );
     storage.setItem(SCHOOLS_CLASSROOM_ROSTER_STORAGE_KEY, "[]");
+    storage.setItem(SCHOOLS_TEACHER_ONBOARDING_STORAGE_KEY, "{}");
     storage.setItem("metapet-classroom-roster", "[]");
 
     const purged = purgeExpiredSchoolsLocalState(storage, now);
@@ -70,6 +72,7 @@ describe("schools storage helpers", () => {
     expect(purged).toBe(true);
     expect(storage.getItem(SCHOOLS_LOCAL_STATE_META_STORAGE_KEY)).toBeNull();
     expect(storage.getItem(SCHOOLS_CLASSROOM_ROSTER_STORAGE_KEY)).toBeNull();
+    expect(storage.getItem(SCHOOLS_TEACHER_ONBOARDING_STORAGE_KEY)).toBeNull();
     expect(storage.getItem("metapet-classroom-roster")).toBeNull();
   });
 

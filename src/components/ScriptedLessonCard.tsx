@@ -19,9 +19,9 @@ import {
 import { useState } from "react";
 
 const PILLAR_COLORS: Record<string, string> = {
-  "Pattern Detective": "border-cyan-400/30 bg-cyan-500/10 text-cyan-200",
-  "Team Story Builder": "border-violet-400/30 bg-violet-500/10 text-violet-200",
-  "Reflection Checkpoint": "border-pink-400/30 bg-pink-500/10 text-pink-200",
+  "Pattern investigation": "border-cyan-400/30 bg-cyan-500/10 text-cyan-200",
+  "Group discussion": "border-violet-400/30 bg-violet-500/10 text-violet-200",
+  Reflection: "border-pink-400/30 bg-pink-500/10 text-pink-200",
 };
 
 export function ScriptedLessonCard({

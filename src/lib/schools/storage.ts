@@ -20,6 +20,8 @@ export const SCHOOLS_EDUCATION_QUEUE_STORAGE_KEY =
   "metapet-schools-education-queue";
 export const SCHOOLS_RUNTIME_STATE_STORAGE_KEY =
   "metapet-schools-runtime-state";
+export const SCHOOLS_TEACHER_ONBOARDING_STORAGE_KEY =
+  "metapet-schools-teacher-onboarding";
 
 const LEGACY_SCHOOL_STORAGE_KEYS = [
   "metapet-classroom-roster",
@@ -27,6 +29,7 @@ const LEGACY_SCHOOL_STORAGE_KEYS = [
   "metapet-classroom-progress",
   "metapet-classroom-analytics",
   "metapet-education-queue",
+  "metapet-teacher-onboarding",
   "teacher-hub-pairing-state",
 ];
 
@@ -38,6 +41,7 @@ export const SCHOOLS_STORAGE_KEYS = [
   SCHOOLS_CLASSROOM_ANALYTICS_STORAGE_KEY,
   SCHOOLS_EDUCATION_QUEUE_STORAGE_KEY,
   SCHOOLS_RUNTIME_STATE_STORAGE_KEY,
+  SCHOOLS_TEACHER_ONBOARDING_STORAGE_KEY,
   ...LEGACY_SCHOOL_STORAGE_KEYS,
 ] as const;
 

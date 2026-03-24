@@ -40,6 +40,12 @@ export interface ExternalResourceLink {
   href: string;
 }
 
+export interface ReviewerPathway {
+  title: string;
+  description: string;
+  docSlugs: string[];
+}
+
 export const schoolPackageDocCategories: SchoolPackageDoc["category"][] = [
   "Core Pack",
   "Teacher Pack",
@@ -542,6 +548,57 @@ export const assuranceItems = [
     title: "Bounded product contract",
     description:
       "The school profile excludes chat, social features, identity shaping, public sharing, and retention pressure loops.",
+  },
+];
+
+export const reviewerPathways: ReviewerPathway[] = [
+  {
+    title: "Principals and pilot leads",
+    description:
+      "Start with the positioning, staff brief, pilot scope, and product boundaries before discussing rollout.",
+    docSlugs: [
+      "01-overview-and-alignment",
+      "staff-brief",
+      "pilot-prospectus",
+      "what-metapet-schools-is-is-not",
+    ],
+  },
+  {
+    title: "ICT and privacy reviewers",
+    description:
+      "Start with the privacy and implementation note, then move through the privacy pack and controls documentation.",
+    docSlugs: [
+      "04-privacy-and-implementation",
+      "privacy-policy",
+      "data-flow-diagram",
+      "data-inventory",
+      "retention-and-deletion-schedule",
+      "security-controls-summary",
+      "privacy-impact-assessment",
+    ],
+  },
+  {
+    title: "Classroom teachers",
+    description:
+      "Start with setup, lesson pacing, reflection materials, and the supervision model for classroom use.",
+    docSlugs: [
+      "teacher-guide",
+      "02-lesson-cards",
+      "03-assessment-and-reflection",
+      "teacher-supervision-model",
+    ],
+  },
+  {
+    title: "Families and wellbeing teams",
+    description:
+      "Start with the family note, privacy notice, safety assessment, and wellbeing escalation pathway.",
+    docSlugs: [
+      "parent-note",
+      "parent-carer-privacy-notice",
+      "child-safety-risk-assessment",
+      "wellbeing-escalation-pathway",
+      "accessibility-and-inclusion-review",
+    ],
   },
 ];
 

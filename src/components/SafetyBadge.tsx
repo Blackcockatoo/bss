@@ -10,13 +10,13 @@ export function SafetyBadge({ className = "" }: { className?: string }) {
       <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
       <span>No chat</span>
       <span className="text-emerald-600">&middot;</span>
-      <span>No internet</span>
+      <span>No student sign-up</span>
       <span className="text-emerald-600">&middot;</span>
-      <span>No accounts</span>
+      <span>Teacher-led</span>
       <span className="text-emerald-600">&middot;</span>
       <span>No marking</span>
       <span className="text-emerald-600">&middot;</span>
-      <span>No admin</span>
+      <span>Local records</span>
     </div>
   );
 }

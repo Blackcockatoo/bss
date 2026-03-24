@@ -9,6 +9,7 @@ import {
   evidenceTools,
   learningOutcomes,
   lessonCards,
+  reviewerPathways,
   schoolPackageDocCategories,
   schoolPackageDocs,
   weeklyFitOptions,
@@ -40,6 +41,7 @@ function SectionHeading({
 
 export default function SchoolsPage() {
   enforceChildSafeServerRoute("/schools");
+  const docsBySlug = new Map(schoolPackageDocs.map((doc) => [doc.slug, doc]));
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
@@ -101,6 +103,49 @@ export default function SchoolsPage() {
             </div>
           </div>
         </header>
+
+        <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 md:p-8">
+          <SectionHeading
+            eyebrow="Start Here"
+            title="Choose the pack for your role"
+            description="The school wrapper is organised so each reviewer can start in the right place without reading the whole pack end to end."
+          />
+
+          <div className="mt-6 grid gap-4 lg:grid-cols-2">
+            {reviewerPathways.map((pathway) => (
+              <article
+                key={pathway.title}
+                className="rounded-2xl border border-slate-800 bg-slate-950/50 p-5"
+              >
+                <h3 className="text-base font-semibold text-white">
+                  {pathway.title}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  {pathway.description}
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {pathway.docSlugs.map((slug) => {
+                    const doc = docsBySlug.get(slug);
+                    if (!doc) {
+                      return null;
+                    }
+
+                    return (
+                      <a
+                        key={doc.slug}
+                        className="rounded-full border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-200"
+                        download
+                        href={doc.href}
+                      >
+                        {doc.title}
+                      </a>
+                    );
+                  })}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
 
         <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 md:p-8">
           <SectionHeading

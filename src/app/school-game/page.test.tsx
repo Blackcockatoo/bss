@@ -34,6 +34,8 @@ describe("SchoolGamePage", () => {
     expect(
       screen.getByRole("link", { name: /Return to school overview/i }),
     ).toHaveAttribute("href", "/schools");
+    expect(screen.getAllByText(/No student sign-up/i).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/^No internet$/i)).not.toBeInTheDocument();
     expect(screen.getByText("Teacher Guide")).toBeInTheDocument();
     expect(screen.getByText("Pilot Evidence")).toBeInTheDocument();
     expect(screen.getByText("Classroom Manager")).toBeInTheDocument();

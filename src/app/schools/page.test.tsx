@@ -35,6 +35,11 @@ describe("SchoolsPage", () => {
         name: /Curriculum alignment with explicit classroom fit/i,
       }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        name: /Choose the pack for your role/i,
+      }),
+    ).toBeInTheDocument();
     expect(screen.getAllByText(/No marking required/i).length).toBeGreaterThan(
       0,
     );

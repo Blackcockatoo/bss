@@ -45,8 +45,9 @@ export default function SchoolGamePage() {
             </h1>
             <p className="max-w-3xl text-base leading-7 text-slate-300 md:text-lg">
               A 15-20 minute guided classroom activity. No admin. No marking.
-              Follow the script. Alias-based setup, local evidence, and clear
-              deletion controls.
+              Follow the script. Alias-based setup, local records, and clear
+              deletion controls. The broader MetaPet product stays outside this
+              school runtime.
             </p>
             <SafetyBadge />
             <div className="flex flex-wrap gap-3 text-sm">
