@@ -1,6 +1,10 @@
 import Link from "next/link";
 
 import { ClassroomManager } from "@/components/ClassroomManager";
+import { CurriculumFitPanel } from "@/components/CurriculumFitPanel";
+import { LessonCardGallery } from "@/components/LessonCardGallery";
+import { SafetyBadge } from "@/components/SafetyBadge";
+import { TeacherOnboarding } from "@/components/TeacherOnboarding";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
 import {
   PLANNED_TEACHER_HUB_MENU_ACTIONS,
@@ -29,6 +33,7 @@ export default function SchoolGamePage() {
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
+      <TeacherOnboarding />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-12 md:gap-10 md:py-16">
         <header className="rounded-3xl border border-amber-300/20 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 p-6 shadow-[0_0_0_1px_rgba(251,191,36,0.05)] md:p-8">
           <div className="space-y-4">
@@ -39,11 +44,11 @@ export default function SchoolGamePage() {
               Teacher-led classroom runtime
             </h1>
             <p className="max-w-3xl text-base leading-7 text-slate-300 md:text-lg">
-              This route is the school-only runtime: alias-based classroom
-              setup, a short lesson queue, local evidence, and clear deletion
-              controls. It is intentionally separate from adult-only and
-              experimental Meta-Pet surfaces.
+              A 15-20 minute guided classroom activity. No admin. No marking.
+              Follow the script. Alias-based setup, local evidence, and clear
+              deletion controls.
             </p>
+            <SafetyBadge />
             <div className="flex flex-wrap gap-3 text-sm">
               {[
                 "Alias roster only",
@@ -133,6 +138,27 @@ export default function SchoolGamePage() {
               ))}
             </div>
           </div>
+        </section>
+
+        <section className="grid gap-6 lg:grid-cols-[1fr,300px]">
+          <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 md:p-8">
+            <p className="text-xs uppercase tracking-[0.35em] text-cyan-300">
+              Scripted Lessons
+            </p>
+            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white md:text-3xl">
+              Pick a lesson. Follow the script. Done.
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-400">
+              Each lesson takes 15-20 minutes. No prep needed. Every step has
+              exact words to say aloud.
+            </p>
+            <div className="mt-6">
+              <LessonCardGallery />
+            </div>
+          </div>
+          <aside className="space-y-4">
+            <CurriculumFitPanel />
+          </aside>
         </section>
 
         <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 md:p-8">
