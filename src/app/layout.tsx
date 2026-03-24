@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import type { CSSProperties } from "react";
 import "./globals.css";
 import { findSiteUrl, findSiteUrlObject } from "@/lib/env/siteUrl";
+import { IS_SCHOOLS_PROFILE } from "@/lib/env/features";
 import { LEGAL_NOTICE_TEXT, getLegalNoticeYear } from "@/lib/legalNotice";
 import ClientBody from "./ClientBody";
 
@@ -17,9 +18,11 @@ const siteUrlObject = findSiteUrlObject();
 
 export const metadata: Metadata = {
   ...(siteUrlObject ? { metadataBase: siteUrlObject } : {}),
-  title: "Blue Snake Studios",
+  title: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Blue Snake Studios",
   description:
-    "Blue Snake Studios builds privacy-first digital learning experiences with a strict child-safe baseline for default student deployments.",
+    IS_SCHOOLS_PROFILE
+      ? "MetaPet Schools is a teacher-led, low-data classroom tool for Years 3-6 digital responsibility, systems thinking, and online safety habits."
+      : "Blue Snake Studios builds privacy-first digital learning experiences with a strict child-safe baseline for default student deployments.",
   manifest: "/manifest.json",
   icons: {
     icon: "/icon.svg",
@@ -31,18 +34,22 @@ export const metadata: Metadata = {
     title: "Blue Snake Studios",
   },
   openGraph: {
-    title: "Blue Snake Studios",
+    title: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Blue Snake Studios",
     description:
-      "Blue Snake Studios builds privacy-first digital learning experiences with a strict child-safe baseline for default student deployments.",
+      IS_SCHOOLS_PROFILE
+        ? "MetaPet Schools is a teacher-led, low-data classroom tool for Years 3-6 digital responsibility, systems thinking, and online safety habits."
+        : "Blue Snake Studios builds privacy-first digital learning experiences with a strict child-safe baseline for default student deployments.",
     ...(siteUrl ? { url: siteUrl } : {}),
-    siteName: "Blue Snake Studios",
+    siteName: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Blue Snake Studios",
     type: "website",
   },
   twitter: {
     card: "summary",
-    title: "Blue Snake Studios",
+    title: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Blue Snake Studios",
     description:
-      "Blue Snake Studios builds privacy-first digital learning experiences with a strict child-safe baseline for default student deployments.",
+      IS_SCHOOLS_PROFILE
+        ? "MetaPet Schools is a teacher-led, low-data classroom tool for Years 3-6 digital responsibility, systems thinking, and online safety habits."
+        : "Blue Snake Studios builds privacy-first digital learning experiences with a strict child-safe baseline for default student deployments.",
   },
 };
 

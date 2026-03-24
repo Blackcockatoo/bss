@@ -7,7 +7,10 @@ import {
   getChildSafeFallbackPathname,
   isChildSafeAllowedPathname,
 } from "@/lib/childSafeBaseline";
-import { ENABLE_CHILD_SAFE_BASELINE } from "@/lib/env/features";
+import {
+  ENABLE_CHILD_SAFE_BASELINE,
+  IS_SCHOOLS_PROFILE,
+} from "@/lib/env/features";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -21,7 +24,7 @@ export default function ClientBody({
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const childSafeBlocked = useMemo(
     () =>
-      ENABLE_CHILD_SAFE_BASELINE &&
+      (ENABLE_CHILD_SAFE_BASELINE || IS_SCHOOLS_PROFILE) &&
       !isChildSafeAllowedPathname(pathname ?? "/"),
     [pathname],
   );
@@ -59,11 +62,11 @@ export default function ClientBody({
       <div className="flex min-h-screen items-center justify-center px-4 text-center text-zinc-200">
         <div className="max-w-md space-y-3">
           <p className="text-sm font-semibold text-emerald-300">
-            Child-safe local mode is active.
+            MetaPet Schools is active.
           </p>
           <p className="text-sm text-zinc-400">
-            This route is disabled in the student baseline and is redirecting to
-            a classroom-safe path.
+            This route is outside the school-safe deployment and is redirecting
+            to the classroom surface.
           </p>
         </div>
       </div>
@@ -74,7 +77,9 @@ export default function ClientBody({
     <div className="antialiased flex min-h-screen flex-col pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]">
       <div className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/90 px-3 py-2 backdrop-blur sm:px-4 sm:py-3">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 sm:gap-3">
-          <div className="text-sm text-zinc-200">Meta-Pet</div>
+          <div className="text-sm text-zinc-200">
+            {IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Meta-Pet"}
+          </div>
           <button
             type="button"
             onClick={() => setPrivacyOpen((current) => !current)}
@@ -86,12 +91,13 @@ export default function ClientBody({
         </div>
         {privacyOpen && (
           <div className="mx-auto mt-3 w-full max-w-6xl rounded-2xl border border-slate-800 bg-slate-900/60 p-3 text-xs leading-5 text-zinc-300 sm:leading-6">
-            Default student use stays local-first, zero-account, and free from
-            countdown or streak pressure. Identity, class progress, and pet
-            records stay on this device unless you deliberately export them.
+            Default school use is local-first, alias-based, and teacher-led.
+            Student accounts, public sharing, and retention-style mechanics stay
+            out of the school deployment. Classroom records remain on this
+            device unless a teacher deliberately exports evidence.
           </div>
         )}
-        <JourneyProgressStrip />
+        {!IS_SCHOOLS_PROFILE && <JourneyProgressStrip />}
       </div>
 
       <div className="flex-1 pb-2">{children}</div>

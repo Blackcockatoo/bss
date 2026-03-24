@@ -1,66 +1,89 @@
-export type MenuActionStatus = 'live' | 'coming-soon';
+export type MenuActionStatus = "live" | "coming-soon";
 
 export interface TeacherHubMenuAction {
-  id: 'pair-qr' | 'confirm-crest' | 'launch-quest' | 'scripted-lessons' | 'print-worksheet' | 'dna-hub' | 'blessings';
+  id:
+    | "teacher-guide"
+    | "parent-note"
+    | "staff-brief"
+    | "lesson-cards"
+    | "reflection-sheet"
+    | "pilot-prospectus"
+    | "minister-brief";
   label: string;
   description: string;
+  href?: string;
   status: MenuActionStatus;
 }
 
 export const TEACHER_HUB_MENU_ACTIONS: TeacherHubMenuAction[] = [
   {
-    id: 'pair-qr',
-    label: 'Pair with Pet via QR',
-    description: 'Scan or paste a QR payload to pair a classroom pet profile.',
-    status: 'live',
+    id: "teacher-guide",
+    label: "Teacher Guide",
+    description:
+      "Open the one-page teacher guide for setup, supervision, and lesson pacing.",
+    href: "/docs/schools-au/teacher-pack/teacher-guide.md",
+    status: "live",
   },
   {
-    id: 'confirm-crest',
-    label: 'Confirm Bonded Crest',
-    description: 'Verify the crest signature before a classroom session begins.',
-    status: 'live',
+    id: "parent-note",
+    label: "Parent Note",
+    description:
+      "Download the parent/carer note used before a classroom pilot begins.",
+    href: "/docs/schools-au/teacher-pack/parent-note.md",
+    status: "live",
   },
   {
-    id: 'launch-quest',
-    label: 'Launch Classroom Quest',
-    description: 'Start a guided classroom quest once pairing and crest verification are complete.',
-    status: 'live',
+    id: "staff-brief",
+    label: "Staff Briefing",
+    description:
+      "Use the one-slide staff briefing to explain the classroom use case and boundaries.",
+    href: "/docs/schools-au/teacher-pack/staff-brief.md",
+    status: "live",
   },
   {
-    id: 'scripted-lessons',
-    label: 'Scripted Lessons',
-    description: '7 teacher-ready lessons with step-by-step scripts. 15-20 minutes each.',
-    status: 'live',
+    id: "lesson-cards",
+    label: "Lesson Cards",
+    description:
+      "Use the 7 lesson cards for low-prep teacher-led classroom delivery.",
+    href: "/docs/schools-au/02-lesson-cards.md",
+    status: "live",
   },
   {
-    id: 'print-worksheet',
-    label: 'Print Backup Worksheet',
-    description: 'Print a 1-page student worksheet for any lesson. Works if tech fails.',
-    status: 'live',
+    id: "reflection-sheet",
+    label: "Reflection Sheet",
+    description:
+      "Print the student reflection sheet and teacher observation checklist.",
+    href: "/docs/schools-au/03-assessment-and-reflection.md",
+    status: "live",
   },
   {
-    id: 'dna-hub',
-    label: 'DNA Hub',
-    description: 'Coming soon: advanced DNA visualizations for lesson extension.',
-    status: 'coming-soon',
+    id: "pilot-prospectus",
+    label: "Pilot Prospectus",
+    description:
+      "Share the pilot prospectus with school leadership before outreach.",
+    href: "/docs/schools-au/pilot/pilot-prospectus.md",
+    status: "live",
   },
   {
-    id: 'blessings',
-    label: 'Blessings',
-    description: 'Coming soon: class blessings wall for non-comparative affirmations.',
-    status: 'coming-soon',
+    id: "minister-brief",
+    label: "Minister Brief",
+    description:
+      "Coming soon after pilot evidence exists. This stays out of pre-pilot school conversations.",
+    status: "coming-soon",
   },
 ];
 
 export const PRIMARY_TEACHER_HUB_MENU_ACTIONS = TEACHER_HUB_MENU_ACTIONS.filter(
-  (action) => action.status === 'live',
+  (action) => action.status === "live",
 );
 
 export const PLANNED_TEACHER_HUB_MENU_ACTIONS = TEACHER_HUB_MENU_ACTIONS.filter(
-  (action) => action.status === 'coming-soon',
+  (action) => action.status === "coming-soon",
 );
 
-export function runTeacherHubMenuSmokeCheck(actions = TEACHER_HUB_MENU_ACTIONS): { ok: boolean; issues: string[] } {
+export function runTeacherHubMenuSmokeCheck(
+  actions = TEACHER_HUB_MENU_ACTIONS,
+): { ok: boolean; issues: string[] } {
   const issues: string[] = [];
 
   for (const action of actions) {
@@ -68,11 +91,18 @@ export function runTeacherHubMenuSmokeCheck(actions = TEACHER_HUB_MENU_ACTIONS):
       issues.push(`${action.id} is missing a label`);
     }
 
-    if (action.status !== 'live' && action.status !== 'coming-soon') {
+    if (action.status !== "live" && action.status !== "coming-soon") {
       issues.push(`${action.id} has invalid status ${String(action.status)}`);
     }
 
-    if (action.status === 'coming-soon' && !/coming soon/i.test(`${action.label} ${action.description}`)) {
+    if (action.status === "live" && !action.href) {
+      issues.push(`${action.id} is live but missing a href`);
+    }
+
+    if (
+      action.status === "coming-soon" &&
+      !/coming soon/i.test(`${action.label} ${action.description}`)
+    ) {
       issues.push(`${action.id} must clearly communicate Coming soon`);
     }
   }

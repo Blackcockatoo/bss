@@ -22,12 +22,12 @@ vi.mock("@/lib/childSafeRoute.server", () => ({
 }));
 
 describe("SchoolsPage", () => {
-  it("surfaces the Australia-wide school packaging content and download links", () => {
+  it("surfaces the school packaging content, governance framing, and download links", () => {
     render(<SchoolsPage />);
 
     expect(
       screen.getByRole("heading", {
-        name: /An Australia-wide Years 3-6 classroom sequence teachers can use tomorrow/i,
+        name: /Teacher-led, low-data classroom pilot for Years 3-6/i,
       }),
     ).toBeInTheDocument();
     expect(
@@ -44,6 +44,11 @@ describe("SchoolsPage", () => {
     expect(
       screen.getByRole("heading", {
         name: /Where this fits in a school week/i,
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        name: /Pilot-ready material for leadership, ICT, and wellbeing review/i,
       }),
     ).toBeInTheDocument();
 

@@ -10,6 +10,7 @@ export function isEnabled(value) {
 export function evaluateChildSafeDeployment(env = process.env) {
   const studentDeployment = isEnabled(env.STUDENT_DEPLOYMENT);
   const childSafeBaseline = isEnabled(env.NEXT_PUBLIC_CHILD_SAFE_BASELINE);
+  const appProfile = `${env.NEXT_PUBLIC_APP_PROFILE ?? ""}`.trim().toLowerCase();
 
   if (!studentDeployment) {
     return {
@@ -31,11 +32,21 @@ export function evaluateChildSafeDeployment(env = process.env) {
     };
   }
 
+  if (appProfile && appProfile !== "schools") {
+    return {
+      ok: false,
+      code: 1,
+      level: "error",
+      message:
+        "[check:child-safe-deployment] Student deployments must set NEXT_PUBLIC_APP_PROFILE=schools.",
+    };
+  }
+
   return {
     ok: true,
     code: 0,
     level: "log",
     message:
-      "[check:child-safe-deployment] Child-safe deployment flag is enabled for this student build.",
+      "[check:child-safe-deployment] Child-safe deployment flag is enabled for this schools build.",
   };
 }

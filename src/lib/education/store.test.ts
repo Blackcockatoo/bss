@@ -1,6 +1,7 @@
 import { createDefaultQueueState, type QueuedLesson } from "./types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { useEducationStore } from "./store";
+import { SCHOOLS_EDUCATION_QUEUE_STORAGE_KEY } from "@/lib/schools/storage";
 
 const DNA_LESSON: QueuedLesson = {
   id: "dna-lesson",
@@ -112,5 +113,25 @@ describe("education store quest gating", () => {
       .queue.find((entry) => entry.title === "Breathing Reset");
 
     expect(lesson?.engagementCategory).toBe("mindfulness-regulation");
+  });
+
+  it("persists the school queue under the schools storage key", () => {
+    useEducationStore.getState().addLesson({
+      title: "Systems Check-In",
+      description: "A short classroom reflection.",
+      engagementCategory: "learning",
+      focusArea: "reflection",
+      dnaMode: null,
+      targetMinutes: 10,
+      standardsRef: [],
+      prePrompt: null,
+      postPrompt: null,
+    });
+
+    expect(window.localStorage.getItem(SCHOOLS_EDUCATION_QUEUE_STORAGE_KEY)).toContain(
+      "Systems Check-In",
+    );
+    expect(window.localStorage.getItem("metapet-education-queue")).toBeNull();
+    expect(window.localStorage.getItem("metapet-auth")).toBeNull();
   });
 });

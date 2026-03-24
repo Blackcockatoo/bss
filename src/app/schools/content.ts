@@ -4,6 +4,11 @@ export interface SchoolPackageDoc {
   description: string;
   audience: string;
   href: string;
+  category:
+    | "Core Pack"
+    | "Teacher Pack"
+    | "Governance Pack"
+    | "Pilot Pack";
 }
 
 export interface CurriculumRow {
@@ -35,6 +40,13 @@ export interface ExternalResourceLink {
   href: string;
 }
 
+export const schoolPackageDocCategories: SchoolPackageDoc["category"][] = [
+  "Core Pack",
+  "Teacher Pack",
+  "Governance Pack",
+  "Pilot Pack",
+];
+
 export const schoolPackageDocs: SchoolPackageDoc[] = [
   {
     slug: "01-overview-and-alignment",
@@ -43,6 +55,7 @@ export const schoolPackageDocs: SchoolPackageDoc[] = [
       "Leadership-ready summary with Years 3-6 fit, learning outcomes and Australian Curriculum V9.0 mapping.",
     audience: "Teachers and school leaders",
     href: "/docs/schools-au/01-overview-and-alignment.md",
+    category: "Core Pack",
   },
   {
     slug: "02-lesson-cards",
@@ -51,6 +64,7 @@ export const schoolPackageDocs: SchoolPackageDoc[] = [
       "Seven 20-minute lesson snapshots with one clear outcome, one activity, one prompt and light evidence.",
     audience: "Classroom teachers",
     href: "/docs/schools-au/02-lesson-cards.md",
+    category: "Core Pack",
   },
   {
     slug: "03-assessment-and-reflection",
@@ -59,6 +73,7 @@ export const schoolPackageDocs: SchoolPackageDoc[] = [
       "No-marking guidance with one student reflection sheet and one teacher observation checklist.",
     audience: "Classroom teachers",
     href: "/docs/schools-au/03-assessment-and-reflection.md",
+    category: "Core Pack",
   },
   {
     slug: "04-privacy-and-implementation",
@@ -67,6 +82,178 @@ export const schoolPackageDocs: SchoolPackageDoc[] = [
       "Plain-language implementation note for ICT, leadership and family reassurance.",
     audience: "ICT and leadership",
     href: "/docs/schools-au/04-privacy-and-implementation.md",
+    category: "Core Pack",
+  },
+  {
+    slug: "teacher-guide",
+    title: "Teacher Guide",
+    description:
+      "One-page setup, supervision, lesson pacing, and deletion guidance for classroom delivery.",
+    audience: "Classroom teachers",
+    href: "/docs/schools-au/teacher-pack/teacher-guide.md",
+    category: "Teacher Pack",
+  },
+  {
+    slug: "parent-note",
+    title: "Parent Note",
+    description:
+      "Plain-language parent/carer note for pilot communication and family questions.",
+    audience: "Parents and carers",
+    href: "/docs/schools-au/teacher-pack/parent-note.md",
+    category: "Teacher Pack",
+  },
+  {
+    slug: "staff-brief",
+    title: "Staff Briefing",
+    description:
+      "One-slide briefing for leadership, staff meetings, and internal pilot sign-off.",
+    audience: "Leadership and staff",
+    href: "/docs/schools-au/teacher-pack/staff-brief.md",
+    category: "Teacher Pack",
+  },
+  {
+    slug: "privacy-policy",
+    title: "Privacy Policy",
+    description:
+      "Plain-English privacy position for school leaders, ICT reviewers, and families.",
+    audience: "Leadership and ICT",
+    href: "/docs/schools-au/governance/privacy-policy.md",
+    category: "Governance Pack",
+  },
+  {
+    slug: "child-privacy-notice",
+    title: "Child Privacy Notice",
+    description:
+      "Short child-friendly explanation of what the school deployment stores and why.",
+    audience: "Students",
+    href: "/docs/schools-au/governance/child-privacy-notice.md",
+    category: "Governance Pack",
+  },
+  {
+    slug: "parent-carer-privacy-notice",
+    title: "Parent/Carer Privacy Notice",
+    description:
+      "Family-facing notice explaining aliases, local storage, and teacher-controlled exports.",
+    audience: "Parents and carers",
+    href: "/docs/schools-au/governance/parent-carer-privacy-notice.md",
+    category: "Governance Pack",
+  },
+  {
+    slug: "data-flow-diagram",
+    title: "Data Flow Diagram",
+    description:
+      "Simple map of local classroom data, optional exports, and adult-controlled review points.",
+    audience: "ICT and privacy reviewers",
+    href: "/docs/schools-au/governance/data-flow-diagram.md",
+    category: "Governance Pack",
+  },
+  {
+    slug: "data-inventory",
+    title: "Data Inventory",
+    description:
+      "Inventory of alias roster data, lesson queue data, local progress, and pilot summaries.",
+    audience: "ICT and privacy reviewers",
+    href: "/docs/schools-au/governance/data-inventory.md",
+    category: "Governance Pack",
+  },
+  {
+    slug: "retention-and-deletion-schedule",
+    title: "Retention and Deletion Schedule",
+    description:
+      "Short retention rules, automatic expiry window, and teacher-triggered deletion controls.",
+    audience: "ICT and leadership",
+    href: "/docs/schools-au/governance/retention-and-deletion-schedule.md",
+    category: "Governance Pack",
+  },
+  {
+    slug: "third-party-services-register",
+    title: "Third-Party Services Register",
+    description:
+      "Register of any services that may receive school-related traffic outside routine classroom use.",
+    audience: "ICT and procurement",
+    href: "/docs/schools-au/governance/third-party-services-register.md",
+    category: "Governance Pack",
+  },
+  {
+    slug: "security-controls-summary",
+    title: "Security Controls Summary",
+    description:
+      "Summary of local storage, route restrictions, deletion controls, and operational checks.",
+    audience: "ICT and privacy reviewers",
+    href: "/docs/schools-au/governance/security-controls-summary.md",
+    category: "Governance Pack",
+  },
+  {
+    slug: "privacy-impact-assessment",
+    title: "Privacy Impact Assessment",
+    description:
+      "Pilot-stage privacy impact assessment with risks, mitigations, and residual review points.",
+    audience: "Leadership and ICT",
+    href: "/docs/schools-au/governance/privacy-impact-assessment.md",
+    category: "Governance Pack",
+  },
+  {
+    slug: "child-safety-risk-assessment",
+    title: "Child-Safety Risk Assessment",
+    description:
+      "Risk register for supervised classroom use, family communication, and device-sharing contexts.",
+    audience: "Leadership and wellbeing teams",
+    href: "/docs/schools-au/governance/child-safety-risk-assessment.md",
+    category: "Governance Pack",
+  },
+  {
+    slug: "misuse-and-overengagement-risk-assessment",
+    title: "Misuse and Over-engagement Risk Assessment",
+    description:
+      "Controls for time-bounded use, no retention pressure, and teacher-led session limits.",
+    audience: "Leadership and wellbeing teams",
+    href: "/docs/schools-au/governance/misuse-and-overengagement-risk-assessment.md",
+    category: "Governance Pack",
+  },
+  {
+    slug: "wellbeing-escalation-pathway",
+    title: "Wellbeing Escalation Pathway",
+    description:
+      "Escalation steps if a classroom interaction raises a wellbeing or safety concern.",
+    audience: "Teachers and wellbeing teams",
+    href: "/docs/schools-au/governance/wellbeing-escalation-pathway.md",
+    category: "Governance Pack",
+  },
+  {
+    slug: "teacher-supervision-model",
+    title: "Teacher Supervision Model",
+    description:
+      "Default supervision expectations for setup, runtime use, evidence review, and deletion.",
+    audience: "Teachers and leadership",
+    href: "/docs/schools-au/governance/teacher-supervision-model.md",
+    category: "Governance Pack",
+  },
+  {
+    slug: "accessibility-and-inclusion-review",
+    title: "Accessibility and Inclusion Review",
+    description:
+      "Pilot-stage review of readability, participation options, and classroom inclusion risks.",
+    audience: "Teachers and inclusion teams",
+    href: "/docs/schools-au/governance/accessibility-and-inclusion-review.md",
+    category: "Governance Pack",
+  },
+  {
+    slug: "what-metapet-schools-is-is-not",
+    title: "What MetaPet Schools Is / Is Not",
+    description:
+      "Boundary statement covering therapy, surveillance, social, and AI expectations.",
+    audience: "Leadership, teachers, and families",
+    href: "/docs/schools-au/governance/what-metapet-schools-is-is-not.md",
+    category: "Governance Pack",
+  },
+  {
+    slug: "pilot-prospectus",
+    title: "Pilot Prospectus",
+    description:
+      "Pilot-ready scope, success criteria, stop conditions, evidence plan, and school ask.",
+    audience: "Leadership and pilot partners",
+    href: "/docs/schools-au/pilot/pilot-prospectus.md",
+    category: "Pilot Pack",
   },
 ];
 
@@ -339,22 +526,22 @@ export const assuranceItems = [
   {
     title: "No student accounts",
     description:
-      "The classroom baseline is positioned for normal use without student login setup.",
+      "The school deployment is built for alias-only classroom use with no student sign-up flow.",
   },
   {
-    title: "On-device storage",
+    title: "Local classroom records",
     description:
-      "School-facing copy describes the experience in plain terms: classroom interaction stays on the device during normal use.",
+      "Routine use keeps roster, lesson, and progress records on the current device during the pilot window.",
   },
   {
-    title: "No marking required",
+    title: "Teacher-led and time-bounded",
     description:
-      "Teachers can collect light evidence with one reflection sheet or one observation checklist.",
+      "The classroom version is designed for supervised lessons, not always-on companion behaviour.",
   },
   {
-    title: "Calm classroom fit",
+    title: "Bounded product contract",
     description:
-      "The sequence is framed as short, low-friction classroom use rather than a reward-pressure platform.",
+      "The school profile excludes chat, social features, identity shaping, public sharing, and retention pressure loops.",
   },
 ];
 

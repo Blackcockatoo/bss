@@ -1,15 +1,11 @@
 "use client";
 
 import { EducationQueuePanel } from "@/components/EducationQueuePanel";
-import { StudentDNACard } from "@/components/StudentDNACard";
-import { UpgradePrompt } from "@/components/UpgradePrompt";
 import { Button } from "@/components/ui/button";
 import {
   DEFAULT_ENGAGEMENT_CATEGORY,
-  DNA_MODE_LABELS,
   ENGAGEMENT_CATEGORY_DEFINITIONS,
   ENGAGEMENT_CATEGORY_OPTIONS,
-  deriveStudentDNA,
   normalizeEngagementCategory,
   useEducationStore,
 } from "@/lib/education";
@@ -18,13 +14,22 @@ import type {
   EngagementCategory,
   FocusArea,
 } from "@/lib/education";
-import { ENABLE_CHILD_SAFE_BASELINE } from "@/lib/env/features";
-import { useQuota } from "@/lib/pricing/hooks";
+import {
+  SCHOOLS_CLASSROOM_ANALYTICS_STORAGE_KEY,
+  SCHOOLS_CLASSROOM_ASSIGNMENTS_STORAGE_KEY,
+  SCHOOLS_CLASSROOM_PROGRESS_STORAGE_KEY,
+  SCHOOLS_CLASSROOM_ROSTER_STORAGE_KEY,
+  SCHOOLS_LOCAL_DATA_RETENTION_DAYS,
+  clearSchoolsLocalState,
+  purgeExpiredSchoolsLocalState,
+  touchSchoolsLocalState,
+} from "@/lib/schools/storage";
 import {
   ClipboardList,
   ListOrdered,
   Plus,
   RefreshCw,
+  ShieldCheck,
   Trash2,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -64,11 +69,6 @@ type AggregatedAnalytics = {
   updatedAt: number;
 };
 
-const ROSTER_STORAGE_KEY = "metapet-classroom-roster";
-const ASSIGNMENT_STORAGE_KEY = "metapet-classroom-assignments";
-const PROGRESS_STORAGE_KEY = "metapet-classroom-progress";
-const ANALYTICS_STORAGE_KEY = "metapet-classroom-analytics";
-
 const DEFAULT_STATUS: ProgressStatus = "not-started";
 
 const sanitizeAlias = (value: string) => value.trim().slice(0, 32);
@@ -103,6 +103,14 @@ const ENGAGEMENT_CATEGORY_BADGE_CLASSNAMES: Record<
     "border-slate-400/30 bg-slate-500/10 text-slate-200",
 };
 
+const SCHOOLS_ACTIVITY_MODE_LABELS: Record<Exclude<DnaMode, null>, string> = {
+  spiral: "Pattern spiral",
+  mandala: "Shape studio",
+  particles: "Response field",
+  sound: "Sound lab",
+  journey: "Guided walkthrough",
+};
+
 function getEngagementCategoryBadgeClassName(
   category: string | null | undefined,
 ): string {
@@ -121,7 +129,7 @@ function normalizeAssignment(
     engagementCategory: normalizeEngagementCategory(
       assignment.engagementCategory,
     ),
-    focus: sanitizeFocus(assignment.focus ?? "Mindfulness") || "Mindfulness",
+    focus: sanitizeFocus(assignment.focus ?? "Reflection") || "Reflection",
     targetMinutes: Math.max(1, Number(assignment.targetMinutes) || 1),
     createdAt: assignment.createdAt,
     dnaMode: assignment.dnaMode ?? null,
@@ -137,52 +145,65 @@ export function ClassroomManager() {
   const [newTitle, setNewTitle] = useState("");
   const [newEngagementCategory, setNewEngagementCategory] =
     useState<EngagementCategory>(DEFAULT_ENGAGEMENT_CATEGORY);
-  const [newFocus, setNewFocus] = useState("Mindfulness");
+  const [newFocus, setNewFocus] = useState("Reflection");
   const [newTargetMinutes, setNewTargetMinutes] = useState(10);
   const [newDnaMode, setNewDnaMode] = useState<DnaMode>(null);
   const [newStandardsRef, setNewStandardsRef] = useState("");
   const [showQueue, setShowQueue] = useState(false);
-  const [upgradeMessage, setUpgradeMessage] = useState<string | null>(null);
+  const [expiredDataPurged, setExpiredDataPurged] = useState(false);
 
   const addLessonToQueue = useEducationStore((s) => s.addLesson);
-  const lessonProgress = useEducationStore((s) => s.lessonProgress);
   const queue = useEducationStore((s) => s.queue);
-  const studentQuota = useQuota("students", students.length);
-  const assignmentQuota = useQuota("assignments", assignments.length);
+  const resetEducationStore = useEducationStore((s) => s.reset);
 
   useEffect(() => {
+    const purged = purgeExpiredSchoolsLocalState(window.localStorage);
+    setExpiredDataPurged(purged);
     setStudents(
-      safeParse<Student[]>(window.localStorage.getItem(ROSTER_STORAGE_KEY), []),
+      safeParse<Student[]>(
+        window.localStorage.getItem(SCHOOLS_CLASSROOM_ROSTER_STORAGE_KEY),
+        [],
+      ),
     );
     setAssignments(
       safeParse<
         Array<Partial<Assignment> & Pick<Assignment, "id" | "title" | "createdAt">>
       >(
-        window.localStorage.getItem(ASSIGNMENT_STORAGE_KEY),
+        window.localStorage.getItem(SCHOOLS_CLASSROOM_ASSIGNMENTS_STORAGE_KEY),
         [],
       ).map(normalizeAssignment),
     );
     setProgress(
       safeParse<ProgressMap>(
-        window.localStorage.getItem(PROGRESS_STORAGE_KEY),
+        window.localStorage.getItem(SCHOOLS_CLASSROOM_PROGRESS_STORAGE_KEY),
         {},
       ),
     );
+    touchSchoolsLocalState(window.localStorage);
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem(ROSTER_STORAGE_KEY, JSON.stringify(students));
+    window.localStorage.setItem(
+      SCHOOLS_CLASSROOM_ROSTER_STORAGE_KEY,
+      JSON.stringify(students),
+    );
+    touchSchoolsLocalState(window.localStorage);
   }, [students]);
 
   useEffect(() => {
     window.localStorage.setItem(
-      ASSIGNMENT_STORAGE_KEY,
+      SCHOOLS_CLASSROOM_ASSIGNMENTS_STORAGE_KEY,
       JSON.stringify(assignments),
     );
+    touchSchoolsLocalState(window.localStorage);
   }, [assignments]);
 
   useEffect(() => {
-    window.localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(progress));
+    window.localStorage.setItem(
+      SCHOOLS_CLASSROOM_PROGRESS_STORAGE_KEY,
+      JSON.stringify(progress),
+    );
+    touchSchoolsLocalState(window.localStorage);
   }, [progress]);
 
   const analytics = useMemo<AggregatedAnalytics>(() => {
@@ -226,22 +247,15 @@ export function ClassroomManager() {
 
   useEffect(() => {
     window.localStorage.setItem(
-      ANALYTICS_STORAGE_KEY,
+      SCHOOLS_CLASSROOM_ANALYTICS_STORAGE_KEY,
       JSON.stringify(analytics),
     );
+    touchSchoolsLocalState(window.localStorage);
   }, [analytics]);
 
   const handleAddStudent = () => {
     const alias = sanitizeAlias(newAlias);
     if (!alias) return;
-    if (studentQuota.atLimit) {
-      setUpgradeMessage(
-        ENABLE_CHILD_SAFE_BASELINE
-          ? "You've reached the local learner limit for this child-safe deployment. Use an adult admin build if you need a larger roster."
-          : "You've reached the Free plan limit of 25 students in this class. Upgrade to Pro for unlimited students.",
-      );
-      return;
-    }
     const student: Student = {
       id: createId(),
       alias,
@@ -276,19 +290,11 @@ export function ClassroomManager() {
   const handleAddAssignment = () => {
     const title = sanitizeTitle(newTitle);
     if (!title) return;
-    if (assignmentQuota.atLimit) {
-      setUpgradeMessage(
-        ENABLE_CHILD_SAFE_BASELINE
-          ? "You've reached the local assignment limit for this child-safe deployment. Use an adult admin build if you need more assignments."
-          : "You've reached the Free plan limit of 10 assignments. Upgrade to Pro for unlimited assignments.",
-      );
-      return;
-    }
     const assignment: Assignment = {
       id: createId(),
       title,
       engagementCategory: newEngagementCategory,
-      focus: sanitizeFocus(newFocus) || "Mindfulness",
+      focus: sanitizeFocus(newFocus) || "Reflection",
       targetMinutes: Math.max(1, Number(newTargetMinutes) || 1),
       createdAt: Date.now(),
       dnaMode: newDnaMode,
@@ -308,6 +314,10 @@ export function ClassroomManager() {
     });
     setNewTitle("");
     setNewEngagementCategory(DEFAULT_ENGAGEMENT_CATEGORY);
+    setNewFocus("Reflection");
+    setNewTargetMinutes(10);
+    setNewDnaMode(null);
+    setNewStandardsRef("");
   };
 
   const handleRemoveAssignment = (assignmentId: string) => {
@@ -352,20 +362,59 @@ export function ClassroomManager() {
   };
 
   const resetClassroom = () => {
-    if (!window.confirm("Clear the roster, assignments, and progress?")) return;
+    if (
+      !window.confirm(
+        "Delete all MetaPet Schools data from this device, including the roster, progress, summaries, and queue?",
+      )
+    ) {
+      return;
+    }
+    clearSchoolsLocalState(window.localStorage);
+    resetEducationStore();
     setStudents([]);
     setAssignments([]);
     setProgress({});
+    setShowQueue(false);
   };
 
   const resetAnalytics = () => {
     if (!window.confirm("Clear the local class summary?")) return;
-    window.localStorage.removeItem(ANALYTICS_STORAGE_KEY);
+    window.localStorage.removeItem(SCHOOLS_CLASSROOM_ANALYTICS_STORAGE_KEY);
+    touchSchoolsLocalState(window.localStorage);
   };
 
   return (
     <div className="space-y-6">
-      {upgradeMessage && <UpgradePrompt message={upgradeMessage} />}
+      <div className="rounded-xl border border-emerald-400/20 bg-emerald-500/5 p-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm font-semibold text-emerald-200">
+              <ShieldCheck className="h-4 w-4" />
+              Local classroom data only
+            </div>
+            <p className="text-sm leading-6 text-zinc-300">
+              This classroom setup is alias-based and stays on the current
+              device unless a teacher deliberately exports evidence. Local
+              school data expires after {SCHOOLS_LOCAL_DATA_RETENTION_DAYS} days
+              without use.
+            </p>
+            {expiredDataPurged && (
+              <p className="text-xs text-emerald-300">
+                Older local school data was cleared automatically at load time.
+              </p>
+            )}
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            className="border-rose-500 text-rose-300 hover:bg-rose-500/10"
+            onClick={resetClassroom}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete local school data
+          </Button>
+        </div>
+      </div>
       <div className="grid gap-4 md:grid-cols-2">
         <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-4 space-y-4">
           <div className="flex items-center gap-2 text-sm font-semibold text-zinc-200">
@@ -407,17 +456,13 @@ export function ClassroomManager() {
               </p>
             ) : (
               students.map((student) => {
-                const studentProgress = lessonProgress.filter(
-                  (p) => p.studentAlias === student.alias,
+                const completedCount = Object.values(progress).reduce(
+                  (count, assignmentProgress) =>
+                    assignmentProgress[student.id] === "complete"
+                      ? count + 1
+                      : count,
+                  0,
                 );
-                const dnaModes: Record<string, DnaMode> = {};
-                for (const lesson of queue) {
-                  dnaModes[lesson.id] = lesson.dnaMode;
-                }
-                const dnaProfile =
-                  studentProgress.length > 0
-                    ? deriveStudentDNA(student.alias, studentProgress, dnaModes)
-                    : null;
                 return (
                   <div
                     key={student.id}
@@ -429,8 +474,8 @@ export function ClassroomManager() {
                           {student.alias}
                         </p>
                         <p className="text-[11px] text-zinc-500">
-                          Joined{" "}
-                          {new Date(student.addedAt).toLocaleDateString()}
+                          {completedCount} completed lesson
+                          {completedCount === 1 ? "" : "s"}
                         </p>
                       </div>
                       <Button
@@ -443,9 +488,6 @@ export function ClassroomManager() {
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
-                    {dnaProfile && (
-                      <StudentDNACard profile={dnaProfile} compact />
-                    )}
                   </div>
                 );
               })
@@ -456,32 +498,32 @@ export function ClassroomManager() {
         <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-4 space-y-4">
           <div className="flex items-center gap-2 text-sm font-semibold text-zinc-200">
             <ClipboardList className="h-4 w-4 text-emerald-300" />
-            Activity assignments
+            Lesson planner
           </div>
           <div className="space-y-2">
             <label
               className="text-xs uppercase tracking-wide text-zinc-500"
               htmlFor="classroom-assignment"
             >
-              Activity title
+              Lesson title
             </label>
             <input
               id="classroom-assignment"
               value={newTitle}
               onChange={(event) => setNewTitle(event.target.value)}
-              placeholder="e.g., 5-minute breathing ritual"
+              placeholder="e.g., Session 1 - Meet the digital companion"
               className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-400"
             />
             <div className="grid gap-2 md:grid-cols-3">
               <div>
                 <label
                   className="text-xs uppercase tracking-wide text-zinc-500"
-                  htmlFor="classroom-category"
+                  htmlFor="classroom-category-primary"
                 >
                   Engagement category
                 </label>
                 <select
-                  id="classroom-category"
+                  id="classroom-category-primary"
                   value={newEngagementCategory}
                   onChange={(event) =>
                     setNewEngagementCategory(
@@ -508,7 +550,7 @@ export function ClassroomManager() {
                   id="classroom-focus"
                   value={newFocus}
                   onChange={(event) => setNewFocus(event.target.value)}
-                  placeholder="Mindfulness"
+                  placeholder="Reflection"
                   className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                 />
               </div>
@@ -530,38 +572,12 @@ export function ClassroomManager() {
                   className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                 />
               </div>
-            </div>
-            <div className="grid gap-2 md:grid-cols-3">
-              <div>
-                <label
-                  className="text-xs uppercase tracking-wide text-zinc-500"
-                  htmlFor="classroom-category"
-                >
-                  Engagement category
-                </label>
-                <select
-                  id="classroom-category"
-                  value={newEngagementCategory}
-                  onChange={(event) =>
-                    setNewEngagementCategory(
-                      normalizeEngagementCategory(event.target.value),
-                    )
-                  }
-                  className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                >
-                  {ENGAGEMENT_CATEGORY_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
               <div>
                 <label
                   className="text-xs uppercase tracking-wide text-zinc-500"
                   htmlFor="classroom-dna-mode"
                 >
-                  DNA mode
+                  Activity mode
                 </label>
                 <select
                   id="classroom-dna-mode"
@@ -576,27 +592,32 @@ export function ClassroomManager() {
                   className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                 >
                   <option value="">None</option>
-                  {(Object.entries(DNA_MODE_LABELS) as [string, string][]).map(
-                    ([key, label]) => (
-                      <option key={key} value={key}>
-                        {label}
-                      </option>
-                    ),
-                  )}
+                  {(
+                    Object.entries(SCHOOLS_ACTIVITY_MODE_LABELS) as [
+                      string,
+                      string,
+                    ][]
+                  ).map(([key, label]) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
                 </select>
               </div>
+            </div>
+            <div className="grid gap-2 md:grid-cols-2">
               <div>
                 <label
                   className="text-xs uppercase tracking-wide text-zinc-500"
                   htmlFor="classroom-standards"
                 >
-                  Standards (opt.)
+                  Curriculum links
                 </label>
                 <input
                   id="classroom-standards"
                   value={newStandardsRef}
                   onChange={(event) => setNewStandardsRef(event.target.value)}
-                  placeholder="e.g., NGSS:MS-ETS1-1"
+                  placeholder="e.g., AC9TDI4P02"
                   className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                 />
               </div>
@@ -612,9 +633,8 @@ export function ClassroomManager() {
                 }
               </p>
               <p className="mt-1 text-[11px] text-zinc-500">
-                Taxonomy policy lives in
-                {" "}
-                docs/compliance/digital-engagement-taxonomy.md.
+                Keep categories descriptive and classroom-facing. Avoid using
+                them as behaviour scores or surveillance labels.
               </p>
             </div>
             <Button
@@ -623,13 +643,13 @@ export function ClassroomManager() {
               className="w-full h-10 bg-emerald-500/90 hover:bg-emerald-500 text-slate-950"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Add assignment
+              Add lesson
             </Button>
           </div>
           <div className="space-y-2 max-h-56 overflow-y-auto">
             {assignments.length === 0 ? (
               <p className="text-xs text-zinc-500">
-                Assignments appear here once created.
+                Lessons appear here once created.
               </p>
             ) : (
               assignments.map((assignment) => {
@@ -658,7 +678,7 @@ export function ClassroomManager() {
                         <p className="text-xs text-zinc-500">
                           {assignment.focus} · {assignment.targetMinutes} min
                           {assignment.dnaMode &&
-                            ` · ${DNA_MODE_LABELS[assignment.dnaMode]}`}
+                            ` · ${SCHOOLS_ACTIVITY_MODE_LABELS[assignment.dnaMode]}`}
                         </p>
                         {assignment.standardsRef && (
                           <p className="text-[10px] text-emerald-400/70 mt-0.5">
@@ -673,19 +693,28 @@ export function ClassroomManager() {
                           className={`h-8 px-2 text-xs ${inQueue ? "text-emerald-400" : "text-cyan-400 hover:bg-cyan-500/10"}`}
                           onClick={() => {
                             if (!inQueue) {
+                              const focusKey = assignment.focus
+                                .trim()
+                                .toLowerCase();
                               const focusMap: Record<string, FocusArea> = {
-                                Mindfulness: "reflection",
-                                "Pattern Recognition": "pattern-recognition",
-                                "Sound Exploration": "sound-exploration",
-                                Collaboration: "collaboration",
+                                reflection: "reflection",
+                                repair: "reflection",
+                                "pattern recognition":
+                                  "pattern-recognition",
+                                patterns: "pattern-recognition",
+                                "sound exploration": "sound-exploration",
+                                sound: "sound-exploration",
+                                collaboration: "collaboration",
+                                "geometry creation":
+                                  "geometry-creation",
+                                geometry: "geometry-creation",
                               };
                               addLessonToQueue({
                                 title: assignment.title,
                                 description: `${assignment.focus} activity`,
                                 engagementCategory:
                                   assignment.engagementCategory,
-                                focusArea:
-                                  focusMap[assignment.focus] ?? "reflection",
+                                focusArea: focusMap[focusKey] ?? "reflection",
                                 dnaMode: assignment.dnaMode ?? null,
                                 targetMinutes: assignment.targetMinutes,
                                 standardsRef: assignment.standardsRef
@@ -694,6 +723,7 @@ export function ClassroomManager() {
                                 prePrompt: null,
                                 postPrompt: null,
                               });
+                              touchSchoolsLocalState(window.localStorage);
                             }
                           }}
                           disabled={inQueue}
@@ -745,7 +775,7 @@ export function ClassroomManager() {
         </div>
         {assignments.length === 0 ? (
           <p className="text-xs text-zinc-500">
-            Create assignments to start tracking progress.
+            Create lessons to start tracking progress.
           </p>
         ) : (
           <div className="space-y-4">
@@ -849,7 +879,8 @@ export function ClassroomManager() {
             Local class summary
           </h3>
           <p className="text-xs text-zinc-500">
-            Summary data is stored as anonymized local totals (no names or IDs).
+            Use the summary for teacher reflection and pilot evidence. It stays
+            local on this device unless you deliberately export it.
           </p>
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div className="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
@@ -859,7 +890,7 @@ export function ClassroomManager() {
               </p>
             </div>
             <div className="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-              <p className="text-xs text-zinc-500">Assignments</p>
+              <p className="text-xs text-zinc-500">Lessons</p>
               <p className="text-lg font-semibold text-zinc-100">
                 {analytics.totalAssignments}
               </p>
@@ -874,7 +905,7 @@ export function ClassroomManager() {
           <div className="space-y-2">
             {analytics.assignments.length === 0 ? (
               <p className="text-xs text-zinc-500">
-                Summary cards appear after adding assignments.
+                Summary cards appear after adding lessons.
               </p>
             ) : (
               analytics.assignments.map((entry) => (
@@ -900,8 +931,8 @@ export function ClassroomManager() {
             Reset controls
           </h3>
           <p className="text-xs text-zinc-500">
-            Reset data locally if you are sharing a device or closing out a
-            term.
+            Use these controls when sharing a device, ending a pilot cycle, or
+            responding to a family deletion request.
           </p>
           <div className="space-y-2">
             <Button
@@ -929,7 +960,7 @@ export function ClassroomManager() {
               onClick={resetClassroom}
             >
               <Trash2 className="h-4 w-4 mr-2" />
-              Reset classroom data
+              Delete all local school data
             </Button>
           </div>
         </div>

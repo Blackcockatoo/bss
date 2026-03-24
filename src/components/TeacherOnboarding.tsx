@@ -12,7 +12,7 @@ import {
   ShieldCheck,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const STEPS = [
   {
@@ -50,14 +50,8 @@ const STEPS = [
 ] as const;
 
 export function TeacherOnboarding() {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(() => !hasCompletedTeacherOnboarding());
   const [step, setStep] = useState(0);
-
-  useEffect(() => {
-    if (!hasCompletedTeacherOnboarding()) {
-      setVisible(true);
-    }
-  }, []);
 
   const handleDismiss = () => {
     completeTeacherOnboarding();

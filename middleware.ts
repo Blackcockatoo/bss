@@ -5,6 +5,7 @@ import {
   getChildSafeFallbackPathname,
   isChildSafeAllowedPathname,
 } from "./src/lib/childSafeBaseline";
+import { APP_PROFILE } from "./src/lib/env/features";
 
 function isEnabled(value: string | undefined): boolean {
   if (typeof value !== "string") {
@@ -21,10 +22,19 @@ const CHILD_SAFE_BASELINE_ENABLED = isEnabled(
 
 export function middleware(request: NextRequest) {
   if (!CHILD_SAFE_BASELINE_ENABLED) {
-    return NextResponse.next();
+    if (APP_PROFILE !== "schools") {
+      return NextResponse.next();
+    }
   }
 
   const { pathname } = request.nextUrl;
+  if (APP_PROFILE === "schools" && pathname === "/") {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/schools";
+    redirectUrl.search = "";
+    return NextResponse.redirect(redirectUrl);
+  }
+
   if (isChildSafeAllowedPathname(pathname)) {
     return NextResponse.next();
   }

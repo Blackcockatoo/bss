@@ -24,6 +24,14 @@ export const ENABLE_CHILD_SAFE_BASELINE = toEnabled(
   process.env.NEXT_PUBLIC_CHILD_SAFE_BASELINE,
   false,
 );
+const APP_PROFILE_VALUE = (
+  readEnvString(process.env.NEXT_PUBLIC_APP_PROFILE) ?? ""
+).toLowerCase();
+export const APP_PROFILE =
+  APP_PROFILE_VALUE === "schools" || ENABLE_CHILD_SAFE_BASELINE
+    ? "schools"
+    : "core";
+export const IS_SCHOOLS_PROFILE = APP_PROFILE === "schools";
 export const ENABLE_MAPS = toEnabled(
   process.env.NEXT_PUBLIC_ENABLE_MAPS,
   false,

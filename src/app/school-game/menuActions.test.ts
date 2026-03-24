@@ -23,4 +23,10 @@ describe('teacher hub menu smoke navigation', () => {
       ),
     ).toBe(true);
   });
+
+  it('requires hrefs for live school runtime actions', () => {
+    expect(
+      PRIMARY_TEACHER_HUB_MENU_ACTIONS.every((action) => Boolean(action.href)),
+    ).toBe(true);
+  });
 });

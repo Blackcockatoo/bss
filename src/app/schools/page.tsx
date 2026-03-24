@@ -9,6 +9,7 @@ import {
   evidenceTools,
   learningOutcomes,
   lessonCards,
+  schoolPackageDocCategories,
   schoolPackageDocs,
   weeklyFitOptions,
 } from "./content";
@@ -46,28 +47,28 @@ export default function SchoolsPage() {
         <header className="rounded-3xl border border-amber-300/20 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 p-6 shadow-[0_0_0_1px_rgba(251,191,36,0.05)] md:p-8">
           <div className="space-y-5">
             <p className="text-xs uppercase tracking-[0.35em] text-amber-300">
-              MetaPet for Schools
+              MetaPet Schools
             </p>
             <div className="space-y-4">
               <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-white md:text-5xl">
-                An Australia-wide Years 3-6 classroom sequence teachers can use
-                tomorrow
+                Teacher-led, low-data classroom pilot for Years 3-6
               </h1>
               <p className="max-w-3xl text-base leading-7 text-slate-300 md:text-lg">
-                This school-facing package is built for Australian classrooms:
-                clear curriculum fit, seven 20-minute sessions, no student
-                accounts, and no marking required. It positions MetaPet as a
-                calm digital companion sequence for Digital Technologies,
-                wellbeing learning and classroom reflection.
+                MetaPet Schools is a teacher-led, time-bounded classroom tool
+                for digital responsibility, systems thinking, and online safety
+                habits. The school profile keeps the product surface narrow:
+                alias-based classroom use, no student accounts, no social
+                features, and a governance pack built for pilot conversations.
               </p>
             </div>
 
             <div className="flex flex-wrap gap-3 text-sm">
               {[
                 "Years 3-6 fit",
+                "Alias-only classroom use",
                 "7 x 20 minute sessions",
                 "No student accounts",
-                "No marking required",
+                "Governance pack included",
               ].map((item) => (
                 <span
                   key={item}
@@ -83,20 +84,20 @@ export default function SchoolsPage() {
                 className="rounded-full bg-amber-300 px-5 py-2 text-sm font-semibold text-slate-950"
                 href="#downloads"
               >
-                Download school pack
-              </a>
-              <a
-                className="rounded-full border border-slate-700 px-5 py-2 text-sm font-semibold text-slate-100"
-                href="#privacy"
-              >
-                View ICT note
+                View document pack
               </a>
               <Link
                 className="rounded-full border border-slate-700 px-5 py-2 text-sm font-semibold text-slate-100"
-                href="/"
+                href="/school-game"
               >
-                Back to MetaPet
+                Open classroom runtime
               </Link>
+              <a
+                className="rounded-full border border-slate-700 px-5 py-2 text-sm font-semibold text-slate-100"
+                href="#governance"
+              >
+                Review governance pack
+              </a>
             </div>
           </div>
         </header>
@@ -205,19 +206,27 @@ export default function SchoolsPage() {
                     <dd>{lesson.outcome}</dd>
                   </div>
                   <div>
-                    <dt className="font-semibold text-slate-100">Student activity</dt>
+                    <dt className="font-semibold text-slate-100">
+                      Student activity
+                    </dt>
                     <dd>{lesson.activity}</dd>
                   </div>
                   <div>
-                    <dt className="font-semibold text-slate-100">Teacher prompt</dt>
+                    <dt className="font-semibold text-slate-100">
+                      Teacher prompt
+                    </dt>
                     <dd>{lesson.prompt}</dd>
                   </div>
                   <div>
-                    <dt className="font-semibold text-slate-100">Light evidence</dt>
+                    <dt className="font-semibold text-slate-100">
+                      Light evidence
+                    </dt>
                     <dd>{lesson.evidence}</dd>
                   </div>
                   <div>
-                    <dt className="font-semibold text-slate-100">Best-fit use case</dt>
+                    <dt className="font-semibold text-slate-100">
+                      Best-fit use case
+                    </dt>
                     <dd>{lesson.bestFit}</dd>
                   </div>
                 </dl>
@@ -292,7 +301,7 @@ export default function SchoolsPage() {
             <SectionHeading
               eyebrow="Family and Admin Reassurance"
               title="Low-friction language for parents, principals and wellbeing teams"
-              description="School-facing positioning stays simple: short classroom sequence, clear curriculum fit, calm use, and no extra teacher workload."
+              description="School-facing positioning stays simple: short classroom sequence, clear curriculum fit, supervised use, and no extra account administration."
             />
 
             <div className="mt-6 grid gap-4">
@@ -318,19 +327,18 @@ export default function SchoolsPage() {
           >
             <SectionHeading
               eyebrow="ICT and Privacy"
-              title="Keep the technical detail in the appendix, not the hero copy"
-              description="Teacher and family surfaces should stay in plain classroom language. The implementation note carries the privacy and ICT discussion, including the privacy-and-security curriculum references."
+              title="Keep the technical detail in the governance pack, not the hero copy"
+              description="Teacher and family surfaces stay in plain classroom language. Privacy, retention, and implementation detail live in the governance pack for leadership and ICT review."
             />
 
             <div className="mt-6 rounded-2xl border border-violet-400/20 bg-violet-500/5 p-4">
               <p className="text-sm font-semibold text-violet-200">
-                ICT note
+                Privacy position
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-300">
-                The school-facing explanation is simple: the classroom baseline
-                uses on-device storage for normal use and does not depend on
-                student account setup. Technical implementation detail belongs in
-                the appendix, not in day-to-day teacher copy.
+                The school-facing explanation is simple: routine classroom use
+                keeps alias-based data on the device, does not depend on student
+                account setup, and leaves exports under adult control.
               </p>
               <p className="mt-3 text-sm text-slate-300">
                 Privacy and security references kept here:
@@ -344,11 +352,59 @@ export default function SchoolsPage() {
             <a
               className="mt-4 inline-flex rounded-full border border-violet-400/30 px-4 py-2 text-sm font-semibold text-violet-200"
               download
-              href="/docs/schools-au/04-privacy-and-implementation.md"
+              href="/docs/schools-au/governance/privacy-policy.md"
             >
-              Download the privacy and implementation note
+              Download the privacy policy
             </a>
           </section>
+        </section>
+
+        <section
+          id="governance"
+          className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 md:p-8"
+        >
+          <SectionHeading
+            eyebrow="Governance Pack"
+            title="Pilot-ready material for leadership, ICT, and wellbeing review"
+            description="The school profile is backed by a privacy pack, a safeguarding pack, a teacher pack, and a pilot prospectus. That is the package you use for principal and pilot conversations."
+          />
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {[
+              {
+                title: "Privacy pack",
+                description:
+                  "Privacy policy, child and parent notices, data inventory, retention schedule, third-party register, controls summary, and privacy impact assessment.",
+              },
+              {
+                title: "Safeguarding pack",
+                description:
+                  "Child-safety risk assessment, misuse and over-engagement controls, escalation pathway, supervision model, and inclusion review.",
+              },
+              {
+                title: "Teacher pack",
+                description:
+                  "Teacher guide, parent note, staff briefing, lesson cards, and printable reflection materials for low-friction delivery.",
+              },
+              {
+                title: "Pilot pack",
+                description:
+                  "Pilot prospectus with scope, evidence plan, success criteria, and stop conditions before any minister-facing brief exists.",
+              },
+            ].map((item) => (
+              <article
+                key={item.title}
+                className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4"
+              >
+                <h3 className="text-base font-semibold text-white">
+                  {item.title}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  {item.description}
+                </p>
+              </article>
+            ))}
+          </div>
         </section>
 
         <section
@@ -358,31 +414,53 @@ export default function SchoolsPage() {
           <SectionHeading
             eyebrow="Download CTA"
             title="School pack downloads"
-            description="These are the four generated markdown documents for the Australia-wide school package."
+            description="The school profile now ships as one document set: curriculum materials, teacher-facing implementation tools, governance artifacts, and a pilot prospectus."
           />
 
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {schoolPackageDocs.map((doc) => (
-              <article
-                key={doc.slug}
-                className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4"
-              >
-                <p className="text-sm font-semibold text-white">{doc.title}</p>
-                <p className="mt-2 text-sm leading-6 text-slate-300">
-                  {doc.description}
-                </p>
-                <p className="mt-2 text-xs uppercase tracking-wide text-slate-500">
-                  {doc.audience}
-                </p>
-                <a
-                  className="mt-4 inline-flex text-sm font-semibold text-amber-300"
-                  download
-                  href={doc.href}
-                >
-                  Download {doc.title}
-                </a>
-              </article>
-            ))}
+          <div className="mt-6 space-y-8">
+            {schoolPackageDocCategories.map((category) => {
+              const docs = schoolPackageDocs.filter(
+                (doc) => doc.category === category,
+              );
+
+              return (
+                <div key={category}>
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="text-lg font-semibold text-white">
+                      {category}
+                    </h3>
+                    <p className="text-xs uppercase tracking-wide text-slate-500">
+                      {docs.length} documents
+                    </p>
+                  </div>
+                  <div className="mt-4 grid gap-4 md:grid-cols-2">
+                    {docs.map((doc) => (
+                      <article
+                        key={doc.slug}
+                        className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4"
+                      >
+                        <p className="text-sm font-semibold text-white">
+                          {doc.title}
+                        </p>
+                        <p className="mt-2 text-sm leading-6 text-slate-300">
+                          {doc.description}
+                        </p>
+                        <p className="mt-2 text-xs uppercase tracking-wide text-slate-500">
+                          {doc.audience}
+                        </p>
+                        <a
+                          className="mt-4 inline-flex text-sm font-semibold text-amber-300"
+                          download
+                          href={doc.href}
+                        >
+                          Download {doc.title}
+                        </a>
+                      </article>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           <div className="mt-8 rounded-2xl border border-slate-800 bg-slate-950/50 p-4">

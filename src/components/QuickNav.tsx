@@ -3,6 +3,7 @@
 import {
   ArrowDownToLine,
   ArrowLeft,
+  FileText,
   BookOpen,
   Home,
   PawPrint,
@@ -14,7 +15,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { CHILD_SAFE_NAV_ROUTES } from "@/lib/childSafeBaseline";
-import { ENABLE_CHILD_SAFE_BASELINE } from "@/lib/env/features";
+import {
+  ENABLE_CHILD_SAFE_BASELINE,
+  IS_SCHOOLS_PROFILE,
+} from "@/lib/env/features";
 import { triggerHaptic } from "@/lib/haptics";
 
 type BeforeInstallPromptEvent = Event & {
@@ -22,11 +26,17 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
-export const QUICK_NAV_ITEMS = [
+export const CORE_QUICK_NAV_ITEMS = [
   { href: "/", label: "Home", icon: Home },
   { href: "/pet", label: "Pet", icon: PawPrint },
   { href: "/school-game", label: "School", icon: BookOpen },
   { href: "/identity", label: "Identity", icon: UserCircle },
+];
+
+export const SCHOOLS_QUICK_NAV_ITEMS = [
+  { href: "/schools", label: "Overview", icon: Home },
+  { href: "/school-game", label: "Runtime", icon: BookOpen },
+  { href: "/legal/privacy", label: "Privacy", icon: FileText },
 ];
 
 export function QuickNav() {
@@ -41,7 +51,7 @@ export function QuickNav() {
       router.back();
       return;
     }
-    router.push("/");
+    router.push(IS_SCHOOLS_PROFILE ? "/schools" : "/");
   }, [router]);
 
   useEffect(() => {
@@ -69,9 +79,10 @@ export function QuickNav() {
   const showInstall = useMemo(() => installPrompt !== null, [installPrompt]);
   const visibleNavItems = useMemo(
     () =>
-      ENABLE_CHILD_SAFE_BASELINE
-        ? QUICK_NAV_ITEMS.filter((item) => CHILD_SAFE_NAV_ROUTES.has(item.href))
-        : QUICK_NAV_ITEMS,
+      (ENABLE_CHILD_SAFE_BASELINE || IS_SCHOOLS_PROFILE)
+        ? (IS_SCHOOLS_PROFILE ? SCHOOLS_QUICK_NAV_ITEMS : CORE_QUICK_NAV_ITEMS)
+            .filter((item) => CHILD_SAFE_NAV_ROUTES.has(item.href))
+        : CORE_QUICK_NAV_ITEMS,
     [],
   );
 

@@ -9,7 +9,7 @@ interface TimerBarProps {
 }
 
 export function TimerBar({ durationMinutes, startedAt }: TimerBarProps) {
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000);

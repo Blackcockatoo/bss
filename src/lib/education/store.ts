@@ -8,7 +8,10 @@
  */
 
 import { generateMeditationPattern, validatePattern } from "@/lib/minigames";
-import { PLAN_LIMITS, UNLIMITED } from "@/lib/pricing/plans";
+import {
+  SCHOOLS_EDUCATION_QUEUE_STORAGE_KEY,
+  SCHOOLS_LOCAL_DATA_RETENTION_DAYS,
+} from "@/lib/schools/storage";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import {
@@ -35,33 +38,7 @@ import {
   createDefaultQueueState,
 } from "./types";
 
-function getAnalyticsRetentionDays(): number {
-  try {
-    const raw = window.localStorage.getItem("metapet-auth");
-    if (!raw) return PLAN_LIMITS.free.analyticsRetentionDays;
-    const parsed = JSON.parse(raw) as {
-      state?: { currentUser?: { subscription?: { planId?: "free" | "pro" } } };
-    };
-    const planId = parsed?.state?.currentUser?.subscription?.planId ?? "free";
-    return PLAN_LIMITS[planId].analyticsRetentionDays;
-  } catch {
-    return PLAN_LIMITS.free.analyticsRetentionDays;
-  }
-}
-
-function getCurrentPlanLimits() {
-  try {
-    const raw = window.localStorage.getItem("metapet-auth");
-    if (!raw) return PLAN_LIMITS.free;
-    const parsed = JSON.parse(raw) as {
-      state?: { currentUser?: { subscription?: { planId?: "free" | "pro" } } };
-    };
-    const planId = parsed?.state?.currentUser?.subscription?.planId ?? "free";
-    return PLAN_LIMITS[planId];
-  } catch {
-    return PLAN_LIMITS.free;
-  }
-}
+const MAX_SCHOOL_LESSONS_IN_QUEUE = 24;
 
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
@@ -238,11 +215,7 @@ export const useEducationStore = create<EducationStore>()(
 
       addLesson: (lesson) =>
         set((state) => {
-          const lessonLimit =
-            typeof window === "undefined"
-              ? PLAN_LIMITS.free.maxLessonsInQueue
-              : getCurrentPlanLimits().maxLessonsInQueue;
-          if (lessonLimit !== UNLIMITED && state.queue.length >= lessonLimit) {
+          if (state.queue.length >= MAX_SCHOOL_LESSONS_IN_QUEUE) {
             return state;
           }
 
@@ -508,11 +481,8 @@ export const useEducationStore = create<EducationStore>()(
 
       getQueueAnalytics: () => {
         const state = get();
-        const retentionDays =
-          typeof window === "undefined"
-            ? PLAN_LIMITS.free.analyticsRetentionDays
-            : getAnalyticsRetentionDays();
-        const retentionMs = retentionDays * 24 * 60 * 60 * 1000;
+        const retentionMs =
+          SCHOOLS_LOCAL_DATA_RETENTION_DAYS * 24 * 60 * 60 * 1000;
         const cutoff = Date.now() - retentionMs;
 
         const retainedProgress = state.lessonProgress.filter((progress) => {
@@ -807,8 +777,8 @@ export const useEducationStore = create<EducationStore>()(
       reset: () => set(createDefaultQueueState()),
     }),
     {
-      name: "metapet-education-queue",
-      version: 4,
+      name: SCHOOLS_EDUCATION_QUEUE_STORAGE_KEY,
+      version: 5,
       migrate: (persistedState: unknown, version: number) => {
         const state = persistedState as Partial<EducationQueueState>;
         const defaults = createDefaultQueueState();
@@ -863,6 +833,19 @@ export const useEducationStore = create<EducationStore>()(
                 lesson.engagementCategory ?? DEFAULT_ENGAGEMENT_CATEGORY,
               ),
             })),
+          } as EducationQueueState;
+        }
+
+        if (version < 5) {
+          migrated = {
+            ...migrated,
+            eduXP: migrated.eduXP ?? defaults.eduXP,
+            vibeReactions: migrated.vibeReactions ?? defaults.vibeReactions,
+            classEnergy: migrated.classEnergy ?? defaults.classEnergy,
+            eduAchievements:
+              migrated.eduAchievements ?? defaults.eduAchievements,
+            vibeReactionCount:
+              migrated.vibeReactionCount ?? defaults.vibeReactionCount,
           } as EducationQueueState;
         }
 

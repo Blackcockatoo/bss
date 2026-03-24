@@ -1,5 +1,11 @@
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import {
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
+import { dirname, relative, resolve } from "node:path";
 
 const workspaceRoot = resolve(process.cwd());
 
@@ -7,7 +13,7 @@ const kppsDocs = [
   {
     id: "01_KPPS_Teacher_Hub_Welcome",
     filename: "01_KPPS_Teacher_Hub_Welcome.md",
-    title: "Meta-Pet & The Veil - Teacher Hub",
+    title: "MetaPet Schools - Teacher Hub",
   },
   {
     id: "02_KPPS_Implementation_Guide",
@@ -42,32 +48,11 @@ const kppsDocs = [
   {
     id: "00_Package_Index",
     filename: "00_Package_Index.md",
-    title: "Meta-Pet & The Veil",
+    title: "MetaPet Schools",
   },
 ];
 
-const schoolsAuDocs = [
-  {
-    filename: "01-overview-and-alignment.md",
-    title: "Overview and Alignment",
-    sourceDir: resolve(workspaceRoot, "docs", "schools-au"),
-  },
-  {
-    filename: "02-lesson-cards.md",
-    title: "7 Lesson Cards",
-    sourceDir: resolve(workspaceRoot, "docs", "schools-au"),
-  },
-  {
-    filename: "03-assessment-and-reflection.md",
-    title: "Assessment and Reflection",
-    sourceDir: resolve(workspaceRoot, "docs", "schools-au"),
-  },
-  {
-    filename: "04-privacy-and-implementation.md",
-    title: "Privacy and Implementation Note",
-    sourceDir: resolve(workspaceRoot, "docs", "schools-au"),
-  },
-];
+const schoolsAuSourceDir = resolve(workspaceRoot, "docs", "schools-au");
 
 const packageMarkdownDir = resolve(
   workspaceRoot,
@@ -105,6 +90,26 @@ function normalize(text) {
   return text.replace(/\r\n/g, "\n").trimEnd() + "\n";
 }
 
+function collectMarkdownFiles(rootDir) {
+  const results = [];
+
+  for (const entry of readdirSync(rootDir)) {
+    const fullPath = resolve(rootDir, entry);
+    const stats = statSync(fullPath);
+
+    if (stats.isDirectory()) {
+      results.push(...collectMarkdownFiles(fullPath));
+      continue;
+    }
+
+    if (fullPath.endsWith(".md")) {
+      results.push(fullPath);
+    }
+  }
+
+  return results;
+}
+
 const packagedDocs = kppsDocs.map((doc) => {
   const sourcePath = resolve(workspaceRoot, doc.filename);
   const markdown = normalize(readFileSync(sourcePath, "utf8"));
@@ -126,17 +131,16 @@ for (const target of docsJsTargets) {
   writeFileSync(target, docsJs, "utf8");
 }
 
-const schoolsAuExports = schoolsAuDocs.map((doc) => {
-  const sourcePath = resolve(doc.sourceDir, doc.filename);
+const schoolsAuExports = collectMarkdownFiles(schoolsAuSourceDir).map((sourcePath) => {
+  const relativePath = relative(schoolsAuSourceDir, sourcePath);
   const markdown = normalize(readFileSync(sourcePath, "utf8"));
-  const publicPath = resolve(schoolsAuPublicDir, doc.filename);
+  const publicPath = resolve(schoolsAuPublicDir, relativePath);
 
   mkdirSync(dirname(publicPath), { recursive: true });
   writeFileSync(publicPath, markdown, "utf8");
 
   return {
-    filename: doc.filename,
-    title: doc.title,
+    filename: relativePath,
   };
 });
 
