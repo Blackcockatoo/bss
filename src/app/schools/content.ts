@@ -8,7 +8,8 @@ export interface SchoolPackageDoc {
     | "Core Pack"
     | "Teacher Pack"
     | "Governance Pack"
-    | "Pilot Pack";
+    | "Pilot Ops Pack"
+    | "Evidence Pack";
 }
 
 export interface CurriculumRow {
@@ -46,11 +47,23 @@ export interface ReviewerPathway {
   docSlugs: string[];
 }
 
+export interface PackageSummaryCard {
+  title: string;
+  description: string;
+}
+
+export interface PilotAcceptanceStep {
+  title: string;
+  description: string;
+  docSlugs: string[];
+}
+
 export const schoolPackageDocCategories: SchoolPackageDoc["category"][] = [
   "Core Pack",
   "Teacher Pack",
   "Governance Pack",
-  "Pilot Pack",
+  "Pilot Ops Pack",
+  "Evidence Pack",
 ];
 
 export const schoolPackageDocs: SchoolPackageDoc[] = [
@@ -259,7 +272,142 @@ export const schoolPackageDocs: SchoolPackageDoc[] = [
       "Pilot-ready scope, success criteria, stop conditions, evidence plan, and school ask.",
     audience: "Leadership and pilot partners",
     href: "/docs/schools-au/pilot/pilot-prospectus.md",
-    category: "Pilot Pack",
+    category: "Pilot Ops Pack",
+  },
+  {
+    slug: "acceptance-runbook",
+    title: "Acceptance Runbook",
+    description:
+      "Ordered acceptance gate for browser checks, dry runs, reviews, and final pre-pilot signoff.",
+    audience: "Pilot leads and reviewers",
+    href: "/docs/schools-au/pilot/acceptance-runbook.md",
+    category: "Pilot Ops Pack",
+  },
+  {
+    slug: "pilot-runbook",
+    title: "Pilot Runbook",
+    description:
+      "One-page pilot timeline, owners, weekly cadence, and stop-condition handling for the first school trial.",
+    audience: "Pilot leads and teachers",
+    href: "/docs/schools-au/pilot/pilot-runbook.md",
+    category: "Pilot Ops Pack",
+  },
+  {
+    slug: "school-partner-checklist",
+    title: "School Partner Checklist",
+    description:
+      "Principal and pilot-lead checklist for devices, staffing, family communication, and launch readiness.",
+    audience: "Principals and pilot leads",
+    href: "/docs/schools-au/pilot/school-partner-checklist.md",
+    category: "Pilot Ops Pack",
+  },
+  {
+    slug: "outreach-pack",
+    title: "Outreach Pack",
+    description:
+      "Principal email template, first-meeting agenda, and recommended review order for school conversations.",
+    audience: "Principals and pilot leads",
+    href: "/docs/schools-au/pilot/outreach-pack.md",
+    category: "Pilot Ops Pack",
+  },
+  {
+    slug: "teacher-dry-run-checklist",
+    title: "Teacher Dry-Run Checklist",
+    description:
+      "Timed rehearsal checklist for setup, classroom flow, deletion controls, and teacher workload.",
+    audience: "Classroom teachers",
+    href: "/docs/schools-au/pilot/teacher-dry-run-checklist.md",
+    category: "Pilot Ops Pack",
+  },
+  {
+    slug: "ict-privacy-review-checklist",
+    title: "ICT/Privacy Review Checklist",
+    description:
+      "Artifact-by-artifact ICT review checklist mapped to the governance pack and route boundary.",
+    audience: "ICT and privacy reviewers",
+    href: "/docs/schools-au/pilot/ict-privacy-review-checklist.md",
+    category: "Pilot Ops Pack",
+  },
+  {
+    slug: "parent-readability-checklist",
+    title: "Parent Readability Checklist",
+    description:
+      "Readability review tool for the parent note, privacy notice, and participation explanation.",
+    audience: "Parents and carers",
+    href: "/docs/schools-au/pilot/parent-readability-checklist.md",
+    category: "Pilot Ops Pack",
+  },
+  {
+    slug: "family-participation-protocol",
+    title: "Family Participation Protocol",
+    description:
+      "Recommended opt-in flow, opt-out handling, shared-device guidance, and teacher language for the pilot.",
+    audience: "Teachers and families",
+    href: "/docs/schools-au/pilot/family-participation-protocol.md",
+    category: "Pilot Ops Pack",
+  },
+  {
+    slug: "teacher-interview-guide",
+    title: "Teacher Interview Guide",
+    description:
+      "Semi-structured interview guide covering setup time, workload, clarity, and classroom impact.",
+    audience: "Pilot leads and researchers",
+    href: "/docs/schools-au/pilot/teacher-interview-guide.md",
+    category: "Evidence Pack",
+  },
+  {
+    slug: "student-exit-feedback",
+    title: "Student Exit Feedback",
+    description:
+      "Anonymous student feedback sheet with age-appropriate questions about clarity, safety, and learning.",
+    audience: "Students",
+    href: "/docs/schools-au/pilot/student-exit-feedback.md",
+    category: "Evidence Pack",
+  },
+  {
+    slug: "parent-feedback-form",
+    title: "Parent/Carer Feedback Form",
+    description:
+      "Short family feedback template for clarity, participation process, concerns, and perceived value.",
+    audience: "Parents and carers",
+    href: "/docs/schools-au/pilot/parent-feedback-form.md",
+    category: "Evidence Pack",
+  },
+  {
+    slug: "pre-post-measure",
+    title: "Pre/Post Measure",
+    description:
+      "Short before-and-after classroom measure for systems thinking, online safety, and regulation language.",
+    audience: "Teachers and pilot leads",
+    href: "/docs/schools-au/pilot/pre-post-measure.md",
+    category: "Evidence Pack",
+  },
+  {
+    slug: "incident-log",
+    title: "Incident Log",
+    description:
+      "Structured log for safeguarding, privacy, inclusion, workload, and over-engagement incidents.",
+    audience: "Teachers and pilot leads",
+    href: "/docs/schools-au/pilot/incident-log.md",
+    category: "Evidence Pack",
+  },
+  {
+    slug: "implementation-fidelity-notes",
+    title: "Implementation Fidelity Notes",
+    description:
+      "Template for recording what was delivered, what changed, and what barriers appeared during the pilot.",
+    audience: "Teachers and pilot leads",
+    href: "/docs/schools-au/pilot/implementation-fidelity-notes.md",
+    category: "Evidence Pack",
+  },
+  {
+    slug: "end-of-pilot-summary",
+    title: "End-of-Pilot Summary",
+    description:
+      "Final summary template for evidence, incidents, findings, and next-step recommendation.",
+    audience: "Leadership and pilot partners",
+    href: "/docs/schools-au/pilot/end-of-pilot-summary.md",
+    category: "Evidence Pack",
   },
 ];
 
@@ -560,6 +708,8 @@ export const reviewerPathways: ReviewerPathway[] = [
       "01-overview-and-alignment",
       "staff-brief",
       "pilot-prospectus",
+      "school-partner-checklist",
+      "outreach-pack",
       "what-metapet-schools-is-is-not",
     ],
   },
@@ -575,6 +725,7 @@ export const reviewerPathways: ReviewerPathway[] = [
       "retention-and-deletion-schedule",
       "security-controls-summary",
       "privacy-impact-assessment",
+      "ict-privacy-review-checklist",
     ],
   },
   {
@@ -586,6 +737,8 @@ export const reviewerPathways: ReviewerPathway[] = [
       "02-lesson-cards",
       "03-assessment-and-reflection",
       "teacher-supervision-model",
+      "teacher-dry-run-checklist",
+      "pilot-runbook",
     ],
   },
   {
@@ -595,11 +748,92 @@ export const reviewerPathways: ReviewerPathway[] = [
     docSlugs: [
       "parent-note",
       "parent-carer-privacy-notice",
+      "family-participation-protocol",
+      "parent-readability-checklist",
       "child-safety-risk-assessment",
       "wellbeing-escalation-pathway",
       "accessibility-and-inclusion-review",
     ],
   },
+];
+
+export const packageSummaryCards: PackageSummaryCard[] = [
+  {
+    title: "Privacy pack",
+    description:
+      "Privacy policy, child and parent notices, data inventory, retention schedule, third-party register, controls summary, and privacy impact assessment.",
+  },
+  {
+    title: "Safeguarding pack",
+    description:
+      "Child-safety risk assessment, misuse and over-engagement controls, escalation pathway, supervision model, and inclusion review.",
+  },
+  {
+    title: "Teacher pack",
+    description:
+      "Teacher guide, parent note, staff briefing, lesson cards, and printable reflection materials for low-friction delivery.",
+  },
+  {
+    title: "Pilot operations pack",
+    description:
+      "Pilot prospectus, acceptance runbook, family participation protocol, review checklists, and outreach material for school launch.",
+  },
+  {
+    title: "Evidence pack",
+    description:
+      "Interview guides, feedback forms, measures, incident logging, fidelity notes, and the end-of-pilot summary template.",
+  },
+];
+
+export const pilotAcceptanceSteps: PilotAcceptanceStep[] = [
+  {
+    title: "Browser and network inspection",
+    description:
+      "Inspect routine classroom use on the school profile and confirm only declared traffic appears during normal lesson flow.",
+    docSlugs: [
+      "acceptance-runbook",
+      "third-party-services-register",
+      "security-controls-summary",
+    ],
+  },
+  {
+    title: "Teacher dry run",
+    description:
+      "Have one teacher rehearse the setup, lesson flow, evidence handling, and deletion controls before any school outreach.",
+    docSlugs: [
+      "teacher-dry-run-checklist",
+      "teacher-guide",
+      "pilot-runbook",
+    ],
+  },
+  {
+    title: "ICT/privacy review",
+    description:
+      "Walk ICT or privacy reviewers through the governance pack and capture a pass/fail decision against the school boundary.",
+    docSlugs: [
+      "ict-privacy-review-checklist",
+      "privacy-policy",
+      "privacy-impact-assessment",
+    ],
+  },
+  {
+    title: "Parent readability review",
+    description:
+      "Test the family note, privacy notice, and participation explanation with a parent or carer before live pilot use.",
+    docSlugs: [
+      "parent-readability-checklist",
+      "parent-note",
+      "parent-carer-privacy-notice",
+      "family-participation-protocol",
+    ],
+  },
+];
+
+export const pilotHardBlockers = [
+  "Any undeclared outbound call during routine classroom use.",
+  "Any reviewer confusion between the school deployment and the broader MetaPet product.",
+  "Any teacher setup burden above the promised low-friction lesson flow.",
+  "Any unclear family participation, alias handling, or deletion process.",
 ];
 
 export const curriculumSourceLinks: ExternalResourceLink[] = [

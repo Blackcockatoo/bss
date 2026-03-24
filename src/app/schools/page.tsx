@@ -9,6 +9,9 @@ import {
   evidenceTools,
   learningOutcomes,
   lessonCards,
+  packageSummaryCards,
+  pilotAcceptanceSteps,
+  pilotHardBlockers,
   reviewerPathways,
   schoolPackageDocCategories,
   schoolPackageDocs,
@@ -411,32 +414,11 @@ export default function SchoolsPage() {
           <SectionHeading
             eyebrow="Governance Pack"
             title="Pilot-ready material for leadership, ICT, and wellbeing review"
-            description="The school profile is backed by a privacy pack, a safeguarding pack, a teacher pack, and a pilot prospectus. That is the package you use for principal and pilot conversations."
+            description="The school profile is backed by a privacy pack, a safeguarding pack, a teacher pack, a pilot operations pack, and an evidence pack. That is the package you use for principal and pilot conversations."
           />
 
-          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {[
-              {
-                title: "Privacy pack",
-                description:
-                  "Privacy policy, child and parent notices, data inventory, retention schedule, third-party register, controls summary, and privacy impact assessment.",
-              },
-              {
-                title: "Safeguarding pack",
-                description:
-                  "Child-safety risk assessment, misuse and over-engagement controls, escalation pathway, supervision model, and inclusion review.",
-              },
-              {
-                title: "Teacher pack",
-                description:
-                  "Teacher guide, parent note, staff briefing, lesson cards, and printable reflection materials for low-friction delivery.",
-              },
-              {
-                title: "Pilot pack",
-                description:
-                  "Pilot prospectus with scope, evidence plan, success criteria, and stop conditions before any minister-facing brief exists.",
-              },
-            ].map((item) => (
+          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            {packageSummaryCards.map((item) => (
               <article
                 key={item.title}
                 className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4"
@@ -452,6 +434,68 @@ export default function SchoolsPage() {
           </div>
         </section>
 
+        <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 md:p-8">
+          <SectionHeading
+            eyebrow="Acceptance Gate"
+            title="Run the acceptance gate before outreach"
+            description="Complete these checks in order. A failed step means fix the issue before moving into school outreach or live pilot use."
+          />
+
+          <div className="mt-6 grid gap-4 lg:grid-cols-2">
+            {pilotAcceptanceSteps.map((step, index) => (
+              <article
+                key={step.title}
+                className="rounded-2xl border border-slate-800 bg-slate-950/50 p-5"
+              >
+                <p className="text-xs uppercase tracking-[0.25em] text-cyan-300">
+                  Step {index + 1}
+                </p>
+                <h3 className="mt-3 text-lg font-semibold text-white">
+                  {step.title}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  {step.description}
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {step.docSlugs.map((slug) => {
+                    const doc = docsBySlug.get(slug);
+                    if (!doc) {
+                      return null;
+                    }
+
+                    return (
+                      <a
+                        key={doc.slug}
+                        className="rounded-full border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-200"
+                        download
+                        href={doc.href}
+                      >
+                        {doc.title}
+                      </a>
+                    );
+                  })}
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-rose-400/20 bg-rose-500/5 p-4">
+            <p className="text-sm font-semibold text-rose-200">
+              Hard blockers before outreach
+            </p>
+            <div className="mt-3 grid gap-2">
+              {pilotHardBlockers.map((item) => (
+                <p
+                  key={item}
+                  className="rounded-xl border border-rose-400/15 bg-slate-950/40 p-3 text-sm leading-6 text-slate-300"
+                >
+                  {item}
+                </p>
+              ))}
+            </div>
+          </div>
+        </section>
+
         <section
           id="downloads"
           className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 md:p-8"
@@ -459,7 +503,7 @@ export default function SchoolsPage() {
           <SectionHeading
             eyebrow="Download CTA"
             title="School pack downloads"
-            description="The school profile now ships as one document set: curriculum materials, teacher-facing implementation tools, governance artifacts, and a pilot prospectus."
+            description="The school profile now ships as one document set: curriculum materials, teacher-facing implementation tools, governance artifacts, pilot operations tools, and evidence templates."
           />
 
           <div className="mt-6 space-y-8">

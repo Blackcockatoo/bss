@@ -30,6 +30,18 @@ Australian schools need low-friction classroom tools that help students discuss 
 - Dropout and engagement counts
 - Implementation fidelity notes
 
+## Operational materials
+
+Use the pilot prospectus together with:
+
+- Acceptance Runbook
+- Pilot Runbook
+- School Partner Checklist
+- Family Participation Protocol
+- ICT/Privacy Review Checklist
+- Parent Readability Checklist
+- End-of-Pilot Summary
+
 ## Success criteria
 
 - Teachers can set up and run the sequence without account administration

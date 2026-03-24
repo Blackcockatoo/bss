@@ -12,5 +12,6 @@
 - Use aliases only
 - Keep sessions time-bounded
 - Do not position it as therapy or counselling
+- Confirm the family participation protocol before launch
 - Review any export before it leaves the device
 - Delete local school data at the end of the pilot cycle

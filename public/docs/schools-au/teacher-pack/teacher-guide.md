@@ -11,7 +11,8 @@
 1. Open the school runtime.
 2. Add aliases only.
 3. Queue the lesson you plan to run.
-4. Keep the parent note and staff brief available if questions arise.
+4. Confirm the family participation process before the first lesson.
+5. Keep the parent note and staff brief available if questions arise.
 
 ## During class
 

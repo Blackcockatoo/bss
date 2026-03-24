@@ -56,6 +56,17 @@ describe("SchoolsPage", () => {
         name: /Pilot-ready material for leadership, ICT, and wellbeing review/i,
       }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        name: /Run the acceptance gate before outreach/i,
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /Pilot operations pack/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByRole("heading", { name: /Evidence pack/i }).length,
+    ).toBeGreaterThan(0);
 
     for (const pathway of reviewerPathways) {
       expect(

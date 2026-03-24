@@ -17,6 +17,12 @@
 - Lesson progress on the classroom device
 - A local class summary for pilot evidence
 
+## How participation works
+
+- The default pilot pack assumes parent/carer opt-in before direct student use.
+- If your school uses a different approved local process, it should explain that clearly before classroom use.
+- Students who are not the primary device user can still take part through observation, discussion, or teacher-provided alternatives.
+
 ## How long is it kept?
 
 The current pilot setup uses short local retention and teacher-controlled deletion. Teachers can clear local classroom data at any time.
