@@ -37,7 +37,19 @@
       "Bash(npx next:*)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/school-game)",
       "Bash(taskkill //f //im node.exe)",
-      "Bash(curl -s -w \"\\\\nHTTP_CODE:%{http_code}\\\\nREDIRECT:%{redirect_url}\" -o /dev/null http://localhost:3000/school-game)"
+      "Bash(curl -s -w \"\\\\nHTTP_CODE:%{http_code}\\\\nREDIRECT:%{redirect_url}\" -o /dev/null http://localhost:3000/school-game)",
+      "Bash(npm install:*)",
+      "Bash(node scripts/generate-school-docs.cjs)",
+      "Bash(python \"C:\\\\Users\\\\Tom\\\\AppData\\\\Roaming\\\\Claude\\\\local-agent-mode-sessions\\\\skills-plugin\\\\9b359ad8-bf38-4623-8816-1e4551bc9750\\\\a11956bc-15f8-4ce9-966b-52d17f17c6f4\\\\skills\\\\docx\\\\scripts\\\\office\\\\validate.py\" public/docs/schools-au/teacher-pack/teacher-guide.docx)",
+      "Bash(python \"C:\\\\Users\\\\Tom\\\\AppData\\\\Roaming\\\\Claude\\\\local-agent-mode-sessions\\\\skills-plugin\\\\9b359ad8-bf38-4623-8816-1e4551bc9750\\\\a11956bc-15f8-4ce9-966b-52d17f17c6f4\\\\skills\\\\docx\\\\scripts\\\\office\\\\validate.py\" public/docs/schools-au/02-lesson-cards.docx)",
+      "Bash(python \"C:\\\\Users\\\\Tom\\\\AppData\\\\Roaming\\\\Claude\\\\local-agent-mode-sessions\\\\skills-plugin\\\\9b359ad8-bf38-4623-8816-1e4551bc9750\\\\a11956bc-15f8-4ce9-966b-52d17f17c6f4\\\\skills\\\\docx\\\\scripts\\\\office\\\\validate.py\" public/docs/schools-au/03-assessment-and-reflection.docx)",
+      "Bash(pip install:*)",
+      "Bash(for f:*)",
+      "Bash(do echo:*)",
+      "Bash(python \"C:\\\\Users\\\\Tom\\\\AppData\\\\Roaming\\\\Claude\\\\local-agent-mode-sessions\\\\skills-plugin\\\\9b359ad8-bf38-4623-8816-1e4551bc9750\\\\a11956bc-15f8-4ce9-966b-52d17f17c6f4\\\\skills\\\\docx\\\\scripts\\\\office\\\\validate.py\" \"$f\")",
+      "Bash(done)",
+      "Bash(python \"C:\\\\Users\\\\Tom\\\\AppData\\\\Roaming\\\\Claude\\\\local-agent-mode-sessions\\\\skills-plugin\\\\9b359ad8-bf38-4623-8816-1e4551bc9750\\\\a11956bc-15f8-4ce9-966b-52d17f17c6f4\\\\skills\\\\docx\\\\scripts\\\\office\\\\soffice.py\" --headless --convert-to pdf \"public/docs/schools-au/02-lesson-cards.docx\")",
+      "Bash(ls -la public/docs/schools-au/teacher-pack/*.docx public/docs/schools-au/*.docx public/docs/schools-au/pilot/*.docx)"
     ]
   }
 }

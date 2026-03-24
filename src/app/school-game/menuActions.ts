@@ -21,7 +21,7 @@ export const TEACHER_HUB_MENU_ACTIONS: TeacherHubMenuAction[] = [
     label: "Teacher Guide",
     description:
       "Open the one-page teacher guide for setup, supervision, and lesson pacing.",
-    href: "/docs/schools-au/teacher-pack/teacher-guide.md",
+    href: "/docs/schools-au/teacher-pack/teacher-guide.docx",
     status: "live",
   },
   {
@@ -29,7 +29,7 @@ export const TEACHER_HUB_MENU_ACTIONS: TeacherHubMenuAction[] = [
     label: "Parent Note",
     description:
       "Download the parent/carer note used before a classroom pilot begins.",
-    href: "/docs/schools-au/teacher-pack/parent-note.md",
+    href: "/docs/schools-au/teacher-pack/parent-note.docx",
     status: "live",
   },
   {
@@ -37,7 +37,7 @@ export const TEACHER_HUB_MENU_ACTIONS: TeacherHubMenuAction[] = [
     label: "Staff Briefing",
     description:
       "Use the one-slide staff briefing to explain the classroom use case and boundaries.",
-    href: "/docs/schools-au/teacher-pack/staff-brief.md",
+    href: "/docs/schools-au/teacher-pack/staff-brief.docx",
     status: "live",
   },
   {
@@ -45,7 +45,7 @@ export const TEACHER_HUB_MENU_ACTIONS: TeacherHubMenuAction[] = [
     label: "Lesson Cards",
     description:
       "Use the 7 lesson cards for low-prep teacher-led classroom delivery.",
-    href: "/docs/schools-au/02-lesson-cards.md",
+    href: "/docs/schools-au/02-lesson-cards.docx",
     status: "live",
   },
   {
@@ -53,7 +53,7 @@ export const TEACHER_HUB_MENU_ACTIONS: TeacherHubMenuAction[] = [
     label: "Reflection Sheet",
     description:
       "Print the student reflection sheet and teacher observation checklist.",
-    href: "/docs/schools-au/03-assessment-and-reflection.md",
+    href: "/docs/schools-au/03-assessment-and-reflection.docx",
     status: "live",
   },
   {
@@ -61,7 +61,7 @@ export const TEACHER_HUB_MENU_ACTIONS: TeacherHubMenuAction[] = [
     label: "Pilot Prospectus",
     description:
       "Share the pilot prospectus with school leadership before outreach.",
-    href: "/docs/schools-au/pilot/pilot-prospectus.md",
+    href: "/docs/schools-au/pilot/pilot-prospectus.docx",
     status: "live",
   },
   {
