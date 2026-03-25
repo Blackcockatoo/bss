@@ -69,25 +69,25 @@ const RITUALS: Record<
     icon: "◌",
     holdMs: 12000,
   },
-  yantra: { label: "Draw", description: "Draw a sacred pattern", icon: "✧" },
+  yantra: { label: "Draw", description: "Draw a geometric pattern", icon: "✧" },
 };
 
 const STAGE_FLOW: Stage[] = [
-  { id: "seed", label: "Seed Sigil", note: "Your journey begins" },
-  { id: "resonant", label: "Resonant Bloom", note: "3+ rituals completed" },
-  { id: "aligned", label: "Aligned Crest", note: "7 rituals completed" },
-  { id: "shadow", label: "Shadow Mirror", note: "Deep reflection" },
-  { id: "myth", label: "Myth Gate", note: "Transcendence" },
+  { id: "seed", label: "First Steps", note: "Your journey begins" },
+  { id: "resonant", label: "Building Momentum", note: "3+ sessions completed" },
+  { id: "aligned", label: "Strong Streak", note: "7 sessions completed" },
+  { id: "shadow", label: "Deep Focus", note: "Deep reflection" },
+  { id: "myth", label: "Milestone Reached", note: "Outstanding effort" },
 ];
 
 const mythFragments = [
-  "The spiral keeper hums in the dark between breaths.",
-  "A faint glyph appears where your focus lingers.",
-  "The pet remembers a song from a mirror world.",
-  "Seven points align; an unseen witness nods.",
-  "Your intention etches a line into the hidden codex.",
-  "The yantra pulses with ancient memory.",
-  "Through sacred geometry, dimensions converge.",
+  "Great focus — your companion responds to your attention.",
+  "Consistency is building — keep it up!",
+  "Your companion is growing stronger with each session.",
+  "That's a milestone — seven sessions and counting.",
+  "Each activity adds to your companion's wellbeing.",
+  "Your drawings are becoming more confident.",
+  "Steady effort leads to real progress.",
 ];
 
 const RITUAL_STORAGE_PREFIX = "metapet-ritual-progress";
@@ -198,7 +198,7 @@ export function RitualLoop({
 
   const [resonance, setResonance] = useState(initialProgress?.resonance ?? 0);
   const [nectar, setNectar] = useState(initialProgress?.nectar ?? 0);
-  const [oracle, setOracle] = useState("Begin your ritual when ready.");
+  const [oracle, setOracle] = useState("Begin your practice when ready.");
   const [myth, setMyth] = useState("");
 
   const [, setStreak] = useState(initialProgress?.streak ?? 0);
@@ -384,9 +384,9 @@ export function RitualLoop({
 
       // Oracle message
       const oracleMessages = [
-        `Your ${inputValue.toLowerCase()} offering resonates through the ${ritualType}.`,
-        `The ${inputType} of ${inputValue} anchors in sacred geometry.`,
-        `${stageCandidate.label} receives your ${inputValue.toLowerCase()} intention.`,
+        `Your ${inputValue.toLowerCase()} focus carried through the ${ritualType} activity.`,
+        `Holding ${inputValue.toLowerCase()} in mind helped shape your practice.`,
+        `${stageCandidate.label} — nice work with your ${inputValue.toLowerCase()} focus.`,
       ];
       setOracle(oracleMessages[seed % oracleMessages.length]);
 
@@ -477,10 +477,10 @@ export function RitualLoop({
       <div className="flex items-start justify-between gap-3 mb-4">
         <div>
           <h2 className="text-lg sm:text-xl font-bold text-white">
-            Sacred Ritual
+            Focus Practice
           </h2>
           <p className="text-zinc-400 text-xs sm:text-sm hidden sm:block">
-            Offer intention through ritual to nourish your companion
+            Choose an activity to care for your companion
           </p>
         </div>
         <div className="text-right text-xs text-zinc-400">
@@ -675,7 +675,7 @@ export function RitualLoop({
               onClick={() => completeRitual()}
               className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-pink-500 text-white font-bold text-lg shadow-lg active:scale-[0.98] transition animate-pulse"
             >
-              Complete Offering
+              Complete Activity
             </button>
           )}
         </div>
@@ -707,14 +707,14 @@ export function RitualLoop({
       <div className="mt-4 flex justify-between items-center text-xs text-zinc-400">
         <div className="flex gap-3">
           <span>
-            Resonance:{" "}
+            Energy:{" "}
             <span className="text-cyan-300 font-mono">{resonance}</span>
           </span>
           <span>
             Nectar: <span className="text-amber-300 font-mono">{nectar}</span>
           </span>
         </div>
-        <span>{totalSessions} rituals</span>
+        <span>{totalSessions} sessions</span>
       </div>
     </div>
   );

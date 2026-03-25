@@ -32,39 +32,39 @@ interface HeptaYantraCanvasProps {
 
 const YANTRA_MESSAGES: Record<YantraPattern, string[]> = {
   triangle: [
-    'The fire element awakens.',
-    'Tejas rises through your offering.',
-    'Three points align in sacred geometry.',
+    'Triangle shape complete.',
+    'Three-pointed pattern recognised.',
+    'Three points in balance.',
   ],
   hexagram: [
-    'As above, so below.',
-    'The Star of Balance emerges.',
-    'Six directions harmonize.',
+    'Six-pointed star drawn.',
+    'Hexagram pattern recognised.',
+    'Six directions in balance.',
   ],
   heptagram: [
-    'The seven-fold seal activates.',
-    'HeptaCode resonance detected.',
-    'The mystic heptagram unlocks hidden frequencies.',
+    'Seven-pointed star drawn.',
+    'Seven-point pattern recognised.',
+    'Complex star shape complete.',
   ],
   spiral: [
-    'The golden spiral unfolds.',
-    'Evolution spirals inward.',
-    'Kundalini stirs in response.',
+    'Spiral pattern drawn.',
+    'Curved path recognised.',
+    'Flowing shape complete.',
   ],
   cross: [
-    'Four elements intersect.',
-    'The crossroads of possibility.',
-    'Cardinal directions anchor the field.',
+    'Cross shape drawn.',
+    'Intersecting lines recognised.',
+    'Four directions balanced.',
   ],
   circle: [
-    'Unity complete, the wheel turns.',
-    'Wholeness radiates outward.',
-    'The eternal cycle continues.',
+    'Circle drawn.',
+    'Circular path complete.',
+    'Round shape recognised.',
   ],
   unknown: [
-    'An unknown sigil... the field watches.',
-    'Chaotic energy disperses.',
-    'The pattern seeks meaning.',
+    'Free-form pattern drawn.',
+    'Keep experimenting with shapes.',
+    'Try a triangle, star, or circle.',
   ],
 };
 
@@ -471,7 +471,7 @@ export function HeptaYantraCanvas({
 
         {/* Pattern guide overlay */}
         <div className="absolute top-2 left-2 text-[10px] text-cyan-400/70 uppercase tracking-wider">
-          Draw Yantra
+          Draw a Shape
         </div>
 
         {/* Stroke counter */}
@@ -498,7 +498,7 @@ export function HeptaYantraCanvas({
               : 'bg-slate-800 text-slate-500 cursor-not-allowed'
           )}
         >
-          Offer Yantra
+          Submit Drawing
         </button>
       </div>
 
@@ -507,7 +507,7 @@ export function HeptaYantraCanvas({
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-amber-300 font-semibold capitalize">
-              {lastResult.pattern === 'unknown' ? 'Unknown Sigil' : `${lastResult.pattern} Detected`}
+              {lastResult.pattern === 'unknown' ? 'Unknown Shape' : `${lastResult.pattern} Detected`}
             </span>
             <span className="text-xs text-slate-400">
               {Math.round(lastResult.confidence * 100)}% confidence
@@ -516,14 +516,14 @@ export function HeptaYantraCanvas({
           <p className="text-sm text-amber-100">{lastResult.message}</p>
           <div className="flex gap-4 text-xs text-slate-400">
             <span>+{lastResult.energy} energy</span>
-            <span>{lastResult.residueActivation.length} residues activated</span>
+            <span>{lastResult.residueActivation.length} points activated</span>
           </div>
         </div>
       )}
 
       {/* Pattern hints */}
       <div className="text-[10px] text-slate-500 text-center">
-        Try: Triangle, Hexagram, Heptagram, Spiral, Cross, or Circle
+        Try: Triangle, Star, Spiral, Cross, or Circle
       </div>
     </div>
   );
