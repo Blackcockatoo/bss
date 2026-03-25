@@ -48,7 +48,7 @@ import {
   predictOffspring,
 } from "@/lib/breeding";
 import { useEducationStore } from "@/lib/education";
-import { ENABLE_CHILD_SAFE_BASELINE } from "@/lib/env/features";
+import { ENABLE_CHILD_SAFE_BASELINE, IS_SCHOOLS_PROFILE } from "@/lib/env/features";
 import { initializeEvolution } from "@/lib/evolution";
 import {
   type Genome,
@@ -1867,56 +1867,85 @@ export default function Home() {
       <div className="min-h-screen pb-24 sm:pb-24">
         <div className="px-4 pt-4 sm:pt-6">
           <div className="mx-auto max-w-5xl rounded-[1.5rem] border border-cyan-500/20 bg-slate-950/75 p-4 shadow-[0_20px_80px_rgba(8,47,73,0.28)] sm:rounded-[2rem] sm:p-6">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+            {IS_SCHOOLS_PROFILE ? (
               <div className="max-w-2xl space-y-3">
-                <p className="text-xs uppercase tracking-[0.34em] text-cyan-300/80">
-                  Meta-Pet Launch Surface
+                <p className="text-xs uppercase tracking-[0.34em] text-amber-300/80">
+                  MetaPet Schools
                 </p>
                 <h1 className="text-3xl font-semibold text-white sm:text-4xl">
-                  {PORTAL_TAGLINE}
+                  Your classroom companion
                 </h1>
                 <p className="text-sm leading-7 text-slate-300 sm:text-base">
-                  This home route is now the plain-language launch point.{" "}
-                  {PORTAL_DESCRIPTION}
+                  A digital companion for Years 3-6 classrooms. Students explore
+                  systems thinking, digital responsibility, and emotional regulation
+                  through short, teacher-led sessions. No accounts, no data collection,
+                  everything stays on this device.
                 </p>
                 <div className="flex flex-wrap gap-3 pt-1">
-                  <Button asChild className="bg-cyan-500 text-slate-950 hover:bg-cyan-400">
-                    <Link href={launchStep.entryCta.href}>
-                      {launchStep.entryCta.label}
-                    </Link>
+                  <Button asChild className="bg-amber-300 text-slate-950 hover:bg-amber-200">
+                    <Link href="/school-game">Open classroom runtime</Link>
                   </Button>
                   <Button
                     asChild
                     variant="outline"
-                    className="border-emerald-400/40 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/15"
+                    className="border-amber-300/40 bg-amber-500/10 text-amber-100 hover:bg-amber-500/15"
                   >
-                    <Link href={classroomStep.entryCta.href}>
-                      {classroomStep.entryCta.label}
-                    </Link>
+                    <Link href="/schools">View school documents</Link>
                   </Button>
                 </div>
               </div>
+            ) : (
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                <div className="max-w-2xl space-y-3">
+                  <p className="text-xs uppercase tracking-[0.34em] text-cyan-300/80">
+                    Meta-Pet Launch Surface
+                  </p>
+                  <h1 className="text-3xl font-semibold text-white sm:text-4xl">
+                    {PORTAL_TAGLINE}
+                  </h1>
+                  <p className="text-sm leading-7 text-slate-300 sm:text-base">
+                    This home route is now the plain-language launch point.{" "}
+                    {PORTAL_DESCRIPTION}
+                  </p>
+                  <div className="flex flex-wrap gap-3 pt-1">
+                    <Button asChild className="bg-cyan-500 text-slate-950 hover:bg-cyan-400">
+                      <Link href={launchStep.entryCta.href}>
+                        {launchStep.entryCta.label}
+                      </Link>
+                    </Button>
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="border-emerald-400/40 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/15"
+                    >
+                      <Link href={classroomStep.entryCta.href}>
+                        {classroomStep.entryCta.label}
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
 
-              <div className="grid w-full gap-3 sm:grid-cols-2 lg:max-w-xl">
-                {journeySteps.map((step) => (
-                  <Link
-                    key={step.key}
-                    href={step.href}
-                    className="rounded-[1.5rem] border border-slate-800 bg-slate-900/70 p-4 transition-colors hover:border-cyan-400/35 hover:bg-slate-900"
-                  >
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">
-                      Step {step.step}
-                    </p>
-                    <p className="mt-2 text-lg font-semibold text-white">
-                      {step.shortLabel}
-                    </p>
-                    <p className="mt-2 text-sm text-slate-300">
-                      {step.entryCta.description}
-                    </p>
-                  </Link>
-                ))}
+                <div className="grid w-full gap-3 sm:grid-cols-2 lg:max-w-xl">
+                  {journeySteps.map((step) => (
+                    <Link
+                      key={step.key}
+                      href={step.href}
+                      className="rounded-[1.5rem] border border-slate-800 bg-slate-900/70 p-4 transition-colors hover:border-cyan-400/35 hover:bg-slate-900"
+                    >
+                      <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">
+                        Step {step.step}
+                      </p>
+                      <p className="mt-2 text-lg font-semibold text-white">
+                        {step.shortLabel}
+                      </p>
+                      <p className="mt-2 text-sm text-slate-300">
+                        {step.entryCta.description}
+                      </p>
+                    </Link>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -1964,109 +1993,122 @@ export default function Home() {
           <PetHero className="py-4" staticMode={lowBandwidthMode} />
 
           {/* Quick Actions */}
-          <FloatingActions />
+          {!IS_SCHOOLS_PROFILE && <FloatingActions />}
 
           {/* Certificate Button */}
-          <div className="flex justify-center pt-2">
-            <Button
-              onClick={() => setCertificateOpen(true)}
-              variant="outline"
-              size="sm"
-              className="border-purple-500/50 text-purple-300 hover:bg-purple-500/10 touch-manipulation"
-            >
-              <Award className="w-4 h-4 mr-2" />
-              {strings.core.viewCertificate}
-            </Button>
-          </div>
+          {!IS_SCHOOLS_PROFILE && (
+            <div className="flex justify-center pt-2">
+              <Button
+                onClick={() => setCertificateOpen(true)}
+                variant="outline"
+                size="sm"
+                className="border-purple-500/50 text-purple-300 hover:bg-purple-500/10 touch-manipulation"
+              >
+                <Award className="w-4 h-4 mr-2" />
+                {strings.core.viewCertificate}
+              </Button>
+            </div>
+          )}
 
           {/* Wellness Quick Bar */}
-          <div className="flex flex-wrap items-center justify-center gap-2 px-4 pt-4">
-            <QuickMoodButton onClick={() => setWellnessSyncOpen(true)} />
-            <HydrationQuickButton onClick={() => setHydrationOpen(true)} />
-            <SleepStatusButton onClick={() => setSleepOpen(true)} />
-            <EmergencyGroundingButton onClick={() => setAnxietyOpen(true)} />
-            <WellnessSettingsButton
-              onClick={() => setWellnessSettingsOpen(true)}
-            />
-          </div>
+          {!IS_SCHOOLS_PROFILE && (
+            <div className="flex flex-wrap items-center justify-center gap-2 px-4 pt-4">
+              <QuickMoodButton onClick={() => setWellnessSyncOpen(true)} />
+              <HydrationQuickButton onClick={() => setHydrationOpen(true)} />
+              <SleepStatusButton onClick={() => setSleepOpen(true)} />
+              <EmergencyGroundingButton onClick={() => setAnxietyOpen(true)} />
+              <WellnessSettingsButton
+                onClick={() => setWellnessSettingsOpen(true)}
+              />
+            </div>
+          )}
         </div>
 
         {/* ===== VITALS BAR ===== */}
-        <CompactVitalsBar />
+        {!IS_SCHOOLS_PROFILE && <CompactVitalsBar />}
 
         {/* ===== CONTENT SECTIONS ===== */}
         <div className="mx-auto max-w-2xl space-y-4 px-4 py-5 sm:py-6">
-          {/* Ritual Loop - Important, keep expanded */}
-          <div id="ritual">
-            <RitualLoop
-              petId={currentPetId ?? PET_ID}
-              initialProgress={ritualProgress}
-              onRitualComplete={(data) => {
-                addRitualRewards({
-                  resonanceDelta: data.resonance,
-                  reward: {
-                    essenceDelta: data.nectar,
-                    source: "ritual",
-                  },
-                  progress: data.progress,
-                });
-              }}
-              signalDigits={
-                genome
-                  ? {
-                      red: genome.red60,
-                      blue: genome.blue60,
-                      black: genome.black60,
-                    }
-                  : undefined
-              }
-            />
-          </div>
+          {/* Ritual Loop - Consumer only */}
+          {!IS_SCHOOLS_PROFILE && (
+            <div id="ritual">
+              <RitualLoop
+                petId={currentPetId ?? PET_ID}
+                initialProgress={ritualProgress}
+                onRitualComplete={(data) => {
+                  addRitualRewards({
+                    resonanceDelta: data.resonance,
+                    reward: {
+                      essenceDelta: data.nectar,
+                      source: "ritual",
+                    },
+                    progress: data.progress,
+                  });
+                }}
+                signalDigits={
+                  genome
+                    ? {
+                        red: genome.red60,
+                        blue: genome.blue60,
+                        black: genome.black60,
+                      }
+                    : undefined
+                }
+              />
+            </div>
+          )}
 
-          {/* Evolution Progress */}
-          <CollapsibleSection
-            title={strings.sections.evolution}
-            icon={<Sparkles className="w-5 h-5 text-cyan-300" />}
-            defaultOpen
-          >
-            <p className="text-xs text-zinc-500 mb-3">
-              Your companion grows through four stages â€” each one mirrors a
-              real branch of science, from genetics to quantum biology. Care
-              drives change.
-            </p>
-            <EvolutionPanel />
-          </CollapsibleSection>
-
-          {/* Sri Yantra Geometry Beast */}
-          <CollapsibleSection
-            title="Geometry Beast"
-            icon={<Hexagon className="w-5 h-5 text-fuchsia-400" />}
-          >
-            <p className="text-xs text-zinc-500 mb-3">
-              The Sri Yantra beast reacts to your red, blue, and black strand
-              packets. Touch its zones, forge new spreads, and cycle movement
-              rituals.
-            </p>
-            <PetGeometryHub />
-          </CollapsibleSection>
-
-          {/* Mini Games */}
-          <div id="mini-games">
+          {/* Evolution Progress - Consumer only */}
+          {!IS_SCHOOLS_PROFILE && (
             <CollapsibleSection
-              title={strings.sections.miniGames}
-              icon={<Sparkles className="w-5 h-5 text-pink-400" />}
+              title={strings.sections.evolution}
+              icon={<Sparkles className="w-5 h-5 text-cyan-300" />}
               defaultOpen
             >
               <p className="text-xs text-zinc-500 mb-3">
-                Every game here trains a real skill â€” pattern recognition,
-                rhythm, memory. Your companion earns rewards, and you build
-                sharper instincts.
+                Your companion grows through four stages â€" each one mirrors a
+                real branch of science, from genetics to quantum biology. Care
+                drives change.
               </p>
-              <FeaturesDashboard />
+              <EvolutionPanel />
             </CollapsibleSection>
-          </div>
+          )}
 
-          {/* Learning Modes */}
+          {/* Sri Yantra Geometry Beast - Consumer only */}
+          {!IS_SCHOOLS_PROFILE && (
+            <CollapsibleSection
+              title="Geometry Beast"
+              icon={<Hexagon className="w-5 h-5 text-fuchsia-400" />}
+            >
+              <p className="text-xs text-zinc-500 mb-3">
+                The Sri Yantra beast reacts to your red, blue, and black strand
+                packets. Touch its zones, forge new spreads, and cycle movement
+                rituals.
+              </p>
+              <PetGeometryHub />
+            </CollapsibleSection>
+          )}
+
+          {/* Mini Games - Consumer only */}
+          {!IS_SCHOOLS_PROFILE && (
+            <div id="mini-games">
+              <CollapsibleSection
+                title={strings.sections.miniGames}
+                icon={<Sparkles className="w-5 h-5 text-pink-400" />}
+                defaultOpen
+              >
+                <p className="text-xs text-zinc-500 mb-3">
+                  Every game here trains a real skill â€" pattern recognition,
+                  rhythm, memory. Your companion earns rewards, and you build
+                  sharper instincts.
+                </p>
+                <FeaturesDashboard />
+              </CollapsibleSection>
+            </div>
+          )}
+
+          {/* Learning Modes - Consumer only */}
+          {!IS_SCHOOLS_PROFILE && (
           <CollapsibleSection
             title="Learning Modes"
             icon={<GraduationCap className="w-5 h-5 text-emerald-300" />}
@@ -2158,7 +2200,11 @@ export default function Home() {
               </div>
             </div>
           </CollapsibleSection>
+          )}
 
+          {/* Breeding Lab - Consumer only */}
+          {!IS_SCHOOLS_PROFILE && (
+          <>
           {/* Breeding Lab */}
           <CollapsibleSection
             title={strings.sections.breedingLab}
@@ -2166,7 +2212,7 @@ export default function Home() {
           >
             <div className="space-y-4">
               <p className="text-xs text-zinc-500">
-                Breeding follows real genetic principles â€” dominant and
+                Breeding follows real genetic principles â€" dominant and
                 recessive traits, mutation chance, and lineage tracking. Two
                 companions at the Speciation stage can produce offspring that
                 inherits from both parents.
@@ -2477,6 +2523,8 @@ export default function Home() {
               )}
             </div>
           </CollapsibleSection>
+          </>
+          )}
 
           <CollapsibleSection
             title={strings.sections.classroomTools}
@@ -2572,9 +2620,9 @@ export default function Home() {
             </div>
           </CollapsibleSection>
 
-          {!ENABLE_CHILD_SAFE_BASELINE && (
+          {!IS_SCHOOLS_PROFILE && (
             <>
-              {/* Steering Wheel â€” Central Navigator */}
+              {/* Steering Wheel â€" Central Navigator */}
               <div className="bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 rounded-2xl border border-cyan-500/20 p-4">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div className="flex items-start gap-3">
@@ -2615,13 +2663,15 @@ export default function Home() {
             </>
           )}
 
-          {/* Genome Traits */}
+          {/* Genome Traits, PrimeTail ID, HeptaCode, Offline Archives, Digital Keys, Classroom Modes - Consumer only */}
+          {!IS_SCHOOLS_PROFILE && (
+          <>
           <CollapsibleSection
             title="Genome Traits"
             icon={<Dna className="w-5 h-5 text-purple-400" />}
           >
             <p className="text-xs text-zinc-500 mb-3">
-              Three genome layers â€” Red60 for physical traits, Blue60 for
+              Three genome layers â€" Red60 for physical traits, Blue60 for
               personality, Black60 for latent potential. The same DNA always
               produces the same companion, just like nature.
             </p>
@@ -2636,7 +2686,7 @@ export default function Home() {
             >
               <div className="space-y-4">
                 <p className="text-xs text-zinc-500">
-                  Your companion&apos;s cryptographic identity â€” signed on
+                  Your companion&apos;s cryptographic identity â€" signed on
                   this device, never shared. The vault, rotation, and tail
                   digits form a tamper-proof fingerprint that proves
                   authenticity without revealing the underlying DNA.
@@ -2685,7 +2735,7 @@ export default function Home() {
               <div className="space-y-4">
                 <p className="text-xs text-zinc-500">
                   42 base-7 digits encode your companion&apos;s identity into
-                  geometry, colour, and sound. One source, three experiences â€”
+                  geometry, colour, and sound. One source, three experiences â€"
                   the same data rendered as a seven-sided tag, a Seed of Life
                   glyph, and an audible chime.
                 </p>
@@ -2717,7 +2767,7 @@ export default function Home() {
           >
             <div className="space-y-4">
               <p className="text-xs text-zinc-500">
-                Everything lives on your device. No accounts, no cloud â€” your
+                Everything lives on your device. No accounts, no cloud â€" your
                 companions are saved locally with cryptographic signatures so
                 nothing can be tampered with. Export anytime to carry them
                 between devices.
@@ -2854,7 +2904,7 @@ export default function Home() {
           >
             <p className="text-xs text-zinc-500 mb-3">
               Your device holds the keys. These cryptographic pairs let you sign
-              addons, verify exports, and prove ownership â€” all without a
+              addons, verify exports, and prove ownership â€" all without a
               central server. This is how digital trust works without
               intermediaries.
             </p>
@@ -2873,6 +2923,8 @@ export default function Home() {
             </p>
             <ClassroomModes />
           </CollapsibleSection>
+          </>
+          )}
         </div>
 
         {/* Footer Info */}
@@ -2890,7 +2942,7 @@ export default function Home() {
           <div className="max-w-sm mx-auto space-y-1 pt-2 border-t border-slate-800/60">
             <p className="text-zinc-700 leading-relaxed">
               Built with care by Blue Snake Studios. Privacy-first,
-              offline-first, kid-safe â€” always. No ads, no tracking, no data
+              offline-first, kid-safe â€" always. No ads, no tracking, no data
               harvesting.
             </p>
             <p className="text-zinc-800 leading-relaxed">
@@ -2902,37 +2954,41 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Registration Certificate Modal */}
-      <RegistrationCertificate
-        petId={currentPetId ?? PET_ID}
-        petName={petName || "Unnamed Companion"}
-        crest={crest}
-        heptaCode={heptaCode}
-        createdAt={createdAt ?? undefined}
-        evolutionState={evolution?.state}
-        isOpen={certificateOpen}
-        onClose={() => setCertificateOpen(false)}
-      />
+      {/* Registration Certificate Modal - Consumer only */}
+      {!IS_SCHOOLS_PROFILE && (
+        <>
+          <RegistrationCertificate
+            petId={currentPetId ?? PET_ID}
+            petName={petName || "Unnamed Companion"}
+            crest={crest}
+            heptaCode={heptaCode}
+            createdAt={createdAt ?? undefined}
+            evolutionState={evolution?.state}
+            isOpen={certificateOpen}
+            onClose={() => setCertificateOpen(false)}
+          />
 
-      {/* Wellness Modals */}
-      <WellnessSync
-        isOpen={wellnessSyncOpen}
-        onClose={() => setWellnessSyncOpen(false)}
-        lastAction={lastWellnessAction}
-      />
-      <HydrationTracker
-        isOpen={hydrationOpen}
-        onClose={() => setHydrationOpen(false)}
-      />
-      <SleepTracker isOpen={sleepOpen} onClose={() => setSleepOpen(false)} />
-      <AnxietyAnchor
-        isOpen={anxietyOpen}
-        onClose={() => setAnxietyOpen(false)}
-      />
-      <WellnessSettings
-        isOpen={wellnessSettingsOpen}
-        onClose={() => setWellnessSettingsOpen(false)}
-      />
+          {/* Wellness Modals */}
+          <WellnessSync
+            isOpen={wellnessSyncOpen}
+            onClose={() => setWellnessSyncOpen(false)}
+            lastAction={lastWellnessAction}
+          />
+          <HydrationTracker
+            isOpen={hydrationOpen}
+            onClose={() => setHydrationOpen(false)}
+          />
+          <SleepTracker isOpen={sleepOpen} onClose={() => setSleepOpen(false)} />
+          <AnxietyAnchor
+            isOpen={anxietyOpen}
+            onClose={() => setAnxietyOpen(false)}
+          />
+          <WellnessSettings
+            isOpen={wellnessSettingsOpen}
+            onClose={() => setWellnessSettingsOpen(false)}
+          />
+        </>
+      )}
     </AmbientBackground>
   );
 }

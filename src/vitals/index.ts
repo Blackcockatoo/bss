@@ -1,5 +1,6 @@
 import type { EvolutionData } from '../evolution/index';
 import { checkEvolutionEligibility } from '../evolution/index';
+import { IS_SCHOOLS_PROFILE } from '@/lib/env/features';
 
 export interface Vitals {
   hunger: number;
@@ -17,6 +18,18 @@ export const DEFAULT_VITALS: Vitals = {
   hygiene: 70,
   mood: 60,
   energy: 80,
+  isSick: false,
+  sicknessSeverity: 0,
+  sicknessType: 'none',
+  deathCount: 0,
+};
+
+/** Stable vitals for school mode — no decay, no sickness, no death. */
+export const SCHOOLS_STABLE_VITALS: Vitals = {
+  hunger: 20,
+  hygiene: 80,
+  mood: 75,
+  energy: 85,
   isSick: false,
   sicknessSeverity: 0,
   sicknessType: 'none',
@@ -55,6 +68,9 @@ export const DECAY_RATES = {
 
 // Check if pet should become sick based on vitals
 export function checkSickness(vitals: Vitals): { isSick: boolean; sicknessType: Vitals['sicknessType']; severity: number } {
+  if (IS_SCHOOLS_PROFILE) {
+    return { isSick: false, sicknessType: 'none', severity: 0 };
+  }
   // Check each vital for critical levels
   if (vitals.hunger >= 90) {
     return { isSick: true, sicknessType: 'hungry', severity: Math.min(100, (vitals.hunger - 80) * 5) };
@@ -74,6 +90,7 @@ export function checkSickness(vitals: Vitals): { isSick: boolean; sicknessType: 
 
 // Check if pet "dies" (sickness too severe) and needs reset
 export function checkDeath(vitals: Vitals): boolean {
+  if (IS_SCHOOLS_PROFILE) return false;
   return vitals.isSick && vitals.sicknessSeverity >= 100;
 }
 
@@ -103,6 +120,7 @@ export function resetAfterDeath(vitals: Vitals): Vitals {
 }
 
 export function applyDecay(vitals: Vitals): Vitals {
+  if (IS_SCHOOLS_PROFILE) return vitals;
   // Decay rates are worse when sick
   const sickMultiplier = vitals.isSick ? 1.5 : 1;
 
@@ -199,6 +217,7 @@ export interface TickResult {
 }
 
 export function tick(vitals: Vitals, evolution: EvolutionData): TickResult {
+  if (IS_SCHOOLS_PROFILE) return { vitals, evolution };
   const nextVitals = applyDecay(vitals);
   const vitalsAvg = getVitalsAverage(nextVitals);
   const canEvolve = checkEvolutionEligibility(evolution, vitalsAvg);

@@ -4,6 +4,7 @@ export interface SchoolPackageDoc {
   description: string;
   audience: string;
   href: string;
+  inAppHref: string;
   category:
     | "Core Pack"
     | "Teacher Pack"
@@ -58,6 +59,12 @@ export interface PilotAcceptanceStep {
   docSlugs: string[];
 }
 
+function withInAppHref(
+  doc: Omit<SchoolPackageDoc, "inAppHref">,
+): SchoolPackageDoc {
+  return { ...doc, inAppHref: `/schools/docs/${doc.slug}` };
+}
+
 export const schoolPackageDocCategories: SchoolPackageDoc["category"][] = [
   "Core Pack",
   "Teacher Pack",
@@ -66,7 +73,7 @@ export const schoolPackageDocCategories: SchoolPackageDoc["category"][] = [
   "Evidence Pack",
 ];
 
-export const schoolPackageDocs: SchoolPackageDoc[] = [
+export const schoolPackageDocs: SchoolPackageDoc[] = ([
   {
     slug: "01-overview-and-alignment",
     title: "Overview and Alignment",
@@ -409,7 +416,7 @@ export const schoolPackageDocs: SchoolPackageDoc[] = [
     href: "/docs/schools-au/pilot/end-of-pilot-summary.md",
     category: "Evidence Pack",
   },
-];
+] as Omit<SchoolPackageDoc, "inAppHref">[]).map(withInAppHref);
 
 export const curriculumRows: CurriculumRow[] = [
   {

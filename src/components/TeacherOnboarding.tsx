@@ -8,43 +8,76 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   BookOpen,
   CheckCircle2,
+  ClipboardList,
+  GraduationCap,
   Monitor,
+  Rocket,
   ShieldCheck,
+  Users,
   X,
 } from "lucide-react";
 import { useState } from "react";
 
 const STEPS = [
   {
-    icon: BookOpen,
-    title: "A 15-20 minute classroom tool",
+    icon: GraduationCap,
+    title: "What is MetaPet Schools?",
     lines: [
-      "Each session takes 15-20 minutes.",
-      "Fits into a 30 or 50 minute block.",
-      "No student sign-up. No marking. Alias-based setup.",
-      "No ongoing maintenance or homework.",
+      "A digital companion for Years 3-6 classrooms.",
+      "Students explore systems thinking, digital responsibility, and emotional regulation.",
+      "7 teacher-led sessions, each 20 minutes.",
+      "No accounts, no data collection, everything on this device.",
     ],
   },
   {
     icon: ShieldCheck,
-    title: "Bounded school use",
+    title: "Privacy and safety",
     lines: [
-      "No chat or messaging between students.",
-      "Routine classroom use keeps records local to this device.",
-      "No student account setup or public sharing.",
-      "No open-ended AI chat.",
-      "Nothing follows students home without adult action.",
+      "No student accounts or sign-up required.",
+      "Students use teacher-assigned aliases only.",
+      "All data stays on this device — no cloud sync.",
+      "No chat, social features, or open-ended AI.",
+      "Clearing the browser removes all data.",
     ],
   },
   {
-    icon: Monitor,
-    title: "First time? Start here",
+    icon: Users,
+    title: "Set up your classroom",
     lines: [
-      "1. Open the site and project it on the board.",
-      "2. Pick Lesson #1 — \"Meet the Digital Companion\".",
-      "3. Follow the script step by step.",
-      "4. Ask the pre and post prompts shown on screen.",
-      "5. Done in 15 minutes.",
+      "Create an alias roster with pseudonyms for each student.",
+      "Use the Classroom Manager to add and manage aliases.",
+      "Aliases keep sessions private — no real names stored.",
+      "You can reset the roster at any time.",
+    ],
+  },
+  {
+    icon: BookOpen,
+    title: "Choose your first lesson",
+    lines: [
+      "Start with Session 1: \"Meet the Digital Companion\".",
+      "Each lesson card includes an outcome, activity, and teacher prompt.",
+      "Add lessons to the queue from the lesson planner.",
+      "Sessions fit into a 30 or 50 minute block.",
+    ],
+  },
+  {
+    icon: ClipboardList,
+    title: "Review before you start",
+    lines: [
+      "Read the safeguarding page for escalation and supervision guidance.",
+      "Check the parent note if families need information.",
+      "Review the teacher guide for pacing and deletion instructions.",
+      "Visit /schools/safeguarding for the full summary.",
+    ],
+  },
+  {
+    icon: Rocket,
+    title: "Ready to go!",
+    lines: [
+      "Open the classroom runtime to start your first session.",
+      "Project it on the board and guide students through the lesson.",
+      "Use the pre and post prompts shown on screen.",
+      "You can re-run this setup wizard from the Classroom Manager.",
     ],
   },
 ] as const;

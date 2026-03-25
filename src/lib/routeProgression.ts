@@ -1,4 +1,5 @@
 import type { OnboardingScope } from "@/lib/onboarding";
+import { IS_SCHOOLS_PROFILE } from "@/lib/env/features";
 
 export type RouteProgressionKey = "pet" | "school" | "identity" | "dna";
 
@@ -29,12 +30,9 @@ export type RouteProgressionStep = {
   advanced?: RouteStepLink;
 };
 
-export const ROUTE_PROGRESSION_SEQUENCE: RouteProgressionKey[] = [
-  "pet",
-  "school",
-  "identity",
-  "dna",
-];
+export const ROUTE_PROGRESSION_SEQUENCE: RouteProgressionKey[] = IS_SCHOOLS_PROFILE
+  ? ["school"]
+  : ["pet", "school", "identity", "dna"];
 
 export const ROUTE_PROGRESSION: Record<
   RouteProgressionKey,

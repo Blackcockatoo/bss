@@ -18,6 +18,7 @@ const CORE_ALLOWED_EXACT = new Set([
 const SCHOOLS_ALLOWED_EXACT = new Set([
   "/",
   "/schools",
+  "/schools/safeguarding",
   "/school-game",
   "/legal",
   "/legal/privacy",
@@ -32,7 +33,7 @@ const SCHOOLS_ALLOWED_EXACT = new Set([
 ]);
 
 const CORE_ALLOWED_PREFIXES = ["/app/", "/docs/"];
-const SCHOOLS_ALLOWED_PREFIXES = ["/docs/schools-au/"];
+const SCHOOLS_ALLOWED_PREFIXES = ["/docs/schools-au/", "/schools/docs/"];
 
 export const CHILD_SAFE_NAV_ROUTES = IS_SCHOOLS_PROFILE
   ? new Set(["/schools", "/school-game", "/legal/privacy"])

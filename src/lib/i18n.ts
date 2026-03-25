@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { IS_SCHOOLS_PROFILE } from '@/lib/env/features';
 
 export const SUPPORTED_LOCALES = ['en', 'es', 'ja', 'hi', 'ru'] as const;
 export type Locale = (typeof SUPPORTED_LOCALES)[number];
@@ -63,7 +64,24 @@ const UI_STRINGS = {
       ],
     },
     onboarding: {
-      steps: [
+      steps: IS_SCHOOLS_PROFILE ? [
+        {
+          title: 'Welcome to MetaPet Schools!',
+          description:
+            'Meet your class companion — a digital character with unique traits. Use it together during short classroom activities to explore systems thinking and digital responsibility.',
+          tip: 'Sessions are designed for 15-20 minutes of teacher-led activity.',
+        },
+        {
+          title: 'Teacher-led sessions',
+          description: 'Each session follows a simple structure: observe the companion, discuss what you notice, and reflect on what you learned. The teacher guides every step.',
+          tip: 'Check the lesson cards for prompts and activity ideas.',
+        },
+        {
+          title: 'No accounts needed',
+          description: 'Everything stays on this device. Students use aliases instead of real names, and clearing the browser removes all data. No sign-ups, no cloud storage.',
+          tip: 'Use the alias roster to set up your class before the first session.',
+        },
+      ] : [
         {
           title: 'Welcome to Meta-Pet!',
           description:

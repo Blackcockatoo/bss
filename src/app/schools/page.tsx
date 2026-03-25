@@ -11,7 +11,6 @@ import {
   lessonCards,
   packageSummaryCards,
   pilotAcceptanceSteps,
-  pilotHardBlockers,
   reviewerPathways,
   schoolPackageDocCategories,
   schoolPackageDocs,
@@ -97,6 +96,12 @@ export default function SchoolsPage() {
               >
                 Open classroom runtime
               </Link>
+              <Link
+                className="rounded-full border border-slate-700 px-5 py-2 text-sm font-semibold text-slate-100"
+                href="/schools/safeguarding"
+              >
+                Safeguarding
+              </Link>
               <a
                 className="rounded-full border border-slate-700 px-5 py-2 text-sm font-semibold text-slate-100"
                 href="#governance"
@@ -106,6 +111,34 @@ export default function SchoolsPage() {
             </div>
           </div>
         </header>
+
+        <section className="rounded-3xl border border-emerald-400/20 bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/30 p-6 md:p-8">
+          <SectionHeading
+            eyebrow="What is Meta-Pet?"
+            title="A digital companion that teaches systems thinking"
+            description="Meta-Pet is a classroom tool where students interact with a digital companion to learn how systems work. Through short, guided activities, students observe cause and effect, practise emotional regulation, and build digital responsibility skills."
+          />
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            <div className="rounded-2xl border border-emerald-400/20 bg-slate-950/50 p-4">
+              <h3 className="text-base font-semibold text-emerald-200">What students do</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                Observe a digital companion, discuss what they notice with classmates, and reflect on patterns, feelings, and system behaviour.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-emerald-400/20 bg-slate-950/50 p-4">
+              <h3 className="text-base font-semibold text-emerald-200">What teachers do</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                Lead 20-minute sessions using lesson cards with built-in prompts. Set up an alias roster, run the activity, and optionally collect light evidence.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-emerald-400/20 bg-slate-950/50 p-4">
+              <h3 className="text-base font-semibold text-emerald-200">What parents should know</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                No accounts, no personal data, no social features. Students use aliases. All data stays on the school device and can be deleted at any time.
+              </p>
+            </div>
+          </div>
+        </section>
 
         <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 md:p-8">
           <SectionHeading
@@ -134,14 +167,13 @@ export default function SchoolsPage() {
                     }
 
                     return (
-                      <a
+                      <Link
                         key={doc.slug}
-                        className="rounded-full border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-200"
-                        download
-                        href={doc.href}
+                        className="rounded-full border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-200 hover:border-slate-500"
+                        href={doc.inAppHref}
                       >
                         {doc.title}
-                      </a>
+                      </Link>
                     );
                   })}
                 </div>
@@ -464,14 +496,13 @@ export default function SchoolsPage() {
                     }
 
                     return (
-                      <a
+                      <Link
                         key={doc.slug}
-                        className="rounded-full border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-200"
-                        download
-                        href={doc.href}
+                        className="rounded-full border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-200 hover:border-slate-500"
+                        href={doc.inAppHref}
                       >
                         {doc.title}
-                      </a>
+                      </Link>
                     );
                   })}
                 </div>
@@ -479,21 +510,6 @@ export default function SchoolsPage() {
             ))}
           </div>
 
-          <div className="mt-6 rounded-2xl border border-rose-400/20 bg-rose-500/5 p-4">
-            <p className="text-sm font-semibold text-rose-200">
-              Hard blockers before outreach
-            </p>
-            <div className="mt-3 grid gap-2">
-              {pilotHardBlockers.map((item) => (
-                <p
-                  key={item}
-                  className="rounded-xl border border-rose-400/15 bg-slate-950/40 p-3 text-sm leading-6 text-slate-300"
-                >
-                  {item}
-                </p>
-              ))}
-            </div>
-          </div>
         </section>
 
         <section
@@ -501,7 +517,7 @@ export default function SchoolsPage() {
           className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 md:p-8"
         >
           <SectionHeading
-            eyebrow="Download CTA"
+            eyebrow="Document Pack"
             title="School pack downloads"
             description="The school profile now ships as one document set: curriculum materials, teacher-facing implementation tools, governance artifacts, pilot operations tools, and evidence templates."
           />
@@ -537,13 +553,21 @@ export default function SchoolsPage() {
                         <p className="mt-2 text-xs uppercase tracking-wide text-slate-500">
                           {doc.audience}
                         </p>
-                        <a
-                          className="mt-4 inline-flex text-sm font-semibold text-amber-300"
-                          download
-                          href={doc.href}
-                        >
-                          Download {doc.title}
-                        </a>
+                        <div className="mt-4 flex flex-wrap items-center gap-3">
+                          <Link
+                            className="text-sm font-semibold text-amber-300 hover:text-amber-200"
+                            href={doc.inAppHref}
+                          >
+                            Read in app
+                          </Link>
+                          <a
+                            className="text-sm text-slate-400 hover:text-slate-300"
+                            download
+                            href={doc.href}
+                          >
+                            Download
+                          </a>
+                        </div>
                       </article>
                     ))}
                   </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { EducationQueuePanel } from "@/components/EducationQueuePanel";
+import { resetTeacherOnboarding } from "@/lib/education/teacher-onboarding";
 import { Button } from "@/components/ui/button";
 import {
   DEFAULT_ENGAGEMENT_CATEGORY,
@@ -952,6 +953,18 @@ export function ClassroomManager() {
             >
               <RefreshCw className="h-4 w-4 mr-2" />
               Clear local class summary
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full border-slate-700"
+              onClick={() => {
+                resetTeacherOnboarding();
+                window.location.reload();
+              }}
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Re-run setup wizard
             </Button>
             <Button
               type="button"

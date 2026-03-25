@@ -2,6 +2,7 @@ import {
   ROUTE_PROGRESSION,
   ROUTE_PROGRESSION_SEQUENCE,
 } from "@/lib/routeProgression";
+import { IS_SCHOOLS_PROFILE } from "@/lib/env/features";
 
 function formatPortalLabel(label: string) {
   return label === label.toUpperCase() ? label : label.toLowerCase();
@@ -29,10 +30,12 @@ const PORTAL_LADDER_LABELS = ROUTE_PROGRESSION_SEQUENCE.map((routeKey) =>
 
 const [portalLaunchLabel = "pet", ...portalNextLabels] = PORTAL_LADDER_LABELS;
 
-export const PORTAL_TAGLINE =
-  portalNextLabels.length > 0
+export const PORTAL_TAGLINE = IS_SCHOOLS_PROFILE
+  ? "A classroom companion for systems thinking and digital responsibility."
+  : portalNextLabels.length > 0
     ? `Start with the ${portalLaunchLabel}, then climb into ${joinWithOxfordComma(portalNextLabels)}.`
     : `Start with the ${portalLaunchLabel}.`;
 
-export const PORTAL_DESCRIPTION =
-  "Care builds the bond, school turns that bond into pattern learning, identity keeps ownership local-first, and DNA reveals the hidden engine underneath all three.";
+export const PORTAL_DESCRIPTION = IS_SCHOOLS_PROFILE
+  ? "Teacher-led, time-bounded sessions for Years 3-6. No accounts, no data collection, everything stays on the school device."
+  : "Care builds the bond, school turns that bond into pattern learning, identity keeps ownership local-first, and DNA reveals the hidden engine underneath all three.";

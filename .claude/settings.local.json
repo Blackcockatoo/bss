@@ -49,7 +49,13 @@
       "Bash(python \"C:\\\\Users\\\\Tom\\\\AppData\\\\Roaming\\\\Claude\\\\local-agent-mode-sessions\\\\skills-plugin\\\\9b359ad8-bf38-4623-8816-1e4551bc9750\\\\a11956bc-15f8-4ce9-966b-52d17f17c6f4\\\\skills\\\\docx\\\\scripts\\\\office\\\\validate.py\" \"$f\")",
       "Bash(done)",
       "Bash(python \"C:\\\\Users\\\\Tom\\\\AppData\\\\Roaming\\\\Claude\\\\local-agent-mode-sessions\\\\skills-plugin\\\\9b359ad8-bf38-4623-8816-1e4551bc9750\\\\a11956bc-15f8-4ce9-966b-52d17f17c6f4\\\\skills\\\\docx\\\\scripts\\\\office\\\\soffice.py\" --headless --convert-to pdf \"public/docs/schools-au/02-lesson-cards.docx\")",
-      "Bash(ls -la public/docs/schools-au/teacher-pack/*.docx public/docs/schools-au/*.docx public/docs/schools-au/pilot/*.docx)"
+      "Bash(ls -la public/docs/schools-au/teacher-pack/*.docx public/docs/schools-au/*.docx public/docs/schools-au/pilot/*.docx)",
+      "Bash(NEXT_PUBLIC_APP_PROFILE=schools npx next build)",
+      "Bash(xxd)",
+      "Bash(python3 -c \":*)",
+      "Bash(node -e \":*)",
+      "Bash(NEXT_PUBLIC_APP_PROFILE=core npx next build)",
+      "Bash(ls -la .env*)"
     ]
   }
 }
