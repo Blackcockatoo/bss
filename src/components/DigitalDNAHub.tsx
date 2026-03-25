@@ -24,6 +24,7 @@ import {
   useRef,
   useCallback,
   useMemo,
+  type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
 import { PatternQuestBoard } from "@/components/PatternQuestBoard";
@@ -132,6 +133,7 @@ const TOOLKIT_STORAGE_KEY = "digital-dna-toolkit-settings-v1";
 const MAX_SAVED_TOOL_PRESETS = 6;
 const MAX_NOTE_BOARD = 180;
 const DEFAULT_NOTE_BOARD_CAPACITY = 48;
+const TRACE_SNAP_RADIUS = 28;
 const TRIANGLE_VIEWBOX = { width: 900, height: 460 } as const;
 const TRIANGLE_VERTICES = {
   top: { x: 160, y: 90 },
@@ -467,6 +469,56 @@ function localPointFromEvent(
   };
 }
 
+function localSvgPointFromEvent(
+  svg: SVGSVGElement,
+  e: ReactPointerEvent<SVGSVGElement>,
+): { x: number; y: number } | null {
+  const matrix = svg.getScreenCTM();
+  if (!matrix) return null;
+
+  const point = svg.createSVGPoint();
+  point.x = e.clientX;
+  point.y = e.clientY;
+
+  const localPoint = point.matrixTransform(matrix.inverse());
+  return { x: localPoint.x, y: localPoint.y };
+}
+
+function closestTraceStepIndex(
+  svg: SVGSVGElement,
+  e: ReactPointerEvent<SVGSVGElement>,
+  steps: Array<{ index: number; x: number; y: number }>,
+  maxDistance = TRACE_SNAP_RADIUS,
+): number | null {
+  const point = localSvgPointFromEvent(svg, e);
+  if (!point) return null;
+
+  let bestIndex: number | null = null;
+  let bestDistanceSquared = maxDistance * maxDistance;
+
+  for (const step of steps) {
+    const dx = step.x - point.x;
+    const dy = step.y - point.y;
+    const distanceSquared = dx * dx + dy * dy;
+
+    if (distanceSquared <= bestDistanceSquared) {
+      bestIndex = step.index;
+      bestDistanceSquared = distanceSquared;
+    }
+  }
+
+  return bestIndex;
+}
+
+function releasePointerCaptureIfNeeded(
+  svg: SVGSVGElement,
+  pointerId: number,
+): void {
+  if (svg.hasPointerCapture?.(pointerId)) {
+    svg.releasePointerCapture?.(pointerId);
+  }
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function DigitalDNAHub({
@@ -620,6 +672,8 @@ export default function DigitalDNAHub({
   const hexagonTraceRef = useRef<number[]>([]);
   const decagonTraceRef = useRef<number[]>([]);
   const circleTraceRef = useRef<number[]>([]);
+  const modeSelectorRef = useRef<HTMLDivElement>(null);
+  const toolkitSectionRef = useRef<HTMLElement>(null);
 
   /**
    * FIX: audioInitialized is tracked in a ref (not only state) so that
@@ -2593,13 +2647,19 @@ export default function DigitalDNAHub({
     },
     [webglSupport],
   );
+  const selectableModes = modes.filter(
+    (mode) => !mode.requiresWebgl || webglSupport.supported,
+  );
+  const scrollToElement = useCallback((element: HTMLElement | null) => {
+    element?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
 
   // ══════════════════════════════════════════════════════════════════════════
   // Render
   // ══════════════════════════════════════════════════════════════════════════
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 text-amber-50 pb-16">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 text-amber-50 pb-32 sm:pb-16">
       {/* Ambient background glow — pointer-events-none so it never blocks input */}
       <div className="fixed inset-0 opacity-20 pointer-events-none" aria-hidden>
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900 via-transparent to-transparent" />
@@ -2640,6 +2700,43 @@ export default function DigitalDNAHub({
             <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-4 py-2 text-xs uppercase tracking-[0.22em] text-amber-100">
               Transform: {toolTransform}
             </span>
+          </div>
+        </div>
+
+        <div className="fixed inset-x-3 bottom-3 z-40 sm:hidden">
+          <div className="rounded-[1.5rem] border border-amber-500/20 bg-slate-950/92 p-3 shadow-2xl shadow-black/40 backdrop-blur">
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+              <label className="min-w-0">
+                <span className="sr-only">Switch instrument</span>
+                <select
+                  value={activeMode}
+                  onChange={(event) =>
+                    handleModeSelect(event.target.value as ModeKey)
+                  }
+                  className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-3 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-amber-400"
+                >
+                  {selectableModes.map((mode) => (
+                    <option key={`mobile-mode-${mode.id}`} value={mode.id}>
+                      {mode.icon} {mode.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="button"
+                onClick={() => scrollToElement(toolkitSectionRef.current)}
+                className="rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-sm font-semibold text-cyan-100 transition-colors hover:bg-cyan-500/20"
+              >
+                Settings
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => scrollToElement(modeSelectorRef.current)}
+              className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-300 transition-colors hover:bg-slate-800"
+            >
+              Open full mode switcher
+            </button>
           </div>
         </div>
 
@@ -2740,7 +2837,10 @@ export default function DigitalDNAHub({
         </div>
 
         {/* ── Mode selector ─────────────────────────────────────────────────── */}
-        <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <div
+          ref={modeSelectorRef}
+          className="mb-8 grid scroll-mt-28 grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5"
+        >
           {modes.map((mode) => (
             <button
               key={mode.id}
@@ -3352,7 +3452,10 @@ export default function DigitalDNAHub({
           </div>
         </section>
 
-        <section className="mb-8 rounded-[2rem] border border-amber-500/20 bg-slate-900/45 p-4 sm:p-6">
+        <section
+          ref={toolkitSectionRef}
+          className="mb-8 scroll-mt-28 rounded-[2rem] border border-amber-500/20 bg-slate-900/45 p-4 sm:p-6"
+        >
           <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-[11px] uppercase tracking-[0.34em] text-cyan-200/70">
@@ -4071,16 +4174,40 @@ export default function DigitalDNAHub({
                       viewBox={`0 0 ${TRIANGLE_VIEWBOX.width} ${TRIANGLE_VIEWBOX.height}`}
                       className="w-full"
                       style={{ touchAction: "none" }}
+                      onPointerDown={(event) => {
+                        const idx = closestTraceStepIndex(
+                          event.currentTarget,
+                          event,
+                          triangleSteps,
+                        );
+                        if (idx === null) return;
+                        event.preventDefault();
+                        event.currentTarget.setPointerCapture?.(event.pointerId);
+                        startTriangleTrace(idx);
+                      }}
                       onPointerLeave={() => setTriangleHoveredStep(null)}
-                      onPointerUp={() => setIsTriangleTracing(false)}
-                      onPointerCancel={() => setIsTriangleTracing(false)}
-                      onPointerMove={(e) => {
-                        const el = document.elementFromPoint(e.clientX, e.clientY);
-                        const g = el?.closest?.("[data-step]") ?? (el instanceof Element ? el : null);
-                        const stepAttr = g?.getAttribute("data-step");
-                        if (stepAttr != null) {
-                          const idx = Number(stepAttr);
-                          setTriangleHoveredStep(idx);
+                      onPointerUp={(event) => {
+                        releasePointerCaptureIfNeeded(
+                          event.currentTarget,
+                          event.pointerId,
+                        );
+                        setIsTriangleTracing(false);
+                      }}
+                      onPointerCancel={(event) => {
+                        releasePointerCaptureIfNeeded(
+                          event.currentTarget,
+                          event.pointerId,
+                        );
+                        setIsTriangleTracing(false);
+                      }}
+                      onPointerMove={(event) => {
+                        const idx = closestTraceStepIndex(
+                          event.currentTarget,
+                          event,
+                          triangleSteps,
+                        );
+                        setTriangleHoveredStep(idx);
+                        if (idx !== null) {
                           extendTriangleTrace(idx);
                         }
                       }}
@@ -4197,23 +4324,6 @@ export default function DigitalDNAHub({
                             key={`triangle-step-${step.index}`}
                             data-step={step.index}
                             className="cursor-pointer"
-                            onPointerDown={(event) => {
-                              event.preventDefault();
-                              startTriangleTrace(step.index);
-                            }}
-                            onPointerEnter={() => {
-                              setTriangleHoveredStep(step.index);
-                              extendTriangleTrace(step.index);
-                            }}
-                            onPointerMove={() => {
-                              setTriangleHoveredStep(step.index);
-                              extendTriangleTrace(step.index);
-                            }}
-                            onPointerLeave={() => {
-                              setTriangleHoveredStep((current) =>
-                                current === step.index ? null : current,
-                              );
-                            }}
                           >
                             <circle
                               cx={step.x}
@@ -4389,16 +4499,40 @@ export default function DigitalDNAHub({
                       viewBox={`0 0 ${PENTAGON_VIEWBOX.width} ${PENTAGON_VIEWBOX.height}`}
                       className="w-full"
                       style={{ touchAction: "none" }}
+                      onPointerDown={(event) => {
+                        const idx = closestTraceStepIndex(
+                          event.currentTarget,
+                          event,
+                          pentagonSteps,
+                        );
+                        if (idx === null) return;
+                        event.preventDefault();
+                        event.currentTarget.setPointerCapture?.(event.pointerId);
+                        startPentagonTrace(idx);
+                      }}
                       onPointerLeave={() => setPentagonHoveredStep(null)}
-                      onPointerUp={() => setIsPentagonTracing(false)}
-                      onPointerCancel={() => setIsPentagonTracing(false)}
-                      onPointerMove={(e) => {
-                        const el = document.elementFromPoint(e.clientX, e.clientY);
-                        const g = el?.closest?.("[data-step]") ?? (el instanceof Element ? el : null);
-                        const stepAttr = g?.getAttribute("data-step");
-                        if (stepAttr != null) {
-                          const idx = Number(stepAttr);
-                          setPentagonHoveredStep(idx);
+                      onPointerUp={(event) => {
+                        releasePointerCaptureIfNeeded(
+                          event.currentTarget,
+                          event.pointerId,
+                        );
+                        setIsPentagonTracing(false);
+                      }}
+                      onPointerCancel={(event) => {
+                        releasePointerCaptureIfNeeded(
+                          event.currentTarget,
+                          event.pointerId,
+                        );
+                        setIsPentagonTracing(false);
+                      }}
+                      onPointerMove={(event) => {
+                        const idx = closestTraceStepIndex(
+                          event.currentTarget,
+                          event,
+                          pentagonSteps,
+                        );
+                        setPentagonHoveredStep(idx);
+                        if (idx !== null) {
                           extendPentagonTrace(idx);
                         }
                       }}
@@ -4477,23 +4611,6 @@ export default function DigitalDNAHub({
                             key={`pentagon-step-${step.index}`}
                             data-step={step.index}
                             className="cursor-pointer"
-                            onPointerDown={(event) => {
-                              event.preventDefault();
-                              startPentagonTrace(step.index);
-                            }}
-                            onPointerEnter={() => {
-                              setPentagonHoveredStep(step.index);
-                              extendPentagonTrace(step.index);
-                            }}
-                            onPointerMove={() => {
-                              setPentagonHoveredStep(step.index);
-                              extendPentagonTrace(step.index);
-                            }}
-                            onPointerLeave={() => {
-                              setPentagonHoveredStep((current) =>
-                                current === step.index ? null : current,
-                              );
-                            }}
                           >
                             <circle cx={step.x} cy={step.y} r={radius + 8} fill="transparent" />
                             <circle
@@ -4660,16 +4777,40 @@ export default function DigitalDNAHub({
                       viewBox={`0 0 ${HEXAGON_VIEWBOX.width} ${HEXAGON_VIEWBOX.height}`}
                       className="w-full"
                       style={{ touchAction: "none" }}
+                      onPointerDown={(event) => {
+                        const idx = closestTraceStepIndex(
+                          event.currentTarget,
+                          event,
+                          hexagonSteps,
+                        );
+                        if (idx === null) return;
+                        event.preventDefault();
+                        event.currentTarget.setPointerCapture?.(event.pointerId);
+                        startHexagonTrace(idx);
+                      }}
                       onPointerLeave={() => setHexagonHoveredStep(null)}
-                      onPointerUp={() => setIsHexagonTracing(false)}
-                      onPointerCancel={() => setIsHexagonTracing(false)}
-                      onPointerMove={(e) => {
-                        const el = document.elementFromPoint(e.clientX, e.clientY);
-                        const g = el?.closest?.("[data-step]") ?? (el instanceof Element ? el : null);
-                        const stepAttr = g?.getAttribute("data-step");
-                        if (stepAttr != null) {
-                          const idx = Number(stepAttr);
-                          setHexagonHoveredStep(idx);
+                      onPointerUp={(event) => {
+                        releasePointerCaptureIfNeeded(
+                          event.currentTarget,
+                          event.pointerId,
+                        );
+                        setIsHexagonTracing(false);
+                      }}
+                      onPointerCancel={(event) => {
+                        releasePointerCaptureIfNeeded(
+                          event.currentTarget,
+                          event.pointerId,
+                        );
+                        setIsHexagonTracing(false);
+                      }}
+                      onPointerMove={(event) => {
+                        const idx = closestTraceStepIndex(
+                          event.currentTarget,
+                          event,
+                          hexagonSteps,
+                        );
+                        setHexagonHoveredStep(idx);
+                        if (idx !== null) {
                           extendHexagonTrace(idx);
                         }
                       }}
@@ -4748,23 +4889,6 @@ export default function DigitalDNAHub({
                             key={`hexagon-step-${step.index}`}
                             data-step={step.index}
                             className="cursor-pointer"
-                            onPointerDown={(event) => {
-                              event.preventDefault();
-                              startHexagonTrace(step.index);
-                            }}
-                            onPointerEnter={() => {
-                              setHexagonHoveredStep(step.index);
-                              extendHexagonTrace(step.index);
-                            }}
-                            onPointerMove={() => {
-                              setHexagonHoveredStep(step.index);
-                              extendHexagonTrace(step.index);
-                            }}
-                            onPointerLeave={() => {
-                              setHexagonHoveredStep((current) =>
-                                current === step.index ? null : current,
-                              );
-                            }}
                           >
                             <circle cx={step.x} cy={step.y} r={radius + 8} fill="transparent" />
                             <circle
@@ -4931,16 +5055,40 @@ export default function DigitalDNAHub({
                       viewBox={`0 0 ${DECAGON_VIEWBOX.width} ${DECAGON_VIEWBOX.height}`}
                       className="w-full"
                       style={{ touchAction: "none" }}
+                      onPointerDown={(event) => {
+                        const idx = closestTraceStepIndex(
+                          event.currentTarget,
+                          event,
+                          decagonSteps,
+                        );
+                        if (idx === null) return;
+                        event.preventDefault();
+                        event.currentTarget.setPointerCapture?.(event.pointerId);
+                        startDecagonTrace(idx);
+                      }}
                       onPointerLeave={() => setDecagonHoveredStep(null)}
-                      onPointerUp={() => setIsDecagonTracing(false)}
-                      onPointerCancel={() => setIsDecagonTracing(false)}
-                      onPointerMove={(e) => {
-                        const el = document.elementFromPoint(e.clientX, e.clientY);
-                        const g = el?.closest?.("[data-step]") ?? (el instanceof Element ? el : null);
-                        const stepAttr = g?.getAttribute("data-step");
-                        if (stepAttr != null) {
-                          const idx = Number(stepAttr);
-                          setDecagonHoveredStep(idx);
+                      onPointerUp={(event) => {
+                        releasePointerCaptureIfNeeded(
+                          event.currentTarget,
+                          event.pointerId,
+                        );
+                        setIsDecagonTracing(false);
+                      }}
+                      onPointerCancel={(event) => {
+                        releasePointerCaptureIfNeeded(
+                          event.currentTarget,
+                          event.pointerId,
+                        );
+                        setIsDecagonTracing(false);
+                      }}
+                      onPointerMove={(event) => {
+                        const idx = closestTraceStepIndex(
+                          event.currentTarget,
+                          event,
+                          decagonSteps,
+                        );
+                        setDecagonHoveredStep(idx);
+                        if (idx !== null) {
                           extendDecagonTrace(idx);
                         }
                       }}
@@ -5019,23 +5167,6 @@ export default function DigitalDNAHub({
                             key={`decagon-step-${step.index}`}
                             data-step={step.index}
                             className="cursor-pointer"
-                            onPointerDown={(event) => {
-                              event.preventDefault();
-                              startDecagonTrace(step.index);
-                            }}
-                            onPointerEnter={() => {
-                              setDecagonHoveredStep(step.index);
-                              extendDecagonTrace(step.index);
-                            }}
-                            onPointerMove={() => {
-                              setDecagonHoveredStep(step.index);
-                              extendDecagonTrace(step.index);
-                            }}
-                            onPointerLeave={() => {
-                              setDecagonHoveredStep((current) =>
-                                current === step.index ? null : current,
-                              );
-                            }}
                           >
                             <circle cx={step.x} cy={step.y} r={radius + 8} fill="transparent" />
                             <circle
@@ -5202,16 +5333,40 @@ export default function DigitalDNAHub({
                       viewBox={`0 0 ${CIRCLE_VIEWBOX.width} ${CIRCLE_VIEWBOX.height}`}
                       className="w-full"
                       style={{ touchAction: "none" }}
+                      onPointerDown={(event) => {
+                        const idx = closestTraceStepIndex(
+                          event.currentTarget,
+                          event,
+                          circleSteps,
+                        );
+                        if (idx === null) return;
+                        event.preventDefault();
+                        event.currentTarget.setPointerCapture?.(event.pointerId);
+                        startCircleTrace(idx);
+                      }}
                       onPointerLeave={() => setCircleHoveredStep(null)}
-                      onPointerUp={() => setIsCircleTracing(false)}
-                      onPointerCancel={() => setIsCircleTracing(false)}
-                      onPointerMove={(e) => {
-                        const el = document.elementFromPoint(e.clientX, e.clientY);
-                        const g = el?.closest?.("[data-step]") ?? (el instanceof Element ? el : null);
-                        const stepAttr = g?.getAttribute("data-step");
-                        if (stepAttr != null) {
-                          const idx = Number(stepAttr);
-                          setCircleHoveredStep(idx);
+                      onPointerUp={(event) => {
+                        releasePointerCaptureIfNeeded(
+                          event.currentTarget,
+                          event.pointerId,
+                        );
+                        setIsCircleTracing(false);
+                      }}
+                      onPointerCancel={(event) => {
+                        releasePointerCaptureIfNeeded(
+                          event.currentTarget,
+                          event.pointerId,
+                        );
+                        setIsCircleTracing(false);
+                      }}
+                      onPointerMove={(event) => {
+                        const idx = closestTraceStepIndex(
+                          event.currentTarget,
+                          event,
+                          circleSteps,
+                        );
+                        setCircleHoveredStep(idx);
+                        if (idx !== null) {
                           extendCircleTrace(idx);
                         }
                       }}
@@ -5261,23 +5416,6 @@ export default function DigitalDNAHub({
                             key={`circle-step-${step.index}`}
                             data-step={step.index}
                             className="cursor-pointer"
-                            onPointerDown={(event) => {
-                              event.preventDefault();
-                              startCircleTrace(step.index);
-                            }}
-                            onPointerEnter={() => {
-                              setCircleHoveredStep(step.index);
-                              extendCircleTrace(step.index);
-                            }}
-                            onPointerMove={() => {
-                              setCircleHoveredStep(step.index);
-                              extendCircleTrace(step.index);
-                            }}
-                            onPointerLeave={() => {
-                              setCircleHoveredStep((current) =>
-                                current === step.index ? null : current,
-                              );
-                            }}
                           >
                             <circle cx={step.x} cy={step.y} r={radius + 8} fill="transparent" />
                             <circle
