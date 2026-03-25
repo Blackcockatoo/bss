@@ -1,5 +1,7 @@
 # MetaPet Schools Pilot Prospectus
 
+Use this prospectus after reviewing `Pilot Readiness Verdict v2`.
+
 ## Problem statement
 
 Australian schools need low-friction classroom tools that help students discuss systems, routines, and online safety habits without adding teacher admin or introducing avoidable privacy and safeguarding risk.
@@ -7,9 +9,10 @@ Australian schools need low-friction classroom tools that help students discuss 
 ## Pilot scope
 
 - Year levels: Years 3-6
-- Schools: 2 to 3
-- Classes: 1 to 2 per school
-- Duration: 4 to 8 weeks
+- Schools: 1
+- Classes: 1
+- Lead teacher: 1
+- Duration: initial single-class pilot with a stop/go review after the first fortnight
 - Delivery model: teacher-led classroom use only
 
 ## Pilot boundaries
@@ -34,6 +37,7 @@ Australian schools need low-friction classroom tools that help students discuss 
 
 Use the pilot prospectus together with:
 
+- Pilot Readiness Verdict v2
 - Acceptance Runbook
 - Pilot Runbook
 - School Partner Checklist

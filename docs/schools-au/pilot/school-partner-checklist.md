@@ -4,6 +4,7 @@ Use this checklist with principals, assistant principals, or pilot leads before 
 
 ## Leadership Review
 
+- Review Pilot Readiness Verdict v2
 - Review the overview and alignment document
 - Review the staff briefing
 - Review the pilot prospectus
@@ -27,6 +28,7 @@ Use this checklist with principals, assistant principals, or pilot leads before 
 
 ## Evidence And Closeout
 
+- Confirm the stop/go review date at the end of the first fortnight
 - Confirm who owns the pre/post measure
 - Confirm who owns the teacher interview and family feedback collection
 - Confirm who will keep the incident log

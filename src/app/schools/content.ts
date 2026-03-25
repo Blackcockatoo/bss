@@ -273,10 +273,19 @@ export const schoolPackageDocs: SchoolPackageDoc[] = ([
     category: "Governance Pack",
   },
   {
+    slug: "pilot-readiness-verdict-v2",
+    title: "Pilot Readiness Verdict v2",
+    description:
+      "Principal-facing decision memo with the updated score, constrained pilot recommendation, and required proof checks.",
+    audience: "Principals and pilot leads",
+    href: "/docs/schools-au/pilot/pilot-readiness-verdict-v2.md",
+    category: "Pilot Ops Pack",
+  },
+  {
     slug: "pilot-prospectus",
     title: "Pilot Prospectus",
     description:
-      "Pilot-ready scope, success criteria, stop conditions, evidence plan, and school ask.",
+      "Constrained pilot scope, success criteria, stop conditions, evidence plan, and school ask.",
     audience: "Leadership and pilot partners",
     href: "/docs/schools-au/pilot/pilot-prospectus.md",
     category: "Pilot Ops Pack",
@@ -710,8 +719,9 @@ export const reviewerPathways: ReviewerPathway[] = [
   {
     title: "Principals and pilot leads",
     description:
-      "Start with the positioning, staff brief, pilot scope, and product boundaries before discussing rollout.",
+      "Start with the updated verdict, then move into the positioning, staff brief, pilot scope, and product boundaries before discussing rollout.",
     docSlugs: [
+      "pilot-readiness-verdict-v2",
       "01-overview-and-alignment",
       "staff-brief",
       "pilot-prospectus",

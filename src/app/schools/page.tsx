@@ -561,6 +561,7 @@ export default function SchoolsPage() {
                             Read in app
                           </Link>
                           <a
+                            aria-label={`Download ${doc.title}`}
                             className="text-sm text-slate-400 hover:text-slate-300"
                             download
                             href={doc.href}
