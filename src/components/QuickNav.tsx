@@ -47,11 +47,15 @@ export function QuickNav() {
 
   const handleBack = useCallback(() => {
     triggerHaptic("light");
+    if (IS_SCHOOLS_PROFILE) {
+      router.push("/schools");
+      return;
+    }
     if (typeof window !== "undefined" && window.history.length > 1) {
       router.back();
       return;
     }
-    router.push(IS_SCHOOLS_PROFILE ? "/schools" : "/");
+    router.push("/");
   }, [router]);
 
   useEffect(() => {

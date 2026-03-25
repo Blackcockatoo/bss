@@ -11,6 +11,7 @@ import {
   ENABLE_CHILD_SAFE_BASELINE,
   IS_SCHOOLS_PROFILE,
 } from "@/lib/env/features";
+import { SCHOOLS_LOCAL_DATA_RETENTION_DAYS } from "@/lib/schools/storage";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -94,7 +95,9 @@ export default function ClientBody({
             Default school use is local-first, alias-based, and teacher-led.
             Student accounts, public sharing, and retention-style mechanics stay
             out of the school deployment. Classroom records remain on this
-            device unless a teacher deliberately exports evidence.
+            device unless a teacher deliberately exports evidence. Classroom
+            data on this device auto-deletes after{" "}
+            {SCHOOLS_LOCAL_DATA_RETENTION_DAYS} days without use.
           </div>
         )}
         {!IS_SCHOOLS_PROFILE && <JourneyProgressStrip />}

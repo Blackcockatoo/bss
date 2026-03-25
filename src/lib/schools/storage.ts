@@ -101,3 +101,18 @@ export function purgeExpiredSchoolsLocalState(
   clearSchoolsLocalState(storage);
   return true;
 }
+
+/**
+ * Returns the expiry date for school data based on the last-updated timestamp,
+ * or `null` if no school data has been written yet.
+ */
+export function getSchoolsDataExpiryDate(
+  storage: Pick<Storage, "getItem">,
+): Date | null {
+  const meta = readMeta(storage);
+  if (!meta) {
+    return null;
+  }
+
+  return new Date(meta.updatedAt + SCHOOLS_LOCAL_DATA_RETENTION_MS);
+}
