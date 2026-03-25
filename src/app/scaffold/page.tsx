@@ -5,6 +5,8 @@ import { useStore } from '@/lib/store';
 import { HUD } from '@/components/HUD';
 import { HeptaTag } from '@/components/HeptaTag';
 import { Button } from '@/components/ui/button';
+import { LineageStatsDashboard } from '@/components/lineage/LineageStatsDashboard';
+import { generateFounderCoatOfArms, type CoatOfArms } from '@/lib/lineage';
 import {
   getDeviceHmacKey,
   mintPrimeTailId,
@@ -92,6 +94,7 @@ export default function ScaffoldPage() {
   const [isVerified, setIsVerified] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [sessionMetrics, setSessionMetrics] = useState<SessionMetrics | null>(null);
+  const [lineageCoats, setLineageCoats] = useState<CoatOfArms[]>([]);
 
   const showDevMetrics = process.env.NODE_ENV !== 'production';
 
@@ -309,6 +312,19 @@ export default function ScaffoldPage() {
   const handleRefreshConsent = useCallback(() => {
     refreshConsent(15);
   }, [refreshConsent]);
+
+  /**
+   * Generate demo lineage coats of arms
+   */
+  const generateDemoLineage = useCallback(() => {
+    const newCoats: CoatOfArms[] = [];
+    for (let i = 0; i < 5; i++) {
+      const id = `demo-founder-${Date.now()}-${i}`;
+      const seed = Date.now() + i * 1000;
+      newCoats.push(generateFounderCoatOfArms(id, seed));
+    }
+    setLineageCoats([...lineageCoats, ...newCoats]);
+  }, [lineageCoats]);
 
   /**
    * Toggle mock vitals decay
@@ -765,6 +781,20 @@ export default function ScaffoldPage() {
               </ul>
             </div>
           </div>
+        </div>
+
+        {/* Lineage Statistics Dashboard */}
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-cyan-300">Lineage Explorer</h2>
+            <button
+              onClick={generateDemoLineage}
+              className="px-4 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 rounded-lg border border-cyan-500/50 transition-colors text-sm font-semibold"
+            >
+              + Generate Demo Lineages
+            </button>
+          </div>
+          <LineageStatsDashboard coats={lineageCoats} />
         </div>
 
         {/* Quick Start Instructions */}

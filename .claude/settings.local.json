@@ -55,7 +55,8 @@
       "Bash(python3 -c \":*)",
       "Bash(node -e \":*)",
       "Bash(NEXT_PUBLIC_APP_PROFILE=core npx next build)",
-      "Bash(ls -la .env*)"
+      "Bash(ls -la .env*)",
+      "Bash(curl -s http://localhost:3000/lineage-demo)"
     ]
   }
 }

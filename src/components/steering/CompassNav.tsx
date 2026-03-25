@@ -5,9 +5,9 @@ import type { SteeringViewProps } from './types';
 import { COMPASS_NAVIGATION_TARGETS, getNavigationTargetByPosition } from './types';
 
 const COLOR_VARIANTS = {
-  red: { primary: '#FF5555', secondary: '#FF9999', tertiary: '#FFCCCC' },
-  blue: { primary: '#5555FF', secondary: '#9999FF', tertiary: '#CCCCFF' },
-  black: { primary: '#AAAAAA', secondary: '#666666', tertiary: '#333333' },
+  red: { primary: '#FF0055', secondary: '#FF33CC', tertiary: '#FF66FF', neon: '#FF0080' },
+  blue: { primary: '#00EAFF', secondary: '#00FFFF', tertiary: '#00D4FF', neon: '#00CCFF' },
+  black: { primary: '#00FFFF', secondary: '#FF00FF', tertiary: '#00CCFF', neon: '#00FFFF' },
 };
 
 const normalizeDelta = (delta: number) => {
@@ -224,33 +224,84 @@ export function CompassNav({
           onPointerCancel={handlePointerUp}
         >
           <defs>
+            <style>{`
+              @keyframes neon-pulse {
+                0%, 100% { filter: drop-shadow(0 0 6px currentColor) drop-shadow(0 0 12px currentColor); }
+                50% { filter: drop-shadow(0 0 10px currentColor) drop-shadow(0 0 20px currentColor); }
+              }
+              @keyframes hologram-float {
+                0%, 100% { opacity: 0.15; }
+                50% { opacity: 0.35; }
+              }
+              @keyframes scanline-pulse {
+                0%, 100% { opacity: 0.08; }
+                50% { opacity: 0.12; }
+              }
+              .neon-element {
+                animation: neon-pulse 2s ease-in-out infinite;
+              }
+              .hologram-ring {
+                animation: hologram-float 3s ease-in-out infinite;
+              }
+              .scanline {
+                animation: scanline-pulse 1.5s ease-in-out infinite;
+              }
+            `}</style>
             <filter id="sector-glow">
-              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feGaussianBlur stdDeviation="6" result="blur" />
+              <feComponentTransfer>
+                <feFuncA type="linear" slope="1.2" />
+              </feComponentTransfer>
               <feMerge>
                 <feMergeNode in="blur" />
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
             <filter id="sector-hover-glow">
-              <feGaussianBlur stdDeviation="2.2" result="hoverBlur" />
+              <feGaussianBlur stdDeviation="3.5" result="hoverBlur" />
               <feMerge>
                 <feMergeNode in="hoverBlur" />
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
+            <filter id="neon-glow">
+              <feGaussianBlur stdDeviation="2.5" result="neonBlur" />
+              <feComponentTransfer>
+                <feFuncA type="linear" slope="1.4" />
+              </feComponentTransfer>
+              <feMerge>
+                <feMergeNode in="neonBlur" />
+                <feMergeNode in="neonBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
             <filter id="label-compact-glow" x="-40%" y="-40%" width="180%" height="180%">
-              <feGaussianBlur stdDeviation="1.6" result="labelBlur" />
+              <feGaussianBlur stdDeviation="2.2" result="labelBlur" />
               <feMerge>
                 <feMergeNode in="labelBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            <filter id="hologram-glow">
+              <feGaussianBlur stdDeviation="3" result="holoBlur" />
+              <feMerge>
+                <feMergeNode in="holoBlur" />
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
           </defs>
 
           <g transform={`rotate(${rotation})`}>
-            {/* Outer ring */}
-            <circle cx="0" cy="0" r="200" stroke={colors.primary} strokeWidth="2" fill="none" />
-            <circle cx="0" cy="0" r="120" stroke={colors.secondary} strokeWidth="1" fill="none" strokeOpacity="0.4" />
+            {/* Holographic background rings */}
+            <circle cx="0" cy="0" r="210" stroke={colors.neon} strokeWidth="0.5" fill="none" opacity="0.15" className="hologram-ring" />
+            <circle cx="0" cy="0" r="180" stroke={colors.secondary} strokeWidth="0.5" fill="none" opacity="0.12" className="hologram-ring" style={{ animationDelay: '0.5s' }} />
+            <circle cx="0" cy="0" r="150" stroke={colors.primary} strokeWidth="0.5" fill="none" opacity="0.1" className="hologram-ring" style={{ animationDelay: '1s' }} />
+
+            {/* Main outer ring with neon glow */}
+            <circle cx="0" cy="0" r="200" stroke={colors.primary} strokeWidth="2.5" fill="none" filter="url(#neon-glow)" className="neon-element" />
+
+            {/* Inner ring with secondary neon */}
+            <circle cx="0" cy="0" r="120" stroke={colors.secondary} strokeWidth="1.5" fill="none" opacity="0.6" filter="url(#neon-glow)" />
 
             {/* 12 clickable sectors */}
             {COMPASS_NAVIGATION_TARGETS.map((target) => {
@@ -285,13 +336,13 @@ export function CompassNav({
                     strokeOpacity={isSelected ? selectedStrokeOpacity : isHovered ? hoverStrokeOpacity : 0}
                     strokeWidth={isSelected ? selectedStrokeWidth : isHovered ? hoverStrokeWidth : 0}
                     filter={isSelected ? 'url(#sector-glow)' : isHovered ? 'url(#sector-hover-glow)' : undefined}
-                    className="pointer-events-none transition-all duration-200"
+                    className={`pointer-events-none transition-all duration-200 ${isSelected ? 'neon-element' : ''}`}
                   />
                 </g>
               );
             })}
 
-            {/* Hour markers */}
+            {/* Hour markers with neon glow */}
             {Array.from({ length: 12 }).map((_, i) => {
               const angle = (i * 30) * (Math.PI / 180);
               const x1 = Math.sin(angle) * 195;
@@ -300,11 +351,11 @@ export function CompassNav({
               const y2 = -Math.cos(angle) * 200;
               return (
                 <line key={`h-${i}`} x1={x1} y1={y1} x2={x2} y2={y2}
-                  stroke={colors.primary} strokeWidth="2" strokeOpacity={isCompact ? 0.72 : 1} />
+                  stroke={colors.primary} strokeWidth="2.5" strokeOpacity={isCompact ? 0.85 : 0.95} filter="url(#neon-glow)" />
               );
             })}
 
-            {/* Minute markers */}
+            {/* Minute markers with neon styling */}
             {Array.from({ length: 60 }).map((_, i) => {
               if (i % 5 === 0) return null;
               const angle = (i * 6) * (Math.PI / 180);
@@ -314,7 +365,7 @@ export function CompassNav({
               const y2 = -Math.cos(angle) * 200;
               return (
                 <line key={`m-${i}`} x1={x1} y1={y1} x2={x2} y2={y2}
-                  stroke={colors.secondary} strokeWidth="0.5" strokeOpacity={isCompact ? 0.48 : 1} />
+                  stroke={colors.secondary} strokeWidth="0.8" strokeOpacity={isCompact ? 0.58 : 0.7} filter="url(#neon-glow)" />
               );
             })}
 
@@ -411,7 +462,7 @@ export function CompassNav({
               );
             })}
 
-            {/* Number sequence digits around the compass (24 positions) */}
+            {/* Number sequence digits with futuristic styling */}
             {Array.from({ length: 24 }).map((_, i) => {
               const angle = (i * 15) * (Math.PI / 180);
               const x = Math.sin(angle) * 135;
@@ -423,10 +474,14 @@ export function CompassNav({
                   key={`num-${i}`}
                   x={x} y={y}
                   fill={colors.tertiary}
-                  fontSize={isCompact ? '7.2' : '7.8'}
+                  fontSize={isCompact ? '7.8' : '8.4'}
+                  fontFamily="monospace"
+                  fontWeight="600"
                   textAnchor="middle"
                   dominantBaseline="middle"
-                  opacity={isCompact ? 0.54 : 0.72}
+                  opacity={isCompact ? 0.68 : 0.85}
+                  filter="url(#neon-glow)"
+                  letterSpacing="0.5px"
                   style={{ pointerEvents: 'none' }}
                 >
                   {digits}
@@ -434,26 +489,28 @@ export function CompassNav({
               );
             })}
 
-            {/* Clock hands (ambient, behind navigation) */}
+            {/* Clock hands with neon glow */}
             <line
               x1="0" y1="0"
               x2={Math.sin(hourAngle * (Math.PI / 180)) * 70}
               y2={-Math.cos(hourAngle * (Math.PI / 180)) * 70}
-              stroke={colors.primary} strokeWidth="3" strokeLinecap="round" opacity="0.6"
+              stroke={colors.primary} strokeWidth="3" strokeLinecap="round" opacity="0.8" filter="url(#neon-glow)"
             />
             <line
               x1="0" y1="0"
               x2={Math.sin(minuteAngle * (Math.PI / 180)) * 95}
               y2={-Math.cos(minuteAngle * (Math.PI / 180)) * 95}
-              stroke={colors.secondary} strokeWidth="2" strokeLinecap="round" opacity="0.5"
+              stroke={colors.secondary} strokeWidth="2.5" strokeLinecap="round" opacity="0.7" filter="url(#neon-glow)"
             />
             <line
               x1="0" y1="0"
               x2={Math.sin(secondAngle * (Math.PI / 180)) * 110}
               y2={-Math.cos(secondAngle * (Math.PI / 180)) * 110}
-              stroke={colors.tertiary} strokeWidth="1" strokeLinecap="round" opacity="0.4"
+              stroke={colors.tertiary} strokeWidth="1.5" strokeLinecap="round" opacity="0.6" filter="url(#neon-glow)"
             />
-            <circle cx="0" cy="0" r="4" fill={colors.primary} />
+            {/* Center hub with neon glow */}
+            <circle cx="0" cy="0" r="6" fill={colors.primary} filter="url(#neon-glow)" className="neon-element" />
+            <circle cx="0" cy="0" r="4" fill={colors.secondary} opacity="0.8" />
           </g>
 
           {/* Fixed center label showing selected feature */}
