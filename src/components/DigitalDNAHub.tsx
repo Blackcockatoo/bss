@@ -538,6 +538,7 @@ export default function DigitalDNAHub({
   const [audioReady, setAudioReady] = useState(false); // display-only; logic uses ref
   const [harmony, setHarmony] = useState(7);
   const [tempo, setTempo] = useState(120);
+  const [showMobileControls, setShowMobileControls] = useState(false);
   const [paintedPattern, setPaintedPattern] = useState<PaintPoint[]>([]);
   const [toolStartIndex, setToolStartIndex] = useState(0);
   const [toolWindowSize, setToolWindowSize] = useState(12);
@@ -2874,8 +2875,88 @@ export default function DigitalDNAHub({
           ))}
         </div>
 
-        <div className="sticky top-3 z-30 mb-8 rounded-[1.75rem] border border-amber-600/30 bg-slate-950/92 px-4 py-4 shadow-2xl shadow-amber-500/15 backdrop-blur">
-          <div className="flex flex-wrap items-center justify-center gap-4 lg:gap-6">
+        <div className="sticky top-3 z-30 mb-8 rounded-[1.75rem] border border-amber-600/30 bg-slate-950/92 px-3 py-3 sm:px-4 sm:py-4 shadow-2xl shadow-amber-500/15 backdrop-blur">
+          {/* ── Mobile compact row ──────────────────────────────────────── */}
+          <div className="flex items-center gap-2 sm:hidden">
+            <div className="flex items-center gap-1.5">
+              {(["red", "blue", "black"] as SeedKey[]).map((seed) => (
+                <button
+                  key={seed}
+                  onClick={() => setSelectedSeed(seed)}
+                  title={seed === "red" ? "Fire" : seed === "blue" ? "Water" : "Earth"}
+                  className={`h-7 w-7 rounded-full transition-all ${
+                    selectedSeed === seed
+                      ? "scale-110 shadow-lg ring-2 ring-white/50"
+                      : "opacity-60"
+                  }`}
+                  style={{
+                    backgroundColor:
+                      seed === "red" ? "#ef4444" : seed === "blue" ? "#3b82f6" : "#374151",
+                  }}
+                />
+              ))}
+            </div>
+            <button
+              onClick={playSequence}
+              disabled={isPlaying}
+              className={`flex-1 rounded-full py-2 text-sm font-bold transition-all ${
+                isPlaying
+                  ? "bg-slate-700 text-slate-400"
+                  : "bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-lg shadow-pink-500/30 active:scale-95"
+              }`}
+            >
+              {isPlaying ? "Playing…" : "▶ Play"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowMobileControls((v) => !v)}
+              className="rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-xs font-semibold text-slate-300"
+            >
+              {showMobileControls ? "▲" : "▼"} Controls
+            </button>
+          </div>
+
+          {/* ── Mobile expanded controls ─────────────────────────────── */}
+          {showMobileControls && (
+            <div className="mt-3 grid gap-3 sm:hidden">
+              <div className="rounded-[1.25rem] border border-slate-700/80 bg-slate-900/80 px-3 py-3">
+                <div className="text-[11px] uppercase tracking-[0.22em] text-slate-400">Harmony</div>
+                <div className="mt-2 flex justify-center gap-2">
+                  {[3, 5, 7, 9, 12].map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => updateHarmony(value)}
+                      className={`h-9 w-9 rounded-full text-sm font-bold transition-colors ${
+                        harmony === value
+                          ? "bg-amber-400 text-slate-950"
+                          : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                      }`}
+                    >
+                      {value}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-[1.25rem] border border-slate-700/80 bg-slate-900/80 px-4 py-3">
+                <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.22em] text-slate-400">
+                  <span>Tempo</span>
+                  <span className="font-mono text-amber-300">{tempo} BPM</span>
+                </div>
+                <input
+                  type="range"
+                  min="60"
+                  max="180"
+                  value={tempo}
+                  onChange={(e) => updateTempo(parseInt(e.target.value, 10))}
+                  className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-700 accent-amber-400"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* ── Desktop full row ─────────────────────────────────────── */}
+          <div className="hidden sm:flex flex-wrap items-center justify-center gap-4 lg:gap-6">
             <div className="flex items-center gap-2 rounded-full border border-slate-700/80 bg-slate-900/80 px-3 py-2">
               <span className="text-xs uppercase tracking-[0.22em] text-slate-400">
                 Seed
@@ -4214,9 +4295,9 @@ export default function DigitalDNAHub({
                     >
                       <polygon
                         points={`${TRIANGLE_VERTICES.top.x},${TRIANGLE_VERTICES.top.y} ${TRIANGLE_VERTICES.left.x},${TRIANGLE_VERTICES.left.y} ${TRIANGLE_VERTICES.right.x},${TRIANGLE_VERTICES.right.y}`}
-                        fill="rgba(15,23,42,0.8)"
-                        stroke="rgba(255,255,255,0.08)"
-                        strokeWidth="2"
+                        fill="rgba(15,23,42,0.5)"
+                        stroke="rgba(148,163,184,0.4)"
+                        strokeWidth="3"
                       />
                       <line
                         x1={TRIANGLE_VERTICES.top.x}
@@ -4542,9 +4623,9 @@ export default function DigitalDNAHub({
                           const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2;
                           return `${PENTAGON_CENTER.x + PENTAGON_RADIUS * Math.cos(angle)},${PENTAGON_CENTER.y + PENTAGON_RADIUS * Math.sin(angle)}`;
                         }).join(" ")}
-                        fill="rgba(15,23,42,0.8)"
-                        stroke="rgba(255,255,255,0.08)"
-                        strokeWidth="2"
+                        fill="rgba(15,23,42,0.5)"
+                        stroke="rgba(148,163,184,0.4)"
+                        strokeWidth="3"
                       />
                       {Array.from({ length: 5 }, (_, i) => {
                         const a1 = (i * 2 * Math.PI) / 5 - Math.PI / 2;
@@ -4820,9 +4901,9 @@ export default function DigitalDNAHub({
                           const angle = (i * 2 * Math.PI) / 6;
                           return `${HEXAGON_CENTER.x + HEXAGON_RADIUS * Math.cos(angle)},${HEXAGON_CENTER.y + HEXAGON_RADIUS * Math.sin(angle)}`;
                         }).join(" ")}
-                        fill="rgba(15,23,42,0.8)"
-                        stroke="rgba(255,255,255,0.08)"
-                        strokeWidth="2"
+                        fill="rgba(15,23,42,0.5)"
+                        stroke="rgba(148,163,184,0.4)"
+                        strokeWidth="3"
                       />
                       {Array.from({ length: 6 }, (_, i) => {
                         const a1 = (i * 2 * Math.PI) / 6;
@@ -5098,9 +5179,9 @@ export default function DigitalDNAHub({
                           const angle = (i * 2 * Math.PI) / 10;
                           return `${DECAGON_CENTER.x + DECAGON_RADIUS * Math.cos(angle)},${DECAGON_CENTER.y + DECAGON_RADIUS * Math.sin(angle)}`;
                         }).join(" ")}
-                        fill="rgba(15,23,42,0.8)"
-                        stroke="rgba(255,255,255,0.08)"
-                        strokeWidth="2"
+                        fill="rgba(15,23,42,0.5)"
+                        stroke="rgba(148,163,184,0.4)"
+                        strokeWidth="3"
                       />
                       {Array.from({ length: 10 }, (_, i) => {
                         const a1 = (i * 2 * Math.PI) / 10;
@@ -5375,10 +5456,10 @@ export default function DigitalDNAHub({
                         cx={CIRCLE_CENTER.x}
                         cy={CIRCLE_CENTER.y}
                         r={CIRCLE_RADIUS}
-                        fill="rgba(15,23,42,0.8)"
+                        fill="rgba(15,23,42,0.5)"
                         stroke={CIRCLE_COLOR}
                         strokeWidth="10"
-                        opacity="0.82"
+                        opacity="0.9"
                       />
 
                       {circleTracePolyline && (
