@@ -56,7 +56,18 @@
       "Bash(node -e \":*)",
       "Bash(NEXT_PUBLIC_APP_PROFILE=core npx next build)",
       "Bash(ls -la .env*)",
-      "Bash(curl -s http://localhost:3000/lineage-demo)"
+      "Bash(curl -s http://localhost:3000/lineage-demo)",
+      "Bash(Remove-Item -Recurse -Force \"C:\\\\Users\\\\Tom\\\\OneDrive\\\\Desktop\\\\bss-main\\\\bss\\\\.next\" -ErrorAction SilentlyContinue)",
+      "Bash(Write-Host \"Cache cleared\")",
+      "Bash(xxd \"C:/Users/Tom/OneDrive/Desktop/bss-main/bss/src/app/ClientBody.tsx\")",
+      "Bash(node -e \"const p = require\\(''./package.json''\\); console.log\\(''next:'', p.dependencies?.next || p.devDependencies?.next\\); console.log\\(''scripts.dev:'', p.scripts?.dev\\);\")",
+      "Bash(rm -rf .next)",
+      "Bash(node_modules/.bin/next build:*)",
+      "Bash(grep -r \"isSchoolPath\\\\|effectiveSchoolsMode\" C:/Users/Tom/OneDrive/Desktop/bss-main/bss/.next/ --include=*.js -l)",
+      "Bash(grep -r \"MetaPet Schools\\\\|Meta-Pet\" C:/Users/Tom/OneDrive/Desktop/bss-main/bss/.next/server/app/ --include=*.html -l)",
+      "Bash(grep -r \"school-game\\\\|/schools\" C:/Users/Tom/OneDrive/Desktop/bss-main/bss/.next/static/chunks/ --include=*.js -l)",
+      "Bash(find /c/Users/Tom/AppData/ -name *.js -newer /c/Users/Tom/OneDrive/Desktop/bss-main/bss/src/app/ClientBody.tsx)",
+      "Bash(grep -r isChildSafeAllowedPathname /c/Users/Tom/OneDrive/Desktop/bss-main/bss/.next/ --include=*.js -l)"
     ]
   }
 }

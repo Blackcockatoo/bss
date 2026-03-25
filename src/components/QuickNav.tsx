@@ -80,15 +80,33 @@ export function QuickNav() {
     };
   }, []);
 
-  const showInstall = useMemo(() => installPrompt !== null, [installPrompt]);
-  const visibleNavItems = useMemo(
+  const isSchoolPath = useMemo(
     () =>
-      (ENABLE_CHILD_SAFE_BASELINE || IS_SCHOOLS_PROFILE)
-        ? (IS_SCHOOLS_PROFILE ? SCHOOLS_QUICK_NAV_ITEMS : CORE_QUICK_NAV_ITEMS)
-            .filter((item) => CHILD_SAFE_NAV_ROUTES.has(item.href))
-        : CORE_QUICK_NAV_ITEMS,
-    [],
+      !!pathname &&
+      (pathname === "/school-game" ||
+        pathname === "/schools" ||
+        pathname.startsWith("/schools/")),
+    [pathname],
   );
+  const effectiveSchoolsMode = IS_SCHOOLS_PROFILE || isSchoolPath;
+
+  const showInstall = useMemo(() => installPrompt !== null, [installPrompt]);
+  const visibleNavItems = useMemo(() => {
+    if (effectiveSchoolsMode) {
+      if (ENABLE_CHILD_SAFE_BASELINE || IS_SCHOOLS_PROFILE) {
+        return SCHOOLS_QUICK_NAV_ITEMS.filter((item) =>
+          CHILD_SAFE_NAV_ROUTES.has(item.href),
+        );
+      }
+      return SCHOOLS_QUICK_NAV_ITEMS;
+    }
+    if (ENABLE_CHILD_SAFE_BASELINE) {
+      return CORE_QUICK_NAV_ITEMS.filter((item) =>
+        CHILD_SAFE_NAV_ROUTES.has(item.href),
+      );
+    }
+    return CORE_QUICK_NAV_ITEMS;
+  }, [effectiveSchoolsMode]);
 
   const handleInstall = useCallback(async () => {
     if (!installPrompt) {
@@ -109,21 +127,21 @@ export function QuickNav() {
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4">
       <div className="max-w-lg mx-auto">
-        <div className={`pointer-events-auto flex items-center justify-between rounded-2xl border px-1.5 py-1.5 backdrop-blur-lg sm:px-2 sm:py-2 ${IS_SCHOOLS_PROFILE ? "border-border bg-background/95 shadow-lg shadow-black/5" : "border-slate-700/70 bg-slate-950/90 shadow-lg shadow-slate-950/60"}`}>
+        <div className={`pointer-events-auto flex items-center justify-between rounded-2xl border px-1.5 py-1.5 backdrop-blur-lg sm:px-2 sm:py-2 ${effectiveSchoolsMode ? "border-border bg-background/95 shadow-lg shadow-black/5" : "border-slate-700/70 bg-slate-950/90 shadow-lg shadow-slate-950/60"}`}>
           {/* Back button */}
           <Button
             type="button"
             variant="ghost"
             size="icon"
             onClick={handleBack}
-            className={`h-11 w-11 rounded-xl touch-manipulation sm:h-12 sm:w-12 ${IS_SCHOOLS_PROFILE ? "text-muted-foreground hover:bg-secondary hover:text-foreground" : "text-slate-400 hover:bg-slate-800/80 hover:text-white"}`}
+            className={`h-11 w-11 rounded-xl touch-manipulation sm:h-12 sm:w-12 ${effectiveSchoolsMode ? "text-muted-foreground hover:bg-secondary hover:text-foreground" : "text-slate-400 hover:bg-slate-800/80 hover:text-white"}`}
             aria-label="Go back"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
 
           {/* Divider */}
-          <div className={`h-8 w-px ${IS_SCHOOLS_PROFILE ? "bg-border" : "bg-slate-700/50"}`} />
+          <div className={`h-8 w-px ${effectiveSchoolsMode ? "bg-border" : "bg-slate-700/50"}`} />
 
           {/* Nav Items */}
           <div className="flex flex-1 items-center justify-around gap-1">
@@ -145,7 +163,7 @@ export function QuickNav() {
                       touch-manipulation
                       sm:min-w-[52px] sm:h-12 sm:px-2
                       ${
-                        IS_SCHOOLS_PROFILE
+                        effectiveSchoolsMode
                           ? isActive
                             ? "bg-emerald-50 text-emerald-700"
                             : "text-muted-foreground hover:bg-secondary hover:text-foreground active:scale-95"

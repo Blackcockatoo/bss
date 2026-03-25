@@ -23,6 +23,15 @@ export default function ClientBody({
   const pathname = usePathname();
   const router = useRouter();
   const [privacyOpen, setPrivacyOpen] = useState(false);
+  const isSchoolPath = useMemo(
+    () =>
+      !!pathname &&
+      (pathname === "/school-game" ||
+        pathname === "/schools" ||
+        pathname.startsWith("/schools/")),
+    [pathname],
+  );
+  const effectiveSchoolsMode = IS_SCHOOLS_PROFILE || isSchoolPath;
   const childSafeBlocked = useMemo(
     () =>
       (ENABLE_CHILD_SAFE_BASELINE || IS_SCHOOLS_PROFILE) &&
@@ -76,22 +85,22 @@ export default function ClientBody({
 
   return (
     <div className="antialiased flex min-h-screen flex-col pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]">
-      <div className={`sticky top-0 z-40 border-b px-3 py-2 backdrop-blur sm:px-4 sm:py-3 ${IS_SCHOOLS_PROFILE ? "border-border bg-background/95" : "border-slate-800 bg-slate-950/90"}`}>
+      <div className={`sticky top-0 z-40 border-b px-3 py-2 backdrop-blur sm:px-4 sm:py-3 ${effectiveSchoolsMode ? "border-border bg-background/95" : "border-slate-800 bg-slate-950/90"}`}>
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 sm:gap-3">
-          <div className={`text-sm ${IS_SCHOOLS_PROFILE ? "text-foreground font-medium" : "text-zinc-200"}`}>
-            {IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Meta-Pet"}
+          <div className={`text-sm ${effectiveSchoolsMode ? "text-foreground font-medium" : "text-zinc-200"}`}>
+            {effectiveSchoolsMode ? "MetaPet Schools" : "Meta-Pet"}
           </div>
           <button
             type="button"
             onClick={() => setPrivacyOpen((current) => !current)}
-            className={`min-h-9 rounded-full border px-3 py-1 text-xs transition-colors ${IS_SCHOOLS_PROFILE ? "border-emerald-600/30 bg-emerald-50 text-emerald-700 hover:border-emerald-600/50 hover:bg-emerald-100" : "border-emerald-400/25 bg-emerald-500/10 text-emerald-200 hover:border-emerald-300/45 hover:bg-emerald-500/15"}`}
+            className={`min-h-9 rounded-full border px-3 py-1 text-xs transition-colors ${effectiveSchoolsMode ? "border-emerald-600/30 bg-emerald-50 text-emerald-700 hover:border-emerald-600/50 hover:bg-emerald-100" : "border-emerald-400/25 bg-emerald-500/10 text-emerald-200 hover:border-emerald-300/45 hover:bg-emerald-500/15"}`}
             aria-expanded={privacyOpen}
           >
             Local-first / child-safe
           </button>
         </div>
         {privacyOpen && (
-          <div className={`mx-auto mt-3 w-full max-w-6xl rounded-2xl border p-3 text-xs leading-5 sm:leading-6 ${IS_SCHOOLS_PROFILE ? "border-border bg-card text-muted-foreground" : "border-slate-800 bg-slate-900/60 text-zinc-300"}`}>
+          <div className={`mx-auto mt-3 w-full max-w-6xl rounded-2xl border p-3 text-xs leading-5 sm:leading-6 ${effectiveSchoolsMode ? "border-border bg-card text-muted-foreground" : "border-slate-800 bg-slate-900/60 text-zinc-300"}`}>
             Default school use is local-first, alias-based, and teacher-led.
             Student accounts, public sharing, and retention-style mechanics stay
             out of the school deployment. Classroom records remain on this
@@ -100,7 +109,7 @@ export default function ClientBody({
             {SCHOOLS_LOCAL_DATA_RETENTION_DAYS} days without use.
           </div>
         )}
-        {!IS_SCHOOLS_PROFILE && <JourneyProgressStrip />}
+        {!effectiveSchoolsMode && <JourneyProgressStrip />}
       </div>
 
       <div className="flex-1 pb-2">{children}</div>
