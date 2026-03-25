@@ -19,6 +19,7 @@ const SCHOOLS_ALLOWED_EXACT = new Set([
   "/",
   "/schools",
   "/schools/safeguarding",
+  "/schools/parents",
   "/school-game",
   "/legal",
   "/legal/privacy",

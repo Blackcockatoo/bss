@@ -9,7 +9,7 @@ import ClientBody from "./ClientBody";
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#040810",
+  themeColor: IS_SCHOOLS_PROFILE ? "#f5f7fa" : "#040810",
   viewportFit: "cover",
 };
 
@@ -64,7 +64,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className="font-sans dark"
+      className={IS_SCHOOLS_PROFILE ? "font-sans schools-theme" : "font-sans dark"}
       style={
         {
           "--font-outfit":

@@ -166,13 +166,29 @@ export const FOCUS_AREA_LABELS: Record<FocusArea, string> = {
   collaboration: "Work Together",
 };
 
-/** DNA mode labels for the teacher dropdown */
+/**
+ * Consumer-only DNA mode labels with lore-style names.
+ * **Do not use in school-facing components** — use
+ * {@link SCHOOLS_ACTIVITY_MODE_LABELS} instead.
+ */
 export const DNA_MODE_LABELS: Record<Exclude<DnaMode, null>, string> = {
   spiral: "DNA Helix Spiral",
   mandala: "Sacred Mandala",
   particles: "Particle Field",
   sound: "Sound Temple",
   journey: "Guided Journey",
+};
+
+/** Plain-language activity mode labels for school-facing components. */
+export const SCHOOLS_ACTIVITY_MODE_LABELS: Record<
+  Exclude<DnaMode, null>,
+  string
+> = {
+  spiral: "Pattern spiral",
+  mandala: "Shape studio",
+  particles: "Response field",
+  sound: "Sound lab",
+  journey: "Guided walkthrough",
 };
 
 /** Learning symbols kids can recognize */

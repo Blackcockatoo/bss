@@ -46,7 +46,7 @@ export default function SchoolsPage() {
   const docsBySlug = new Map(schoolPackageDocs.map((doc) => [doc.slug, doc]));
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100">
+    <main className="min-h-screen bg-background text-foreground">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 py-12 md:gap-14 md:py-16">
         <header className="rounded-3xl border border-amber-300/20 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 p-6 shadow-[0_0_0_1px_rgba(251,191,36,0.05)] md:p-8">
           <div className="space-y-5">
@@ -136,6 +136,12 @@ export default function SchoolsPage() {
               <p className="mt-2 text-sm leading-6 text-slate-300">
                 No accounts, no personal data, no social features. Students use aliases. All data stays on the school device and can be deleted at any time.
               </p>
+              <Link
+                href="/schools/parents"
+                className="mt-3 inline-block rounded-full border border-emerald-400/30 px-3 py-1.5 text-xs font-medium text-emerald-200 hover:border-emerald-300/50"
+              >
+                Read the full parent information page
+              </Link>
             </div>
           </div>
         </section>

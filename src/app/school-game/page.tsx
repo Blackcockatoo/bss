@@ -32,7 +32,7 @@ export default function SchoolGamePage() {
   enforceChildSafeServerRoute("/school-game");
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100">
+    <main className="min-h-screen bg-background text-foreground">
       <TeacherOnboarding />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-12 md:gap-10 md:py-16">
         <header className="rounded-3xl border border-amber-300/20 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 p-6 shadow-[0_0_0_1px_rgba(251,191,36,0.05)] md:p-8">
@@ -77,6 +77,12 @@ export default function SchoolGamePage() {
                 href="/legal/privacy"
               >
                 Privacy materials
+              </Link>
+              <Link
+                className="rounded-full border border-slate-700 px-5 py-2 text-sm font-semibold text-slate-100"
+                href="/schools/parents"
+              >
+                Parent information
               </Link>
             </div>
           </div>

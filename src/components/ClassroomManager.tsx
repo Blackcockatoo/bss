@@ -15,6 +15,7 @@ import type {
   EngagementCategory,
   FocusArea,
 } from "@/lib/education";
+import { SCHOOLS_ACTIVITY_MODE_LABELS } from "@/lib/education/types";
 import {
   SCHOOLS_CLASSROOM_ANALYTICS_STORAGE_KEY,
   SCHOOLS_CLASSROOM_ASSIGNMENTS_STORAGE_KEY,
@@ -104,13 +105,6 @@ const ENGAGEMENT_CATEGORY_BADGE_CLASSNAMES: Record<
     "border-slate-400/30 bg-slate-500/10 text-slate-200",
 };
 
-const SCHOOLS_ACTIVITY_MODE_LABELS: Record<Exclude<DnaMode, null>, string> = {
-  spiral: "Pattern spiral",
-  mandala: "Shape studio",
-  particles: "Response field",
-  sound: "Sound lab",
-  journey: "Guided walkthrough",
-};
 
 function getEngagementCategoryBadgeClassName(
   category: string | null | undefined,

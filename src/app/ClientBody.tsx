@@ -60,12 +60,12 @@ export default function ClientBody({
 
   if (childSafeBlocked) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-4 text-center text-zinc-200">
+      <div className="flex min-h-screen items-center justify-center px-4 text-center text-foreground">
         <div className="max-w-md space-y-3">
-          <p className="text-sm font-semibold text-emerald-300">
+          <p className="text-sm font-semibold text-primary">
             MetaPet Schools is active.
           </p>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-muted-foreground">
             This route is outside the school-safe deployment and is redirecting
             to the classroom surface.
           </p>
@@ -76,22 +76,22 @@ export default function ClientBody({
 
   return (
     <div className="antialiased flex min-h-screen flex-col pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]">
-      <div className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/90 px-3 py-2 backdrop-blur sm:px-4 sm:py-3">
+      <div className={`sticky top-0 z-40 border-b px-3 py-2 backdrop-blur sm:px-4 sm:py-3 ${IS_SCHOOLS_PROFILE ? "border-border bg-background/95" : "border-slate-800 bg-slate-950/90"}`}>
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 sm:gap-3">
-          <div className="text-sm text-zinc-200">
+          <div className={`text-sm ${IS_SCHOOLS_PROFILE ? "text-foreground font-medium" : "text-zinc-200"}`}>
             {IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Meta-Pet"}
           </div>
           <button
             type="button"
             onClick={() => setPrivacyOpen((current) => !current)}
-            className="min-h-9 rounded-full border border-emerald-400/25 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-200 transition-colors hover:border-emerald-300/45 hover:bg-emerald-500/15"
+            className={`min-h-9 rounded-full border px-3 py-1 text-xs transition-colors ${IS_SCHOOLS_PROFILE ? "border-emerald-600/30 bg-emerald-50 text-emerald-700 hover:border-emerald-600/50 hover:bg-emerald-100" : "border-emerald-400/25 bg-emerald-500/10 text-emerald-200 hover:border-emerald-300/45 hover:bg-emerald-500/15"}`}
             aria-expanded={privacyOpen}
           >
             Local-first / child-safe
           </button>
         </div>
         {privacyOpen && (
-          <div className="mx-auto mt-3 w-full max-w-6xl rounded-2xl border border-slate-800 bg-slate-900/60 p-3 text-xs leading-5 text-zinc-300 sm:leading-6">
+          <div className={`mx-auto mt-3 w-full max-w-6xl rounded-2xl border p-3 text-xs leading-5 sm:leading-6 ${IS_SCHOOLS_PROFILE ? "border-border bg-card text-muted-foreground" : "border-slate-800 bg-slate-900/60 text-zinc-300"}`}>
             Default school use is local-first, alias-based, and teacher-led.
             Student accounts, public sharing, and retention-style mechanics stay
             out of the school deployment. Classroom records remain on this
