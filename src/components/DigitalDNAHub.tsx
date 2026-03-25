@@ -498,7 +498,7 @@ export default function DigitalDNAHub({
     SavedToolkitPreset[]
   >([]);
   const [toolkitHydrated, setToolkitHydrated] = useState(false);
-  const [soundSource, setSoundSource] = useState<"toolkit" | "triangle">(
+  const [soundSource, setSoundSource] = useState<"toolkit" | "triangle" | "pentagon" | "hexagon" | "decagon" | "circle">(
     "toolkit",
   );
   // Triangle state
@@ -1179,15 +1179,157 @@ export default function DigitalDNAHub({
         .join(" "),
     [triangleSteps, triangleTrace],
   );
+
+  // Pentagon computed memos
+  const pentagonSteps = useMemo(
+    () =>
+      PENTAGON_PERIMETER_STEPS.map((step, index) => ({
+        ...step,
+        digit: trianglePerimeterDigits[index] ?? 0,
+        note: digitToNote(trianglePerimeterDigits[index] ?? 0),
+        color: digitToLearningColor(trianglePerimeterDigits[index] ?? 0),
+      })),
+    [trianglePerimeterDigits],
+  );
+  const pentagonTraceDigits = useMemo(
+    () =>
+      pentagonTrace
+        .map((stepIndex) => pentagonSteps[stepIndex]?.digit)
+        .filter((digit): digit is number => typeof digit === "number"),
+    [pentagonSteps, pentagonTrace],
+  );
+  const pentagonTraceStepSet = useMemo(
+    () => new Set(pentagonTrace),
+    [pentagonTrace],
+  );
+  const pentagonTracePolyline = useMemo(
+    () =>
+      pentagonTrace
+        .map((stepIndex) => pentagonSteps[stepIndex])
+        .filter(Boolean)
+        .map((step) => `${step.x},${step.y}`)
+        .join(" "),
+    [pentagonSteps, pentagonTrace],
+  );
+
+  // Hexagon computed memos
+  const hexagonSteps = useMemo(
+    () =>
+      HEXAGON_PERIMETER_STEPS.map((step, index) => ({
+        ...step,
+        digit: trianglePerimeterDigits[index] ?? 0,
+        note: digitToNote(trianglePerimeterDigits[index] ?? 0),
+        color: digitToLearningColor(trianglePerimeterDigits[index] ?? 0),
+      })),
+    [trianglePerimeterDigits],
+  );
+  const hexagonTraceDigits = useMemo(
+    () =>
+      hexagonTrace
+        .map((stepIndex) => hexagonSteps[stepIndex]?.digit)
+        .filter((digit): digit is number => typeof digit === "number"),
+    [hexagonSteps, hexagonTrace],
+  );
+  const hexagonTraceStepSet = useMemo(
+    () => new Set(hexagonTrace),
+    [hexagonTrace],
+  );
+  const hexagonTracePolyline = useMemo(
+    () =>
+      hexagonTrace
+        .map((stepIndex) => hexagonSteps[stepIndex])
+        .filter(Boolean)
+        .map((step) => `${step.x},${step.y}`)
+        .join(" "),
+    [hexagonSteps, hexagonTrace],
+  );
+
+  // Decagon computed memos
+  const decagonSteps = useMemo(
+    () =>
+      DECAGON_PERIMETER_STEPS.map((step, index) => ({
+        ...step,
+        digit: trianglePerimeterDigits[index] ?? 0,
+        note: digitToNote(trianglePerimeterDigits[index] ?? 0),
+        color: digitToLearningColor(trianglePerimeterDigits[index] ?? 0),
+      })),
+    [trianglePerimeterDigits],
+  );
+  const decagonTraceDigits = useMemo(
+    () =>
+      decagonTrace
+        .map((stepIndex) => decagonSteps[stepIndex]?.digit)
+        .filter((digit): digit is number => typeof digit === "number"),
+    [decagonSteps, decagonTrace],
+  );
+  const decagonTraceStepSet = useMemo(
+    () => new Set(decagonTrace),
+    [decagonTrace],
+  );
+  const decagonTracePolyline = useMemo(
+    () =>
+      decagonTrace
+        .map((stepIndex) => decagonSteps[stepIndex])
+        .filter(Boolean)
+        .map((step) => `${step.x},${step.y}`)
+        .join(" "),
+    [decagonSteps, decagonTrace],
+  );
+
+  // Circle computed memos
+  const circleSteps = useMemo(
+    () =>
+      CIRCLE_PERIMETER_STEPS.map((step, index) => ({
+        ...step,
+        digit: trianglePerimeterDigits[index] ?? 0,
+        note: digitToNote(trianglePerimeterDigits[index] ?? 0),
+        color: digitToLearningColor(trianglePerimeterDigits[index] ?? 0),
+      })),
+    [trianglePerimeterDigits],
+  );
+  const circleTraceDigits = useMemo(
+    () =>
+      circleTrace
+        .map((stepIndex) => circleSteps[stepIndex]?.digit)
+        .filter((digit): digit is number => typeof digit === "number"),
+    [circleSteps, circleTrace],
+  );
+  const circleTraceStepSet = useMemo(
+    () => new Set(circleTrace),
+    [circleTrace],
+  );
+  const circleTracePolyline = useMemo(
+    () =>
+      circleTrace
+        .map((stepIndex) => circleSteps[stepIndex])
+        .filter(Boolean)
+        .map((step) => `${step.x},${step.y}`)
+        .join(" "),
+    [circleSteps, circleTrace],
+  );
+
   const toolkitSoundSequence = transformedWindow.length
     ? transformedWindow
     : sequence.slice(0, 60);
   const soundLabSequence =
     soundSource === "triangle" && triangleTraceDigits.length
       ? triangleTraceDigits
-      : toolkitSoundSequence;
+      : soundSource === "pentagon" && pentagonTraceDigits.length
+        ? pentagonTraceDigits
+        : soundSource === "hexagon" && hexagonTraceDigits.length
+          ? hexagonTraceDigits
+          : soundSource === "decagon" && decagonTraceDigits.length
+            ? decagonTraceDigits
+            : soundSource === "circle" && circleTraceDigits.length
+              ? circleTraceDigits
+              : toolkitSoundSequence;
   const soundSourceLabel =
-    soundSource === "triangle" ? "Triangle Trace" : "Toolkit Phrase";
+    soundSource === "triangle" ? "Triangle Trace"
+    : soundSource === "pentagon" ? "Pentagon Trace"
+    : soundSource === "hexagon" ? "Hexagon Trace"
+    : soundSource === "decagon" ? "Decagon Trace"
+    : soundSource === "circle" ? "Circle Trace"
+    : "Toolkit Phrase";
   const recommendedModeId = webglSupport.supported ? "spiral" : "journey";
   const noteBoardDigits = useMemo(
     () => noteBoard.filter((digit): digit is number => digit !== null),
@@ -1610,17 +1752,6 @@ export default function DigitalDNAHub({
   }, [registerInteraction]);
 
   // Pentagon handlers
-  const pentagonSteps = useMemo(
-    () =>
-      PENTAGON_PERIMETER_STEPS.map((step, index) => ({
-        ...step,
-        digit: trianglePerimeterDigits[index] ?? 0,
-        note: digitToNote(trianglePerimeterDigits[index] ?? 0),
-        color: digitToLearningColor(trianglePerimeterDigits[index] ?? 0),
-      })),
-    [trianglePerimeterDigits],
-  );
-
   const startPentagonTrace = useCallback(
     (stepIndex: number) => {
       const step = pentagonSteps[stepIndex];
@@ -1669,17 +1800,6 @@ export default function DigitalDNAHub({
   }, [registerInteraction]);
 
   // Hexagon handlers
-  const hexagonSteps = useMemo(
-    () =>
-      HEXAGON_PERIMETER_STEPS.map((step, index) => ({
-        ...step,
-        digit: trianglePerimeterDigits[index] ?? 0,
-        note: digitToNote(trianglePerimeterDigits[index] ?? 0),
-        color: digitToLearningColor(trianglePerimeterDigits[index] ?? 0),
-      })),
-    [trianglePerimeterDigits],
-  );
-
   const startHexagonTrace = useCallback(
     (stepIndex: number) => {
       const step = hexagonSteps[stepIndex];
@@ -1728,17 +1848,6 @@ export default function DigitalDNAHub({
   }, [registerInteraction]);
 
   // Decagon handlers
-  const decagonSteps = useMemo(
-    () =>
-      DECAGON_PERIMETER_STEPS.map((step, index) => ({
-        ...step,
-        digit: trianglePerimeterDigits[index] ?? 0,
-        note: digitToNote(trianglePerimeterDigits[index] ?? 0),
-        color: digitToLearningColor(trianglePerimeterDigits[index] ?? 0),
-      })),
-    [trianglePerimeterDigits],
-  );
-
   const startDecagonTrace = useCallback(
     (stepIndex: number) => {
       const step = decagonSteps[stepIndex];
@@ -1787,17 +1896,6 @@ export default function DigitalDNAHub({
   }, [registerInteraction]);
 
   // Circle handlers
-  const circleSteps = useMemo(
-    () =>
-      CIRCLE_PERIMETER_STEPS.map((step, index) => ({
-        ...step,
-        digit: trianglePerimeterDigits[index] ?? 0,
-        note: digitToNote(trianglePerimeterDigits[index] ?? 0),
-        color: digitToLearningColor(trianglePerimeterDigits[index] ?? 0),
-      })),
-    [trianglePerimeterDigits],
-  );
-
   const startCircleTrace = useCallback(
     (stepIndex: number) => {
       const step = circleSteps[stepIndex];
@@ -3975,6 +4073,17 @@ export default function DigitalDNAHub({
                       style={{ touchAction: "none" }}
                       onPointerLeave={() => setTriangleHoveredStep(null)}
                       onPointerUp={() => setIsTriangleTracing(false)}
+                      onPointerCancel={() => setIsTriangleTracing(false)}
+                      onPointerMove={(e) => {
+                        const el = document.elementFromPoint(e.clientX, e.clientY);
+                        const g = el?.closest?.("[data-step]") ?? (el instanceof Element ? el : null);
+                        const stepAttr = g?.getAttribute("data-step");
+                        if (stepAttr != null) {
+                          const idx = Number(stepAttr);
+                          setTriangleHoveredStep(idx);
+                          extendTriangleTrace(idx);
+                        }
+                      }}
                     >
                       <polygon
                         points={`${TRIANGLE_VERTICES.top.x},${TRIANGLE_VERTICES.top.y} ${TRIANGLE_VERTICES.left.x},${TRIANGLE_VERTICES.left.y} ${TRIANGLE_VERTICES.right.x},${TRIANGLE_VERTICES.right.y}`}
@@ -4086,6 +4195,7 @@ export default function DigitalDNAHub({
                         return (
                           <g
                             key={`triangle-step-${step.index}`}
+                            data-step={step.index}
                             className="cursor-pointer"
                             onPointerDown={(event) => {
                               event.preventDefault();
@@ -4281,16 +4391,91 @@ export default function DigitalDNAHub({
                       style={{ touchAction: "none" }}
                       onPointerLeave={() => setPentagonHoveredStep(null)}
                       onPointerUp={() => setIsPentagonTracing(false)}
+                      onPointerCancel={() => setIsPentagonTracing(false)}
+                      onPointerMove={(e) => {
+                        const el = document.elementFromPoint(e.clientX, e.clientY);
+                        const g = el?.closest?.("[data-step]") ?? (el instanceof Element ? el : null);
+                        const stepAttr = g?.getAttribute("data-step");
+                        if (stepAttr != null) {
+                          const idx = Number(stepAttr);
+                          setPentagonHoveredStep(idx);
+                          extendPentagonTrace(idx);
+                        }
+                      }}
                     >
+                      <polygon
+                        points={Array.from({ length: 5 }, (_, i) => {
+                          const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+                          return `${PENTAGON_CENTER.x + PENTAGON_RADIUS * Math.cos(angle)},${PENTAGON_CENTER.y + PENTAGON_RADIUS * Math.sin(angle)}`;
+                        }).join(" ")}
+                        fill="rgba(15,23,42,0.8)"
+                        stroke="rgba(255,255,255,0.08)"
+                        strokeWidth="2"
+                      />
+                      {Array.from({ length: 5 }, (_, i) => {
+                        const a1 = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+                        const a2 = (((i + 1) % 5) * 2 * Math.PI) / 5 - Math.PI / 2;
+                        return (
+                          <line
+                            key={`pent-side-${i}`}
+                            x1={PENTAGON_CENTER.x + PENTAGON_RADIUS * Math.cos(a1)}
+                            y1={PENTAGON_CENTER.y + PENTAGON_RADIUS * Math.sin(a1)}
+                            x2={PENTAGON_CENTER.x + PENTAGON_RADIUS * Math.cos(a2)}
+                            y2={PENTAGON_CENTER.y + PENTAGON_RADIUS * Math.sin(a2)}
+                            stroke={PENTAGON_COLORS[i]}
+                            strokeWidth="10"
+                            strokeLinecap="round"
+                            opacity="0.82"
+                          />
+                        );
+                      })}
+
+                      {pentagonTracePolyline && (
+                        <polyline
+                          points={pentagonTracePolyline}
+                          fill="none"
+                          stroke="#F8FAFC"
+                          strokeWidth="5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          opacity="0.95"
+                        />
+                      )}
+
+                      {Array.from({ length: 5 }, (_, i) => {
+                        const a1 = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+                        const a2 = (((i + 1) % 5) * 2 * Math.PI) / 5 - Math.PI / 2;
+                        const mx = (Math.cos(a1) + Math.cos(a2)) / 2;
+                        const my = (Math.sin(a1) + Math.sin(a2)) / 2;
+                        const len = Math.sqrt(mx * mx + my * my);
+                        const labelX = PENTAGON_CENTER.x + (PENTAGON_RADIUS + 30) * (mx / len);
+                        const labelY = PENTAGON_CENTER.y + (PENTAGON_RADIUS + 30) * (my / len);
+                        return (
+                          <text
+                            key={`pent-label-${i}`}
+                            x={labelX}
+                            y={labelY}
+                            fill={PENTAGON_COLORS[i]}
+                            fontSize="18"
+                            fontWeight="700"
+                            textAnchor="middle"
+                            dominantBaseline="central"
+                          >
+                            12
+                          </text>
+                        );
+                      })}
+
                       {pentagonSteps.map((step) => {
                         const isHovered = pentagonHoveredStep === step.index;
                         const isActive = pentagonActiveStep === step.index;
-                        const isTraced = pentagonTrace.includes(step.index);
+                        const isTraced = pentagonTraceStepSet.has(step.index);
                         const radius = isActive ? 13 : isHovered ? 12 : isTraced ? 11 : 9.5;
 
                         return (
                           <g
                             key={`pentagon-step-${step.index}`}
+                            data-step={step.index}
                             className="cursor-pointer"
                             onPointerDown={(event) => {
                               event.preventDefault();
@@ -4342,17 +4527,92 @@ export default function DigitalDNAHub({
                     <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-300/80">
                       Pentagon phrase
                     </p>
+                    <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                      <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-3">
+                        <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
+                          Perimeter
+                        </div>
+                        <div className="mt-1 text-2xl font-bold text-white">
+                          60
+                        </div>
+                      </div>
+                      <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-3">
+                        <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
+                          Trace
+                        </div>
+                        <div className="mt-1 text-2xl font-bold text-white">
+                          {pentagonTraceDigits.length}
+                        </div>
+                      </div>
+                    </div>
                     <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/80 p-3">
                       <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
                         Active phrase
                       </div>
                       <p className="mt-2 min-h-[3rem] font-mono text-xs leading-6 text-cyan-200">
-                        {pentagonTrace.length ? pentagonTrace.map(i => pentagonSteps[i]?.digit).join(" · ") : "Trace the pentagon to capture a phrase."}
+                        {pentagonTraceDigits.length
+                          ? pentagonTraceDigits.join(" · ")
+                          : "Trace the edge to capture a phrase."}
                       </p>
                     </div>
                   </div>
 
                   <div className="grid gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void playCustomSequence(trianglePerimeterDigits)
+                      }
+                      disabled={isPlaying}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        isPlaying
+                          ? "bg-slate-800 text-slate-500"
+                          : "bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 hover:brightness-110"
+                      }`}
+                    >
+                      {isPlaying ? "Playing..." : "Play perimeter"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void playCustomSequence(pentagonTraceDigits)
+                      }
+                      disabled={isPlaying || pentagonTraceDigits.length === 0}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        isPlaying || pentagonTraceDigits.length === 0
+                          ? "bg-slate-800 text-slate-500"
+                          : "bg-gradient-to-r from-amber-400 to-orange-400 text-slate-950 hover:brightness-110"
+                      }`}
+                    >
+                      {isPlaying ? "Playing..." : "Play traced path"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => loadNoteBoard(pentagonTraceDigits)}
+                      disabled={pentagonTraceDigits.length === 0}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        pentagonTraceDigits.length === 0
+                          ? "bg-slate-800 text-slate-500"
+                          : "border border-emerald-400/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20"
+                      }`}
+                    >
+                      Send traced path to note board
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSoundSource("pentagon");
+                        setActiveMode("sound");
+                      }}
+                      disabled={pentagonTraceDigits.length === 0}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        pentagonTraceDigits.length === 0
+                          ? "bg-slate-800 text-slate-500"
+                          : "border border-pink-500/30 bg-pink-500/10 text-pink-100 hover:bg-pink-500/20"
+                      }`}
+                    >
+                      Send traced path to Sound Lab
+                    </button>
                     <button
                       type="button"
                       onClick={clearPentagonTrace}
@@ -4402,16 +4662,91 @@ export default function DigitalDNAHub({
                       style={{ touchAction: "none" }}
                       onPointerLeave={() => setHexagonHoveredStep(null)}
                       onPointerUp={() => setIsHexagonTracing(false)}
+                      onPointerCancel={() => setIsHexagonTracing(false)}
+                      onPointerMove={(e) => {
+                        const el = document.elementFromPoint(e.clientX, e.clientY);
+                        const g = el?.closest?.("[data-step]") ?? (el instanceof Element ? el : null);
+                        const stepAttr = g?.getAttribute("data-step");
+                        if (stepAttr != null) {
+                          const idx = Number(stepAttr);
+                          setHexagonHoveredStep(idx);
+                          extendHexagonTrace(idx);
+                        }
+                      }}
                     >
+                      <polygon
+                        points={Array.from({ length: 6 }, (_, i) => {
+                          const angle = (i * 2 * Math.PI) / 6;
+                          return `${HEXAGON_CENTER.x + HEXAGON_RADIUS * Math.cos(angle)},${HEXAGON_CENTER.y + HEXAGON_RADIUS * Math.sin(angle)}`;
+                        }).join(" ")}
+                        fill="rgba(15,23,42,0.8)"
+                        stroke="rgba(255,255,255,0.08)"
+                        strokeWidth="2"
+                      />
+                      {Array.from({ length: 6 }, (_, i) => {
+                        const a1 = (i * 2 * Math.PI) / 6;
+                        const a2 = (((i + 1) % 6) * 2 * Math.PI) / 6;
+                        return (
+                          <line
+                            key={`hex-side-${i}`}
+                            x1={HEXAGON_CENTER.x + HEXAGON_RADIUS * Math.cos(a1)}
+                            y1={HEXAGON_CENTER.y + HEXAGON_RADIUS * Math.sin(a1)}
+                            x2={HEXAGON_CENTER.x + HEXAGON_RADIUS * Math.cos(a2)}
+                            y2={HEXAGON_CENTER.y + HEXAGON_RADIUS * Math.sin(a2)}
+                            stroke={HEXAGON_COLORS[i]}
+                            strokeWidth="10"
+                            strokeLinecap="round"
+                            opacity="0.82"
+                          />
+                        );
+                      })}
+
+                      {hexagonTracePolyline && (
+                        <polyline
+                          points={hexagonTracePolyline}
+                          fill="none"
+                          stroke="#F8FAFC"
+                          strokeWidth="5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          opacity="0.95"
+                        />
+                      )}
+
+                      {Array.from({ length: 6 }, (_, i) => {
+                        const a1 = (i * 2 * Math.PI) / 6;
+                        const a2 = (((i + 1) % 6) * 2 * Math.PI) / 6;
+                        const mx = (Math.cos(a1) + Math.cos(a2)) / 2;
+                        const my = (Math.sin(a1) + Math.sin(a2)) / 2;
+                        const len = Math.sqrt(mx * mx + my * my);
+                        const labelX = HEXAGON_CENTER.x + (HEXAGON_RADIUS + 30) * (mx / len);
+                        const labelY = HEXAGON_CENTER.y + (HEXAGON_RADIUS + 30) * (my / len);
+                        return (
+                          <text
+                            key={`hex-label-${i}`}
+                            x={labelX}
+                            y={labelY}
+                            fill={HEXAGON_COLORS[i]}
+                            fontSize="18"
+                            fontWeight="700"
+                            textAnchor="middle"
+                            dominantBaseline="central"
+                          >
+                            10
+                          </text>
+                        );
+                      })}
+
                       {hexagonSteps.map((step) => {
                         const isHovered = hexagonHoveredStep === step.index;
                         const isActive = hexagonActiveStep === step.index;
-                        const isTraced = hexagonTrace.includes(step.index);
+                        const isTraced = hexagonTraceStepSet.has(step.index);
                         const radius = isActive ? 13 : isHovered ? 12 : isTraced ? 11 : 9.5;
 
                         return (
                           <g
                             key={`hexagon-step-${step.index}`}
+                            data-step={step.index}
                             className="cursor-pointer"
                             onPointerDown={(event) => {
                               event.preventDefault();
@@ -4463,17 +4798,92 @@ export default function DigitalDNAHub({
                     <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-300/80">
                       Hexagon phrase
                     </p>
+                    <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                      <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-3">
+                        <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
+                          Perimeter
+                        </div>
+                        <div className="mt-1 text-2xl font-bold text-white">
+                          60
+                        </div>
+                      </div>
+                      <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-3">
+                        <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
+                          Trace
+                        </div>
+                        <div className="mt-1 text-2xl font-bold text-white">
+                          {hexagonTraceDigits.length}
+                        </div>
+                      </div>
+                    </div>
                     <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/80 p-3">
                       <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
                         Active phrase
                       </div>
                       <p className="mt-2 min-h-[3rem] font-mono text-xs leading-6 text-cyan-200">
-                        {hexagonTrace.length ? hexagonTrace.map(i => hexagonSteps[i]?.digit).join(" · ") : "Trace the hexagon to capture a phrase."}
+                        {hexagonTraceDigits.length
+                          ? hexagonTraceDigits.join(" · ")
+                          : "Trace the edge to capture a phrase."}
                       </p>
                     </div>
                   </div>
 
                   <div className="grid gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void playCustomSequence(trianglePerimeterDigits)
+                      }
+                      disabled={isPlaying}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        isPlaying
+                          ? "bg-slate-800 text-slate-500"
+                          : "bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 hover:brightness-110"
+                      }`}
+                    >
+                      {isPlaying ? "Playing..." : "Play perimeter"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void playCustomSequence(hexagonTraceDigits)
+                      }
+                      disabled={isPlaying || hexagonTraceDigits.length === 0}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        isPlaying || hexagonTraceDigits.length === 0
+                          ? "bg-slate-800 text-slate-500"
+                          : "bg-gradient-to-r from-amber-400 to-orange-400 text-slate-950 hover:brightness-110"
+                      }`}
+                    >
+                      {isPlaying ? "Playing..." : "Play traced path"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => loadNoteBoard(hexagonTraceDigits)}
+                      disabled={hexagonTraceDigits.length === 0}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        hexagonTraceDigits.length === 0
+                          ? "bg-slate-800 text-slate-500"
+                          : "border border-emerald-400/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20"
+                      }`}
+                    >
+                      Send traced path to note board
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSoundSource("hexagon");
+                        setActiveMode("sound");
+                      }}
+                      disabled={hexagonTraceDigits.length === 0}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        hexagonTraceDigits.length === 0
+                          ? "bg-slate-800 text-slate-500"
+                          : "border border-pink-500/30 bg-pink-500/10 text-pink-100 hover:bg-pink-500/20"
+                      }`}
+                    >
+                      Send traced path to Sound Lab
+                    </button>
                     <button
                       type="button"
                       onClick={clearHexagonTrace}
@@ -4523,16 +4933,91 @@ export default function DigitalDNAHub({
                       style={{ touchAction: "none" }}
                       onPointerLeave={() => setDecagonHoveredStep(null)}
                       onPointerUp={() => setIsDecagonTracing(false)}
+                      onPointerCancel={() => setIsDecagonTracing(false)}
+                      onPointerMove={(e) => {
+                        const el = document.elementFromPoint(e.clientX, e.clientY);
+                        const g = el?.closest?.("[data-step]") ?? (el instanceof Element ? el : null);
+                        const stepAttr = g?.getAttribute("data-step");
+                        if (stepAttr != null) {
+                          const idx = Number(stepAttr);
+                          setDecagonHoveredStep(idx);
+                          extendDecagonTrace(idx);
+                        }
+                      }}
                     >
+                      <polygon
+                        points={Array.from({ length: 10 }, (_, i) => {
+                          const angle = (i * 2 * Math.PI) / 10;
+                          return `${DECAGON_CENTER.x + DECAGON_RADIUS * Math.cos(angle)},${DECAGON_CENTER.y + DECAGON_RADIUS * Math.sin(angle)}`;
+                        }).join(" ")}
+                        fill="rgba(15,23,42,0.8)"
+                        stroke="rgba(255,255,255,0.08)"
+                        strokeWidth="2"
+                      />
+                      {Array.from({ length: 10 }, (_, i) => {
+                        const a1 = (i * 2 * Math.PI) / 10;
+                        const a2 = (((i + 1) % 10) * 2 * Math.PI) / 10;
+                        return (
+                          <line
+                            key={`dec-side-${i}`}
+                            x1={DECAGON_CENTER.x + DECAGON_RADIUS * Math.cos(a1)}
+                            y1={DECAGON_CENTER.y + DECAGON_RADIUS * Math.sin(a1)}
+                            x2={DECAGON_CENTER.x + DECAGON_RADIUS * Math.cos(a2)}
+                            y2={DECAGON_CENTER.y + DECAGON_RADIUS * Math.sin(a2)}
+                            stroke={DECAGON_COLORS[i]}
+                            strokeWidth="10"
+                            strokeLinecap="round"
+                            opacity="0.82"
+                          />
+                        );
+                      })}
+
+                      {decagonTracePolyline && (
+                        <polyline
+                          points={decagonTracePolyline}
+                          fill="none"
+                          stroke="#F8FAFC"
+                          strokeWidth="5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          opacity="0.95"
+                        />
+                      )}
+
+                      {Array.from({ length: 10 }, (_, i) => {
+                        const a1 = (i * 2 * Math.PI) / 10;
+                        const a2 = (((i + 1) % 10) * 2 * Math.PI) / 10;
+                        const mx = (Math.cos(a1) + Math.cos(a2)) / 2;
+                        const my = (Math.sin(a1) + Math.sin(a2)) / 2;
+                        const len = Math.sqrt(mx * mx + my * my);
+                        const labelX = DECAGON_CENTER.x + (DECAGON_RADIUS + 30) * (mx / len);
+                        const labelY = DECAGON_CENTER.y + (DECAGON_RADIUS + 30) * (my / len);
+                        return (
+                          <text
+                            key={`dec-label-${i}`}
+                            x={labelX}
+                            y={labelY}
+                            fill={DECAGON_COLORS[i]}
+                            fontSize="16"
+                            fontWeight="700"
+                            textAnchor="middle"
+                            dominantBaseline="central"
+                          >
+                            6
+                          </text>
+                        );
+                      })}
+
                       {decagonSteps.map((step) => {
                         const isHovered = decagonHoveredStep === step.index;
                         const isActive = decagonActiveStep === step.index;
-                        const isTraced = decagonTrace.includes(step.index);
+                        const isTraced = decagonTraceStepSet.has(step.index);
                         const radius = isActive ? 13 : isHovered ? 12 : isTraced ? 11 : 9.5;
 
                         return (
                           <g
                             key={`decagon-step-${step.index}`}
+                            data-step={step.index}
                             className="cursor-pointer"
                             onPointerDown={(event) => {
                               event.preventDefault();
@@ -4584,17 +5069,92 @@ export default function DigitalDNAHub({
                     <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-300/80">
                       Decagon phrase
                     </p>
+                    <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                      <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-3">
+                        <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
+                          Perimeter
+                        </div>
+                        <div className="mt-1 text-2xl font-bold text-white">
+                          60
+                        </div>
+                      </div>
+                      <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-3">
+                        <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
+                          Trace
+                        </div>
+                        <div className="mt-1 text-2xl font-bold text-white">
+                          {decagonTraceDigits.length}
+                        </div>
+                      </div>
+                    </div>
                     <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/80 p-3">
                       <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
                         Active phrase
                       </div>
                       <p className="mt-2 min-h-[3rem] font-mono text-xs leading-6 text-cyan-200">
-                        {decagonTrace.length ? decagonTrace.map(i => decagonSteps[i]?.digit).join(" · ") : "Trace the decagon to capture a phrase."}
+                        {decagonTraceDigits.length
+                          ? decagonTraceDigits.join(" · ")
+                          : "Trace the edge to capture a phrase."}
                       </p>
                     </div>
                   </div>
 
                   <div className="grid gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void playCustomSequence(trianglePerimeterDigits)
+                      }
+                      disabled={isPlaying}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        isPlaying
+                          ? "bg-slate-800 text-slate-500"
+                          : "bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 hover:brightness-110"
+                      }`}
+                    >
+                      {isPlaying ? "Playing..." : "Play perimeter"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void playCustomSequence(decagonTraceDigits)
+                      }
+                      disabled={isPlaying || decagonTraceDigits.length === 0}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        isPlaying || decagonTraceDigits.length === 0
+                          ? "bg-slate-800 text-slate-500"
+                          : "bg-gradient-to-r from-amber-400 to-orange-400 text-slate-950 hover:brightness-110"
+                      }`}
+                    >
+                      {isPlaying ? "Playing..." : "Play traced path"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => loadNoteBoard(decagonTraceDigits)}
+                      disabled={decagonTraceDigits.length === 0}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        decagonTraceDigits.length === 0
+                          ? "bg-slate-800 text-slate-500"
+                          : "border border-emerald-400/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20"
+                      }`}
+                    >
+                      Send traced path to note board
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSoundSource("decagon");
+                        setActiveMode("sound");
+                      }}
+                      disabled={decagonTraceDigits.length === 0}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        decagonTraceDigits.length === 0
+                          ? "bg-slate-800 text-slate-500"
+                          : "border border-pink-500/30 bg-pink-500/10 text-pink-100 hover:bg-pink-500/20"
+                      }`}
+                    >
+                      Send traced path to Sound Lab
+                    </button>
                     <button
                       type="button"
                       onClick={clearDecagonTrace}
@@ -4644,16 +5204,62 @@ export default function DigitalDNAHub({
                       style={{ touchAction: "none" }}
                       onPointerLeave={() => setCircleHoveredStep(null)}
                       onPointerUp={() => setIsCircleTracing(false)}
+                      onPointerCancel={() => setIsCircleTracing(false)}
+                      onPointerMove={(e) => {
+                        const el = document.elementFromPoint(e.clientX, e.clientY);
+                        const g = el?.closest?.("[data-step]") ?? (el instanceof Element ? el : null);
+                        const stepAttr = g?.getAttribute("data-step");
+                        if (stepAttr != null) {
+                          const idx = Number(stepAttr);
+                          setCircleHoveredStep(idx);
+                          extendCircleTrace(idx);
+                        }
+                      }}
                     >
+                      <circle
+                        cx={CIRCLE_CENTER.x}
+                        cy={CIRCLE_CENTER.y}
+                        r={CIRCLE_RADIUS}
+                        fill="rgba(15,23,42,0.8)"
+                        stroke={CIRCLE_COLOR}
+                        strokeWidth="10"
+                        opacity="0.82"
+                      />
+
+                      {circleTracePolyline && (
+                        <polyline
+                          points={circleTracePolyline}
+                          fill="none"
+                          stroke="#F8FAFC"
+                          strokeWidth="5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          opacity="0.95"
+                        />
+                      )}
+
+                      <text
+                        x={CIRCLE_CENTER.x}
+                        y={CIRCLE_CENTER.y}
+                        fill={CIRCLE_COLOR}
+                        fontSize="18"
+                        fontWeight="700"
+                        textAnchor="middle"
+                        dominantBaseline="central"
+                      >
+                        60 pts
+                      </text>
+
                       {circleSteps.map((step) => {
                         const isHovered = circleHoveredStep === step.index;
                         const isActive = circleActiveStep === step.index;
-                        const isTraced = circleTrace.includes(step.index);
+                        const isTraced = circleTraceStepSet.has(step.index);
                         const radius = isActive ? 13 : isHovered ? 12 : isTraced ? 11 : 9.5;
 
                         return (
                           <g
                             key={`circle-step-${step.index}`}
+                            data-step={step.index}
                             className="cursor-pointer"
                             onPointerDown={(event) => {
                               event.preventDefault();
@@ -4705,17 +5311,92 @@ export default function DigitalDNAHub({
                     <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-300/80">
                       Circle phrase
                     </p>
+                    <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                      <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-3">
+                        <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
+                          Perimeter
+                        </div>
+                        <div className="mt-1 text-2xl font-bold text-white">
+                          60
+                        </div>
+                      </div>
+                      <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-3">
+                        <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
+                          Trace
+                        </div>
+                        <div className="mt-1 text-2xl font-bold text-white">
+                          {circleTraceDigits.length}
+                        </div>
+                      </div>
+                    </div>
                     <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/80 p-3">
                       <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
                         Active phrase
                       </div>
                       <p className="mt-2 min-h-[3rem] font-mono text-xs leading-6 text-cyan-200">
-                        {circleTrace.length ? circleTrace.map(i => circleSteps[i]?.digit).join(" · ") : "Trace the circle to capture a phrase."}
+                        {circleTraceDigits.length
+                          ? circleTraceDigits.join(" · ")
+                          : "Trace the edge to capture a phrase."}
                       </p>
                     </div>
                   </div>
 
                   <div className="grid gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void playCustomSequence(trianglePerimeterDigits)
+                      }
+                      disabled={isPlaying}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        isPlaying
+                          ? "bg-slate-800 text-slate-500"
+                          : "bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 hover:brightness-110"
+                      }`}
+                    >
+                      {isPlaying ? "Playing..." : "Play perimeter"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void playCustomSequence(circleTraceDigits)
+                      }
+                      disabled={isPlaying || circleTraceDigits.length === 0}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        isPlaying || circleTraceDigits.length === 0
+                          ? "bg-slate-800 text-slate-500"
+                          : "bg-gradient-to-r from-amber-400 to-orange-400 text-slate-950 hover:brightness-110"
+                      }`}
+                    >
+                      {isPlaying ? "Playing..." : "Play traced path"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => loadNoteBoard(circleTraceDigits)}
+                      disabled={circleTraceDigits.length === 0}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        circleTraceDigits.length === 0
+                          ? "bg-slate-800 text-slate-500"
+                          : "border border-emerald-400/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20"
+                      }`}
+                    >
+                      Send traced path to note board
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSoundSource("circle");
+                        setActiveMode("sound");
+                      }}
+                      disabled={circleTraceDigits.length === 0}
+                      className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                        circleTraceDigits.length === 0
+                          ? "bg-slate-800 text-slate-500"
+                          : "border border-pink-500/30 bg-pink-500/10 text-pink-100 hover:bg-pink-500/20"
+                      }`}
+                    >
+                      Send traced path to Sound Lab
+                    </button>
                     <button
                       type="button"
                       onClick={clearCircleTrace}
@@ -4761,11 +5442,11 @@ export default function DigitalDNAHub({
                     {soundSourceLabel}
                   </span>
                   .{" "}
-                  {soundSource === "triangle" ? (
+                  {soundSource !== "toolkit" ? (
                     <>
                       Showing {soundLabSequence.length} digits traced around the{" "}
                       <span className="font-semibold text-cyan-200">
-                        60-step triangle
+                        60-step {soundSource}
                       </span>
                       .
                     </>
