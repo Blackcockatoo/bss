@@ -30,7 +30,23 @@ function extractSection(startMarker: string, endMarker: string) {
   return script.slice(start, end).trim();
 }
 
-const bindHoldSource = extractSection('function bindHold(button, keyCode) {', 'function gameLoop(');
+function extractSectionWithFallback(startMarker: string, endMarkers: string[]) {
+  for (const endMarker of endMarkers) {
+    const start = script.indexOf(startMarker);
+    const end = script.indexOf(endMarker, start);
+
+    if (start !== -1 && end !== -1) {
+      return script.slice(start, end).trim();
+    }
+  }
+
+  throw new Error(`Could not extract section between ${startMarker} and any of: ${endMarkers.join(', ')}.`);
+}
+
+const bindHoldSource = extractSectionWithFallback('function bindHold(button, keyCode) {', [
+  'function bindPressAction(',
+  'function gameLoop(',
+]);
 const setPhoneHintVisibleSource = extractSection('function setPhoneHintVisible(visible) {', 'function clearPhoneHintTimer() {');
 const clearPhoneHintTimerSource = extractSection('function clearPhoneHintTimer() {', 'function schedulePhoneHintDismiss() {');
 const schedulePhoneHintDismissSource = extractSection('function schedulePhoneHintDismiss() {', 'function updatePhoneHint() {');

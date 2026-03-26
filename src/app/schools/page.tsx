@@ -84,11 +84,17 @@ export default function SchoolsPage() {
             </div>
 
             <div className="flex flex-wrap gap-3 pt-2">
-              <a
+              <Link
                 className="rounded-full bg-amber-300 px-5 py-2 text-sm font-semibold text-slate-950"
+                href="/schools/docs/pilot-readiness-verdict-v2"
+              >
+                Read pilot readiness verdict
+              </Link>
+              <a
+                className="rounded-full border border-slate-700 px-5 py-2 text-sm font-semibold text-slate-100"
                 href="#downloads"
               >
-                View document pack
+                Browse full document pack
               </a>
               <Link
                 className="rounded-full border border-slate-700 px-5 py-2 text-sm font-semibold text-slate-100"
@@ -435,13 +441,21 @@ export default function SchoolsPage() {
               </p>
             </div>
 
-            <a
-              className="mt-4 inline-flex rounded-full border border-violet-400/30 px-4 py-2 text-sm font-semibold text-violet-200"
-              download
-              href="/docs/schools-au/governance/privacy-policy.md"
-            >
-              Download the privacy policy
-            </a>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link
+                className="inline-flex rounded-full bg-violet-300 px-4 py-2 text-sm font-semibold text-slate-950"
+                href="/schools/docs/privacy-policy"
+              >
+                Read the privacy policy in app
+              </Link>
+              <a
+                className="inline-flex rounded-full border border-violet-400/30 px-4 py-2 text-sm font-semibold text-violet-200"
+                download
+                href="/docs/schools-au/governance/privacy-policy.md"
+              >
+                Download the privacy policy
+              </a>
+            </div>
           </section>
         </section>
 
@@ -525,7 +539,7 @@ export default function SchoolsPage() {
           <SectionHeading
             eyebrow="Document Pack"
             title="School pack downloads"
-            description="The school profile now ships as one document set: curriculum materials, teacher-facing implementation tools, governance artifacts, pilot operations tools, and evidence templates."
+            description="Start with the in-app reader for review. Use downloads when a teacher or reviewer needs a printable or offline copy of the same material."
           />
 
           <div className="mt-6 space-y-8">

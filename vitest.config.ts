@@ -9,12 +9,13 @@ export default defineConfig({
     environment: 'happy-dom',
     globals: true,
     setupFiles: [path.resolve(__dirname, './test/setup.ts')],
-    exclude: ['.claude/**', 'coverage/**', 'node_modules/**'],
+    exclude: ['.claude/**', 'coverage/**', 'node_modules/**', '**/node_modules/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       exclude: [
         'node_modules/',
+        '**/node_modules/**',
         'test/',
         '.claude/**',
         '**/*.d.ts',

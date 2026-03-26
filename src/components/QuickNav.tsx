@@ -44,6 +44,15 @@ export function QuickNav() {
   const router = useRouter();
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
+  const isSchoolPath = useMemo(
+    () =>
+      !!pathname &&
+      (pathname === "/school-game" ||
+        pathname === "/schools" ||
+        pathname.startsWith("/schools/")),
+    [pathname],
+  );
+  const effectiveSchoolsMode = IS_SCHOOLS_PROFILE || isSchoolPath;
 
   const handleBack = useCallback(() => {
     triggerHaptic("light");
@@ -59,6 +68,10 @@ export function QuickNav() {
   }, [router]);
 
   useEffect(() => {
+    if (effectiveSchoolsMode) {
+      return;
+    }
+
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
       setInstallPrompt(event as BeforeInstallPromptEvent);
@@ -78,19 +91,12 @@ export function QuickNav() {
       );
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
-  }, []);
+  }, [effectiveSchoolsMode]);
 
-  const isSchoolPath = useMemo(
-    () =>
-      !!pathname &&
-      (pathname === "/school-game" ||
-        pathname === "/schools" ||
-        pathname.startsWith("/schools/")),
-    [pathname],
+  const showInstall = useMemo(
+    () => !effectiveSchoolsMode && installPrompt !== null,
+    [effectiveSchoolsMode, installPrompt],
   );
-  const effectiveSchoolsMode = IS_SCHOOLS_PROFILE || isSchoolPath;
-
-  const showInstall = useMemo(() => installPrompt !== null, [installPrompt]);
   const visibleNavItems = useMemo(() => {
     if (effectiveSchoolsMode) {
       if (ENABLE_CHILD_SAFE_BASELINE || IS_SCHOOLS_PROFILE) {

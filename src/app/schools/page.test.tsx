@@ -31,6 +31,9 @@ describe("SchoolsPage", () => {
       }),
     ).toBeInTheDocument();
     expect(
+      screen.getByRole("link", { name: /Read pilot readiness verdict/i }),
+    ).toHaveAttribute("href", "/schools/docs/pilot-readiness-verdict-v2");
+    expect(
       screen.getByRole("heading", {
         name: /Curriculum alignment with explicit classroom fit/i,
       }),

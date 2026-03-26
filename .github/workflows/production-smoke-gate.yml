@@ -1,10 +1,10 @@
-name: Production Smoke Gate
+name: MetaPet Schools Smoke Gate
 
 on:
   workflow_dispatch:
     inputs:
       smoke_confirmation:
-        description: "Set to confirmed after /digital-dna smoke runbook passes"
+        description: "Set to confirmed after the MetaPet Schools smoke runbook passes"
         required: true
         type: choice
         options:
@@ -39,13 +39,15 @@ jobs:
         env:
           STUDENT_DEPLOYMENT: ${{ vars.STUDENT_DEPLOYMENT }}
           NEXT_PUBLIC_CHILD_SAFE_BASELINE: ${{ vars.NEXT_PUBLIC_CHILD_SAFE_BASELINE }}
+          NEXT_PUBLIC_APP_PROFILE: ${{ vars.NEXT_PUBLIC_APP_PROFILE }}
+          NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
         run: npm run check:child-safe-deployment
 
       - name: Build
         run: npm run build
 
-  digital-dna-smoke-confirmation:
-    name: Verify /digital-dna Smoke Confirmation
+  schools-smoke-confirmation:
+    name: Verify MetaPet Schools Smoke Confirmation
     runs-on: ubuntu-latest
     needs: quality-gate
     steps:
@@ -62,12 +64,12 @@ jobs:
           fi
 
           echo "Smoke check confirmed by: ${{ github.event.inputs.smoke_owner }}"
-          echo "Runbook: docs/deployment/digital-dna-smoke.md"
+          echo "Runbook: docs/deployment/metapet-schools-smoke.md"
 
-  production-promotion-ready:
-    name: Production Promotion Ready
+  schools-promotion-ready:
+    name: Schools Promotion Ready
     runs-on: ubuntu-latest
-    needs: digital-dna-smoke-confirmation
+    needs: schools-smoke-confirmation
     steps:
       - name: Promotion gate passed
-        run: echo "All deployment gates passed for /digital-dna."
+        run: echo "All deployment gates passed for MetaPet Schools."

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { SCHOOLS_LOCAL_DATA_RETENTION_DAYS } from "@/lib/schools/storage";
 
 const PRIVACY_ARTIFACTS = [
@@ -125,12 +127,20 @@ export default function LegalPrivacyPage() {
         </ul>
       </section>
 
-      <a
-        href="/docs/schools-au/governance/privacy-policy.md"
-        className="inline-flex rounded-full border border-emerald-400/30 px-4 py-2 text-sm font-semibold text-emerald-200"
-      >
-        Download the privacy policy
-      </a>
+      <div className="flex flex-wrap gap-3">
+        <Link
+          href="/schools/docs/privacy-policy"
+          className="inline-flex rounded-full bg-emerald-300 px-4 py-2 text-sm font-semibold text-slate-950"
+        >
+          Read the privacy policy in app
+        </Link>
+        <a
+          href="/docs/schools-au/governance/privacy-policy.md"
+          className="inline-flex rounded-full border border-emerald-400/30 px-4 py-2 text-sm font-semibold text-emerald-200"
+        >
+          Download the privacy policy
+        </a>
+      </div>
     </main>
   );
 }

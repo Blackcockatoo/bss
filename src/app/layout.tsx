@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     IS_SCHOOLS_PROFILE
       ? "MetaPet Schools is a teacher-led, low-data classroom tool for Years 3-6 digital responsibility, systems thinking, and online safety habits."
       : "Blue Snake Studios builds privacy-first digital learning experiences with a strict child-safe baseline for default student deployments.",
-  manifest: "/manifest.json",
+  manifest: "/manifest.webmanifest",
   icons: {
     icon: "/icon.svg",
     apple: "/icon.svg",
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Blue Snake Studios",
+    title: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Blue Snake Studios",
   },
   openGraph: {
     title: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Blue Snake Studios",
@@ -59,7 +59,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const currentYear = getLegalNoticeYear();
-  const legalMetaContent = `© ${currentYear} Blue Snake Studios. ${LEGAL_NOTICE_TEXT}`;
+  const legalMetaContent = IS_SCHOOLS_PROFILE
+    ? `MetaPet Schools educational pilot by Blue Snake Studios. © ${currentYear}. ${LEGAL_NOTICE_TEXT}`
+    : `© ${currentYear} Blue Snake Studios. ${LEGAL_NOTICE_TEXT}`;
 
   return (
     <html

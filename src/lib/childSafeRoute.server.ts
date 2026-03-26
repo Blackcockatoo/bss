@@ -4,10 +4,10 @@ import {
   getChildSafeFallbackPathname,
   isChildSafeAllowedPathname,
 } from "@/lib/childSafeBaseline";
-import { ENABLE_CHILD_SAFE_BASELINE } from "@/lib/env/features";
+import { IS_SCHOOLS_PROFILE } from "@/lib/env/features";
 
 export function enforceChildSafeServerRoute(pathname: string): void {
-  if (!ENABLE_CHILD_SAFE_BASELINE || isChildSafeAllowedPathname(pathname)) {
+  if (!IS_SCHOOLS_PROFILE || isChildSafeAllowedPathname(pathname)) {
     return;
   }
 

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const SAFETY_ARTIFACTS = [
   "Child-safety risk assessment",
   "Misuse and over-engagement risk assessment",
@@ -34,12 +36,20 @@ export default function LegalSafetyPage() {
         ))}
       </div>
 
-      <a
-        href="/docs/schools-au/governance/child-safety-risk-assessment.md"
-        className="inline-flex rounded-full border border-cyan-400/30 px-4 py-2 text-sm font-semibold text-cyan-200"
-      >
-        Download the child-safety risk assessment
-      </a>
+      <div className="flex flex-wrap gap-3">
+        <Link
+          href="/schools/docs/child-safety-risk-assessment"
+          className="inline-flex rounded-full bg-cyan-300 px-4 py-2 text-sm font-semibold text-slate-950"
+        >
+          Read the safety assessment in app
+        </Link>
+        <a
+          href="/docs/schools-au/governance/child-safety-risk-assessment.md"
+          className="inline-flex rounded-full border border-cyan-400/30 px-4 py-2 text-sm font-semibold text-cyan-200"
+        >
+          Download the child-safety risk assessment
+        </a>
+      </div>
     </main>
   );
 }

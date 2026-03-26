@@ -1807,7 +1807,13 @@ export default function Home() {
 
   if (loading) {
     return (
-      <MetaPetLoadingScreen statusMessage="Generating genome sequence" />
+      <MetaPetLoadingScreen
+        statusMessage={
+          IS_SCHOOLS_PROFILE
+            ? "Preparing classroom tools"
+            : "Generating genome sequence"
+        }
+      />
     );
   }
 
@@ -2940,16 +2946,32 @@ export default function Home() {
               : "Session-only mode"}
           </p>
           <div className="max-w-sm mx-auto space-y-1 pt-2 border-t border-slate-800/60">
-            <p className="text-zinc-700 leading-relaxed">
-              Built with care by Blue Snake Studios. Privacy-first,
-              offline-first, kid-safe â€" always. No ads, no tracking, no data
-              harvesting.
-            </p>
-            <p className="text-zinc-800 leading-relaxed">
-              We&apos;re building toward a world where digital companions teach
-              real science, honour real privacy, and grow with the people who
-              care for them.
-            </p>
+            {IS_SCHOOLS_PROFILE ? (
+              <>
+                <p className="text-zinc-700 leading-relaxed">
+                  MetaPet Schools is packaged for a tightly scoped classroom
+                  pilot: teacher-led, alias-based, local-first, and bounded to
+                  the school review path.
+                </p>
+                <p className="text-zinc-800 leading-relaxed">
+                  Operated by Blue Snake Studios for limited educational pilot
+                  use. No ads, no public sharing, and no student account flow.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-zinc-700 leading-relaxed">
+                  Built with care by Blue Snake Studios. Privacy-first,
+                  offline-first, kid-safe â€" always. No ads, no tracking, no
+                  data harvesting.
+                </p>
+                <p className="text-zinc-800 leading-relaxed">
+                  We&apos;re building toward a world where digital companions
+                  teach real science, honour real privacy, and grow with the
+                  people who care for them.
+                </p>
+              </>
+            )}
           </div>
         </div>
       </div>

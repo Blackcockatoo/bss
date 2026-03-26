@@ -21,6 +21,9 @@ describe("child-safe route boundary", () => {
     expect(childSafe.isChildSafeAllowedPathname("/app")).toBe(true);
     expect(childSafe.isChildSafeAllowedPathname("/pet")).toBe(true);
     expect(childSafe.isChildSafeAllowedPathname("/docs/example")).toBe(true);
+    expect(childSafe.isChildSafeAllowedPathname("/manifest.webmanifest")).toBe(
+      true,
+    );
     expect(childSafe.isChildSafeAllowedPathname("/schools")).toBe(false);
     expect(childSafe.isChildSafeAllowedPathname("/identity")).toBe(false);
     expect(childSafe.getChildSafeFallbackPathname("/docs/example")).toBe(
@@ -41,6 +44,9 @@ describe("child-safe route boundary", () => {
     expect(childSafe.isChildSafeAllowedPathname("/schools")).toBe(true);
     expect(childSafe.isChildSafeAllowedPathname("/school-game")).toBe(true);
     expect(childSafe.isChildSafeAllowedPathname("/legal/privacy")).toBe(true);
+    expect(
+      childSafe.isChildSafeAllowedPathname("/manifest.webmanifest"),
+    ).toBe(true);
     expect(
       childSafe.isChildSafeAllowedPathname(
         "/docs/schools-au/governance/privacy-policy.md",

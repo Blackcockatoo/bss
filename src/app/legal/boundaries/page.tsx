@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const BOUNDARIES = [
   "Not therapy or counselling",
   "Not social media",
@@ -36,12 +38,20 @@ export default function LegalBoundariesPage() {
         ))}
       </div>
 
-      <a
-        href="/docs/schools-au/governance/what-metapet-schools-is-is-not.md"
-        className="inline-flex rounded-full border border-amber-400/30 px-4 py-2 text-sm font-semibold text-amber-200"
-      >
-        Download the boundaries statement
-      </a>
+      <div className="flex flex-wrap gap-3">
+        <Link
+          href="/schools/docs/what-metapet-schools-is-is-not"
+          className="inline-flex rounded-full bg-amber-300 px-4 py-2 text-sm font-semibold text-slate-950"
+        >
+          Read the boundaries statement in app
+        </Link>
+        <a
+          href="/docs/schools-au/governance/what-metapet-schools-is-is-not.md"
+          className="inline-flex rounded-full border border-amber-400/30 px-4 py-2 text-sm font-semibold text-amber-200"
+        >
+          Download the boundaries statement
+        </a>
+      </div>
     </main>
   );
 }

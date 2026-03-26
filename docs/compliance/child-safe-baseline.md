@@ -4,8 +4,14 @@ This document defines the strict child-safe baseline for default student deploym
 
 For teacher-facing classification of classroom use, see `docs/compliance/digital-engagement-taxonomy.md`.
 
-Set `NEXT_PUBLIC_CHILD_SAFE_BASELINE=true` to enforce the route guard for student deployments.
-In CI, set `STUDENT_DEPLOYMENT=true` as well to make the deployment assertion fail fast if the baseline flag is missing.
+Use the dedicated schools deployment contract for pilot builds:
+
+- `NEXT_PUBLIC_APP_PROFILE=schools`
+- `NEXT_PUBLIC_CHILD_SAFE_BASELINE=true`
+- `STUDENT_DEPLOYMENT=true`
+- `NEXT_PUBLIC_SITE_URL=https://<schools-domain>`
+
+In CI, `STUDENT_DEPLOYMENT=true` makes the deployment assertion fail fast when the schools contract is incomplete.
 
 ## Core Rules
 

@@ -31,6 +31,8 @@ jobs:
         env:
           STUDENT_DEPLOYMENT: ${{ vars.STUDENT_DEPLOYMENT }}
           NEXT_PUBLIC_CHILD_SAFE_BASELINE: ${{ vars.NEXT_PUBLIC_CHILD_SAFE_BASELINE }}
+          NEXT_PUBLIC_APP_PROFILE: ${{ vars.NEXT_PUBLIC_APP_PROFILE }}
+          NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
         run: npm run check:child-safe-deployment
 
       - name: Build

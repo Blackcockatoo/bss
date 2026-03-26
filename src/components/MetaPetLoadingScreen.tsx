@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import Image from "next/image";
 import { getCockatooDataUri } from "@/lib/cockatooSprites";
+import { IS_SCHOOLS_PROFILE } from "@/lib/env/features";
 
 type MetaPetLoadingScreenProps = {
   /** Optional external progress 0–100. If omitted, a smooth fake progress is used. */
@@ -12,7 +13,7 @@ type MetaPetLoadingScreenProps = {
   statusMessage?: string;
 };
 
-const STAGE_MESSAGES: { threshold: number; label: string }[] = [
+const CORE_STAGE_MESSAGES: { threshold: number; label: string }[] = [
   { threshold: 0, label: "Priming the astral circuits…" },
   { threshold: 10, label: "Summoning the Yellow-tailed Black Cockatoo…" },
   { threshold: 25, label: "Weaving golden filaments into the mandala…" },
@@ -20,6 +21,16 @@ const STAGE_MESSAGES: { threshold: number; label: string }[] = [
   { threshold: 65, label: "Focusing cyan light through the halo…" },
   { threshold: 85, label: "Harmonising soul, seed, and shell…" },
   { threshold: 100, label: "Docking into the Meta-Pet cockpit…" },
+];
+
+const SCHOOL_STAGE_MESSAGES: { threshold: number; label: string }[] = [
+  { threshold: 0, label: "Preparing classroom tools…" },
+  { threshold: 10, label: "Loading lesson materials for review…" },
+  { threshold: 25, label: "Checking local-only classroom settings…" },
+  { threshold: 45, label: "Restoring alias-based classroom state…" },
+  { threshold: 65, label: "Preparing privacy and safeguarding materials…" },
+  { threshold: 85, label: "Opening the teacher-led runtime…" },
+  { threshold: 100, label: "Ready for classroom review." },
 ];
 
 const ambientSparkleVariants = {
@@ -34,6 +45,9 @@ export function MetaPetLoadingScreen(props: MetaPetLoadingScreenProps) {
   const [internalProgress, setInternalProgress] = useState(0);
   const [isDodging, setIsDodging] = useState(false);
   const dodgeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const stageMessages = IS_SCHOOLS_PROFILE
+    ? SCHOOL_STAGE_MESSAGES
+    : CORE_STAGE_MESSAGES;
 
   const progress = props.progress ?? internalProgress;
 
@@ -56,12 +70,12 @@ export function MetaPetLoadingScreen(props: MetaPetLoadingScreenProps) {
   );
 
   const derivedLabel = useMemo(() => {
-    let current = STAGE_MESSAGES[0].label;
-    for (const stage of STAGE_MESSAGES) {
+    let current = stageMessages[0].label;
+    for (const stage of stageMessages) {
       if (safeProgress >= stage.threshold) current = stage.label;
     }
     return current;
-  }, [safeProgress]);
+  }, [safeProgress, stageMessages]);
 
   const displayLabel = props.statusMessage ?? derivedLabel;
 
@@ -209,7 +223,11 @@ export function MetaPetLoadingScreen(props: MetaPetLoadingScreenProps) {
               >
                 <Image
                   src={getCockatooDataUri("flying")}
-                  alt="Meta-Pet Cockatoo"
+                  alt={
+                    IS_SCHOOLS_PROFILE
+                      ? "MetaPet Schools companion"
+                      : "Meta-Pet Cockatoo"
+                  }
                   width={56}
                   height={56}
                   priority
@@ -220,10 +238,20 @@ export function MetaPetLoadingScreen(props: MetaPetLoadingScreenProps) {
 
             <div className="w-full md:w-1/2 space-y-6">
               <div>
-                <p className="text-xs tracking-[0.25em] uppercase text-cyan-300/70 mb-2">Meta-Pet // Blue Snake Studios</p>
-                <h1 className="text-2xl md:text-3xl font-semibold text-slate-50">The Celestial Flight</h1>
+                <p className="text-xs tracking-[0.25em] uppercase text-cyan-300/70 mb-2">
+                  {IS_SCHOOLS_PROFILE
+                    ? "MetaPet Schools"
+                    : "Meta-Pet // Blue Snake Studios"}
+                </p>
+                <h1 className="text-2xl md:text-3xl font-semibold text-slate-50">
+                  {IS_SCHOOLS_PROFILE
+                    ? "Preparing the classroom review path"
+                    : "The Celestial Flight"}
+                </h1>
                 <p className="mt-2 text-sm text-slate-300/80">
-                  Your cockpit is spinning up. Our cockatoo is tracing figure-eights through a gold–cyan mandala while the core experience boots in the background.
+                  {IS_SCHOOLS_PROFILE
+                    ? "This school-facing session keeps setup, privacy materials, and classroom runtime on a narrow teacher-led path."
+                    : "Your cockpit is spinning up. Our cockatoo is tracing figure-eights through a gold–cyan mandala while the core experience boots in the background."}
                 </p>
               </div>
 
@@ -243,8 +271,9 @@ export function MetaPetLoadingScreen(props: MetaPetLoadingScreenProps) {
               </div>
 
               <div className="text-[0.7rem] text-slate-400 leading-relaxed">
-                Tip: tap or click the cockatoo to make it briefly dodge off its orbit.  
-                It will always snap back to the flight path—just like Meta-Pet recovering from a cold start.
+                {IS_SCHOOLS_PROFILE
+                  ? "Local classroom state stays on this device unless a teacher deliberately exports pilot evidence."
+                  : "Tip: tap or click the cockatoo to make it briefly dodge off its orbit. It will always snap back to the flight path, just like Meta-Pet recovering from a cold start."}
               </div>
             </div>
           </div>

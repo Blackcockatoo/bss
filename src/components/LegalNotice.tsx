@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { IS_SCHOOLS_PROFILE } from "@/lib/env/features";
 import { LEGAL_NOTICE_TEXT, getLegalNoticeYear } from "@/lib/legalNotice";
 
 type LegalNoticeProps = {
@@ -17,7 +18,9 @@ export default function LegalNotice({ className }: LegalNoticeProps) {
         className,
       )}
     >
-      © {year} Blue Snake Studios — {LEGAL_NOTICE_TEXT}
+      {IS_SCHOOLS_PROFILE
+        ? `MetaPet Schools educational pilot. Operated by Blue Snake Studios. © ${year}. ${LEGAL_NOTICE_TEXT}`
+        : `© ${year} Blue Snake Studios — ${LEGAL_NOTICE_TEXT}`}
     </p>
   );
 }

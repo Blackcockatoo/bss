@@ -39,7 +39,16 @@ describe("middleware school profile boundary", () => {
   it("redirects blocked school profile routes back to /schools", async () => {
     const { middleware } = await loadMiddleware("schools");
 
-    for (const pathname of ["/pet", "/app", "/identity", "/moss60"]) {
+    for (const pathname of [
+      "/pet",
+      "/app",
+      "/app/moss60",
+      "/identity",
+      "/moss60",
+      "/digital-dna",
+      "/pricing",
+      "/shop",
+    ]) {
       const response = middleware(
         new NextRequest(`https://example.com${pathname}`),
       );
@@ -47,6 +56,24 @@ describe("middleware school profile boundary", () => {
       expect(response.headers.get("location")).toBe(
         "https://example.com/schools",
       );
+    }
+  });
+
+  it("keeps allowed school profile routes inside the schools deployment", async () => {
+    const { middleware } = await loadMiddleware("schools");
+
+    for (const pathname of [
+      "/schools",
+      "/school-game",
+      "/schools/docs/privacy-policy",
+      "/legal/privacy",
+      "/manifest.webmanifest",
+    ]) {
+      const response = middleware(
+        new NextRequest(`https://example.com${pathname}`),
+      );
+
+      expect(response.headers.get("location")).toBeNull();
     }
   });
 });
