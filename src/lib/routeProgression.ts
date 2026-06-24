@@ -43,23 +43,23 @@ export const ROUTE_PROGRESSION: Record<
     step: 1,
     href: "/pet",
     tutorialScope: "pet",
-    shortLabel: "Pet",
-    title: "Care builds the bond",
-    role: "This is the daily care layer: mood, comfort, trust, and presence.",
+    shortLabel: "Try Demo",
+    title: "Try the companion first",
+    role: "This is the safe demo layer: meet the companion, care for it, and see the learning loop without needing an account.",
     summary:
-      "Start here to care for the companion directly before climbing into pattern learning and identity layers.",
+      "Start here to try Meta-Pet on this device before reviewing the school pilot pack.",
     entryCta: {
       href: "/pet",
-      label: "Meet your companion",
+      label: "Try the pet demo",
       description:
-        "Start with the pet so the rest of the ladder has an emotional anchor.",
+        "Open the companion demo in the browser. No account, no ad tracking, and local-first storage.",
     },
     next: {
-      href: "/school-game",
-      title: "Next layer: School",
-      label: "Open School Quest",
+      href: "/schools",
+      title: "Next layer: School pilot",
+      label: "Review School Pilot Pack",
       description:
-        "Turn the bond into pattern learning, observation, and short reflection loops.",
+        "See the classroom fit, privacy summary, parent note, safeguarding material, and pilot pathway.",
     },
   },
   school: {
@@ -67,16 +67,16 @@ export const ROUTE_PROGRESSION: Record<
     step: 2,
     href: "/school-game",
     tutorialScope: "school",
-    shortLabel: "School",
-    title: "Pattern learning earns the deeper view",
-    role: "This is the pattern layer: shared reasoning, recognition, and calm classroom progression.",
+    shortLabel: "School Pilot",
+    title: "Teacher-led classroom path",
+    role: "This is the school layer: short guided sessions, alias-only classroom use, and clear adult review materials.",
     summary:
-      "Students move from caring for the companion to noticing how its patterns behave and what they mean.",
+      "Teachers and school leaders can review safety, lessons, governance, and pilot readiness before trying it with students.",
     entryCta: {
-      href: "/school-game",
-      label: "Launch the classroom quest",
+      href: "/schools",
+      label: "Review school pilot pack",
       description:
-        "Use the bonded pet and lesson queue to turn care into a guided learning loop.",
+        "Understand what it is, why it is safe, how to try it, and how to ask about a pilot.",
     },
     next: {
       href: "/identity",
@@ -91,16 +91,16 @@ export const ROUTE_PROGRESSION: Record<
     step: 3,
     href: "/identity",
     tutorialScope: "identity",
-    shortLabel: "Identity",
+    shortLabel: "Privacy",
     title: "Ownership stays local-first",
-    role: "This is the ownership layer: the person controls profile data, storage, and sharing boundaries.",
+    role: "This is the privacy layer: adults can see how profile data, storage, and sharing boundaries are controlled locally.",
     summary:
       "Identity explains who controls the companion record before the DNA route reveals the hidden system underneath it.",
     entryCta: {
       href: "/identity",
-      label: "Save the local owner profile",
+      label: "Review local identity controls",
       description:
-        "Lock in a local identity so the DNA route has a clear owner and next step.",
+        "See how local storage, device ownership, export, and deletion are meant to work.",
     },
     next: {
       href: "/digital-dna",
@@ -122,7 +122,7 @@ export const ROUTE_PROGRESSION: Record<
     step: 4,
     href: "/digital-dna",
     tutorialScope: "dna",
-    shortLabel: "DNA",
+    shortLabel: "DNA Engine",
     title: "The hidden engine is now visible",
     role: "This is the decoded system layer: the structures, signal ownership, and resonant patterns behind the companion.",
     summary:
