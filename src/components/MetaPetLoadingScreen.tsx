@@ -14,13 +14,13 @@ type MetaPetLoadingScreenProps = {
 };
 
 const CORE_STAGE_MESSAGES: { threshold: number; label: string }[] = [
-  { threshold: 0, label: "Priming the astral circuits…" },
-  { threshold: 10, label: "Summoning the Yellow-tailed Black Cockatoo…" },
-  { threshold: 25, label: "Weaving golden filaments into the mandala…" },
-  { threshold: 45, label: "Syncing prime tails with the lattice…" },
-  { threshold: 65, label: "Focusing cyan light through the halo…" },
-  { threshold: 85, label: "Harmonising soul, seed, and shell…" },
-  { threshold: 100, label: "Docking into the Meta-Pet cockpit…" },
+  { threshold: 0, label: "Preparing privacy-first demo…" },
+  { threshold: 10, label: "Checking local-only browser storage…" },
+  { threshold: 25, label: "Loading the companion safely…" },
+  { threshold: 45, label: "Keeping accounts, ads, and trackers out…" },
+  { threshold: 65, label: "Opening guided learning activities…" },
+  { threshold: 85, label: "Preparing school and family review path…" },
+  { threshold: 100, label: "Ready to try Meta-Pet." },
 ];
 
 const SCHOOL_STAGE_MESSAGES: { threshold: number; label: string }[] = [
@@ -226,7 +226,7 @@ export function MetaPetLoadingScreen(props: MetaPetLoadingScreenProps) {
                   alt={
                     IS_SCHOOLS_PROFILE
                       ? "MetaPet Schools companion"
-                      : "Meta-Pet Cockatoo"
+                      : "Meta-Pet companion"
                   }
                   width={56}
                   height={56}
@@ -241,17 +241,17 @@ export function MetaPetLoadingScreen(props: MetaPetLoadingScreenProps) {
                 <p className="text-xs tracking-[0.25em] uppercase text-cyan-300/70 mb-2">
                   {IS_SCHOOLS_PROFILE
                     ? "MetaPet Schools"
-                    : "Meta-Pet // Blue Snake Studios"}
+                    : "Meta-Pet // school-safe preview"}
                 </p>
                 <h1 className="text-2xl md:text-3xl font-semibold text-slate-50">
                   {IS_SCHOOLS_PROFILE
                     ? "Preparing the classroom review path"
-                    : "The Celestial Flight"}
+                    : "Preparing the privacy-first demo"}
                 </h1>
                 <p className="mt-2 text-sm text-slate-300/80">
                   {IS_SCHOOLS_PROFILE
-                    ? "This school-facing session keeps setup, privacy materials, and classroom runtime on a narrow teacher-led path."
-                    : "Your cockpit is spinning up. Our cockatoo is tracing figure-eights through a gold–cyan mandala while the core experience boots in the background."}
+                    ? "Teacher-led setup, privacy materials, and classroom runtime are kept together so staff can review it without extra noise."
+                    : "Meta-Pet is a browser-first learning companion for classrooms and families. No ads, no trackers, no student accounts, and no unnecessary data collection."}
                 </p>
               </div>
 
@@ -273,7 +273,7 @@ export function MetaPetLoadingScreen(props: MetaPetLoadingScreenProps) {
               <div className="text-[0.7rem] text-slate-400 leading-relaxed">
                 {IS_SCHOOLS_PROFILE
                   ? "Local classroom state stays on this device unless a teacher deliberately exports pilot evidence."
-                  : "Tip: tap or click the cockatoo to make it briefly dodge off its orbit. It will always snap back to the flight path, just like Meta-Pet recovering from a cold start."}
+                  : "Local-first means the companion can run on this device without a login. Adults can review the classroom runtime, privacy summary, and pilot pathway before using it with children."}
               </div>
             </div>
           </div>
