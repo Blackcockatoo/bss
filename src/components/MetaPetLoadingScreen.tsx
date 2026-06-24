@@ -77,7 +77,10 @@ export function MetaPetLoadingScreen(props: MetaPetLoadingScreenProps) {
     return current;
   }, [safeProgress, stageMessages]);
 
-  const displayLabel = props.statusMessage ?? derivedLabel;
+  const displayLabel =
+    props.statusMessage === "Generating genome sequence"
+      ? "Preparing privacy-first demo"
+      : props.statusMessage ?? derivedLabel;
 
   const glow = useMotionValue(0);
   const glowScale = useTransform(glow, [0, 1], [1, 1.1]);
