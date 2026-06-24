@@ -5,11 +5,15 @@ export default function Loading() {
   return (
     <RouteShellLoading
       eyebrow={IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Meta-Pet"}
-      title="Opening the next route"
+      title={
+        IS_SCHOOLS_PROFILE
+          ? "Preparing classroom review"
+          : "Preparing the privacy-first demo"
+      }
       detail={
         IS_SCHOOLS_PROFILE
-          ? "The school deployment keeps its shared chrome minimal so teachers can move between overview, classroom setup, and privacy materials without extra noise."
-          : "The shared chrome stays light here so each destination can arrive with its own identity instead of the same fullscreen ritual."
+          ? "Teacher-led classroom materials are loading with the privacy summary, lesson path, and local-only runtime kept close together."
+          : "Meta-Pet is a browser-first learning companion: no ads, no trackers, no student accounts, and local-first storage unless an adult deliberately exports something."
       }
     />
   );
