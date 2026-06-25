@@ -96,6 +96,13 @@ const nextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return {
+      beforeFiles: [
+        { source: "/", destination: "/metapet-landing.html" },
+      ],
+    };
+  },
   async headers() {
     return [
       {
