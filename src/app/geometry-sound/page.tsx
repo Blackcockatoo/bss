@@ -8,8 +8,6 @@ import { useEnforceChildSafeClientRoute } from "@/lib/childSafeRoute.client";
 
 import { buildGeometrySoundIframeSrc } from "./iframe-src";
 
-import { buildGeometrySoundIframeSrc } from './buildGeometrySoundIframeSrc';
-
 export default function GeometrySoundPage() {
   const childSafeBlocked = useEnforceChildSafeClientRoute("/geometry-sound");
   const iframeRef = useRef<HTMLIFrameElement>(null);
