@@ -3,10 +3,11 @@
   "buildCommand": "npm run build",
   "framework": "nextjs",
   "installCommand": "npm ci",
-  "rewrites": [
+  "redirects": [
     {
       "source": "/",
-      "destination": "/metapet-landing.html"
+      "destination": "/metapet-landing.html",
+      "permanent": false
     }
   ]
 }
