@@ -114,6 +114,12 @@ export default function ClientBody({
 
       <div className="flex-1 pb-2">{children}</div>
       <footer className="px-4 pb-24 pt-4 text-center sm:pb-6">
+        <a
+          href="mailto:bluesssnakestudio@gmail.com?subject=Meta-Pet%20School%20Pilot%20Enquiry"
+          className="mb-4 inline-block text-xs text-slate-400 underline hover:text-slate-300"
+        >
+          Pilot Enquiry
+        </a>
         <LegalNotice />
       </footer>
       <QuickNav />

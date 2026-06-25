@@ -203,6 +203,27 @@ export default function SchoolGamePage() {
             <ClassroomManager />
           </div>
         </section>
+
+        <section className="rounded-3xl border border-cyan-500/20 bg-cyan-950/20 p-6 md:p-8">
+          <p className="text-xs uppercase tracking-[0.35em] text-cyan-400/70">
+            Pilot enquiry
+          </p>
+          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white md:text-3xl">
+            Ask about a no-cost pilot
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-slate-300">
+            Schools, teachers, principals, councils, and education contacts can
+            approach Blue $nake Studio about a no-cost pilot pathway.
+          </p>
+          <div className="mt-4">
+            <a
+              href="mailto:bluesssnakestudio@gmail.com?subject=Meta-Pet%20School%20Pilot%20Enquiry"
+              className="inline-flex items-center rounded-xl bg-cyan-400 px-5 py-2.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-cyan-300"
+            >
+              Ask About a Pilot
+            </a>
+          </div>
+        </section>
       </div>
     </main>
   );

@@ -115,6 +115,12 @@ export default function SchoolsParentPage() {
         >
           Back to school overview
         </Link>
+        <a
+          href="mailto:bluesssnakestudio@gmail.com?subject=Meta-Pet%20School%20Pilot%20Enquiry"
+          className="rounded-full border border-cyan-400/30 px-4 py-2 text-sm font-semibold text-cyan-200"
+        >
+          Pilot Enquiry
+        </a>
       </div>
     </main>
   );
