@@ -5,6 +5,7 @@ import { findSiteUrl, findSiteUrlObject } from "@/lib/env/siteUrl";
 import { IS_SCHOOLS_PROFILE } from "@/lib/env/features";
 import { LEGAL_NOTICE_TEXT, getLegalNoticeYear } from "@/lib/legalNotice";
 import ClientBody from "./ClientBody";
+import { Analytics } from "@vercel/analytics/next";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -81,6 +82,7 @@ export default function RootLayout({
       </head>
       <body suppressHydrationWarning className="antialiased">
         <ClientBody>{children}</ClientBody>
+        <Analytics />
       </body>
     </html>
   );
