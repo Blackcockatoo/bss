@@ -14,6 +14,9 @@ import {
 } from '@/lib/evolution';
 import { Zap, Clock, TrendingUp, Sparkles, CheckCircle2, AlertTriangle } from 'lucide-react';
 
+import { useReducedMotion } from '@/hooks/useReducedMotion';
+
+import { EvolutionCeremony } from './EvolutionCeremony';
 import { Button } from './ui/button';
 
 type StageSequence = readonly EvolutionState[];
@@ -24,6 +27,8 @@ export function EvolutionPanel() {
   const evolution = useStore(state => state.evolution);
   const vitals = useStore(state => state.vitals);
   const tryEvolve = useStore(state => state.tryEvolve);
+  const [ceremonyStage, setCeremonyStage] = useState<EvolutionState | null>(null);
+  const prefersReducedMotion = useReducedMotion();
 
   const vitalsAverage = useMemo(
     () => (vitals.hunger + vitals.hygiene + vitals.mood + vitals.energy) / 4,
@@ -90,10 +95,11 @@ export function EvolutionPanel() {
   }, [evolution.lastEvolutionTime, evolution.birthTime]);
 
   const handleEvolve = useCallback(() => {
+    const targetStage = requirementSnapshot?.state ?? evolution.state;
     const evolved = tryEvolve();
     if (evolved) {
-      const targetStage = requirementSnapshot?.state ?? evolution.state;
       console.info('[evolution] advanced to', targetStage);
+      setCeremonyStage(targetStage);
     }
   }, [evolution.state, requirementSnapshot, tryEvolve]);
 
@@ -104,6 +110,13 @@ export function EvolutionPanel() {
 
   return (
     <div className="space-y-4">
+      {ceremonyStage && (
+        <EvolutionCeremony
+          stage={ceremonyStage}
+          reduceMotion={prefersReducedMotion}
+          onComplete={() => setCeremonyStage(null)}
+        />
+      )}
       <header className="text-center space-y-2">
         <div
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full border-2"

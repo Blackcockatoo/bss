@@ -3404,6 +3404,7 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
                     blue60={blue60}
                     black60={black60}
                     positionOverride={positionOverrides?.[addon.id]}
+                    reduceMotion={reduceMotion}
                     draggable={addonEditMode}
                     onPositionChange={(x, y) =>
                       setAddonPosition(addon.id, x, y)

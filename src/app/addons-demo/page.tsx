@@ -7,24 +7,70 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { AddonInventoryPanel } from '@/components/addons/AddonInventoryPanel';
 import { AddonRenderer, AddonSVGDefs } from '@/components/addons/AddonRenderer';
 import { PetProfilePanel } from '@/components/addons/PetProfilePanel';
-import { CryptoKeyDisplay } from '@/components/addons/CryptoKeyDisplay';
+import { InteractiveGeometryField } from '@/components/InteractiveGeometryField';
+import { VisualEvaluationPanel } from '@/components/dev/VisualEvaluationPanel';
+import { useMovementController } from '@/pet/movement';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 import {
   generateAddonKeypair,
   mintAddon,
   useAddonStore,
   initializeAddonStore,
-  WIZARD_HAT,
-  WIZARD_STAFF,
-  CELESTIAL_CROWN,
-  SHADOW_CLOAK,
-  PRISMATIC_AURA,
-  FLOATING_FAMILIAR,
   verifyAddon,
+  type AddonTemplate,
 } from '@/lib/addons';
+import { ADDON_CATALOG } from '@/lib/addons/catalog';
+
+/**
+ * User-facing pack grouping for the mint catalog. Labels are intentionally
+ * style-neutral (Charm/Glam/etc.) rather than demographic.
+ */
+const ADDON_PACKS: Array<{
+  title: string;
+  blurb: string;
+  match: (id: string) => boolean;
+  defaultOpen?: boolean;
+}> = [
+  {
+    title: 'Core Collection',
+    blurb: 'The original wizard-era artifacts.',
+    match: (id) =>
+      !id.startsWith('custom-addon-') &&
+      !id.startsWith('girl-') &&
+      !isPremiumId(id),
+    defaultOpen: true,
+  },
+  {
+    title: 'Premium Vault',
+    blurb: 'Holographic, ethereal, and quantum showpieces.',
+    match: isPremiumId,
+  },
+  {
+    title: 'Mythic Workshop',
+    blurb: 'Reality-bending custom pieces 1008–1024.',
+    match: (id) => id.startsWith('custom-addon-'),
+  },
+  {
+    title: 'Charm Pack',
+    blurb: 'Expressive style, glam, and charm accessories.',
+    match: (id) => id.startsWith('girl-'),
+  },
+];
+
+function isPremiumId(id: string): boolean {
+  return [
+    'holographic-vault-001',
+    'ethereal-background-001',
+    'quantum-data-flow-001',
+    'phoenix-wings-001',
+    'crystal-heart-001',
+    'void-mask-001',
+  ].includes(id);
+}
 
 export default function AddonsDemoPage() {
   const [userKeys, setUserKeys] = useState<{ publicKey: string; privateKey: string } | null>(
@@ -36,6 +82,9 @@ export default function AddonsDemoPage() {
   const [loading, setLoading] = useState(false);
   const [animationPhase, setAnimationPhase] = useState(0);
   const [addonEditMode, setAddonEditMode] = useState(false);
+  const [showEvalPanel, setShowEvalPanel] = useState(false);
+  const [mirrorSignal, setMirrorSignal] = useState(0);
+  const reduceMotion = useReducedMotion();
 
   const { addAddon, getEquippedAddons, getAddonPosition, setAddonPosition, lockAddonPosition, resetAddonPosition, positionOverrides } = useAddonStore();
 
@@ -89,7 +138,7 @@ export default function AddonsDemoPage() {
     return () => cancelAnimationFrame(animationFrame);
   }, []);
 
-  const handleMintAddon = async (addonTemplate: typeof WIZARD_HAT) => {
+  const handleMintAddon = async (addonTemplate: AddonTemplate) => {
     if (!userKeys || !issuerKeys) {
       alert('Keys not initialized');
       return;
@@ -137,6 +186,20 @@ export default function AddonsDemoPage() {
 
   const equippedAddons = getEquippedAddons();
 
+  // Movement controller reacting to geometry-field gestures.
+  const movement = useMovementController({
+    equippedAddonCount: equippedAddons.length,
+    reduceMotion,
+  });
+
+  const packedTemplates = useMemo(() => {
+    const all = Object.values(ADDON_CATALOG);
+    return ADDON_PACKS.map((pack) => ({
+      ...pack,
+      templates: all.filter((t) => pack.match(t.id)),
+    })).filter((pack) => pack.templates.length > 0);
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
       <div className="max-w-7xl mx-auto">
@@ -169,8 +232,21 @@ export default function AddonsDemoPage() {
                   </span>
                 </div>
               </div>
-              <div className="aspect-square bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg flex items-center justify-center">
-                <svg viewBox="0 0 200 200" className="auralia-pet-svg w-full h-full">
+              <div className="relative aspect-square bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg flex items-center justify-center overflow-hidden">
+                {/* Living geometry layer behind the pet */}
+                <div className="absolute inset-0">
+                  <InteractiveGeometryField
+                    reduceMotion={reduceMotion}
+                    mirrorSignal={mirrorSignal}
+                    onGesture={(gesture) => movement.onGesture(gesture)}
+                  />
+                </div>
+                {/* In edit mode the pet svg takes pointer input for addon
+                    dragging; otherwise gestures fall through to the field */}
+                <svg
+                  viewBox="0 0 200 200"
+                  className={`auralia-pet-svg w-full h-full relative ${addonEditMode ? '' : 'pointer-events-none'}`}
+                >
                   <AddonSVGDefs />
 
                   {/* Simple Auralia representation */}
@@ -223,6 +299,7 @@ export default function AddonsDemoPage() {
                       petPosition={{ x: 100, y: 100 }}
                       animationPhase={animationPhase}
                       positionOverride={positionOverrides?.[addon.id]}
+                      reduceMotion={reduceMotion}
                       draggable={addonEditMode}
                       onPositionChange={(x, y) => setAddonPosition(addon.id, x, y)}
                       onToggleLock={(locked) => lockAddonPosition(addon.id, locked)}
@@ -264,47 +341,64 @@ export default function AddonsDemoPage() {
               </div>
             </div>
 
-            {/* Mint Addons */}
+            {/* Mint Addons — full catalog grouped into packs */}
             <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-6">
-              <h2 className="text-xl font-bold text-white mb-4">Mint Addons</h2>
-              <div className="grid grid-cols-2 gap-3">
-                <MintButton
-                  name="Wizard Hat"
-                  rarity="epic"
-                  onClick={() => handleMintAddon(WIZARD_HAT)}
-                  loading={loading}
-                />
-                <MintButton
-                  name="Wizard Staff"
-                  rarity="legendary"
-                  onClick={() => handleMintAddon(WIZARD_STAFF)}
-                  loading={loading}
-                />
-                <MintButton
-                  name="Celestial Crown"
-                  rarity="mythic"
-                  onClick={() => handleMintAddon(CELESTIAL_CROWN)}
-                  loading={loading}
-                />
-                <MintButton
-                  name="Shadow Cloak"
-                  rarity="rare"
-                  onClick={() => handleMintAddon(SHADOW_CLOAK)}
-                  loading={loading}
-                />
-                <MintButton
-                  name="Prismatic Aura"
-                  rarity="epic"
-                  onClick={() => handleMintAddon(PRISMATIC_AURA)}
-                  loading={loading}
-                />
-                <MintButton
-                  name="Floating Familiar"
-                  rarity="legendary"
-                  onClick={() => handleMintAddon(FLOATING_FAMILIAR)}
-                  loading={loading}
-                />
+              <h2 className="text-xl font-bold text-white mb-1">Mint Addons</h2>
+              <p className="text-xs text-slate-400 mb-4">
+                {Object.keys(ADDON_CATALOG).length} items across{' '}
+                {packedTemplates.length} packs
+              </p>
+              <div className="space-y-3">
+                {packedTemplates.map((pack) => (
+                  <details
+                    key={pack.title}
+                    open={pack.defaultOpen}
+                    className="rounded-lg border border-slate-700/60 bg-slate-950/40"
+                  >
+                    <summary className="cursor-pointer select-none px-4 py-3 min-h-[44px] flex flex-col justify-center">
+                      <span className="text-sm font-semibold text-white">
+                        {pack.title}{' '}
+                        <span className="text-slate-500 font-normal">
+                          ({pack.templates.length})
+                        </span>
+                      </span>
+                      <span className="text-xs text-slate-400">{pack.blurb}</span>
+                    </summary>
+                    <div className="grid grid-cols-2 gap-3 p-4 pt-1">
+                      {pack.templates.map((template) => (
+                        <MintButton
+                          key={template.id}
+                          name={template.name}
+                          rarity={template.rarity}
+                          onClick={() => handleMintAddon(template)}
+                          loading={loading}
+                        />
+                      ))}
+                    </div>
+                  </details>
+                ))}
               </div>
+            </div>
+
+            {/* Dev tools */}
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setShowEvalPanel((v) => !v)}
+                className="min-h-[44px] rounded-lg border border-slate-600 bg-slate-800/70 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700"
+              >
+                {showEvalPanel ? 'Hide' : 'Show'} Visual Eval Panel
+              </button>
+              <button
+                type="button"
+                onClick={() => setMirrorSignal((v) => v + 1)}
+                className="min-h-[44px] rounded-lg border border-slate-600 bg-slate-800/70 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700"
+              >
+                Trigger Mirror Bloom
+              </button>
+              <span className="text-xs text-slate-500">
+                Movement: {movement.active.clip.label}
+              </span>
             </div>
           </div>
 
@@ -348,6 +442,20 @@ export default function AddonsDemoPage() {
           </div>
         </div>
       </div>
+
+      {showEvalPanel && (
+        <VisualEvaluationPanel
+          particleCount={equippedAddons.reduce(
+            (sum, addon) => sum + (addon.visual.particles?.count ?? 0),
+            0,
+          )}
+          activeMovement={movement.active.clip.label}
+          equippedAddons={equippedAddons.map((addon) => addon.name)}
+          addonAnchors={equippedAddons.map(
+            (addon) => addon.attachment.anchorPoint,
+          )}
+        />
+      )}
     </div>
   );
 }
@@ -361,6 +469,8 @@ interface MintButtonProps {
 
 const MintButton: React.FC<MintButtonProps> = ({ name, rarity, onClick, loading }) => {
   const rarityColors = {
+    common: 'from-slate-600 to-slate-700',
+    uncommon: 'from-emerald-600 to-emerald-700',
     rare: 'from-blue-600 to-blue-700',
     epic: 'from-purple-600 to-purple-700',
     legendary: 'from-orange-600 to-orange-700',
@@ -372,8 +482,8 @@ const MintButton: React.FC<MintButtonProps> = ({ name, rarity, onClick, loading 
       onClick={onClick}
       disabled={loading}
       className={`bg-gradient-to-br ${
-        rarityColors[rarity as keyof typeof rarityColors]
-      } text-white font-medium py-3 px-4 rounded-lg transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed`}
+        rarityColors[rarity as keyof typeof rarityColors] ?? rarityColors.common
+      } text-white font-medium min-h-[44px] py-3 px-4 rounded-lg transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed`}
     >
       <div className="text-sm">{name}</div>
       <div className="text-xs opacity-75 capitalize">{rarity}</div>

@@ -2,7 +2,9 @@
 
 ## Overview
 
-This document provides a comprehensive inventory of 13 epic addon items created for the Blackcockatoo/bss repository. Each addon has been assigned a unique cryptographic identifier starting from **1008** and includes detailed specifications for visual appearance, behavioral properties, and cryptographic verification.
+This document provides a comprehensive inventory of the 17 custom addon items (cryptographic codes **1008–1024**) created for the Blackcockatoo/bss repository. Each addon has been assigned a unique cryptographic identifier and includes detailed specifications for visual appearance, behavioral properties, and cryptographic verification.
+
+> **Source of truth**: `src/lib/addons/customAddons.ts`. If this manifest and the code disagree, the code wins — regenerate the counts below from that file.
 
 ---
 
@@ -200,6 +202,18 @@ This document provides a comprehensive inventory of 13 epic addon items created 
 - **Particles**: 20 white particles with ambient behavior
 - **Max Editions**: 5
 
+### 17. Seraphic Pendant Field
+- **ID**: custom-addon-1024
+- **Cryptographic Code**: 1024
+- **SHA256**: `fb2cfb12a6477c1bd21004a3e6dc43842dcca7f37d522f4c608a551342e4311b`
+- **Category**: Accessory
+- **Rarity**: Mythic
+- **Appearance**: A living pendant lattice that projects a tesseract halo, helix strands, and oracle particles around Auralia's heart-field. Deep indigo primary with gold secondary and cyan accents, rendered by a dedicated custom renderer (`seraphicPendantField`).
+- **Behavior**: Projects a resonant heart-field lattice. Grants +18 Energy, +24 Curiosity, +18 Bond and +12 Luck.
+- **Animation**: Shimmer effect (1800ms, ease-in-out)
+- **Particles**: 20 cyan particles with orbit behavior
+- **Max Editions**: 3
+
 ---
 
 ## Cryptographic Verification
@@ -228,19 +242,19 @@ SHA256: 6b5d3d5cad2a0e0bf3778685dd696c66faf7064ba9e9566d359a653d6681a1ff
 
 | Metric | Value |
 |--------|-------|
-| Total Addons | 16 |
-| Mythic Rarity | 9 |
+| Total Addons | 17 |
+| Mythic Rarity | 10 |
 | Legendary Rarity | 4 |
 | Epic Rarity | 3 |
 | Total Categories | 6 |
-| Cryptographic Codes | 1008-1023 |
-| Average Max Editions | 15.6 |
+| Cryptographic Codes | 1008-1024 |
+| Average Max Editions | 14.7 |
 
 ### Category Distribution
 
 | Category | Count |
 |----------|-------|
-| Accessory | 8 |
+| Accessory | 9 |
 | Headwear | 3 |
 | Weapon | 2 |
 | Companion | 1 |
@@ -251,9 +265,9 @@ SHA256: 6b5d3d5cad2a0e0bf3778685dd696c66faf7064ba9e9566d359a653d6681a1ff
 
 | Rarity | Count | Percentage |
 |--------|-------|-----------|
-| Mythic | 9 | 56.3% |
-| Legendary | 4 | 25.0% |
-| Epic | 3 | 18.7% |
+| Mythic | 10 | 58.8% |
+| Legendary | 4 | 23.5% |
+| Epic | 3 | 17.6% |
 
 ---
 
@@ -284,17 +298,17 @@ All addons provide stat modifications:
 ## Visual Characteristics
 
 ### Animation Types Used
-- **Shimmer**: 8 addons (smooth color transitions)
-- **Pulse**: 4 addons (rhythmic expansion/contraction)
-- **Rotate**: 2 addons (continuous rotation)
-- **Sparkle**: 1 addon (twinkling effect)
-- **Float**: 1 addon (gentle floating motion)
+- **Shimmer**: 7 addons (smooth color transitions)
+- **Rotate**: 4 addons (continuous rotation)
+- **Pulse**: 3 addons (rhythmic expansion/contraction)
+- **Sparkle**: 2 addons (twinkling effect)
+- **Glow**: 1 addon (breathing glow)
 
 ### Particle Behaviors
 - **Ambient**: 8 addons (floating particles)
-- **Burst**: 4 addons (explosive particle spread)
+- **Orbit**: 4 addons (circular particle movement)
 - **Trail**: 3 addons (following particle paths)
-- **Orbit**: 1 addon (circular particle movement)
+- **Burst**: 2 addons (explosive particle spread)
 
 ---
 
@@ -314,7 +328,7 @@ All addons provide stat modifications:
 
 ## Conclusion
 
-This collection of 16 epic addon items (including 13 custom addons starting from ID 1008) represents a comprehensive expansion of the Blackcockatoo/bss addon ecosystem. Each item has been carefully designed with unique visual characteristics, behavioral properties, and cryptographic verification codes to ensure authenticity and prevent counterfeiting.
+This collection of 17 custom addon items (IDs 1008–1024) represents a comprehensive expansion of the Blackcockatoo/bss addon ecosystem. Each item has been carefully designed with unique visual characteristics, behavioral properties, and cryptographic verification codes to ensure authenticity and prevent counterfeiting.
 
 The addons are production-ready and fully integrated with the existing addon system, providing players with diverse cosmetic and stat-boosting options across multiple rarity tiers and categories.
 
