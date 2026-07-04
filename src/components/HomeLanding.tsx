@@ -3,8 +3,8 @@
 /**
  * HomeLanding — mode-aware home page.
  *
- * Normal mode (default): an app launcher that gets people into the actual
- * experiences (pet, DNA music hub, add-ons, …) in one tap.
+ * Normal mode (default): the original Meta-Pet app shell — pet hero,
+ * Sri Yantra Geometry Beast, evolution, mini games, identity, archives.
  * School mode: the teacher-facing pilot/marketing landing.
  *
  * The mode follows the header School/Normal switch (see @/lib/appMode);
@@ -13,12 +13,9 @@
 
 import Link from "next/link";
 
+import HomeAppShell from "@/components/HomeAppShell";
 import { useAppMode } from "@/lib/appMode";
-import { isChildSafeAllowedPathname } from "@/lib/childSafeBaseline";
-import {
-  ENABLE_CHILD_SAFE_BASELINE,
-  IS_SCHOOLS_PROFILE,
-} from "@/lib/env/features";
+import { IS_SCHOOLS_PROFILE } from "@/lib/env/features";
 
 const PILOT_MAILTO =
   "mailto:bluesssnakestudio@gmail.com?subject=Meta-Pet%20School%20Pilot%20Enquiry";
@@ -34,130 +31,10 @@ const TRUST_BADGES = [
   "Pilot pack ready",
 ];
 
-interface AppTile {
-  href: string;
-  title: string;
-  desc: string;
-  icon: string;
-  accent: string;
-}
-
-const APP_TILES: AppTile[] = [
-  {
-    href: "/pet",
-    title: "Meta-Pet Companion",
-    desc: "Care for Auralia — feed, play, bond, evolve.",
-    icon: "🐦",
-    accent: "border-cyan-500/25 bg-cyan-500/5 hover:bg-cyan-500/10",
-  },
-  {
-    href: "/digital-dna",
-    title: "DNA Music Hub",
-    desc: "Turn number strands into geometry, colour, and sound.",
-    icon: "🧬",
-    accent: "border-amber-500/25 bg-amber-500/5 hover:bg-amber-500/10",
-  },
-  {
-    href: "/addons-demo",
-    title: "Add-on Studio",
-    desc: "Mint and equip crypto-signed cosmetic add-ons.",
-    icon: "✨",
-    accent: "border-violet-500/25 bg-violet-500/5 hover:bg-violet-500/10",
-  },
-  {
-    href: "/moss60",
-    title: "Moss60 Hub",
-    desc: "Explore the 60-glyph strand system.",
-    icon: "🌿",
-    accent: "border-emerald-500/25 bg-emerald-500/5 hover:bg-emerald-500/10",
-  },
-  {
-    href: "/genome-explorer",
-    title: "Genome Explorer",
-    desc: "Dig into the genetic engine behind your pet.",
-    icon: "🔬",
-    accent: "border-blue-500/25 bg-blue-500/5 hover:bg-blue-500/10",
-  },
-  {
-    href: "/identity",
-    title: "Identity",
-    desc: "Your local-first keys, crest, and profile.",
-    icon: "🗝️",
-    accent: "border-rose-500/25 bg-rose-500/5 hover:bg-rose-500/10",
-  },
-];
-
 export function HomeLanding() {
   const appMode = useAppMode();
   const schoolMode = IS_SCHOOLS_PROFILE || appMode === "school";
-  return schoolMode ? <SchoolLanding /> : <NormalLanding />;
-}
-
-function NormalLanding() {
-  // Child-safe deployments only expose a subset of routes; hide tiles that
-  // would just redirect back.
-  const tiles = ENABLE_CHILD_SAFE_BASELINE
-    ? APP_TILES.filter((tile) => isChildSafeAllowedPathname(tile.href))
-    : APP_TILES;
-  return (
-    <main className="min-h-dvh bg-slate-950 text-slate-100">
-      {/* Hero — compact, app-first */}
-      <section className="mx-auto w-full max-w-5xl px-5 pb-6 pt-10 sm:pt-14">
-        <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-          Meta-Pet
-        </h1>
-        <p className="mt-2 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-          Your local-first geometry companion. Pick a place to start:
-        </p>
-      </section>
-
-      {/* App launcher */}
-      <section className="mx-auto w-full max-w-5xl px-5 pb-10">
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {tiles.map((tile) => (
-            <Link
-              key={tile.href}
-              href={tile.href}
-              className={`group flex min-h-[44px] items-start gap-3 rounded-2xl border p-4 transition-colors ${tile.accent}`}
-            >
-              <span aria-hidden className="text-2xl leading-none pt-0.5">
-                {tile.icon}
-              </span>
-              <span>
-                <span className="block text-sm font-semibold text-slate-100 group-hover:text-white">
-                  {tile.title} →
-                </span>
-                <span className="mt-1 block text-xs leading-5 text-slate-400">
-                  {tile.desc}
-                </span>
-              </span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* Compact school pointer */}
-      <section className="mx-auto w-full max-w-5xl px-5 pb-14">
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-800 bg-slate-900/40 p-4">
-          <div>
-            <p className="text-sm font-semibold text-slate-100">
-              Teacher or school?
-            </p>
-            <p className="text-xs text-slate-400">
-              Switch to School mode in the header, or go straight to the pilot
-              pack.
-            </p>
-          </div>
-          <Link
-            href="/schools"
-            className="inline-flex min-h-[44px] items-center rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-200 transition-colors hover:bg-amber-500/15"
-          >
-            School Pilot Pack
-          </Link>
-        </div>
-      </section>
-    </main>
-  );
+  return schoolMode ? <SchoolLanding /> : <HomeAppShell />;
 }
 
 function SchoolLanding() {
