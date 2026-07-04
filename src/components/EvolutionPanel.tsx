@@ -15,6 +15,7 @@ import {
 import { Zap, Clock, TrendingUp, Sparkles, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { requestMovement } from '@/pet/movement';
 
 import { EvolutionCeremony } from './EvolutionCeremony';
 import { Button } from './ui/button';
@@ -114,7 +115,13 @@ export function EvolutionPanel() {
         <EvolutionCeremony
           stage={ceremonyStage}
           reduceMotion={prefersReducedMotion}
-          onComplete={() => setCeremonyStage(null)}
+          onComplete={() => {
+            // The final stage earns the signature move as the ceremony ends.
+            if (ceremonyStage === 'SPECIATION') {
+              requestMovement('black_wing_bloom');
+            }
+            setCeremonyStage(null);
+          }}
         />
       )}
       <header className="text-center space-y-2">

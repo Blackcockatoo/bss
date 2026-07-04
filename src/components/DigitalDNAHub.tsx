@@ -86,6 +86,8 @@ interface ToolkitSettingsSnapshot {
   toolWindowSize: number;
   toolTransform: ToolTransform;
   toolFocusBand: "all" | "odd" | "even";
+  /** Optional so snapshots saved before this field existed still parse. */
+  visualQuality?: VisualQuality;
 }
 
 interface SavedToolkitPreset extends ToolkitSettingsSnapshot {
@@ -148,6 +150,16 @@ const QUALITY_SPHERE_SEGMENTS: Record<VisualQuality, number> = {
   high: 16,
 };
 const QUALITY_ORDER: VisualQuality[] = ["low", "medium", "high"];
+
+// ── Touch-friendly range slider (44px hit area, thin visual track) ──────────
+const SLIDER_BASE_CLASS =
+  "h-11 w-full cursor-pointer appearance-none bg-transparent " +
+  "[&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-slate-700 " +
+  "[&::-webkit-slider-thumb]:-mt-1.5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full " +
+  "[&::-moz-range-track]:h-2 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-slate-700 " +
+  "[&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0";
+const SLIDER_AMBER = `${SLIDER_BASE_CLASS} [&::-webkit-slider-thumb]:bg-amber-400 [&::-moz-range-thumb]:bg-amber-400`;
+const SLIDER_CYAN = `${SLIDER_BASE_CLASS} [&::-webkit-slider-thumb]:bg-cyan-400 [&::-moz-range-thumb]:bg-cyan-400`;
 
 function defaultVisualQuality(): VisualQuality {
   if (typeof window === "undefined") return "medium";
@@ -1104,6 +1116,7 @@ export default function DigitalDNAHub({
       toolWindowSize,
       toolTransform,
       toolFocusBand,
+      visualQuality,
     }),
     [
       selectedSeed,
@@ -1119,6 +1132,7 @@ export default function DigitalDNAHub({
       toolWindowSize,
       toolTransform,
       toolFocusBand,
+      visualQuality,
     ],
   );
 
@@ -1141,6 +1155,12 @@ export default function DigitalDNAHub({
       setToolWindowSize(clamp(settings.toolWindowSize, 6, 20));
       setToolTransform(settings.toolTransform);
       setToolFocusBand(settings.toolFocusBand);
+      if (
+        settings.visualQuality &&
+        QUALITY_ORDER.includes(settings.visualQuality)
+      ) {
+        setVisualQuality(settings.visualQuality);
+      }
     },
     [],
   );
@@ -3025,6 +3045,9 @@ export default function DigitalDNAHub({
                 <button
                   key={seed}
                   onClick={() => setSelectedSeed(seed)}
+                  aria-label={`Select ${
+                    seed === "red" ? "Fire" : seed === "blue" ? "Water" : "Earth"
+                  } strand`}
                   title={
                     seed === "red"
                       ? "Fire"
@@ -3032,7 +3055,7 @@ export default function DigitalDNAHub({
                         ? "Water"
                         : "Earth"
                   }
-                  className={`h-9 w-9 rounded-full transition-all ${
+                  className={`h-11 w-11 rounded-full transition-all ${
                     selectedSeed === seed
                       ? "scale-110 shadow-lg ring-2 ring-white/50"
                       : "opacity-60 hover:opacity-90"
@@ -3082,7 +3105,7 @@ export default function DigitalDNAHub({
                 max="180"
                 value={tempo}
                 onChange={(e) => updateTempo(parseInt(e.target.value, 10))}
-                className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-700 accent-amber-400"
+                className={`mt-1 ${SLIDER_AMBER}`}
               />
             </div>
 
@@ -3233,7 +3256,7 @@ export default function DigitalDNAHub({
                             setMiniPathStartIndex(parseInt(e.target.value, 10));
                             setSequenceSource("packet");
                           }}
-                          className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-700 accent-cyan-400"
+                          className={SLIDER_CYAN}
                         />
                       </div>
 
@@ -3259,7 +3282,7 @@ export default function DigitalDNAHub({
                             setMiniPathLength(parseInt(e.target.value, 10));
                             setSequenceSource("packet");
                           }}
-                          className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-700 accent-amber-400"
+                          className={SLIDER_AMBER}
                         />
                       </div>
                     </div>
@@ -3401,7 +3424,7 @@ export default function DigitalDNAHub({
                   <button
                     type="button"
                     onClick={() => setSelectedSeed(strand.key)}
-                    className="rounded-full border border-white/15 bg-black/20 px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-black/30"
+                    className="min-h-[44px] rounded-full border border-white/15 bg-black/20 px-4 py-1 text-xs font-semibold text-white transition-colors hover:bg-black/30"
                   >
                     Load
                   </button>
@@ -3649,7 +3672,7 @@ export default function DigitalDNAHub({
                     onChange={(e) =>
                       setToolStartIndex(parseInt(e.target.value, 10))
                     }
-                    className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-700 accent-cyan-400"
+                    className={SLIDER_CYAN}
                   />
                 </div>
 
@@ -3671,7 +3694,7 @@ export default function DigitalDNAHub({
                     onChange={(e) =>
                       setToolWindowSize(parseInt(e.target.value, 10))
                     }
-                    className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-700 accent-amber-400"
+                    className={SLIDER_AMBER}
                   />
                 </div>
 
@@ -4040,7 +4063,7 @@ export default function DigitalDNAHub({
                         onChange={(e) =>
                           setNoteBoardCapacity(parseInt(e.target.value, 10))
                         }
-                        className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-700 accent-cyan-400"
+                        className={SLIDER_CYAN}
                       />
                       <p className="mt-3 text-xs leading-5 text-slate-500">
                         Start small, then scale the board up to 180 notes when
@@ -5833,7 +5856,7 @@ export default function DigitalDNAHub({
                         max="180"
                         value={tempo}
                         onChange={(e) => updateTempo(parseInt(e.target.value, 10))}
-                        className="w-full h-3 rounded-lg appearance-none cursor-pointer bg-slate-700 accent-amber-400"
+                        className={SLIDER_AMBER}
                       />
                       <div className="text-center text-2xl font-bold text-amber-400 font-mono">
                         {tempo} BPM

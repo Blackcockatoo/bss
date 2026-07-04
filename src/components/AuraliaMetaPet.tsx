@@ -34,8 +34,10 @@ import {
   useGuardianAI,
   useGuardianInteraction,
 } from "../../shared/auralia/guardianBehavior";
+import { useMovementController } from "../pet/movement";
 import { AddonRenderer, AddonSVGDefs } from "./addons/AddonRenderer";
 import { EyeEmotionFilters } from "./auralia/EyeFilters";
+import { InteractiveGeometryField } from "./InteractiveGeometryField";
 import {
   EyeRenderer,
   type EyeState,
@@ -551,6 +553,7 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
   const [masterVolume, setMasterVolume] = useState<number>(0.8);
   const [audioMuted, setAudioMuted] = useState<boolean>(true);
   const [reduceMotion, setReduceMotion] = useState<boolean>(false);
+  const [showGeometryField, setShowGeometryField] = useState<boolean>(true);
   const [isVisible, setIsVisible] = useState<boolean>(true);
   const [showDebugOverlay, setShowDebugOverlay] = useState<boolean>(false);
   const [dreamJournal, setDreamJournal] = useState<DreamInsightEntry[]>([]);
@@ -1182,6 +1185,26 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
 
   const { red60, blue60, black60 } = computeGenome();
   const mood = Math.max(0, Math.min(100, health - annoyanceLevel * 3));
+
+  // Movement vocabulary controller: reacts to taps and schedules mood
+  // expression / rare signature moves alongside the existing behaviors.
+  const movement = useMovementController({
+    mood,
+    energy,
+    curiosity,
+    bond,
+    equippedAddonCount: equippedAddons.length,
+    reduceMotion,
+    paused: !isVisible,
+  });
+  // Signature moves fold the background geometry into its mirror bloom.
+  const activeMovementId = movement.active.clip.id;
+  const geometryMirrorSignal =
+    activeMovementId === "black_wing_bloom" ||
+    activeMovementId === "quantum_split" ||
+    activeMovementId === "folded_wing_hide"
+      ? movement.active.startedAt
+      : 0;
 
   const generateSigil = useCallback(
     (seed: string): SigilPoint[] => {
@@ -2713,6 +2736,12 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
               AI State: <span className="text-cyan-400">{aiState.mode}</span>
             </p>
             <p>
+              Movement:{" "}
+              <span className="text-cyan-400">
+                {movement.active.clip.label}
+              </span>
+            </p>
+            <p>
               Time in State:{" "}
               <span className="text-cyan-400">{timeInState}s</span>
             </p>
@@ -2863,6 +2892,25 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
                 isVisible={isVisible}
               />
 
+              {/* Living geometry ring behind the pet. Pointer events stay on
+                  the pet svg above, so this layer is display-only here. */}
+              {showGeometryField && (
+                <div className="absolute inset-0 pointer-events-none">
+                  <InteractiveGeometryField
+                    mood={mood}
+                    energy={energy}
+                    curiosity={curiosity}
+                    bond={bond}
+                    red60={red60}
+                    blue60={blue60}
+                    black60={black60}
+                    reduceMotion={reduceMotion}
+                    quality={reduceMotion ? "low" : "medium"}
+                    mirrorSignal={geometryMirrorSignal}
+                  />
+                </div>
+              )}
+
               <svg
                 ref={svgRef}
                 viewBox="0 0 400 400"
@@ -2876,7 +2924,10 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
                 onTouchStart={handleOrbMouseDown}
                 onTouchMove={handleOrbMouseMove}
                 onTouchEnd={handleOrbMouseUp}
-                onClick={handleOrbClick}
+                onClick={(event) => {
+                  movement.onGesture("tap");
+                  handleOrbClick(event);
+                }}
                 style={{ userSelect: "none" }}
               >
                 <defs>
@@ -4449,6 +4500,23 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
                     >
                       <span
                         className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${reduceMotion ? "translate-x-6" : "translate-x-0"}`}
+                      />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium text-gray-300">
+                      Geometry Field
+                    </label>
+                    <button
+                      onClick={() => setShowGeometryField(!showGeometryField)}
+                      className={`relative w-12 h-6 rounded-full transition-colors ${showGeometryField ? "bg-cyan-500" : "bg-gray-600"}`}
+                      role="switch"
+                      aria-checked={showGeometryField}
+                      aria-label="Toggle background geometry field"
+                    >
+                      <span
+                        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${showGeometryField ? "translate-x-6" : "translate-x-0"}`}
                       />
                     </button>
                   </div>

@@ -116,7 +116,7 @@ export default function ClientBody({
       <footer className="px-4 pb-24 pt-4 text-center sm:pb-6">
         <a
           href="mailto:bluesssnakestudio@gmail.com?subject=Meta-Pet%20School%20Pilot%20Enquiry"
-          className="mb-4 inline-block text-xs text-slate-400 underline hover:text-slate-300"
+          className="mb-4 inline-flex min-h-[44px] items-center text-xs text-slate-400 underline hover:text-slate-300"
         >
           Pilot Enquiry
         </a>

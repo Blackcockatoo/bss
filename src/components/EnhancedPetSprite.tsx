@@ -5,7 +5,36 @@ import Image from 'next/image';
 import { useStore } from '@/lib/store';
 import { EVOLUTION_VISUALS } from '@/lib/evolution';
 import { getCockatooDataUri } from '@/lib/cockatooSprites';
-import { motion } from 'framer-motion';
+import { useMovementController } from '@/pet/movement';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { motion, type TargetAndTransition } from 'framer-motion';
+
+/**
+ * Visual interpretation of movement vocabulary clips as whole-sprite
+ * transforms. Clips missing here (e.g. idle_breathe, blink) are covered by
+ * the existing mood/eye animations instead.
+ */
+const CLIP_ANIMATIONS: Record<string, TargetAndTransition> = {
+  head_tilt: { rotate: [0, 8, 8, 0] },
+  wing_flutter: { x: [0, -4, 4, -4, 4, 0], rotate: [0, -2, 2, 0] },
+  happy_bounce: { y: [0, -14, 0, -7, 0], scaleY: [1, 1.05, 0.94, 1.02, 1] },
+  sleepy_droop: { y: [0, 6, 6, 0], rotate: [0, -4, -4, 0] },
+  tap_surprise: { scale: [1, 1.15, 0.95, 1.03, 1] },
+  hold_charge: { scale: [1, 1.07, 1.07, 1], rotate: [0, 0, 2, 0] },
+  swipe_spin: { rotate: [0, 360] },
+  beat_hit: { scale: [1, 1.07, 1] },
+  aura_pulse: { scale: [1, 1.05, 1], opacity: [1, 0.92, 1] },
+  quantum_split: { x: [0, -7, 7, -4, 4, 0], opacity: [1, 0.7, 1, 0.8, 1] },
+  quantum_stutter: { x: [0, -6, 6, -3, 3, 0] },
+  omen_twitch: { x: [0, -3, 3, -2, 1, 0], rotate: [0, -2, 2, 0] },
+  moss60_orbit: { x: [0, 7, 0, -7, 0], y: [0, -7, 0, 7, 0] },
+  venom_pulse: { scale: [1, 1.09, 0.98, 1.04, 1] },
+  folded_wing_hide: { scaleX: [1, 0.86, 0.86, 1], y: [0, 5, 5, 0], opacity: [1, 0.78, 0.78, 1] },
+  oracle_blink: { opacity: [1, 0.55, 1, 0.7, 1] },
+  black_wing_bloom: { scale: [1, 1.2, 1.05, 1], rotate: [0, -7, 7, 0] },
+  sacred_toy_bounce: { y: [0, -16, 0, -9, 0], rotate: [0, 10, -10, 0] },
+  evolution_ceremony: { scale: [1, 1.12, 1], opacity: [1, 0.85, 1] },
+};
 
 export const EnhancedPetSprite = memo(function EnhancedPetSprite() {
   const traits = useStore(s => s.traits);
@@ -16,6 +45,18 @@ export const EnhancedPetSprite = memo(function EnhancedPetSprite() {
 
   const ACTION_WINDOW_MS = 1400;
   const [actionActive, setActionActive] = useState(false);
+  const reduceMotion = useReducedMotion();
+
+  const movement = useMovementController({
+    mood: vitals.mood,
+    energy: vitals.energy,
+    evolutionState: evolution.state,
+    lastAction,
+    reduceMotion,
+  });
+
+  const activeClip = movement.active.clip;
+  const clipAnimation = CLIP_ANIMATIONS[activeClip.id];
 
   useEffect(() => {
     const age = Date.now() - lastActionAt;
@@ -192,6 +233,7 @@ export const EnhancedPetSprite = memo(function EnhancedPetSprite() {
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.6, type: 'spring' }}
+      onPointerDown={() => movement.onGesture('tap')}
     >
       {/* Background glow effect */}
       <motion.div
@@ -244,10 +286,20 @@ export const EnhancedPetSprite = memo(function EnhancedPetSprite() {
         />
       </motion.div>
 
+      {/* Movement-clip layer: restarts whenever a new clip takes over */}
+      <motion.div
+        key={movement.active.startedAt}
+        className="w-full h-full flex items-center justify-center relative z-10"
+        animate={clipAnimation ?? {}}
+        transition={{
+          duration: activeClip.duration / 1000,
+          ease: 'easeInOut',
+        }}
+      >
       {/* Pet sprite with animations */}
       <motion.svg
         viewBox="0 0 200 200"
-        className="w-full h-full max-w-xs relative z-10"
+        className="w-full h-full max-w-xs"
         animate={getMoodAnimation()}
         transition={{
           duration: isHappy ? 1.5 : isTired ? 2.5 : 2,
@@ -288,12 +340,22 @@ export const EnhancedPetSprite = memo(function EnhancedPetSprite() {
         {/* Glossy shine overlay */}
         <circle cx="100" cy="100" r={physical.size * 80} fill="url(#petGloss)" />
 
-        {/* Eyes - animated based on mood */}
+        {/* Eyes - animated based on mood; scaleY closes them on blink clips */}
         <motion.g
+          style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
           animate={{
             opacity: isTired ? 0.5 : 1,
+            scaleY:
+              activeClip.id === 'blink' || activeClip.id === 'oracle_blink'
+                ? [1, 0.15, 1]
+                : 1,
           }}
-          transition={{ duration: 0.3 }}
+          transition={{
+            duration:
+              activeClip.id === 'blink' || activeClip.id === 'oracle_blink'
+                ? activeClip.duration / 1000
+                : 0.3,
+          }}
         >
           <circle cx="85" cy="90" r="8" fill="white" />
           <circle cx="115" cy="90" r="8" fill="white" />
@@ -398,6 +460,7 @@ export const EnhancedPetSprite = memo(function EnhancedPetSprite() {
           </>
         )}
       </motion.svg>
+      </motion.div>
     </motion.div>
   );
 });

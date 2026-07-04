@@ -11,7 +11,11 @@ export type {
   MovementTag,
   PetMood,
 } from "./movementVocabulary";
-export { useMovementController } from "./useMovementController";
+export {
+  MOVEMENT_REQUEST_EVENT,
+  requestMovement,
+  useMovementController,
+} from "./useMovementController";
 export type {
   ActiveMovement,
   MovementControllerApi,

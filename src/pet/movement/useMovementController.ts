@@ -40,6 +40,12 @@ export interface MovementControllerInputs {
   secretMoveChance?: number;
   /** Disable the internal timer (for tests/SSR-safety). */
   paused?: boolean;
+  /**
+   * Update `progress` continuously via rAF. Off by default: per-frame state
+   * updates re-render every consumer and can interrupt React hydration, so
+   * only enable it when something actually renders the progress value.
+   */
+  trackProgress?: boolean;
 }
 
 export interface ActiveMovement {
@@ -51,7 +57,7 @@ export interface ActiveMovement {
 export interface MovementControllerApi {
   /** Currently playing clip (always defined; idle_breathe at rest). */
   active: ActiveMovement;
-  /** Normalized 0..1 progress through the active clip. */
+  /** Normalized 0..1 clip progress; stays 0 unless `trackProgress` is set. */
   progress: number;
   /** Derived mood bucket used for gating. */
   moodBucket: PetMood;
@@ -63,6 +69,19 @@ export interface MovementControllerApi {
   onBeat: () => void;
   /** Trigger the evolution ceremony movement. */
   playCeremony: () => void;
+}
+
+/**
+ * Cross-component movement requests: any code (e.g. the evolution ceremony)
+ * can ask running movement controllers to play a clip without a shared store.
+ */
+export const MOVEMENT_REQUEST_EVENT = "bss:movement-request";
+
+export function requestMovement(clipId: string): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(
+    new CustomEvent(MOVEMENT_REQUEST_EVENT, { detail: { clipId } }),
+  );
 }
 
 const BRAIN_TICK_MS = 2400;
@@ -89,6 +108,7 @@ export function useMovementController(
     reduceMotion = false,
     secretMoveChance = DEFAULT_SECRET_CHANCE,
     paused = false,
+    trackProgress = false,
   } = inputs;
 
   const moodBucket = useMemo(
@@ -162,27 +182,50 @@ export function useMovementController(
     return () => window.clearTimeout(timer);
   }, [lastAction, tryPlay]);
 
-  // Progress ticker + clip expiry → fall back to idle breathing.
+  // Clip expiry → fall back to idle breathing. Deliberately quiet: while
+  // idle no state updates fire at all, so mounting the controller never
+  // interrupts React hydration or re-renders consumers at rest.
   useEffect(() => {
     if (paused || typeof window === "undefined") return;
-    let raf = 0;
-    const step = () => {
-      const elapsed = Date.now() - active.startedAt;
-      if (elapsed >= active.clip.duration) {
-        if (active.clip.id !== IDLE_CLIP.id) {
-          setActive({ clip: IDLE_CLIP, startedAt: Date.now() });
-        } else {
-          // Loop idle breathing without re-render churn.
-          setProgress((elapsed % IDLE_CLIP.duration) / IDLE_CLIP.duration);
-        }
-      } else {
-        setProgress(elapsed / active.clip.duration);
+    const EXPIRY_CHECK_MS = 150;
+    const expiry = window.setInterval(() => {
+      if (active.clip.id === IDLE_CLIP.id) return;
+      if (Date.now() - active.startedAt >= active.clip.duration) {
+        setActive({ clip: IDLE_CLIP, startedAt: Date.now() });
       }
+    }, EXPIRY_CHECK_MS);
+
+    // Optional per-frame progress for consumers that render it.
+    let raf = 0;
+    if (trackProgress) {
+      const step = () => {
+        const elapsed = Date.now() - active.startedAt;
+        setProgress(
+          active.clip.id === IDLE_CLIP.id
+            ? (elapsed % IDLE_CLIP.duration) / IDLE_CLIP.duration
+            : Math.min(1, elapsed / active.clip.duration),
+        );
+        raf = window.requestAnimationFrame(step);
+      };
       raf = window.requestAnimationFrame(step);
+    }
+
+    return () => {
+      window.clearInterval(expiry);
+      if (raf) window.cancelAnimationFrame(raf);
     };
-    raf = window.requestAnimationFrame(step);
-    return () => window.cancelAnimationFrame(raf);
-  }, [active, paused]);
+  }, [active, paused, trackProgress]);
+
+  // External movement requests (evolution ceremony, add-on equips, …).
+  useEffect(() => {
+    if (paused || typeof window === "undefined") return;
+    const onRequest = (event: Event) => {
+      const clipId = (event as CustomEvent<{ clipId?: string }>).detail?.clipId;
+      if (clipId) tryPlay(clipId);
+    };
+    window.addEventListener(MOVEMENT_REQUEST_EVENT, onRequest);
+    return () => window.removeEventListener(MOVEMENT_REQUEST_EVENT, onRequest);
+  }, [paused, tryPlay]);
 
   // Brain tick: schedule mood expressions, addon reactions, secret moves.
   useEffect(() => {
