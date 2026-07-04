@@ -3,6 +3,7 @@
 import LegalNotice from "@/components/LegalNotice";
 import { JourneyProgressStrip } from "@/components/JourneyProgressStrip";
 import { QuickNav } from "@/components/QuickNav";
+import { setAppMode, useAppMode } from "@/lib/appMode";
 import {
   getChildSafeFallbackPathname,
   isChildSafeAllowedPathname,
@@ -23,6 +24,7 @@ export default function ClientBody({
   const pathname = usePathname();
   const router = useRouter();
   const [privacyOpen, setPrivacyOpen] = useState(false);
+  const appMode = useAppMode();
   const isSchoolPath = useMemo(
     () =>
       !!pathname &&
@@ -31,7 +33,8 @@ export default function ClientBody({
         pathname.startsWith("/schools/")),
     [pathname],
   );
-  const effectiveSchoolsMode = IS_SCHOOLS_PROFILE || isSchoolPath;
+  const effectiveSchoolsMode =
+    IS_SCHOOLS_PROFILE || isSchoolPath || appMode === "school";
   const childSafeBlocked = useMemo(
     () =>
       (ENABLE_CHILD_SAFE_BASELINE || IS_SCHOOLS_PROFILE) &&
@@ -90,14 +93,32 @@ export default function ClientBody({
           <div className={`text-sm ${effectiveSchoolsMode ? "text-foreground font-medium" : "text-zinc-200"}`}>
             {effectiveSchoolsMode ? "MetaPet Schools" : "Meta-Pet"}
           </div>
-          <button
-            type="button"
-            onClick={() => setPrivacyOpen((current) => !current)}
-            className={`min-h-9 rounded-full border px-3 py-1 text-xs transition-colors ${effectiveSchoolsMode ? "border-emerald-600/30 bg-emerald-50 text-emerald-700 hover:border-emerald-600/50 hover:bg-emerald-100" : "border-emerald-400/25 bg-emerald-500/10 text-emerald-200 hover:border-emerald-300/45 hover:bg-emerald-500/15"}`}
-            aria-expanded={privacyOpen}
-          >
-            Local-first / child-safe
-          </button>
+          <div className="flex items-center gap-2">
+            {/* School/normal mode switch — hidden on deployments that force
+                school mode via env, where switching is not allowed */}
+            {!IS_SCHOOLS_PROFILE && (
+              <button
+                type="button"
+                onClick={() =>
+                  setAppMode(appMode === "school" ? "normal" : "school")
+                }
+                className={`min-h-9 rounded-full border px-3 py-1 text-xs transition-colors ${effectiveSchoolsMode ? "border-amber-600/40 bg-amber-50 text-amber-700 hover:bg-amber-100" : "border-slate-600 bg-slate-800/70 text-slate-200 hover:bg-slate-700"}`}
+                role="switch"
+                aria-checked={appMode === "school"}
+                aria-label="Toggle between school mode and normal mode"
+              >
+                {appMode === "school" ? "School mode" : "Normal mode"}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setPrivacyOpen((current) => !current)}
+              className={`min-h-9 rounded-full border px-3 py-1 text-xs transition-colors ${effectiveSchoolsMode ? "border-emerald-600/30 bg-emerald-50 text-emerald-700 hover:border-emerald-600/50 hover:bg-emerald-100" : "border-emerald-400/25 bg-emerald-500/10 text-emerald-200 hover:border-emerald-300/45 hover:bg-emerald-500/15"}`}
+              aria-expanded={privacyOpen}
+            >
+              Local-first / child-safe
+            </button>
+          </div>
         </div>
         {privacyOpen && (
           <div className={`mx-auto mt-3 w-full max-w-6xl rounded-2xl border p-3 text-xs leading-5 sm:leading-6 ${effectiveSchoolsMode ? "border-border bg-card text-muted-foreground" : "border-slate-800 bg-slate-900/60 text-zinc-300"}`}>

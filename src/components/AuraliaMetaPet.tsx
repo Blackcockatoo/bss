@@ -553,7 +553,9 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
   const [masterVolume, setMasterVolume] = useState<number>(0.8);
   const [audioMuted, setAudioMuted] = useState<boolean>(true);
   const [reduceMotion, setReduceMotion] = useState<boolean>(false);
-  const [showGeometryField, setShowGeometryField] = useState<boolean>(true);
+  // Off by default: it's a flourish, not core to the pet. Opt in via the
+  // "Geometry Field" switch in Accessibility settings.
+  const [showGeometryField, setShowGeometryField] = useState<boolean>(false);
   const [isVisible, setIsVisible] = useState<boolean>(true);
   const [showDebugOverlay, setShowDebugOverlay] = useState<boolean>(false);
   const [dreamJournal, setDreamJournal] = useState<DreamInsightEntry[]>([]);

@@ -14,6 +14,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useAppMode } from "@/lib/appMode";
 import { CHILD_SAFE_NAV_ROUTES } from "@/lib/childSafeBaseline";
 import {
   ENABLE_CHILD_SAFE_BASELINE,
@@ -44,6 +45,7 @@ export function QuickNav() {
   const router = useRouter();
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
+  const appMode = useAppMode();
   const isSchoolPath = useMemo(
     () =>
       !!pathname &&
@@ -52,7 +54,8 @@ export function QuickNav() {
         pathname.startsWith("/schools/")),
     [pathname],
   );
-  const effectiveSchoolsMode = IS_SCHOOLS_PROFILE || isSchoolPath;
+  const effectiveSchoolsMode =
+    IS_SCHOOLS_PROFILE || isSchoolPath || appMode === "school";
 
   const handleBack = useCallback(() => {
     triggerHaptic("light");
