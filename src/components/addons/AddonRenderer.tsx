@@ -5,6 +5,15 @@
 "use client";
 
 import type { Addon, AddonPositionOverride } from "@/lib/addons";
+import {
+  RARITY_POP,
+  REDUCED_MOTION_DAMP,
+  getParticleImpactBoost,
+  getPopTransform,
+  getShockwave,
+  getSnapOn,
+  getSparklePoints,
+} from "@/lib/addons/animationPop";
 import type React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { SeraphicPendantField } from "./SeraphicPendantField";
@@ -32,6 +41,8 @@ interface AddonRendererProps {
   onToggleLock?: (locked: boolean) => void;
   /** Callback to reset position */
   onResetPosition?: () => void;
+  /** Respect the user's reduced-motion preference */
+  reduceMotion?: boolean;
 }
 
 export const AddonRenderer: React.FC<AddonRendererProps> = ({
@@ -51,8 +62,14 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
   onPositionChange,
   onToggleLock,
   onResetPosition,
+  reduceMotion = false,
 }) => {
   const { attachment, visual } = addon;
+  const popProfile = RARITY_POP[addon.rarity];
+  // Anchor the equip "snap on" flourish to the animation clock so it
+  // pauses with the parent and never needs its own timer.
+  const [mountPhase] = useState(animationPhase);
+  const snapOn = getSnapOn(animationPhase - mountPhase, reduceMotion);
   const [isDragging, setIsDragging] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const dragStartRef = useRef<{
@@ -171,49 +188,56 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
     [draggable, isLocked, position, onPositionChange],
   );
 
-  // Animation transform
-  const animationTransform = useMemo(() => {
-    if (!visual.animation) return "";
-
-    const { type, duration } = visual.animation;
-    const progress = (animationPhase % duration) / duration;
-
-    switch (type) {
-      case "float":
-        const floatY = Math.sin(progress * Math.PI * 2) * 3;
-        return `translateY(${floatY}px)`;
-
-      case "rotate":
-        const rotateDeg = progress * 360;
-        return `rotate(${rotateDeg}deg)`;
-
-      case "pulse":
-        const scale = 1 + Math.sin(progress * Math.PI * 2) * 0.1;
-        return `scale(${scale})`;
-
-      case "shimmer":
-        // Handled via opacity animation
-        return "";
-
-      default:
-        return "";
-    }
+  // Normalized progress through one animation cycle (0..1)
+  const cycleT = useMemo(() => {
+    if (!visual.animation) return 0;
+    return (animationPhase % visual.animation.duration) / visual.animation.duration;
   }, [visual.animation, animationPhase]);
 
-  // Opacity for shimmer effect
+  // Animation transform with rarity pop (attack/impact/aftershock/settle)
+  const pop = useMemo(() => {
+    if (!visual.animation) return { transform: "", opacityFactor: 1 };
+    return getPopTransform(visual.animation.type, cycleT, addon.rarity, reduceMotion);
+  }, [visual.animation, cycleT, addon.rarity, reduceMotion]);
+
+  const animationTransform = pop.transform;
+
+  // Shockwave ring for pulse/glow/sparkle addons on rarities that earn one
+  const shockwave = useMemo(() => {
+    const type = visual.animation?.type;
+    const wantsShockwave =
+      type === "pulse" || type === "glow" || type === "sparkle";
+    if (!wantsShockwave || !popProfile.shockwave || reduceMotion) return null;
+    const wave = getShockwave(cycleT, popProfile.amplitude);
+    return wave.opacity > 0.01 ? wave : null;
+  }, [visual.animation, cycleT, popProfile, reduceMotion]);
+
+  // Sparkle glints for the sparkle type
+  const sparkles = useMemo(() => {
+    if (visual.animation?.type !== "sparkle") return null;
+    const count = reduceMotion ? 3 : 6;
+    return getSparklePoints(cycleT, count);
+  }, [visual.animation, cycleT, reduceMotion]);
+
+  // Opacity for shimmer effect (gentler wave under reduced motion)
   const opacity = useMemo(() => {
+    let value = 1;
     if (visual.animation?.type === "shimmer") {
-      const progress =
-        (animationPhase % visual.animation.duration) /
-        visual.animation.duration;
-      return 0.7 + Math.sin(progress * Math.PI * 2) * 0.3;
+      const waveDepth = reduceMotion ? 0.3 * REDUCED_MOTION_DAMP : 0.3;
+      value = 1 - waveDepth + Math.sin(cycleT * Math.PI * 2) * waveDepth;
     }
-    return 1;
-  }, [visual.animation, animationPhase]);
+    return value * pop.opacityFactor * snapOn.opacity;
+  }, [visual.animation, cycleT, reduceMotion, pop.opacityFactor, snapOn.opacity]);
+
+  const particleImpactBoost = getParticleImpactBoost(
+    cycleT,
+    popProfile,
+    reduceMotion,
+  );
 
   return (
     <g
-      transform={`translate(${position.x}, ${position.y}) rotate(${attachment.rotation}) scale(${attachment.scale})`}
+      transform={`translate(${position.x}, ${position.y}) rotate(${attachment.rotation}) scale(${attachment.scale * snapOn.scale})`}
       opacity={opacity}
       onMouseEnter={() => draggable && setShowControls(true)}
       onMouseLeave={() => !isDragging && setShowControls(false)}
@@ -411,6 +435,48 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
         </g>
       ) : null}
 
+      {/* Shockwave ring synced to the impact phase */}
+      {shockwave && (
+        <circle
+          cx="0"
+          cy="0"
+          r={shockwave.radius}
+          fill="none"
+          stroke={visual.colors.glow || visual.colors.accent || visual.colors.primary}
+          strokeWidth={shockwave.strokeWidth}
+          opacity={shockwave.opacity}
+          style={{ pointerEvents: "none" }}
+        />
+      )}
+
+      {/* Sparkle glints */}
+      {sparkles?.map((s, i) => (
+        <circle
+          key={`sparkle-${i}`}
+          cx={s.x}
+          cy={s.y}
+          r={s.r}
+          fill={visual.colors.accent || visual.colors.glow || "#ffffff"}
+          opacity={s.opacity}
+          filter="url(#particleGlow)"
+          style={{ pointerEvents: "none" }}
+        />
+      ))}
+
+      {/* Snap-on flash when freshly equipped */}
+      {snapOn.active && !reduceMotion && (
+        <circle
+          cx="0"
+          cy="0"
+          r={30 * (2 - snapOn.scale)}
+          fill="none"
+          stroke={visual.colors.glow || visual.colors.primary}
+          strokeWidth="2"
+          opacity={Math.max(0, snapOn.opacity - 0.55)}
+          style={{ pointerEvents: "none" }}
+        />
+      )}
+
       {/* Particles */}
       {visual.particles && (
         <AddonParticles
@@ -418,6 +484,8 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
           animationPhase={animationPhase}
           centerX={0}
           centerY={0}
+          impactBoost={particleImpactBoost}
+          reduceMotion={reduceMotion}
         />
       )}
     </g>
@@ -429,6 +497,9 @@ interface AddonParticlesProps {
   animationPhase: number;
   centerX: number;
   centerY: number;
+  /** Radius/speed multiplier applied during the impact phase (>= 1). */
+  impactBoost?: number;
+  reduceMotion?: boolean;
 }
 
 const AddonParticles: React.FC<AddonParticlesProps> = ({
@@ -436,37 +507,46 @@ const AddonParticles: React.FC<AddonParticlesProps> = ({
   animationPhase,
   centerX,
   centerY,
+  impactBoost = 1,
+  reduceMotion = false,
 }) => {
   const particles = useMemo(() => {
-    const { count, color, size, behavior } = config;
+    const { count, behavior } = config;
+    const visibleCount = reduceMotion ? Math.max(2, Math.ceil(count / 2)) : count;
+    // Boosted clock makes orbits/trails visibly accelerate on impact.
+    const boostedPhase = animationPhase * impactBoost;
     const result: Array<{ id: number; x: number; y: number; opacity: number }> =
       [];
 
-    for (let i = 0; i < count; i++) {
-      const angle = (i / count) * Math.PI * 2;
+    for (let i = 0; i < visibleCount; i++) {
+      const angle = (i / visibleCount) * Math.PI * 2;
       let x = centerX;
       let y = centerY;
 
       switch (behavior) {
         case "orbit":
-          const radius = 30 + Math.sin((animationPhase / 1000 + i) * 0.5) * 5;
-          const orbitAngle = angle + animationPhase / 1000;
+          const radius =
+            (30 + Math.sin((boostedPhase / 1000 + i) * 0.5) * 5) * impactBoost;
+          const orbitAngle = angle + boostedPhase / 1000;
           x = centerX + Math.cos(orbitAngle) * radius;
           y = centerY + Math.sin(orbitAngle) * radius;
           break;
 
         case "ambient":
-          x = centerX + Math.sin((animationPhase / 2000 + i) * 0.8) * 20;
-          y = centerY + Math.cos((animationPhase / 1500 + i) * 0.6) * 20;
+          x = centerX + Math.sin((boostedPhase / 2000 + i) * 0.8) * 20 * impactBoost;
+          y = centerY + Math.cos((boostedPhase / 1500 + i) * 0.6) * 20 * impactBoost;
           break;
 
         case "trail":
-          x = centerX + Math.cos(angle) * (20 - i * 2);
-          y = centerY + Math.sin(angle) * (20 - i * 2) - animationPhase / 100;
+          x = centerX + Math.cos(angle) * (20 - i * 2) * impactBoost;
+          y =
+            centerY +
+            Math.sin(angle) * (20 - i * 2) * impactBoost -
+            boostedPhase / 100;
           break;
 
         case "burst":
-          const burstRadius = ((animationPhase % 2000) / 2000) * 30;
+          const burstRadius = ((boostedPhase % 2000) / 2000) * 30 * impactBoost;
           x = centerX + Math.cos(angle) * burstRadius;
           y = centerY + Math.sin(angle) * burstRadius;
           break;
@@ -477,12 +557,12 @@ const AddonParticles: React.FC<AddonParticlesProps> = ({
         x,
         y,
         opacity:
-          behavior === "burst" ? 1 - (animationPhase % 2000) / 2000 : 0.8,
+          behavior === "burst" ? 1 - (boostedPhase % 2000) / 2000 : 0.8,
       });
     }
 
     return result;
-  }, [config, animationPhase, centerX, centerY]);
+  }, [config, animationPhase, centerX, centerY, impactBoost, reduceMotion]);
 
   return (
     <>

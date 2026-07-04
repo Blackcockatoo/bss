@@ -28,6 +28,7 @@ import {
   type ReactNode,
 } from "react";
 import { PatternQuestBoard } from "@/components/PatternQuestBoard";
+import { VisualEvaluationPanel } from "@/components/dev/VisualEvaluationPanel";
 import * as THREE from "three";
 import * as Tone from "tone";
 import { saveDnaImprint } from "@/lib/dnaImprint";
@@ -128,6 +129,32 @@ interface PolygonPerimeterStep {
 const MAX_PIXEL_RATIO = 2;
 const MIN_SURFACE = 260; // px — minimum canvas dimension on any axis
 const MAX_PAINT_POINTS = 6000;
+
+// ── Visualizer quality levels (mobile defaults lower) ────────────────────────
+type VisualQuality = "low" | "medium" | "high";
+const QUALITY_PIXEL_RATIO: Record<VisualQuality, number> = {
+  low: 1,
+  medium: 1.5,
+  high: MAX_PIXEL_RATIO,
+};
+const QUALITY_STAR_COUNT: Record<VisualQuality, number> = {
+  low: 200,
+  medium: 400,
+  high: 700,
+};
+const QUALITY_SPHERE_SEGMENTS: Record<VisualQuality, number> = {
+  low: 8,
+  medium: 12,
+  high: 16,
+};
+const QUALITY_ORDER: VisualQuality[] = ["low", "medium", "high"];
+
+function defaultVisualQuality(): VisualQuality {
+  if (typeof window === "undefined") return "medium";
+  if (window.innerWidth < 480) return "low";
+  if (window.innerWidth < 1024) return "medium";
+  return "high";
+}
 const INTERACTION_THROTTLE_MS = 34; // ~29 fps interaction sampling
 const TOOLKIT_STORAGE_KEY = "digital-dna-toolkit-settings-v1";
 const MAX_SAVED_TOOL_PRESETS = 6;
@@ -536,6 +563,9 @@ export default function DigitalDNAHub({
   const [miniPathLength, setMiniPathLength] = useState(5);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioReady, setAudioReady] = useState(false); // display-only; logic uses ref
+  const [visualQuality, setVisualQuality] = useState<VisualQuality>(defaultVisualQuality);
+  const [introExpanded, setIntroExpanded] = useState(false);
+  const [showEvalPanel, setShowEvalPanel] = useState(false);
   const [harmony, setHarmony] = useState(7);
   const [tempo, setTempo] = useState(120);
   const [paintedPattern, setPaintedPattern] = useState<PaintPoint[]>([]);
@@ -2019,11 +2049,11 @@ export default function DigitalDNAHub({
      */
     const renderer = new THREE.WebGLRenderer({
       canvas,
-      antialias: true,
+      antialias: visualQuality !== "low",
       alpha: false,
     });
     renderer.setPixelRatio(
-      Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO),
+      Math.min(window.devicePixelRatio || 1, QUALITY_PIXEL_RATIO[visualQuality]),
     );
     // display:block prevents an inline-element baseline gap that can collapse
     // the parent container to 0 height before JS sets explicit dimensions.
@@ -2118,7 +2148,12 @@ export default function DigitalDNAHub({
         );
         positions.push(pos);
 
-        const geo = new THREE.SphereGeometry(0.18 + digit * 0.022, 16, 16);
+        const sphereSegments = QUALITY_SPHERE_SEGMENTS[visualQuality];
+        const geo = new THREE.SphereGeometry(
+          0.18 + digit * 0.022,
+          sphereSegments,
+          sphereSegments,
+        );
         const sphere = new THREE.Mesh(geo, sharedMats[digit]);
         sphere.position.copy(pos);
         sphere.userData = { digit, index: i };
@@ -2155,7 +2190,7 @@ export default function DigitalDNAHub({
     scene.add(group);
 
     // Starfield — fills the dark void around the helix
-    const starCount = 700;
+    const starCount = QUALITY_STAR_COUNT[visualQuality];
     const starPos = new Float32Array(starCount * 3);
     for (let i = 0; i < starCount; i++) {
       starPos[i * 3] = (Math.random() - 0.5) * 90;
@@ -2305,6 +2340,8 @@ export default function DigitalDNAHub({
 
     const animate = () => {
       animId = requestAnimationFrame(animate);
+      // Skip work while the tab is hidden — mobile battery saver.
+      if (document.hidden) return;
       const t = clock.getElapsedTime();
 
       rotX += (targetRotX - rotX) * 0.08;
@@ -2359,6 +2396,7 @@ export default function DigitalDNAHub({
     registerInteraction,
     pulseHaptic,
     webglSupport.supported,
+    visualQuality,
   ]);
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -2659,19 +2697,19 @@ export default function DigitalDNAHub({
   // ══════════════════════════════════════════════════════════════════════════
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 text-amber-50 pb-32 sm:pb-16">
+    <div className="min-h-dvh overflow-x-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 text-amber-50 pb-56 sm:pb-16">
       {/* Ambient background glow — pointer-events-none so it never blocks input */}
       <div className="fixed inset-0 opacity-20 pointer-events-none" aria-hidden>
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900 via-transparent to-transparent" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-3 py-4 sm:px-6 sm:py-6">
-        {/* ── Header ──────────────────────────────────────────────────────── */}
-        <div className="text-center mb-8 sm:mb-10">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-3 bg-gradient-to-r from-amber-400 via-amber-200 to-amber-400 bg-clip-text text-transparent animate-pulse">
+        {/* ── Header (compact on mobile) ──────────────────────────────────── */}
+        <div className="text-center mb-5 sm:mb-10">
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold mb-2 sm:mb-3 bg-gradient-to-r from-amber-400 via-amber-200 to-amber-400 bg-clip-text text-transparent motion-safe:animate-pulse">
             ✨ Digital DNA ✨
           </h1>
-          <p className="text-lg sm:text-2xl text-blue-300 font-light mb-2">
+          <p className="text-base sm:text-2xl text-blue-300 font-light mb-1 sm:mb-2">
             All-Ages Learning Hub · Touch · Sound · Patterns
           </p>
           {lessonContext && (
@@ -2680,10 +2718,18 @@ export default function DigitalDNAHub({
               <strong>{lessonContext.studentAlias}</strong>
             </p>
           )}
-          <p className="text-sm text-slate-400 italic mt-1">
+          <p className="hidden sm:block text-sm text-slate-400 italic mt-1">
             Works with fingers, stylus, trackpad, and mouse.
           </p>
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+          {/* Mobile: one compact status line instead of four badges */}
+          <p className="sm:hidden mt-2 text-xs text-slate-300">
+            <strong className="text-white">{currentSeedMeta.label}</strong>
+            {" · "}
+            {sequenceSource === "packet" ? "Mini Path" : "Core 60"}
+            {" · "}
+            {soundLabSequence.length} digits
+          </p>
+          <div className="mt-5 hidden sm:flex flex-wrap items-center justify-center gap-2">
             <span className="rounded-full border border-white/10 bg-slate-900/70 px-4 py-2 text-xs uppercase tracking-[0.22em] text-slate-300">
               Active strand:{" "}
               <strong className="text-white">{currentSeedMeta.label}</strong>
@@ -2700,12 +2746,52 @@ export default function DigitalDNAHub({
             <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-4 py-2 text-xs uppercase tracking-[0.22em] text-amber-100">
               Transform: {toolTransform}
             </span>
+            <button
+              type="button"
+              onClick={() =>
+                setVisualQuality(
+                  (q) =>
+                    QUALITY_ORDER[
+                      (QUALITY_ORDER.indexOf(q) + 1) % QUALITY_ORDER.length
+                    ],
+                )
+              }
+              className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-4 py-2 text-xs uppercase tracking-[0.22em] text-emerald-100 hover:bg-emerald-500/20"
+              aria-label={`Visual quality: ${visualQuality}. Tap to change.`}
+            >
+              Quality: <strong className="text-white">{visualQuality}</strong>
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowEvalPanel((v) => !v)}
+              className="rounded-full border border-slate-700 bg-slate-900/70 px-4 py-2 text-xs uppercase tracking-[0.22em] text-slate-400 hover:bg-slate-800"
+              aria-label="Toggle visual evaluation dev panel"
+            >
+              Dev
+            </button>
           </div>
         </div>
 
-        <div className="fixed inset-x-3 bottom-3 z-40 sm:hidden">
+        {/* Sits above the global QuickNav bar (fixed bottom-0, ~4.25rem tall) */}
+        <div className="fixed inset-x-3 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-40 sm:hidden">
           <div className="rounded-[1.5rem] border border-amber-500/20 bg-slate-950/92 p-3 shadow-2xl shadow-black/40 backdrop-blur">
-            <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+            {/* Row 1: big play + instrument switcher + settings */}
+            <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] gap-2">
+              <button
+                type="button"
+                onClick={playSequence}
+                disabled={isPlaying}
+                className={`min-w-[52px] rounded-xl px-3 py-3 text-lg font-bold transition-colors ${
+                  isPlaying
+                    ? "bg-emerald-500/20 text-emerald-200"
+                    : "bg-amber-500 text-slate-950 hover:bg-amber-400"
+                }`}
+                aria-label={
+                  isPlaying ? "Playing DNA melody" : "Play DNA melody"
+                }
+              >
+                {isPlaying ? "♪" : "▶"}
+              </button>
               <label className="min-w-0">
                 <span className="sr-only">Switch instrument</span>
                 <select
@@ -2713,7 +2799,7 @@ export default function DigitalDNAHub({
                   onChange={(event) =>
                     handleModeSelect(event.target.value as ModeKey)
                   }
-                  className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-3 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  className="w-full h-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-3 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-amber-400"
                 >
                   {selectableModes.map((mode) => (
                     <option key={`mobile-mode-${mode.id}`} value={mode.id}>
@@ -2730,17 +2816,72 @@ export default function DigitalDNAHub({
                 Settings
               </button>
             </div>
-            <button
-              type="button"
-              onClick={() => scrollToElement(modeSelectorRef.current)}
-              className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-300 transition-colors hover:bg-slate-800"
-            >
-              Open full mode switcher
-            </button>
+            {/* Row 2: mode switcher link + quality cycle */}
+            <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto_auto] gap-2">
+              <button
+                type="button"
+                onClick={() => scrollToElement(modeSelectorRef.current)}
+                className="min-h-[44px] rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-300 transition-colors hover:bg-slate-800"
+              >
+                All modes
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setVisualQuality(
+                    (q) =>
+                      QUALITY_ORDER[
+                        (QUALITY_ORDER.indexOf(q) + 1) % QUALITY_ORDER.length
+                      ],
+                  )
+                }
+                className="min-h-[44px] rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-100 transition-colors hover:bg-emerald-500/20"
+                aria-label={`Visual quality: ${visualQuality}. Tap to change.`}
+              >
+                Q: {visualQuality}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowEvalPanel((v) => !v)}
+                className="min-h-[44px] rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-xs font-semibold text-slate-400 transition-colors hover:bg-slate-800"
+                aria-label="Toggle visual evaluation dev panel"
+              >
+                Dev
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="mb-8 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+        {showEvalPanel && (
+          <VisualEvaluationPanel
+            qualityLevel={visualQuality}
+            dnaHubMode={introExpanded ? "full" : "compact"}
+            audioContextState={audioReady ? Tone.context.state : "suspended"}
+            particleCount={
+              activeMode === "spiral"
+                ? QUALITY_STAR_COUNT[visualQuality] + 60
+                : activeMode === "mandala"
+                  ? paintedPattern.length
+                  : 0
+            }
+          />
+        )}
+
+        {/* Mobile: intro guide collapsed by default to cut visual bulk */}
+        <button
+          type="button"
+          onClick={() => setIntroExpanded((v) => !v)}
+          className="sm:hidden mb-3 flex min-h-[44px] w-full items-center justify-between rounded-2xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-sm font-semibold text-slate-200"
+          aria-expanded={introExpanded}
+        >
+          <span>Guide &amp; decode tips</span>
+          <span aria-hidden>{introExpanded ? "▴" : "▾"}</span>
+        </button>
+        <div
+          className={`mb-8 gap-4 lg:grid-cols-[1.15fr_0.85fr] ${
+            introExpanded ? "grid" : "hidden sm:grid"
+          }`}
+        >
           <section className="rounded-[1.75rem] border border-slate-800 bg-slate-900/70 p-5">
             <p className="text-xs uppercase tracking-[0.3em] text-cyan-300/80">
               What can I do here?
