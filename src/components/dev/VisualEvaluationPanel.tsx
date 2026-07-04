@@ -236,7 +236,7 @@ export function VisualEvaluationPanel({
 
   return (
     <aside
-      className="fixed bottom-3 left-3 z-[90] w-64 max-w-[calc(100vw-1.5rem)] rounded-xl border border-slate-700 bg-slate-950/92 text-xs text-slate-200 shadow-xl backdrop-blur"
+      className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] left-3 z-[90] w-64 max-w-[calc(100vw-1.5rem)] rounded-xl border border-slate-700 bg-slate-950/92 text-xs text-slate-200 shadow-xl backdrop-blur sm:bottom-3"
       aria-label="Visual evaluation dev panel"
     >
       <div className="flex items-center justify-between gap-2 border-b border-slate-800 px-3 py-2">
