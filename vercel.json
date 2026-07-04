@@ -2,12 +2,5 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "npm run build",
   "framework": "nextjs",
-  "installCommand": "npm ci",
-  "redirects": [
-    {
-      "source": "/",
-      "destination": "/metapet-landing.html",
-      "permanent": false
-    }
-  ]
+  "installCommand": "npm ci"
 }

@@ -99,9 +99,14 @@ export default function ClientBody({
             {!IS_SCHOOLS_PROFILE && (
               <button
                 type="button"
-                onClick={() =>
-                  setAppMode(appMode === "school" ? "normal" : "school")
-                }
+                onClick={() => {
+                  setAppMode(appMode === "school" ? "normal" : "school");
+                  // Land on the matching home page so the switch has an
+                  // immediate, visible effect from anywhere in the app.
+                  if (pathname !== "/") {
+                    router.push("/");
+                  }
+                }}
                 className={`min-h-9 rounded-full border px-3 py-1 text-xs transition-colors ${effectiveSchoolsMode ? "border-amber-600/40 bg-amber-50 text-amber-700 hover:bg-amber-100" : "border-slate-600 bg-slate-800/70 text-slate-200 hover:bg-slate-700"}`}
                 role="switch"
                 aria-checked={appMode === "school"}
