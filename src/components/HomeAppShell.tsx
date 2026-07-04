@@ -24,6 +24,7 @@ import {
 } from "@/components/HydrationTracker";
 import { PetGeometryHub } from "@/components/PetGeometryHub";
 import { PetHero } from "@/components/PetHero";
+import { QuickLaunchGrid } from "@/components/QuickLaunchGrid";
 import { MetaPetLoadingScreen } from "@/components/MetaPetLoadingScreen";
 import { PetResponseOverlay } from "@/components/PetResponseOverlay";
 import {
@@ -2041,6 +2042,9 @@ export default function HomeAppShell() {
 
         {/* ===== CONTENT SECTIONS ===== */}
         <div className="mx-auto max-w-2xl space-y-4 px-4 py-5 sm:py-6">
+          {/* Quick launch into the other worlds - Consumer only */}
+          {!IS_SCHOOLS_PROFILE && <QuickLaunchGrid />}
+
           {/* Ritual Loop - Consumer only */}
           {!IS_SCHOOLS_PROFILE && (
             <div id="ritual">
