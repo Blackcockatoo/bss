@@ -152,6 +152,141 @@ export default function SchoolsPage() {
           </div>
         </section>
 
+        <section className="rounded-3xl border border-amber-300/20 bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/20 p-6 md:p-8">
+          <SectionHeading
+            eyebrow="Three ways to start"
+            title="From a 10-minute look to a full pilot"
+            description="You do not have to commit to anything to evaluate this. Each step is small, teacher-controlled, and reversible."
+          />
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            <div className="flex flex-col rounded-2xl border border-amber-300/20 bg-slate-950/50 p-5">
+              <p className="text-xs uppercase tracking-[0.25em] text-amber-300">
+                Step 1 · 10 minutes
+              </p>
+              <h3 className="mt-3 text-lg font-semibold text-white">
+                Try it yourself
+              </h3>
+              <p className="mt-2 flex-1 text-sm leading-6 text-slate-300">
+                Open the browser demo on your own device. No account, no
+                install, nothing saved beyond your browser. See exactly what
+                students would see.
+              </p>
+              <Link
+                href="/pet"
+                className="mt-4 inline-block rounded-full border border-amber-300/30 px-4 py-2 text-center text-sm font-semibold text-amber-100 hover:border-amber-300/60"
+              >
+                Open the 10-minute demo
+              </Link>
+            </div>
+            <div className="flex flex-col rounded-2xl border border-amber-300/20 bg-slate-950/50 p-5">
+              <p className="text-xs uppercase tracking-[0.25em] text-amber-300">
+                Step 2 · One classroom session
+              </p>
+              <h3 className="mt-3 text-lg font-semibold text-white">
+                Run one 20-minute session
+              </h3>
+              <p className="mt-2 flex-1 text-sm leading-6 text-slate-300">
+                Use Lesson Card 1 with your class as a one-off taster. The dry-run
+                checklist covers devices, aliases and timing so nothing surprises
+                you mid-lesson.
+              </p>
+              <Link
+                href="/schools/docs/teacher-dry-run-checklist"
+                className="mt-4 inline-block rounded-full border border-amber-300/30 px-4 py-2 text-center text-sm font-semibold text-amber-100 hover:border-amber-300/60"
+              >
+                Read the dry-run checklist
+              </Link>
+            </div>
+            <div className="flex flex-col rounded-2xl border border-amber-300/20 bg-slate-950/50 p-5">
+              <p className="text-xs uppercase tracking-[0.25em] text-amber-300">
+                Step 3 · 7-session pilot
+              </p>
+              <h3 className="mt-3 text-lg font-semibold text-white">
+                Run the constrained pilot
+              </h3>
+              <p className="mt-2 flex-1 text-sm leading-6 text-slate-300">
+                Seven 20-minute lessons with the full governance pack: teacher
+                checklist, parent/carer notice, ICT privacy summary, stop
+                conditions and an evidence plan.
+              </p>
+              <a
+                href="mailto:bluesssnakestudio@gmail.com?subject=Meta-Pet%20School%20Pilot%20Enquiry"
+                className="mt-4 inline-block rounded-full bg-amber-300 px-4 py-2 text-center text-sm font-semibold text-slate-950 hover:bg-amber-200"
+              >
+                Start a pilot conversation
+              </a>
+            </div>
+          </div>
+          <div className="mt-6 flex flex-wrap gap-2 text-xs">
+            {[
+              {
+                label: "Teacher checklist",
+                href: "/schools/docs/school-partner-checklist",
+              },
+              { label: "Parent/carer notice", href: "/schools/parents" },
+              {
+                label: "ICT privacy summary",
+                href: "/schools/docs/ict-privacy-review-checklist",
+              },
+              {
+                label: "What data is stored",
+                href: "/schools/docs/data-inventory",
+              },
+              {
+                label: "How to delete local data",
+                href: "/schools/docs/retention-and-deletion-schedule",
+              },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-full border border-slate-700 px-3 py-1.5 font-medium text-slate-200 hover:border-slate-500"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-emerald-400/20 bg-slate-900/60 p-6 md:p-8">
+          <SectionHeading
+            eyebrow="Data, in plain words"
+            title="What is stored, what is never collected"
+            description="The governance pack has the full detail. These are the answers up front, in the language a staff meeting actually uses."
+          />
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            <div className="rounded-2xl border border-emerald-400/20 bg-slate-950/50 p-4">
+              <h3 className="text-base font-semibold text-emerald-200">
+                What is stored
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                Alias-based classroom progress and settings, saved locally on
+                the school device. No names, no student accounts, no profiles.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-emerald-400/20 bg-slate-950/50 p-4">
+              <h3 className="text-base font-semibold text-emerald-200">
+                What is never collected
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                Names, emails, photos, voice, location, contacts, behavioural
+                profiles or advertising identifiers. There is no mechanism to
+                collect them.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-emerald-400/20 bg-slate-950/50 p-4">
+              <h3 className="text-base font-semibold text-emerald-200">
+                How it is deleted
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                Clearing the browser&apos;s site data on the device removes
+                everything. Any staff member with device access can do it — no
+                request to the studio required.
+              </p>
+            </div>
+          </div>
+        </section>
+
         <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 md:p-8">
           <SectionHeading
             eyebrow="Start Here"
