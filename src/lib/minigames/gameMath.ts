@@ -13,6 +13,9 @@
 
 import type { EvolutionData, EvolutionState } from '../../evolution/types';
 
+/** The slice of evolution state the game suite needs. */
+export type EvolutionSnapshot = Pick<EvolutionData, 'state' | 'level'>;
+
 // ===== SEEDED RNG =====
 
 /** Deterministic xorshift32 RNG in [0, 1). Genome seeds keep games personal to each pet. */
@@ -299,7 +302,12 @@ export interface MiniGameSessionResult {
   level?: number;
   /** Companion game flavor: 'sigil-pattern' | 'trivia' | 'snake'. */
   detail?: string;
+  /** Skill rank the run was played at ('calm' | 'flow' | 'surge' | 'mythic'). */
+  rank?: string;
 }
+
+/** XP bonus per skill-rank step above Calm (flow=1, surge=2, mythic=3). */
+const RANK_XP_STEP = ['calm', 'flow', 'surge', 'mythic'];
 
 export interface VitalsDelta {
   mood?: number;
@@ -331,7 +339,9 @@ export function computeGameReward(
   evolution: Pick<EvolutionData, 'state' | 'level'>
 ): GameReward {
   const tier = STAGE_TIER[evolution.state] ?? 1;
-  const xpCap = 10 + tier * 5;
+  const rankStep = Math.max(0, RANK_XP_STEP.indexOf(result.rank ?? 'calm'));
+  // Higher skill ranks raise both the bonus and the ceiling.
+  const xpCap = 10 + tier * 5 + rankStep * 3;
 
   let performanceXp = 0;
   let vitals: VitalsDelta = {};
@@ -390,7 +400,7 @@ export function computeGameReward(
 
   const hasProgress = result.score > 0 || performanceXp > 0;
   const xp = hasProgress
-    ? Math.min(xpCap, Math.max(3, BASE_XP[result.game] + performanceXp))
+    ? Math.min(xpCap, Math.max(3, BASE_XP[result.game] + performanceXp + rankStep * 2))
     : 0;
 
   return {

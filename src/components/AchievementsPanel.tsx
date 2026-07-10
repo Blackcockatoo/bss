@@ -16,6 +16,7 @@ import { useStore } from '@/lib/store';
 import {
   ACHIEVEMENT_CATALOG,
   ACHIEVEMENT_TARGETS,
+  getTotalMasteryStars,
   type Achievement,
   type BattleStats,
   type MiniGameProgress,
@@ -95,6 +96,11 @@ function getAchievementProgress(
       return source.miniGames.totalPlays;
     case 'minigame-companion-playmate':
       return source.miniGames.companionWins;
+    case 'minigame-mythic-clear':
+      return source.miniGames.mythicClears;
+    case 'minigame-star-collector':
+    case 'minigame-grandmaster':
+      return getTotalMasteryStars(source.miniGames);
     case 'breeding-first':
       return unlocked ? 1 : 0;
     default:

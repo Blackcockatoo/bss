@@ -60,6 +60,8 @@ export interface MiniGameProgress {
   companionWins: number;
   /** Lifetime completed game sessions across the whole suite. */
   totalPlays: number;
+  /** Runs completed at the Mythic skill rank. */
+  mythicClears: number;
 }
 
 export interface Achievement {
@@ -91,6 +93,9 @@ export const ACHIEVEMENT_TARGETS = {
   'minigame-sigil-sage': 60,
   'minigame-arcade-devotee': 30,
   'minigame-companion-playmate': 10,
+  'minigame-mythic-clear': 1,
+  'minigame-star-collector': 8,
+  'minigame-grandmaster': 16,
 } as const;
 
 export const ACHIEVEMENT_CATALOG: Achievement[] = [
@@ -216,7 +221,76 @@ export const ACHIEVEMENT_CATALOG: Achievement[] = [
     description: `Win ${ACHIEVEMENT_TARGETS['minigame-companion-playmate']} bond games with your companion.`,
     category: 'minigame',
   },
+  {
+    id: 'minigame-mythic-clear',
+    title: 'Mythic Clear',
+    description: 'Complete a run at the Mythic skill rank.',
+    category: 'minigame',
+  },
+  {
+    id: 'minigame-star-collector',
+    title: 'Star Collector',
+    description: `Earn ${ACHIEVEMENT_TARGETS['minigame-star-collector']} mastery stars across the arcade.`,
+    category: 'minigame',
+  },
+  {
+    id: 'minigame-grandmaster',
+    title: 'Arcade Grandmaster',
+    description: `Earn ${ACHIEVEMENT_TARGETS['minigame-grandmaster']} of the arcade's 20 mastery stars.`,
+    category: 'minigame',
+  },
 ];
+
+// ===== MASTERY STARS =====
+
+export type MasteryGame = 'memory' | 'rhythm' | 'sigil' | 'vimana';
+
+export interface MasteryTrack {
+  label: string;
+  getValue: (progress: MiniGameProgress) => number;
+  /** Five ascending thresholds — one per star. */
+  thresholds: [number, number, number, number, number];
+}
+
+/**
+ * Five mastery stars per game, 20 total. Stars are derived from lifetime
+ * stats, never stored — they can't drift from real play.
+ */
+export const MASTERY_TRACKS: Record<MasteryGame, MasteryTrack> = {
+  memory: {
+    label: 'Best round fully recalled',
+    getValue: (p) => p.shuffleBestRound,
+    thresholds: [2, 4, 6, 8, 11],
+  },
+  rhythm: {
+    label: 'Best timing accuracy',
+    getValue: (p) => p.pulseBestAccuracy,
+    thresholds: [40, 60, 75, 88, 95],
+  },
+  sigil: {
+    label: 'Patterns named in total',
+    getValue: (p) => p.sigilTotalCorrect,
+    thresholds: [10, 25, 45, 70, 100],
+  },
+  vimana: {
+    label: 'Most lines in one run',
+    getValue: (p) => p.vimanaMaxLines,
+    thresholds: [4, 8, 14, 20, 28],
+  },
+};
+
+export function getMasteryStars(progress: MiniGameProgress, game: MasteryGame): number {
+  const track = MASTERY_TRACKS[game];
+  const value = track.getValue(progress);
+  return track.thresholds.filter((threshold) => value >= threshold).length;
+}
+
+export function getTotalMasteryStars(progress: MiniGameProgress): number {
+  return (Object.keys(MASTERY_TRACKS) as MasteryGame[]).reduce(
+    (total, game) => total + getMasteryStars(progress, game),
+    0,
+  );
+}
 
 /**
  * Single source of truth for how mini-game progress maps to achievement
@@ -242,6 +316,9 @@ export const MINIGAME_ACHIEVEMENT_CHECKS: ReadonlyArray<{
   { id: 'minigame-sigil-sage', getProgress: (p) => p.sigilTotalCorrect },
   { id: 'minigame-arcade-devotee', getProgress: (p) => p.totalPlays },
   { id: 'minigame-companion-playmate', getProgress: (p) => p.companionWins },
+  { id: 'minigame-mythic-clear', getProgress: (p) => p.mythicClears },
+  { id: 'minigame-star-collector', getProgress: getTotalMasteryStars },
+  { id: 'minigame-grandmaster', getProgress: getTotalMasteryStars },
 ];
 
 export interface CreateBattleStatsOptions {
@@ -281,6 +358,7 @@ export function createDefaultMiniGameProgress(overrides: Partial<MiniGameProgres
     sigilTotalCorrect: 0,
     companionWins: 0,
     totalPlays: 0,
+    mythicClears: 0,
     ...overrides,
   };
 }

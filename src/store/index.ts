@@ -612,6 +612,10 @@ export function createMetaPetWebStore(
             break;
         }
 
+        if (result.rank === 'mythic' && hasProgress) {
+          next.mythicClears = previous.mythicClears + 1;
+        }
+
         let achievements = state.achievements;
         for (const check of MINIGAME_ACHIEVEMENT_CHECKS) {
           if (check.getProgress(next) >= ACHIEVEMENT_TARGETS[check.id]) {

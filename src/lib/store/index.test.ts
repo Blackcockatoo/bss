@@ -503,6 +503,56 @@ describe('Store State Management', () => {
       expect(after.miniGames.totalPlays).toBe(1);
     });
 
+    it('counts mythic-rank clears and unlocks the achievement', () => {
+      useStore.getState().recordMiniGameResult({
+        game: 'rhythm',
+        score: 20,
+        accuracy: 88,
+        combo: 9,
+        rank: 'mythic',
+      });
+
+      const state = useStore.getState();
+      expect(state.miniGames.mythicClears).toBe(1);
+      expect(state.achievements.some(a => a.id === 'minigame-mythic-clear')).toBe(true);
+    });
+
+    it('does not count failed runs as mythic clears', () => {
+      useStore.getState().recordMiniGameResult({
+        game: 'rhythm',
+        score: 0,
+        accuracy: 0,
+        combo: 0,
+        rank: 'mythic',
+      });
+
+      expect(useStore.getState().miniGames.mythicClears).toBe(0);
+    });
+
+    it('grants more XP at higher skill ranks for the same performance', () => {
+      const calmXpBefore = useStore.getState().evolution.totalXp;
+      useStore.getState().recordMiniGameResult({
+        game: 'sigil',
+        score: 30,
+        correctAnswers: 3,
+        accuracy: 50,
+        rank: 'calm',
+      });
+      const calmGain = useStore.getState().evolution.totalXp - calmXpBefore;
+
+      const mythicXpBefore = useStore.getState().evolution.totalXp;
+      useStore.getState().recordMiniGameResult({
+        game: 'sigil',
+        score: 30,
+        correctAnswers: 3,
+        accuracy: 50,
+        rank: 'mythic',
+      });
+      const mythicGain = useStore.getState().evolution.totalXp - mythicXpBefore;
+
+      expect(mythicGain).toBeGreaterThan(calmGain);
+    });
+
     it('does not record results while the system is sealed', () => {
       useStore.setState({ systemState: 'sealed' });
 
