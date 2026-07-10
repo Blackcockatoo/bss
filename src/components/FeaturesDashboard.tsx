@@ -7,7 +7,6 @@ import { AchievementsPanel } from "./AchievementsPanel";
 import { BattleArena } from "./BattleArena";
 import { CosmeticsPanel } from "./CosmeticsPanel";
 import { MiniGamesPanel } from "./MiniGamesPanel";
-import { PatternRecognitionGame } from "./PatternRecognitionGame";
 import { SteeringWheel } from "./steering";
 import { VimanaMap } from "./VimanaMap";
 
@@ -113,13 +112,7 @@ export function FeaturesDashboard({
 
         <TabsContent value="games" className="mt-0">
           <div className="bg-zinc-900/80 backdrop-blur rounded-xl p-3 sm:p-6 border border-zinc-800">
-            <div className="space-y-6">
-              <MiniGamesPanel />
-
-              <div className="border-t border-zinc-700 pt-6">
-                <PatternRecognitionGame />
-              </div>
-            </div>
+            <MiniGamesPanel />
           </div>
         </TabsContent>
 

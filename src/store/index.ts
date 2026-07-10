@@ -19,10 +19,15 @@ import type {
 import {
   ACHIEVEMENT_CATALOG,
   ACHIEVEMENT_TARGETS,
+  MINIGAME_ACHIEVEMENT_CHECKS,
   createDefaultBattleStats,
   createDefaultMiniGameProgress,
   createDefaultVimanaState,
 } from '../progression/types';
+import {
+  computeGameReward,
+  type MiniGameSessionResult,
+} from '../lib/minigames/gameMath';
 import type { Vitals } from '../vitals/index';
 import {
   DEFAULT_VITALS,
@@ -122,6 +127,8 @@ export interface MetaPetState {
   addEssence: (payload: { amount: number; source: RewardSource }) => void;
   tryEvolve: () => boolean;
   recordBattle: (result: 'win' | 'loss', opponent: string) => void;
+  /** Unified entry point for every game in the suite: updates progress, XP, vitals, essence, and achievements in one pass. */
+  recordMiniGameResult: (result: MiniGameSessionResult) => void;
   updateMiniGameScore: (game: 'memory' | 'rhythm', score: number) => void;
   recordVimanaRun: (score: number, lines: number, level: number) => void;
   exploreCell: (cellId: string) => void;
@@ -420,7 +427,8 @@ export function createMetaPetWebStore(
         lastRewardAmount: typeof lastRewardAmount === 'number' ? lastRewardAmount : state.lastRewardAmount,
         achievements: achievements ? achievements.map(entry => ({ ...entry })) : state.achievements,
         battle: battle ? { ...battle } : state.battle,
-        miniGames: miniGames ? { ...miniGames } : state.miniGames,
+        // Merge with defaults so saves from before the game-suite rebuild gain the new fields.
+        miniGames: miniGames ? { ...createDefaultMiniGameProgress(), ...miniGames } : state.miniGames,
         vimana: vimana ? cloneVimanaState(vimana) : state.vimana,
         rewardHistory: rewardHistory ? rewardHistory.map(entry => ({ ...entry, reward: { ...entry.reward } })) : state.rewardHistory,
         lastReward: lastReward ?? state.lastReward,
@@ -561,41 +569,60 @@ export function createMetaPetWebStore(
       rewardPayloads.forEach(payload => get().recordReward(payload));
     },
 
-    updateMiniGameScore(game, score) {
+    recordMiniGameResult(result) {
       if (get().systemState === 'sealed') return;
       const rewardPayloads: RewardPayloadInput[] = [];
       set(state => {
+        const previous = state.miniGames;
+        const reward = computeGameReward(result, state.evolution);
+        const hasProgress = result.score > 0 || (result.lines ?? 0) > 0;
+
         const next: MiniGameProgress = {
-          ...state.miniGames,
+          ...previous,
+          focusStreak: hasProgress ? previous.focusStreak + 1 : 0,
+          totalPlays: hasProgress ? previous.totalPlays + 1 : previous.totalPlays,
           lastPlayedAt: Date.now(),
         };
 
-        if (game === 'memory') {
-          next.memoryHighScore = Math.max(next.memoryHighScore, score);
-        } else {
-          next.rhythmHighScore = Math.max(next.rhythmHighScore, score);
+        switch (result.game) {
+          case 'memory':
+            next.memoryHighScore = Math.max(previous.memoryHighScore, result.score);
+            next.shuffleBestRound = Math.max(previous.shuffleBestRound, result.roundsCompleted ?? 0);
+            break;
+          case 'rhythm':
+            next.rhythmHighScore = Math.max(previous.rhythmHighScore, result.score);
+            next.pulseBestCombo = Math.max(previous.pulseBestCombo, result.combo ?? 0);
+            next.pulseBestAccuracy = Math.max(previous.pulseBestAccuracy, Math.round(result.accuracy ?? 0));
+            break;
+          case 'sigil':
+            next.sigilHighScore = Math.max(previous.sigilHighScore, result.score);
+            next.sigilBestStreak = Math.max(previous.sigilBestStreak, result.combo ?? 0);
+            next.sigilTotalCorrect = previous.sigilTotalCorrect + (result.correctAnswers ?? 0);
+            break;
+          case 'vimana':
+            next.vimanaHighScore = Math.max(previous.vimanaHighScore, result.score);
+            next.vimanaMaxLines = Math.max(previous.vimanaMaxLines, result.lines ?? 0);
+            next.vimanaMaxLevel = Math.max(previous.vimanaMaxLevel, result.level ?? 0);
+            next.vimanaLastScore = result.score;
+            next.vimanaLastLines = result.lines ?? 0;
+            next.vimanaLastLevel = result.level ?? 0;
+            break;
+          case 'companion':
+            next.companionWins = previous.companionWins + 1;
+            break;
+        }
+
+        if (result.rank === 'mythic' && hasProgress) {
+          next.mythicClears = previous.mythicClears + 1;
         }
 
         let achievements = state.achievements;
-        if (game === 'memory' && next.memoryHighScore >= ACHIEVEMENT_TARGETS['minigame-memory']) {
-          const result = unlockAchievementWithReward(achievements, 'minigame-memory');
-          achievements = result.achievements;
-          if (result.reward) rewardPayloads.push(result.reward);
-        }
-        if (game === 'rhythm' && next.rhythmHighScore >= ACHIEVEMENT_TARGETS['minigame-rhythm']) {
-          const result = unlockAchievementWithReward(achievements, 'minigame-rhythm');
-          achievements = result.achievements;
-          if (result.reward) rewardPayloads.push(result.reward);
-        }
-        if (game === 'memory' && next.memoryHighScore >= ACHIEVEMENT_TARGETS['minigame-memory-ace']) {
-          const result = unlockAchievementWithReward(achievements, 'minigame-memory-ace');
-          achievements = result.achievements;
-          if (result.reward) rewardPayloads.push(result.reward);
-        }
-        if (game === 'rhythm' && next.rhythmHighScore >= ACHIEVEMENT_TARGETS['minigame-rhythm-ace']) {
-          const result = unlockAchievementWithReward(achievements, 'minigame-rhythm-ace');
-          achievements = result.achievements;
-          if (result.reward) rewardPayloads.push(result.reward);
+        for (const check of MINIGAME_ACHIEVEMENT_CHECKS) {
+          if (check.getProgress(next) >= ACHIEVEMENT_TARGETS[check.id]) {
+            const unlock = unlockAchievementWithReward(achievements, check.id);
+            achievements = unlock.achievements;
+            if (unlock.reward) rewardPayloads.push(unlock.reward);
+          }
         }
 
         const update: Partial<MetaPetState> = { miniGames: next };
@@ -603,9 +630,29 @@ export function createMetaPetWebStore(
           update.achievements = achievements;
         }
 
-        // Grant XP based on score (5-10 XP)
-        const xpGain = Math.min(10, Math.max(5, Math.floor(score / 2)));
-        update.evolution = gainExperience(state.evolution, xpGain);
+        if (reward.xp > 0) {
+          update.evolution = gainExperience(state.evolution, reward.xp);
+          update.vitals = {
+            ...state.vitals,
+            mood: clamp(state.vitals.mood + (reward.vitals.mood ?? 0)),
+            energy: clamp(state.vitals.energy + (reward.vitals.energy ?? 0)),
+            hygiene: clamp(state.vitals.hygiene + (reward.vitals.hygiene ?? 0)),
+          };
+          if (reward.essence > 0) {
+            update.essence = state.essence + reward.essence;
+            update.lastRewardSource = 'minigame';
+            update.lastRewardAmount = reward.essence;
+          }
+          rewardPayloads.push({
+            source: 'minigame',
+            title: 'Game Session Complete',
+            description: reward.message,
+            reward: {
+              type: 'xp',
+              value: reward.xp,
+            },
+          });
+        }
 
         return update;
       });
@@ -613,62 +660,12 @@ export function createMetaPetWebStore(
       rewardPayloads.forEach(payload => get().recordReward(payload));
     },
 
+    updateMiniGameScore(game, score) {
+      get().recordMiniGameResult({ game, score });
+    },
+
     recordVimanaRun(score, lines, level) {
-      if (get().systemState === 'sealed') return;
-      const rewardPayloads: RewardPayloadInput[] = [];
-      set(state => {
-        const previous = state.miniGames;
-        const hasProgress = lines > 0 || score > 0;
-
-        const next: MiniGameProgress = {
-          ...previous,
-          focusStreak: hasProgress ? previous.focusStreak + 1 : 0,
-          vimanaHighScore: Math.max(previous.vimanaHighScore, score),
-          vimanaMaxLines: Math.max(previous.vimanaMaxLines, lines),
-          vimanaMaxLevel: Math.max(previous.vimanaMaxLevel, level),
-          vimanaLastScore: score,
-          vimanaLastLines: lines,
-          vimanaLastLevel: level,
-          lastPlayedAt: Date.now(),
-        };
-
-        let achievements = state.achievements;
-        if (next.vimanaHighScore >= ACHIEVEMENT_TARGETS['minigame-vimana-score']) {
-          const result = unlockAchievementWithReward(achievements, 'minigame-vimana-score');
-          achievements = result.achievements;
-          if (result.reward) rewardPayloads.push(result.reward);
-        }
-        if (next.vimanaMaxLines >= ACHIEVEMENT_TARGETS['minigame-vimana-lines']) {
-          const result = unlockAchievementWithReward(achievements, 'minigame-vimana-lines');
-          achievements = result.achievements;
-          if (result.reward) rewardPayloads.push(result.reward);
-        }
-        if (next.vimanaMaxLevel >= ACHIEVEMENT_TARGETS['minigame-vimana-level']) {
-          const result = unlockAchievementWithReward(achievements, 'minigame-vimana-level');
-          achievements = result.achievements;
-          if (result.reward) rewardPayloads.push(result.reward);
-        }
-        if (next.focusStreak >= ACHIEVEMENT_TARGETS['minigame-focus-streak']) {
-          const result = unlockAchievementWithReward(achievements, 'minigame-focus-streak');
-          achievements = result.achievements;
-          if (result.reward) rewardPayloads.push(result.reward);
-        }
-
-        const update: Partial<MetaPetState> = { miniGames: next };
-        if (achievements !== state.achievements) {
-          update.achievements = achievements;
-        }
-
-        // Grant XP based on performance (5-10 XP, scaled by lines and level)
-        if (hasProgress) {
-          const xpGain = Math.min(10, Math.max(5, Math.floor(lines / 2) + level));
-          update.evolution = gainExperience(state.evolution, xpGain);
-        }
-
-        return update;
-      });
-
-      rewardPayloads.forEach(payload => get().recordReward(payload));
+      get().recordMiniGameResult({ game: 'vimana', score, lines, level });
     },
 
     exploreCell(cellId) {

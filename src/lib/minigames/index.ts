@@ -3,6 +3,8 @@
  * Boosts specific vitals and provides engagement
  */
 
+export * from './gameMath';
+
 export interface MiniGamesState {
   memoryHighScore: number;
   rhythmHighScore: number;

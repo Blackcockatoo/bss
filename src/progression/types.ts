@@ -47,6 +47,21 @@ export interface MiniGameProgress {
   vimanaLastLines: number;
   vimanaLastLevel: number;
   lastPlayedAt: number | null;
+  /** Memory Shuffle: most rounds fully recalled in one run. */
+  shuffleBestRound: number;
+  /** Rhythm Pulse: best combo and best timing accuracy (0-100). */
+  pulseBestCombo: number;
+  pulseBestAccuracy: number;
+  /** Sigil Sequence: best run score, best streak, and lifetime correct answers. */
+  sigilHighScore: number;
+  sigilBestStreak: number;
+  sigilTotalCorrect: number;
+  /** Wins from the companion's bond games (sigil pattern, trivia, snake). */
+  companionWins: number;
+  /** Lifetime completed game sessions across the whole suite. */
+  totalPlays: number;
+  /** Runs completed at the Mythic skill rank. */
+  mythicClears: number;
 }
 
 export interface Achievement {
@@ -71,6 +86,16 @@ export const ACHIEVEMENT_TARGETS = {
   'minigame-rhythm-ace': 15,
   'minigame-vimana-level': 5,
   'minigame-focus-streak': 5,
+  'minigame-shuffle-adept': 6,
+  'minigame-pulse-flow': 12,
+  'minigame-pulse-perfect': 95,
+  'minigame-sigil-scholar': 70,
+  'minigame-sigil-sage': 60,
+  'minigame-arcade-devotee': 30,
+  'minigame-companion-playmate': 10,
+  'minigame-mythic-clear': 1,
+  'minigame-star-collector': 8,
+  'minigame-grandmaster': 16,
 } as const;
 
 export const ACHIEVEMENT_CATALOG: Achievement[] = [
@@ -153,6 +178,147 @@ export const ACHIEVEMENT_CATALOG: Achievement[] = [
     description: `Build a focus streak of ${ACHIEVEMENT_TARGETS['minigame-focus-streak']} mini-game runs.`,
     category: 'minigame',
   },
+  // Rebuilt game-suite achievements
+  {
+    id: 'minigame-shuffle-adept',
+    title: 'Shuffle Adept',
+    description: `Fully recall ${ACHIEVEMENT_TARGETS['minigame-shuffle-adept']} rounds in one Memory Shuffle run.`,
+    category: 'minigame',
+  },
+  {
+    id: 'minigame-pulse-flow',
+    title: 'Pulse Flow',
+    description: `Chain a ${ACHIEVEMENT_TARGETS['minigame-pulse-flow']}-beat combo in Rhythm Pulse.`,
+    category: 'minigame',
+  },
+  {
+    id: 'minigame-pulse-perfect',
+    title: 'Pulse Perfect',
+    description: `Finish a Rhythm Pulse run at ${ACHIEVEMENT_TARGETS['minigame-pulse-perfect']}% timing accuracy or better.`,
+    category: 'minigame',
+  },
+  {
+    id: 'minigame-sigil-scholar',
+    title: 'Sigil Scholar',
+    description: `Score ${ACHIEVEMENT_TARGETS['minigame-sigil-scholar']} or more in a single Sigil Sequence run.`,
+    category: 'minigame',
+  },
+  {
+    id: 'minigame-sigil-sage',
+    title: 'Sequence Sage',
+    description: `Name ${ACHIEVEMENT_TARGETS['minigame-sigil-sage']} number patterns correctly across all Sigil Sequence runs.`,
+    category: 'minigame',
+  },
+  {
+    id: 'minigame-arcade-devotee',
+    title: 'Arcade Devotee',
+    description: `Complete ${ACHIEVEMENT_TARGETS['minigame-arcade-devotee']} game sessions across the suite.`,
+    category: 'minigame',
+  },
+  {
+    id: 'minigame-companion-playmate',
+    title: 'Companion Playmate',
+    description: `Win ${ACHIEVEMENT_TARGETS['minigame-companion-playmate']} bond games with your companion.`,
+    category: 'minigame',
+  },
+  {
+    id: 'minigame-mythic-clear',
+    title: 'Mythic Clear',
+    description: 'Complete a run at the Mythic skill rank.',
+    category: 'minigame',
+  },
+  {
+    id: 'minigame-star-collector',
+    title: 'Star Collector',
+    description: `Earn ${ACHIEVEMENT_TARGETS['minigame-star-collector']} mastery stars across the arcade.`,
+    category: 'minigame',
+  },
+  {
+    id: 'minigame-grandmaster',
+    title: 'Arcade Grandmaster',
+    description: `Earn ${ACHIEVEMENT_TARGETS['minigame-grandmaster']} of the arcade's 20 mastery stars.`,
+    category: 'minigame',
+  },
+];
+
+// ===== MASTERY STARS =====
+
+export type MasteryGame = 'memory' | 'rhythm' | 'sigil' | 'vimana';
+
+export interface MasteryTrack {
+  label: string;
+  getValue: (progress: MiniGameProgress) => number;
+  /** Five ascending thresholds — one per star. */
+  thresholds: [number, number, number, number, number];
+}
+
+/**
+ * Five mastery stars per game, 20 total. Stars are derived from lifetime
+ * stats, never stored — they can't drift from real play.
+ */
+export const MASTERY_TRACKS: Record<MasteryGame, MasteryTrack> = {
+  memory: {
+    label: 'Best round fully recalled',
+    getValue: (p) => p.shuffleBestRound,
+    thresholds: [2, 4, 6, 8, 11],
+  },
+  rhythm: {
+    label: 'Best timing accuracy',
+    getValue: (p) => p.pulseBestAccuracy,
+    thresholds: [40, 60, 75, 88, 95],
+  },
+  sigil: {
+    label: 'Patterns named in total',
+    getValue: (p) => p.sigilTotalCorrect,
+    thresholds: [10, 25, 45, 70, 100],
+  },
+  vimana: {
+    label: 'Most lines in one run',
+    getValue: (p) => p.vimanaMaxLines,
+    thresholds: [4, 8, 14, 20, 28],
+  },
+};
+
+export function getMasteryStars(progress: MiniGameProgress, game: MasteryGame): number {
+  const track = MASTERY_TRACKS[game];
+  const value = track.getValue(progress);
+  return track.thresholds.filter((threshold) => value >= threshold).length;
+}
+
+export function getTotalMasteryStars(progress: MiniGameProgress): number {
+  return (Object.keys(MASTERY_TRACKS) as MasteryGame[]).reduce(
+    (total, game) => total + getMasteryStars(progress, game),
+    0,
+  );
+}
+
+/**
+ * Single source of truth for how mini-game progress maps to achievement
+ * targets. The store uses it to unlock; the achievements panel uses it to
+ * render progress bars — keeping both consistent by construction.
+ */
+export const MINIGAME_ACHIEVEMENT_CHECKS: ReadonlyArray<{
+  id: keyof typeof ACHIEVEMENT_TARGETS;
+  getProgress: (progress: MiniGameProgress) => number;
+}> = [
+  { id: 'minigame-memory', getProgress: (p) => p.memoryHighScore },
+  { id: 'minigame-memory-ace', getProgress: (p) => p.memoryHighScore },
+  { id: 'minigame-rhythm', getProgress: (p) => p.rhythmHighScore },
+  { id: 'minigame-rhythm-ace', getProgress: (p) => p.rhythmHighScore },
+  { id: 'minigame-vimana-score', getProgress: (p) => p.vimanaHighScore },
+  { id: 'minigame-vimana-lines', getProgress: (p) => p.vimanaMaxLines },
+  { id: 'minigame-vimana-level', getProgress: (p) => p.vimanaMaxLevel },
+  { id: 'minigame-focus-streak', getProgress: (p) => p.focusStreak },
+  { id: 'minigame-shuffle-adept', getProgress: (p) => p.shuffleBestRound },
+  { id: 'minigame-pulse-flow', getProgress: (p) => p.pulseBestCombo },
+  { id: 'minigame-pulse-perfect', getProgress: (p) => p.pulseBestAccuracy },
+  { id: 'minigame-sigil-scholar', getProgress: (p) => p.sigilHighScore },
+  { id: 'minigame-sigil-sage', getProgress: (p) => p.sigilTotalCorrect },
+  { id: 'minigame-arcade-devotee', getProgress: (p) => p.totalPlays },
+  { id: 'minigame-companion-playmate', getProgress: (p) => p.companionWins },
+  { id: 'minigame-mythic-clear', getProgress: (p) => p.mythicClears },
+  { id: 'minigame-star-collector', getProgress: getTotalMasteryStars },
+  { id: 'minigame-grandmaster', getProgress: getTotalMasteryStars },
 ];
 
 export interface CreateBattleStatsOptions {
@@ -184,6 +350,15 @@ export function createDefaultMiniGameProgress(overrides: Partial<MiniGameProgres
     vimanaLastLines: 0,
     vimanaLastLevel: 0,
     lastPlayedAt: null,
+    shuffleBestRound: 0,
+    pulseBestCombo: 0,
+    pulseBestAccuracy: 0,
+    sigilHighScore: 0,
+    sigilBestStreak: 0,
+    sigilTotalCorrect: 0,
+    companionWins: 0,
+    totalPlays: 0,
+    mythicClears: 0,
     ...overrides,
   };
 }

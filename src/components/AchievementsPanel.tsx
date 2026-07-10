@@ -16,6 +16,7 @@ import { useStore } from '@/lib/store';
 import {
   ACHIEVEMENT_CATALOG,
   ACHIEVEMENT_TARGETS,
+  getTotalMasteryStars,
   type Achievement,
   type BattleStats,
   type MiniGameProgress,
@@ -81,6 +82,25 @@ function getAchievementProgress(
       return source.miniGames.vimanaMaxLevel;
     case 'minigame-focus-streak':
       return source.miniGames.focusStreak;
+    case 'minigame-shuffle-adept':
+      return source.miniGames.shuffleBestRound;
+    case 'minigame-pulse-flow':
+      return source.miniGames.pulseBestCombo;
+    case 'minigame-pulse-perfect':
+      return source.miniGames.pulseBestAccuracy;
+    case 'minigame-sigil-scholar':
+      return source.miniGames.sigilHighScore;
+    case 'minigame-sigil-sage':
+      return source.miniGames.sigilTotalCorrect;
+    case 'minigame-arcade-devotee':
+      return source.miniGames.totalPlays;
+    case 'minigame-companion-playmate':
+      return source.miniGames.companionWins;
+    case 'minigame-mythic-clear':
+      return source.miniGames.mythicClears;
+    case 'minigame-star-collector':
+    case 'minigame-grandmaster':
+      return getTotalMasteryStars(source.miniGames);
     case 'breeding-first':
       return unlocked ? 1 : 0;
     default:

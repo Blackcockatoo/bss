@@ -7,6 +7,7 @@ import {
   createDefaultBattleStats,
   createDefaultMiniGameProgress,
   createDefaultVimanaState,
+  type MiniGameProgress,
 } from '@/lib/progression/types';
 
 type TraitOverrides = {
@@ -393,6 +394,206 @@ describe('Store State Management', () => {
 
       const achievements = useStore.getState().achievements;
       expect(achievements.some(a => a.id === 'minigame-rhythm-ace')).toBe(true);
+    });
+  });
+
+  describe('Unified Mini-Game Pipeline', () => {
+    it('records memory shuffle rounds and unlocks shuffle adept', () => {
+      useStore.getState().recordMiniGameResult({
+        game: 'memory',
+        score: 33,
+        roundsCompleted: 6,
+      });
+
+      const state = useStore.getState();
+      expect(state.miniGames.memoryHighScore).toBe(33);
+      expect(state.miniGames.shuffleBestRound).toBe(6);
+      expect(state.achievements.some(a => a.id === 'minigame-shuffle-adept')).toBe(true);
+    });
+
+    it('records rhythm pulse combo/accuracy and unlocks pulse achievements', () => {
+      useStore.getState().recordMiniGameResult({
+        game: 'rhythm',
+        score: 28,
+        accuracy: 96,
+        combo: 14,
+      });
+
+      const state = useStore.getState();
+      expect(state.miniGames.pulseBestCombo).toBe(14);
+      expect(state.miniGames.pulseBestAccuracy).toBe(96);
+      expect(state.achievements.some(a => a.id === 'minigame-pulse-flow')).toBe(true);
+      expect(state.achievements.some(a => a.id === 'minigame-pulse-perfect')).toBe(true);
+    });
+
+    it('accumulates sigil correct answers across runs', () => {
+      useStore.getState().recordMiniGameResult({
+        game: 'sigil',
+        score: 88,
+        correctAnswers: 6,
+        combo: 6,
+        accuracy: 100,
+      });
+      useStore.getState().recordMiniGameResult({
+        game: 'sigil',
+        score: 40,
+        correctAnswers: 4,
+        combo: 2,
+        accuracy: 57,
+      });
+
+      const state = useStore.getState();
+      expect(state.miniGames.sigilHighScore).toBe(88);
+      expect(state.miniGames.sigilTotalCorrect).toBe(10);
+      expect(state.miniGames.sigilBestStreak).toBe(6);
+      expect(state.achievements.some(a => a.id === 'minigame-sigil-scholar')).toBe(true);
+    });
+
+    it('counts companion wins toward the playmate achievement', () => {
+      for (let i = 0; i < 10; i++) {
+        useStore.getState().recordMiniGameResult({
+          game: 'companion',
+          score: 10,
+          detail: 'sigil-pattern',
+        });
+      }
+
+      const state = useStore.getState();
+      expect(state.miniGames.companionWins).toBe(10);
+      expect(state.achievements.some(a => a.id === 'minigame-companion-playmate')).toBe(true);
+    });
+
+    it('grants XP, vitals, and essence for successful runs', () => {
+      const before = useStore.getState();
+      const beforeXp = before.evolution.totalXp;
+      const beforeMood = before.vitals.mood;
+
+      useStore.getState().recordMiniGameResult({
+        game: 'memory',
+        score: 12,
+        roundsCompleted: 3,
+      });
+
+      const after = useStore.getState();
+      expect(after.evolution.totalXp).toBeGreaterThan(beforeXp);
+      expect(after.vitals.mood).toBeGreaterThan(beforeMood);
+      expect(after.essence).toBeGreaterThan(0);
+      expect(after.lastRewardSource).toBe('minigame');
+      expect(after.miniGames.totalPlays).toBe(1);
+      expect(after.miniGames.focusStreak).toBe(1);
+    });
+
+    it('resets the focus streak and grants nothing for empty runs', () => {
+      useStore.getState().recordMiniGameResult({
+        game: 'memory',
+        score: 10,
+        roundsCompleted: 2,
+      });
+      const midXp = useStore.getState().evolution.totalXp;
+
+      useStore.getState().recordMiniGameResult({
+        game: 'memory',
+        score: 0,
+        roundsCompleted: 0,
+      });
+
+      const after = useStore.getState();
+      expect(after.evolution.totalXp).toBe(midXp);
+      expect(after.miniGames.focusStreak).toBe(0);
+      expect(after.miniGames.totalPlays).toBe(1);
+    });
+
+    it('counts mythic-rank clears and unlocks the achievement', () => {
+      useStore.getState().recordMiniGameResult({
+        game: 'rhythm',
+        score: 20,
+        accuracy: 88,
+        combo: 9,
+        rank: 'mythic',
+      });
+
+      const state = useStore.getState();
+      expect(state.miniGames.mythicClears).toBe(1);
+      expect(state.achievements.some(a => a.id === 'minigame-mythic-clear')).toBe(true);
+    });
+
+    it('does not count failed runs as mythic clears', () => {
+      useStore.getState().recordMiniGameResult({
+        game: 'rhythm',
+        score: 0,
+        accuracy: 0,
+        combo: 0,
+        rank: 'mythic',
+      });
+
+      expect(useStore.getState().miniGames.mythicClears).toBe(0);
+    });
+
+    it('grants more XP at higher skill ranks for the same performance', () => {
+      const calmXpBefore = useStore.getState().evolution.totalXp;
+      useStore.getState().recordMiniGameResult({
+        game: 'sigil',
+        score: 30,
+        correctAnswers: 3,
+        accuracy: 50,
+        rank: 'calm',
+      });
+      const calmGain = useStore.getState().evolution.totalXp - calmXpBefore;
+
+      const mythicXpBefore = useStore.getState().evolution.totalXp;
+      useStore.getState().recordMiniGameResult({
+        game: 'sigil',
+        score: 30,
+        correctAnswers: 3,
+        accuracy: 50,
+        rank: 'mythic',
+      });
+      const mythicGain = useStore.getState().evolution.totalXp - mythicXpBefore;
+
+      expect(mythicGain).toBeGreaterThan(calmGain);
+    });
+
+    it('does not record results while the system is sealed', () => {
+      useStore.setState({ systemState: 'sealed' });
+
+      useStore.getState().recordMiniGameResult({
+        game: 'sigil',
+        score: 50,
+        correctAnswers: 5,
+      });
+
+      expect(useStore.getState().miniGames.sigilHighScore).toBe(0);
+      useStore.setState({ systemState: 'active' });
+    });
+
+    it('hydrates legacy saves without the new game fields', () => {
+      const legacyMiniGames = {
+        memoryHighScore: 9,
+        rhythmHighScore: 7,
+        focusStreak: 2,
+        vimanaHighScore: 400,
+        vimanaMaxLines: 6,
+        vimanaMaxLevel: 2,
+        vimanaLastScore: 300,
+        vimanaLastLines: 4,
+        vimanaLastLevel: 1,
+        lastPlayedAt: Date.now(),
+      };
+
+      useStore.getState().hydrate({
+        vitals: useStore.getState().vitals,
+        genome: createMockGenome(1),
+        traits: createMockTraits(),
+        evolution: initializeEvolution(),
+        // Cast: simulates data saved before the game-suite rebuild.
+        miniGames: legacyMiniGames as MiniGameProgress,
+      });
+
+      const miniGames = useStore.getState().miniGames;
+      expect(miniGames.memoryHighScore).toBe(9);
+      expect(miniGames.sigilHighScore).toBe(0);
+      expect(miniGames.totalPlays).toBe(0);
+      expect(miniGames.companionWins).toBe(0);
     });
   });
 
