@@ -5,6 +5,8 @@ import {
   ArrowLeft,
   FileText,
   BookOpen,
+  Gamepad2,
+  HeartHandshake,
   Home,
   PawPrint,
   UserCircle,
@@ -14,6 +16,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useAppMode } from "@/lib/appMode";
 import { CHILD_SAFE_NAV_ROUTES } from "@/lib/childSafeBaseline";
 import {
   ENABLE_CHILD_SAFE_BASELINE,
@@ -29,8 +32,17 @@ type BeforeInstallPromptEvent = Event & {
 export const CORE_QUICK_NAV_ITEMS = [
   { href: "/", label: "Home", icon: Home },
   { href: "/pet", label: "Pet", icon: PawPrint },
-  { href: "/school-game", label: "School", icon: BookOpen },
+  { href: "/app/activities", label: "Play", icon: Gamepad2 },
   { href: "/identity", label: "Identity", icon: UserCircle },
+];
+
+/** Bottom nav while the Explorer/Teacher toggle is set to Teacher on a core build. */
+export const TEACHER_QUICK_NAV_ITEMS = [
+  { href: "/", label: "Home", icon: Home },
+  { href: "/schools", label: "Pilot Pack", icon: BookOpen },
+  { href: "/school-game", label: "Runtime", icon: BookOpen },
+  { href: "/schools/parents", label: "Parents", icon: HeartHandshake },
+  { href: "/legal/privacy", label: "Privacy", icon: FileText },
 ];
 
 export const SCHOOLS_QUICK_NAV_ITEMS = [
@@ -42,6 +54,7 @@ export const SCHOOLS_QUICK_NAV_ITEMS = [
 export function QuickNav() {
   const pathname = usePathname();
   const router = useRouter();
+  const { mode } = useAppMode();
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const isSchoolPath = useMemo(
@@ -106,13 +119,13 @@ export function QuickNav() {
       }
       return SCHOOLS_QUICK_NAV_ITEMS;
     }
+    const baseItems =
+      mode === "teacher" ? TEACHER_QUICK_NAV_ITEMS : CORE_QUICK_NAV_ITEMS;
     if (ENABLE_CHILD_SAFE_BASELINE) {
-      return CORE_QUICK_NAV_ITEMS.filter((item) =>
-        CHILD_SAFE_NAV_ROUTES.has(item.href),
-      );
+      return baseItems.filter((item) => CHILD_SAFE_NAV_ROUTES.has(item.href));
     }
-    return CORE_QUICK_NAV_ITEMS;
-  }, [effectiveSchoolsMode]);
+    return baseItems;
+  }, [effectiveSchoolsMode, mode]);
 
   const handleInstall = useCallback(async () => {
     if (!installPrompt) {
