@@ -5,6 +5,8 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } 
 interface VimanaTetrisProps {
   petName?: string;
   genomeSeed?: number;
+  /** Level the run begins at — the arcade passes the pet's evolution tier here. */
+  startLevel?: number;
   onExit?: () => void;
   onGameOver?: (score: number, lines: number, level: number) => void;
 }
@@ -305,15 +307,17 @@ function computeGhost(piece: ActivePiece, board: Cell[][]): ActivePiece {
 export function VimanaTetris({
   petName = 'Meta-Pet',
   genomeSeed,
+  startLevel = 1,
   onExit,
   onGameOver,
 }: VimanaTetrisProps) {
+  const initialLevel = Math.max(1, startLevel);
   const [board, setBoard] = useState<Cell[][]>(() => makeEmptyBoard());
   const [active, setActive] = useState<ActivePiece | null>(null);
   const [nextPiece, setNextPiece] = useState<ActivePiece | null>(null);
   const [score, setScore] = useState(0);
   const [lines, setLines] = useState(0);
-  const [level, setLevel] = useState(1);
+  const [level, setLevel] = useState(initialLevel);
   const [state, setState] = useState<'running' | 'paused' | 'gameover'>('running');
 
   const rngRef = useRef<() => number>(() => Math.random());
@@ -353,11 +357,11 @@ export function VimanaTetris({
     setNextPiece(secondPiece);
     setScore(0);
     setLines(0);
-    setLevel(1);
+    setLevel(initialLevel);
     setState('running');
-    dropIntervalRef.current = 1000;
+    dropIntervalRef.current = Math.max(120, 1000 - (initialLevel - 1) * 80);
     lastDropRef.current = performance.now();
-  }, [spawnPiece]);
+  }, [spawnPiece, initialLevel]);
 
   useEffect(() => {
     const id = requestAnimationFrame(() => resetGame());
@@ -378,7 +382,7 @@ export function VimanaTetris({
         const base = lineScoreTable[cleared] ?? cleared * 150;
         nextLines = lines + cleared;
         nextScore = score + base * level;
-        nextLevel = 1 + Math.floor(nextLines / 10);
+        nextLevel = initialLevel + Math.floor(nextLines / 10);
         dropIntervalRef.current = Math.max(120, 1000 - (nextLevel - 1) * 80);
         if (nextLines !== lines) {
           setLines(nextLines);
@@ -412,7 +416,7 @@ export function VimanaTetris({
       setActive(spawn);
       lastDropRef.current = performance.now();
     },
-    [board, level, lines, nextPiece, onGameOver, score, spawnPiece]
+    [board, level, lines, nextPiece, onGameOver, score, spawnPiece, initialLevel]
   );
 
   useEffect(() => {

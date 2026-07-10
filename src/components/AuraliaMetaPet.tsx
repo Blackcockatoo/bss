@@ -1,6 +1,7 @@
 "use client";
 
 import { useAddonStore } from "@/lib/addons";
+import { useStore } from "@/lib/store";
 import type {
   AccessibilitySettings,
   AudioSettings,
@@ -104,7 +105,6 @@ type MiniGameType =
   | "sigilPattern"
   | "fibonacciTrivia"
   | "snake"
-  | "tetris"
   | null;
 type PatternChallenge = {
   sequence: number[];
@@ -117,13 +117,6 @@ type SnakeState = {
   segments: SnakeSegment[];
   food: { x: number; y: number };
   direction: "up" | "down" | "left" | "right";
-  score: number;
-  gameOver: boolean;
-};
-type TetrisPiece = { shape: number[][]; x: number; y: number; color: string };
-type TetrisState = {
-  board: number[][];
-  currentPiece: TetrisPiece | null;
   score: number;
   gameOver: boolean;
 };
@@ -288,65 +281,6 @@ const generateFibonacciTrivia = (field: Field): TriviaQuestion => {
   return { question: q.question, answer: q.answer, options };
 };
 
-// ===== TETRIS PIECES =====
-const TETRIS_PIECES = [
-  { shape: [[1, 1, 1, 1]], color: "#00FFFF" }, // I
-  {
-    shape: [
-      [1, 1],
-      [1, 1],
-    ],
-    color: "#FFFF00",
-  }, // O
-  {
-    shape: [
-      [0, 1, 0],
-      [1, 1, 1],
-    ],
-    color: "#FF00FF",
-  }, // T
-  {
-    shape: [
-      [1, 1, 0],
-      [0, 1, 1],
-    ],
-    color: "#00FF00",
-  }, // S
-  {
-    shape: [
-      [0, 1, 1],
-      [1, 1, 0],
-    ],
-    color: "#FF0000",
-  }, // Z
-  {
-    shape: [
-      [1, 0, 0],
-      [1, 1, 1],
-    ],
-    color: "#0000FF",
-  }, // J
-  {
-    shape: [
-      [0, 0, 1],
-      [1, 1, 1],
-    ],
-    color: "#FFA500",
-  }, // L
-];
-
-const rotatePiece = (shape: number[][]): number[][] => {
-  const rows = shape.length;
-  const cols = shape[0].length;
-  const rotated: number[][] = [];
-  for (let i = 0; i < cols; i++) {
-    rotated[i] = [];
-    for (let j = 0; j < rows; j++) {
-      rotated[i][j] = shape[rows - 1 - j][i];
-    }
-  }
-  return rotated;
-};
 
 // ===== AURALIA PERSONALITY SYSTEM =====
 // Innate traits: pedantic precision, spectral curiosity, ambient melancholy,
@@ -514,6 +448,10 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
     () => getTimeOfDay(),
   );
 
+  // Companion game wins also feed the main pet store so XP, achievements,
+  // and vitals stay consistent with the Conscious Arcade.
+  const recordMiniGameResult = useStore((s) => s.recordMiniGameResult);
+
   const [currentGame, setCurrentGame] = useState<MiniGameType>(null);
   const [patternChallenge, setPatternChallenge] = useState<PatternChallenge>({
     sequence: [],
@@ -533,14 +471,6 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
     ],
     food: { x: 10, y: 10 },
     direction: "right",
-    score: 0,
-    gameOver: false,
-  });
-  const [tetrisState, setTetrisState] = useState<TetrisState>({
-    board: Array(20)
-      .fill(null)
-      .map(() => Array(10).fill(0)),
-    currentPiece: null,
     score: 0,
     gameOver: false,
   });
@@ -1880,6 +1810,11 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
           setBond((b) => Math.min(100, b + 10));
           setCuriosity((c) => Math.min(100, c + 5));
           setGamesWon((prev) => prev + 1);
+          recordMiniGameResult({
+            game: "companion",
+            score: 10,
+            detail: "sigil-pattern",
+          });
           addToBondHistory(
             `Won pattern game! Sequence: ${patternChallenge.sequence.map((i) => i + 1).join(", ")}`,
           );
@@ -1961,6 +1896,7 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
       setBond((b) => Math.min(100, b + 8));
       setCuriosity((c) => Math.min(100, c + 12));
       setGamesWon((prev) => prev + 1);
+      recordMiniGameResult({ game: "companion", score: 8, detail: "trivia" });
       addToBondHistory(`Answered trivia correctly: ${triviaQuestion.answer}`);
       handleWhisper(
         "Correct. The Fibonacci sequence holds its structure regardless of who examines it. I find that reassuring.",
@@ -2091,6 +2027,11 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
             setBond((b) => Math.min(100, b + 15));
             setEnergy((e) => Math.min(100, e + 10));
             setGamesWon((g) => g + 1);
+            recordMiniGameResult({
+              game: "companion",
+              score: newScore,
+              detail: "snake",
+            });
             addToBondHistory(`Won Snake game with score ${newScore}!`);
             handleWhisper(`Serpent mastery achieved! ${newScore} points.`);
             return { ...prev, gameOver: true };
@@ -2118,277 +2059,7 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
     field,
     addToBondHistory,
     handleWhisper,
-  ]);
-
-  // ===== TETRIS GAME LOGIC =====
-  const startTetrisGame = () => {
-    const piece =
-      TETRIS_PIECES[Math.floor(field.prng() * TETRIS_PIECES.length)];
-    setTetrisState({
-      board: Array(20)
-        .fill(null)
-        .map(() => Array(10).fill(0)),
-      currentPiece: { ...piece, x: 4, y: 0 },
-      score: 0,
-      gameOver: false,
-    });
-    setCurrentGame("tetris");
-    handleWhisper("Stack the sacred geometries!");
-  };
-
-  const resetTetrisGame = () => {
-    startTetrisGame();
-  };
-
-  // Helper function must be defined before callbacks that use it
-  const canPlacePiece = useCallback(
-    (
-      piece: TetrisPiece,
-      board: number[][],
-      offsetX = 0,
-      offsetY = 0,
-    ): boolean => {
-      for (let y = 0; y < piece.shape.length; y++) {
-        for (let x = 0; x < piece.shape[y].length; x++) {
-          if (piece.shape[y][x]) {
-            const newX = piece.x + x + offsetX;
-            const newY = piece.y + y + offsetY;
-            if (
-              newX < 0 ||
-              newX >= 10 ||
-              newY >= 20 ||
-              (newY >= 0 && board[newY][newX])
-            ) {
-              return false;
-            }
-          }
-        }
-      }
-      return true;
-    },
-    [],
-  );
-
-  // Movement callbacks must be defined before the effect that uses them
-  const moveTetrisPiece = useCallback(
-    (dx: number, dy: number) => {
-      setTetrisState((prev) => {
-        if (!prev.currentPiece) return prev;
-        if (canPlacePiece(prev.currentPiece, prev.board, dx, dy)) {
-          return {
-            ...prev,
-            currentPiece: {
-              ...prev.currentPiece,
-              x: prev.currentPiece.x + dx,
-              y: prev.currentPiece.y + dy,
-            },
-          };
-        }
-        return prev;
-      });
-    },
-    [canPlacePiece],
-  );
-
-  const rotateTetrisPiece = useCallback(() => {
-    setTetrisState((prev) => {
-      if (!prev.currentPiece) return prev;
-      const rotated = {
-        ...prev.currentPiece,
-        shape: rotatePiece(prev.currentPiece.shape),
-      };
-      if (canPlacePiece(rotated, prev.board)) {
-        return { ...prev, currentPiece: rotated };
-      }
-      return prev;
-    });
-  }, [canPlacePiece]);
-
-  // Effect that uses the movement callbacks
-  useEffect(() => {
-    if (
-      currentGame !== "tetris" ||
-      !tetrisState.currentPiece ||
-      tetrisState.gameOver
-    )
-      return;
-
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") moveTetrisPiece(-1, 0);
-      if (e.key === "ArrowRight") moveTetrisPiece(1, 0);
-      if (e.key === "ArrowDown") moveTetrisPiece(0, 1);
-      if (e.key === "ArrowUp") rotateTetrisPiece();
-    };
-
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [currentGame, tetrisState, moveTetrisPiece, rotateTetrisPiece]);
-
-  const lockPiece = useCallback(() => {
-    setTetrisState((prev) => {
-      if (!prev.currentPiece) return prev;
-
-      const newBoard = prev.board.map((row) => [...row]);
-      const piece = prev.currentPiece;
-
-      for (let y = 0; y < piece.shape.length; y++) {
-        for (let x = 0; x < piece.shape[y].length; x++) {
-          if (piece.shape[y][x] && piece.y + y >= 0) {
-            newBoard[piece.y + y][piece.x + x] = 1;
-          }
-        }
-      }
-
-      // Clear full rows
-      let linesCleared = 0;
-      for (let y = newBoard.length - 1; y >= 0; y--) {
-        if (newBoard[y].every((cell) => cell === 1)) {
-          newBoard.splice(y, 1);
-          newBoard.unshift(Array(10).fill(0));
-          linesCleared++;
-          y++;
-        }
-      }
-
-      const newScore = prev.score + linesCleared * 100;
-
-      // Create new piece
-      const nextPiece =
-        TETRIS_PIECES[Math.floor(field.prng() * TETRIS_PIECES.length)];
-      const newPiece = { ...nextPiece, x: 4, y: 0 };
-
-      if (!canPlacePiece(newPiece, newBoard)) {
-        handleWhisper(`Tetris complete! Score: ${newScore}`);
-        if (newScore >= 300) {
-          setBond((b) => Math.min(100, b + 20));
-          setCuriosity((c) => Math.min(100, c + 15));
-          setGamesWon((g) => g + 1);
-          addToBondHistory(`Won Tetris with score ${newScore}!`);
-        }
-        return {
-          ...prev,
-          board: newBoard,
-          score: newScore,
-          gameOver: true,
-          currentPiece: null,
-        };
-      }
-
-      if (linesCleared > 0 && audioEnabled) {
-        playNote(linesCleared % 7, 0.3);
-      }
-
-      return {
-        ...prev,
-        board: newBoard,
-        currentPiece: newPiece,
-        score: newScore,
-      };
-    });
-  }, [
-    canPlacePiece,
-    field,
-    handleWhisper,
-    setBond,
-    setCuriosity,
-    setGamesWon,
-    addToBondHistory,
-    audioEnabled,
-    playNote,
-  ]);
-
-  useEffect(() => {
-    if (
-      currentGame !== "tetris" ||
-      !tetrisState.currentPiece ||
-      tetrisState.gameOver
-    )
-      return;
-
-    const gameLoop = setInterval(() => {
-      setTetrisState((prev) => {
-        if (!prev.currentPiece || prev.gameOver) return prev;
-
-        // Check if we can move down
-        if (canPlacePiece(prev.currentPiece, prev.board, 0, 1)) {
-          return {
-            ...prev,
-            currentPiece: { ...prev.currentPiece, y: prev.currentPiece.y + 1 },
-          };
-        }
-
-        // Lock the piece inline to avoid stale closure
-        const newBoard = prev.board.map((row) => [...row]);
-        const piece = prev.currentPiece;
-
-        for (let y = 0; y < piece.shape.length; y++) {
-          for (let x = 0; x < piece.shape[y].length; x++) {
-            if (piece.shape[y][x] && piece.y + y >= 0) {
-              newBoard[piece.y + y][piece.x + x] = 1;
-            }
-          }
-        }
-
-        // Clear full rows
-        let linesCleared = 0;
-        for (let y = newBoard.length - 1; y >= 0; y--) {
-          if (newBoard[y].every((cell) => cell === 1)) {
-            newBoard.splice(y, 1);
-            newBoard.unshift(Array(10).fill(0));
-            linesCleared++;
-            y++; // Re-check this row
-          }
-        }
-
-        const newScore = prev.score + linesCleared * 100;
-
-        // Create new piece
-        const nextPiece =
-          TETRIS_PIECES[Math.floor(field.prng() * TETRIS_PIECES.length)];
-        const newPiece = { ...nextPiece, x: 4, y: 0 };
-
-        // Check if new piece can be placed (game over check)
-        if (!canPlacePiece(newPiece, newBoard)) {
-          handleWhisper(`Tetris complete! Score: ${newScore}`);
-          if (newScore >= 300) {
-            setBond((b) => Math.min(100, b + 20));
-            setCuriosity((c) => Math.min(100, c + 15));
-            setGamesWon((g) => g + 1);
-            addToBondHistory(`Won Tetris with score ${newScore}!`);
-          }
-          return {
-            ...prev,
-            board: newBoard,
-            score: newScore,
-            gameOver: true,
-            currentPiece: null,
-          };
-        }
-
-        if (linesCleared > 0 && audioEnabled) {
-          playNote(linesCleared % 7, 0.3);
-        }
-
-        return {
-          ...prev,
-          board: newBoard,
-          currentPiece: newPiece,
-          score: newScore,
-        };
-      });
-    }, 500);
-
-    return () => clearInterval(gameLoop);
-  }, [
-    currentGame,
-    tetrisState.currentPiece,
-    tetrisState.gameOver,
-    canPlacePiece,
-    field,
-    handleWhisper,
-    audioEnabled,
-    playNote,
-    addToBondHistory,
+    recordMiniGameResult,
   ]);
 
   // ===== BREEDING SYSTEM =====
@@ -4005,15 +3676,11 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
                   >
                     🐍 Snake
                   </button>
-                  <button
-                    onClick={startTetrisGame}
-                    disabled={currentGame !== null}
-                    className="px-3 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed rounded-lg font-medium transition-all text-sm"
-                    aria-label="Start Tetris game"
-                  >
-                    🟦 Tetris
-                  </button>
                 </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  Looking for Tetris? The Vimana Tetris Field now lives in the
+                  Conscious Arcade with evolution-scaled difficulty.
+                </p>
                 {gamesWon > 0 && (
                   <p className="text-xs text-center text-green-400 mt-3">
                     Games Won: {gamesWon}
@@ -4161,105 +3828,6 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
                   </div>
                 )}
 
-                {currentGame === "tetris" && (
-                  <div className="mt-4 p-3 bg-indigo-900/20 border border-indigo-500/30 rounded-lg">
-                    <div className="flex justify-between mb-2">
-                      <p className="text-sm text-indigo-300 font-medium">
-                        Tetris Game
-                      </p>
-                      <p className="text-sm text-indigo-400">
-                        Score: {tetrisState.score}
-                      </p>
-                    </div>
-                    {tetrisState.gameOver ? (
-                      <div className="text-center py-4">
-                        <p className="text-sm text-red-400 mb-2">Game Over!</p>
-                        <button
-                          onClick={resetTetrisGame}
-                          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded text-sm active:bg-indigo-400 touch-manipulation"
-                        >
-                          Play Again
-                        </button>
-                      </div>
-                    ) : (
-                      <>
-                        <div
-                          className="bg-gray-950 p-2 rounded mx-auto"
-                          style={{ maxWidth: "fit-content" }}
-                        >
-                          {tetrisState.board.map((row, y) => (
-                            <div key={y} className="flex gap-0.5">
-                              {row.map((cell, x) => {
-                                let cellColor = cell ? "#4B5563" : "#1F2937";
-                                if (tetrisState.currentPiece) {
-                                  const piece = tetrisState.currentPiece;
-                                  for (
-                                    let py = 0;
-                                    py < piece.shape.length;
-                                    py++
-                                  ) {
-                                    for (
-                                      let px = 0;
-                                      px < piece.shape[py].length;
-                                      px++
-                                    ) {
-                                      if (
-                                        piece.shape[py][px] &&
-                                        piece.x + px === x &&
-                                        piece.y + py === y
-                                      ) {
-                                        cellColor = piece.color;
-                                      }
-                                    }
-                                  }
-                                }
-                                return (
-                                  <div
-                                    key={x}
-                                    className="w-4 h-4 sm:w-3 sm:h-3 rounded-sm"
-                                    style={{ backgroundColor: cellColor }}
-                                  />
-                                );
-                              })}
-                            </div>
-                          ))}
-                        </div>
-                        {/* Mobile touch controls for Tetris */}
-                        <div className="flex justify-center items-center gap-2 mt-3">
-                          <button
-                            onClick={() => moveTetrisPiece(-1, 0)}
-                            className="w-12 h-12 rounded-lg bg-indigo-800/80 border border-indigo-600 flex items-center justify-center text-xl active:bg-indigo-700 select-none touch-manipulation"
-                          >
-                            ◀
-                          </button>
-                          <div className="flex flex-col gap-2">
-                            <button
-                              onClick={() => rotateTetrisPiece()}
-                              className="w-12 h-12 rounded-lg bg-indigo-800/80 border border-indigo-600 flex items-center justify-center text-lg active:bg-indigo-700 select-none touch-manipulation"
-                            >
-                              ↻
-                            </button>
-                            <button
-                              onClick={() => moveTetrisPiece(0, 1)}
-                              className="w-12 h-12 rounded-lg bg-indigo-800/80 border border-indigo-600 flex items-center justify-center text-xl active:bg-indigo-700 select-none touch-manipulation"
-                            >
-                              ▼
-                            </button>
-                          </div>
-                          <button
-                            onClick={() => moveTetrisPiece(1, 0)}
-                            className="w-12 h-12 rounded-lg bg-indigo-800/80 border border-indigo-600 flex items-center justify-center text-xl active:bg-indigo-700 select-none touch-manipulation"
-                          >
-                            ▶
-                          </button>
-                        </div>
-                      </>
-                    )}
-                    <p className="text-xs text-gray-400 mt-2 text-center hidden sm:block">
-                      Arrows: move/rotate (↑), Drop: ↓
-                    </p>
-                  </div>
-                )}
               </div>
 
               <div className="bg-gray-900/80 rounded-2xl p-6 border border-yellow-600/20">

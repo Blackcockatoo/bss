@@ -47,6 +47,19 @@ export interface MiniGameProgress {
   vimanaLastLines: number;
   vimanaLastLevel: number;
   lastPlayedAt: number | null;
+  /** Memory Shuffle: most rounds fully recalled in one run. */
+  shuffleBestRound: number;
+  /** Rhythm Pulse: best combo and best timing accuracy (0-100). */
+  pulseBestCombo: number;
+  pulseBestAccuracy: number;
+  /** Sigil Sequence: best run score, best streak, and lifetime correct answers. */
+  sigilHighScore: number;
+  sigilBestStreak: number;
+  sigilTotalCorrect: number;
+  /** Wins from the companion's bond games (sigil pattern, trivia, snake). */
+  companionWins: number;
+  /** Lifetime completed game sessions across the whole suite. */
+  totalPlays: number;
 }
 
 export interface Achievement {
@@ -71,6 +84,13 @@ export const ACHIEVEMENT_TARGETS = {
   'minigame-rhythm-ace': 15,
   'minigame-vimana-level': 5,
   'minigame-focus-streak': 5,
+  'minigame-shuffle-adept': 6,
+  'minigame-pulse-flow': 12,
+  'minigame-pulse-perfect': 95,
+  'minigame-sigil-scholar': 70,
+  'minigame-sigil-sage': 60,
+  'minigame-arcade-devotee': 30,
+  'minigame-companion-playmate': 10,
 } as const;
 
 export const ACHIEVEMENT_CATALOG: Achievement[] = [
@@ -153,6 +173,75 @@ export const ACHIEVEMENT_CATALOG: Achievement[] = [
     description: `Build a focus streak of ${ACHIEVEMENT_TARGETS['minigame-focus-streak']} mini-game runs.`,
     category: 'minigame',
   },
+  // Rebuilt game-suite achievements
+  {
+    id: 'minigame-shuffle-adept',
+    title: 'Shuffle Adept',
+    description: `Fully recall ${ACHIEVEMENT_TARGETS['minigame-shuffle-adept']} rounds in one Memory Shuffle run.`,
+    category: 'minigame',
+  },
+  {
+    id: 'minigame-pulse-flow',
+    title: 'Pulse Flow',
+    description: `Chain a ${ACHIEVEMENT_TARGETS['minigame-pulse-flow']}-beat combo in Rhythm Pulse.`,
+    category: 'minigame',
+  },
+  {
+    id: 'minigame-pulse-perfect',
+    title: 'Pulse Perfect',
+    description: `Finish a Rhythm Pulse run at ${ACHIEVEMENT_TARGETS['minigame-pulse-perfect']}% timing accuracy or better.`,
+    category: 'minigame',
+  },
+  {
+    id: 'minigame-sigil-scholar',
+    title: 'Sigil Scholar',
+    description: `Score ${ACHIEVEMENT_TARGETS['minigame-sigil-scholar']} or more in a single Sigil Sequence run.`,
+    category: 'minigame',
+  },
+  {
+    id: 'minigame-sigil-sage',
+    title: 'Sequence Sage',
+    description: `Name ${ACHIEVEMENT_TARGETS['minigame-sigil-sage']} number patterns correctly across all Sigil Sequence runs.`,
+    category: 'minigame',
+  },
+  {
+    id: 'minigame-arcade-devotee',
+    title: 'Arcade Devotee',
+    description: `Complete ${ACHIEVEMENT_TARGETS['minigame-arcade-devotee']} game sessions across the suite.`,
+    category: 'minigame',
+  },
+  {
+    id: 'minigame-companion-playmate',
+    title: 'Companion Playmate',
+    description: `Win ${ACHIEVEMENT_TARGETS['minigame-companion-playmate']} bond games with your companion.`,
+    category: 'minigame',
+  },
+];
+
+/**
+ * Single source of truth for how mini-game progress maps to achievement
+ * targets. The store uses it to unlock; the achievements panel uses it to
+ * render progress bars — keeping both consistent by construction.
+ */
+export const MINIGAME_ACHIEVEMENT_CHECKS: ReadonlyArray<{
+  id: keyof typeof ACHIEVEMENT_TARGETS;
+  getProgress: (progress: MiniGameProgress) => number;
+}> = [
+  { id: 'minigame-memory', getProgress: (p) => p.memoryHighScore },
+  { id: 'minigame-memory-ace', getProgress: (p) => p.memoryHighScore },
+  { id: 'minigame-rhythm', getProgress: (p) => p.rhythmHighScore },
+  { id: 'minigame-rhythm-ace', getProgress: (p) => p.rhythmHighScore },
+  { id: 'minigame-vimana-score', getProgress: (p) => p.vimanaHighScore },
+  { id: 'minigame-vimana-lines', getProgress: (p) => p.vimanaMaxLines },
+  { id: 'minigame-vimana-level', getProgress: (p) => p.vimanaMaxLevel },
+  { id: 'minigame-focus-streak', getProgress: (p) => p.focusStreak },
+  { id: 'minigame-shuffle-adept', getProgress: (p) => p.shuffleBestRound },
+  { id: 'minigame-pulse-flow', getProgress: (p) => p.pulseBestCombo },
+  { id: 'minigame-pulse-perfect', getProgress: (p) => p.pulseBestAccuracy },
+  { id: 'minigame-sigil-scholar', getProgress: (p) => p.sigilHighScore },
+  { id: 'minigame-sigil-sage', getProgress: (p) => p.sigilTotalCorrect },
+  { id: 'minigame-arcade-devotee', getProgress: (p) => p.totalPlays },
+  { id: 'minigame-companion-playmate', getProgress: (p) => p.companionWins },
 ];
 
 export interface CreateBattleStatsOptions {
@@ -184,6 +273,14 @@ export function createDefaultMiniGameProgress(overrides: Partial<MiniGameProgres
     vimanaLastLines: 0,
     vimanaLastLevel: 0,
     lastPlayedAt: null,
+    shuffleBestRound: 0,
+    pulseBestCombo: 0,
+    pulseBestAccuracy: 0,
+    sigilHighScore: 0,
+    sigilBestStreak: 0,
+    sigilTotalCorrect: 0,
+    companionWins: 0,
+    totalPlays: 0,
     ...overrides,
   };
 }

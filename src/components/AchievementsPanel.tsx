@@ -81,6 +81,20 @@ function getAchievementProgress(
       return source.miniGames.vimanaMaxLevel;
     case 'minigame-focus-streak':
       return source.miniGames.focusStreak;
+    case 'minigame-shuffle-adept':
+      return source.miniGames.shuffleBestRound;
+    case 'minigame-pulse-flow':
+      return source.miniGames.pulseBestCombo;
+    case 'minigame-pulse-perfect':
+      return source.miniGames.pulseBestAccuracy;
+    case 'minigame-sigil-scholar':
+      return source.miniGames.sigilHighScore;
+    case 'minigame-sigil-sage':
+      return source.miniGames.sigilTotalCorrect;
+    case 'minigame-arcade-devotee':
+      return source.miniGames.totalPlays;
+    case 'minigame-companion-playmate':
+      return source.miniGames.companionWins;
     case 'breeding-first':
       return unlocked ? 1 : 0;
     default:

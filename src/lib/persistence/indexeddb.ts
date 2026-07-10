@@ -531,7 +531,8 @@ export function importPetFromJSON(
   const miniGames = (() => {
     if (parsed.miniGames === undefined) return createDefaultMiniGameProgress();
     if (isValidMiniGameProgress(parsed.miniGames)) {
-      return { ...parsed.miniGames };
+      // Merge with defaults so pre-rebuild saves gain the newer game fields.
+      return { ...createDefaultMiniGameProgress(), ...parsed.miniGames };
     }
     throw new Error("Invalid pet file: mini-game progress malformed");
   })();
@@ -666,7 +667,7 @@ function normalizePetData(raw: unknown): PetSaveData {
     ? { ...typed.battle }
     : createDefaultBattleStats();
   const miniGames = isValidMiniGameProgress(typed.miniGames)
-    ? { ...typed.miniGames }
+    ? { ...createDefaultMiniGameProgress(), ...typed.miniGames }
     : createDefaultMiniGameProgress();
   const vimana = isValidVimanaState(typed.vimana)
     ? cloneVimana(typed.vimana)

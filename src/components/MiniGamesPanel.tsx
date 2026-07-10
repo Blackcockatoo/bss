@@ -1,11 +1,24 @@
 "use client";
 
-import { BrainCircuit, Gamepad2, Lock, Music4, Rocket } from "lucide-react";
+import {
+  BrainCircuit,
+  Calculator,
+  Gamepad2,
+  Music4,
+  Rocket,
+  TrendingUp,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 
+import {
+  getGameDifficulty,
+  TIER_LABELS,
+} from "@/lib/minigames/gameMath";
 import { useStore } from "@/lib/store";
 
-import { SafeCrackMini } from "./SafeCrackMini";
+import { MemoryShuffle, type MemoryShuffleResult } from "./games/MemoryShuffle";
+import { RhythmPulse, type RhythmPulseResult } from "./games/RhythmPulse";
+import { SigilSequence, type SigilSequenceResult } from "./games/SigilSequence";
 import { VimanaTetris } from "./VimanaTetris";
 import { Button } from "./ui/button";
 
@@ -13,17 +26,15 @@ interface MiniGamesPanelProps {
   petName?: string;
 }
 
-const MEMORY_HINT = "Solve memory puzzles to raise temperament.";
-const RHYTHM_HINT = "Sync to cosmic beats for energy surges.";
-const VIMANA_HINT = "Navigate the Vimana grid to channel focus.";
+type ActiveGame = "memory" | "rhythm" | "sigil" | "vimana" | null;
 
 export function MiniGamesPanel({ petName }: MiniGamesPanelProps) {
   const miniGames = useStore((state) => state.miniGames);
-  const vitals = useStore((state) => state.vitals);
-  const updateScore = useStore((state) => state.updateMiniGameScore);
-  const recordVimanaRun = useStore((state) => state.recordVimanaRun);
-  const recordReward = useStore((state) => state.recordReward);
+  const evolution = useStore((state) => state.evolution);
+  const recordMiniGameResult = useStore((state) => state.recordMiniGameResult);
   const genome = useStore((state) => state.genome);
+
+  const [activeGame, setActiveGame] = useState<ActiveGame>(null);
 
   const genomeSeed = useMemo(() => {
     if (!genome) return undefined;
@@ -38,85 +49,38 @@ export function MiniGamesPanel({ petName }: MiniGamesPanelProps) {
     );
   }, [genome]);
 
-  const [memoryLog, setMemoryLog] = useState<string>(MEMORY_HINT);
-  const [rhythmLog, setRhythmLog] = useState<string>(RHYTHM_HINT);
-  const [vimanaLog, setVimanaLog] = useState<string>(VIMANA_HINT);
-  const [vimanaOpen, setVimanaOpen] = useState<boolean>(false);
-  const [safeCrackLog, setSafeCrackLog] = useState<string>(
-    "Crack the vault to earn rewards.",
+  const difficulty = useMemo(
+    () => getGameDifficulty(evolution),
+    [evolution],
   );
-  const [safeCrackOpen, setSafeCrackOpen] = useState<boolean>(false);
-  const [safeCrackHighScore, setSafeCrackHighScore] = useState<number>(0);
-  const [safeCrackAttempts, setSafeCrackAttempts] = useState<number>(0);
 
-  const playMemory = () => {
-    const base = Math.round((vitals.mood + vitals.energy) / 20);
-    const noise = Math.floor(Math.random() * 4);
-    const score = base + noise;
-    const isNewBest = score > miniGames.memoryHighScore;
-    updateScore("memory", score);
-    const best = Math.max(score, miniGames.memoryHighScore);
-    setMemoryLog(`Pattern recall score: ${score}. High score: ${best}.`);
-    recordReward({
-      source: "minigame",
-      title: "Memory Session Complete",
-      description: `Pattern recall score: ${score}.`,
-      reward: {
-        type: "score",
-        value: score,
-      },
+  const closeGame = () => setActiveGame(null);
+
+  const handleMemoryComplete = (result: MemoryShuffleResult) => {
+    recordMiniGameResult({
+      game: "memory",
+      score: result.score,
+      roundsCompleted: result.roundsCompleted,
     });
-    if (isNewBest) {
-      recordReward({
-        source: "minigame",
-        title: "New Memory High Score",
-        description: `New best score: ${score}.`,
-        reward: {
-          type: "score",
-          value: score,
-        },
-      });
-    }
   };
 
-  const playRhythm = () => {
-    const base = Math.round((vitals.energy + vitals.hygiene) / 18);
-    const noise = Math.floor(Math.random() * 5);
-    const score = base + noise;
-    const isNewBest = score > miniGames.rhythmHighScore;
-    updateScore("rhythm", score);
-    const best = Math.max(score, miniGames.rhythmHighScore);
-    setRhythmLog(`Rhythm alignment score: ${score}. High score: ${best}.`);
-    recordReward({
-      source: "minigame",
-      title: "Rhythm Session Complete",
-      description: `Rhythm alignment score: ${score}.`,
-      reward: {
-        type: "score",
-        value: score,
-      },
+  const handleRhythmComplete = (result: RhythmPulseResult) => {
+    recordMiniGameResult({
+      game: "rhythm",
+      score: result.score,
+      accuracy: result.accuracy,
+      combo: result.combo,
     });
-    if (isNewBest) {
-      recordReward({
-        source: "minigame",
-        title: "New Rhythm High Score",
-        description: `New best score: ${score}.`,
-        reward: {
-          type: "score",
-          value: score,
-        },
-      });
-    }
   };
 
-  const handleLaunchVimana = () => {
-    setVimanaOpen(true);
-    setVimanaLog("Vimana grid engaged. Maintain focus to stabilize the run.");
-  };
-
-  const handleCloseVimana = () => {
-    setVimanaOpen(false);
-    setVimanaLog(VIMANA_HINT);
+  const handleSigilComplete = (result: SigilSequenceResult) => {
+    recordMiniGameResult({
+      game: "sigil",
+      score: result.score,
+      correctAnswers: result.correctAnswers,
+      combo: result.combo,
+      accuracy: result.accuracy,
+    });
   };
 
   const handleVimanaGameOver = (
@@ -124,251 +88,215 @@ export function MiniGamesPanel({ petName }: MiniGamesPanelProps) {
     lines: number,
     level: number,
   ) => {
-    const isNewBest = score > miniGames.vimanaHighScore;
-    recordVimanaRun(score, lines, level);
-    setVimanaLog(
-      `Run collapsed at level ${level}. Score ${score} with ${lines} lines cleared.`,
-    );
-    recordReward({
-      source: "minigame",
-      title: "Vimana Run Complete",
-      description: `Level ${level}, Score ${score}, Lines ${lines}.`,
-      reward: {
-        type: "score",
-        value: { score, lines, level },
-      },
-    });
-    if (isNewBest) {
-      recordReward({
-        source: "minigame",
-        title: "New Vimana High Score",
-        description: `New best Vimana score: ${score}.`,
-        reward: {
-          type: "score",
-          value: score,
-        },
-      });
-    }
-  };
-
-  const handleLaunchSafeCrack = () => {
-    setSafeCrackOpen(true);
-    setSafeCrackLog("Safe lock engaged. Match the combo to unlock.");
-  };
-
-  const handleCloseSafeCrack = () => {
-    setSafeCrackOpen(false);
-    setSafeCrackLog("Crack the vault to earn rewards.");
-  };
-
-  const handleSafeCrackGameOver = (
-    success: boolean,
-    score: number,
-    attempts: number,
-  ) => {
-    const isNewBest = success && score > safeCrackHighScore;
-    setSafeCrackAttempts((prev) => prev + 1);
-    if (success) {
-      const multiplier = score.toFixed(2);
-      setSafeCrackHighScore((prev) => Math.max(prev, score));
-      setSafeCrackLog(
-        `Vault cracked! Multiplier: ${multiplier}x. Attempts: ${safeCrackAttempts + 1}.`,
-      );
-      recordReward({
-        source: "minigame",
-        title: "Safe Crack Success",
-        description: `Multiplier ${multiplier}x after ${attempts} attempts.`,
-        reward: {
-          type: "score",
-          value: score,
-        },
-      });
-      if (isNewBest) {
-        recordReward({
-          source: "minigame",
-          title: "New Safe Crack High Score",
-          description: `New best multiplier: ${multiplier}x.`,
-          reward: {
-            type: "score",
-            value: score,
-          },
-        });
-      }
-    } else {
-      setSafeCrackLog(
-        `Lock jammed after ${attempts} strikes. Try again with steadier hands.`,
-      );
-    }
+    recordMiniGameResult({ game: "vimana", score, lines, level });
   };
 
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
-          <Gamepad2 className="w-5 h-5 text-emerald-300" />
-          Conscious Mini-Games
+        <h2 className="flex items-center gap-2 text-xl font-bold text-white">
+          <Gamepad2 className="h-5 w-5 text-emerald-300" />
+          Conscious Arcade
         </h2>
+        <div className="flex items-center gap-2 rounded-full border border-violet-500/40 bg-violet-900/30 px-3 py-1 text-xs text-violet-200">
+          <TrendingUp className="h-3.5 w-3.5" />
+          {evolution.state} · Lv {evolution.level} —{" "}
+          {TIER_LABELS[difficulty.tier]} (Tier {difficulty.tier})
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 space-y-3">
+      <p className="text-xs text-zinc-500">
+        Every game scales with your pet&apos;s evolution and feeds XP, vitals,
+        and essence back into its growth. Evolve to unlock harder patterns and
+        richer rewards.
+      </p>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* Memory Shuffle */}
+        <div className="space-y-3 rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
           <div className="flex items-center gap-2 text-sm text-zinc-300">
-            <BrainCircuit className="w-4 h-4 text-emerald-300" />
-            Memory Sequence
+            <BrainCircuit className="h-4 w-4 text-emerald-300" />
+            Memory Shuffle
           </div>
           <p className="text-xs text-zinc-400">
-            Higher mood and energy produce better recall performance.
+            Recall growing sigil weaves. {difficulty.memory.padCount} pads,
+            starting at {difficulty.memory.startLength} sigils.
           </p>
-          <Button onClick={playMemory} className="gap-2">
-            <BrainCircuit className="w-4 h-4" />
-            Attempt Memory Shuffle
+          <Button onClick={() => setActiveGame("memory")} className="gap-2">
+            <BrainCircuit className="h-4 w-4" />
+            Start Weaving
           </Button>
-          <p className="text-xs text-zinc-400 italic">{memoryLog}</p>
-          <p className="text-xs text-zinc-500">
-            Best score:{" "}
-            <span className="text-emerald-300 font-semibold">
-              {miniGames.memoryHighScore}
-            </span>
-          </p>
+          <div className="grid grid-cols-2 gap-2 text-[11px] text-zinc-400">
+            <div>
+              Best Score
+              <div className="font-semibold text-emerald-300">
+                {miniGames.memoryHighScore}
+              </div>
+            </div>
+            <div>
+              Best Round
+              <div className="font-semibold text-emerald-300">
+                {miniGames.shuffleBestRound}
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 space-y-3">
+        {/* Rhythm Pulse */}
+        <div className="space-y-3 rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
           <div className="flex items-center gap-2 text-sm text-zinc-300">
-            <Music4 className="w-4 h-4 text-pink-300" />
-            Rhythm Weave
+            <Music4 className="h-4 w-4 text-pink-300" />
+            Rhythm Pulse
           </div>
           <p className="text-xs text-zinc-400">
-            Energy and cleanliness align to keep tempo steady.
+            Tap in time with the pulse. {difficulty.rhythm.bpm} BPM,{" "}
+            {difficulty.rhythm.beats} beats.
           </p>
-          <Button onClick={playRhythm} className="gap-2">
-            <Music4 className="w-4 h-4" />
-            Play Rhythm Pulse
+          <Button onClick={() => setActiveGame("rhythm")} className="gap-2">
+            <Music4 className="h-4 w-4" />
+            Feel the Beat
           </Button>
-          <p className="text-xs text-zinc-400 italic">{rhythmLog}</p>
-          <p className="text-xs text-zinc-500">
-            Best score:{" "}
-            <span className="text-pink-300 font-semibold">
-              {miniGames.rhythmHighScore}
-            </span>
-          </p>
+          <div className="grid grid-cols-2 gap-2 text-[11px] text-zinc-400">
+            <div>
+              Best Score
+              <div className="font-semibold text-pink-300">
+                {miniGames.rhythmHighScore}
+              </div>
+            </div>
+            <div>
+              Best Sync
+              <div className="font-semibold text-pink-300">
+                {miniGames.pulseBestAccuracy}% · {miniGames.pulseBestCombo}x
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 space-y-3">
+        {/* Sigil Sequence */}
+        <div className="space-y-3 rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
           <div className="flex items-center gap-2 text-sm text-zinc-300">
-            <Rocket className="w-4 h-4 text-cyan-300" />
+            <Calculator className="h-4 w-4 text-violet-300" />
+            Sigil Sequence
+          </div>
+          <p className="text-xs text-zinc-400">
+            Name the next number in the flow — Fibonacci, primes, and stranger
+            maths await deeper stages.
+          </p>
+          <Button onClick={() => setActiveGame("sigil")} className="gap-2">
+            <Calculator className="h-4 w-4" />
+            Read the Numbers
+          </Button>
+          <div className="grid grid-cols-2 gap-2 text-[11px] text-zinc-400">
+            <div>
+              Best Score
+              <div className="font-semibold text-violet-300">
+                {miniGames.sigilHighScore}
+              </div>
+            </div>
+            <div>
+              Patterns Named
+              <div className="font-semibold text-violet-300">
+                {miniGames.sigilTotalCorrect}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Vimana Tetris Field */}
+        <div className="space-y-3 rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+          <div className="flex items-center gap-2 text-sm text-zinc-300">
+            <Rocket className="h-4 w-4 text-cyan-300" />
             Vimana Tetris Field
           </div>
           <p className="text-xs text-zinc-400">
-            Clear lines to stabilize the craft. Hard drops accelerate anomaly
-            resolution.
+            Clear lines to stabilize the craft. Evolution stage sets the
+            launch speed — currently level {difficulty.vimana.startLevel}.
           </p>
-          <Button onClick={handleLaunchVimana} className="gap-2">
-            <Rocket className="w-4 h-4" />
+          <Button onClick={() => setActiveGame("vimana")} className="gap-2">
+            <Rocket className="h-4 w-4" />
             Launch Simulation
           </Button>
-          <p className="text-xs text-zinc-400 italic">{vimanaLog}</p>
           <div className="grid grid-cols-2 gap-2 text-[11px] text-zinc-400">
             <div>
               High Score
-              <div className="text-emerald-300 font-semibold">
+              <div className="font-semibold text-cyan-300">
                 {miniGames.vimanaHighScore}
               </div>
             </div>
             <div>
-              Max Lines
-              <div className="text-cyan-300 font-semibold">
-                {miniGames.vimanaMaxLines}
-              </div>
-            </div>
-            <div>
-              Max Level
-              <div className="text-purple-300 font-semibold">
-                {miniGames.vimanaMaxLevel}
-              </div>
-            </div>
-            <div>
-              Last Run
-              <div className="text-amber-200 font-semibold">
-                {miniGames.vimanaLastScore} / {miniGames.vimanaLastLines}L • Lv{" "}
-                {miniGames.vimanaLastLevel}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 space-y-3">
-          <div className="flex items-center gap-2 text-sm text-zinc-300">
-            <Lock className="w-4 h-4 text-amber-300" />
-            Safe Crack Challenge
-          </div>
-          <p className="text-xs text-zinc-400">
-            Match the 3-number combo by rotating the dial. Precision and
-            patience unlock rewards.
-          </p>
-          <Button onClick={handleLaunchSafeCrack} className="gap-2">
-            <Lock className="w-4 h-4" />
-            Attempt Crack
-          </Button>
-          <p className="text-xs text-zinc-400 italic">{safeCrackLog}</p>
-          <div className="grid grid-cols-2 gap-2 text-[11px] text-zinc-400">
-            <div>
-              High Score
-              <div className="text-amber-300 font-semibold">
-                {safeCrackHighScore.toFixed(2)}x
-              </div>
-            </div>
-            <div>
-              Attempts
-              <div className="text-slate-300 font-semibold">
-                {safeCrackAttempts}
+              Max Lines · Level
+              <div className="font-semibold text-cyan-300">
+                {miniGames.vimanaMaxLines} · {miniGames.vimanaMaxLevel}
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {vimanaOpen && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-black/70 p-2 sm:p-4 sm:items-center sm:justify-center">
-          <div className="flex justify-end py-2 sm:w-full sm:max-w-3xl shrink-0">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleCloseVimana}
-              className="touch-manipulation"
-            >
-              Close
-            </Button>
-          </div>
-          <div className="flex-1 min-h-0 w-full sm:max-w-3xl">
-            <VimanaTetris
-              petName={petName}
-              genomeSeed={genomeSeed}
-              onExit={handleCloseVimana}
-              onGameOver={handleVimanaGameOver}
-            />
-          </div>
-        </div>
-      )}
+      <div className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/40 px-4 py-2 text-[11px] text-zinc-500">
+        <span>
+          Focus streak:{" "}
+          <span className="font-semibold text-amber-300">
+            {miniGames.focusStreak}
+          </span>
+        </span>
+        <span>
+          Sessions played:{" "}
+          <span className="font-semibold text-zinc-300">
+            {miniGames.totalPlays}
+          </span>
+        </span>
+      </div>
 
-      {safeCrackOpen && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-black/70 p-2 sm:p-4 sm:items-center sm:justify-center">
-          <div className="flex justify-end py-2 sm:w-full sm:max-w-3xl shrink-0">
+      {activeGame && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-black/70 p-2 sm:items-center sm:justify-center sm:p-4">
+          <div className="flex shrink-0 justify-end py-2 sm:w-full sm:max-w-3xl">
             <Button
               size="sm"
               variant="outline"
-              onClick={handleCloseSafeCrack}
+              onClick={closeGame}
               className="touch-manipulation"
             >
               Close
             </Button>
           </div>
-          <div className="flex-1 min-h-0 w-full sm:max-w-3xl">
-            <SafeCrackMini
-              petName={petName}
-              genomeSeed={genomeSeed}
-              onExit={handleCloseSafeCrack}
-              onGameOver={handleSafeCrackGameOver}
-            />
+          <div className="min-h-0 w-full flex-1 sm:max-w-3xl">
+            {activeGame === "memory" && (
+              <MemoryShuffle
+                petName={petName}
+                genomeSeed={genomeSeed}
+                difficulty={difficulty.memory}
+                onComplete={handleMemoryComplete}
+                onExit={closeGame}
+              />
+            )}
+            {activeGame === "rhythm" && (
+              <RhythmPulse
+                petName={petName}
+                difficulty={difficulty.rhythm}
+                onComplete={handleRhythmComplete}
+                onExit={closeGame}
+              />
+            )}
+            {activeGame === "sigil" && (
+              <SigilSequence
+                petName={petName}
+                genomeSeed={genomeSeed}
+                difficulty={difficulty.sigil}
+                tier={difficulty.tier}
+                onComplete={handleSigilComplete}
+                onExit={closeGame}
+              />
+            )}
+            {activeGame === "vimana" && (
+              <VimanaTetris
+                petName={petName}
+                genomeSeed={genomeSeed}
+                startLevel={difficulty.vimana.startLevel}
+                onExit={closeGame}
+                onGameOver={handleVimanaGameOver}
+              />
+            )}
           </div>
         </div>
       )}
