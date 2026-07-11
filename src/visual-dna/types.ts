@@ -1,3 +1,4 @@
+import type { DigitalDoshaPhenotype } from '../digital-dosha';
 import type { EvolutionData, EvolutionState } from '../evolution/types';
 import type { DerivedTraits } from '../genome/types';
 import type { Vitals } from '../vitals';
@@ -131,6 +132,7 @@ export interface VisualPhenotype {
   version: 1;
   identity: VisualIdentity;
   evolution: EvolutionVisualProfile;
+  dosha: DigitalDoshaPhenotype;
   aura: AuraPhenotype;
   body: BodyPhenotype;
   face: FacePhenotype;
