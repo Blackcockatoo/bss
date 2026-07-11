@@ -58,7 +58,10 @@ export default function ClientBody({
 
     const registerServiceWorker = async () => {
       try {
-        await navigator.serviceWorker.register("/sw.js");
+        const registration = await navigator.serviceWorker.register("/sw.js", {
+          updateViaCache: "none",
+        });
+        await registration.update();
       } catch (error) {
         console.error("Service worker registration failed", error);
       }
