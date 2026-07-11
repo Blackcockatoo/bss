@@ -9,7 +9,13 @@ describe("QuickNav items", () => {
   it("keeps the core bottom nav focused on the main ladder", () => {
     const hrefs = CORE_QUICK_NAV_ITEMS.map((item) => item.href);
 
-    expect(hrefs).toEqual(["/", "/pet", "/school-game", "/identity"]);
+    expect(hrefs).toEqual([
+      "/",
+      "/pet",
+      "/app/wellness",
+      "/school-game",
+      "/identity",
+    ]);
     expect(hrefs).not.toContain("/moss60");
   });
 

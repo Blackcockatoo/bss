@@ -28,6 +28,10 @@ export interface EvolutionCeremonyProps {
   /** Called when the ceremony finishes (or is skipped). */
   onComplete: () => void;
   reduceMotion?: boolean;
+  /** Branch accent triad; overrides the stage's default colours. */
+  accentColors?: [string, string, string];
+  /** Branch display title; overrides the stage's default title. */
+  displayTitle?: string;
 }
 
 type CeremonyPhase = "dim" | "tighten" | "transform" | "shockwave" | "settle";
@@ -61,6 +65,8 @@ export function EvolutionCeremony({
   stage,
   onComplete,
   reduceMotion = false,
+  accentColors,
+  displayTitle,
 }: EvolutionCeremonyProps) {
   const [elapsed, setElapsed] = useState(0);
   const onCompleteRef = useRef(onComplete);
@@ -88,10 +94,11 @@ export function EvolutionCeremony({
   const { phase, local } = phaseAt(elapsed);
   const visuals = EVOLUTION_VISUALS[stage];
   const info = EVOLUTION_STAGE_INFO[stage];
+  const palette = accentColors ?? visuals.colors;
   const [c0, c1, c2] = [
-    visuals.colors[0],
-    visuals.colors[1] ?? visuals.colors[0],
-    visuals.colors[2] ?? visuals.colors[0],
+    palette[0],
+    palette[1] ?? palette[0],
+    palette[2] ?? palette[0],
   ];
 
   // Backdrop dim: rises fast, holds, releases at settle.
@@ -130,7 +137,7 @@ export function EvolutionCeremony({
       className="fixed inset-0 z-[100] flex items-center justify-center"
       role="status"
       aria-live="polite"
-      aria-label={`Evolving to ${info.title}`}
+      aria-label={`Evolving to ${displayTitle ?? info.title}`}
     >
       {/* Blackout / dim pulse */}
       <div
@@ -201,7 +208,7 @@ export function EvolutionCeremony({
         <p className="text-xs uppercase tracking-[0.4em]" style={{ color: c1 }}>
           Evolution
         </p>
-        <p className="mt-1 text-2xl font-bold text-white">{info.title}</p>
+        <p className="mt-1 text-2xl font-bold text-white">{displayTitle ?? info.title}</p>
         <p className="mt-1 text-sm text-zinc-300">{info.tagline}</p>
       </div>
 

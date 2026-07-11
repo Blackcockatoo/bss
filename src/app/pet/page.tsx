@@ -1,12 +1,18 @@
 "use client";
 
 import AuraliaMetaPet from "@/components/AuraliaMetaPet";
+import { EvolutionPanel } from "@/components/EvolutionPanel";
 import { HUD, HUDAdvancedStats } from "@/components/HUD";
 import { PetResponseOverlay } from "@/components/PetResponseOverlay";
 import { RouteProgressionCard } from "@/components/RouteProgressionCard";
 import { RouteTutorialControls } from "@/components/RouteTutorialControls";
 import { AddonInventoryPanel } from "@/components/addons/AddonInventoryPanel";
 import { PetProfilePanel } from "@/components/addons/PetProfilePanel";
+import {
+  CertificateButton,
+  RegistrationCertificate,
+} from "@/components/RegistrationCertificate";
+import { WellnessSync } from "@/components/WellnessSync";
 import { Button } from "@/components/ui/button";
 import { initializeStarterAddons } from "@/lib/addons/starter";
 import { useDnaImprint } from "@/lib/dnaImprint";
@@ -22,6 +28,7 @@ import {
   Shield,
   Sparkles,
   UserCircle,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -29,13 +36,19 @@ import { useEffect, useState } from "react";
 export default function PetPage() {
   const startTick = useStore((s) => s.startTick);
   const stopTick = useStore((s) => s.stopTick);
+  const evolution = useStore((s) => s.evolution);
+  const lastAction = useStore((s) => s.lastAction);
+  const lastActionAt = useStore((s) => s.lastActionAt);
   const dnaImprint = useDnaImprint();
   const petStep = getRouteProgression("pet");
   const [showAddonPanel, setShowAddonPanel] = useState(false);
   const [showProfilePanel, setShowProfilePanel] = useState(false);
+  const [showEvolutionPanel, setShowEvolutionPanel] = useState(false);
   const [addonEditMode, setAddonEditMode] = useState(false);
   const [addonsInitialized, setAddonsInitialized] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showCertificate, setShowCertificate] = useState(false);
+  const [showWellnessSync, setShowWellnessSync] = useState(false);
   useJourneyProgressTracker("pet", { completeOnVisit: true });
 
   const imprintAccentClass =
@@ -51,6 +64,18 @@ export default function PetPage() {
     startTick();
     return () => stopTick();
   }, [startTick, stopTick]);
+
+  // Caring for the pet gently prompts the user's own self-care, at most
+  // once per hour.
+  useEffect(() => {
+    if (!lastAction || !lastActionAt) return;
+    const PROMPT_KEY = "metapet-wellness-sync-prompted-at";
+    const lastPrompt = Number(window.localStorage.getItem(PROMPT_KEY) ?? 0);
+    if (lastActionAt - lastPrompt < 60 * 60 * 1000) return;
+    window.localStorage.setItem(PROMPT_KEY, String(lastActionAt));
+    const id = requestAnimationFrame(() => setShowWellnessSync(true));
+    return () => cancelAnimationFrame(id);
+  }, [lastAction, lastActionAt]);
 
   // Initialize starter addons on first load
   useEffect(() => {
@@ -71,6 +96,7 @@ export default function PetPage() {
       const next = !prev;
       if (next) {
         setShowAddonPanel(false);
+        setShowEvolutionPanel(false);
       }
       return next;
     });
@@ -81,6 +107,18 @@ export default function PetPage() {
       const next = !prev;
       if (next) {
         setShowProfilePanel(false);
+        setShowEvolutionPanel(false);
+      }
+      return next;
+    });
+  };
+
+  const handleToggleEvolutionPanel = () => {
+    setShowEvolutionPanel((prev) => {
+      const next = !prev;
+      if (next) {
+        setShowProfilePanel(false);
+        setShowAddonPanel(false);
       }
       return next;
     });
@@ -89,6 +127,7 @@ export default function PetPage() {
   const closePanels = () => {
     setShowAddonPanel(false);
     setShowProfilePanel(false);
+    setShowEvolutionPanel(false);
   };
 
   const handleToggleAdvanced = () => {
@@ -245,6 +284,22 @@ export default function PetPage() {
                       <Sparkles className="w-4 h-4" />
                       Addons
                     </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleToggleEvolutionPanel}
+                      className={`gap-2 ${
+                        showEvolutionPanel
+                          ? "border-emerald-500 bg-emerald-600 text-white hover:bg-emerald-700"
+                          : "border-emerald-700 bg-emerald-900/80 text-emerald-200 hover:bg-emerald-800"
+                      }`}
+                    >
+                      <Zap className="w-4 h-4" />
+                      Evolution
+                    </Button>
+                    <CertificateButton
+                      onClick={() => setShowCertificate(true)}
+                    />
                   </div>
 
                   {addonEditMode && (
@@ -264,7 +319,12 @@ export default function PetPage() {
                       />
                     )}
                     {showAddonPanel && <AddonInventoryPanel />}
-                    {!showProfilePanel && !showAddonPanel && (
+                    {showEvolutionPanel && (
+                      <div className="rounded-lg border border-emerald-800/60 bg-zinc-950/60 p-4 md:col-span-2">
+                        <EvolutionPanel />
+                      </div>
+                    )}
+                    {!showProfilePanel && !showAddonPanel && !showEvolutionPanel && (
                       <div className="space-y-2 rounded-lg border border-dashed border-slate-700/60 p-4 text-xs text-slate-400 md:col-span-2">
                         <p>
                           Use the controls above to open the profile or addon
@@ -289,6 +349,23 @@ export default function PetPage() {
           </div>
         </div>
       </div>
+
+      <RegistrationCertificate
+        petId="auralia-main"
+        petName="Auralia"
+        crest={null}
+        heptaCode={null}
+        createdAt={evolution.birthTime}
+        evolutionState={evolution.state}
+        isOpen={showCertificate}
+        onClose={() => setShowCertificate(false)}
+      />
+
+      <WellnessSync
+        isOpen={showWellnessSync}
+        onClose={() => setShowWellnessSync(false)}
+        lastAction={lastAction}
+      />
     </div>
   );
 }

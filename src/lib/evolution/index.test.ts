@@ -3,14 +3,17 @@ import {
   initializeEvolution,
   checkEvolutionEligibility,
   evolvePet,
+  applyEvolution,
   gainExperience,
   getTimeUntilNextEvolution,
   getEvolutionProgress,
   getNextEvolutionRequirement,
   getRequirementProgress,
+  EVOLUTION_VITALS_BOOST,
   type EvolutionData,
 } from './index';
 import { EVOLUTION_REQUIREMENTS } from './types';
+import type { DerivedTraits } from '../../genome/types';
 
 describe('Evolution System', () => {
   describe('initializeEvolution', () => {
@@ -173,6 +176,74 @@ describe('Evolution System', () => {
 
       expect(evolved.birthTime).toBe(originalEvolution.birthTime);
       expect(evolved.totalInteractions).toBe(originalEvolution.totalInteractions);
+    });
+  });
+
+  describe('applyEvolution', () => {
+    const traits = {
+      latent: {
+        evolutionPath: 'Void Walker',
+        rareAbilities: ['Star Whisper', 'Echo Step', 'Nova Bloom'],
+        potential: { physical: 50, mental: 50, social: 50 },
+        hiddenGenes: [],
+      },
+    } as unknown as DerivedTraits;
+
+    function evolvable(state: EvolutionData['state']): EvolutionData {
+      return {
+        state,
+        birthTime: Date.now() - 100_000,
+        lastEvolutionTime: Date.now() - 100_000,
+        experience: 75,
+        level: 15,
+        currentLevelXp: 0,
+        totalXp: 300,
+        totalInteractions: 100,
+        canEvolve: true,
+      };
+    }
+
+    it('advances the stage and grants stage effects', () => {
+      const { evolution, effects } = applyEvolution(evolvable('GENETICS'), traits);
+
+      expect(evolution.state).toBe('NEURO');
+      expect(evolution.branchId).toBe('void-walker');
+      expect(evolution.abilitiesUnlocked).toEqual(['Star Whisper']);
+      expect(effects).not.toBeNull();
+      expect(effects?.vitalsBoost).toBe(EVOLUTION_VITALS_BOOST);
+      expect(effects?.essenceGrant).toBe(25);
+      expect(effects?.abilitiesRevealed).toEqual(['Star Whisper']);
+      expect(effects?.achievementId).toBe('evolve-neuro');
+    });
+
+    it('reveals only the newly unlocked abilities per stage', () => {
+      const { evolution, effects } = applyEvolution(evolvable('QUANTUM'), traits);
+
+      expect(evolution.state).toBe('SPECIATION');
+      expect(evolution.abilitiesUnlocked).toEqual([
+        'Star Whisper',
+        'Echo Step',
+        'Nova Bloom',
+      ]);
+      expect(effects?.abilitiesRevealed).toEqual(['Nova Bloom']);
+      expect(effects?.essenceGrant).toBe(100);
+      expect(effects?.achievementId).toBe('evolve-speciation');
+    });
+
+    it('returns null effects at the final stage', () => {
+      const { evolution, effects } = applyEvolution(evolvable('SPECIATION'), traits);
+
+      expect(evolution.state).toBe('SPECIATION');
+      expect(effects).toBeNull();
+    });
+
+    it('works without traits', () => {
+      const { evolution, effects } = applyEvolution(evolvable('GENETICS'), null);
+
+      expect(evolution.state).toBe('NEURO');
+      expect(evolution.branchId).toBe('unaligned');
+      expect(evolution.abilitiesUnlocked).toEqual([]);
+      expect(effects?.abilitiesRevealed).toEqual([]);
     });
   });
 

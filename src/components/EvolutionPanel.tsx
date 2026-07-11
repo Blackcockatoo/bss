@@ -2,14 +2,18 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { useStore } from '@/lib/store';
+import { buildEvolutionContext, useStore } from '@/lib/store';
 import {
   getEvolutionProgress,
   getTimeUntilNextEvolution,
   getNextEvolutionRequirement,
   getRequirementProgress,
+  getEvolutionBranch,
+  getStageVisuals,
+  getStageDisplayTitle,
+  getUnlockedAbilities,
+  EVOLUTION_ORDER,
   EVOLUTION_STAGE_INFO,
-  EVOLUTION_VISUALS,
   type EvolutionState,
 } from '@/lib/evolution';
 import { Zap, Clock, TrendingUp, Sparkles, CheckCircle2, AlertTriangle } from 'lucide-react';
@@ -19,16 +23,28 @@ import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { EvolutionCeremony } from './EvolutionCeremony';
 import { Button } from './ui/button';
 
-type StageSequence = readonly EvolutionState[];
-
-const STAGE_SEQUENCE: StageSequence = ['GENETICS', 'NEURO', 'QUANTUM', 'SPECIATION'];
-
 export function EvolutionPanel() {
   const evolution = useStore(state => state.evolution);
   const vitals = useStore(state => state.vitals);
   const tryEvolve = useStore(state => state.tryEvolve);
+  const traits = useStore(state => state.traits);
+  const battle = useStore(state => state.battle);
+  const miniGames = useStore(state => state.miniGames);
+  const essence = useStore(state => state.essence);
   const [ceremonyStage, setCeremonyStage] = useState<EvolutionState | null>(null);
   const prefersReducedMotion = useReducedMotion();
+
+  const evolutionContext = useMemo(
+    () => buildEvolutionContext({ traits, battle, miniGames, essence }),
+    [traits, battle, miniGames, essence]
+  );
+
+  const branch = useMemo(() => getEvolutionBranch(traits), [traits]);
+  const unlockedAbilities = useMemo(
+    () => getUnlockedAbilities(traits, evolution.state),
+    [traits, evolution.state]
+  );
+  const totalAbilities = traits?.latent.rareAbilities.length ?? 0;
 
   const vitalsAverage = useMemo(
     () => (vitals.hunger + vitals.hygiene + vitals.mood + vitals.energy) / 4,
@@ -36,12 +52,19 @@ export function EvolutionPanel() {
   );
 
   const stageIndex = useMemo(
-    () => STAGE_SEQUENCE.indexOf(evolution.state),
+    () => EVOLUTION_ORDER.indexOf(evolution.state),
     [evolution.state]
   );
 
-  const visuals = EVOLUTION_VISUALS[evolution.state];
+  const visuals = getStageVisuals(evolution.state, branch);
   const stageInfo = EVOLUTION_STAGE_INFO[evolution.state];
+  // Header keeps the raw stage code until the apex, where the branch's
+  // apex form takes over.
+  const stageDisplayTitle = getStageDisplayTitle(
+    evolution.state,
+    branch,
+    evolution.state
+  );
 
   const progress = useMemo(
     () => getEvolutionProgress(evolution, vitalsAverage),
@@ -61,9 +84,14 @@ export function EvolutionPanel() {
   const requirementProgress = useMemo(
     () =>
       requirementSnapshot
-        ? getRequirementProgress(evolution, vitalsAverage, requirementSnapshot)
+        ? getRequirementProgress(
+            evolution,
+            vitalsAverage,
+            requirementSnapshot,
+            evolutionContext
+          )
         : null,
-    [evolution, vitalsAverage, requirementSnapshot]
+    [evolution, vitalsAverage, requirementSnapshot, evolutionContext]
   );
 
   const nextStageInfo = requirementSnapshot ? EVOLUTION_STAGE_INFO[requirementSnapshot.state] : null;
@@ -104,7 +132,7 @@ export function EvolutionPanel() {
   }, [evolution.state, requirementSnapshot, tryEvolve]);
 
   const experiencePercent = Math.round(evolution.experience);
-  const nextStageLabel = stageIndex >= 0 ? `Evolution Stage ${stageIndex + 1}/${STAGE_SEQUENCE.length}` : 'Evolution';
+  const nextStageLabel = stageIndex >= 0 ? `Evolution Stage ${stageIndex + 1}/${EVOLUTION_ORDER.length}` : 'Evolution';
   const accent = visuals.colors[1] ?? visuals.colors[0];
   const tertiary = visuals.colors[visuals.colors.length - 1] ?? visuals.colors[0];
 
@@ -115,6 +143,18 @@ export function EvolutionPanel() {
           stage={ceremonyStage}
           reduceMotion={prefersReducedMotion}
           onComplete={() => setCeremonyStage(null)}
+          accentColors={
+            getStageVisuals(ceremonyStage, branch).colors as [
+              string,
+              string,
+              string,
+            ]
+          }
+          displayTitle={getStageDisplayTitle(
+            ceremonyStage,
+            branch,
+            EVOLUTION_STAGE_INFO[ceremonyStage].title
+          )}
         />
       )}
       <header className="text-center space-y-2">
@@ -126,10 +166,15 @@ export function EvolutionPanel() {
           }}
         >
           <Sparkles className="w-4 h-4" style={{ color: visuals.colors[0] }} />
-          <span className="font-bold text-white text-lg">{evolution.state}</span>
+          <span className="font-bold text-white text-lg">{stageDisplayTitle}</span>
         </div>
         <p className="text-zinc-400 text-sm">{nextStageLabel}</p>
         <p className="text-zinc-300 text-xs">{stageInfo.tagline}</p>
+        {traits && (
+          <p className="text-xs" style={{ color: branch.accentColors[0] }}>
+            {branch.label} path — {branch.motto}
+          </p>
+        )}
       </header>
 
       <section className="grid grid-cols-2 gap-3 text-sm">
@@ -161,7 +206,7 @@ export function EvolutionPanel() {
         </div>
       </section>
 
-      {evolution.state !== 'SPECIATION' && (
+      {requirementSnapshot !== null && (
         <section className="space-y-2">
           <div className="flex justify-between items-center text-sm">
             <span className="text-zinc-400">Next evolution</span>
@@ -221,14 +266,14 @@ export function EvolutionPanel() {
               )}
               color={tertiary}
             />
-            {requirementSnapshot.requirements.specialDescription && (
+            {requirementProgress.specialDescription && (
               <div className="flex items-start gap-2 text-xs">
                 {requirementProgress.specialMet ? (
                   <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                 ) : (
                   <AlertTriangle className="w-4 h-4 text-amber-300" />
                 )}
-                <span className="text-zinc-400">{requirementSnapshot.requirements.specialDescription}</span>
+                <span className="text-zinc-400">{requirementProgress.specialDescription}</span>
               </div>
             )}
           </div>
@@ -244,7 +289,36 @@ export function EvolutionPanel() {
         </ul>
       </section>
 
-      {evolution.canEvolve && evolution.state !== 'SPECIATION' && (
+      {totalAbilities > 0 && (
+        <section className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4 space-y-3 text-xs text-zinc-300">
+          <p className="font-semibold text-white text-sm">Rare Abilities</p>
+          {unlockedAbilities.length > 0 ? (
+            <ul className="space-y-1">
+              {unlockedAbilities.map(ability => (
+                <li key={ability} className="flex items-center gap-2">
+                  <Sparkles
+                    className="w-3 h-3"
+                    style={{ color: branch.accentColors[0] }}
+                  />
+                  <span>{ability}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-zinc-500">
+              Latent abilities sleep in the genome, waiting for evolution.
+            </p>
+          )}
+          {unlockedAbilities.length < totalAbilities && (
+            <p className="text-zinc-500">
+              {totalAbilities - unlockedAbilities.length} more awaken as your
+              companion evolves.
+            </p>
+          )}
+        </section>
+      )}
+
+      {evolution.canEvolve && requirementSnapshot !== null && (
         <section className="space-y-3">
           <div className="bg-emerald-500/10 border border-emerald-500/40 text-emerald-100 text-xs rounded-lg px-3 py-2">
             {nextStageInfo ? nextStageInfo.celebration : stageInfo.celebration}

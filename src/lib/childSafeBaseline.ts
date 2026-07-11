@@ -41,7 +41,7 @@ const SCHOOLS_ALLOWED_PREFIXES = ["/docs/schools-au/", "/schools/docs/"];
 
 export const CHILD_SAFE_NAV_ROUTES = IS_SCHOOLS_PROFILE
   ? new Set(["/schools", "/school-game", "/legal/privacy"])
-  : new Set(["/", "/pet", "/school-game"]);
+  : new Set(["/", "/pet", "/app/wellness", "/school-game"]);
 
 export function getChildSafeFallbackPathname(_pathname: string): string {
   if (IS_SCHOOLS_PROFILE) {

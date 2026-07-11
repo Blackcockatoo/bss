@@ -206,8 +206,14 @@ describe('Store State Management', () => {
 
     it('should evolve when requirements are met', () => {
       // Set up evolution that meets all requirements for NEURO
-      // NEURO requires minLevel: 5, minInteractions: 12, minVitalsAverage: 55
+      // NEURO requires minLevel: 5, minInteractions: 12, minVitalsAverage: 55,
+      // plus a bonding activity (mini-game or battle win) as the special
+      // condition.
       useStore.setState({
+        miniGames: {
+          ...useStore.getState().miniGames,
+          totalPlays: 1,
+        },
         evolution: {
           state: 'GENETICS',
           birthTime: Date.now() - 100_000_000, // Very old
@@ -235,6 +241,53 @@ describe('Store State Management', () => {
 
       expect(result).toBe(true);
       expect(useStore.getState().evolution.state).toBe('NEURO');
+    });
+
+    it('should apply stage effects when evolving', () => {
+      useStore.setState({
+        essence: 5,
+        miniGames: {
+          ...useStore.getState().miniGames,
+          totalPlays: 1,
+        },
+        evolution: {
+          state: 'GENETICS',
+          birthTime: Date.now() - 100_000_000,
+          lastEvolutionTime: Date.now() - 100_000_000,
+          experience: 100,
+          level: 5,
+          currentLevelXp: 0,
+          totalXp: 100,
+          totalInteractions: 100,
+          canEvolve: true,
+        },
+        vitals: {
+          hunger: 80,
+          hygiene: 95,
+          mood: 80,
+          energy: 80,
+          isSick: false,
+          sicknessSeverity: 0,
+          sicknessType: 'none',
+          deathCount: 0,
+        },
+      });
+
+      const result = useStore.getState().tryEvolve();
+      const state = useStore.getState();
+
+      expect(result).toBe(true);
+      // +10 vitals boost, clamped at 100
+      expect(state.vitals.hunger).toBe(90);
+      expect(state.vitals.hygiene).toBe(100);
+      expect(state.vitals.mood).toBe(90);
+      expect(state.vitals.energy).toBe(90);
+      // NEURO essence grant on top of existing essence
+      expect(state.essence).toBe(30);
+      // Stage achievement unlocked with a reward entry
+      expect(
+        state.achievements.some(entry => entry.id === 'evolve-neuro'),
+      ).toBe(true);
     });
   });
 
