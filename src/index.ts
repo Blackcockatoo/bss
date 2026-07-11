@@ -9,5 +9,8 @@ export const useStore = createMetaPetWebStore();
 // Element number theory exports
 export * from './elements';
 
+// Visual phenotype resolver shared by every pet renderer
+export * from './visual-dna';
+
 // MOSS60 share/widget bundle
 export * from './lib/moss60';
