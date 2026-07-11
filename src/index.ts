@@ -9,6 +9,9 @@ export const useStore = createMetaPetWebStore();
 // Element number theory exports
 export * from './elements';
 
+// Digital constitution and live drift engine
+export * from './digital-dosha';
+
 // Visual phenotype resolver shared by every pet renderer
 export * from './visual-dna';
 
