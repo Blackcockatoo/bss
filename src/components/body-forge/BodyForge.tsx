@@ -1,7 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';\nimport { useRouter } from 'next/navigation';
-import { BodyFeature, BodyPattern, BodyShape, DEFAULT_BODY_SPEC, FaceExpression, PetBodyRenderer, type BodySpec } from '@/components/body-forge/PetBodyRenderer';\nimport { createDNAReadyBodyPacket, saveForgedBody } from '@/visual-dna/bodyForgeAdapter';
+import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { BodyFeature, BodyPattern, BodyShape, DEFAULT_BODY_SPEC, FaceExpression, PetBodyRenderer, type BodySpec } from '@/components/body-forge/PetBodyRenderer';
+import { createDNAReadyBodyPacket, saveForgedBody } from '@/visual-dna/bodyForgeAdapter';
 
 const PRESETS: Record<string, BodySpec> = {
   Auralia: DEFAULT_BODY_SPEC,
@@ -18,7 +20,8 @@ function Select<T extends string>({ label, value, values, onChange }: { label: s
 }
 
 export function BodyForge() {
-  const router = useRouter();\n  const [spec, setSpec] = useState<BodySpec>(DEFAULT_BODY_SPEC);
+  const router = useRouter();
+  const [spec, setSpec] = useState<BodySpec>(DEFAULT_BODY_SPEC);
   const [animate, setAnimate] = useState(true);
   const [background, setBackground] = useState<'void' | 'light' | 'grid'>('void');
   const [copied, setCopied] = useState(false);
@@ -40,12 +43,18 @@ export function BodyForge() {
   };
 
   const exportJson = () => {
-    const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+    const packet = JSON.stringify(createDNAReadyBodyPacket(spec), null, 2);
+    const url = URL.createObjectURL(new Blob([packet], { type: 'application/json' }));
     const link = document.createElement('a');
     link.href = url;
     link.download = `${spec.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.metapet-body.json`;
     link.click();
     URL.revokeObjectURL(url);
+  };
+
+  const sendToMetaPet = () => {
+    saveForgedBody(spec);
+    router.push('/app/pet');
   };
 
   return (
