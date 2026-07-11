@@ -84,6 +84,13 @@ export const NAVIGATION_TARGETS: NavigationTarget[] = [
     route: "/qr-messaging",
     icon: "QrCode",
   },
+  {
+    position: 12,
+    angle: 360,
+    label: "Body Forge",
+    route: "/body-forge",
+    icon: "Shapes",
+  },
 ];
 
 export const getCompassNavigationTargets = (): CompassNavigationTarget[] => {
