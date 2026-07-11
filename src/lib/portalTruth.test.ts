@@ -3,15 +3,18 @@ import { describe, expect, it } from "vitest";
 import { PORTAL_DESCRIPTION, PORTAL_TAGLINE } from "@/lib/portalTruth";
 
 describe("portal truth", () => {
-  it("builds the portal tagline from the main ladder labels", () => {
+  it("keeps the canonical core tagline", () => {
     expect(PORTAL_TAGLINE).toBe(
-      "Start with the pet, then climb into school, identity, and DNA.",
+      "Privacy-first digital learning companion for classrooms and families.",
     );
   });
 
-  it("keeps the shared launch description in one canonical string", () => {
-    expect(PORTAL_DESCRIPTION).toBe(
-      "Care builds the bond, school turns that bond into pattern learning, identity keeps ownership local-first, and DNA reveals the hidden engine underneath all three.",
+  it("builds the launch description path summary from the main ladder labels", () => {
+    expect(PORTAL_DESCRIPTION).toContain(
+      "Meta-Pet turns care, pattern learning, and digital responsibility into short guided activities.",
+    );
+    expect(PORTAL_DESCRIPTION).toContain(
+      "Start with try demo, then review school pilot, privacy, and dna engine.",
     );
   });
 });
