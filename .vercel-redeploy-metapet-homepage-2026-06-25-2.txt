@@ -1,3 +1,0 @@
-Force another Vercel production redeploy after Meta-Pet public homepage trust-landing changes.
-
-Purpose: ensure bluesnakestudios.com rebuilds from Blackcockatoo/bss main and stops serving the older boot/loading homepage build.
