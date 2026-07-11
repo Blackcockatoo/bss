@@ -73,7 +73,8 @@ export default function PetPage() {
     const lastPrompt = Number(window.localStorage.getItem(PROMPT_KEY) ?? 0);
     if (lastActionAt - lastPrompt < 60 * 60 * 1000) return;
     window.localStorage.setItem(PROMPT_KEY, String(lastActionAt));
-    setShowWellnessSync(true);
+    const id = requestAnimationFrame(() => setShowWellnessSync(true));
+    return () => cancelAnimationFrame(id);
   }, [lastAction, lastActionAt]);
 
   // Initialize starter addons on first load

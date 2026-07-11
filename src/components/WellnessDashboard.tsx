@@ -42,10 +42,11 @@ export function WellnessDashboard() {
     deleteHabit,
   } = useBond({ petId: PET_ID });
   const pinMoment = useBondStore((state) => state.pinMoment);
+  const [mountTimestamp] = useState(() => Date.now());
 
   const totalDaysTogether = Math.max(
     1,
-    Math.floor((Date.now() - bond.bondStartedAt) / 86400000),
+    Math.floor((mountTimestamp - bond.bondStartedAt) / 86400000),
   );
 
   return (
