@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   FileText,
   BookOpen,
+  HeartPulse,
   Home,
   PawPrint,
   UserCircle,
@@ -29,6 +30,7 @@ type BeforeInstallPromptEvent = Event & {
 export const CORE_QUICK_NAV_ITEMS = [
   { href: "/", label: "Home", icon: Home },
   { href: "/pet", label: "Pet", icon: PawPrint },
+  { href: "/app/wellness", label: "Wellness", icon: HeartPulse },
   { href: "/school-game", label: "School", icon: BookOpen },
   { href: "/identity", label: "Identity", icon: UserCircle },
 ];

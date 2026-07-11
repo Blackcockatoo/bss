@@ -30,9 +30,11 @@ describe("child-safe route boundary", () => {
       "/legal",
     );
     expect(childSafe.getChildSafeFallbackPathname("/identity")).toBe("/app");
+    expect(childSafe.isChildSafeAllowedPathname("/app/wellness")).toBe(true);
     expect([...childSafe.CHILD_SAFE_NAV_ROUTES]).toEqual([
       "/",
       "/pet",
+      "/app/wellness",
       "/school-game",
     ]);
   });
