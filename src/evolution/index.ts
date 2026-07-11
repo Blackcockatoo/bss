@@ -1,7 +1,10 @@
 import type { EvolutionData, EvolutionState, EvolutionRequirement } from './types';
 import { EVOLUTION_REQUIREMENTS, EVOLUTION_ORDER } from './types';
+import type { EvolutionContext } from './conditions';
+import { evaluateSpecialCondition } from './conditions';
 
 export * from './types';
+export * from './conditions';
 
 export interface RequirementSnapshot {
   state: EvolutionState;
@@ -56,9 +59,23 @@ export function initializeEvolution(): EvolutionData {
   };
 }
 
+function isSpecialConditionMet(
+  nextState: EvolutionState,
+  requirements: EvolutionRequirement,
+  context?: EvolutionContext
+): boolean {
+  // Without a progress snapshot we cannot evaluate stage conditions, so
+  // callers that omit context keep the pre-conditions behaviour.
+  if (context) {
+    return evaluateSpecialCondition(nextState, context)?.met ?? true;
+  }
+  return requirements.specialCondition ? requirements.specialCondition() : true;
+}
+
 export function checkEvolutionEligibility(
   evolution: EvolutionData,
-  vitalsAverage: number
+  vitalsAverage: number,
+  context?: EvolutionContext
 ): boolean {
   const nextState = getNextState(evolution.state);
   if (!nextState) {
@@ -72,7 +89,7 @@ export function checkEvolutionEligibility(
   const isInteractionsMet = evolution.totalInteractions >= requirements.minInteractions;
   const isVitalsMet = vitalsAverage >= requirements.minVitalsAverage;
   const isLevelMet = evolution.level >= requirements.minLevel;
-  const isSpecialMet = requirements.specialCondition ? requirements.specialCondition() : true;
+  const isSpecialMet = isSpecialConditionMet(nextState, requirements, context);
 
   return isAgeMet && isInteractionsMet && isVitalsMet && isLevelMet && isSpecialMet;
 }
@@ -174,7 +191,8 @@ export function getNextEvolutionRequirement(evolution: EvolutionData): Requireme
 export function getRequirementProgress(
   evolution: EvolutionData,
   vitalsAverage: number,
-  snapshot: RequirementSnapshot | null = getNextEvolutionRequirement(evolution)
+  snapshot: RequirementSnapshot | null = getNextEvolutionRequirement(evolution),
+  context?: EvolutionContext
 ): RequirementProgress | null {
   if (!snapshot) {
     return null;
@@ -185,7 +203,12 @@ export function getRequirementProgress(
   const ageProgress = normalizeProgress(ageElapsed, requirements.minAge);
   const interactionsProgress = normalizeProgress(evolution.totalInteractions, requirements.minInteractions);
   const vitalsProgress = normalizeProgress(vitalsAverage, requirements.minVitalsAverage);
-  const specialMet = requirements.specialCondition ? requirements.specialCondition() : true;
+  const special = context ? evaluateSpecialCondition(state, context) : null;
+  const specialMet = special
+    ? special.met
+    : requirements.specialCondition
+      ? requirements.specialCondition()
+      : true;
 
   return {
     nextState: state,
@@ -193,6 +216,6 @@ export function getRequirementProgress(
     interactionsProgress,
     vitalsProgress,
     specialMet,
-    specialDescription: requirements.specialDescription,
+    specialDescription: special?.description ?? requirements.specialDescription,
   };
 }

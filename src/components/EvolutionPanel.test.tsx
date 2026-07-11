@@ -18,15 +18,34 @@ const mockVitals = {
   deathCount: 0,
 };
 
-vi.mock("@/lib/store", () => ({
-  useStore: (
-    selector: (store: {
-      evolution: EvolutionData;
-      vitals: typeof mockVitals;
-      tryEvolve: typeof tryEvolve;
-    }) => unknown,
-  ) => selector({ evolution: mockEvolution, vitals: mockVitals, tryEvolve }),
-}));
+const mockProgress = {
+  traits: null,
+  battle: { wins: 2, losses: 0, streak: 2, energyShield: 50, lastResult: null, lastOpponent: null },
+  miniGames: { totalPlays: 3 },
+  essence: 10,
+};
+
+vi.mock("@/lib/store", async () => {
+  const { buildEvolutionContext } = await vi.importActual<
+    typeof import("@metapet/core/store")
+  >("@metapet/core/store");
+  return {
+    buildEvolutionContext,
+    useStore: (
+      selector: (store: {
+        evolution: EvolutionData;
+        vitals: typeof mockVitals;
+        tryEvolve: typeof tryEvolve;
+      }) => unknown,
+    ) =>
+      selector({
+        evolution: mockEvolution,
+        vitals: mockVitals,
+        tryEvolve,
+        ...mockProgress,
+      } as never),
+  };
+});
 
 vi.mock("./EvolutionCeremony", () => ({
   EvolutionCeremony: ({ stage }: { stage: string }) => (

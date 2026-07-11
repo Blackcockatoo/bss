@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { useStore } from '@/lib/store';
+import { buildEvolutionContext, useStore } from '@/lib/store';
 import {
   getEvolutionProgress,
   getTimeUntilNextEvolution,
@@ -24,8 +24,17 @@ export function EvolutionPanel() {
   const evolution = useStore(state => state.evolution);
   const vitals = useStore(state => state.vitals);
   const tryEvolve = useStore(state => state.tryEvolve);
+  const traits = useStore(state => state.traits);
+  const battle = useStore(state => state.battle);
+  const miniGames = useStore(state => state.miniGames);
+  const essence = useStore(state => state.essence);
   const [ceremonyStage, setCeremonyStage] = useState<EvolutionState | null>(null);
   const prefersReducedMotion = useReducedMotion();
+
+  const evolutionContext = useMemo(
+    () => buildEvolutionContext({ traits, battle, miniGames, essence }),
+    [traits, battle, miniGames, essence]
+  );
 
   const vitalsAverage = useMemo(
     () => (vitals.hunger + vitals.hygiene + vitals.mood + vitals.energy) / 4,
@@ -58,9 +67,14 @@ export function EvolutionPanel() {
   const requirementProgress = useMemo(
     () =>
       requirementSnapshot
-        ? getRequirementProgress(evolution, vitalsAverage, requirementSnapshot)
+        ? getRequirementProgress(
+            evolution,
+            vitalsAverage,
+            requirementSnapshot,
+            evolutionContext
+          )
         : null,
-    [evolution, vitalsAverage, requirementSnapshot]
+    [evolution, vitalsAverage, requirementSnapshot, evolutionContext]
   );
 
   const nextStageInfo = requirementSnapshot ? EVOLUTION_STAGE_INFO[requirementSnapshot.state] : null;
@@ -218,14 +232,14 @@ export function EvolutionPanel() {
               )}
               color={tertiary}
             />
-            {requirementSnapshot.requirements.specialDescription && (
+            {requirementProgress.specialDescription && (
               <div className="flex items-start gap-2 text-xs">
                 {requirementProgress.specialMet ? (
                   <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                 ) : (
                   <AlertTriangle className="w-4 h-4 text-amber-300" />
                 )}
-                <span className="text-zinc-400">{requirementSnapshot.requirements.specialDescription}</span>
+                <span className="text-zinc-400">{requirementProgress.specialDescription}</span>
               </div>
             )}
           </div>

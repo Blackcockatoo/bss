@@ -1,4 +1,4 @@
-import type { EvolutionData } from '../evolution/index';
+import type { EvolutionContext, EvolutionData } from '../evolution/index';
 import { checkEvolutionEligibility } from '../evolution/index';
 import { IS_SCHOOLS_PROFILE } from '@/lib/env/features';
 
@@ -216,11 +216,15 @@ export interface TickResult {
   evolution: EvolutionData;
 }
 
-export function tick(vitals: Vitals, evolution: EvolutionData): TickResult {
+export function tick(
+  vitals: Vitals,
+  evolution: EvolutionData,
+  context?: EvolutionContext
+): TickResult {
   if (IS_SCHOOLS_PROFILE) return { vitals, evolution };
   const nextVitals = applyDecay(vitals);
   const vitalsAvg = getVitalsAverage(nextVitals);
-  const canEvolve = checkEvolutionEligibility(evolution, vitalsAvg);
+  const canEvolve = checkEvolutionEligibility(evolution, vitalsAvg, context);
 
   return {
     vitals: nextVitals,
@@ -231,12 +235,17 @@ export function tick(vitals: Vitals, evolution: EvolutionData): TickResult {
   };
 }
 
-export function multiTick(vitals: Vitals, evolution: EvolutionData, tickCount: number): TickResult {
+export function multiTick(
+  vitals: Vitals,
+  evolution: EvolutionData,
+  tickCount: number,
+  context?: EvolutionContext
+): TickResult {
   let currentVitals = vitals;
   let currentEvolution = evolution;
 
   for (let i = 0; i < tickCount; i++) {
-    const result = tick(currentVitals, currentEvolution);
+    const result = tick(currentVitals, currentEvolution, context);
     currentVitals = result.vitals;
     currentEvolution = result.evolution;
   }

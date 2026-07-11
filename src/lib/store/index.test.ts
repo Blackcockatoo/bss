@@ -206,8 +206,14 @@ describe('Store State Management', () => {
 
     it('should evolve when requirements are met', () => {
       // Set up evolution that meets all requirements for NEURO
-      // NEURO requires minLevel: 5, minInteractions: 12, minVitalsAverage: 55
+      // NEURO requires minLevel: 5, minInteractions: 12, minVitalsAverage: 55,
+      // plus a bonding activity (mini-game or battle win) as the special
+      // condition.
       useStore.setState({
+        miniGames: {
+          ...useStore.getState().miniGames,
+          totalPlays: 1,
+        },
         evolution: {
           state: 'GENETICS',
           birthTime: Date.now() - 100_000_000, // Very old

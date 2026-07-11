@@ -8,6 +8,7 @@ import {
   gainExperience,
   checkEvolutionEligibility,
   evolvePet,
+  type EvolutionContext,
 } from '../evolution/index';
 import { summarizeElementWeb } from '../genome/elementResidue';
 import type {
@@ -261,6 +262,21 @@ function unlockAchievementWithReward(list: Achievement[], id: Achievement['id'])
   };
 }
 
+/** Snapshot the live progress signals used by evolution special conditions. */
+export function buildEvolutionContext(state: {
+  traits: DerivedTraits | null;
+  battle: BattleStats;
+  miniGames: MiniGameProgress;
+  essence: number;
+}): EvolutionContext {
+  return {
+    traits: state.traits,
+    battleWins: state.battle.wins,
+    miniGamesPlayed: state.miniGames.totalPlays,
+    essence: state.essence,
+  };
+}
+
 function applyVimanaReward(reward: VimanaReward, vitals: Vitals): Vitals {
   switch (reward) {
     case 'mood':
@@ -445,7 +461,7 @@ export function createMetaPetWebStore(
       const id = scheduleInterval(() => {
         if (get().systemState === 'sealed') return;
         const { vitals, evolution } = get();
-        const result = runTick(vitals, evolution);
+        const result = runTick(vitals, evolution, buildEvolutionContext(get()));
         set({ vitals: result.vitals, evolution: result.evolution });
       }, tickMs);
 
@@ -513,7 +529,8 @@ export function createMetaPetWebStore(
       if (get().systemState === 'sealed') return false;
       const { evolution, vitals } = get();
       const vitalsAvg = getVitalsAverage(vitals);
-      if (checkEvolutionEligibility(evolution, vitalsAvg)) {
+      const context = buildEvolutionContext(get());
+      if (checkEvolutionEligibility(evolution, vitalsAvg, context)) {
         const nextEvolution = evolvePet(evolution);
         set({ evolution: nextEvolution });
         return true;
