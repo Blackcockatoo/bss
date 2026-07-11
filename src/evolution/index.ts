@@ -1,7 +1,9 @@
+import type { DerivedTraits } from '../genome/types';
 import type { EvolutionData, EvolutionState, EvolutionRequirement } from './types';
 import { EVOLUTION_REQUIREMENTS, EVOLUTION_ORDER } from './types';
 import type { EvolutionContext } from './conditions';
 import { evaluateSpecialCondition } from './conditions';
+import { getEvolutionBranch, getUnlockedAbilities } from './branching';
 
 export * from './types';
 export * from './conditions';
@@ -108,6 +110,76 @@ export function evolvePet(evolution: EvolutionData): EvolutionData {
     lastEvolutionTime: Date.now(),
     experience: 0,
     canEvolve: false,
+  };
+}
+
+/** Uniform boost applied to every vital when a stage is reached. */
+export const EVOLUTION_VITALS_BOOST = 10;
+
+const STAGE_ESSENCE_GRANTS: Partial<Record<EvolutionState, number>> = {
+  NEURO: 25,
+  QUANTUM: 50,
+  SPECIATION: 100,
+};
+
+const STAGE_ACHIEVEMENT_IDS: Partial<Record<EvolutionState, string>> = {
+  NEURO: 'evolve-neuro',
+  QUANTUM: 'evolve-quantum',
+  SPECIATION: 'evolve-speciation',
+};
+
+export interface EvolutionEffects {
+  /** Added to every vital, clamped to 0-100 by the caller. */
+  vitalsBoost: number;
+  essenceGrant: number;
+  /** Newly revealed rare abilities (not previously unlocked). */
+  abilitiesRevealed: string[];
+  achievementId: string | null;
+}
+
+export interface ApplyEvolutionResult {
+  evolution: EvolutionData;
+  /** Null when the pet could not evolve (already at the final stage). */
+  effects: EvolutionEffects | null;
+}
+
+/**
+ * Evolve the pet and compute the stage's concrete payoffs: a vitals boost,
+ * an essence grant, newly revealed rare abilities, and the stage
+ * achievement. Also stamps the genome branch and unlocked abilities onto the
+ * persisted evolution data. `evolvePet` remains the effect-free primitive.
+ */
+export function applyEvolution(
+  evolution: EvolutionData,
+  traits: DerivedTraits | null
+): ApplyEvolutionResult {
+  const evolved = evolvePet(evolution);
+  if (evolved === evolution) {
+    return { evolution, effects: null };
+  }
+
+  const branch = getEvolutionBranch(traits);
+  const unlocked = getUnlockedAbilities(traits, evolved.state);
+  const previouslyUnlocked = new Set(
+    evolution.abilitiesUnlocked ??
+      getUnlockedAbilities(traits, evolution.state)
+  );
+  const abilitiesRevealed = unlocked.filter(
+    ability => !previouslyUnlocked.has(ability)
+  );
+
+  return {
+    evolution: {
+      ...evolved,
+      branchId: branch.id,
+      abilitiesUnlocked: unlocked,
+    },
+    effects: {
+      vitalsBoost: EVOLUTION_VITALS_BOOST,
+      essenceGrant: STAGE_ESSENCE_GRANTS[evolved.state] ?? 0,
+      abilitiesRevealed,
+      achievementId: STAGE_ACHIEVEMENT_IDS[evolved.state] ?? null,
+    },
   };
 }
 

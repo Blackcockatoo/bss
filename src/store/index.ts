@@ -7,7 +7,7 @@ import {
   initializeEvolution,
   gainExperience,
   checkEvolutionEligibility,
-  evolvePet,
+  applyEvolution,
   type EvolutionContext,
 } from '../evolution/index';
 import { summarizeElementWeb } from '../genome/elementResidue';
@@ -527,15 +527,54 @@ export function createMetaPetWebStore(
 
     tryEvolve() {
       if (get().systemState === 'sealed') return false;
-      const { evolution, vitals } = get();
+      const { evolution, vitals, traits } = get();
       const vitalsAvg = getVitalsAverage(vitals);
       const context = buildEvolutionContext(get());
-      if (checkEvolutionEligibility(evolution, vitalsAvg, context)) {
-        const nextEvolution = evolvePet(evolution);
-        set({ evolution: nextEvolution });
-        return true;
+      if (!checkEvolutionEligibility(evolution, vitalsAvg, context)) {
+        return false;
       }
-      return false;
+
+      const { evolution: nextEvolution, effects } = applyEvolution(
+        evolution,
+        traits
+      );
+      if (!effects) {
+        return false;
+      }
+
+      const rewardPayloads: RewardPayloadInput[] = [];
+      set(state => {
+        const update: Partial<MetaPetState> = { evolution: nextEvolution };
+
+        update.vitals = {
+          ...state.vitals,
+          hunger: clamp(state.vitals.hunger + effects.vitalsBoost),
+          hygiene: clamp(state.vitals.hygiene + effects.vitalsBoost),
+          mood: clamp(state.vitals.mood + effects.vitalsBoost),
+          energy: clamp(state.vitals.energy + effects.vitalsBoost),
+        };
+
+        if (effects.essenceGrant > 0) {
+          update.essence = state.essence + effects.essenceGrant;
+          update.lastRewardSource = 'system';
+        }
+
+        if (effects.achievementId) {
+          const unlocked = unlockAchievementWithReward(
+            state.achievements,
+            effects.achievementId
+          );
+          if (unlocked.achievements !== state.achievements) {
+            update.achievements = unlocked.achievements;
+            if (unlocked.reward) rewardPayloads.push(unlocked.reward);
+          }
+        }
+
+        return update;
+      });
+
+      rewardPayloads.forEach(payload => get().recordReward(payload));
+      return true;
     },
 
     recordBattle(result, opponent) {

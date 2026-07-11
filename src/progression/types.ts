@@ -153,6 +153,24 @@ export const ACHIEVEMENT_CATALOG: Achievement[] = [
     description: 'Breed two pets to create a new companion.',
     category: 'breeding',
   },
+  {
+    id: 'evolve-neuro',
+    title: 'Neural Awakening',
+    description: 'Evolve into the NEURO stage.',
+    category: 'evolution',
+  },
+  {
+    id: 'evolve-quantum',
+    title: 'Quantum Leap',
+    description: 'Evolve into the QUANTUM stage.',
+    category: 'evolution',
+  },
+  {
+    id: 'evolve-speciation',
+    title: 'Apex Form',
+    description: 'Reach SPECIATION and take your branch apex form.',
+    category: 'evolution',
+  },
   // Additional achievable mini-game milestones
   {
     id: 'minigame-memory-ace',
