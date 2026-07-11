@@ -1,6 +1,7 @@
 "use client";
 
 import AuraliaMetaPet from "@/components/AuraliaMetaPet";
+import { EvolutionPanel } from "@/components/EvolutionPanel";
 import { HUD, HUDAdvancedStats } from "@/components/HUD";
 import { PetResponseOverlay } from "@/components/PetResponseOverlay";
 import { RouteProgressionCard } from "@/components/RouteProgressionCard";
@@ -26,6 +27,7 @@ import {
   Shield,
   Sparkles,
   UserCircle,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -38,6 +40,7 @@ export default function PetPage() {
   const petStep = getRouteProgression("pet");
   const [showAddonPanel, setShowAddonPanel] = useState(false);
   const [showProfilePanel, setShowProfilePanel] = useState(false);
+  const [showEvolutionPanel, setShowEvolutionPanel] = useState(false);
   const [addonEditMode, setAddonEditMode] = useState(false);
   const [addonsInitialized, setAddonsInitialized] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -77,6 +80,7 @@ export default function PetPage() {
       const next = !prev;
       if (next) {
         setShowAddonPanel(false);
+        setShowEvolutionPanel(false);
       }
       return next;
     });
@@ -87,6 +91,18 @@ export default function PetPage() {
       const next = !prev;
       if (next) {
         setShowProfilePanel(false);
+        setShowEvolutionPanel(false);
+      }
+      return next;
+    });
+  };
+
+  const handleToggleEvolutionPanel = () => {
+    setShowEvolutionPanel((prev) => {
+      const next = !prev;
+      if (next) {
+        setShowProfilePanel(false);
+        setShowAddonPanel(false);
       }
       return next;
     });
@@ -95,6 +111,7 @@ export default function PetPage() {
   const closePanels = () => {
     setShowAddonPanel(false);
     setShowProfilePanel(false);
+    setShowEvolutionPanel(false);
   };
 
   const handleToggleAdvanced = () => {
@@ -251,6 +268,19 @@ export default function PetPage() {
                       <Sparkles className="w-4 h-4" />
                       Addons
                     </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleToggleEvolutionPanel}
+                      className={`gap-2 ${
+                        showEvolutionPanel
+                          ? "border-emerald-500 bg-emerald-600 text-white hover:bg-emerald-700"
+                          : "border-emerald-700 bg-emerald-900/80 text-emerald-200 hover:bg-emerald-800"
+                      }`}
+                    >
+                      <Zap className="w-4 h-4" />
+                      Evolution
+                    </Button>
                     <CertificateButton
                       onClick={() => setShowCertificate(true)}
                     />
@@ -273,7 +303,12 @@ export default function PetPage() {
                       />
                     )}
                     {showAddonPanel && <AddonInventoryPanel />}
-                    {!showProfilePanel && !showAddonPanel && (
+                    {showEvolutionPanel && (
+                      <div className="rounded-lg border border-emerald-800/60 bg-zinc-950/60 p-4 md:col-span-2">
+                        <EvolutionPanel />
+                      </div>
+                    )}
+                    {!showProfilePanel && !showAddonPanel && !showEvolutionPanel && (
                       <div className="space-y-2 rounded-lg border border-dashed border-slate-700/60 p-4 text-xs text-slate-400 md:col-span-2">
                         <p>
                           Use the controls above to open the profile or addon

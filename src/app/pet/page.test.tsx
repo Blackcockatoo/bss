@@ -54,6 +54,10 @@ vi.mock("@/components/addons/PetProfilePanel", () => ({
   PetProfilePanel: () => <div>Pet Profile</div>,
 }));
 
+vi.mock("@/components/EvolutionPanel", () => ({
+  EvolutionPanel: () => <div data-testid="evolution-panel" />,
+}));
+
 vi.mock("@/components/RegistrationCertificate", () => ({
   RegistrationCertificate: ({ isOpen }: { isOpen?: boolean }) =>
     isOpen ? <div data-testid="registration-certificate" /> : null,
@@ -137,5 +141,25 @@ describe("PetPage", () => {
     expect(
       screen.getByTestId("registration-certificate"),
     ).toBeInTheDocument();
+  });
+
+  it("toggles the evolution panel from the advanced section", async () => {
+    render(<PetPage />);
+
+    await waitFor(() => {
+      expect(initializeStarterAddons).toHaveBeenCalled();
+    });
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /Advanced \/ Mechanics Lab/i }),
+    );
+    expect(screen.queryByTestId("evolution-panel")).not.toBeInTheDocument();
+
+    const evolutionToggle = screen.getByRole("button", { name: /Evolution/i });
+    fireEvent.click(evolutionToggle);
+    expect(screen.getByTestId("evolution-panel")).toBeInTheDocument();
+
+    fireEvent.click(evolutionToggle);
+    expect(screen.queryByTestId("evolution-panel")).not.toBeInTheDocument();
   });
 });

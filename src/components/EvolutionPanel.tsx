@@ -8,6 +8,7 @@ import {
   getTimeUntilNextEvolution,
   getNextEvolutionRequirement,
   getRequirementProgress,
+  EVOLUTION_ORDER,
   EVOLUTION_STAGE_INFO,
   EVOLUTION_VISUALS,
   type EvolutionState,
@@ -18,10 +19,6 @@ import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 import { EvolutionCeremony } from './EvolutionCeremony';
 import { Button } from './ui/button';
-
-type StageSequence = readonly EvolutionState[];
-
-const STAGE_SEQUENCE: StageSequence = ['GENETICS', 'NEURO', 'QUANTUM', 'SPECIATION'];
 
 export function EvolutionPanel() {
   const evolution = useStore(state => state.evolution);
@@ -36,7 +33,7 @@ export function EvolutionPanel() {
   );
 
   const stageIndex = useMemo(
-    () => STAGE_SEQUENCE.indexOf(evolution.state),
+    () => EVOLUTION_ORDER.indexOf(evolution.state),
     [evolution.state]
   );
 
@@ -104,7 +101,7 @@ export function EvolutionPanel() {
   }, [evolution.state, requirementSnapshot, tryEvolve]);
 
   const experiencePercent = Math.round(evolution.experience);
-  const nextStageLabel = stageIndex >= 0 ? `Evolution Stage ${stageIndex + 1}/${STAGE_SEQUENCE.length}` : 'Evolution';
+  const nextStageLabel = stageIndex >= 0 ? `Evolution Stage ${stageIndex + 1}/${EVOLUTION_ORDER.length}` : 'Evolution';
   const accent = visuals.colors[1] ?? visuals.colors[0];
   const tertiary = visuals.colors[visuals.colors.length - 1] ?? visuals.colors[0];
 
@@ -161,7 +158,7 @@ export function EvolutionPanel() {
         </div>
       </section>
 
-      {evolution.state !== 'SPECIATION' && (
+      {requirementSnapshot !== null && (
         <section className="space-y-2">
           <div className="flex justify-between items-center text-sm">
             <span className="text-zinc-400">Next evolution</span>
@@ -244,7 +241,7 @@ export function EvolutionPanel() {
         </ul>
       </section>
 
-      {evolution.canEvolve && evolution.state !== 'SPECIATION' && (
+      {evolution.canEvolve && requirementSnapshot !== null && (
         <section className="space-y-3">
           <div className="bg-emerald-500/10 border border-emerald-500/40 text-emerald-100 text-xs rounded-lg px-3 py-2">
             {nextStageInfo ? nextStageInfo.celebration : stageInfo.celebration}
