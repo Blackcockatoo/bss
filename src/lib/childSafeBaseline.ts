@@ -3,6 +3,7 @@ import { IS_SCHOOLS_PROFILE } from "@/lib/env/features";
 const CORE_ALLOWED_EXACT = new Set([
   "/",
   "/app",
+  "/compass",
   "/pet",
   "/school-game",
   "/legal",

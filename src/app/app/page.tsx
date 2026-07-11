@@ -16,9 +16,9 @@ const actionCards = [
     href: '/app/genome',
   },
   {
-    title: 'Explore Activities',
+    title: 'Open Navigator & Activities',
     description:
-      'Battle, explore the Vimana grid, play mini-games, and unlock style rewards.',
+      'Use the compass, network, and geometry wheel, then battle, explore, and play mini-games.',
     href: '/app/activities',
   },
   {
