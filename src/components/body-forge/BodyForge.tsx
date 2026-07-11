@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { BodyFeature, BodyPattern, BodyShape, DEFAULT_BODY_SPEC, FaceExpression, PetBodyRenderer, type BodySpec } from '@/components/body-forge/PetBodyRenderer';
+import { useMemo, useState } from 'react';\nimport { useRouter } from 'next/navigation';
+import { BodyFeature, BodyPattern, BodyShape, DEFAULT_BODY_SPEC, FaceExpression, PetBodyRenderer, type BodySpec } from '@/components/body-forge/PetBodyRenderer';\nimport { createDNAReadyBodyPacket, saveForgedBody } from '@/visual-dna/bodyForgeAdapter';
 
 const PRESETS: Record<string, BodySpec> = {
   Auralia: DEFAULT_BODY_SPEC,
@@ -18,7 +18,7 @@ function Select<T extends string>({ label, value, values, onChange }: { label: s
 }
 
 export function BodyForge() {
-  const [spec, setSpec] = useState<BodySpec>(DEFAULT_BODY_SPEC);
+  const router = useRouter();\n  const [spec, setSpec] = useState<BodySpec>(DEFAULT_BODY_SPEC);
   const [animate, setAnimate] = useState(true);
   const [background, setBackground] = useState<'void' | 'light' | 'grid'>('void');
   const [copied, setCopied] = useState(false);
@@ -43,7 +43,7 @@ export function BodyForge() {
     const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${spec.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.body.json`;
+    link.download = `${spec.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.metapet-body.json`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -103,7 +103,7 @@ export function BodyForge() {
           <Slider label="Bob" value={spec.bob} min={0} max={20} onChange={(value) => patch('bob', value)} />
           <Slider label="Breathing" value={spec.breathe} min={0} max={0.12} step={0.005} onChange={(value) => patch('breathe', value)} />
           <Slider label="Motion speed" value={spec.animationSpeed} min={0.25} max={2.5} step={0.05} onChange={(value) => patch('animationSpeed', value)} />
-          <div className="grid grid-cols-2 gap-2"><button onClick={copyJson} className="rounded-lg border border-slate-700 px-3 py-2 text-xs hover:border-cyan-400">{copied ? 'Copied' : 'Copy JSON'}</button><button onClick={exportJson} className="rounded-lg bg-cyan-300 px-3 py-2 text-xs font-bold text-slate-950">Export preset</button></div>
+          <div className="grid grid-cols-2 gap-2"><button onClick={copyJson} className="rounded-lg border border-slate-700 px-3 py-2 text-xs hover:border-cyan-400">{copied ? 'Copied' : 'Copy JSON'}</button><button onClick={exportJson} className="rounded-lg border border-cyan-500 px-3 py-2 text-xs font-bold text-cyan-200">DNA packet</button><button onClick={sendToMetaPet} className="col-span-2 rounded-lg bg-cyan-300 px-3 py-3 text-xs font-black uppercase tracking-[0.16em] text-slate-950">Send to Meta Pet</button></div>
         </aside>
       </div>
     </main>
