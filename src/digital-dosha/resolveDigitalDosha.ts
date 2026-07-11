@@ -83,7 +83,7 @@ function resolvePhase(
   coherence: number,
   residue: number,
 ): DigitalDoshaPhase {
-  if (residue >= 0.7 && coherence < 0.72) return 'fragmented';
+  if (residue >= 0.85 || (residue >= 0.7 && coherence < 0.78)) return 'fragmented';
   if (residue >= 0.58 && drift.kapha >= 0.08) return 'saturated';
 
   const [dominantDrift] = ranked(drift);
@@ -214,6 +214,7 @@ export function resolveDigitalDosha(input: DigitalDoshaInput): DigitalDoshaPheno
   const phase = resolvePhase(drift, coherence, residue);
   const constitutionRanking = ranked(baseline);
   const stateRanking = ranked(current);
+  const signature = `${ALIASES[constitutionRanking[0]]}-${ALIASES[constitutionRanking[1]]}-${Math.round(baseline.vata * 100)}${Math.round(baseline.pitta * 100)}${Math.round(baseline.kapha * 100)}`;
 
   return {
     version: 1,
@@ -221,7 +222,7 @@ export function resolveDigitalDosha(input: DigitalDoshaInput): DigitalDoshaPheno
       baseline,
       dominant: constitutionRanking[0],
       secondary: constitutionRanking[1],
-      signature: `${ALIASES[constitutionRanking[0]]}-${ALIASES[constitutionRanking[1]]}-${Math.round(coherence * 100)}`,
+      signature,
       aliases: ALIASES,
     },
     state: {
