@@ -1,7 +1,0 @@
-Force Vercel production redeploy after Meta-Pet public homepage trust-copy update.
-
-Updated source:
-- Public tagline now explains Meta-Pet as a privacy-first learning companion.
-- Public description now states browser-first/local-first, no ads, no trackers, no student accounts, and no unnecessary data collection.
-- Homepage CTA route copy now points users to the pet demo and school pilot pack.
-- Loading screen copy no longer presents the public experience as a cockpit/genome boot ritual.
