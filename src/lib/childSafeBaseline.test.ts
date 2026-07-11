@@ -19,6 +19,7 @@ describe("child-safe route boundary", () => {
     const childSafe = await loadChildSafeBaseline(false);
 
     expect(childSafe.isChildSafeAllowedPathname("/app")).toBe(true);
+    expect(childSafe.isChildSafeAllowedPathname("/compass")).toBe(true);
     expect(childSafe.isChildSafeAllowedPathname("/pet")).toBe(true);
     expect(childSafe.isChildSafeAllowedPathname("/docs/example")).toBe(true);
     expect(childSafe.isChildSafeAllowedPathname("/manifest.webmanifest")).toBe(
@@ -57,6 +58,7 @@ describe("child-safe route boundary", () => {
       true,
     );
     expect(childSafe.isChildSafeAllowedPathname("/app")).toBe(false);
+    expect(childSafe.isChildSafeAllowedPathname("/compass")).toBe(false);
     expect(childSafe.isChildSafeAllowedPathname("/pet")).toBe(false);
     expect(childSafe.isChildSafeAllowedPathname("/identity")).toBe(false);
     expect(childSafe.isChildSafeAllowedPathname("/genome-resonance")).toBe(

@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import type { SteeringViewProps } from './types';
 import { COMPASS_NAVIGATION_TARGETS, getNavigationTargetByPosition } from './types';
+import { getLabelLines, useIsCompactViewport } from './labelUtils';
 
 const COLOR_VARIANTS = {
   red: { stroke: '#FF5555', node: '#FF9999', dim: '#FF555533' },
@@ -13,11 +14,11 @@ const COLOR_VARIANTS = {
 // Connections between feature nodes based on system relationships
 const FEATURE_CONNECTIONS: [number, number][] = [
   [0, 1], [0, 2], [0, 3],       // Home connects to Explore, Pet, Studio Site
-  [6, 7], [6, 10],              // Shop connects to DNA and QR
+  [6, 7], [6, 11],              // Shop connects to DNA and QR
   [7, 8], [8, 9],               // DNA → Identity → Lineage
   [1, 3],                        // Explore ↔ Games
   [4, 5],                        // Style ↔ Rewards
-  [9, 10],                       // Lineage ↔ QR
+  [9, 11],                       // Lineage ↔ QR
   [2, 5],                        // Pet ↔ Rewards
 ];
 
@@ -34,6 +35,7 @@ export function NetworkView({
 
   const colors = COLOR_VARIANTS[color];
   const numberString = numberStrings[color];
+  const isCompact = useIsCompactViewport();
 
   // Animate particles along connections
   useEffect(() => {
@@ -46,10 +48,10 @@ export function NetworkView({
     return () => cancelAnimationFrame(frame);
   }, []);
 
-  // Generate node positions: 12 feature nodes in a ring + data-driven inner nodes
+  // Generate compacted feature nodes in a ring + data-driven inner nodes
   const featureNodes = useMemo(() => {
     return Object.fromEntries(COMPASS_NAVIGATION_TARGETS.map((target) => {
-      const angle = target.angle * (Math.PI / 180);
+      const angle = target.renderAngle * (Math.PI / 180);
       const r = 160;
       return [target.position, {
         x: Math.sin(angle) * r,
@@ -186,17 +188,53 @@ export function NetworkView({
                   filter={isSelected ? 'url(#node-glow)' : undefined}
                   className="transition-all duration-200"
                 />
-                <text
-                  x={node.x} y={node.y}
-                  fill={isSelected ? '#fff' : colors.node}
-                  fontSize="6"
-                  fontWeight={isSelected ? 'bold' : 'normal'}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  style={{ pointerEvents: 'none' }}
-                >
-                  {node.label.length > 6 ? node.label.slice(0, 5) + '.' : node.label}
-                </text>
+                {(() => {
+                  const labelLines = getLabelLines(node.label);
+                  const baseFontSize = isSelected ? (isCompact ? 9.8 : 8.8) : isHovered ? (isCompact ? 8.8 : 7.8) : (isCompact ? 8.2 : 7.2);
+                  const lineHeight = isCompact ? 8.6 : 7.8;
+                  const maxLineChars = Math.max(...labelLines.map((line) => line.length));
+                  const estimatedWidth = maxLineChars * baseFontSize * 0.56;
+                  const widthScale = Math.min(1, (isCompact ? 66 : 58) / Math.max(estimatedWidth, 1));
+                  const fontSize = Number((baseFontSize * widthScale).toFixed(2));
+                  const scaledLineHeight = Number((lineHeight * widthScale).toFixed(2));
+                  const firstLineY = node.y - ((labelLines.length - 1) * scaledLineHeight) / 2;
+                  const plateWidth = Math.max(28, maxLineChars * fontSize * 0.56 + (isCompact ? 10 : 8));
+                  const plateHeight = labelLines.length * scaledLineHeight + (isCompact ? 5 : 4);
+                  return (
+                    <>
+                      <rect
+                        x={node.x - plateWidth / 2}
+                        y={firstLineY - scaledLineHeight / 2 - (isCompact ? 2.5 : 2)}
+                        width={plateWidth}
+                        height={plateHeight}
+                        rx={isCompact ? 5 : 4}
+                        fill={isSelected ? 'rgba(5, 9, 18, 0.92)' : isHovered ? 'rgba(5, 9, 18, 0.78)' : 'rgba(5, 9, 18, 0.58)'}
+                        stroke={isSelected || isHovered ? colors.stroke : 'rgba(210,221,244,0.2)'}
+                        strokeWidth={isSelected ? 1 : 0.7}
+                        style={{ pointerEvents: 'none' }}
+                      />
+                      <text
+                        x={node.x}
+                        y={firstLineY}
+                        fill={isSelected ? '#fff' : '#eef4ff'}
+                        fontSize={fontSize}
+                        fontWeight={isSelected ? 'bold' : '600'}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        stroke="rgba(4, 8, 16, 0.92)"
+                        strokeWidth={isCompact ? 2 : 1.5}
+                        paintOrder="stroke"
+                        style={{ pointerEvents: 'none' }}
+                      >
+                        {labelLines.map((line, lineIndex) => (
+                          <tspan key={`${node.label}-${lineIndex}`} x={node.x} dy={lineIndex === 0 ? 0 : scaledLineHeight}>
+                            {line}
+                          </tspan>
+                        ))}
+                      </text>
+                    </>
+                  );
+                })()}
               </g>
             );
           })}
