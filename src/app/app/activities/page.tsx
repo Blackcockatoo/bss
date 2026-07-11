@@ -1,8 +1,43 @@
 'use client';
 
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+
 import { FeaturesDashboard } from '@/components/FeaturesDashboard';
 import { IS_SCHOOLS_PROFILE } from '@/lib/env/features';
 import { useStore } from '@/lib/store';
+
+type FeaturesDashboardTab =
+  | 'navigator'
+  | 'battle'
+  | 'vimana'
+  | 'games'
+  | 'cosmetics'
+  | 'achievements';
+
+const VALID_TABS: readonly FeaturesDashboardTab[] = [
+  'navigator',
+  'battle',
+  'vimana',
+  'games',
+  'cosmetics',
+  'achievements',
+];
+
+function ActivitiesDashboard({ showNavigator }: { showNavigator: boolean }) {
+  const searchParams = useSearchParams();
+  const requestedTab = searchParams.get('tab');
+  const tab = VALID_TABS.includes(requestedTab as FeaturesDashboardTab)
+    ? (requestedTab as FeaturesDashboardTab)
+    : undefined;
+
+  return (
+    <FeaturesDashboard
+      includeNavigator={showNavigator}
+      initialTab={tab ?? (showNavigator ? 'navigator' : 'battle')}
+    />
+  );
+}
 
 export default function AppActivitiesPage() {
   const evolution = useStore((state) => state.evolution);
@@ -24,10 +59,16 @@ export default function AppActivitiesPage() {
         </p>
       </header>
 
-      <FeaturesDashboard
-        includeNavigator={showNavigator}
-        initialTab={showNavigator ? "navigator" : "battle"}
-      />
+      <Suspense
+        fallback={
+          <FeaturesDashboard
+            includeNavigator={showNavigator}
+            initialTab={showNavigator ? 'navigator' : 'battle'}
+          />
+        }
+      >
+        <ActivitiesDashboard showNavigator={showNavigator} />
+      </Suspense>
     </main>
   );
 }

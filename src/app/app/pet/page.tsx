@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { DigitalDoshaPanel } from '@/components/DigitalDoshaPanel';
 import { VisualDNAPet } from '@/components/VisualDNAPet';
 import { useStore } from '@/lib/store';
@@ -20,6 +22,21 @@ export default function AppPetPage() {
       </p>
 
       <VisualDNAPet className="mt-6" />
+
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <Link
+          href="/body-forge"
+          className="inline-flex items-center gap-2 rounded-xl border border-cyan-500/40 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-200 transition hover:border-cyan-300 hover:bg-cyan-500/20"
+        >
+          Open Body Forge
+        </Link>
+        <p className="text-xs text-zinc-500">
+          Sculpt a custom body, then &ldquo;Send to Meta-Pet&rdquo; to see it
+          here. Use the &ldquo;Use DNA body&rdquo; toggle to return control to
+          the genome.
+        </p>
+      </div>
+
       <DigitalDoshaPanel className="mt-6" />
 
       <section className="mt-6 grid gap-3 rounded-xl border border-slate-800 bg-slate-900/60 p-5 text-sm text-zinc-200 md:grid-cols-2 lg:grid-cols-4">

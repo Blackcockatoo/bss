@@ -22,6 +22,18 @@ const actionCards = [
     href: '/app/activities',
   },
   {
+    title: 'Mini-Game Arcade',
+    description:
+      'Play the evolution-scaled arcade: Memory Shuffle, Rhythm Pulse, Sigil Sequence, and Vimana Tetris.',
+    href: '/app/activities?tab=games',
+  },
+  {
+    title: 'Body Forge',
+    description:
+      'Sculpt a custom body in the visual workshop, then send it straight to your Meta-Pet.',
+    href: '/body-forge',
+  },
+  {
     title: 'Battle Arena',
     description: 'Enter the consciousness arena and fight the eight opponents.',
     href: '/app/battle',
