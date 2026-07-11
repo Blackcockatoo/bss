@@ -3,7 +3,9 @@
 import { useEffect, useId, useMemo, useReducer, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 
-import { useStore } from '@/lib/store';\nimport { PetBodyRenderer, type BodySpec } from '@/components/body-forge/PetBodyRenderer';\nimport { clearForgedBody, loadForgedBody, phenotypeToBodySpec } from '@/visual-dna/bodyForgeAdapter';
+import { useStore } from '@/lib/store';
+import { PetBodyRenderer, type BodySpec } from '@/components/body-forge/PetBodyRenderer';
+import { clearForgedBody, loadForgedBody, phenotypeToBodySpec } from '@/visual-dna/bodyForgeAdapter';
 import { resolveVisualDNA, type ParticleMode, type VisualPhenotype } from '@/visual-dna';
 
 const ACTION_WINDOW_MS = 1_600;
@@ -115,9 +117,21 @@ export function VisualDNAPet({
   const lastAction = useStore((state) => state.lastAction);
   const lastActionAt = useStore((state) => state.lastActionAt);
   const reducedMotion = useReducedMotion();
-  const [actionEpoch, expireAction] = useReducer((value: number) => value + 1, 0);\n  const [forgedBody, setForgedBody] = useState<BodySpec | null>(null);
+  const [actionEpoch, expireAction] = useReducer((value: number) => value + 1, 0);
+  const [forgedBody, setForgedBody] = useState<BodySpec | null>(null);
   const rawId = useId();
   const id = sanitizeId(rawId);
+
+  useEffect(() => {
+    setForgedBody(loadForgedBody());
+    const sync = () => setForgedBody(loadForgedBody());
+    window.addEventListener('bss:body-forge:updated', sync);
+    window.addEventListener('storage', sync);
+    return () => {
+      window.removeEventListener('bss:body-forge:updated', sync);
+      window.removeEventListener('storage', sync);
+    };
+  }, []);
 
   useEffect(() => {
     if (!lastAction || !lastActionAt) return;
@@ -140,7 +154,9 @@ export function VisualDNAPet({
     });
   }, [actionEpoch, evolution, lastAction, lastActionAt, reducedMotion, traits, vitals]);
 
-  const resolvedBody = useMemo(() => phenotype ? (forgedBody ?? phenotypeToBodySpec(phenotype)) : null, [forgedBody, phenotype]);\n\n  const particles = useMemo(() => {
+  const resolvedBody = useMemo(() => phenotype ? (forgedBody ?? phenotypeToBodySpec(phenotype)) : null, [forgedBody, phenotype]);
+
+  const particles = useMemo(() => {
     if (!phenotype) return [];
     const count = phenotype.particles.count;
     return Array.from({ length: count }, (_, index) => {
@@ -318,7 +334,16 @@ export function VisualDNAPet({
               );
             })}
 
-            {resolvedBody && (\n              <g transform="translate(40 42) scale(.5)">\n                <PetBodyRenderer spec={resolvedBody} animate={!reducedMotion} className="overflow-visible" />\n              </g>\n            )}\n\n            <motion.g\n              className="opacity-0" aria-hidden="true"\n              style={{ transformOrigin: '110px 105px' }}\n              animate={reducedMotion ? undefined : {
+            {resolvedBody && (
+              <g transform="translate(40 42) scale(.5)">
+                <PetBodyRenderer spec={resolvedBody} animate={!reducedMotion} className="overflow-visible" />
+              </g>
+            )}
+
+            <motion.g
+              className="opacity-0" aria-hidden="true"
+              style={{ transformOrigin: '110px 105px' }}
+              animate={reducedMotion ? undefined : {
                 y: [0, -phenotype.body.bobPixels, 0],
                 rotate: [phenotype.body.tiltDegrees - phenotype.body.shiver, phenotype.body.tiltDegrees + phenotype.body.shiver, phenotype.body.tiltDegrees - phenotype.body.shiver],
                 scaleX: phenotype.body.squashX,
@@ -392,7 +417,8 @@ export function VisualDNAPet({
             <h2 className="mt-2 text-lg font-semibold text-white">{phenotype.behavior.state.replace('-', ' ')}</h2>
             <p className="mt-2 text-xs leading-5 text-zinc-400">{phenotype.behavior.label}</p>
             <dl className="mt-4 space-y-2 text-xs">
-              <div className="flex justify-between gap-3"><dt>Body source</dt><dd className={forgedBody ? 'text-amber-200' : 'text-cyan-200'}>{forgedBody ? 'Body Forge' : 'Visual DNA'}</dd></div>\n              <div className="flex justify-between gap-3"><dt>Evolution</dt><dd className="text-cyan-200">{phenotype.evolution.state}</dd></div>
+              <div className="flex justify-between gap-3"><dt>Body source</dt><dd className={forgedBody ? 'text-amber-200' : 'text-cyan-200'}>{forgedBody ? 'Body Forge' : 'Visual DNA'}</dd></div>
+              <div className="flex justify-between gap-3"><dt>Evolution</dt><dd className="text-cyan-200">{phenotype.evolution.state}</dd></div>
               <div className="flex justify-between gap-3"><dt>Aura</dt><dd className="text-cyan-200">{phenotype.aura.topology}</dd></div>
               <div className="flex justify-between gap-3"><dt>Rings / nodes</dt><dd>{phenotype.aura.rings} / {phenotype.aura.nodes}</dd></div>
               <div className="flex justify-between gap-3"><dt>Urgency</dt><dd>{Math.round(phenotype.behavior.urgency * 100)}%</dd></div>
