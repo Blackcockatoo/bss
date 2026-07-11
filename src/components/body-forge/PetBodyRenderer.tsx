@@ -114,11 +114,11 @@ export function PetBodyRenderer({ spec, className = '', animate = true }: { spec
   return (
     <motion.svg viewBox="0 0 280 250" className={className} role="img" aria-label={`${spec.name}, ${spec.shape} body`}>
       <defs>
-        <linearGradient id={patternId} x1="10%" y1="0%" x2="90%" y2="100%">
+        {spec.pattern === 'gradient' && <linearGradient id={patternId} x1="10%" y1="0%" x2="90%" y2="100%">
           <stop offset="0%" stopColor={spec.highlightColor} />
           <stop offset="42%" stopColor={spec.primaryColor} />
           <stop offset="100%" stopColor={spec.secondaryColor} />
-        </linearGradient>
+        </linearGradient>}
         {spec.pattern === 'striped' && <pattern id={patternId} width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(24)"><rect width="16" height="16" fill={spec.primaryColor} /><rect width="6" height="16" fill={spec.highlightColor} opacity=".8" /></pattern>}
         {spec.pattern === 'spotted' && <pattern id={patternId} width="24" height="24" patternUnits="userSpaceOnUse"><rect width="24" height="24" fill={spec.primaryColor} /><circle cx="7" cy="8" r="4" fill={spec.highlightColor} /><circle cx="19" cy="18" r="3" fill={spec.secondaryColor} /></pattern>}
         <filter id={glowId} x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation={2 + spec.glow * 10} result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
