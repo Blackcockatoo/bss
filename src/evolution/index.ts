@@ -5,6 +5,7 @@ import { evaluateSpecialCondition } from './conditions';
 
 export * from './types';
 export * from './conditions';
+export * from './branching';
 
 export interface RequirementSnapshot {
   state: EvolutionState;

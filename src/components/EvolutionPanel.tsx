@@ -8,9 +8,12 @@ import {
   getTimeUntilNextEvolution,
   getNextEvolutionRequirement,
   getRequirementProgress,
+  getEvolutionBranch,
+  getStageVisuals,
+  getStageDisplayTitle,
+  getUnlockedAbilities,
   EVOLUTION_ORDER,
   EVOLUTION_STAGE_INFO,
-  EVOLUTION_VISUALS,
   type EvolutionState,
 } from '@/lib/evolution';
 import { Zap, Clock, TrendingUp, Sparkles, CheckCircle2, AlertTriangle } from 'lucide-react';
@@ -36,6 +39,13 @@ export function EvolutionPanel() {
     [traits, battle, miniGames, essence]
   );
 
+  const branch = useMemo(() => getEvolutionBranch(traits), [traits]);
+  const unlockedAbilities = useMemo(
+    () => getUnlockedAbilities(traits, evolution.state),
+    [traits, evolution.state]
+  );
+  const totalAbilities = traits?.latent.rareAbilities.length ?? 0;
+
   const vitalsAverage = useMemo(
     () => (vitals.hunger + vitals.hygiene + vitals.mood + vitals.energy) / 4,
     [vitals.energy, vitals.hunger, vitals.hygiene, vitals.mood]
@@ -46,8 +56,15 @@ export function EvolutionPanel() {
     [evolution.state]
   );
 
-  const visuals = EVOLUTION_VISUALS[evolution.state];
+  const visuals = getStageVisuals(evolution.state, branch);
   const stageInfo = EVOLUTION_STAGE_INFO[evolution.state];
+  // Header keeps the raw stage code until the apex, where the branch's
+  // apex form takes over.
+  const stageDisplayTitle = getStageDisplayTitle(
+    evolution.state,
+    branch,
+    evolution.state
+  );
 
   const progress = useMemo(
     () => getEvolutionProgress(evolution, vitalsAverage),
@@ -126,6 +143,18 @@ export function EvolutionPanel() {
           stage={ceremonyStage}
           reduceMotion={prefersReducedMotion}
           onComplete={() => setCeremonyStage(null)}
+          accentColors={
+            getStageVisuals(ceremonyStage, branch).colors as [
+              string,
+              string,
+              string,
+            ]
+          }
+          displayTitle={getStageDisplayTitle(
+            ceremonyStage,
+            branch,
+            EVOLUTION_STAGE_INFO[ceremonyStage].title
+          )}
         />
       )}
       <header className="text-center space-y-2">
@@ -137,10 +166,15 @@ export function EvolutionPanel() {
           }}
         >
           <Sparkles className="w-4 h-4" style={{ color: visuals.colors[0] }} />
-          <span className="font-bold text-white text-lg">{evolution.state}</span>
+          <span className="font-bold text-white text-lg">{stageDisplayTitle}</span>
         </div>
         <p className="text-zinc-400 text-sm">{nextStageLabel}</p>
         <p className="text-zinc-300 text-xs">{stageInfo.tagline}</p>
+        {traits && (
+          <p className="text-xs" style={{ color: branch.accentColors[0] }}>
+            {branch.label} path — {branch.motto}
+          </p>
+        )}
       </header>
 
       <section className="grid grid-cols-2 gap-3 text-sm">
@@ -254,6 +288,35 @@ export function EvolutionPanel() {
           ))}
         </ul>
       </section>
+
+      {totalAbilities > 0 && (
+        <section className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4 space-y-3 text-xs text-zinc-300">
+          <p className="font-semibold text-white text-sm">Rare Abilities</p>
+          {unlockedAbilities.length > 0 ? (
+            <ul className="space-y-1">
+              {unlockedAbilities.map(ability => (
+                <li key={ability} className="flex items-center gap-2">
+                  <Sparkles
+                    className="w-3 h-3"
+                    style={{ color: branch.accentColors[0] }}
+                  />
+                  <span>{ability}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-zinc-500">
+              Latent abilities sleep in the genome, waiting for evolution.
+            </p>
+          )}
+          {unlockedAbilities.length < totalAbilities && (
+            <p className="text-zinc-500">
+              {totalAbilities - unlockedAbilities.length} more awaken as your
+              companion evolves.
+            </p>
+          )}
+        </section>
+      )}
 
       {evolution.canEvolve && requirementSnapshot !== null && (
         <section className="space-y-3">

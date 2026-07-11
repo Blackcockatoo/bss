@@ -19,6 +19,10 @@ export interface EvolutionData {
   totalXp: number;
   totalInteractions: number;
   canEvolve: boolean;
+  /** Genome branch stamped at evolve time; derived from traits when absent. */
+  branchId?: string;
+  /** Rare abilities revealed so far; derived from traits when absent. */
+  abilitiesUnlocked?: string[];
 }
 
 export interface StageInfo {
