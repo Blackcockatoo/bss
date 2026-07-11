@@ -1,3 +1,4 @@
+import { resolveDigitalDosha, type DigitalDoshaPhenotype } from '../digital-dosha';
 import type { EvolutionState } from '../evolution/types';
 import type {
   BehaviorPhenotype,
@@ -227,12 +228,19 @@ function resolveParticles(
   evolution: EvolutionVisualProfile,
   needs: VisualPhenotype['needs'],
   reducedMotion: boolean,
+  dosha: DigitalDoshaPhenotype,
 ): ParticlePhenotype {
   if (reducedMotion) {
     return { mode: 'none', count: 0, speed: 0, opacity: 0, size: 0 };
   }
 
+  const { current, phase, residue } = dosha.state;
   let mode: ParticlePhenotype['mode'] = evolution.state === 'GENETICS' ? 'orbit' : 'spark';
+  if (behavior.state === 'idle' || behavior.state === 'alert') {
+    if (phase === 'flux-surge') mode = 'orbit';
+    if (phase === 'forge-surge') mode = 'spark';
+    if (phase === 'anchor-surge' || phase === 'saturated') mode = 'fall';
+  }
   if (behavior.state === 'feeding' || behavior.state === 'hungry' || behavior.state === 'starving') mode = 'inward';
   if (behavior.state === 'cleaning') mode = 'rise';
   if (behavior.state === 'playing' || behavior.state === 'joyful') mode = 'spark';
@@ -242,10 +250,10 @@ function resolveParticles(
 
   return {
     mode,
-    count: Math.round(clamp(evolution.nodeCount * 0.7 + behavior.urgency * 5, 2, 16)),
-    speed: clamp(0.35 + evolution.complexity * 0.5 + needs.hunger * 0.55 - needs.energy * 0.25, 0.15, 1.4),
-    opacity: clamp(0.24 + evolution.complexity * 0.34 + behavior.urgency * 0.12, 0.2, 0.82),
-    size: clamp(1.4 + evolution.complexity * 1.6 + needs.sickness * 0.8, 1.2, 4),
+    count: Math.round(clamp(evolution.nodeCount * 0.7 + behavior.urgency * 5 + current.kapha * 2 + current.pitta, 2, 18)),
+    speed: clamp(0.28 + evolution.complexity * 0.45 + needs.hunger * 0.55 - needs.energy * 0.25 + current.vata * 0.4 + current.pitta * 0.12 - current.kapha * 0.12, 0.15, 1.6),
+    opacity: clamp(0.22 + evolution.complexity * 0.32 + behavior.urgency * 0.12 + current.kapha * 0.08 - residue * 0.05, 0.18, 0.86),
+    size: clamp(1.3 + evolution.complexity * 1.55 + needs.sickness * 0.8 + current.kapha * 0.45, 1.2, 4.3),
   };
 }
 
@@ -266,6 +274,11 @@ export function resolveVisualDNA(input: VisualDNAInput): VisualPhenotype {
     sickness: vitals.isSick ? Math.max(0.35, clamp01(vitals.sicknessSeverity / 100)) : 0,
   };
 
+  const dosha = resolveDigitalDosha(input);
+  const flux = dosha.state.current.vata;
+  const forge = dosha.state.current.pitta;
+  const anchor = dosha.state.current.kapha;
+  const fluxSurge = Math.max(0, dosha.state.drift.vata);
   const positiveMood = clamp01((vitals.mood - 55) / 45);
   const personalityReactivity = clamp(
     0.72 +
@@ -326,23 +339,23 @@ export function resolveVisualDNA(input: VisualDNAInput): VisualPhenotype {
   const aura: VisualPhenotype['aura'] = {
     topology: profile.topology,
     rings: profile.rings,
-    nodes: Math.round(profile.nodeCount + positiveMood * 2 + needs.sickness * 3),
+    nodes: Math.round(profile.nodeCount + positiveMood * 2 + needs.sickness * 3 + flux * 2 + forge * 2),
     radius: clamp(
-      72 + profile.complexity * 16 + moodExpansion - hungerCompression - energyCompression + actionLift * 6,
+      72 + profile.complexity * 16 + moodExpansion - hungerCompression - energyCompression + actionLift * 6 + anchor * 5 - fluxSurge * 4,
       52,
-      104,
+      108,
     ),
-    thickness: clamp(1.6 + profile.complexity * 2.1 + behavior.urgency * 0.8, 1.4, 4.8),
-    opacity: clamp(0.28 + profile.complexity * 0.24 + positiveMood * 0.12 - needs.energy * 0.08, 0.18, 0.72),
-    blur: clamp(7 + profile.complexity * 8 + positiveMood * 4 + needs.sickness * 3, 5, 22),
+    thickness: clamp(1.5 + profile.complexity * 2.1 + behavior.urgency * 0.8 + anchor * 0.7 + forge * 0.4, 1.4, 5.2),
+    opacity: clamp(0.25 + profile.complexity * 0.24 + positiveMood * 0.12 - needs.energy * 0.08 + anchor * 0.08 + forge * 0.03 - dosha.state.residue * 0.06, 0.18, 0.78),
+    blur: clamp(7 + profile.complexity * 8 + positiveMood * 4 + needs.sickness * 3 + anchor * 3 + flux * 0.5, 5, 24),
     pulseSeconds: reducedMotion
       ? 0
-      : clamp(3.8 - positiveMood * 1.2 - needs.hunger * 1.1 + needs.energy * 1.7, 1.25, 6.5),
+      : clamp(3.8 - positiveMood * 1.2 - needs.hunger * 1.1 + needs.energy * 1.7 - forge * 0.45 + anchor * 0.45, 1.2, 6.8),
     rotationSeconds: reducedMotion
       ? 0
-      : clamp(18 - profile.complexity * 7 - positiveMood * 2 + needs.energy * 8, 6, 30),
-    turbulence: clamp(needs.sickness * 0.85 + needs.hunger * 0.25 + needs.hygiene * 0.3, 0, 1),
-    asymmetry: clamp(inheritedAsymmetry * 0.55 + needs.sickness * 0.8 + sicknessDistortion / 20, 0, 1),
+      : clamp(18 - profile.complexity * 7 - positiveMood * 2 + needs.energy * 8 - flux * 4 + anchor * 3, 5.5, 32),
+    turbulence: clamp(needs.sickness * 0.85 + needs.hunger * 0.25 + needs.hygiene * 0.3 + fluxSurge * 0.4 + dosha.state.residue * 0.32, 0, 1),
+    asymmetry: clamp(inheritedAsymmetry * 0.55 + needs.sickness * 0.8 + sicknessDistortion / 20 + fluxSurge * 0.22, 0, 1),
     inwardPull: clamp(needs.hunger * 0.82 + (behavior.state === 'feeding' ? 0.22 : 0), 0, 1),
     phaseOffset: waveAngle,
     colors: [
@@ -353,28 +366,29 @@ export function resolveVisualDNA(input: VisualDNAInput): VisualPhenotype {
     ],
   };
 
-  const reactiveBob = (2 + unit(traits.personality.energy) * 4 + positiveMood * 5) * personalityReactivity;
+  const reactiveBob = (2 + unit(traits.personality.energy) * 4 + positiveMood * 5 + flux * 2) * personalityReactivity;
   const body: VisualPhenotype['body'] = {
-    scale: clamp(identity.bodyScale * (1 + positiveMood * 0.035 - needs.hunger * 0.05 - needs.energy * 0.04), 0.58, 1.4),
+    scale: clamp(identity.bodyScale * (1 + positiveMood * 0.035 - needs.hunger * 0.05 - needs.energy * 0.04 + anchor * 0.012), 0.58, 1.4),
     squashX: clamp(1 + needs.hunger * 0.055 + actionLift * 0.025, 0.9, 1.12),
     squashY: clamp(1 - needs.hunger * 0.07 - needs.energy * 0.045 + positiveMood * 0.03, 0.82, 1.1),
-    tiltDegrees: clamp(seedDirection * (needs.energy * 5 + needs.mood * 3) + needs.sickness * 2, -10, 10),
-    bobPixels: reducedMotion ? 0 : clamp(reactiveBob - needs.energy * 4, 0.5, 9),
-    bobSeconds: reducedMotion ? 0 : clamp(2.9 - positiveMood * 0.9 + needs.energy * 1.8, 1.25, 5),
-    saturation: clamp(1 + positiveMood * 0.12 - needs.sickness * 0.38 - needs.energy * 0.12, 0.52, 1.2),
-    brightness: clamp(1 + positiveMood * 0.12 - needs.sickness * 0.2 - needs.energy * 0.14, 0.62, 1.2),
+    tiltDegrees: clamp(seedDirection * (needs.energy * 5 + needs.mood * 3 + fluxSurge * 4) + needs.sickness * 2, -10, 10),
+    bobPixels: reducedMotion ? 0 : clamp(reactiveBob - needs.energy * 4 - anchor * 0.6, 0.5, 10),
+    bobSeconds: reducedMotion ? 0 : clamp(2.9 - positiveMood * 0.9 + needs.energy * 1.8 - flux * 0.45 + anchor * 0.35, 1.2, 5.4),
+    saturation: clamp(1 + positiveMood * 0.12 - needs.sickness * 0.38 - needs.energy * 0.12 + forge * 0.08 - dosha.state.residue * 0.12, 0.5, 1.25),
+    brightness: clamp(1 + positiveMood * 0.12 - needs.sickness * 0.2 - needs.energy * 0.14 + forge * 0.08 - dosha.state.residue * 0.08, 0.6, 1.25),
     opacity: clamp(1 - needs.sickness * 0.12 - needs.energy * 0.05, 0.76, 1),
-    shiver: reducedMotion ? 0 : clamp(needs.sickness * 3.5 + (behavior.state === 'starving' ? 0.8 : 0), 0, 4),
+    shiver: reducedMotion ? 0 : clamp(needs.sickness * 3.5 + (behavior.state === 'starving' ? 0.8 : 0) + fluxSurge * 2, 0, 4.5),
   };
 
   return {
     version: 1,
     identity,
     evolution: profile,
+    dosha,
     aura,
     body,
     face: resolveFace(behavior, needs, positiveMood),
-    particles: resolveParticles(behavior, profile, needs, reducedMotion),
+    particles: resolveParticles(behavior, profile, needs, reducedMotion, dosha),
     behavior,
     needs,
   };
