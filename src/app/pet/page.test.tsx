@@ -58,6 +58,11 @@ vi.mock("@/components/EvolutionPanel", () => ({
   EvolutionPanel: () => <div data-testid="evolution-panel" />,
 }));
 
+vi.mock("@/components/WellnessSync", () => ({
+  WellnessSync: ({ isOpen }: { isOpen: boolean }) =>
+    isOpen ? <div data-testid="wellness-sync" /> : null,
+}));
+
 vi.mock("@/components/RegistrationCertificate", () => ({
   RegistrationCertificate: ({ isOpen }: { isOpen?: boolean }) =>
     isOpen ? <div data-testid="registration-certificate" /> : null,
@@ -86,6 +91,8 @@ const storeState = {
     state: "GENETICS",
     birthTime: 1710000000000,
   },
+  lastAction: null,
+  lastActionAt: 0,
 };
 
 vi.mock("@/lib/store", () => ({

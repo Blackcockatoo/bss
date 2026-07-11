@@ -12,6 +12,7 @@ import {
   CertificateButton,
   RegistrationCertificate,
 } from "@/components/RegistrationCertificate";
+import { WellnessSync } from "@/components/WellnessSync";
 import { Button } from "@/components/ui/button";
 import { initializeStarterAddons } from "@/lib/addons/starter";
 import { useDnaImprint } from "@/lib/dnaImprint";
@@ -36,6 +37,8 @@ export default function PetPage() {
   const startTick = useStore((s) => s.startTick);
   const stopTick = useStore((s) => s.stopTick);
   const evolution = useStore((s) => s.evolution);
+  const lastAction = useStore((s) => s.lastAction);
+  const lastActionAt = useStore((s) => s.lastActionAt);
   const dnaImprint = useDnaImprint();
   const petStep = getRouteProgression("pet");
   const [showAddonPanel, setShowAddonPanel] = useState(false);
@@ -45,6 +48,7 @@ export default function PetPage() {
   const [addonsInitialized, setAddonsInitialized] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showCertificate, setShowCertificate] = useState(false);
+  const [showWellnessSync, setShowWellnessSync] = useState(false);
   useJourneyProgressTracker("pet", { completeOnVisit: true });
 
   const imprintAccentClass =
@@ -60,6 +64,17 @@ export default function PetPage() {
     startTick();
     return () => stopTick();
   }, [startTick, stopTick]);
+
+  // Caring for the pet gently prompts the user's own self-care, at most
+  // once per hour.
+  useEffect(() => {
+    if (!lastAction || !lastActionAt) return;
+    const PROMPT_KEY = "metapet-wellness-sync-prompted-at";
+    const lastPrompt = Number(window.localStorage.getItem(PROMPT_KEY) ?? 0);
+    if (lastActionAt - lastPrompt < 60 * 60 * 1000) return;
+    window.localStorage.setItem(PROMPT_KEY, String(lastActionAt));
+    setShowWellnessSync(true);
+  }, [lastAction, lastActionAt]);
 
   // Initialize starter addons on first load
   useEffect(() => {
@@ -343,6 +358,12 @@ export default function PetPage() {
         evolutionState={evolution.state}
         isOpen={showCertificate}
         onClose={() => setShowCertificate(false)}
+      />
+
+      <WellnessSync
+        isOpen={showWellnessSync}
+        onClose={() => setShowWellnessSync(false)}
+        lastAction={lastAction}
       />
     </div>
   );
