@@ -7,6 +7,10 @@ import { RouteProgressionCard } from "@/components/RouteProgressionCard";
 import { RouteTutorialControls } from "@/components/RouteTutorialControls";
 import { AddonInventoryPanel } from "@/components/addons/AddonInventoryPanel";
 import { PetProfilePanel } from "@/components/addons/PetProfilePanel";
+import {
+  CertificateButton,
+  RegistrationCertificate,
+} from "@/components/RegistrationCertificate";
 import { Button } from "@/components/ui/button";
 import { initializeStarterAddons } from "@/lib/addons/starter";
 import { useDnaImprint } from "@/lib/dnaImprint";
@@ -29,6 +33,7 @@ import { useEffect, useState } from "react";
 export default function PetPage() {
   const startTick = useStore((s) => s.startTick);
   const stopTick = useStore((s) => s.stopTick);
+  const evolution = useStore((s) => s.evolution);
   const dnaImprint = useDnaImprint();
   const petStep = getRouteProgression("pet");
   const [showAddonPanel, setShowAddonPanel] = useState(false);
@@ -36,6 +41,7 @@ export default function PetPage() {
   const [addonEditMode, setAddonEditMode] = useState(false);
   const [addonsInitialized, setAddonsInitialized] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showCertificate, setShowCertificate] = useState(false);
   useJourneyProgressTracker("pet", { completeOnVisit: true });
 
   const imprintAccentClass =
@@ -245,6 +251,9 @@ export default function PetPage() {
                       <Sparkles className="w-4 h-4" />
                       Addons
                     </Button>
+                    <CertificateButton
+                      onClick={() => setShowCertificate(true)}
+                    />
                   </div>
 
                   {addonEditMode && (
@@ -289,6 +298,17 @@ export default function PetPage() {
           </div>
         </div>
       </div>
+
+      <RegistrationCertificate
+        petId="auralia-main"
+        petName="Auralia"
+        crest={null}
+        heptaCode={null}
+        createdAt={evolution.birthTime}
+        evolutionState={evolution.state}
+        isOpen={showCertificate}
+        onClose={() => setShowCertificate(false)}
+      />
     </div>
   );
 }

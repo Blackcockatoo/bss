@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import PetPage from "@/app/pet/page";
@@ -54,6 +54,16 @@ vi.mock("@/components/addons/PetProfilePanel", () => ({
   PetProfilePanel: () => <div>Pet Profile</div>,
 }));
 
+vi.mock("@/components/RegistrationCertificate", () => ({
+  RegistrationCertificate: ({ isOpen }: { isOpen?: boolean }) =>
+    isOpen ? <div data-testid="registration-certificate" /> : null,
+  CertificateButton: ({ onClick }: { onClick: () => void }) => (
+    <button type="button" onClick={onClick}>
+      View Certificate
+    </button>
+  ),
+}));
+
 vi.mock("@/lib/addons/starter", () => ({
   initializeStarterAddons: () => initializeStarterAddons(),
 }));
@@ -65,10 +75,18 @@ vi.mock("@/lib/journeyProgress", () => ({
   }),
 }));
 
+const storeState = {
+  startTick,
+  stopTick,
+  evolution: {
+    state: "GENETICS",
+    birthTime: 1710000000000,
+  },
+};
+
 vi.mock("@/lib/store", () => ({
-  useStore: (
-    selector: (store: { startTick: typeof startTick; stopTick: typeof stopTick }) => unknown,
-  ) => selector({ startTick, stopTick }),
+  useStore: (selector: (store: typeof storeState) => unknown) =>
+    selector(storeState),
 }));
 
 describe("PetPage", () => {
@@ -98,6 +116,26 @@ describe("PetPage", () => {
     expect(screen.getByText(/Tidal Orbit/i)).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /Re-open DNA Hub/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("opens the registration certificate from the advanced section", async () => {
+    render(<PetPage />);
+
+    await waitFor(() => {
+      expect(initializeStarterAddons).toHaveBeenCalled();
+    });
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /Advanced \/ Mechanics Lab/i }),
+    );
+    expect(
+      screen.queryByTestId("registration-certificate"),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /View Certificate/i }));
+    expect(
+      screen.getByTestId("registration-certificate"),
     ).toBeInTheDocument();
   });
 });
