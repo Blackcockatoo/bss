@@ -10,6 +10,11 @@ export interface NavigationTarget {
   icon: string;
 }
 
+export interface CompassNavigationTarget extends NavigationTarget {
+  renderPosition: number;
+  renderAngle: number;
+}
+
 export const GENOME_RESONANCE_ROUTE = "/genome-resonance";
 
 export const NAVIGATION_TARGETS: NavigationTarget[] = [
@@ -81,9 +86,20 @@ export const NAVIGATION_TARGETS: NavigationTarget[] = [
   },
 ];
 
-export const COMPASS_NAVIGATION_TARGETS = NAVIGATION_TARGETS.filter(
-  (target) => target.route !== GENOME_RESONANCE_ROUTE,
-);
+export const getCompassNavigationTargets = (): CompassNavigationTarget[] => {
+  const compassTargets = NAVIGATION_TARGETS.filter(
+    (target) => target.route !== GENOME_RESONANCE_ROUTE,
+  );
+  const slotAngle = 360 / compassTargets.length;
+
+  return compassTargets.map((target, renderPosition) => ({
+    ...target,
+    renderPosition,
+    renderAngle: renderPosition * slotAngle,
+  }));
+};
+
+export const COMPASS_NAVIGATION_TARGETS = getCompassNavigationTargets();
 
 export const getNavigationTargetByPosition = (position: number) =>
   NAVIGATION_TARGETS.find((target) => target.position === position);

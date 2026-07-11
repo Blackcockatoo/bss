@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import type { SteeringViewProps } from './types';
 import { COMPASS_NAVIGATION_TARGETS, getNavigationTargetByPosition } from './types';
+import { getLabelLines, useIsCompactViewport } from './labelUtils';
 
 const COLOR_VARIANTS = {
   red: { primary: '#FF0055', secondary: '#FF33CC', tertiary: '#FF66FF', neon: '#FF0080' },
@@ -16,25 +17,6 @@ const normalizeDelta = (delta: number) => {
   return delta;
 };
 
-const getLabelLines = (label: string): string[] => {
-  if (label.length <= 11 || !label.includes(' ')) {
-    return [label];
-  }
-
-  const words = label.split(' ');
-
-  if (
-    words.length === 2
-    && words[0].length <= 2
-    && words[1].length >= 7
-  ) {
-    return [label];
-  }
-
-  const halfway = Math.ceil(words.length / 2);
-  return [words.slice(0, halfway).join(' '), words.slice(halfway).join(' ')];
-};
-
 export function CompassNav({
   color,
   numberStrings,
@@ -46,7 +28,7 @@ export function CompassNav({
   const [rotation, setRotation] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [hoveredSector, setHoveredSector] = useState<number | null>(null);
-  const [isCompact, setIsCompact] = useState(false);
+  const isCompact = useIsCompactViewport();
   const [isDragging, setIsDragging] = useState(false);
   const activePointerIdRef = useRef<number | null>(null);
   const rotationRef = useRef(0);
@@ -57,20 +39,14 @@ export function CompassNav({
 
   const colors = COLOR_VARIANTS[color];
   const numberString = numberStrings[color];
+  const slotCount = COMPASS_NAVIGATION_TARGETS.length;
+  const slotAngle = 360 / slotCount;
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    const media = window.matchMedia('(max-width: 640px)');
-    const syncCompact = () => setIsCompact(media.matches);
-    syncCompact();
-
-    media.addEventListener('change', syncCompact);
-    return () => media.removeEventListener('change', syncCompact);
-  }, []);
 
   const clearSettleAnimation = useCallback(() => {
     if (settleFrameRef.current !== null) {
@@ -93,10 +69,13 @@ export function CompassNav({
   const secondAngle = seconds * 6;
 
   const selectTopSector = useCallback((angle: number) => {
-    const sectorAtTop = (((-angle % 360) + 360) % 360) / 30;
-    const sectorIndex = Math.round(sectorAtTop) % 12;
-    onFeatureSelect(sectorIndex);
-  }, [onFeatureSelect]);
+    const sectorAtTop = (((-angle % 360) + 360) % 360) / slotAngle;
+    const renderPosition = Math.round(sectorAtTop) % slotCount;
+    const target = COMPASS_NAVIGATION_TARGETS.find((candidate) => candidate.renderPosition === renderPosition);
+    if (target) {
+      onFeatureSelect(target.position);
+    }
+  }, [onFeatureSelect, slotAngle, slotCount]);
 
   const settleToNearestSector = useCallback((targetRotation: number) => {
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -189,14 +168,15 @@ export function CompassNav({
     }
 
     const projected = rotationRef.current + velocityRef.current * 8;
-    const snapped = Math.round(projected / 30) * 30;
+    const snapped = Math.round(projected / slotAngle) * slotAngle;
     settleToNearestSector(snapped);
-  }, [isDragging, settleToNearestSector]);
+  }, [isDragging, settleToNearestSector, slotAngle]);
 
-  // Build a sector (wedge) path for a 30-degree arc
+  // Build a sector (wedge) path using the rendered slot angle
   const sectorPath = (index: number) => {
-    const startAngle = (index * 30 - 15) * (Math.PI / 180);
-    const endAngle = (index * 30 + 15) * (Math.PI / 180);
+    const centerAngle = index * slotAngle;
+    const startAngle = (centerAngle - slotAngle / 2) * (Math.PI / 180);
+    const endAngle = (centerAngle + slotAngle / 2) * (Math.PI / 180);
     const innerR = 120;
     const outerR = 195;
     const x1 = Math.sin(startAngle) * innerR;
@@ -316,7 +296,7 @@ export function CompassNav({
               return (
                 <g key={target.position}>
                   <path
-                    d={sectorPath(target.position)}
+                    d={sectorPath(target.renderPosition)}
                     fill="rgba(255, 255, 255, 0.001)"
                     stroke="transparent"
                     onPointerEnter={() => setHoveredSector(target.position)}
@@ -330,7 +310,7 @@ export function CompassNav({
                     style={{ cursor: 'pointer' }}
                   />
                   <path
-                    d={sectorPath(target.position)}
+                    d={sectorPath(target.renderPosition)}
                     fill={isSelected ? selectedFill : isHovered ? hoverFill : 'transparent'}
                     stroke={isSelected ? colors.primary : isHovered ? `${colors.secondary}` : 'transparent'}
                     strokeOpacity={isSelected ? selectedStrokeOpacity : isHovered ? hoverStrokeOpacity : 0}
@@ -343,8 +323,8 @@ export function CompassNav({
             })}
 
             {/* Hour markers with neon glow */}
-            {Array.from({ length: 12 }).map((_, i) => {
-              const angle = (i * 30) * (Math.PI / 180);
+            {Array.from({ length: slotCount }).map((_, i) => {
+              const angle = (i * slotAngle) * (Math.PI / 180);
               const x1 = Math.sin(angle) * 195;
               const y1 = -Math.cos(angle) * 195;
               const x2 = Math.sin(angle) * 200;
@@ -371,7 +351,7 @@ export function CompassNav({
 
             {/* Feature labels at each sector */}
             {COMPASS_NAVIGATION_TARGETS.map((target) => {
-              const angle = target.angle * (Math.PI / 180);
+              const angle = target.renderAngle * (Math.PI / 180);
               const isLongCompactLabel = isCompact && target.label.length >= 12;
               const compactLabelInset = isLongCompactLabel ? 6 : 0;
               const labelR = (isCompact ? 154 : 157) - compactLabelInset;
