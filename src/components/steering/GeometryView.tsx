@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import type { SteeringViewProps } from './types';
 import { COMPASS_NAVIGATION_TARGETS, getNavigationTargetByPosition } from './types';
+import { getLabelLines, useIsCompactViewport } from './labelUtils';
 
 const COLOR_VARIANTS = {
   red: { primary: '#FF5555', secondary: '#FF9999', bg: 'rgba(255,85,85,0.05)' },
@@ -26,6 +27,7 @@ export function GeometryView({
 
   const colors = COLOR_VARIANTS[color];
   const numberString = numberStrings[color];
+  const isCompact = useIsCompactViewport();
 
   // Slow rotation animation
   useEffect(() => {
@@ -39,11 +41,11 @@ export function GeometryView({
     return () => cancelAnimationFrame(frame);
   }, [animating]);
 
-  // Feature vertex positions (12 points on outer ring, overlaid on geometry)
+  // Feature vertex positions on the outer ring, overlaid on geometry
   const featureVertices = useMemo(() => {
     return COMPASS_NAVIGATION_TARGETS.map((target) => {
-      const angle = target.angle * (Math.PI / 180);
-      const r = 210;
+      const angle = target.renderAngle * (Math.PI / 180);
+      const r = isCompact ? 200 : 205;
       return {
         position: target.position,
         x: Math.sin(angle) * r,
@@ -51,7 +53,7 @@ export function GeometryView({
         label: target.label,
       };
     });
-  }, []);
+  }, [isCompact]);
 
   const renderFlower = () => (
     <>
@@ -203,23 +205,60 @@ export function GeometryView({
                   strokeWidth={isSelected ? 1.5 : 0.5}
                   className="transition-all duration-200"
                 />
-                <text
-                  x={v.x} y={v.y}
-                  fill={isSelected ? colors.primary : colors.secondary}
-                  fontSize="5"
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  style={{ pointerEvents: 'none' }}
-                >
-                  {v.label.length > 7 ? v.label.slice(0, 6) + '.' : v.label}
-                </text>
+                {(() => {
+                  const labelLines = getLabelLines(v.label);
+                  const baseFontSize = isSelected ? (isCompact ? 9.6 : 8.6) : (isCompact ? 8 : 7.2);
+                  const lineHeight = isCompact ? 8.4 : 7.6;
+                  const maxLineChars = Math.max(...labelLines.map((line) => line.length));
+                  const estimatedWidth = maxLineChars * baseFontSize * 0.56;
+                  const widthScale = Math.min(1, (isCompact ? 68 : 60) / Math.max(estimatedWidth, 1));
+                  const fontSize = Number((baseFontSize * widthScale).toFixed(2));
+                  const scaledLineHeight = Number((lineHeight * widthScale).toFixed(2));
+                  const firstLineY = v.y - ((labelLines.length - 1) * scaledLineHeight) / 2;
+                  const plateWidth = Math.max(30, maxLineChars * fontSize * 0.56 + (isCompact ? 11 : 9));
+                  const plateHeight = labelLines.length * scaledLineHeight + (isCompact ? 5 : 4);
+                  return (
+                    <>
+                      <rect
+                        x={v.x - plateWidth / 2}
+                        y={firstLineY - scaledLineHeight / 2 - (isCompact ? 2.5 : 2)}
+                        width={plateWidth}
+                        height={plateHeight}
+                        rx={isCompact ? 5 : 4}
+                        fill={isSelected ? 'rgba(5, 9, 18, 0.9)' : 'rgba(5, 9, 18, 0.62)'}
+                        stroke={isSelected ? colors.primary : `${colors.secondary}99`}
+                        strokeWidth={isSelected ? 1 : 0.7}
+                        style={{ pointerEvents: 'none' }}
+                      />
+                      <text
+                        x={v.x}
+                        y={firstLineY}
+                        fill={isSelected ? '#ffffff' : '#eef4ff'}
+                        fontSize={fontSize}
+                        fontWeight={isSelected ? 'bold' : '600'}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        stroke="rgba(4, 8, 16, 0.92)"
+                        strokeWidth={isCompact ? 2 : 1.5}
+                        paintOrder="stroke"
+                        style={{ pointerEvents: 'none' }}
+                      >
+                        {labelLines.map((line, lineIndex) => (
+                          <tspan key={`${v.label}-${lineIndex}`} x={v.x} dy={lineIndex === 0 ? 0 : scaledLineHeight}>
+                            {line}
+                          </tspan>
+                        ))}
+                      </text>
+                    </>
+                  );
+                })()}
               </g>
             );
           })}
 
           {/* Selected feature label */}
           <text
-            x="0" y="240"
+            x="0" y="228"
             fill={colors.primary}
             fontSize="12"
             fontWeight="bold"
