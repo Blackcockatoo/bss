@@ -434,7 +434,10 @@ export function MiniGamesPanel({ petName }: MiniGamesPanelProps) {
       </p>
 
       {activeGame && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-black/70 p-2 backdrop-blur-sm sm:items-center sm:justify-center sm:p-4">
+        <div
+          className="fixed inset-x-0 top-0 z-50 flex h-[100dvh] flex-col bg-black/70 p-2 backdrop-blur-sm sm:items-center sm:justify-center sm:p-4"
+          style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top, 0px))' }}
+        >
           <div className="flex shrink-0 justify-end py-2 sm:w-full sm:max-w-3xl">
             <Button
               size="sm"
