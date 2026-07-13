@@ -1,9 +1,29 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useReducer, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { BodyFeature, BodyPattern, BodyShape, DEFAULT_BODY_SPEC, FaceExpression, PetBodyRenderer, type BodySpec } from '@/components/body-forge/PetBodyRenderer';
-import { createDNAReadyBodyPacket, saveForgedBody } from '@/visual-dna/bodyForgeAdapter';
+
+import {
+  DEFAULT_BODY_SPEC,
+  PetBodyRenderer,
+  type BodyFeature,
+  type BodyPattern,
+  type BodyShape,
+  type BodySpec,
+  type FaceExpression,
+} from '@/components/body-forge/PetBodyRenderer';
+import { useStore } from '@/lib/store';
+import { resolveVisualDNA } from '@/visual-dna';
+import {
+  applyLivePhenotype,
+  createDNAReadyBodyPacket,
+  createGenomeBodySpec,
+  getGenomeVisualFingerprint,
+  loadForgedBody,
+  saveForgedBody,
+} from '@/visual-dna/bodyForgeAdapter';
+
+const ACTION_WINDOW_MS = 1_600;
 
 const PRESETS: Record<string, BodySpec> = {
   Auralia: DEFAULT_BODY_SPEC,
@@ -21,10 +41,34 @@ function Select<T extends string>({ label, value, values, onChange }: { label: s
 
 export function BodyForge() {
   const router = useRouter();
+  const genome = useStore((state) => state.genome);
+  const traits = useStore((state) => state.traits);
+  const vitals = useStore((state) => state.vitals);
+  const evolution = useStore((state) => state.evolution);
+  const lastAction = useStore((state) => state.lastAction);
+  const lastActionAt = useStore((state) => state.lastActionAt);
   const [spec, setSpec] = useState<BodySpec>(DEFAULT_BODY_SPEC);
+  const [actionEpoch, expireAction] = useReducer((value: number) => value + 1, 0);
   const [animate, setAnimate] = useState(true);
   const [background, setBackground] = useState<'void' | 'light' | 'grid'>('void');
   const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    const stored = loadForgedBody();
+    if (stored) setSpec(stored);
+  }, []);
+
+  useEffect(() => {
+    if (!lastAction || !lastActionAt) return;
+    const remaining = ACTION_WINDOW_MS - (Date.now() - lastActionAt);
+    if (remaining <= 0) return;
+    const timeout = window.setTimeout(expireAction, remaining + 20);
+    return () => window.clearTimeout(timeout);
+  }, [lastAction, lastActionAt]);
+
+  const phenotype = useMemo(() => traits ? resolveVisualDNA({ traits, vitals, evolution, lastAction, lastActionAt, now: Date.now() }) : null, [actionEpoch, evolution, lastAction, lastActionAt, traits, vitals]);
+  const dnaBody = useMemo(() => phenotype ? createGenomeBodySpec(phenotype, genome) : null, [genome, phenotype]);
+  const previewSpec = useMemo(() => phenotype ? applyLivePhenotype(spec, phenotype) : spec, [phenotype, spec]);
+  const fingerprint = getGenomeVisualFingerprint(genome, phenotype?.identity.seed ?? 0);
   const json = useMemo(() => JSON.stringify(spec, null, 2), [spec]);
   const patch = <K extends keyof BodySpec>(key: K, value: BodySpec[K]) => setSpec((current) => ({ ...current, [key]: value }));
   const toggleFeature = (feature: BodyFeature) => patch('features', spec.features.includes(feature) ? spec.features.filter((item) => item !== feature) : [...spec.features, feature]);
@@ -32,8 +76,28 @@ export function BodyForge() {
   const randomize = () => {
     const colors = ['#1677ff', '#12b8a6', '#8528d8', '#d12f5b', '#e28723', '#151b2d'];
     const highlights = ['#f5c451', '#7ef9ff', '#ff82ce', '#d9ff75', '#ffffff'];
-    patch('primaryColor', colors[Math.floor(Math.random() * colors.length)]);
-    setSpec((current) => ({ ...current, shape: (['round', 'bean', 'cubic', 'crystal', 'toroid'] as BodyShape[])[Math.floor(Math.random() * 5)], pattern: (['solid', 'gradient', 'striped', 'spotted'] as BodyPattern[])[Math.floor(Math.random() * 4)], highlightColor: highlights[Math.floor(Math.random() * highlights.length)], bodyWidth: 82 + Math.round(Math.random() * 54), bodyHeight: 88 + Math.round(Math.random() * 56), eyeSpacing: 30 + Math.round(Math.random() * 30), eyeSize: 8 + Math.round(Math.random() * 8) }));
+    const featurePool: BodyFeature[] = ['wings', 'horns', 'crown', 'thirdEye', 'tailFlame'];
+    setSpec((current) => ({
+      ...current,
+      shape: (['round', 'bean', 'cubic', 'crystal', 'toroid'] as BodyShape[])[Math.floor(Math.random() * 5)],
+      pattern: (['solid', 'gradient', 'striped', 'spotted'] as BodyPattern[])[Math.floor(Math.random() * 4)],
+      primaryColor: colors[Math.floor(Math.random() * colors.length)],
+      secondaryColor: colors[Math.floor(Math.random() * colors.length)],
+      highlightColor: highlights[Math.floor(Math.random() * highlights.length)],
+      bodyWidth: 72 + Math.random() * 74,
+      bodyHeight: 78 + Math.random() * 80,
+      bodyScale: 0.72 + Math.random() * 0.56,
+      eyeSpacing: 22 + Math.random() * 48,
+      eyeSize: 6.5 + Math.random() * 12.5,
+      pupilSize: 2.5 + Math.random() * 7,
+      wingSpread: 0.3 + Math.random() * 1.1,
+      hornLength: 11 + Math.random() * 43,
+      glow: 0.05 + Math.random() * 0.9,
+      bob: 1 + Math.random() * 14,
+      breathe: 0.012 + Math.random() * 0.083,
+      animationSpeed: 0.45 + Math.random() * 1.8,
+      features: featurePool.filter(() => Math.random() > 0.54),
+    }));
   };
 
   const copyJson = async () => {
@@ -43,7 +107,7 @@ export function BodyForge() {
   };
 
   const exportJson = () => {
-    const packet = JSON.stringify(createDNAReadyBodyPacket(spec), null, 2);
+    const packet = JSON.stringify(createDNAReadyBodyPacket(spec, genome, phenotype?.identity.seed ?? 0), null, 2);
     const url = URL.createObjectURL(new Blob([packet], { type: 'application/json' }));
     const link = document.createElement('a');
     link.href = url;
@@ -61,9 +125,10 @@ export function BodyForge() {
     <main className="min-h-screen bg-[#030610] text-white">
       <header className="border-b border-cyan-950/80 bg-slate-950/85 px-4 py-4 backdrop-blur">
         <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-3">
-          <div><p className="text-[10px] uppercase tracking-[0.32em] text-cyan-300">B$S creature workshop</p><h1 className="text-2xl font-black tracking-tight">BODY FORGE</h1></div>
+          <div><p className="text-[10px] uppercase tracking-[0.32em] text-cyan-300">B$S creature workshop</p><h1 className="text-2xl font-black tracking-tight">BODY FORGE</h1><p className="mt-1 font-mono text-[9px] uppercase tracking-[0.16em] text-cyan-200/65">180 digits → 30 visual genes · {fingerprint}</p></div>
           <div className="flex flex-wrap gap-2">
             {Object.entries(PRESETS).map(([name, value]) => <button key={name} onClick={() => setSpec(value)} className="rounded-full border border-slate-700 px-3 py-1.5 text-xs hover:border-cyan-400">{name}</button>)}
+            {dnaBody && <button onClick={() => setSpec(dnaBody)} className="rounded-full border border-amber-400/60 bg-amber-300/10 px-3 py-1.5 text-xs font-bold text-amber-100">Load live DNA</button>}
             <button onClick={randomize} className="rounded-full bg-cyan-300 px-3 py-1.5 text-xs font-bold text-slate-950">Mutate body</button>
           </div>
         </div>
@@ -74,12 +139,12 @@ export function BodyForge() {
           <div className="flex items-center justify-between"><h2 className="font-semibold">Structure</h2><button className="text-xs text-zinc-400 hover:text-white" onClick={() => setSpec(DEFAULT_BODY_SPEC)}>Reset</button></div>
           <label className="grid gap-1 text-xs text-zinc-300">Preset name<input className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white" value={spec.name} onChange={(event) => patch('name', event.target.value)} /></label>
           <div className="grid grid-cols-2 gap-3"><Select label="Shape" value={spec.shape} values={['round', 'bean', 'cubic', 'crystal', 'toroid']} onChange={(value) => patch('shape', value)} /><Select label="Pattern" value={spec.pattern} values={['solid', 'gradient', 'striped', 'spotted']} onChange={(value) => patch('pattern', value)} /></div>
-          <Slider label="Body width" value={spec.bodyWidth} min={64} max={150} onChange={(value) => patch('bodyWidth', value)} />
-          <Slider label="Body height" value={spec.bodyHeight} min={68} max={160} onChange={(value) => patch('bodyHeight', value)} />
-          <Slider label="Body scale" value={spec.bodyScale} min={0.65} max={1.35} step={0.01} onChange={(value) => patch('bodyScale', value)} />
+          <Slider label="Body width" value={spec.bodyWidth} min={58} max={170} onChange={(value) => patch('bodyWidth', value)} />
+          <Slider label="Body height" value={spec.bodyHeight} min={62} max={180} onChange={(value) => patch('bodyHeight', value)} />
+          <Slider label="Body scale" value={spec.bodyScale} min={0.48} max={1.65} step={0.01} onChange={(value) => patch('bodyScale', value)} />
           <Slider label="Corner softness" value={spec.cornerRoundness} min={0} max={50} onChange={(value) => patch('cornerRoundness', value)} />
-          <Slider label="Wing spread" value={spec.wingSpread} min={0.25} max={1.4} step={0.01} onChange={(value) => patch('wingSpread', value)} />
-          <Slider label="Horn length" value={spec.hornLength} min={10} max={54} onChange={(value) => patch('hornLength', value)} />
+          <Slider label="Wing spread" value={spec.wingSpread} min={0.2} max={1.65} step={0.01} onChange={(value) => patch('wingSpread', value)} />
+          <Slider label="Horn length" value={spec.hornLength} min={8} max={64} onChange={(value) => patch('hornLength', value)} />
           <div><p className="mb-2 text-xs text-zinc-400">Features</p><div className="flex flex-wrap gap-2">{(['wings', 'horns', 'crown', 'thirdEye', 'tailFlame'] as BodyFeature[]).map((feature) => <button key={feature} onClick={() => toggleFeature(feature)} className={`rounded-full border px-3 py-1 text-xs ${spec.features.includes(feature) ? 'border-cyan-300 bg-cyan-300/15 text-cyan-200' : 'border-slate-700 text-zinc-400'}`}>{feature}</button>)}</div></div>
         </aside>
 
@@ -89,8 +154,8 @@ export function BodyForge() {
             <label className="flex items-center gap-2"><input type="checkbox" checked={animate} onChange={(event) => setAnimate(event.target.checked)} />Animate</label>
           </div>
           <div className={`relative flex min-h-[570px] items-center justify-center overflow-hidden ${background === 'light' ? 'bg-zinc-100' : background === 'grid' ? 'bg-[#08101d] bg-[linear-gradient(rgba(34,211,238,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,.08)_1px,transparent_1px)] bg-[size:28px_28px]' : 'bg-[radial-gradient(circle_at_center,#132945_0%,#050814_58%,#010207_100%)]'}`}>
-            <PetBodyRenderer spec={spec} animate={animate} className="h-auto w-full max-w-[720px]" />
-            <div className="absolute bottom-4 left-4 rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-white/60">DNA disconnected · manual phenotype</div>
+            <PetBodyRenderer spec={previewSpec} animate={animate} className="h-auto w-full max-w-[720px]" />
+            <div className="absolute bottom-4 left-4 rounded-lg border border-white/10 bg-black/45 px-3 py-2 text-[10px] uppercase tracking-[0.16em] text-white/65">DNA live · forged form stays inherited while mood, hunger, evolution and dosha deform it</div>
           </div>
         </section>
 
@@ -112,7 +177,7 @@ export function BodyForge() {
           <Slider label="Bob" value={spec.bob} min={0} max={20} onChange={(value) => patch('bob', value)} />
           <Slider label="Breathing" value={spec.breathe} min={0} max={0.12} step={0.005} onChange={(value) => patch('breathe', value)} />
           <Slider label="Motion speed" value={spec.animationSpeed} min={0.25} max={2.5} step={0.05} onChange={(value) => patch('animationSpeed', value)} />
-          <div className="grid grid-cols-2 gap-2"><button onClick={copyJson} className="rounded-lg border border-slate-700 px-3 py-2 text-xs hover:border-cyan-400">{copied ? 'Copied' : 'Copy JSON'}</button><button onClick={exportJson} className="rounded-lg border border-cyan-500 px-3 py-2 text-xs font-bold text-cyan-200">DNA packet</button><button onClick={sendToMetaPet} className="col-span-2 rounded-lg bg-cyan-300 px-3 py-3 text-xs font-black uppercase tracking-[0.16em] text-slate-950">Send to Meta Pet</button></div>
+          <div className="grid grid-cols-2 gap-2"><button onClick={copyJson} className="rounded-lg border border-slate-700 px-3 py-2 text-xs hover:border-cyan-400">{copied ? 'Copied' : 'Copy JSON'}</button><button onClick={exportJson} className="rounded-lg border border-cyan-500 px-3 py-2 text-xs font-bold text-cyan-200">DNA packet</button><button onClick={sendToMetaPet} className="col-span-2 rounded-lg bg-cyan-300 px-3 py-3 text-xs font-black uppercase tracking-[0.16em] text-slate-950">Set inherited body</button></div>
         </aside>
       </div>
     </main>
