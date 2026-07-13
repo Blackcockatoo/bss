@@ -13,6 +13,7 @@ import {
   migrateVimanaState,
   revealVimanaNeighbors,
   scanVimanaNode,
+  vimanaInfoLevel,
 } from './vimana';
 
 describe('createDefaultVimanaState', () => {
@@ -257,6 +258,15 @@ describe('map navigation', () => {
     expect(findVimanaRoute(revealed, 'a', 'a')).toEqual(['a']);
   });
 
+  it('reveals two hops out for a perfect scan (hops=2)', () => {
+    const nodes = buildNodes();
+    const revealed = revealVimanaNeighbors(nodes, 'b', 2);
+    // One hop from b is c (already covered); two hops reaches d and e too.
+    expect(revealed.find((n) => n.id === 'c')!.discoveryStage).toBe('detected');
+    expect(revealed.find((n) => n.id === 'd')!.discoveryStage).toBe('detected');
+    expect(revealed.find((n) => n.id === 'e')!.discoveryStage).toBe('detected');
+  });
+
   it('default state keeps every revealed signal reachable from home', () => {
     const state = createDefaultVimanaState({ random: () => 0.4, genomeSeed: 8 });
     const homeId = state.activeNodeId!;
@@ -326,5 +336,35 @@ describe('scanVimanaNode', () => {
     const resolved = { ...current, anomaly: { ...current.anomaly!, state: 'resolved' as const } };
     const mastery = scanVimanaNode(resolved, 500);
     expect(mastery.node.discoveryStage).toBe('mastered');
+  });
+
+  it('stores the resonance-ring quality score, keeping the best result', () => {
+    const node = createVimanaNode({ id: 'n4', discoveryStage: 'detected' });
+
+    const rough = scanVimanaNode(node, 100, 45);
+    expect(rough.node.scanQuality).toBe(45);
+
+    // A worse follow-up scan never erases a better one already on record.
+    const worseAfter = scanVimanaNode(rough.node, 200, 20);
+    expect(worseAfter.node.scanQuality).toBe(45);
+
+    const perfect = scanVimanaNode(worseAfter.node, 300, 100);
+    expect(perfect.node.scanQuality).toBe(100);
+  });
+
+  it('defaults to the flat baseline quality when no score is supplied', () => {
+    const node = createVimanaNode({ id: 'n5', discoveryStage: 'detected' });
+    expect(scanVimanaNode(node, 100).node.scanQuality).toBe(60);
+  });
+});
+
+describe('vimanaInfoLevel', () => {
+  it('maps scanQuality thresholds to rough / clean / perfect', () => {
+    expect(vimanaInfoLevel(0)).toBe('rough');
+    expect(vimanaInfoLevel(54)).toBe('rough');
+    expect(vimanaInfoLevel(55)).toBe('clean');
+    expect(vimanaInfoLevel(84)).toBe('clean');
+    expect(vimanaInfoLevel(85)).toBe('perfect');
+    expect(vimanaInfoLevel(100)).toBe('perfect');
   });
 });

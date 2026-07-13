@@ -30,7 +30,9 @@ import {
   migrateVimanaState,
   revealVimanaNeighbors,
   scanVimanaNode,
+  vimanaInfoLevel,
 } from '../progression/types';
+import { FLIGHT_GATE_COUNT } from '../lib/minigames/vimanaFlight';
 import {
   computeGameReward,
   type MiniGameSessionResult,
@@ -138,7 +140,15 @@ export interface MetaPetState {
   recordMiniGameResult: (result: MiniGameSessionResult) => void;
   updateMiniGameScore: (game: 'memory' | 'rhythm', score: number) => void;
   recordVimanaRun: (score: number, lines: number, level: number) => void;
-  exploreCell: (cellId: string) => void;
+  exploreCell: (
+    cellId: string,
+    options?: {
+      /** Resonance-ring result (0-100) for this attempt; see vimanaInfoLevel. */
+      scanQuality?: number;
+      /** Gates threaded during the flight sequence, if travel preceded the scan. */
+      flightBonus?: number;
+    }
+  ) => void;
   resolveAnomaly: (cellId: string) => void;
   recordBreeding: () => void;
   recordReward: (payload: RewardPayloadInput) => void;
@@ -714,7 +724,7 @@ export function createMetaPetWebStore(
       get().recordMiniGameResult({ game: 'vimana', score, lines, level });
     },
 
-    exploreCell(cellId) {
+    exploreCell(cellId, options) {
       if (get().systemState === 'sealed') return;
       const rewardPayloads: RewardPayloadInput[] = [];
       set(state => {
@@ -723,17 +733,36 @@ export function createMetaPetWebStore(
         if (!target) return {};
 
         const now = Date.now();
-        const outcome = scanVimanaNode(target, now);
-        // Scanning a field also surfaces the signals one route hop away.
+        const outcome = scanVimanaNode(target, now, options?.scanQuality);
+        // Scanning a field surfaces signals one route hop away; a perfect
+        // resonance-ring reading reaches a second hop as its bonus.
+        const hops = vimanaInfoLevel(options?.scanQuality ?? 60) === 'perfect' ? 2 : 1;
         const nodes = revealVimanaNeighbors(
           vimana.nodes.map(node => (node.id === cellId ? outcome.node : node)),
-          cellId
+          cellId,
+          hops
         );
 
         let updatedVitals = vitals;
         let essence = state.essence;
         let achievements = state.achievements;
         const update: Partial<MetaPetState> = {};
+
+        // Flight-gate bonus: purely additive, never a punishment for a rough
+        // flight — clamped defensively at the same cap the flight uses.
+        const flightBonus = Math.max(0, Math.min(FLIGHT_GATE_COUNT, options?.flightBonus ?? 0));
+        if (flightBonus > 0) {
+          essence += flightBonus;
+          rewardPayloads.push({
+            source: 'exploration',
+            title: 'Flight Bonus',
+            description: `Threaded ${flightBonus} route gate${flightBonus === 1 ? '' : 's'} en route.`,
+            reward: {
+              type: 'vitals',
+              value: { essence: flightBonus },
+            },
+          });
+        }
 
         // The full first-discovery reward (vitals + essence) is granted only
         // once per node; repeat scans just deepen samples and mastery.

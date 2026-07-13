@@ -3,8 +3,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useStore } from '@/lib/store';
 import type { VimanaNode } from '@/lib/vimana';
-import { findVimanaRoute, isVimanaNodeDiscovered } from '@/lib/vimana';
-import { AlertTriangle, MapPin, Radar, Sparkles, X } from 'lucide-react';
+import { computeVimanaGenomeSeed, findVimanaRoute, isVimanaNodeDiscovered, vimanaInfoLevel } from '@/lib/vimana';
+import {
+  EXPEDITION_CHARGE_REGEN_MS,
+  createExpeditionCharge,
+  flightBonusEssence,
+  regenExpeditionCharge,
+  spendExpeditionCharge,
+  type ExpeditionCharge,
+} from '@/lib/minigames/vimanaFlight';
+import type { ScanRingResult } from '@/lib/minigames/vimanaScanRing';
+import { VimanaFlightSequence } from './VimanaFlightSequence';
+import { VimanaScanRing } from './VimanaScanRing';
+import { AlertTriangle, MapPin, Radar, Sparkles, X, Zap } from 'lucide-react';
 
 /** World-space layout: px per coordinate unit, with a slight z parallax. */
 const SPACING = 96;
@@ -66,13 +77,35 @@ function nodeDisplayName(node: VimanaNode): string {
   return 'Unidentified Signal';
 }
 
-export function VimanaMap() {
+type TravelState =
+  | { phase: 'flight'; targetId: string; seed: number }
+  | { phase: 'scan'; targetId: string; gatesHit: number };
+
+interface VimanaMapProps {
+  petName?: string;
+}
+
+export function VimanaMap({ petName = 'Meta-Pet' }: VimanaMapProps) {
   const vimana = useStore((s) => s.vimana);
+  const genome = useStore((s) => s.genome);
   const exploreCell = useStore((s) => s.exploreCell);
   const resolveAnomaly = useStore((s) => s.resolveAnomaly);
 
+  const accentHue = computeVimanaGenomeSeed(genome) % 360;
+
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [offset, setOffset] = useState<{ x: number; y: number } | null>(null);
+  const [travel, setTravel] = useState<TravelState | null>(null);
+  const [charge, setCharge] = useState<ExpeditionCharge>(() => createExpeditionCharge());
+
+  // Session-only regen tick for the expedition charge — never persisted, and
+  // never blocks travel itself, only whether the flight flourish plays.
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setCharge((current) => regenExpeditionCharge(current, performance.now()));
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, []);
 
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const panRef = useRef<{
@@ -149,7 +182,7 @@ export function VimanaMap() {
 
   const handlePointerDown = useCallback(
     (event: React.PointerEvent) => {
-      if (panRef.current || offset === null) return;
+      if (panRef.current || offset === null || travel) return;
       viewportRef.current?.setPointerCapture(event.pointerId);
       panRef.current = {
         pointerId: event.pointerId,
@@ -161,13 +194,13 @@ export function VimanaMap() {
       };
       pannedRef.current = false;
     },
-    [offset],
+    [offset, travel],
   );
 
   const handlePointerMove = useCallback(
     (event: React.PointerEvent) => {
       const pan = panRef.current;
-      if (!pan || pan.pointerId !== event.pointerId) return;
+      if (!pan || pan.pointerId !== event.pointerId || travel) return;
       const dx = event.clientX - pan.startX;
       const dy = event.clientY - pan.startY;
       if (!pan.panned && Math.hypot(dx, dy) < PAN_THRESHOLD) return;
@@ -175,7 +208,7 @@ export function VimanaMap() {
       pannedRef.current = true;
       setOffset(clampOffset(pan.originX + dx, pan.originY + dy));
     },
-    [clampOffset],
+    [clampOffset, travel],
   );
 
   const handlePointerEnd = useCallback((event: React.PointerEvent) => {
@@ -192,8 +225,42 @@ export function VimanaMap() {
 
   const handleTravelScan = useCallback(() => {
     if (!selectedNode) return;
-    exploreCell(selectedNode.id);
-  }, [exploreCell, selectedNode]);
+    const isTravel = selectedNode.id !== vimana.activeNodeId;
+    if (isTravel) {
+      const now = performance.now();
+      const settled = regenExpeditionCharge(charge, now);
+      if (settled.count > 0) {
+        setCharge(spendExpeditionCharge(settled, now));
+        setTravel({ phase: 'flight', targetId: selectedNode.id, seed: Date.now() });
+        return;
+      }
+      if (settled !== charge) setCharge(settled);
+      // Out of charge: skip the flight flourish, but travel is never
+      // blocked — go straight to the scan that always follows arrival.
+    }
+    setTravel({ phase: 'scan', targetId: selectedNode.id, gatesHit: 0 });
+  }, [selectedNode, vimana.activeNodeId, charge]);
+
+  const handleFlightComplete = useCallback((gatesHit: number) => {
+    setTravel((current) =>
+      current?.phase === 'flight' ? { phase: 'scan', targetId: current.targetId, gatesHit } : current,
+    );
+  }, []);
+
+  const handleScanComplete = useCallback(
+    (result: ScanRingResult) => {
+      setTravel((current) => {
+        if (current) {
+          exploreCell(current.targetId, {
+            scanQuality: result.scanQuality,
+            flightBonus: flightBonusEssence(current.phase === 'scan' ? current.gatesHit : 0),
+          });
+        }
+        return null;
+      });
+    },
+    [exploreCell],
+  );
 
   const handleResolve = useCallback(() => {
     if (!selectedNode) return;
@@ -243,6 +310,10 @@ export function VimanaMap() {
           from { transform: translateY(24px); opacity: 0; }
           to { transform: translateY(0); opacity: 1; }
         }
+        @keyframes vimana-flight-particle {
+          from { transform: translateY(0); opacity: 0.9; }
+          to { transform: translateY(340%); opacity: 0; }
+        }
         @media (prefers-reduced-motion: reduce) {
           .vimana-map-fx { animation: none !important; }
         }
@@ -265,6 +336,20 @@ export function VimanaMap() {
           <p>
             Anomalies Resolved:{' '}
             <span className="font-semibold text-emerald-300">{vimana.anomaliesResolved}</span>
+          </p>
+          <p
+            className="mt-1 flex items-center justify-end gap-1"
+            aria-label={`Expedition charge ${charge.count} of ${charge.max}`}
+            title={`Flight charge — regenerates every ${EXPEDITION_CHARGE_REGEN_MS / 1000}s`}
+          >
+            <Zap className="h-3 w-3 text-amber-300" />
+            {Array.from({ length: charge.max }, (_, index) => (
+              <span
+                key={index}
+                className="h-1.5 w-3 rounded-full"
+                style={{ background: index < charge.count ? '#fbbf24' : '#334155' }}
+              />
+            ))}
           </p>
         </div>
       </div>
@@ -401,10 +486,31 @@ export function VimanaMap() {
               'radial-gradient(ellipse at center, transparent 55%, rgba(2,6,23,0.75) 100%)',
           }}
         />
+
+        {/* Flight sequence: brief travel animation between nodes. */}
+        {travel?.phase === 'flight' && (
+          <VimanaFlightSequence
+            seed={travel.seed}
+            petName={petName}
+            accentHue={accentHue}
+            fromLabel={activeNode ? nodeDisplayName(activeNode) : 'Origin'}
+            toLabel={
+              nodesById.get(travel.targetId)
+                ? nodeDisplayName(nodesById.get(travel.targetId)!)
+                : 'Destination'
+            }
+            onComplete={handleFlightComplete}
+          />
+        )}
+
+        {/* Resonance-ring scan: tap timing on arrival (or scanning in place). */}
+        {travel?.phase === 'scan' && (
+          <VimanaScanRing accentHue={accentHue} onComplete={handleScanComplete} />
+        )}
       </div>
 
       {/* Bottom sheet: destination panel with progressive reveal. */}
-      {selectedNode && (
+      {selectedNode && !travel && (
         <div
           data-testid="vimana-bottom-sheet"
           className="vimana-map-fx fixed inset-x-0 bottom-0 z-40 mx-auto max-w-xl rounded-t-3xl border border-b-0 border-slate-700 bg-slate-950/95 px-4 pt-2 shadow-[0_-8px_40px_rgba(0,0,0,0.6)] backdrop-blur"
@@ -422,7 +528,9 @@ export function VimanaMap() {
                   {STAGE_LABEL[selectedNode.discoveryStage]}
                 </span>
               </h3>
-              {/* Details reveal progressively with the discovery stage. */}
+              {/* Details reveal progressively: first by discovery stage (is
+                  this field known at all?), then by how precise the
+                  resonance-ring scan that found it was. */}
               {isVimanaNodeDiscovered(selectedNode) ? (
                 <div className="mt-1 space-y-0.5 text-xs text-zinc-400">
                   <p>
@@ -433,21 +541,29 @@ export function VimanaMap() {
                     >
                       {selectedNode.fieldType}
                     </span>
-                    <span className="ml-3">
-                      Intensity:{' '}
-                      <span className="font-semibold text-cyan-200">
-                        {Math.round(selectedNode.intensity)}
+                    {vimanaInfoLevel(selectedNode.scanQuality) !== 'rough' && (
+                      <span className="ml-3">
+                        Intensity:{' '}
+                        <span className="font-semibold text-cyan-200">
+                          {Math.round(selectedNode.intensity)}
+                        </span>
                       </span>
-                    </span>
+                    )}
                   </p>
-                  <p>
-                    Visits: {selectedNode.visits} · Samples: {selectedNode.samples} · Routes:{' '}
-                    {selectedNode.connections.length}
-                  </p>
+                  {vimanaInfoLevel(selectedNode.scanQuality) === 'rough' ? (
+                    <p className="text-zinc-500">A sharper scan would read this field more clearly.</p>
+                  ) : (
+                    <p>
+                      Visits: {selectedNode.visits} · Samples: {selectedNode.samples} · Routes:{' '}
+                      {selectedNode.connections.length}
+                    </p>
+                  )}
                   {selectedNode.anomaly?.state === 'active' && (
                     <p className="flex items-center gap-1 text-amber-300">
                       <AlertTriangle className="h-3 w-3" />
-                      {selectedNode.anomaly.severity} {selectedNode.anomaly.type} anomaly active
+                      {vimanaInfoLevel(selectedNode.scanQuality) === 'rough'
+                        ? 'Instability detected'
+                        : `${selectedNode.anomaly.severity} ${selectedNode.anomaly.type} anomaly active`}
                     </p>
                   )}
                   {selectedNode.discoveryStage === 'mastered' && (

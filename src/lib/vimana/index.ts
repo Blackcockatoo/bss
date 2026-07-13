@@ -8,6 +8,9 @@
  */
 
 export {
+  SCAN_QUALITY_CLEAN_MIN,
+  SCAN_QUALITY_PERFECT_MIN,
+  SCAN_TIER_SCORES,
   VIMANA_ESSENCE_REWARDS,
   VIMANA_STATE_VERSION,
   computeVimanaGenomeSeed,
@@ -22,6 +25,7 @@ export {
   migrateVimanaState,
   revealVimanaNeighbors,
   scanVimanaNode,
+  vimanaInfoLevel,
 } from '@metapet/core/progression';
 
 export type {
@@ -34,6 +38,7 @@ export type {
   VimanaFieldType,
   VimanaNode,
   VimanaScanOutcome,
+  VimanaScanTier,
   VimanaState,
 } from '@metapet/core/progression';
 

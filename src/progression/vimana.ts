@@ -78,6 +78,31 @@ export const VIMANA_ESSENCE_REWARDS = {
 /** Number of scans a node needs (post-discovery) before it can be mastered. */
 export const VIMANA_MASTERY_VISITS = 3;
 
+/** Numeric scanQuality achieved by each resonance-ring tap-timing tier. */
+export const SCAN_TIER_SCORES = {
+  rough: 45,
+  clean: 75,
+  perfect: 100,
+} as const;
+
+export type VimanaScanTier = keyof typeof SCAN_TIER_SCORES;
+
+/** scanQuality reached before a node's info reveals more than the basics. */
+export const SCAN_QUALITY_CLEAN_MIN = 55;
+export const SCAN_QUALITY_PERFECT_MIN = 85;
+
+/**
+ * How much of a node's data a stored scanQuality has actually earned.
+ * Ties the resonance-ring result to what the bottom sheet is allowed to show:
+ * a rough scan only confirms the field type, a clean scan adds intensity and
+ * anomaly presence, a perfect scan reveals full anomaly detail.
+ */
+export function vimanaInfoLevel(scanQuality: number): VimanaScanTier {
+  if (scanQuality >= SCAN_QUALITY_PERFECT_MIN) return 'perfect';
+  if (scanQuality >= SCAN_QUALITY_CLEAN_MIN) return 'clean';
+  return 'rough';
+}
+
 const DISCOVERY_STAGES: VimanaDiscoveryStage[] = [
   'unknown',
   'detected',
@@ -696,22 +721,40 @@ export function migrateVimanaState(
 
 /**
  * Promote unknown neighbours of a node to 'detected' — scanning a field
- * surfaces the signals of everything one route hop away, which is how the
- * fog of war recedes on the map.
+ * surfaces the signals of everything up to `hops` routes away, which is how
+ * the fog of war recedes. A perfect resonance-ring scan reaches two hops
+ * instead of the usual one, rewarding precision with a wider picture.
  */
-export function revealVimanaNeighbors(nodes: VimanaNode[], nodeId: string): VimanaNode[] {
-  const source = nodes.find((node) => node.id === nodeId);
-  if (!source) return nodes;
-  const targets = new Set(source.connections);
-  let changed = false;
-  const next = nodes.map((node) => {
-    if (targets.has(node.id) && node.discoveryStage === 'unknown') {
-      changed = true;
-      return { ...node, discoveryStage: 'detected' as const };
+export function revealVimanaNeighbors(
+  nodes: VimanaNode[],
+  nodeId: string,
+  hops: number = 1,
+): VimanaNode[] {
+  const byId = new Map(nodes.map((node) => [node.id, node]));
+  if (!byId.has(nodeId)) return nodes;
+
+  let frontier = new Set<string>([nodeId]);
+  const toReveal = new Set<string>();
+  for (let hop = 0; hop < hops; hop++) {
+    const nextFrontier = new Set<string>();
+    for (const id of frontier) {
+      const node = byId.get(id);
+      if (!node) continue;
+      for (const neighbourId of node.connections) {
+        if (!byId.has(neighbourId)) continue;
+        nextFrontier.add(neighbourId);
+        if (byId.get(neighbourId)!.discoveryStage === 'unknown') {
+          toReveal.add(neighbourId);
+        }
+      }
     }
-    return node;
-  });
-  return changed ? next : nodes;
+    frontier = nextFrontier;
+  }
+
+  if (toReveal.size === 0) return nodes;
+  return nodes.map((node) =>
+    toReveal.has(node.id) ? { ...node, discoveryStage: 'detected' as const } : node,
+  );
 }
 
 /**
@@ -774,8 +817,18 @@ export interface VimanaScanOutcome {
 /**
  * Advance a node one discovery step for a scan/visit. Pure; returns the next
  * node plus flags for the store to translate into rewards exactly once.
+ *
+ * `qualityScore` (0-100) is the result of the resonance-ring tap-timing
+ * minigame for this attempt; the node keeps the best score it has ever
+ * earned, which in turn gates how much detail the UI reveals (see
+ * {@link vimanaInfoLevel}). Callers that don't run the minigame (tests,
+ * migrations) get the previous flat baseline.
  */
-export function scanVimanaNode(node: VimanaNode, now: number = Date.now()): VimanaScanOutcome {
+export function scanVimanaNode(
+  node: VimanaNode,
+  now: number = Date.now(),
+  qualityScore: number = 60,
+): VimanaScanOutcome {
   const rank = discoveryStageRank(node.discoveryStage);
   const scannedRank = discoveryStageRank('scanned');
 
@@ -805,7 +858,7 @@ export function scanVimanaNode(node: VimanaNode, now: number = Date.now()): Vima
   const next: VimanaNode = {
     ...node,
     discoveryStage: mastered ? 'mastered' : nextStage,
-    scanQuality: Math.max(node.scanQuality, 60),
+    scanQuality: Math.max(node.scanQuality, clampNumber(qualityScore, 0, 100, 60)),
     samples,
     visits,
     firstRewardClaimed: node.firstRewardClaimed || firstDiscovery,
