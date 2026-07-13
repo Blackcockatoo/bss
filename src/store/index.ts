@@ -21,9 +21,14 @@ import {
   ACHIEVEMENT_CATALOG,
   ACHIEVEMENT_TARGETS,
   MINIGAME_ACHIEVEMENT_CHECKS,
+  VIMANA_ESSENCE_REWARDS,
+  computeVimanaGenomeSeed,
   createDefaultBattleStats,
   createDefaultMiniGameProgress,
   createDefaultVimanaState,
+  getVimanaFieldRewardDelta,
+  migrateVimanaState,
+  scanVimanaNode,
 } from '../progression/types';
 import {
   computeGameReward,
@@ -183,7 +188,7 @@ export interface CreateMetaPetWebStoreOptions {
 
 type MetaPetStore = UseBoundStore<StoreApi<MetaPetState>>;
 
-type VimanaReward = VimanaState['cells'][number]['reward'];
+type VimanaFieldType = VimanaState['nodes'][number]['fieldType'];
 
 type AchievementMap = Map<Achievement['id'], Achievement>;
 
@@ -277,38 +282,18 @@ export function buildEvolutionContext(state: {
   };
 }
 
-function applyVimanaReward(reward: VimanaReward, vitals: Vitals): Vitals {
-  switch (reward) {
-    case 'mood':
-      return { ...vitals, mood: clamp(vitals.mood + 10) };
-    case 'energy':
-      return { ...vitals, energy: clamp(vitals.energy + 10) };
-    case 'hygiene':
-      return { ...vitals, hygiene: clamp(vitals.hygiene + 12) };
-    case 'mystery':
-      return {
-        ...vitals,
-        mood: clamp(vitals.mood + 5),
-        energy: clamp(vitals.energy + 5),
-      };
-    default:
-      return vitals;
-  }
+function applyVitalsDelta(vitals: Vitals, delta: Record<string, number>): Vitals {
+  return {
+    ...vitals,
+    hunger: clamp(vitals.hunger + (delta.hunger ?? 0)),
+    hygiene: clamp(vitals.hygiene + (delta.hygiene ?? 0)),
+    mood: clamp(vitals.mood + (delta.mood ?? 0)),
+    energy: clamp(vitals.energy + (delta.energy ?? 0)),
+  };
 }
 
-function getVimanaRewardDelta(reward: VimanaReward): Record<string, number> {
-  switch (reward) {
-    case 'mood':
-      return { mood: 10 };
-    case 'energy':
-      return { energy: 10 };
-    case 'hygiene':
-      return { hygiene: 12 };
-    case 'mystery':
-      return { mood: 5, energy: 5 };
-    default:
-      return {};
-  }
+function applyVimanaFieldReward(fieldType: VimanaFieldType, vitals: Vitals): Vitals {
+  return applyVitalsDelta(vitals, getVimanaFieldRewardDelta(fieldType));
 }
 
 export function createMetaPetWebStore(
@@ -445,7 +430,11 @@ export function createMetaPetWebStore(
         battle: battle ? { ...battle } : state.battle,
         // Merge with defaults so saves from before the game-suite rebuild gain the new fields.
         miniGames: miniGames ? { ...createDefaultMiniGameProgress(), ...miniGames } : state.miniGames,
-        vimana: vimana ? cloneVimanaState(vimana) : state.vimana,
+        // Runs the save-shape migration even for current saves; it is
+        // idempotent and shields hydrate from stale persisted layouts.
+        vimana: vimana
+          ? migrateVimanaState(vimana, { genomeSeed: computeVimanaGenomeSeed(genome) })
+          : state.vimana,
         rewardHistory: rewardHistory ? rewardHistory.map(entry => ({ ...entry, reward: { ...entry.reward } })) : state.rewardHistory,
         lastReward: lastReward ?? state.lastReward,
         petType: petType ?? state.petType,
@@ -729,60 +718,58 @@ export function createMetaPetWebStore(
       const rewardPayloads: RewardPayloadInput[] = [];
       set(state => {
         const { vimana, vitals } = state;
-        const previousCell = vimana.cells.find(cell => cell.id === cellId);
-        const cells = vimana.cells.map(cell => {
-          if (cell.id !== cellId) return cell;
-          return {
-            ...cell,
-            discovered: true,
-            visitedAt: Date.now(),
-          };
-        });
+        const target = vimana.nodes.find(node => node.id === cellId);
+        if (!target) return {};
 
-        const target = cells.find(cell => cell.id === cellId);
+        const now = Date.now();
+        const outcome = scanVimanaNode(target, now);
+        const nodes = vimana.nodes.map(node =>
+          node.id === cellId ? outcome.node : node
+        );
+
         let updatedVitals = vitals;
-        if (target) {
-          updatedVitals = applyVimanaReward(target.reward, vitals);
-        }
-
-        const anomaliesFound = cells.filter(cell => cell.anomaly && cell.discovered).length;
-
+        let essence = state.essence;
         let achievements = state.achievements;
-        if (!previousCell?.discovered && target?.discovered) {
+        const update: Partial<MetaPetState> = {};
+
+        // The full first-discovery reward (vitals + essence) is granted only
+        // once per node; repeat scans just deepen samples and mastery.
+        if (outcome.firstDiscovery) {
+          updatedVitals = applyVimanaFieldReward(outcome.node.fieldType, vitals);
+          essence += VIMANA_ESSENCE_REWARDS.discovery;
+          update.lastRewardSource = 'exploration';
+          update.lastRewardAmount = VIMANA_ESSENCE_REWARDS.discovery;
+
           const result = unlockAchievementWithReward(achievements, 'explorer-first-step');
           achievements = result.achievements;
           if (result.reward) {
             rewardPayloads.push(result.reward);
           }
+
+          rewardPayloads.push({
+            source: 'exploration',
+            title: 'Field Scan Reward',
+            description: `First survey of ${outcome.node.label ?? outcome.node.id}.`,
+            reward: {
+              type: 'vitals',
+              value: getVimanaFieldRewardDelta(outcome.node.fieldType),
+            },
+          });
         }
 
-        if (target) {
-          const rewardDelta = getVimanaRewardDelta(target.reward);
-          if (Object.keys(rewardDelta).length > 0) {
-            rewardPayloads.push({
-              source: 'exploration',
-              title: 'Field Scan Reward',
-              description: `Exploration reward for ${target.label ?? target.id}.`,
-              reward: {
-                type: 'vitals',
-                value: rewardDelta,
-              },
-            });
-          }
-        }
+        const anomaliesFound = nodes.filter(
+          node => node.anomaly !== null && node.anomaly.state !== 'dormant'
+        ).length;
 
-        const updatedVimana: VimanaState = {
+        update.vitals = updatedVitals;
+        update.essence = essence;
+        update.vimana = {
           ...vimana,
-          cells,
-          activeCellId: cellId,
+          nodes,
+          activeNodeId: cellId,
           scansPerformed: vimana.scansPerformed + 1,
           anomaliesFound,
-          lastScanAt: Date.now(),
-        };
-
-        const update: Partial<MetaPetState> = {
-          vitals: updatedVitals,
-          vimana: updatedVimana,
+          lastScanAt: now,
         };
 
         if (achievements !== state.achievements) {
@@ -800,25 +787,26 @@ export function createMetaPetWebStore(
       const rewardPayloads: RewardPayloadInput[] = [];
       set(state => {
         const { vimana, vitals } = state;
-        const previousCell = vimana.cells.find(cell => cell.id === cellId);
-        const cells = vimana.cells.map(cell => {
-          if (cell.id !== cellId) return cell;
-          if (!cell.anomaly) return cell;
+        const target = vimana.nodes.find(node => node.id === cellId);
+        // Only an anomaly that has been revealed by scanning can be resolved,
+        // and resolving it twice is impossible by construction.
+        if (!target || target.anomaly?.state !== 'active') return {};
+
+        const now = Date.now();
+        const nodes = vimana.nodes.map(node => {
+          if (node.id !== cellId || !node.anomaly) return node;
           return {
-            ...cell,
-            anomaly: false,
-            discovered: true,
-            visitedAt: Date.now(),
+            ...node,
+            anomaly: { ...node.anomaly, state: 'resolved' as const },
+            lastVisitedAt: now,
           };
         });
 
-        const updatedVitals = applyVimanaReward('mood', vitals);
-        const anomaliesFound = cells.filter(cell => cell.anomaly && cell.discovered).length;
-
-        let anomaliesResolved = vimana.anomaliesResolved ?? 0;
-        if (previousCell?.anomaly) {
-          anomaliesResolved += 1;
-        }
+        const updatedVitals = applyVimanaFieldReward('calm', vitals);
+        const anomaliesFound = nodes.filter(
+          node => node.anomaly !== null && node.anomaly.state !== 'dormant'
+        ).length;
+        const anomaliesResolved = vimana.anomaliesResolved + 1;
 
         let achievements = state.achievements;
         if (anomaliesResolved >= ACHIEVEMENT_TARGETS['explorer-anomaly-hunter']) {
@@ -831,9 +819,12 @@ export function createMetaPetWebStore(
 
         const update: Partial<MetaPetState> = {
           vitals: updatedVitals,
+          essence: state.essence + VIMANA_ESSENCE_REWARDS.anomalyResolved,
+          lastRewardSource: 'exploration',
+          lastRewardAmount: VIMANA_ESSENCE_REWARDS.anomalyResolved,
           vimana: {
             ...vimana,
-            cells,
+            nodes,
             anomaliesFound,
             anomaliesResolved,
           },
@@ -849,7 +840,7 @@ export function createMetaPetWebStore(
           description: 'Stabilized a Vimana anomaly.',
           reward: {
             type: 'vitals',
-            value: getVimanaRewardDelta('mood'),
+            value: getVimanaFieldRewardDelta('calm'),
           },
         });
 
@@ -1062,12 +1053,6 @@ function normalizeTraits(genome: Genome, traits: DerivedTraits): DerivedTraits {
   };
 }
 
-function cloneVimanaState(source: VimanaState): VimanaState {
-  return {
-    ...source,
-    cells: source.cells.map(cell => ({ ...cell })),
-  };
-}
 
 function generatePresenceToken(): string {
   const cryptoApi = typeof globalThis !== 'undefined' ? (globalThis.crypto as Crypto | undefined) : undefined;

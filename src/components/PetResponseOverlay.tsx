@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback } from 'react';
 import { useStore } from '@/lib/store';
+import { isVimanaNodeDiscovered } from '@/lib/vimana';
 import { useRealtimeResponse } from '@/lib/realtime/useRealtimeResponse';
 import { ResponseBubble } from '@/components/ResponseBubble';
 import { playHepta } from '@/lib/identity/hepta';
@@ -114,8 +115,8 @@ export function PetResponseOverlay({ enableAudio = true, enableAnticipation = tr
 
       // Detect Vimana exploration
       if (state.vimana && prevState.vimana) {
-        const discoveredCount = state.vimana.cells.filter(c => c.discovered).length;
-        const prevDiscoveredCount = prevState.vimana.cells.filter(c => c.discovered).length;
+        const discoveredCount = state.vimana.nodes.filter(isVimanaNodeDiscovered).length;
+        const prevDiscoveredCount = prevState.vimana.nodes.filter(isVimanaNodeDiscovered).length;
 
         if (discoveredCount > prevDiscoveredCount) {
           triggerResponse('exploration_discovery');
