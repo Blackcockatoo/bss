@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useReducer, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import {
@@ -15,7 +15,9 @@ import {
 import { useStore } from '@/lib/store';
 import { resolveVisualDNA } from '@/visual-dna';
 import {
+  applyEvolutionGrowth,
   applyLivePhenotype,
+  clearForgedBody,
   createDNAReadyBodyPacket,
   createGenomeBodySpec,
   getGenomeVisualFingerprint,
@@ -48,26 +50,59 @@ export function BodyForge() {
   const lastAction = useStore((state) => state.lastAction);
   const lastActionAt = useStore((state) => state.lastActionAt);
   const [spec, setSpec] = useState<BodySpec>(DEFAULT_BODY_SPEC);
-  const [actionEpoch, expireAction] = useReducer((value: number) => value + 1, 0);
+  // Tracks which action timestamp has aged past the reaction window. Keeps
+  // render pure (no Date.now during render): while an action is fresh the
+  // memo is fed now=lastActionAt (full reaction), after the timer fires it is
+  // fed a time past the window (pose settled).
+  const [settledActionAt, setSettledActionAt] = useState<number | null>(null);
   const [animate, setAnimate] = useState(true);
   const [background, setBackground] = useState<'void' | 'light' | 'grid'>('void');
   const [copied, setCopied] = useState(false);
+  const [hasSavedForge, setHasSavedForge] = useState(false);
   useEffect(() => {
-    const stored = loadForgedBody();
-    if (stored) setSpec(stored);
+    // Deferred so the initial load happens outside the effect body, rather
+    // than setting state synchronously during mount.
+    const initialLoad = window.setTimeout(() => {
+      const stored = loadForgedBody();
+      if (stored) {
+        setSpec(stored);
+        setHasSavedForge(true);
+      }
+    }, 0);
+    return () => window.clearTimeout(initialLoad);
   }, []);
 
   useEffect(() => {
     if (!lastAction || !lastActionAt) return;
     const remaining = ACTION_WINDOW_MS - (Date.now() - lastActionAt);
-    if (remaining <= 0) return;
-    const timeout = window.setTimeout(expireAction, remaining + 20);
+    const timeout = window.setTimeout(
+      () => setSettledActionAt(lastActionAt),
+      Math.max(0, remaining + 20),
+    );
     return () => window.clearTimeout(timeout);
   }, [lastAction, lastActionAt]);
 
-  const phenotype = useMemo(() => traits ? resolveVisualDNA({ traits, vitals, evolution, lastAction, lastActionAt, now: Date.now() }) : null, [actionEpoch, evolution, lastAction, lastActionAt, traits, vitals]);
+  const actionSettled = !lastActionAt || settledActionAt === lastActionAt;
+
+  const phenotype = useMemo(() => {
+    if (!traits) return null;
+    return resolveVisualDNA({
+      traits,
+      vitals,
+      evolution,
+      lastAction,
+      lastActionAt,
+      now: actionSettled ? lastActionAt + ACTION_WINDOW_MS : lastActionAt,
+    });
+  }, [actionSettled, evolution, lastAction, lastActionAt, traits, vitals]);
   const dnaBody = useMemo(() => phenotype ? createGenomeBodySpec(phenotype, genome) : null, [genome, phenotype]);
-  const previewSpec = useMemo(() => phenotype ? applyLivePhenotype(spec, phenotype) : spec, [phenotype, spec]);
+  // Live preview mirrors the same pipeline VisualDNAPet uses: the edited
+  // draft is the inherited base, evolution reveals earned features on top,
+  // then current mood/hunger/dosha temporarily deform it for preview only.
+  const previewSpec = useMemo(
+    () => phenotype ? applyLivePhenotype(applyEvolutionGrowth(spec, phenotype), phenotype) : spec,
+    [phenotype, spec],
+  );
   const fingerprint = getGenomeVisualFingerprint(genome, phenotype?.identity.seed ?? 0);
   const json = useMemo(() => JSON.stringify(spec, null, 2), [spec]);
   const patch = <K extends keyof BodySpec>(key: K, value: BodySpec[K]) => setSpec((current) => ({ ...current, [key]: value }));
@@ -117,8 +152,15 @@ export function BodyForge() {
   };
 
   const sendToMetaPet = () => {
-    saveForgedBody(spec);
+    saveForgedBody(spec, genome, phenotype?.identity.seed ?? 0);
+    setHasSavedForge(true);
     router.push('/app/pet');
+  };
+
+  const clearForge = () => {
+    clearForgedBody();
+    setHasSavedForge(false);
+    if (dnaBody) setSpec(dnaBody);
   };
 
   return (
@@ -128,8 +170,9 @@ export function BodyForge() {
           <div><p className="text-[10px] uppercase tracking-[0.32em] text-cyan-300">B$S creature workshop</p><h1 className="text-2xl font-black tracking-tight">BODY FORGE</h1><p className="mt-1 font-mono text-[9px] uppercase tracking-[0.16em] text-cyan-200/65">180 digits → 30 visual genes · {fingerprint}</p></div>
           <div className="flex flex-wrap gap-2">
             {Object.entries(PRESETS).map(([name, value]) => <button key={name} onClick={() => setSpec(value)} className="rounded-full border border-slate-700 px-3 py-1.5 text-xs hover:border-cyan-400">{name}</button>)}
-            {dnaBody && <button onClick={() => setSpec(dnaBody)} className="rounded-full border border-amber-400/60 bg-amber-300/10 px-3 py-1.5 text-xs font-bold text-amber-100">Load live DNA</button>}
+            {dnaBody && <button onClick={() => setSpec(dnaBody)} className="rounded-full border border-amber-400/60 bg-amber-300/10 px-3 py-1.5 text-xs font-bold text-amber-100" title="Reset the edit below to the pure genome-derived body">Load live DNA</button>}
             <button onClick={randomize} className="rounded-full bg-cyan-300 px-3 py-1.5 text-xs font-bold text-slate-950">Mutate body</button>
+            {hasSavedForge && <button onClick={clearForge} className="rounded-full border border-rose-400/60 bg-rose-500/10 px-3 py-1.5 text-xs font-bold text-rose-200" title="Delete the saved forged customisation; Meta-Pet reverts to the pure DNA body">Clear forged body</button>}
           </div>
         </div>
       </header>
@@ -137,6 +180,9 @@ export function BodyForge() {
       <div className="mx-auto grid max-w-[1500px] gap-4 p-4 lg:grid-cols-[320px_minmax(420px,1fr)_320px]">
         <aside className="space-y-5 rounded-2xl border border-slate-800 bg-slate-900/65 p-4">
           <div className="flex items-center justify-between"><h2 className="font-semibold">Structure</h2><button className="text-xs text-zinc-400 hover:text-white" onClick={() => setSpec(DEFAULT_BODY_SPEC)}>Reset</button></div>
+          <p className="-mt-3 text-[11px] leading-4 text-zinc-500">
+            Editing the <span className="text-amber-200">forged customisation</span>. It starts from a preset or the live DNA body; nothing here is saved until you press &ldquo;Set inherited body&rdquo;.
+          </p>
           <label className="grid gap-1 text-xs text-zinc-300">Preset name<input className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white" value={spec.name} onChange={(event) => patch('name', event.target.value)} /></label>
           <div className="grid grid-cols-2 gap-3"><Select label="Shape" value={spec.shape} values={['round', 'bean', 'cubic', 'crystal', 'toroid']} onChange={(value) => patch('shape', value)} /><Select label="Pattern" value={spec.pattern} values={['solid', 'gradient', 'striped', 'spotted']} onChange={(value) => patch('pattern', value)} /></div>
           <Slider label="Body width" value={spec.bodyWidth} min={58} max={170} onChange={(value) => patch('bodyWidth', value)} />
@@ -155,7 +201,9 @@ export function BodyForge() {
           </div>
           <div className={`relative flex min-h-[570px] items-center justify-center overflow-hidden ${background === 'light' ? 'bg-zinc-100' : background === 'grid' ? 'bg-[#08101d] bg-[linear-gradient(rgba(34,211,238,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,.08)_1px,transparent_1px)] bg-[size:28px_28px]' : 'bg-[radial-gradient(circle_at_center,#132945_0%,#050814_58%,#010207_100%)]'}`}>
             <PetBodyRenderer spec={previewSpec} animate={animate} className="h-auto w-full max-w-[720px]" />
-            <div className="absolute bottom-4 left-4 rounded-lg border border-white/10 bg-black/45 px-3 py-2 text-[10px] uppercase tracking-[0.16em] text-white/65">DNA live · forged form stays inherited while mood, hunger, evolution and dosha deform it</div>
+            <div className="absolute bottom-4 left-4 max-w-[80%] rounded-lg border border-white/10 bg-black/45 px-3 py-2 text-[10px] uppercase tracking-[0.16em] text-white/65">
+              Live preview · forged anatomy stays inherited; current mood, hunger, evolution and dosha only preview a temporary deformation here
+            </div>
           </div>
         </section>
 
@@ -178,6 +226,7 @@ export function BodyForge() {
           <Slider label="Breathing" value={spec.breathe} min={0} max={0.12} step={0.005} onChange={(value) => patch('breathe', value)} />
           <Slider label="Motion speed" value={spec.animationSpeed} min={0.25} max={2.5} step={0.05} onChange={(value) => patch('animationSpeed', value)} />
           <div className="grid grid-cols-2 gap-2"><button onClick={copyJson} className="rounded-lg border border-slate-700 px-3 py-2 text-xs hover:border-cyan-400">{copied ? 'Copied' : 'Copy JSON'}</button><button onClick={exportJson} className="rounded-lg border border-cyan-500 px-3 py-2 text-xs font-bold text-cyan-200">DNA packet</button><button onClick={sendToMetaPet} className="col-span-2 rounded-lg bg-cyan-300 px-3 py-3 text-xs font-black uppercase tracking-[0.16em] text-slate-950">Set inherited body</button></div>
+          <p className="text-[10px] leading-4 text-zinc-500">Saves this customisation as the pet&rsquo;s inherited anatomy. Evolution can still add revealed features on top; hunger, mood, energy, sickness and actions only ever deform it temporarily.</p>
         </aside>
       </div>
     </main>

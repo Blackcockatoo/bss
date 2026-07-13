@@ -1,15 +1,22 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
-import type { EvolutionData } from '../evolution/types';
+import { DEFAULT_BODY_SPEC } from '../components/body-forge/PetBodyRenderer';
+import type { EvolutionData, EvolutionState } from '../evolution/types';
 import type { DerivedTraits, Genome } from '../genome/types';
 import { DEFAULT_VITALS } from '../vitals';
 import { resolveVisualDNA } from './resolveVisualDNA';
 import {
-  applyLivePhenotype,
+  applyEvolutionGrowth,
+  BODY_FORGE_STORAGE_KEY,
+  clearForgedBody,
   createGenomeBodySpec,
   genomeToVisualGenes,
   getGenomeVisualFingerprint,
+  LEGACY_BODY_FORGE_STORAGE_KEY,
+  loadForgedBody,
   resolveBodySpec,
+  saveForgedBody,
+  sanitizeBodySpec,
 } from './bodyForgeAdapter';
 
 const traits: DerivedTraits = {
@@ -133,13 +140,17 @@ describe('Body Forge visual genome bridge', () => {
     };
 
     const stableBody = resolveBodySpec(stable, genome, { ...forged, features: [...forged.features] });
-    const starvingBody = applyLivePhenotype({ ...forged, features: [...forged.features] }, starving);
+    const starvingBody = resolveBodySpec(starving, genome, { ...forged, features: [...forged.features] });
 
     expect(stableBody.shape).toBe('toroid');
     expect(starvingBody.shape).toBe('toroid');
     expect(starvingBody.bodyHeight).toBeLessThan(stableBody.bodyHeight);
     expect(starvingBody.expression).toBe('focused');
-    expect(starvingBody.features).toEqual(['crown']);
+    // Vitals (hunger, here) never touch the feature set — only evolution and
+    // the forge/genome own that, so it must be identical no matter how
+    // hungry the pet currently is.
+    expect(starvingBody.features).toEqual(stableBody.features);
+    expect(stableBody.features).toContain('crown');
   });
 
   it('changes the visual fingerprint when any genome lane changes', () => {
@@ -147,5 +158,129 @@ describe('Body Forge visual genome bridge', () => {
     expect(getGenomeVisualFingerprint(changeGene(genome, 0))).not.toBe(getGenomeVisualFingerprint(genome));
     expect(getGenomeVisualFingerprint(changeGene(genome, 10))).not.toBe(getGenomeVisualFingerprint(genome));
     expect(getGenomeVisualFingerprint(changeGene(genome, 20))).not.toBe(getGenomeVisualFingerprint(genome));
+  });
+
+  it('lets evolution permanently grant its own stage feature as the pet matures, stacking on every earlier stage without ever removing one', () => {
+    const genome = changeGene(emptyGenome(), 5);
+    const stages: EvolutionState[] = ['GENETICS', 'NEURO', 'QUANTUM', 'SPECIATION'];
+    const revealed = stages.map((state) => {
+      const frame = resolveVisualDNA({
+        traits,
+        vitals: DEFAULT_VITALS,
+        evolution: { ...evolution, state },
+        now: 10_000,
+      });
+      const base = { ...createGenomeBodySpec(frame, genome), features: ['wings'] as const };
+      return applyEvolutionGrowth({ ...base, features: [...base.features] }, frame).features;
+    });
+
+    expect(revealed[0]).toEqual(['wings']);
+    expect(revealed[1]).toEqual(['wings']);
+    expect(revealed[2].sort()).toEqual(['thirdEye', 'wings'].sort());
+    expect(revealed[3].sort()).toEqual(['crown', 'thirdEye', 'wings'].sort());
+
+    for (let index = 1; index < revealed.length; index += 1) {
+      for (const feature of revealed[index - 1]) {
+        expect(revealed[index], `stage ${stages[index]} should keep ${feature}`).toContain(feature);
+      }
+    }
+  });
+
+  it('never lets evolution growth remove a feature the genome or Body Forge already granted', () => {
+    const genome = changeGene(emptyGenome(), 12);
+    const genetics = resolveVisualDNA({
+      traits,
+      vitals: DEFAULT_VITALS,
+      evolution: { ...evolution, state: 'GENETICS' },
+      now: 10_000,
+    });
+    const forged = { ...createGenomeBodySpec(genetics, genome), features: ['tailFlame'] as const };
+
+    const grown = applyEvolutionGrowth({ ...forged, features: [...forged.features] }, genetics);
+
+    expect(grown.features).toContain('tailFlame');
+  });
+});
+
+describe('forged body persistence', () => {
+  afterEach(() => {
+    window.localStorage.clear();
+  });
+
+  it('round-trips a saved forged body through the versioned packet', () => {
+    const genome = changeGene(emptyGenome(), 8);
+    const spec = { ...DEFAULT_BODY_SPEC, name: 'Round Trip', bodyWidth: 111, features: ['crown', 'wings'] as const };
+
+    saveForgedBody({ ...spec, features: [...spec.features] }, genome, 42);
+
+    expect(loadForgedBody()).toEqual({ ...spec, features: [...spec.features] });
+  });
+
+  it('migrates a legacy pre-version save and removes the old key', () => {
+    const legacySpec = { ...DEFAULT_BODY_SPEC, name: 'Legacy Save', bodyWidth: 101 };
+    window.localStorage.setItem(LEGACY_BODY_FORGE_STORAGE_KEY, JSON.stringify(legacySpec));
+
+    const loaded = loadForgedBody();
+
+    expect(loaded).toEqual(legacySpec);
+    expect(window.localStorage.getItem(LEGACY_BODY_FORGE_STORAGE_KEY)).toBeNull();
+    expect(window.localStorage.getItem(BODY_FORGE_STORAGE_KEY)).not.toBeNull();
+    expect(loadForgedBody()).toEqual(legacySpec);
+  });
+
+  it('falls back field-by-field for a partially malformed saved body', () => {
+    window.localStorage.setItem(
+      BODY_FORGE_STORAGE_KEY,
+      JSON.stringify({
+        version: 2,
+        body: {
+          ...DEFAULT_BODY_SPEC,
+          bodyWidth: 'banana',
+          glow: Number.NaN,
+          shape: 'hexagon',
+          features: ['nonsense', 'wings', 'wings'],
+        },
+      }),
+    );
+
+    const loaded = loadForgedBody();
+
+    expect(loaded).not.toBeNull();
+    expect(loaded?.bodyWidth).toBe(DEFAULT_BODY_SPEC.bodyWidth);
+    expect(loaded?.glow).toBe(DEFAULT_BODY_SPEC.glow);
+    expect(loaded?.shape).toBe(DEFAULT_BODY_SPEC.shape);
+    expect(loaded?.features).toEqual(['wings']);
+  });
+
+  it('returns null instead of inventing a body from unusable saved data', () => {
+    window.localStorage.setItem(BODY_FORGE_STORAGE_KEY, 'not json{');
+    expect(loadForgedBody()).toBeNull();
+
+    window.localStorage.setItem(BODY_FORGE_STORAGE_KEY, JSON.stringify(42));
+    expect(loadForgedBody()).toBeNull();
+
+    window.localStorage.setItem(BODY_FORGE_STORAGE_KEY, JSON.stringify([1, 2, 3]));
+    expect(loadForgedBody()).toBeNull();
+
+    window.localStorage.setItem(BODY_FORGE_STORAGE_KEY, JSON.stringify(null));
+    expect(loadForgedBody()).toBeNull();
+  });
+
+  it('sanitizeBodySpec never throws and always returns every BodySpec field', () => {
+    for (const garbage of [undefined, null, 'x', 3, [], {}, { features: 'nope' }]) {
+      const sanitized = sanitizeBodySpec(garbage);
+      expect(Object.keys(sanitized).sort()).toEqual(Object.keys(DEFAULT_BODY_SPEC).sort());
+    }
+  });
+
+  it('clearForgedBody removes both the current and legacy keys', () => {
+    window.localStorage.setItem(BODY_FORGE_STORAGE_KEY, JSON.stringify({ version: 2, body: DEFAULT_BODY_SPEC }));
+    window.localStorage.setItem(LEGACY_BODY_FORGE_STORAGE_KEY, JSON.stringify(DEFAULT_BODY_SPEC));
+
+    clearForgedBody();
+
+    expect(window.localStorage.getItem(BODY_FORGE_STORAGE_KEY)).toBeNull();
+    expect(window.localStorage.getItem(LEGACY_BODY_FORGE_STORAGE_KEY)).toBeNull();
+    expect(loadForgedBody()).toBeNull();
   });
 });

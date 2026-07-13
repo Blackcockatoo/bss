@@ -6,14 +6,24 @@ import {
   type BodySpec,
   type FaceExpression,
 } from '@/components/body-forge/PetBodyRenderer';
+import { EVOLUTION_ORDER } from '@/evolution/types';
 import type { Genome } from '@/genome/types';
 import type { VisualPhenotype } from '@/visual-dna';
 
-export const BODY_FORGE_STORAGE_KEY = 'bss:meta-pet:body-spec:v1';
+/** Canonical storage key for the versioned, validated forged-body packet. */
+export const BODY_FORGE_STORAGE_KEY = 'bss:meta-pet:body-spec:v2';
+/** Pre-versioning key: a bare BodySpec with no envelope. Read-only migration source. */
+export const LEGACY_BODY_FORGE_STORAGE_KEY = 'bss:meta-pet:body-spec:v1';
+const STORED_BODY_PACKET_VERSION = 2;
 
 const GENE_COUNT = 30;
 const DIGITS_PER_GENE = 6;
 const GENE_MAX = 999_999;
+
+const BODY_SHAPES: readonly BodyShape[] = ['round', 'bean', 'cubic', 'crystal', 'toroid'];
+const BODY_PATTERNS: readonly BodyPattern[] = ['solid', 'gradient', 'striped', 'spotted'];
+const FACE_EXPRESSIONS: readonly FaceExpression[] = ['neutral', 'smile', 'frown', 'focused', 'sleepy'];
+const BODY_FEATURES: readonly BodyFeature[] = ['wings', 'horns', 'crown', 'thirdEye', 'tailFlame'];
 
 const shapeMap: Record<string, BodyShape> = {
   Spherical: 'round',
@@ -222,6 +232,39 @@ export function createGenomeBodySpec(
   };
 }
 
+/**
+ * Anatomical structures evolution permanently grants once a stage is
+ * reached, mirroring that stage's own aura topology (phase-torus insight at
+ * QUANTUM, the speciation crown at SPECIATION — see EVOLUTION_STAGE_INFO).
+ * Earned once, kept forever after: a later stage's grants stack on top of
+ * every earlier stage's.
+ */
+const EVOLUTION_GRANTED_FEATURES: Partial<Record<VisualPhenotype['evolution']['state'], BodyFeature>> = {
+  QUANTUM: 'thirdEye',
+  SPECIATION: 'crown',
+};
+
+/**
+ * Evolution owns earned permanent additions. As the pet matures it gains
+ * durable anatomical structures on top of whatever the genome or Body Forge
+ * already established. It only ever adds to the feature set — it must
+ * never remove a feature the genome or forge chose, and it never touches
+ * silhouette, colour, or proportions.
+ */
+export function applyEvolutionGrowth(base: BodySpec, phenotype: VisualPhenotype): BodySpec {
+  const reachedIndex = EVOLUTION_ORDER.indexOf(phenotype.evolution.state);
+  const merged = new Set(base.features);
+  let changed = false;
+  for (let index = 0; index <= reachedIndex; index += 1) {
+    const granted = EVOLUTION_GRANTED_FEATURES[EVOLUTION_ORDER[index]];
+    if (granted && !merged.has(granted)) {
+      merged.add(granted);
+      changed = true;
+    }
+  }
+  return changed ? { ...base, features: [...merged] } : base;
+}
+
 /** Applies mood, care, dosha, evolution and vitals without replacing inherited anatomy. */
 export function applyLivePhenotype(base: BodySpec, phenotype: VisualPhenotype): BodySpec {
   const identityScale = Math.max(0.01, phenotype.identity.bodyScale);
@@ -262,44 +305,158 @@ export function phenotypeToBodySpec(
   phenotype: VisualPhenotype,
   genome?: Genome | null,
 ): BodySpec {
-  return applyLivePhenotype(createGenomeBodySpec(phenotype, genome), phenotype);
+  const inherited = applyEvolutionGrowth(createGenomeBodySpec(phenotype, genome), phenotype);
+  return applyLivePhenotype(inherited, phenotype);
 }
 
+/**
+ * The one authoritative body resolution pipeline:
+ * genome (or an explicit Body Forge override) → evolution growth → live
+ * vitals/dosha/action deformation. Each stage only owns what it is allowed
+ * to own; none of them replace the creature with a different body.
+ */
 export function resolveBodySpec(
   phenotype: VisualPhenotype,
   genome: Genome | null | undefined,
   forgedBody: BodySpec | null | undefined,
 ): BodySpec {
-  return applyLivePhenotype(forgedBody ?? createGenomeBodySpec(phenotype, genome), phenotype);
+  const inheritedAnatomy = forgedBody ?? createGenomeBodySpec(phenotype, genome);
+  const grownAnatomy = applyEvolutionGrowth(inheritedAnatomy, phenotype);
+  return applyLivePhenotype(grownAnatomy, phenotype);
 }
 
+export interface StoredBodyPacket {
+  version: 2;
+  savedAt: number;
+  genomeFingerprint: string;
+  body: BodySpec;
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function isHexColor(value: unknown): value is string {
+  return typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value);
+}
+
+function sanitizeNumber(value: unknown, fallback: number): number {
+  return isFiniteNumber(value) ? value : fallback;
+}
+
+function sanitizeColor(value: unknown, fallback: string): string {
+  return isHexColor(value) ? value : fallback;
+}
+
+function sanitizeEnum<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
+  return typeof value === 'string' && (allowed as readonly string[]).includes(value) ? (value as T) : fallback;
+}
+
+function sanitizeFeatures(value: unknown): BodyFeature[] | null {
+  if (!Array.isArray(value)) return null;
+  const filtered = value.filter((item): item is BodyFeature =>
+    typeof item === 'string' && (BODY_FEATURES as readonly string[]).includes(item),
+  );
+  return [...new Set(filtered)];
+}
+
+/**
+ * Validates an arbitrary value (old save shape, hand-edited JSON, or plain
+ * corruption) into a safe BodySpec. Every field falls back independently to
+ * `DEFAULT_BODY_SPEC` so a single bad field cannot invalidate an otherwise
+ * good save.
+ */
+export function sanitizeBodySpec(value: unknown): BodySpec {
+  const candidate: Partial<Record<keyof BodySpec, unknown>> = isPlainObject(value) ? value : {};
+  return {
+    name: typeof candidate.name === 'string' && candidate.name.trim().length > 0
+      ? candidate.name.slice(0, 80)
+      : DEFAULT_BODY_SPEC.name,
+    shape: sanitizeEnum(candidate.shape, BODY_SHAPES, DEFAULT_BODY_SPEC.shape),
+    pattern: sanitizeEnum(candidate.pattern, BODY_PATTERNS, DEFAULT_BODY_SPEC.pattern),
+    expression: sanitizeEnum(candidate.expression, FACE_EXPRESSIONS, DEFAULT_BODY_SPEC.expression),
+    primaryColor: sanitizeColor(candidate.primaryColor, DEFAULT_BODY_SPEC.primaryColor),
+    secondaryColor: sanitizeColor(candidate.secondaryColor, DEFAULT_BODY_SPEC.secondaryColor),
+    highlightColor: sanitizeColor(candidate.highlightColor, DEFAULT_BODY_SPEC.highlightColor),
+    bodyWidth: sanitizeNumber(candidate.bodyWidth, DEFAULT_BODY_SPEC.bodyWidth),
+    bodyHeight: sanitizeNumber(candidate.bodyHeight, DEFAULT_BODY_SPEC.bodyHeight),
+    bodyScale: sanitizeNumber(candidate.bodyScale, DEFAULT_BODY_SPEC.bodyScale),
+    cornerRoundness: sanitizeNumber(candidate.cornerRoundness, DEFAULT_BODY_SPEC.cornerRoundness),
+    eyeSize: sanitizeNumber(candidate.eyeSize, DEFAULT_BODY_SPEC.eyeSize),
+    eyeSpacing: sanitizeNumber(candidate.eyeSpacing, DEFAULT_BODY_SPEC.eyeSpacing),
+    eyeHeight: sanitizeNumber(candidate.eyeHeight, DEFAULT_BODY_SPEC.eyeHeight),
+    pupilSize: sanitizeNumber(candidate.pupilSize, DEFAULT_BODY_SPEC.pupilSize),
+    gazeX: sanitizeNumber(candidate.gazeX, DEFAULT_BODY_SPEC.gazeX),
+    gazeY: sanitizeNumber(candidate.gazeY, DEFAULT_BODY_SPEC.gazeY),
+    mouthWidth: sanitizeNumber(candidate.mouthWidth, DEFAULT_BODY_SPEC.mouthWidth),
+    mouthHeight: sanitizeNumber(candidate.mouthHeight, DEFAULT_BODY_SPEC.mouthHeight),
+    wingSpread: sanitizeNumber(candidate.wingSpread, DEFAULT_BODY_SPEC.wingSpread),
+    hornLength: sanitizeNumber(candidate.hornLength, DEFAULT_BODY_SPEC.hornLength),
+    outlineWidth: sanitizeNumber(candidate.outlineWidth, DEFAULT_BODY_SPEC.outlineWidth),
+    glow: sanitizeNumber(candidate.glow, DEFAULT_BODY_SPEC.glow),
+    tilt: sanitizeNumber(candidate.tilt, DEFAULT_BODY_SPEC.tilt),
+    bob: sanitizeNumber(candidate.bob, DEFAULT_BODY_SPEC.bob),
+    breathe: sanitizeNumber(candidate.breathe, DEFAULT_BODY_SPEC.breathe),
+    animationSpeed: sanitizeNumber(candidate.animationSpeed, DEFAULT_BODY_SPEC.animationSpeed),
+    features: sanitizeFeatures(candidate.features) ?? DEFAULT_BODY_SPEC.features,
+  };
+}
+
+/**
+ * Loads the saved forged body, validating and migrating as needed.
+ * - Unparseable JSON or a non-object payload is treated as no save at all
+ *   (the caller falls back to the pure DNA body) rather than manufacturing
+ *   a spec nobody actually saved.
+ * - A recognisable object (current envelope or a pre-versioning bare
+ *   BodySpec) is sanitised field-by-field so partial corruption cannot
+ *   destroy an otherwise valid save.
+ * - A legacy (`v1`) save with no current-key data is migrated forward and
+ *   re-saved under the current key.
+ */
 export function loadForgedBody(): BodySpec | null {
   if (typeof window === 'undefined') return null;
   try {
     const raw = window.localStorage.getItem(BODY_FORGE_STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as Partial<BodySpec>;
-    return {
-      ...DEFAULT_BODY_SPEC,
-      ...parsed,
-      features: Array.isArray(parsed.features)
-        ? parsed.features.filter((feature): feature is BodyFeature => ['wings', 'horns', 'crown', 'thirdEye', 'tailFlame'].includes(feature))
-        : DEFAULT_BODY_SPEC.features,
-    };
+    if (raw) {
+      const parsed: unknown = JSON.parse(raw);
+      if (!isPlainObject(parsed)) return null;
+      const body = isPlainObject(parsed.body) ? parsed.body : parsed;
+      return sanitizeBodySpec(body);
+    }
+
+    const legacyRaw = window.localStorage.getItem(LEGACY_BODY_FORGE_STORAGE_KEY);
+    if (!legacyRaw) return null;
+    const legacyParsed: unknown = JSON.parse(legacyRaw);
+    if (!isPlainObject(legacyParsed)) return null;
+    const migrated = sanitizeBodySpec(legacyParsed);
+    saveForgedBody(migrated);
+    window.localStorage.removeItem(LEGACY_BODY_FORGE_STORAGE_KEY);
+    return migrated;
   } catch {
     return null;
   }
 }
 
-export function saveForgedBody(spec: BodySpec): void {
+export function saveForgedBody(spec: BodySpec, genome?: Genome | null, fallbackSeed = 0): void {
   if (typeof window === 'undefined') return;
-  window.localStorage.setItem(BODY_FORGE_STORAGE_KEY, JSON.stringify(spec));
+  const packet: StoredBodyPacket = {
+    version: STORED_BODY_PACKET_VERSION,
+    savedAt: Date.now(),
+    genomeFingerprint: getGenomeVisualFingerprint(genome, fallbackSeed),
+    body: spec,
+  };
+  window.localStorage.setItem(BODY_FORGE_STORAGE_KEY, JSON.stringify(packet));
   window.dispatchEvent(new CustomEvent('bss:body-forge:updated', { detail: spec }));
 }
 
 export function clearForgedBody(): void {
   if (typeof window === 'undefined') return;
   window.localStorage.removeItem(BODY_FORGE_STORAGE_KEY);
+  window.localStorage.removeItem(LEGACY_BODY_FORGE_STORAGE_KEY);
   window.dispatchEvent(new CustomEvent('bss:body-forge:updated', { detail: null }));
 }
 

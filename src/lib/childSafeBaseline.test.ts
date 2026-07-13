@@ -64,6 +64,9 @@ describe("child-safe route boundary", () => {
     expect(childSafe.isChildSafeAllowedPathname("/genome-resonance")).toBe(
       false,
     );
+    // Body Forge is not part of the schools profile allowlist and must stay
+    // unreachable there unless explicitly added.
+    expect(childSafe.isChildSafeAllowedPathname("/body-forge")).toBe(false);
     expect(childSafe.getChildSafeFallbackPathname("/pet")).toBe("/schools");
     expect([...childSafe.CHILD_SAFE_NAV_ROUTES]).toEqual([
       "/schools",
