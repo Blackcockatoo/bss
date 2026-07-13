@@ -210,8 +210,13 @@ export function MiniGamesPanel({ petName }: MiniGamesPanelProps) {
     });
   };
 
-  const handleVimanaGameOver = (score: number, lines: number, level: number) => {
-    recordWithUnlocks("vimana", { score, lines, level });
+  const handleVimanaGameOver = (
+    score: number,
+    lines: number,
+    level: number,
+    extras?: { combo: number },
+  ) => {
+    recordWithUnlocks("vimana", { score, lines, level, combo: extras?.combo });
   };
 
   const toggleSound = () => {

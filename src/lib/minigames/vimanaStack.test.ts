@@ -1,25 +1,36 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  COMBO_BONUS_PER_STEP,
+  EXPEDITION_DURATION_MS,
+  FLUX_GRAVITY_FACTOR,
   LINE_SCORE_TABLE,
   LOCK_DELAY_MS,
   MAX_LOCK_RESETS,
+  POWER_COSTS,
+  POWER_DURATIONS_MS,
   PREVIEW_COUNT,
+  RESONANCE_MAX,
+  RESONANCE_PER_LINE,
   SHAPE_LIST,
   STACK_COLS,
   STACK_ROWS,
+  activatePower,
   clearLines,
   createStackGame,
+  currentGravityIntervalMs,
   drawBag,
   gravityIntervalMs,
   hardDropActive,
   holdActive,
+  isInDanger,
   isValidPosition,
   levelForLines,
   makeEmptyBoard,
   moveActive,
   rotateActive,
   scoreForClear,
+  shiftStackClock,
   softDropActive,
   tickStack,
   type StackCell,
@@ -272,6 +283,20 @@ describe('gravity and lock delay', () => {
     expect(after.board.some((row) => row.some((cell) => cell.filled))).toBe(true);
   });
 
+  it('shifts every time anchor when the clock is adjusted after a pause', () => {
+    let state = createStackGame(5, 1, 0, { mode: 'expedition' });
+    state = {
+      ...state,
+      lockDeadline: 400,
+      power: { kind: 'flux', expiresAt: 900 },
+    };
+    const shifted = shiftStackClock(state, 1000);
+    expect(shifted.lastGravityAt).toBe(state.lastGravityAt + 1000);
+    expect(shifted.lockDeadline).toBe(1400);
+    expect(shifted.endsAt).toBe(state.endsAt! + 1000);
+    expect(shifted.power!.expiresAt).toBe(1900);
+  });
+
   it('ends the game when the spawn position is blocked', () => {
     let state = createStackGame(5, 1, 0);
     const board = makeEmptyBoard();
@@ -288,5 +313,164 @@ describe('gravity and lock delay', () => {
     expect(events.gameOver).toBe(true);
     expect(over.status).toBe('gameover');
     expect(over.active).toBeNull();
+  });
+});
+
+// ===== Phase 3: combo, resonance, powers, expedition =====
+
+/** A game whose active piece is a vertical I hovering over column `col`,
+ *  with the bottom row full except that column — hard drop clears one line. */
+function primedForClear(col = 0): StackState {
+  const state = createStackGame(5, 1, 0);
+  const board = makeEmptyBoard();
+  board[STACK_ROWS - 1] = Array.from({ length: STACK_COLS }, (_, x) => ({
+    filled: x !== col,
+    color: '#fff',
+  }));
+  return {
+    ...state,
+    board,
+    active: { shape: 'I', rotation: 1, pos: { x: col, y: 0 } },
+  };
+}
+
+describe('resonance combo', () => {
+  it('builds combo and awards chained bonus score', () => {
+    let state = primedForClear(0);
+    const first = hardDropActive(state, 100);
+    expect(first.events.combo).toBe(1);
+    expect(first.state.score).toBe(LINE_SCORE_TABLE[1]);
+
+    // Prime a second clear immediately: combo should chain to 2.
+    state = {
+      ...primedForClear(1),
+      score: first.state.score,
+      combo: first.state.combo,
+      bestCombo: first.state.bestCombo,
+      resonance: first.state.resonance,
+    };
+    const second = hardDropActive(state, 200);
+    expect(second.events.combo).toBe(2);
+    expect(second.state.score).toBe(
+      first.state.score + LINE_SCORE_TABLE[1] + COMBO_BONUS_PER_STEP,
+    );
+    expect(second.state.bestCombo).toBe(2);
+  });
+
+  it('breaks the combo on a lock without a clear', () => {
+    const state = { ...createStackGame(5, 1, 0), combo: 3, bestCombo: 3 };
+    const dropped = hardDropActive(state, 100);
+    expect(dropped.events.cleared).toBe(0);
+    expect(dropped.state.combo).toBe(0);
+    expect(dropped.state.bestCombo).toBe(3);
+  });
+
+  it('accumulates resonance from clears up to the cap', () => {
+    const cleared = hardDropActive(primedForClear(), 100).state;
+    expect(cleared.resonance).toBe(RESONANCE_PER_LINE);
+
+    const nearCap = { ...primedForClear(), resonance: RESONANCE_MAX - 2 };
+    expect(hardDropActive(nearCap, 100).state.resonance).toBe(RESONANCE_MAX);
+  });
+});
+
+describe('dosha powers', () => {
+  it('flux slows gravity while active and expires on its own', () => {
+    let state = { ...createStackGame(5, 1, 0), resonance: RESONANCE_MAX };
+    state = activatePower(state, 'flux', 1000);
+    expect(state.power?.kind).toBe('flux');
+    expect(state.resonance).toBe(RESONANCE_MAX - POWER_COSTS.flux);
+    expect(currentGravityIntervalMs(state, 1001)).toBe(
+      Math.round(gravityIntervalMs(1) * FLUX_GRAVITY_FACTOR),
+    );
+
+    // After the duration the power unloads on the next tick.
+    const after = tickStack(state, 1000 + POWER_DURATIONS_MS.flux + 1).state;
+    expect(after.power).toBeNull();
+    expect(currentGravityIntervalMs(after, 999999)).toBe(gravityIntervalMs(1));
+  });
+
+  it('forge repairs the lowest nearly-complete row without scoring', () => {
+    let state = { ...createStackGame(5, 1, 0), resonance: RESONANCE_MAX };
+    const board = makeEmptyBoard();
+    // Bottom row has 8 of 10 filled — eligible for repair.
+    board[STACK_ROWS - 1] = Array.from({ length: STACK_COLS }, (_, x) => ({
+      filled: x < 8,
+      color: '#fff',
+    }));
+    state = { ...state, board };
+
+    const repaired = activatePower(state, 'forge', 500);
+    expect(repaired.resonance).toBe(RESONANCE_MAX - POWER_COSTS.forge);
+    expect(repaired.board[STACK_ROWS - 1].every((cell) => !cell.filled)).toBe(true);
+    // No free progress: score/lines/combo untouched.
+    expect(repaired.score).toBe(0);
+    expect(repaired.lines).toBe(0);
+  });
+
+  it('forge refuses when no row is close enough to complete', () => {
+    const state = { ...createStackGame(5, 1, 0), resonance: RESONANCE_MAX };
+    const same = activatePower(state, 'forge', 500);
+    expect(same).toBe(state);
+  });
+
+  it('anchor lets a blocked piece hop a single-cell bump', () => {
+    let state = { ...createStackGame(5, 1, 0), resonance: RESONANCE_MAX };
+    const board = makeEmptyBoard();
+    // A one-cell bump directly right of the O piece resting on the floor.
+    board[STACK_ROWS - 1][6] = { filled: true, color: '#fff' };
+    state = {
+      ...state,
+      board,
+      active: { shape: 'O', rotation: 0, pos: { x: 4, y: STACK_ROWS - 2 } },
+    };
+
+    // Without anchor the move is blocked.
+    expect(moveActive(state, 1, 100).active!.pos).toEqual({ x: 4, y: STACK_ROWS - 2 });
+
+    const empowered = activatePower(state, 'anchor', 100);
+    const hopped = moveActive(empowered, 1, 101);
+    expect(hopped.active!.pos).toEqual({ x: 5, y: STACK_ROWS - 3 });
+  });
+
+  it('rejects activation without enough resonance or while a power runs', () => {
+    const broke = createStackGame(5, 1, 0);
+    expect(activatePower(broke, 'flux', 0)).toBe(broke);
+
+    let state = { ...createStackGame(5, 1, 0), resonance: RESONANCE_MAX };
+    state = activatePower(state, 'flux', 0);
+    const doubled = activatePower({ ...state, resonance: RESONANCE_MAX }, 'anchor', 10);
+    expect(doubled.power?.kind).toBe('flux');
+  });
+});
+
+describe('expedition mode', () => {
+  it('runs on a 60 second window and ends with a timeUp event', () => {
+    const state = createStackGame(5, 1, 0, { mode: 'expedition' });
+    expect(state.endsAt).toBe(EXPEDITION_DURATION_MS);
+
+    const before = tickStack(state, EXPEDITION_DURATION_MS - 10);
+    expect(before.events.gameOver).toBe(false);
+
+    const done = tickStack(before.state, EXPEDITION_DURATION_MS + 1);
+    expect(done.events.gameOver).toBe(true);
+    expect(done.events.timeUp).toBe(true);
+    expect(done.state.status).toBe('gameover');
+  });
+
+  it('endless mode never times out', () => {
+    const state = createStackGame(5, 1, 0);
+    expect(state.endsAt).toBeNull();
+    const later = tickStack(state, 10 * EXPEDITION_DURATION_MS);
+    expect(later.state.status).toBe('running');
+  });
+});
+
+describe('danger detection', () => {
+  it('flags the board when the stack reaches the top rows', () => {
+    const board = makeEmptyBoard();
+    expect(isInDanger(board)).toBe(false);
+    board[4][3] = { filled: true, color: '#fff' };
+    expect(isInDanger(board)).toBe(true);
   });
 });

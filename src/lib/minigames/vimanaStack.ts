@@ -27,6 +27,11 @@ export interface StackPiece {
 
 export type StackStatus = 'running' | 'paused' | 'gameover';
 
+export type StackMode = 'endless' | 'expedition';
+
+/** Temporary powers keyed to the three doshas (Forge/Flux/Anchor). */
+export type StackPowerKind = 'forge' | 'flux' | 'anchor';
+
 export interface StackState {
   board: StackCell[][];
   active: StackPiece | null;
@@ -41,6 +46,16 @@ export interface StackState {
   level: number;
   startLevel: number;
   status: StackStatus;
+  mode: StackMode;
+  /** Expedition deadline timestamp; null in endless mode. */
+  endsAt: number | null;
+  /** Consecutive piece locks that cleared lines (0 = chain broken). */
+  combo: number;
+  bestCombo: number;
+  /** Resonance meter 0..RESONANCE_MAX, built by clears, spent on powers. */
+  resonance: number;
+  /** Currently running timed power, if any (forge resolves instantly). */
+  power: { kind: StackPowerKind; expiresAt: number } | null;
   /** Timestamp of the last gravity step. */
   lastGravityAt: number;
   /** When the grounded piece will lock, or null while airborne. */
@@ -54,6 +69,10 @@ export interface StackEvents {
   cleared: number;
   locked: boolean;
   gameOver: boolean;
+  /** Combo count after this lock (>=2 means a chain is running). */
+  combo: number;
+  /** True when an expedition run ended because the timer ran out. */
+  timeUp: boolean;
 }
 
 export interface StackResult {
@@ -67,8 +86,37 @@ export const PREVIEW_COUNT = 3;
 export const LOCK_DELAY_MS = 500;
 export const MAX_LOCK_RESETS = 15;
 export const LINE_SCORE_TABLE = [0, 100, 300, 500, 800] as const;
+export const EXPEDITION_DURATION_MS = 60_000;
 
-const NO_EVENTS: StackEvents = { cleared: 0, locked: false, gameOver: false };
+export const RESONANCE_MAX = 100;
+/** Resonance gained per cleared line / per combo step beyond the first. */
+export const RESONANCE_PER_LINE = 12;
+export const RESONANCE_PER_COMBO = 6;
+/** Combo bonus: 50 × (combo - 1) × level for every chained clear. */
+export const COMBO_BONUS_PER_STEP = 50;
+
+export const POWER_COSTS: Record<StackPowerKind, number> = {
+  forge: 90,
+  flux: 60,
+  anchor: 60,
+};
+export const POWER_DURATIONS_MS: Record<StackPowerKind, number> = {
+  forge: 0, // instant board repair
+  flux: 15_000,
+  anchor: 10_000,
+};
+/** Flux stretches the gravity interval — slower fall, never a full stop. */
+export const FLUX_GRAVITY_FACTOR = 1.6;
+/** Rows from the top that count as the danger zone for UI distortion. */
+export const DANGER_ROWS = 5;
+
+const NO_EVENTS: StackEvents = {
+  cleared: 0,
+  locked: false,
+  gameOver: false,
+  combo: 0,
+  timeUp: false,
+};
 
 export const STACK_SHAPES: Record<ShapeKey, Point[][]> = {
   I: [
@@ -279,14 +327,41 @@ export function gravityIntervalMs(level: number): number {
   return Math.max(120, 1000 - (level - 1) * 80);
 }
 
+/** Gravity interval with any active Flux slow-fall applied. */
+export function currentGravityIntervalMs(state: StackState, now: number): number {
+  const base = gravityIntervalMs(state.level);
+  if (state.power?.kind === 'flux' && now < state.power.expiresAt) {
+    return Math.round(base * FLUX_GRAVITY_FACTOR);
+  }
+  return base;
+}
+
+/** True when the stack reaches into the top rows — used for UI distortion. */
+export function isInDanger(board: StackCell[][]): boolean {
+  for (let y = 0; y < DANGER_ROWS; y += 1) {
+    if (board[y].some((cell) => cell.filled)) return true;
+  }
+  return false;
+}
+
 // ===== Game lifecycle =====
 
 function spawnPiece(shape: ShapeKey): StackPiece {
   return { shape, rotation: 0, pos: { x: Math.floor(STACK_COLS / 2), y: 0 } };
 }
 
-export function createStackGame(seed: number, startLevel: number, now: number): StackState {
+export interface CreateStackGameOptions {
+  mode?: StackMode;
+}
+
+export function createStackGame(
+  seed: number,
+  startLevel: number,
+  now: number,
+  options: CreateStackGameOptions = {},
+): StackState {
   const level = Math.max(1, startLevel);
+  const mode = options.mode ?? 'endless';
   const initial = refillQueue([], seed >>> 0 || 1, PREVIEW_COUNT + 1);
   const [first, ...rest] = initial.queue;
   return {
@@ -301,6 +376,12 @@ export function createStackGame(seed: number, startLevel: number, now: number): 
     level,
     startLevel: level,
     status: 'running',
+    mode,
+    endsAt: mode === 'expedition' ? now + EXPEDITION_DURATION_MS : null,
+    combo: 0,
+    bestCombo: 0,
+    resonance: 0,
+    power: null,
     lastGravityAt: now,
     lockDeadline: null,
     lockResets: 0,
@@ -331,11 +412,20 @@ function lockActivePiece(state: StackState, piece: StackPiece): StackResult {
   const merged = mergePiece(piece, state.board);
   const { board, cleared } = clearLines(merged);
 
-  let { score, lines, level } = state;
+  let { score, lines, level, resonance } = state;
+  const combo = cleared > 0 ? state.combo + 1 : 0;
+  const bestCombo = Math.max(state.bestCombo, combo);
   if (cleared > 0) {
     lines += cleared;
     score += scoreForClear(cleared, level);
+    if (combo > 1) {
+      score += COMBO_BONUS_PER_STEP * (combo - 1) * level;
+    }
     level = levelForLines(state.startLevel, lines);
+    resonance = Math.min(
+      RESONANCE_MAX,
+      resonance + cleared * RESONANCE_PER_LINE + Math.max(0, combo - 1) * RESONANCE_PER_COMBO,
+    );
   }
 
   const refill = refillQueue(state.queue, state.rngState, PREVIEW_COUNT + 1);
@@ -353,11 +443,14 @@ function lockActivePiece(state: StackState, piece: StackPiece): StackResult {
         score,
         lines,
         level,
+        combo,
+        bestCombo,
+        resonance,
         status: 'gameover',
         lockDeadline: null,
         lockResets: 0,
       },
-      events: { cleared, locked: true, gameOver: true },
+      events: { cleared, locked: true, gameOver: true, combo, timeUp: false },
     };
   }
 
@@ -372,10 +465,13 @@ function lockActivePiece(state: StackState, piece: StackPiece): StackResult {
       score,
       lines,
       level,
+      combo,
+      bestCombo,
+      resonance,
       lockDeadline: null,
       lockResets: 0,
     },
-    events: { cleared, locked: true, gameOver: false },
+    events: { cleared, locked: true, gameOver: false, combo, timeUp: false },
   };
 }
 
@@ -388,8 +484,21 @@ function canAct(state: StackState): state is StackState & { active: StackPiece }
 export function moveActive(state: StackState, dx: -1 | 1, now: number): StackState {
   if (!canAct(state)) return state;
   const moved = { ...state.active, pos: { x: state.active.pos.x + dx, y: state.active.pos.y } };
-  if (!isValidPosition(moved, state.board)) return state;
-  return afterActiveChange(state, moved, now);
+  if (isValidPosition(moved, state.board)) {
+    return afterActiveChange(state, moved, now);
+  }
+  // Anchor phase slide: while active, a blocked sideways move may hop over a
+  // single-cell bump. It never tunnels through walls or taller stacks.
+  if (state.power?.kind === 'anchor' && now < state.power.expiresAt) {
+    const hopped = {
+      ...state.active,
+      pos: { x: state.active.pos.x + dx, y: state.active.pos.y - 1 },
+    };
+    if (isValidPosition(hopped, state.board)) {
+      return afterActiveChange(state, hopped, now);
+    }
+  }
+  return state;
 }
 
 /** Rotate with wall kicks; tries each kick offset until one fits. */
@@ -485,6 +594,77 @@ export function setStackStatus(state: StackState, status: StackStatus): StackSta
 }
 
 /**
+ * Shift the game's time anchors after a pause so gravity, powers, and the
+ * expedition clock do not silently burn while the game was frozen.
+ */
+export function shiftStackClock(state: StackState, pausedMs: number): StackState {
+  if (pausedMs <= 0) return state;
+  return {
+    ...state,
+    lastGravityAt: state.lastGravityAt + pausedMs,
+    lockDeadline: state.lockDeadline !== null ? state.lockDeadline + pausedMs : null,
+    endsAt: state.endsAt !== null ? state.endsAt + pausedMs : null,
+    power: state.power
+      ? { ...state.power, expiresAt: state.power.expiresAt + pausedMs }
+      : null,
+  };
+}
+
+/**
+ * Forge repair: fills the gaps of the lowest nearly-complete row and removes
+ * it. Deliberately grants no score, lines, combo, or resonance — it is board
+ * relief bought with resonance earned from real clears.
+ */
+function applyForgeRepair(state: StackState): StackState | null {
+  for (let y = STACK_ROWS - 1; y >= 0; y -= 1) {
+    const filledCount = state.board[y].filter((cell) => cell.filled).length;
+    if (filledCount >= 5 && filledCount < STACK_COLS) {
+      const board = state.board.map((row) => row.map((cell) => ({ ...cell })));
+      board.splice(y, 1);
+      board.unshift(
+        Array.from({ length: STACK_COLS }, () => ({ filled: false, color: null })),
+      );
+      return { ...state, board };
+    }
+  }
+  return null;
+}
+
+/**
+ * Spend resonance to activate a dosha power:
+ * - forge: instant repair of the lowest nearly-complete row
+ * - flux: slower gravity for a while
+ * - anchor: phase slide over single-cell bumps for a while
+ * No-op when resonance is short, a timed power is already running, or a
+ * forge repair has no eligible row.
+ */
+export function activatePower(
+  state: StackState,
+  kind: StackPowerKind,
+  now: number,
+): StackState {
+  if (state.status !== 'running') return state;
+  if (state.resonance < POWER_COSTS[kind]) return state;
+  if (state.power && now < state.power.expiresAt) return state;
+
+  if (kind === 'forge') {
+    const repaired = applyForgeRepair(state);
+    if (!repaired) return state;
+    return {
+      ...repaired,
+      resonance: state.resonance - POWER_COSTS.forge,
+      power: null,
+    };
+  }
+
+  return {
+    ...state,
+    resonance: state.resonance - POWER_COSTS[kind],
+    power: { kind, expiresAt: now + POWER_DURATIONS_MS[kind] },
+  };
+}
+
+/**
  * Advance time: applies gravity steps and the lock-delay countdown.
  * Call once per animation frame with the current timestamp.
  */
@@ -492,6 +672,19 @@ export function tickStack(state: StackState, now: number): StackResult {
   if (!canAct(state)) return { state, events: NO_EVENTS };
 
   let current = state;
+
+  // Expedition timer: the run ends cleanly when the repair window closes.
+  if (current.endsAt !== null && now >= current.endsAt) {
+    return {
+      state: { ...current, active: null, status: 'gameover', lockDeadline: null },
+      events: { ...NO_EVENTS, gameOver: true, timeUp: true },
+    };
+  }
+
+  // Timed powers wind down on their own.
+  if (current.power && now >= current.power.expiresAt) {
+    current = { ...current, power: null };
+  }
 
   // Grounded piece: wait for the lock delay to expire, then lock.
   if (isGrounded(current.active!, current.board)) {
@@ -508,7 +701,7 @@ export function tickStack(state: StackState, now: number): StackResult {
   }
 
   // Airborne: apply as many gravity steps as elapsed time allows.
-  const interval = gravityIntervalMs(current.level);
+  const interval = currentGravityIntervalMs(current, now);
   let elapsed = now - current.lastGravityAt;
   while (elapsed >= interval && current.active) {
     const moved = {
