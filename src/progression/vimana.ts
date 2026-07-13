@@ -331,9 +331,9 @@ function createPresetNodes(random: () => number, now: number): VimanaNode[] {
       coordinates: spec.coordinates,
       fieldType: spec.fieldType,
       intensity: spec.intensity,
-      // The home node starts scanned; everything else is a detected signal so
-      // the map shows destinations without revealing their details.
-      discoveryStage: isHome ? 'scanned' : 'detected',
+      // The home node starts scanned; everything else begins fogged and is
+      // revealed to 'detected' hop by hop as neighbouring fields are scanned.
+      discoveryStage: isHome ? 'scanned' : 'unknown',
       scanQuality: isHome ? 60 : 0,
       samples: isHome ? 1 : 0,
       visits: isHome ? 1 : 0,
@@ -366,7 +366,7 @@ function createGridNodes(random: () => number, now: number): VimanaNode[] {
             coordinates: { x, y, z },
             fieldType: FIELD_TYPES[hashString(id) % FIELD_TYPES.length],
             intensity,
-            discoveryStage: isCenter ? 'scanned' : 'detected',
+            discoveryStage: isCenter ? 'scanned' : 'unknown',
             scanQuality: isCenter ? 60 : 0,
             samples: isCenter ? 1 : 0,
             visits: isCenter ? 1 : 0,
@@ -398,15 +398,18 @@ export function createDefaultVimanaState(
 
   const baseNodes =
     layout === 'grid' ? createGridNodes(random, now) : createPresetNodes(random, now);
-  const nodes = applyConnections(
+  const connected = applyConnections(
     ensureMinimumAnomalies(baseNodes, MIN_VIMANA_ANOMALIES, random),
     seed,
   );
+  const homeId = layout === 'grid' ? '0,0,0' : connected[0]?.id ?? null;
+  // Signals one hop from home start detected; the rest of the map is fog.
+  const nodes = homeId ? revealVimanaNeighbors(connected, homeId) : connected;
 
   return {
     version: VIMANA_STATE_VERSION,
     nodes,
-    activeNodeId: layout === 'grid' ? '0,0,0' : nodes[0]?.id ?? null,
+    activeNodeId: homeId,
     anomaliesFound: countAnomaliesFound(nodes),
     anomaliesResolved: 0,
     scansPerformed: 0,
@@ -687,6 +690,74 @@ export function migrateVimanaState(
   }
 
   return createDefaultVimanaState({ genomeSeed: seed });
+}
+
+// ===== Map navigation =====
+
+/**
+ * Promote unknown neighbours of a node to 'detected' — scanning a field
+ * surfaces the signals of everything one route hop away, which is how the
+ * fog of war recedes on the map.
+ */
+export function revealVimanaNeighbors(nodes: VimanaNode[], nodeId: string): VimanaNode[] {
+  const source = nodes.find((node) => node.id === nodeId);
+  if (!source) return nodes;
+  const targets = new Set(source.connections);
+  let changed = false;
+  const next = nodes.map((node) => {
+    if (targets.has(node.id) && node.discoveryStage === 'unknown') {
+      changed = true;
+      return { ...node, discoveryStage: 'detected' as const };
+    }
+    return node;
+  });
+  return changed ? next : nodes;
+}
+
+/**
+ * Shortest route between two nodes travelling only through revealed
+ * (non-unknown) space. Returns the node id path including both endpoints,
+ * or null when the destination cannot be reached through known signals.
+ */
+export function findVimanaRoute(
+  nodes: VimanaNode[],
+  fromId: string,
+  toId: string,
+): string[] | null {
+  if (fromId === toId) return [fromId];
+  const byId = new Map(nodes.map((node) => [node.id, node]));
+  const from = byId.get(fromId);
+  const to = byId.get(toId);
+  if (!from || !to || to.discoveryStage === 'unknown') return null;
+
+  const previous = new Map<string, string>();
+  const visited = new Set<string>([fromId]);
+  const queue: string[] = [fromId];
+
+  while (queue.length > 0) {
+    const currentId = queue.shift()!;
+    const current = byId.get(currentId);
+    if (!current) continue;
+    for (const neighbourId of current.connections) {
+      if (visited.has(neighbourId)) continue;
+      const neighbour = byId.get(neighbourId);
+      if (!neighbour || neighbour.discoveryStage === 'unknown') continue;
+      visited.add(neighbourId);
+      previous.set(neighbourId, currentId);
+      if (neighbourId === toId) {
+        const path = [toId];
+        let step = toId;
+        while (step !== fromId) {
+          step = previous.get(step)!;
+          path.unshift(step);
+        }
+        return path;
+      }
+      queue.push(neighbourId);
+    }
+  }
+
+  return null;
 }
 
 // ===== Scan / visit progression =====

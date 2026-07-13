@@ -7,9 +7,11 @@ import {
   createDefaultVimanaState,
   createVimanaNode,
   deriveVimanaConnections,
+  findVimanaRoute,
   isCanonicalVimanaState,
   isVimanaNodeDiscovered,
   migrateVimanaState,
+  revealVimanaNeighbors,
   scanVimanaNode,
 } from './vimana';
 
@@ -26,10 +28,11 @@ describe('createDefaultVimanaState', () => {
     expect(isVimanaNodeDiscovered(home!)).toBe(true);
     expect(home!.firstRewardClaimed).toBe(true);
 
-    // Every other node is a visible signal, not fully revealed.
+    // Home's route neighbours start as detected signals; the rest is fog.
+    const neighbourIds = new Set(home!.connections);
     for (const node of state.nodes) {
       if (node.id === home!.id) continue;
-      expect(node.discoveryStage).toBe('detected');
+      expect(node.discoveryStage).toBe(neighbourIds.has(node.id) ? 'detected' : 'unknown');
       expect(node.firstRewardClaimed).toBe(false);
     }
   });
@@ -198,6 +201,68 @@ describe('migrateVimanaState', () => {
       const state = migrateVimanaState(junk, { genomeSeed: 5 });
       expect(isCanonicalVimanaState(state)).toBe(true);
       expect(state.nodes.length).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe('map navigation', () => {
+  const buildNodes = () => {
+    // a — b — c — d in a line, plus stray e connected to c.
+    const stages: Record<string, import('./vimana').VimanaDiscoveryStage> = {
+      a: 'scanned',
+      b: 'detected',
+      c: 'unknown',
+      d: 'unknown',
+      e: 'unknown',
+    };
+    const connections: Record<string, string[]> = {
+      a: ['b'],
+      b: ['a', 'c'],
+      c: ['b', 'd', 'e'],
+      d: ['c'],
+      e: ['c'],
+    };
+    return Object.keys(stages).map((id) =>
+      createVimanaNode({
+        id,
+        discoveryStage: stages[id],
+        connections: connections[id],
+      }),
+    );
+  };
+
+  it('reveals unknown neighbours when a node is scanned', () => {
+    const nodes = buildNodes();
+    const revealed = revealVimanaNeighbors(nodes, 'b');
+    expect(revealed.find((n) => n.id === 'c')!.discoveryStage).toBe('detected');
+    // Non-neighbours stay fogged; already-revealed nodes are untouched.
+    expect(revealed.find((n) => n.id === 'd')!.discoveryStage).toBe('unknown');
+    expect(revealed.find((n) => n.id === 'a')!.discoveryStage).toBe('scanned');
+  });
+
+  it('returns the same array when nothing needs revealing', () => {
+    const nodes = buildNodes();
+    expect(revealVimanaNeighbors(nodes, 'a')).toBe(nodes); // b already detected
+  });
+
+  it('plots the shortest route through revealed space only', () => {
+    const nodes = buildNodes();
+    expect(findVimanaRoute(nodes, 'a', 'b')).toEqual(['a', 'b']);
+    // c is fogged: no route may pass through or end in it.
+    expect(findVimanaRoute(nodes, 'a', 'c')).toBeNull();
+    expect(findVimanaRoute(nodes, 'a', 'd')).toBeNull();
+
+    const revealed = revealVimanaNeighbors(nodes, 'b');
+    expect(findVimanaRoute(revealed, 'a', 'c')).toEqual(['a', 'b', 'c']);
+    expect(findVimanaRoute(revealed, 'a', 'a')).toEqual(['a']);
+  });
+
+  it('default state keeps every revealed signal reachable from home', () => {
+    const state = createDefaultVimanaState({ random: () => 0.4, genomeSeed: 8 });
+    const homeId = state.activeNodeId!;
+    for (const node of state.nodes) {
+      if (node.discoveryStage === 'unknown') continue;
+      expect(findVimanaRoute(state.nodes, homeId, node.id)).not.toBeNull();
     }
   });
 });

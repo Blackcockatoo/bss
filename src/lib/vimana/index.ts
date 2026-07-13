@@ -15,10 +15,12 @@ export {
   createVimanaNode,
   deriveVimanaConnections,
   discoveryStageRank,
+  findVimanaRoute,
   getVimanaFieldRewardDelta,
   isCanonicalVimanaState,
   isVimanaNodeDiscovered,
   migrateVimanaState,
+  revealVimanaNeighbors,
   scanVimanaNode,
 } from '@metapet/core/progression';
 

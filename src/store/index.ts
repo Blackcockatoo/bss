@@ -28,6 +28,7 @@ import {
   createDefaultVimanaState,
   getVimanaFieldRewardDelta,
   migrateVimanaState,
+  revealVimanaNeighbors,
   scanVimanaNode,
 } from '../progression/types';
 import {
@@ -723,8 +724,10 @@ export function createMetaPetWebStore(
 
         const now = Date.now();
         const outcome = scanVimanaNode(target, now);
-        const nodes = vimana.nodes.map(node =>
-          node.id === cellId ? outcome.node : node
+        // Scanning a field also surfaces the signals one route hop away.
+        const nodes = revealVimanaNeighbors(
+          vimana.nodes.map(node => (node.id === cellId ? outcome.node : node)),
+          cellId
         );
 
         let updatedVitals = vitals;
