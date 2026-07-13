@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useMemo, useReducer, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 
 import { useStore } from '@/lib/store';
@@ -117,17 +117,23 @@ export function VisualDNAPet({
   const lastAction = useStore((state) => state.lastAction);
   const lastActionAt = useStore((state) => state.lastActionAt);
   const reducedMotion = useReducedMotion();
-  const [actionEpoch, expireAction] = useReducer((value: number) => value + 1, 0);
+  // Tracks which action timestamp has aged past the reaction window. Keeps
+  // render pure (no Date.now during render): while an action is fresh the
+  // memo is fed now=lastActionAt (full reaction), after the timer fires it is
+  // fed a time past the window (pose settled).
+  const [settledActionAt, setSettledActionAt] = useState<number | null>(null);
   const [forgedBody, setForgedBody] = useState<BodySpec | null>(null);
   const rawId = useId();
   const id = sanitizeId(rawId);
 
   useEffect(() => {
-    setForgedBody(loadForgedBody());
     const sync = () => setForgedBody(loadForgedBody());
+    // Deferred so the initial load happens outside the effect body.
+    const initialLoad = window.setTimeout(sync, 0);
     window.addEventListener('bss:body-forge:updated', sync);
     window.addEventListener('storage', sync);
     return () => {
+      window.clearTimeout(initialLoad);
       window.removeEventListener('bss:body-forge:updated', sync);
       window.removeEventListener('storage', sync);
     };
@@ -136,10 +142,14 @@ export function VisualDNAPet({
   useEffect(() => {
     if (!lastAction || !lastActionAt) return;
     const remaining = ACTION_WINDOW_MS - (Date.now() - lastActionAt);
-    if (remaining <= 0) return;
-    const timeout = window.setTimeout(expireAction, remaining + 20);
+    const timeout = window.setTimeout(
+      () => setSettledActionAt(lastActionAt),
+      Math.max(0, remaining + 20),
+    );
     return () => window.clearTimeout(timeout);
   }, [lastAction, lastActionAt]);
+
+  const actionSettled = !lastActionAt || settledActionAt === lastActionAt;
 
   const phenotype = useMemo(() => {
     if (!traits) return null;
@@ -149,10 +159,10 @@ export function VisualDNAPet({
       evolution,
       lastAction,
       lastActionAt,
-      now: Date.now(),
+      now: actionSettled ? lastActionAt + ACTION_WINDOW_MS : lastActionAt,
       reducedMotion: Boolean(reducedMotion),
     });
-  }, [actionEpoch, evolution, lastAction, lastActionAt, reducedMotion, traits, vitals]);
+  }, [actionSettled, evolution, lastAction, lastActionAt, reducedMotion, traits, vitals]);
 
   const resolvedBody = useMemo(() => phenotype ? (forgedBody ?? phenotypeToBodySpec(phenotype)) : null, [forgedBody, phenotype]);
 

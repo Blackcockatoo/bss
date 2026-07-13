@@ -18,9 +18,11 @@ import {
   type BattleStats,
   type MiniGameProgress,
   type VimanaState,
+  computeVimanaGenomeSeed,
   createDefaultBattleStats,
   createDefaultMiniGameProgress,
   createDefaultVimanaState,
+  migrateVimanaState,
 } from "@/lib/progression/types";
 import {
   type RitualProgress,
@@ -45,8 +47,6 @@ const DB_NAME = "MetaPetDB";
 const DB_VERSION = 2;
 const STORE_NAME = "pets";
 const HISTORY_STORE = "petHistory";
-const VIMANA_FIELDS = ["calm", "neuro", "quantum", "earth"] as const;
-const VIMANA_REWARDS = ["mood", "energy", "hygiene", "mystery"] as const;
 
 export interface PetSaveData {
   id: string; // pet ID from crest
@@ -538,11 +538,12 @@ export function importPetFromJSON(
   })();
 
   const vimana = (() => {
-    if (parsed.vimana === undefined) return createDefaultVimanaState();
-    if (isValidVimanaState(parsed.vimana)) {
-      return cloneVimana(parsed.vimana);
+    const genomeSeed = computeVimanaGenomeSeed(genome);
+    if (parsed.vimana === undefined) {
+      return createDefaultVimanaState({ genomeSeed });
     }
-    throw new Error("Invalid pet file: vimana state malformed");
+    // Accepts current and legacy save shapes; never throws.
+    return migrateVimanaState(parsed.vimana, { genomeSeed });
   })();
 
   const mirrorMode = (() => {
@@ -651,7 +652,12 @@ export function importPetFromJSON(
 function cloneVimana(value: VimanaState): VimanaState {
   return {
     ...value,
-    cells: value.cells.map((cell) => ({ ...cell })),
+    nodes: value.nodes.map((node) => ({
+      ...node,
+      coordinates: { ...node.coordinates },
+      connections: [...node.connections],
+      anomaly: node.anomaly ? { ...node.anomaly } : null,
+    })),
   };
 }
 
@@ -669,9 +675,11 @@ function normalizePetData(raw: unknown): PetSaveData {
   const miniGames = isValidMiniGameProgress(typed.miniGames)
     ? { ...createDefaultMiniGameProgress(), ...typed.miniGames }
     : createDefaultMiniGameProgress();
-  const vimana = isValidVimanaState(typed.vimana)
-    ? cloneVimana(typed.vimana)
-    : createDefaultVimanaState();
+  const vimana = migrateVimanaState(typed.vimana, {
+    genomeSeed: computeVimanaGenomeSeed(
+      isValidGenome(typed.genome) ? typed.genome : null,
+    ),
+  });
   const mirrorMode = isValidMirrorMode(typed.mirrorMode)
     ? { ...typed.mirrorMode }
     : createDefaultMirrorMode();
@@ -930,47 +938,6 @@ function isValidMiniGameProgress(value: unknown): value is MiniGameProgress {
   );
 
   return statsValid && lastPlayedValid;
-}
-
-function isValidVimanaState(value: unknown): value is VimanaState {
-  if (!value || typeof value !== "object") return false;
-  const state = value as VimanaState;
-  const lastScanValid =
-    state.lastScanAt === null || typeof state.lastScanAt === "number";
-  return (
-    Array.isArray(state.cells) &&
-    state.cells.every(isValidVimanaCell) &&
-    typeof state.activeCellId === "string" &&
-    typeof state.anomaliesFound === "number" &&
-    typeof state.anomaliesResolved === "number" &&
-    typeof state.scansPerformed === "number" &&
-    lastScanValid
-  );
-}
-
-function isValidVimanaCell(
-  value: unknown,
-): value is VimanaState["cells"][number] {
-  if (!value || typeof value !== "object") return false;
-  const cell = value as VimanaState["cells"][number];
-  const fieldValid = VIMANA_FIELDS.includes(
-    cell.field as (typeof VIMANA_FIELDS)[number],
-  );
-  const rewardValid = VIMANA_REWARDS.includes(
-    cell.reward as (typeof VIMANA_REWARDS)[number],
-  );
-  return (
-    typeof cell.id === "string" &&
-    typeof cell.label === "string" &&
-    typeof cell.field === "string" &&
-    fieldValid &&
-    typeof cell.discovered === "boolean" &&
-    typeof cell.anomaly === "boolean" &&
-    typeof cell.energy === "number" &&
-    typeof cell.reward === "string" &&
-    rewardValid &&
-    (cell.visitedAt === undefined || typeof cell.visitedAt === "number")
-  );
 }
 
 function isValidRitualProgress(value: unknown): value is RitualProgress {

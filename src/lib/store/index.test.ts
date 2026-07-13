@@ -8,6 +8,7 @@ import {
   createDefaultMiniGameProgress,
   createDefaultVimanaState,
   type MiniGameProgress,
+  type VimanaState,
 } from '@/lib/progression/types';
 
 type TraitOverrides = {
@@ -727,6 +728,109 @@ describe('Store State Management', () => {
       });
 
       expect(useStore.getState().tickId).toBe(12345);
+    });
+  });
+
+  describe('Vimana Exploration', () => {
+    const getUndiscoveredNodeId = () => {
+      const node = useStore
+        .getState()
+        .vimana.nodes.find(n => !n.firstRewardClaimed && n.anomaly === null);
+      expect(node).toBeDefined();
+      return node!.id;
+    };
+
+    it('grants the first-discovery reward exactly once per node', () => {
+      const nodeId = getUndiscoveredNodeId();
+
+      useStore.getState().exploreCell(nodeId);
+      const essenceAfterFirst = useStore.getState().essence;
+      expect(essenceAfterFirst).toBeGreaterThan(0);
+
+      const rewardsAfterFirst = useStore
+        .getState()
+        .rewardHistory.filter(r => r.title === 'Field Scan Reward').length;
+
+      useStore.getState().exploreCell(nodeId);
+      useStore.getState().exploreCell(nodeId);
+
+      // Repeat scans deepen progress but never re-grant the full reward.
+      expect(useStore.getState().essence).toBe(essenceAfterFirst);
+      const rewardsAfterRepeat = useStore
+        .getState()
+        .rewardHistory.filter(r => r.title === 'Field Scan Reward').length;
+      expect(rewardsAfterRepeat).toBe(rewardsAfterFirst);
+
+      const node = useStore.getState().vimana.nodes.find(n => n.id === nodeId)!;
+      expect(node.firstRewardClaimed).toBe(true);
+      expect(node.visits).toBe(3);
+      expect(node.discoveryStage).toBe('mastered');
+    });
+
+    it('unlocks the first-step achievement on first discovery', () => {
+      useStore.getState().exploreCell(getUndiscoveredNodeId());
+      expect(
+        useStore.getState().achievements.some(a => a.id === 'explorer-first-step')
+      ).toBe(true);
+    });
+
+    it('resolves an anomaly only after it has been revealed, and only once', () => {
+      const anomalyNode = useStore
+        .getState()
+        .vimana.nodes.find(n => n.anomaly?.state === 'dormant');
+      expect(anomalyNode).toBeDefined();
+      const nodeId = anomalyNode!.id;
+
+      // Dormant anomaly cannot be resolved before scanning.
+      useStore.getState().resolveAnomaly(nodeId);
+      expect(useStore.getState().vimana.anomaliesResolved).toBe(0);
+
+      useStore.getState().exploreCell(nodeId);
+      expect(
+        useStore.getState().vimana.nodes.find(n => n.id === nodeId)!.anomaly!.state
+      ).toBe('active');
+
+      useStore.getState().resolveAnomaly(nodeId);
+      expect(useStore.getState().vimana.anomaliesResolved).toBe(1);
+      const essenceAfterResolve = useStore.getState().essence;
+
+      // Resolving again is a no-op.
+      useStore.getState().resolveAnomaly(nodeId);
+      expect(useStore.getState().vimana.anomaliesResolved).toBe(1);
+      expect(useStore.getState().essence).toBe(essenceAfterResolve);
+    });
+
+    it('migrates legacy cell saves during hydration and keeps discoveries', () => {
+      useStore.getState().hydrate({
+        vitals: useStore.getState().vitals,
+        genome: createMockGenome(3),
+        traits: createMockTraits(),
+        evolution: initializeEvolution(),
+        // Cast: simulates a pre-consolidation save with the old cell model.
+        vimana: {
+          cells: [
+            { id: 'calm-1', label: 'Calm Glade', field: 'calm', discovered: true, anomaly: false, energy: 60, reward: 'mood', visitedAt: 42 },
+            { id: 'quantum-1', label: 'Quantum Pool', field: 'quantum', discovered: false, anomaly: true, energy: 80, reward: 'mood' },
+          ],
+          activeCellId: 'calm-1',
+          anomaliesFound: 0,
+          anomaliesResolved: 0,
+          scansPerformed: 4,
+          lastScanAt: 42,
+        } as unknown as VimanaState,
+      });
+
+      const vimana = useStore.getState().vimana;
+      expect(vimana.version).toBe(2);
+      expect(vimana.scansPerformed).toBe(4);
+      const calm = vimana.nodes.find(n => n.id === 'calm-1')!;
+      expect(calm.discoveryStage).toBe('explored');
+      expect(calm.firstRewardClaimed).toBe(true);
+
+      // The migrated discovered node must not pay out again.
+      const essenceBefore = useStore.getState().essence;
+      useStore.getState().exploreCell('calm-1');
+      expect(useStore.getState().essence).toBe(essenceBefore);
     });
   });
 

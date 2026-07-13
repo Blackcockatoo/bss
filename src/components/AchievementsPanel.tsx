@@ -17,6 +17,7 @@ import {
   ACHIEVEMENT_CATALOG,
   ACHIEVEMENT_TARGETS,
   getTotalMasteryStars,
+  isVimanaNodeDiscovered,
   type Achievement,
   type BattleStats,
   type MiniGameProgress,
@@ -61,7 +62,7 @@ function getAchievementProgress(
 ): number {
   switch (id) {
     case 'explorer-first-step':
-      return source.vimana.cells.filter((cell) => cell.discovered).length > 1 ? 1 : 0;
+      return source.vimana.nodes.filter(isVimanaNodeDiscovered).length > 1 ? 1 : 0;
     case 'explorer-anomaly-hunter':
       return source.vimana.anomaliesResolved ?? 0;
     case 'battle-first-win':

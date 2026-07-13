@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useReducer } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { resolveDigitalDosha, type DigitalDoshaKey } from '@/digital-dosha';
 import { useStore } from '@/lib/store';
@@ -35,15 +35,23 @@ export function DigitalDoshaPanel({ className = '' }: { className?: string }) {
   const evolution = useStore((state) => state.evolution);
   const lastAction = useStore((state) => state.lastAction);
   const lastActionAt = useStore((state) => state.lastActionAt);
-  const [actionEpoch, expireAction] = useReducer((value: number) => value + 1, 0);
+  // Tracks which action timestamp has aged past the reaction window. Keeps
+  // render pure (no Date.now during render): while an action is fresh the
+  // memo is fed now=lastActionAt (full impulse), after the timer fires it is
+  // fed a time past the window (impulse settled).
+  const [settledActionAt, setSettledActionAt] = useState<number | null>(null);
 
   useEffect(() => {
     if (!lastAction || !lastActionAt) return;
     const remaining = ACTION_WINDOW_MS - (Date.now() - lastActionAt);
-    if (remaining <= 0) return;
-    const timeout = window.setTimeout(expireAction, remaining + 20);
+    const timeout = window.setTimeout(
+      () => setSettledActionAt(lastActionAt),
+      Math.max(0, remaining + 20),
+    );
     return () => window.clearTimeout(timeout);
   }, [lastAction, lastActionAt]);
+
+  const actionSettled = !lastActionAt || settledActionAt === lastActionAt;
 
   const dosha = useMemo(() => {
     if (!traits) return null;
@@ -53,9 +61,9 @@ export function DigitalDoshaPanel({ className = '' }: { className?: string }) {
       evolution,
       lastAction,
       lastActionAt,
-      now: Date.now(),
+      now: actionSettled ? lastActionAt + ACTION_WINDOW_MS : lastActionAt,
     });
-  }, [actionEpoch, evolution, lastAction, lastActionAt, traits, vitals]);
+  }, [actionSettled, evolution, lastAction, lastActionAt, traits, vitals]);
 
   if (!dosha) return null;
 
