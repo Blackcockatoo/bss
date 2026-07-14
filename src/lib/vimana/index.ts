@@ -8,6 +8,10 @@
  */
 
 export {
+  SCAN_QUALITY_CLEAN_MIN,
+  SCAN_QUALITY_PERFECT_MIN,
+  SCAN_TIER_SCORES,
+  VIMANA_ENCOUNTER_KINDS,
   VIMANA_ESSENCE_REWARDS,
   VIMANA_STATE_VERSION,
   computeVimanaGenomeSeed,
@@ -15,11 +19,17 @@ export {
   createVimanaNode,
   deriveVimanaConnections,
   discoveryStageRank,
+  findVimanaRoute,
+  getVimanaEncounterKind,
   getVimanaFieldRewardDelta,
+  hashString,
   isCanonicalVimanaState,
+  isVimanaLivingRuin,
   isVimanaNodeDiscovered,
   migrateVimanaState,
+  revealVimanaNeighbors,
   scanVimanaNode,
+  vimanaInfoLevel,
 } from '@metapet/core/progression';
 
 export type {
@@ -29,9 +39,11 @@ export type {
   VimanaAnomalyType,
   VimanaCoordinates,
   VimanaDiscoveryStage,
+  VimanaEncounterKind,
   VimanaFieldType,
   VimanaNode,
   VimanaScanOutcome,
+  VimanaScanTier,
   VimanaState,
 } from '@metapet/core/progression';
 

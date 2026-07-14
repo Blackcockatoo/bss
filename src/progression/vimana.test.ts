@@ -7,10 +7,13 @@ import {
   createDefaultVimanaState,
   createVimanaNode,
   deriveVimanaConnections,
+  findVimanaRoute,
   isCanonicalVimanaState,
   isVimanaNodeDiscovered,
   migrateVimanaState,
+  revealVimanaNeighbors,
   scanVimanaNode,
+  vimanaInfoLevel,
 } from './vimana';
 
 describe('createDefaultVimanaState', () => {
@@ -26,10 +29,11 @@ describe('createDefaultVimanaState', () => {
     expect(isVimanaNodeDiscovered(home!)).toBe(true);
     expect(home!.firstRewardClaimed).toBe(true);
 
-    // Every other node is a visible signal, not fully revealed.
+    // Home's route neighbours start as detected signals; the rest is fog.
+    const neighbourIds = new Set(home!.connections);
     for (const node of state.nodes) {
       if (node.id === home!.id) continue;
-      expect(node.discoveryStage).toBe('detected');
+      expect(node.discoveryStage).toBe(neighbourIds.has(node.id) ? 'detected' : 'unknown');
       expect(node.firstRewardClaimed).toBe(false);
     }
   });
@@ -202,6 +206,77 @@ describe('migrateVimanaState', () => {
   });
 });
 
+describe('map navigation', () => {
+  const buildNodes = () => {
+    // a — b — c — d in a line, plus stray e connected to c.
+    const stages: Record<string, import('./vimana').VimanaDiscoveryStage> = {
+      a: 'scanned',
+      b: 'detected',
+      c: 'unknown',
+      d: 'unknown',
+      e: 'unknown',
+    };
+    const connections: Record<string, string[]> = {
+      a: ['b'],
+      b: ['a', 'c'],
+      c: ['b', 'd', 'e'],
+      d: ['c'],
+      e: ['c'],
+    };
+    return Object.keys(stages).map((id) =>
+      createVimanaNode({
+        id,
+        discoveryStage: stages[id],
+        connections: connections[id],
+      }),
+    );
+  };
+
+  it('reveals unknown neighbours when a node is scanned', () => {
+    const nodes = buildNodes();
+    const revealed = revealVimanaNeighbors(nodes, 'b');
+    expect(revealed.find((n) => n.id === 'c')!.discoveryStage).toBe('detected');
+    // Non-neighbours stay fogged; already-revealed nodes are untouched.
+    expect(revealed.find((n) => n.id === 'd')!.discoveryStage).toBe('unknown');
+    expect(revealed.find((n) => n.id === 'a')!.discoveryStage).toBe('scanned');
+  });
+
+  it('returns the same array when nothing needs revealing', () => {
+    const nodes = buildNodes();
+    expect(revealVimanaNeighbors(nodes, 'a')).toBe(nodes); // b already detected
+  });
+
+  it('plots the shortest route through revealed space only', () => {
+    const nodes = buildNodes();
+    expect(findVimanaRoute(nodes, 'a', 'b')).toEqual(['a', 'b']);
+    // c is fogged: no route may pass through or end in it.
+    expect(findVimanaRoute(nodes, 'a', 'c')).toBeNull();
+    expect(findVimanaRoute(nodes, 'a', 'd')).toBeNull();
+
+    const revealed = revealVimanaNeighbors(nodes, 'b');
+    expect(findVimanaRoute(revealed, 'a', 'c')).toEqual(['a', 'b', 'c']);
+    expect(findVimanaRoute(revealed, 'a', 'a')).toEqual(['a']);
+  });
+
+  it('reveals two hops out for a perfect scan (hops=2)', () => {
+    const nodes = buildNodes();
+    const revealed = revealVimanaNeighbors(nodes, 'b', 2);
+    // One hop from b is c (already covered); two hops reaches d and e too.
+    expect(revealed.find((n) => n.id === 'c')!.discoveryStage).toBe('detected');
+    expect(revealed.find((n) => n.id === 'd')!.discoveryStage).toBe('detected');
+    expect(revealed.find((n) => n.id === 'e')!.discoveryStage).toBe('detected');
+  });
+
+  it('default state keeps every revealed signal reachable from home', () => {
+    const state = createDefaultVimanaState({ random: () => 0.4, genomeSeed: 8 });
+    const homeId = state.activeNodeId!;
+    for (const node of state.nodes) {
+      if (node.discoveryStage === 'unknown') continue;
+      expect(findVimanaRoute(state.nodes, homeId, node.id)).not.toBeNull();
+    }
+  });
+});
+
 describe('scanVimanaNode', () => {
   it('grants first discovery exactly once and advances stages', () => {
     const node = createVimanaNode({ id: 'n1', discoveryStage: 'detected', intensity: 60 });
@@ -261,5 +336,35 @@ describe('scanVimanaNode', () => {
     const resolved = { ...current, anomaly: { ...current.anomaly!, state: 'resolved' as const } };
     const mastery = scanVimanaNode(resolved, 500);
     expect(mastery.node.discoveryStage).toBe('mastered');
+  });
+
+  it('stores the resonance-ring quality score, keeping the best result', () => {
+    const node = createVimanaNode({ id: 'n4', discoveryStage: 'detected' });
+
+    const rough = scanVimanaNode(node, 100, 45);
+    expect(rough.node.scanQuality).toBe(45);
+
+    // A worse follow-up scan never erases a better one already on record.
+    const worseAfter = scanVimanaNode(rough.node, 200, 20);
+    expect(worseAfter.node.scanQuality).toBe(45);
+
+    const perfect = scanVimanaNode(worseAfter.node, 300, 100);
+    expect(perfect.node.scanQuality).toBe(100);
+  });
+
+  it('defaults to the flat baseline quality when no score is supplied', () => {
+    const node = createVimanaNode({ id: 'n5', discoveryStage: 'detected' });
+    expect(scanVimanaNode(node, 100).node.scanQuality).toBe(60);
+  });
+});
+
+describe('vimanaInfoLevel', () => {
+  it('maps scanQuality thresholds to rough / clean / perfect', () => {
+    expect(vimanaInfoLevel(0)).toBe('rough');
+    expect(vimanaInfoLevel(54)).toBe('rough');
+    expect(vimanaInfoLevel(55)).toBe('clean');
+    expect(vimanaInfoLevel(84)).toBe('clean');
+    expect(vimanaInfoLevel(85)).toBe('perfect');
+    expect(vimanaInfoLevel(100)).toBe('perfect');
   });
 });

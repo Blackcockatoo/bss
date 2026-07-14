@@ -59,7 +59,14 @@ function HpBar({ hp, maxHp, color }: { hp: number; maxHp: number; color: string 
   );
 }
 
-export function BattleArena() {
+interface BattleArenaProps {
+  /** Called once, right after a win is recorded — e.g. to resolve a Guardian Signal anomaly. */
+  onWin?: (opponent: string) => void;
+  /** When provided, renders a "Return" affordance back to the caller (e.g. the Vimana map). */
+  onExit?: () => void;
+}
+
+export function BattleArena({ onWin, onExit }: BattleArenaProps = {}) {
   const battle  = useStore(s => s.battle);
   const vitals  = useStore(s => s.vitals);
   const recordBattle = useStore(s => s.recordBattle);
@@ -179,6 +186,9 @@ export function BattleArena() {
     if (outcome.battleOver && outcome.winner) {
       const won = outcome.winner === 'player';
       recordBattle(won ? 'win' : 'loss', opponent);
+      if (won) {
+        onWin?.(opponent);
+      }
       setResultMsg(won
         ? `Victory! ${opponent} yielded to your resonance!`
         : `Defeated! ${opponent} was too strong — rest and return.`);
@@ -186,13 +196,22 @@ export function BattleArena() {
     }
 
     setResolving(false);
-  }, [resolving, playerMoves, opponentMoves, playerHp, playerAtk, playerDef, playerSpd, playerType, playerStatus, opponent, opponentHp, opponentAtk, opponentDef, opponentSpd, opponentType, opponentStatus, recordBattle]);
+  }, [resolving, playerMoves, opponentMoves, playerHp, playerAtk, playerDef, playerSpd, playerType, playerStatus, opponent, opponentHp, opponentAtk, opponentDef, opponentSpd, opponentType, opponentStatus, recordBattle, onWin]);
 
   // ── Idle ──────────────────────────────────────────────────────────────────
   if (phase === 'idle') {
     const pType = derivePlayerType(battle.energyShield);
     return (
       <div className="space-y-4">
+        {onExit && (
+          <button
+            onClick={onExit}
+            className="flex items-center gap-1 text-xs text-zinc-400 hover:text-white transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            Return to field
+          </button>
+        )}
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
@@ -369,6 +388,14 @@ export function BattleArena() {
       >
         Back to Arena
       </button>
+      {onExit && (
+        <button
+          onClick={onExit}
+          className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors block mx-auto"
+        >
+          Return to field
+        </button>
+      )}
     </div>
   );
 }

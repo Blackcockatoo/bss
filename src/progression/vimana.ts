@@ -78,6 +78,31 @@ export const VIMANA_ESSENCE_REWARDS = {
 /** Number of scans a node needs (post-discovery) before it can be mastered. */
 export const VIMANA_MASTERY_VISITS = 3;
 
+/** Numeric scanQuality achieved by each resonance-ring tap-timing tier. */
+export const SCAN_TIER_SCORES = {
+  rough: 45,
+  clean: 75,
+  perfect: 100,
+} as const;
+
+export type VimanaScanTier = keyof typeof SCAN_TIER_SCORES;
+
+/** scanQuality reached before a node's info reveals more than the basics. */
+export const SCAN_QUALITY_CLEAN_MIN = 55;
+export const SCAN_QUALITY_PERFECT_MIN = 85;
+
+/**
+ * How much of a node's data a stored scanQuality has actually earned.
+ * Ties the resonance-ring result to what the bottom sheet is allowed to show:
+ * a rough scan only confirms the field type, a clean scan adds intensity and
+ * anomaly presence, a perfect scan reveals full anomaly detail.
+ */
+export function vimanaInfoLevel(scanQuality: number): VimanaScanTier {
+  if (scanQuality >= SCAN_QUALITY_PERFECT_MIN) return 'perfect';
+  if (scanQuality >= SCAN_QUALITY_CLEAN_MIN) return 'clean';
+  return 'rough';
+}
+
 const DISCOVERY_STAGES: VimanaDiscoveryStage[] = [
   'unknown',
   'detected',
@@ -128,7 +153,7 @@ function mulberry32(seed: number): () => number {
   };
 }
 
-function hashString(value: string): number {
+export function hashString(value: string): number {
   let hash = 2166136261;
   for (let i = 0; i < value.length; i++) {
     hash ^= value.charCodeAt(i);
@@ -331,9 +356,9 @@ function createPresetNodes(random: () => number, now: number): VimanaNode[] {
       coordinates: spec.coordinates,
       fieldType: spec.fieldType,
       intensity: spec.intensity,
-      // The home node starts scanned; everything else is a detected signal so
-      // the map shows destinations without revealing their details.
-      discoveryStage: isHome ? 'scanned' : 'detected',
+      // The home node starts scanned; everything else begins fogged and is
+      // revealed to 'detected' hop by hop as neighbouring fields are scanned.
+      discoveryStage: isHome ? 'scanned' : 'unknown',
       scanQuality: isHome ? 60 : 0,
       samples: isHome ? 1 : 0,
       visits: isHome ? 1 : 0,
@@ -366,7 +391,7 @@ function createGridNodes(random: () => number, now: number): VimanaNode[] {
             coordinates: { x, y, z },
             fieldType: FIELD_TYPES[hashString(id) % FIELD_TYPES.length],
             intensity,
-            discoveryStage: isCenter ? 'scanned' : 'detected',
+            discoveryStage: isCenter ? 'scanned' : 'unknown',
             scanQuality: isCenter ? 60 : 0,
             samples: isCenter ? 1 : 0,
             visits: isCenter ? 1 : 0,
@@ -398,15 +423,18 @@ export function createDefaultVimanaState(
 
   const baseNodes =
     layout === 'grid' ? createGridNodes(random, now) : createPresetNodes(random, now);
-  const nodes = applyConnections(
+  const connected = applyConnections(
     ensureMinimumAnomalies(baseNodes, MIN_VIMANA_ANOMALIES, random),
     seed,
   );
+  const homeId = layout === 'grid' ? '0,0,0' : connected[0]?.id ?? null;
+  // Signals one hop from home start detected; the rest of the map is fog.
+  const nodes = homeId ? revealVimanaNeighbors(connected, homeId) : connected;
 
   return {
     version: VIMANA_STATE_VERSION,
     nodes,
-    activeNodeId: layout === 'grid' ? '0,0,0' : nodes[0]?.id ?? null,
+    activeNodeId: homeId,
     anomaliesFound: countAnomaliesFound(nodes),
     anomaliesResolved: 0,
     scansPerformed: 0,
@@ -689,6 +717,92 @@ export function migrateVimanaState(
   return createDefaultVimanaState({ genomeSeed: seed });
 }
 
+// ===== Map navigation =====
+
+/**
+ * Promote unknown neighbours of a node to 'detected' — scanning a field
+ * surfaces the signals of everything up to `hops` routes away, which is how
+ * the fog of war recedes. A perfect resonance-ring scan reaches two hops
+ * instead of the usual one, rewarding precision with a wider picture.
+ */
+export function revealVimanaNeighbors(
+  nodes: VimanaNode[],
+  nodeId: string,
+  hops: number = 1,
+): VimanaNode[] {
+  const byId = new Map(nodes.map((node) => [node.id, node]));
+  if (!byId.has(nodeId)) return nodes;
+
+  let frontier = new Set<string>([nodeId]);
+  const toReveal = new Set<string>();
+  for (let hop = 0; hop < hops; hop++) {
+    const nextFrontier = new Set<string>();
+    for (const id of frontier) {
+      const node = byId.get(id);
+      if (!node) continue;
+      for (const neighbourId of node.connections) {
+        if (!byId.has(neighbourId)) continue;
+        nextFrontier.add(neighbourId);
+        if (byId.get(neighbourId)!.discoveryStage === 'unknown') {
+          toReveal.add(neighbourId);
+        }
+      }
+    }
+    frontier = nextFrontier;
+  }
+
+  if (toReveal.size === 0) return nodes;
+  return nodes.map((node) =>
+    toReveal.has(node.id) ? { ...node, discoveryStage: 'detected' as const } : node,
+  );
+}
+
+/**
+ * Shortest route between two nodes travelling only through revealed
+ * (non-unknown) space. Returns the node id path including both endpoints,
+ * or null when the destination cannot be reached through known signals.
+ */
+export function findVimanaRoute(
+  nodes: VimanaNode[],
+  fromId: string,
+  toId: string,
+): string[] | null {
+  if (fromId === toId) return [fromId];
+  const byId = new Map(nodes.map((node) => [node.id, node]));
+  const from = byId.get(fromId);
+  const to = byId.get(toId);
+  if (!from || !to || to.discoveryStage === 'unknown') return null;
+
+  const previous = new Map<string, string>();
+  const visited = new Set<string>([fromId]);
+  const queue: string[] = [fromId];
+
+  while (queue.length > 0) {
+    const currentId = queue.shift()!;
+    const current = byId.get(currentId);
+    if (!current) continue;
+    for (const neighbourId of current.connections) {
+      if (visited.has(neighbourId)) continue;
+      const neighbour = byId.get(neighbourId);
+      if (!neighbour || neighbour.discoveryStage === 'unknown') continue;
+      visited.add(neighbourId);
+      previous.set(neighbourId, currentId);
+      if (neighbourId === toId) {
+        const path = [toId];
+        let step = toId;
+        while (step !== fromId) {
+          step = previous.get(step)!;
+          path.unshift(step);
+        }
+        return path;
+      }
+      queue.push(neighbourId);
+    }
+  }
+
+  return null;
+}
+
 // ===== Scan / visit progression =====
 
 export interface VimanaScanOutcome {
@@ -703,8 +817,18 @@ export interface VimanaScanOutcome {
 /**
  * Advance a node one discovery step for a scan/visit. Pure; returns the next
  * node plus flags for the store to translate into rewards exactly once.
+ *
+ * `qualityScore` (0-100) is the result of the resonance-ring tap-timing
+ * minigame for this attempt; the node keeps the best score it has ever
+ * earned, which in turn gates how much detail the UI reveals (see
+ * {@link vimanaInfoLevel}). Callers that don't run the minigame (tests,
+ * migrations) get the previous flat baseline.
  */
-export function scanVimanaNode(node: VimanaNode, now: number = Date.now()): VimanaScanOutcome {
+export function scanVimanaNode(
+  node: VimanaNode,
+  now: number = Date.now(),
+  qualityScore: number = 60,
+): VimanaScanOutcome {
   const rank = discoveryStageRank(node.discoveryStage);
   const scannedRank = discoveryStageRank('scanned');
 
@@ -734,7 +858,7 @@ export function scanVimanaNode(node: VimanaNode, now: number = Date.now()): Vima
   const next: VimanaNode = {
     ...node,
     discoveryStage: mastered ? 'mastered' : nextStage,
-    scanQuality: Math.max(node.scanQuality, 60),
+    scanQuality: Math.max(node.scanQuality, clampNumber(qualityScore, 0, 100, 60)),
     samples,
     visits,
     firstRewardClaimed: node.firstRewardClaimed || firstDiscovery,

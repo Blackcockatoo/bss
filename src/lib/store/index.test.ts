@@ -800,6 +800,92 @@ describe('Store State Management', () => {
       expect(useStore.getState().essence).toBe(essenceAfterResolve);
     });
 
+    it('stores the resonance-ring scan quality on the node, keeping the best result', () => {
+      const nodeId = getUndiscoveredNodeId();
+
+      useStore.getState().exploreCell(nodeId, { scanQuality: 45 });
+      expect(useStore.getState().vimana.nodes.find(n => n.id === nodeId)!.scanQuality).toBe(45);
+
+      // A weaker follow-up scan never erases a stronger one already banked.
+      useStore.getState().exploreCell(nodeId, { scanQuality: 20 });
+      expect(useStore.getState().vimana.nodes.find(n => n.id === nodeId)!.scanQuality).toBe(45);
+
+      useStore.getState().exploreCell(nodeId, { scanQuality: 100 });
+      expect(useStore.getState().vimana.nodes.find(n => n.id === nodeId)!.scanQuality).toBe(100);
+    });
+
+    it('reveals a second hop of signals only on a perfect resonance-ring scan', () => {
+      const { vimana } = useStore.getState();
+      const byId = new Map(vimana.nodes.map(n => [n.id, n]));
+      const home = byId.get(vimana.activeNodeId!)!;
+
+      // Any scan always reveals the scanned node's own neighbours (baseline
+      // hops=1); the perfect-scan bonus reaches one hop further still. Find a
+      // neighbour of home with a neighbour-of-its-neighbour that isn't
+      // already reachable within that baseline hop.
+      const homeConnections = new Set(home.connections);
+      let neighborId: string | undefined;
+      let secondHopId: string | undefined;
+      for (const candidate of home.connections) {
+        const candidateNode = byId.get(candidate)!;
+        const oneHopFromCandidate = new Set(candidateNode.connections);
+        const found = candidateNode.connections
+          .flatMap(id => byId.get(id)?.connections ?? [])
+          // Must not already be revealed at genesis: not home, not a direct
+          // home neighbour (those start 'detected'), and not within the
+          // scanned node's own baseline one-hop reveal.
+          .find(
+            id =>
+              id !== candidate &&
+              id !== home.id &&
+              !homeConnections.has(id) &&
+              !oneHopFromCandidate.has(id)
+          );
+        if (found && byId.get(found)!.discoveryStage === 'unknown') {
+          neighborId = candidate;
+          secondHopId = found;
+          break;
+        }
+      }
+
+      if (!neighborId || !secondHopId) {
+        // Topology-dependent: skip gracefully if this preset is too small
+        // for a distinct third-hop node to exist.
+        return;
+      }
+
+      // A rough scan only reveals the scanned node's immediate neighbours.
+      useStore.getState().exploreCell(neighborId, { scanQuality: 45 });
+      expect(
+        useStore.getState().vimana.nodes.find(n => n.id === secondHopId)!.discoveryStage
+      ).toBe('unknown');
+
+      // A perfect scan reaches one hop further.
+      useStore.getState().exploreCell(neighborId, { scanQuality: 100 });
+      expect(
+        useStore.getState().vimana.nodes.find(n => n.id === secondHopId)!.discoveryStage
+      ).not.toBe('unknown');
+    });
+
+    it('grants a purely additive flight bonus for gates threaded en route', () => {
+      const nodeId = getUndiscoveredNodeId();
+      const essenceBefore = useStore.getState().essence;
+
+      useStore.getState().exploreCell(nodeId, { flightBonus: 2 });
+      const afterBonus = useStore.getState().essence;
+      expect(afterBonus).toBeGreaterThan(essenceBefore);
+      expect(
+        useStore.getState().rewardHistory.some(r => r.title === 'Flight Bonus')
+      ).toBe(true);
+
+      // Defensively clamped even if a caller passes an out-of-range value.
+      const secondNodeId = getUndiscoveredNodeId();
+      const essenceBeforeClamp = useStore.getState().essence;
+      useStore.getState().exploreCell(secondNodeId, { flightBonus: 999 });
+      const gained = useStore.getState().essence - essenceBeforeClamp;
+      expect(gained).toBeLessThanOrEqual(3 + 4); // flight cap (3) + discovery reward (4)
+    });
+
     it('migrates legacy cell saves during hydration and keeps discoveries', () => {
       useStore.getState().hydrate({
         vitals: useStore.getState().vitals,

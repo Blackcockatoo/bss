@@ -3,6 +3,7 @@
 // so existing '@/lib/progression/types' importers keep working.
 export * from './vimana';
 export type { VimanaFieldType as VimanaField } from './vimana';
+export * from './vimanaEncounters';
 
 export interface BattleStats {
   wins: number;
