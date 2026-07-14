@@ -152,6 +152,12 @@ export default function PetPage() {
 
   const petName = petType === "auralia" ? "Auralia" : "Meta-Pet";
   const petId = petType === "auralia" ? "auralia-main" : "visual-dna-main";
+  const formLabel =
+    petType === "auralia"
+      ? "Auralia Guardian"
+      : petType === "geometry"
+        ? "Geometry · Sri Yantra"
+        : "Evolved · DNA / Forge Body";
 
   return (
     <div
@@ -165,7 +171,7 @@ export default function PetPage() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="space-y-2">
                 <p className="text-xs uppercase tracking-[0.28em] text-cyan-300/75">
-                  Bond Layer · {petType === "auralia" ? "Auralia Guardian" : "DNA / Forge Body"}
+                  Bond Layer · {formLabel}
                 </p>
                 <p className="text-sm text-zinc-200">{petStep.summary}</p>
                 {dnaImprint ? (
@@ -207,6 +213,76 @@ export default function PetPage() {
           </div>
 
           <div className="flex-shrink-0 border-t border-slate-700/50 bg-slate-900/90 p-4 sm:p-6">
+            <div className="mb-4">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-200">
+                Visual form — one pet, three bodies
+              </p>
+              <div
+                role="group"
+                aria-label="Pet visual form"
+                className="grid grid-cols-3 gap-2"
+              >
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => selectPetRuntime("auralia")}
+                  aria-pressed={petType === "auralia"}
+                  className={
+                    petType === "auralia"
+                      ? "border-amber-400 bg-amber-500/20 text-amber-100"
+                      : "border-slate-700 bg-slate-900/80 text-zinc-300"
+                  }
+                >
+                  Auralia
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => selectPetRuntime("evolved")}
+                  aria-pressed={petType === "evolved"}
+                  className={
+                    petType === "evolved"
+                      ? "border-cyan-400 bg-cyan-500/20 text-cyan-100"
+                      : "border-slate-700 bg-slate-900/80 text-zinc-300"
+                  }
+                >
+                  Evolved
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => selectPetRuntime("geometry")}
+                  aria-pressed={petType === "geometry"}
+                  className={
+                    petType === "geometry"
+                      ? "border-fuchsia-400 bg-fuchsia-500/20 text-fuchsia-100"
+                      : "border-slate-700 bg-slate-900/80 text-zinc-300"
+                  }
+                >
+                  Geometry
+                </Button>
+              </div>
+              {petType === "evolved" && (
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  <p className="text-xs text-slate-400">
+                    The Evolved body inherits the live 180-digit genome. Shape
+                    it in the Body Forge.
+                  </p>
+                  <Link href="/body-forge">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="whitespace-nowrap border-fuchsia-700 bg-fuchsia-950/50 text-fuchsia-200 hover:bg-fuchsia-900/60"
+                    >
+                      Open Body Forge
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
             <HUD mode="simple" />
             <div className="mt-6 border-t border-slate-800/80 pt-4">
               <Button
@@ -235,48 +311,22 @@ export default function PetPage() {
                     <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-200">
                       Active body engine
                     </p>
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => selectPetRuntime("geometric")}
-                        className={
-                          petType === "geometric"
-                            ? "border-cyan-400 bg-cyan-500/20 text-cyan-100"
-                            : "border-slate-700 bg-slate-900/80 text-zinc-300"
-                        }
-                      >
-                        DNA / Forge Body
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => selectPetRuntime("auralia")}
-                        className={
-                          petType === "auralia"
-                            ? "border-amber-400 bg-amber-500/20 text-amber-100"
-                            : "border-slate-700 bg-slate-900/80 text-zinc-300"
-                        }
-                      >
-                        Auralia Guardian
-                      </Button>
-                      <Link href="/body-forge">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="border-fuchsia-700 bg-fuchsia-950/50 text-fuchsia-200 hover:bg-fuchsia-900/60"
-                        >
-                          Open Body Forge
-                        </Button>
-                      </Link>
-                    </div>
-                    <p className="mt-2 text-xs text-slate-400">
-                      Body Forge always returns here and selects the DNA / Forge
-                      renderer. Vimana and the Navigator now return to this same
-                      pet runtime instead of a separate pet page.
+                    <p className="text-xs text-slate-400">
+                      Auralia, Evolved and Geometry are three renderers over
+                      the same pet — switch them with the Visual Form selector
+                      above. Body Forge shapes the Evolved body and always
+                      returns here. Vimana and the Navigator return to this
+                      same pet runtime instead of a separate pet page.
                     </p>
+                    <Link href="/body-forge" className="mt-2 inline-block">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-fuchsia-700 bg-fuchsia-950/50 text-fuchsia-200 hover:bg-fuchsia-900/60"
+                      >
+                        Open Body Forge
+                      </Button>
+                    </Link>
                   </div>
 
                   <div className="flex flex-wrap gap-2">

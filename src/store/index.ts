@@ -64,7 +64,21 @@ import {
 } from '../lib/system/invariants';
 
 export type { Vitals };
-export type PetType = 'geometric' | 'auralia';
+export type PetType = 'auralia' | 'evolved' | 'geometry';
+
+/**
+ * Saves from the two-form era persisted 'geometric' (and very old exports
+ * used 'organic'/'hybrid'). Map those onto the three-form model instead of
+ * rejecting them: the DNA / Body Forge renderer became the Evolved form.
+ */
+export function normalizePetType(value: unknown): PetType | null {
+  if (value === 'auralia' || value === 'evolved' || value === 'geometry') {
+    return value;
+  }
+  if (value === 'geometric' || value === 'hybrid') return 'evolved';
+  if (value === 'organic') return 'auralia';
+  return null;
+}
 export type RewardSource =
   | 'battle'
   | 'exploration'
@@ -335,7 +349,7 @@ export function createMetaPetWebStore(
     vimana: createDefaultVimanaState(),
     rewardHistory: [],
     lastReward: null,
-    petType: 'geometric',
+    petType: 'auralia',
     mirrorMode: { ...DEFAULT_MIRROR_MODE },
     lastAction: null,
     lastActionAt: 0,
@@ -448,7 +462,7 @@ export function createMetaPetWebStore(
           : state.vimana,
         rewardHistory: rewardHistory ? rewardHistory.map(entry => ({ ...entry, reward: { ...entry.reward } })) : state.rewardHistory,
         lastReward: lastReward ?? state.lastReward,
-        petType: petType ?? state.petType,
+        petType: normalizePetType(petType) ?? state.petType,
         mirrorMode: mirrorMode ? { ...mirrorMode } : state.mirrorMode,
         tickId: state.tickId,
       }));

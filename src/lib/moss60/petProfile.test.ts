@@ -21,7 +21,7 @@ describe('deriveMoss60PetProfile', () => {
     const profile = deriveMoss60PetProfile({
       id: 'pet-123',
       name: 'Nova',
-      petType: 'geometric',
+      petType: 'evolved',
       genome,
       source: 'live',
     });

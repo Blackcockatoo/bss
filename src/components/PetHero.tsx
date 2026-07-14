@@ -16,7 +16,6 @@ interface PetHeroProps {
  * Supports gesture controls and shows the pet prominently
  */
 export function PetHero({ className = '', staticMode = false }: PetHeroProps) {
-  const petType = useStore(state => state.petType);
   const feed = useStore(state => state.feed);
   const play = useStore(state => state.play);
   const clean = useStore(state => state.clean);

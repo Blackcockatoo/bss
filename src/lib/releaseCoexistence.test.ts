@@ -25,7 +25,7 @@ describe("BSS release coexistence contract", () => {
     expect(vimanaMap).toContain("Vimana Field Atlas");
     expect(bodyForgeRoute).toContain("<BodyForge />");
     expect(bodyForgeWorkshop).toContain("Set inherited body");
-    expect(bodyForgeWorkshop).toContain("setPetType('geometric')");
+    expect(bodyForgeWorkshop).toContain("setPetType('evolved')");
     expect(bodyForgeWorkshop).toContain("router.push('/pet')");
     expect(canonicalPetRoute).toContain("<PetRuntimeStage");
     expect(duplicatePetRoute).toContain("redirect('/pet')");

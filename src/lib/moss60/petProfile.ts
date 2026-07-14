@@ -98,7 +98,11 @@ export function deriveMoss60PetProfile(
   const label = source.name?.trim() || 'Active Companion';
   const idLabel = source.id?.trim() || 'live-companion';
   const petTypeLabel =
-    source.petType === 'auralia' ? 'Auralia companion' : 'Geometric companion';
+    source.petType === 'auralia'
+      ? 'Auralia companion'
+      : source.petType === 'geometry'
+        ? 'Geometry companion'
+        : 'Evolved companion';
   const baseSeed = [
     label,
     idLabel,
