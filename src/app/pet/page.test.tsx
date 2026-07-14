@@ -8,6 +8,7 @@ import { getRouteProgression } from "@/lib/routeProgression";
 
 const startTick = vi.fn();
 const stopTick = vi.fn();
+const setPetType = vi.fn();
 const initializeStarterAddons = vi.fn().mockResolvedValue({
   success: true,
   addonsCreated: 3,
@@ -25,8 +26,8 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-vi.mock("@/components/AuraliaMetaPet", () => ({
-  default: () => <div data-testid="auralia-meta-pet" />,
+vi.mock("@/components/PetRuntimeStage", () => ({
+  PetRuntimeStage: () => <div data-testid="pet-runtime-stage" />,
 }));
 
 vi.mock("@/components/HUD", () => ({
@@ -93,6 +94,8 @@ const storeState = {
   },
   lastAction: null,
   lastActionAt: 0,
+  petType: "geometric" as const,
+  setPetType,
 };
 
 vi.mock("@/lib/store", () => ({
@@ -102,6 +105,7 @@ vi.mock("@/lib/store", () => ({
 
 describe("PetPage", () => {
   beforeEach(() => {
+    setPetType.mockReset();
     window.localStorage.clear();
     saveDnaImprint({
       selectedSeed: "blue",
@@ -113,13 +117,14 @@ describe("PetPage", () => {
     });
   });
 
-  it("surfaces the latest DNA imprint back on the pet route", async () => {
+  it("surfaces the latest DNA imprint on the canonical pet route", async () => {
     render(<PetPage />);
 
     await waitFor(() => {
       expect(initializeStarterAddons).toHaveBeenCalled();
     });
 
+    expect(screen.getByTestId("pet-runtime-stage")).toBeInTheDocument();
     expect(
       screen.getByText(getRouteProgression("pet").summary),
     ).toBeInTheDocument();
@@ -128,6 +133,20 @@ describe("PetPage", () => {
     expect(
       screen.getByRole("link", { name: /Re-open DNA Hub/i }),
     ).toBeInTheDocument();
+  });
+
+  it("switches the active body engine from the mechanics lab", async () => {
+    render(<PetPage />);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /Advanced \/ Mechanics Lab/i }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Auralia Guardian/i }));
+
+    expect(setPetType).toHaveBeenCalledWith("auralia");
+    expect(
+      screen.getByRole("link", { name: /Open Body Forge/i }),
+    ).toHaveAttribute("href", "/body-forge");
   });
 
   it("opens the registration certificate from the advanced section", async () => {
