@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PetHero } from './PetHero';
 
 const state = vi.hoisted(() => ({
-  petType: 'geometric' as 'geometric' | 'auralia',
+  petType: 'geometry' as 'auralia' | 'evolved' | 'geometry',
   systemState: 'active',
   feed: vi.fn(),
   play: vi.fn(),
@@ -23,13 +23,16 @@ vi.mock('./GeometryAvatarRenderer', () => ({
 vi.mock('./AuraliaSprite', () => ({
   default: () => <div data-testid="auralia-sprite" />,
 }));
+vi.mock('./VisualDNAPet', () => ({
+  VisualDNAPet: () => <div data-testid="visual-dna-pet" />,
+}));
 
 describe('PetHero', () => {
   beforeEach(() => {
-    state.petType = 'geometric';
+    state.petType = 'geometry';
   });
 
-  it('uses GeometryAvatarRenderer for the geometric hero presentation', () => {
+  it('uses GeometryAvatarRenderer for the Geometry hero presentation', () => {
     render(<PetHero staticMode />);
 
     expect(screen.getByTestId('geometry-avatar-renderer')).toBeInTheDocument();
@@ -41,6 +44,15 @@ describe('PetHero', () => {
     render(<PetHero staticMode />);
 
     expect(screen.getByTestId('auralia-sprite')).toBeInTheDocument();
+    expect(screen.queryByTestId('geometry-avatar-renderer')).not.toBeInTheDocument();
+  });
+
+  it('uses the forged Visual DNA body for the Evolved hero presentation', () => {
+    state.petType = 'evolved';
+    render(<PetHero staticMode />);
+
+    expect(screen.getByTestId('visual-dna-pet')).toBeInTheDocument();
+    expect(screen.queryByTestId('auralia-sprite')).not.toBeInTheDocument();
     expect(screen.queryByTestId('geometry-avatar-renderer')).not.toBeInTheDocument();
   });
 });

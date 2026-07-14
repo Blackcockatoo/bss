@@ -102,6 +102,7 @@ describe('Store State Management', () => {
       battle: createDefaultBattleStats(),
       miniGames: createDefaultMiniGameProgress(),
       vimana: createDefaultVimanaState(),
+      petType: 'auralia',
     });
   });
 
@@ -133,6 +134,22 @@ describe('Store State Management', () => {
       const state = useStore.getState();
 
       expect(state.achievements).toEqual([]);
+    });
+
+    it('should default to the Auralia form', () => {
+      expect(useStore.getState().petType).toBe('auralia');
+    });
+
+    it('should switch renderers without replacing companion state', () => {
+      const vitals = useStore.getState().vitals;
+
+      useStore.getState().setPetType('evolved');
+      expect(useStore.getState().petType).toBe('evolved');
+      expect(useStore.getState().vitals).toBe(vitals);
+
+      useStore.getState().setPetType('geometry');
+      expect(useStore.getState().petType).toBe('geometry');
+      expect(useStore.getState().vitals).toBe(vitals);
     });
   });
 

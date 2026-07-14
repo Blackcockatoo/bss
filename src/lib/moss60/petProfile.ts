@@ -1,5 +1,6 @@
 import type { Genome, GenomeHash } from '@/lib/genome';
 import type { HeptaDigits, PrimeTailID } from '@/lib/identity/types';
+import { normalizePetForm, type PetForm } from '@/lib/petForms';
 import { moss60Hash } from '@/lib/qr-messaging/crypto';
 
 export type Moss60PetStrandKey = 'red' | 'blue' | 'black' | 'combined' | 'security';
@@ -97,8 +98,12 @@ export function deriveMoss60PetProfile(
 ): Moss60PetProfile {
   const label = source.name?.trim() || 'Active Companion';
   const idLabel = source.id?.trim() || 'live-companion';
-  const petTypeLabel =
-    source.petType === 'auralia' ? 'Auralia companion' : 'Geometric companion';
+  const petTypeLabels: Record<PetForm, string> = {
+    auralia: 'Auralia companion',
+    evolved: 'Evolved / Body Forge companion',
+    geometry: 'Geometry / Moss60 companion',
+  };
+  const petTypeLabel = petTypeLabels[normalizePetForm(source.petType)];
   const baseSeed = [
     label,
     idLabel,

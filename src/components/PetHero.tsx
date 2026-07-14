@@ -5,6 +5,7 @@ import { useStore } from '@/lib/store';
 import { triggerHaptic } from '@/lib/haptics';
 import AuraliaSprite from './AuraliaSprite';
 import { GeometryAvatarRenderer } from './GeometryAvatarRenderer';
+import { VisualDNAPet } from './VisualDNAPet';
 
 interface PetHeroProps {
   className?: string;
@@ -127,8 +128,15 @@ export function PetHero({ className = '', staticMode = false }: PetHeroProps) {
       onTouchEnd={handleTouchEnd}
     >
       <div className="relative w-64 h-64 flex items-center justify-center">
-        {petType === 'geometric' ? (
+        {petType === 'geometry' ? (
           <GeometryAvatarRenderer animated={!staticMode} />
+        ) : petType === 'evolved' ? (
+          <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+            <VisualDNAPet
+              showReadout={false}
+              className="w-[430px] shrink-0 scale-[0.58] border-0 bg-transparent p-0"
+            />
+          </div>
         ) : (
           <AuraliaSprite size="large" interactive staticMode={staticMode} />
         )}

@@ -33,6 +33,7 @@ describe('deriveMoss60PetProfile', () => {
     expect(profile.strands.combined).toHaveLength(60);
     expect(profile.strands.security).toHaveLength(60);
     expect(profile.strands.red.startsWith('0123456789')).toBe(true);
+    expect(profile.petTypeLabel).toBe('Evolved / Body Forge companion');
   });
 
   it('stays deterministic without a genome', () => {

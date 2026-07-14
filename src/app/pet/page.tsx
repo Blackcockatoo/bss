@@ -33,6 +33,12 @@ import {
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+const PET_FORM_LABELS: Record<PetType, string> = {
+  auralia: "Auralia Companion",
+  evolved: "Evolved / Body Forge",
+  geometry: "Geometry / Moss60",
+};
+
 export default function PetPage() {
   const startTick = useStore((s) => s.startTick);
   const stopTick = useStore((s) => s.stopTick);
@@ -150,8 +156,9 @@ export default function PetPage() {
     }
   };
 
-  const petName = petType === "auralia" ? "Auralia" : "Meta-Pet";
-  const petId = petType === "auralia" ? "auralia-main" : "visual-dna-main";
+  // Switching form changes the renderer, never the companion identity.
+  const petName = "Meta-Pet";
+  const petId = "visual-dna-main";
 
   return (
     <div
@@ -165,7 +172,7 @@ export default function PetPage() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="space-y-2">
                 <p className="text-xs uppercase tracking-[0.28em] text-cyan-300/75">
-                  Bond Layer · {petType === "auralia" ? "Auralia Guardian" : "DNA / Forge Body"}
+                  Bond Layer · {PET_FORM_LABELS[petType]}
                 </p>
                 <p className="text-sm text-zinc-200">{petStep.summary}</p>
                 {dnaImprint ? (
@@ -240,19 +247,6 @@ export default function PetPage() {
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => selectPetRuntime("geometric")}
-                        className={
-                          petType === "geometric"
-                            ? "border-cyan-400 bg-cyan-500/20 text-cyan-100"
-                            : "border-slate-700 bg-slate-900/80 text-zinc-300"
-                        }
-                      >
-                        DNA / Forge Body
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
                         onClick={() => selectPetRuntime("auralia")}
                         className={
                           petType === "auralia"
@@ -260,7 +254,33 @@ export default function PetPage() {
                             : "border-slate-700 bg-slate-900/80 text-zinc-300"
                         }
                       >
-                        Auralia Guardian
+                        Auralia Companion
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => selectPetRuntime("evolved")}
+                        className={
+                          petType === "evolved"
+                            ? "border-fuchsia-400 bg-fuchsia-500/20 text-fuchsia-100"
+                            : "border-slate-700 bg-slate-900/80 text-zinc-300"
+                        }
+                      >
+                        Evolved / Body Forge
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => selectPetRuntime("geometry")}
+                        className={
+                          petType === "geometry"
+                            ? "border-cyan-400 bg-cyan-500/20 text-cyan-100"
+                            : "border-slate-700 bg-slate-900/80 text-zinc-300"
+                        }
+                      >
+                        Geometry / Moss60
                       </Button>
                       <Link href="/body-forge">
                         <Button
@@ -273,9 +293,9 @@ export default function PetPage() {
                       </Link>
                     </div>
                     <p className="mt-2 text-xs text-slate-400">
-                      Body Forge always returns here and selects the DNA / Forge
-                      renderer. Vimana and the Navigator now return to this same
-                      pet runtime instead of a separate pet page.
+                      These are three forms of the same companion. Body Forge
+                      returns here in Evolved form; Geometry reads the same live
+                      Moss60 genome; Auralia is the default form.
                     </p>
                   </div>
 
@@ -398,9 +418,9 @@ export default function PetPage() {
                             evolution panels.
                           </p>
                           <p className="text-slate-500">
-                            The DNA / Forge body is the canonical inherited body
-                            renderer. Auralia remains available as a specialist
-                            Guardian form instead of a second hidden pet route.
+                            Auralia, Evolved, and Geometry share one identity,
+                            progression record, vitals system, and canonical pet
+                            route.
                           </p>
                         </div>
                       )}

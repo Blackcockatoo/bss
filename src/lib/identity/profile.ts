@@ -30,9 +30,12 @@ export const defaultIdentityProfile: IdentityProfile = {
 };
 
 function normalizeIdentityProfile(profile?: Partial<IdentityProfile>): IdentityProfile {
+  const avatarDataUrl =
+    typeof profile?.avatarDataUrl === 'string' ? profile.avatarDataUrl : '';
   return {
     ...defaultIdentityProfile,
     ...profile,
+    avatarDataUrl: getAvatarDataUrlError(avatarDataUrl) ? '' : avatarDataUrl,
   };
 }
 
@@ -138,7 +141,10 @@ interface IdentityProfileStore {
   refreshProfile: () => void;
 }
 
-const initialProfile = loadIdentityProfile();
+// Server and client must begin from the same snapshot. ClientBody refreshes
+// this store from local storage after hydration so direct route loads still
+// recover the saved profile without changing the server-rendered markup.
+const initialProfile = defaultIdentityProfile;
 
 export const useIdentityProfileStore = create<IdentityProfileStore>((set) => ({
   profile: initialProfile,

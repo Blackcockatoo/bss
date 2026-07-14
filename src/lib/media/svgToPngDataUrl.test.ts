@@ -94,6 +94,26 @@ describe('svgElementToPngDataUrl', () => {
     expect(revokeObjectURL).toHaveBeenCalledWith('blob:body-forge-avatar');
   });
 
+  it('revokes the temporary URL when Safari cannot load the SVG blob', async () => {
+    vi.stubGlobal(
+      'Image',
+      class MockFailingImage {
+        decoding = '';
+        onload: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+
+        set src(_value: string) {
+          queueMicrotask(() => this.onerror?.());
+        }
+      },
+    );
+
+    await expect(svgElementToPngDataUrl(createSvg())).rejects.toThrow(
+      /failed to rasterize/i,
+    );
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:body-forge-avatar');
+  });
+
   it('fails before allocating an object URL when the SVG has no usable dimensions', async () => {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 

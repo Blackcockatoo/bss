@@ -63,5 +63,19 @@ describe("indexeddb persistence helpers", () => {
     expect(imported.genome.red60).toHaveLength(60);
     expect(imported.genome.blue60.every((value) => value === 0)).toBe(true);
     expect(imported.genome.black60.every((value) => value === 0)).toBe(true);
+    expect(imported.petType).toBe("auralia");
+  });
+
+  it("migrates the historical geometric renderer to Evolved", () => {
+    const imported = importPetFromJSON(
+      JSON.stringify({
+        ...validBaseRecord,
+        genome: null,
+        petType: "geometric",
+      }),
+      { skipGenomeValidation: true },
+    );
+
+    expect(imported.petType).toBe("evolved");
   });
 });

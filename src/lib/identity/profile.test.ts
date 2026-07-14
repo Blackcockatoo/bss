@@ -57,6 +57,22 @@ describe('identity avatar persistence', () => {
     expect(loadIdentityProfile()).toEqual(original);
   });
 
+  it('drops malformed avatar data during reload instead of displaying it', () => {
+    window.localStorage.setItem(
+      'metapet-identity-profile',
+      JSON.stringify({
+        ...defaultIdentityProfile,
+        username: 'Safe Keeper',
+        avatarDataUrl: 'data:image/svg+xml;base64,PHN2ZyBvbmxvYWQ9YWxlcnQoMSk+',
+      }),
+    );
+
+    expect(loadIdentityProfile()).toMatchObject({
+      username: 'Safe Keeper',
+      avatarDataUrl: '',
+    });
+  });
+
   it('does not mutate Vimana, games, rewards, or progression state', () => {
     const before = useStore.getState();
     const frozenState = structuredClone({
