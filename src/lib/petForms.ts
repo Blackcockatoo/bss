@@ -11,6 +11,13 @@ export type PetForm = (typeof PET_FORMS)[number];
 export const BODY_FORGE_RETURN_FORM: PetForm = 'evolved';
 
 /**
+ * Where the chosen visual form is remembered between sessions. Presentation
+ * preference only — never a second copy of pet state. Values are passed
+ * through `normalizePetForm` on read so legacy strings stay harmless.
+ */
+export const PET_FORM_STORAGE_KEY = 'bss:meta-pet:pet-form:v1';
+
+/**
  * Resolve current and historical body labels to the canonical three-form
  * companion contract. Historical `geometric` saves used the Visual DNA / Body
  * Forge renderer, so they migrate to `evolved` rather than the new Geometry

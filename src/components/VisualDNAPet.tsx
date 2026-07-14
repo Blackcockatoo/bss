@@ -207,8 +207,12 @@ export function VisualDNAPet({
     vitals,
   ]);
 
+  // Before a genome exists the forged body still IS the creature: it renders
+  // as-forged (with the living movement layer) instead of hiding behind the
+  // forming-orb placeholder. Live phenotype deformation joins once traits do.
   const resolvedBody = useMemo(
-    () => (phenotype ? resolveBodySpec(phenotype, genome, forgedBody) : null),
+    () =>
+      phenotype ? resolveBodySpec(phenotype, genome, forgedBody) : forgedBody,
     [forgedBody, genome, phenotype],
   );
 
@@ -690,6 +694,46 @@ export function VisualDNAPet({
       </>
     );
   }, [particles, phenotype, runtimeAura]);
+
+  if (!phenotype && resolvedBody) {
+    // Forged body, no genome yet: the inherited creature performs the Moss60
+    // living layer on its own forge aura until a genome adds live phenotype.
+    return (
+      <section
+        data-testid="forged-body-pregenome-stage"
+        className={`relative overflow-hidden rounded-3xl border border-cyan-900/50 bg-[radial-gradient(circle_at_center,_rgba(8,47,73,0.42),_rgba(2,6,23,0.96)_72%)] p-4 ${className}`}
+      >
+        <div
+          ref={stageRef}
+          className="relative min-h-[360px] select-none"
+          style={{ touchAction: "pan-y" }}
+          onPointerMove={handlePointerMove}
+          onPointerDown={handlePointerDown}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerLeave}
+          onPointerLeave={handlePointerLeave}
+        >
+          <div className="absolute inset-0 flex items-center justify-center">
+            <PetBodyRenderer
+              spec={resolvedBody}
+              animate={!reducedMotion}
+              className="h-auto w-full max-w-xl overflow-visible"
+              showForgeAura
+              performance={performanceFrame}
+              living={sealed ? null : living}
+              activeClipId={sealed ? null : movement.active.clip.id}
+            />
+          </div>
+        </div>
+        {showReadout && (
+          <p className="mt-2 text-center text-xs text-zinc-400">
+            Inherited Body Forge creature · no DNA imprint yet — visit the DNA
+            route to add live phenotype
+          </p>
+        )}
+      </section>
+    );
+  }
 
   if (!phenotype) {
     return (
