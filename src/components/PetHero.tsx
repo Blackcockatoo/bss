@@ -3,7 +3,8 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useStore } from '@/lib/store';
 import { triggerHaptic } from '@/lib/haptics';
-import { PetRendererRouter } from './PetRendererRouter';
+import AuraliaSprite from './AuraliaSprite';
+import { GeometryAvatarRenderer } from './GeometryAvatarRenderer';
 
 interface PetHeroProps {
   className?: string;
@@ -125,7 +126,11 @@ export function PetHero({ className = '', staticMode = false }: PetHeroProps) {
       onTouchEnd={handleTouchEnd}
     >
       <div className="relative w-64 h-64 flex items-center justify-center">
-        <PetRendererRouter variant="compact" staticMode={staticMode} />
+        {petType === 'geometric' ? (
+          <GeometryAvatarRenderer animated={!staticMode} />
+        ) : (
+          <AuraliaSprite size="large" interactive staticMode={staticMode} />
+        )}
 
         {/* Gesture Indicator Overlay */}
         {gestureIndicator && (
