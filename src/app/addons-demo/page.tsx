@@ -12,6 +12,7 @@ import { AddonInventoryPanel } from '@/components/addons/AddonInventoryPanel';
 import { AddonRenderer, AddonSVGDefs } from '@/components/addons/AddonRenderer';
 import { PetProfilePanel } from '@/components/addons/PetProfilePanel';
 import { InteractiveGeometryField } from '@/components/InteractiveGeometryField';
+import { MovementParade } from '@/components/dev/MovementParade';
 import { VisualEvaluationPanel } from '@/components/dev/VisualEvaluationPanel';
 import { useMovementController } from '@/pet/movement';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
@@ -83,6 +84,7 @@ export default function AddonsDemoPage() {
   const [animationPhase, setAnimationPhase] = useState(0);
   const [addonEditMode, setAddonEditMode] = useState(false);
   const [showEvalPanel, setShowEvalPanel] = useState(false);
+  const [showMovementParade, setShowMovementParade] = useState(false);
   const [mirrorSignal, setMirrorSignal] = useState(0);
   const reduceMotion = useReducedMotion();
 
@@ -396,10 +398,21 @@ export default function AddonsDemoPage() {
               >
                 Trigger Mirror Bloom
               </button>
+              {process.env.NODE_ENV !== 'production' && (
+                <button
+                  type="button"
+                  onClick={() => setShowMovementParade((v) => !v)}
+                  className="min-h-[44px] rounded-lg border border-slate-600 bg-slate-800/70 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700"
+                >
+                  {showMovementParade ? 'Hide' : 'Show'} Movement Parade
+                </button>
+              )}
               <span className="text-xs text-slate-500">
                 Movement: {movement.active.clip.label}
               </span>
             </div>
+
+            {showMovementParade && <MovementParade />}
           </div>
 
           {/* Right: Inventory */}

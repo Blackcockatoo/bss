@@ -25,8 +25,14 @@ describe("BSS release coexistence contract", () => {
     expect(vimanaMap).toContain("Vimana Field Atlas");
     expect(bodyForgeRoute).toContain("<BodyForge />");
     expect(bodyForgeWorkshop).toContain("Set inherited body");
-    expect(bodyForgeWorkshop).toContain("setPetType('evolved')");
-    expect(bodyForgeWorkshop).toContain("router.push('/pet')");
+    expect(bodyForgeWorkshop).toContain("Aura lab");
+    expect(bodyForgeWorkshop).toContain("Import Body Forge packet");
+    // The Forge must exit through the one canonical return-form constant —
+    // never a scattered string literal, and never the legacy `geometric`.
+    expect(bodyForgeWorkshop).toContain("setPetType(BODY_FORGE_RETURN_FORM)");
+    expect(bodyForgeWorkshop).not.toContain('"geometric"');
+    expect(bodyForgeWorkshop).not.toContain("'geometric'");
+    expect(bodyForgeWorkshop).toContain('router.push("/pet")');
     expect(canonicalPetRoute).toContain("<PetRuntimeStage");
     expect(duplicatePetRoute).toContain("redirect('/pet')");
     expect(petRuntimeStage).toContain("<VisualDNAPet");
@@ -37,8 +43,11 @@ describe("BSS release coexistence contract", () => {
     expect(canonicalPetRoute).not.toContain("avatarDataUrl");
     expect(petHero).toContain("<GeometryAvatarRenderer");
     expect(visualDnaPet).toContain("resolveBodySpec");
+    expect(visualDnaPet).toContain("runtimeAura");
     expect(bodyResolver).toContain("genomeToVisualGenes");
     expect(bodyResolver).toContain("loadForgedBody");
+    expect(bodyResolver).toContain("body-spec:v3");
+    expect(bodyResolver).toContain("PREVIOUS_BODY_FORGE_STORAGE_KEY");
   });
 
   it("shows the same identity avatar without feeding it into the Meta-Pet body", () => {
