@@ -28,3 +28,8 @@ Note: the uploaded markdown title says 13 addons, but the file inventory and IDs
 - `1029-ouroboros-cockatoo-mask.svg` — Ouroboros Cockatoo Mask (Mythic, Headwear)
 - `1030-comet-kit-familiar.svg` — Comet Kit Familiar (Epic, Companion)
 - `1031-verdant-bloom-halo.svg` — Verdant Bloom Halo (Rare, Aura)
+- `1032-aurora-veil-mantle.svg` — Aurora Veil Mantle (Mythic, Accessory)
+- `1033-tidecaller-trident.svg` — Tidecaller Trident (Legendary, Weapon)
+- `1034-prism-sentinel-core.svg` — Prism Sentinel Core (Epic, Companion)
+- `1035-molten-sovereign-crown.svg` — Molten Sovereign Crown (Mythic, Headwear)
+- `1036-glacial-ward-sigil.svg` — Glacial Ward Sigil (Legendary, Effect)

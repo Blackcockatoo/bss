@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Glacial Ward Sigil">
+  <defs>
+    <linearGradient id="bgGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#04101a"/>
+      <stop offset="50%" stop-color="#07202f"/>
+      <stop offset="100%" stop-color="#030c14"/>
+    </linearGradient>
+    <radialGradient id="frostGlow" cx="50%" cy="50%" r="55%">
+      <stop offset="0%" stop-color="#cdf4ff" stop-opacity="0.30"/>
+      <stop offset="55%" stop-color="#4aa8d6" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ice" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f2fdff"/>
+      <stop offset="45%" stop-color="#a5e6ff"/>
+      <stop offset="100%" stop-color="#4a9ec8"/>
+    </linearGradient>
+    <filter id="frostSoft" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="cardClip1036"><rect x="36" y="36" width="952" height="952" rx="48"/></clipPath>
+
+    <g id="frostArm">
+      <path d="M 512 512 L 512 250" stroke="url(#ice)" stroke-width="7" stroke-linecap="round"/>
+      <path d="M 512 320 L 476 288 M 512 320 L 548 288" stroke="url(#ice)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M 512 380 L 484 356 M 512 380 L 540 356" stroke="url(#ice)" stroke-width="4" stroke-linecap="round"/>
+      <path d="M 512 262 L 490 244 M 512 262 L 534 244" stroke="url(#ice)" stroke-width="4" stroke-linecap="round"/>
+    </g>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bgGradient)"/>
+  <g clip-path="url(#cardClip1036)">
+    <rect x="36" y="36" width="952" height="952" rx="48" fill="url(#bgGradient)"/>
+    <circle cx="512" cy="512" r="340" fill="url(#frostGlow)"/>
+
+    <g opacity="0.5">
+      <circle cx="230" cy="230" r="2" fill="#dff"/>
+      <circle cx="800" cy="270" r="2.6" fill="#fff"/>
+      <circle cx="760" cy="760" r="2.2" fill="#cff"/>
+      <circle cx="250" cy="780" r="2.4" fill="#fff"/>
+      <circle cx="860" cy="520" r="1.8" fill="#eff"/>
+      <circle cx="150" cy="500" r="1.8" fill="#eff"/>
+    </g>
+
+    <!-- hex shield ward -->
+    <g filter="url(#frostSoft)">
+      <path d="M 512 214 L 726 338 L 726 586 L 512 748 L 298 586 L 298 338 Z" fill="#0d2c3d" fill-opacity="0.72" stroke="url(#ice)" stroke-width="6"/>
+      <path d="M 512 262 L 686 362 L 686 566 L 512 700 L 338 566 L 338 362 Z" fill="none" stroke="#8fe0ff" stroke-opacity="0.4" stroke-width="2.4" stroke-dasharray="6 10"/>
+    </g>
+
+    <!-- inner snowflake sigil -->
+    <g filter="url(#frostSoft)">
+      <use href="#frostArm" transform="rotate(0 512 512)"/>
+      <use href="#frostArm" transform="rotate(60 512 512)"/>
+      <use href="#frostArm" transform="rotate(120 512 512)"/>
+      <use href="#frostArm" transform="rotate(180 512 512)"/>
+      <use href="#frostArm" transform="rotate(240 512 512)"/>
+      <use href="#frostArm" transform="rotate(300 512 512)"/>
+      <circle cx="512" cy="512" r="26" fill="#0d2c3d" stroke="url(#ice)" stroke-width="4"/>
+      <circle cx="512" cy="512" r="11" fill="#eafcff"/>
+    </g>
+
+    <!-- drifting frost motes -->
+    <g opacity="0.8">
+      <circle cx="400" cy="470" r="3" fill="#cdf4ff"/>
+      <circle cx="624" cy="470" r="3" fill="#cdf4ff"/>
+      <circle cx="512" cy="628" r="3.2" fill="#eafcff"/>
+      <circle cx="440" cy="600" r="2.2" fill="#a5e6ff"/>
+      <circle cx="584" cy="600" r="2.2" fill="#a5e6ff"/>
+    </g>
+  </g>
+</svg>

@@ -760,6 +760,179 @@ const CUSTOM_ADDON_LIST: AddonTemplate[] = [
       maxEditions: 60,
     },
   },
+  {
+    id: "custom-addon-1032",
+    name: "Aurora Veil Mantle",
+    description:
+      "A mantle woven from captured polar light — three curtains of teal, violet, and rose aurora ripple behind Auralia and never stop drifting.",
+    category: "accessory",
+    rarity: "mythic",
+    attachment: {
+      ...ACCESSORY_ATTACHMENT,
+      offset: { x: 0, y: -6, z: -6 },
+      scale: 1.3,
+    },
+    visual: {
+      // Three flowing aurora curtains falling from the shoulders
+      svgPath:
+        "M -18 -20 C -24 4 -14 28 -20 52 C -14 60 -4 60 2 54 C -2 30 6 6 6 -18 C -2 -24 -12 -24 -18 -20 Z M 4 -22 C 2 4 10 28 4 56 C 12 62 24 62 30 54 C 26 30 32 6 34 -18 C 24 -26 12 -26 4 -22 Z",
+      previewAsset: previewAsset("1032-aurora-veil-mantle.svg"),
+      colors: {
+        primary: "#123a5a",
+        secondary: "#4fe0a8",
+        accent: "#c37bff",
+        glow: "rgba(111, 247, 198, 0.5)",
+      },
+      animation: { type: "shimmer", duration: 3400, easing: "ease-in-out" },
+      particles: { count: 18, color: "#bffff0", size: 1.6, behavior: "ambient" },
+    },
+    modifiers: { curiosity: 20, bond: 16, energy: 12 },
+    metadata: {
+      creator,
+      tags: ["mantle", "aurora", "veil", "polar", "light"],
+      maxEditions: 10,
+    },
+  },
+  {
+    id: "custom-addon-1033",
+    name: "Tidecaller Trident",
+    description:
+      "A three-pronged trident chased with coral scrollwork and a living pearl core — it hums with the pull of distant tides.",
+    category: "weapon",
+    rarity: "legendary",
+    attachment: {
+      anchorPoint: "right-hand",
+      offset: { x: 14, y: 8, z: 0 },
+      scale: 1.35,
+      rotation: -22,
+      followAnimation: true,
+    },
+    visual: {
+      // Central shaft with three flared prongs and a pearl node
+      svgPath:
+        "M 46 44 L 54 44 L 52 92 L 48 92 Z M 50 44 L 50 8 M 50 14 L 44 8 M 50 14 L 56 8 M 34 44 C 30 30 30 18 34 8 C 40 20 42 32 40 44 M 66 44 C 70 30 70 18 66 8 C 60 20 58 32 60 44 M 50 44 A 8 8 0 1 1 50.01 44 Z",
+      previewAsset: previewAsset("1033-tidecaller-trident.svg"),
+      colors: {
+        primary: "#0c2c40",
+        secondary: "#7fe4ff",
+        accent: "#eafaff",
+        glow: "rgba(57, 214, 255, 0.55)",
+      },
+      animation: { type: "glow", duration: 1600, easing: "ease-in-out" },
+      particles: { count: 20, color: "#bff2ff", size: 1.8, behavior: "ambient" },
+    },
+    modifiers: { energy: 24, curiosity: 12, bond: 10 },
+    metadata: {
+      creator,
+      tags: ["trident", "tide", "ocean", "weapon", "pearl"],
+      maxEditions: 16,
+    },
+  },
+  {
+    id: "custom-addon-1034",
+    name: "Prism Sentinel Core",
+    description:
+      "An octahedral drone-familiar with an ever-open prism eye — it orbits Auralia, refracting light into a slow watchful rainbow.",
+    category: "companion",
+    rarity: "epic",
+    attachment: {
+      anchorPoint: "floating",
+      offset: { x: 36, y: -16, z: 0 },
+      scale: 0.46,
+      rotation: 0,
+      followAnimation: false,
+    },
+    visual: {
+      // Octahedron outline with an eye and internal edges
+      svgPath:
+        "M 50 14 L 84 50 L 50 86 L 16 50 Z M 50 14 L 50 86 M 16 50 L 84 50 M 50 50 A 16 11 0 1 1 50.01 50 Z M 50 50 A 6 6 0 1 1 50.01 50 Z",
+      previewAsset: previewAsset("1034-prism-sentinel-core.svg"),
+      colors: {
+        primary: "#1a1430",
+        secondary: "#8ff0ff",
+        accent: "#ff6fae",
+        glow: "rgba(140, 240, 255, 0.5)",
+      },
+      animation: { type: "rotate", duration: 5200, easing: "linear" },
+      particles: { count: 16, color: "#5cc8ff", size: 1.6, behavior: "orbit" },
+    },
+    modifiers: { curiosity: 24, bond: 14, luck: 10 },
+    metadata: {
+      creator,
+      tags: ["companion", "sentinel", "prism", "drone", "eye"],
+      maxEditions: 44,
+    },
+  },
+  {
+    id: "custom-addon-1035",
+    name: "Molten Sovereign Crown",
+    description:
+      "A crown of cooled obsidian rock threaded with living magma — five spires burn from within and shed slow embers across the brow.",
+    category: "headwear",
+    rarity: "mythic",
+    attachment: {
+      anchorPoint: "head",
+      offset: { x: 0, y: -22, z: 0 },
+      scale: 1.05,
+      rotation: 0,
+      followAnimation: true,
+    },
+    visual: {
+      // Banded crown with five magma-veined spires
+      svgPath:
+        "M 20 62 L 80 62 L 76 78 C 60 84 40 84 24 78 Z M 22 62 L 18 34 L 34 56 Z M 40 62 L 38 24 L 54 56 L 46 56 Z M 50 62 L 50 16 L 60 56 L 40 56 Z M 60 62 L 62 24 L 46 56 Z M 78 62 L 82 34 L 66 56 Z M 50 56 L 50 24",
+      previewAsset: previewAsset("1035-molten-sovereign-crown.svg"),
+      colors: {
+        primary: "#1c0d0a",
+        secondary: "#ff8a2a",
+        accent: "#ffe27a",
+        glow: "rgba(255, 107, 31, 0.55)",
+      },
+      animation: { type: "glow", duration: 1800, easing: "ease-in-out" },
+      particles: { count: 16, color: "#ffb14a", size: 1.8, behavior: "trail" },
+    },
+    modifiers: { energy: 28, bond: 12, luck: 14 },
+    metadata: {
+      creator,
+      tags: ["crown", "molten", "magma", "sovereign", "fire"],
+      maxEditions: 7,
+    },
+  },
+  {
+    id: "custom-addon-1036",
+    name: "Glacial Ward Sigil",
+    description:
+      "A hexagonal ward of everlasting frost, its six-armed snowflake sigil turning slowly to shed a cold, protective shimmer around Auralia.",
+    category: "effect",
+    rarity: "legendary",
+    attachment: {
+      anchorPoint: "aura",
+      offset: { x: 0, y: 0, z: 0 },
+      scale: 1.7,
+      rotation: 0,
+      followAnimation: false,
+    },
+    visual: {
+      // Hex shield with six-armed frost sigil inside
+      svgPath:
+        "M 50 12 L 84 32 L 84 68 L 50 90 L 16 68 L 16 32 Z M 50 30 L 50 70 M 33 40 L 67 60 M 67 40 L 33 60 M 50 30 L 44 24 M 50 30 L 56 24 M 33 40 L 25 38 M 67 40 L 75 38 M 50 50 A 7 7 0 1 1 50.01 50 Z",
+      previewAsset: previewAsset("1036-glacial-ward-sigil.svg"),
+      colors: {
+        primary: "#0d2c3d",
+        secondary: "#a5e6ff",
+        accent: "#eafcff",
+        glow: "rgba(205, 244, 255, 0.5)",
+      },
+      animation: { type: "rotate", duration: 7000, easing: "linear" },
+      particles: { count: 20, color: "#cdf4ff", size: 1.5, behavior: "ambient" },
+    },
+    modifiers: { bond: 18, energy: 14, curiosity: 10 },
+    metadata: {
+      creator,
+      tags: ["ward", "glacial", "frost", "sigil", "shield"],
+      maxEditions: 12,
+    },
+  },
 ];
 
 export const CUSTOM_ADDONS: Record<string, AddonTemplate> = Object.fromEntries(

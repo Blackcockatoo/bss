@@ -51,7 +51,7 @@ const ADDON_PACKS: Array<{
   },
   {
     title: 'Mythic Workshop',
-    blurb: 'Reality-bending custom pieces 1008–1031.',
+    blurb: 'Reality-bending custom pieces 1008–1036.',
     match: (id) => id.startsWith('custom-addon-'),
   },
   {

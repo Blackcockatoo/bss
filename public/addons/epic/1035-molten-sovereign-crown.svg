@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Molten Sovereign Crown">
+  <defs>
+    <linearGradient id="bgGradient" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#160604"/>
+      <stop offset="55%" stop-color="#210806"/>
+      <stop offset="100%" stop-color="#0a0202"/>
+    </linearGradient>
+    <radialGradient id="forgeGlow" cx="50%" cy="55%" r="60%">
+      <stop offset="0%" stop-color="#ff6b1f" stop-opacity="0.4"/>
+      <stop offset="50%" stop-color="#a11f0a" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rock" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3a2018"/>
+      <stop offset="55%" stop-color="#1c0d0a"/>
+      <stop offset="100%" stop-color="#0c0504"/>
+    </linearGradient>
+    <linearGradient id="magma" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffe27a"/>
+      <stop offset="45%" stop-color="#ff8a2a"/>
+      <stop offset="100%" stop-color="#d21f0a"/>
+    </linearGradient>
+    <filter id="emberGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="cardClip1035"><rect x="36" y="36" width="952" height="952" rx="48"/></clipPath>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bgGradient)"/>
+  <g clip-path="url(#cardClip1035)">
+    <rect x="36" y="36" width="952" height="952" rx="48" fill="url(#bgGradient)"/>
+    <ellipse cx="512" cy="540" rx="380" ry="320" fill="url(#forgeGlow)"/>
+
+    <!-- rising embers -->
+    <g filter="url(#emberGlow)">
+      <circle cx="320" cy="720" r="4" fill="#ffb14a" opacity="0.9"/>
+      <circle cx="360" cy="620" r="2.6" fill="#ff8a2a" opacity="0.8"/>
+      <circle cx="700" cy="700" r="3.4" fill="#ffb14a" opacity="0.85"/>
+      <circle cx="668" cy="600" r="2.2" fill="#ff8a2a" opacity="0.75"/>
+      <circle cx="512" cy="760" r="3" fill="#ffe27a" opacity="0.9"/>
+      <circle cx="230" cy="560" r="2.4" fill="#ff8a2a" opacity="0.7"/>
+      <circle cx="790" cy="540" r="2.4" fill="#ff8a2a" opacity="0.7"/>
+    </g>
+
+    <!-- crown base band -->
+    <g filter="url(#emberGlow)">
+      <path d="M 300 560 L 724 560 L 706 640 C 640 664 384 664 318 640 Z" fill="url(#rock)" stroke="#ff7a2a" stroke-width="4"/>
+      <path d="M 330 596 C 430 612 594 612 694 596" fill="none" stroke="url(#magma)" stroke-width="6" opacity="0.9"/>
+      <path d="M 340 622 C 440 636 584 636 684 622" fill="none" stroke="#ff8a2a" stroke-width="3" opacity="0.6"/>
+
+      <!-- five spires -->
+      <path d="M 312 560 L 300 400 L 372 520 Z" fill="url(#rock)" stroke="#ff7a2a" stroke-width="4"/>
+      <path d="M 412 560 L 402 356 L 484 524 Z" fill="url(#rock)" stroke="#ff7a2a" stroke-width="4"/>
+      <path d="M 512 560 L 512 300 L 546 520 L 478 520 Z" fill="url(#rock)" stroke="#ff7a2a" stroke-width="4.5"/>
+      <path d="M 612 560 L 622 356 L 540 524 Z" fill="url(#rock)" stroke="#ff7a2a" stroke-width="4"/>
+      <path d="M 712 560 L 724 400 L 652 520 Z" fill="url(#rock)" stroke="#ff7a2a" stroke-width="4"/>
+
+      <!-- magma veins up the spires -->
+      <path d="M 512 540 L 512 330" stroke="url(#magma)" stroke-width="5" opacity="0.9"/>
+      <path d="M 336 540 L 312 430" stroke="url(#magma)" stroke-width="4" opacity="0.75"/>
+      <path d="M 688 540 L 712 430" stroke="url(#magma)" stroke-width="4" opacity="0.75"/>
+      <path d="M 430 540 L 414 400" stroke="url(#magma)" stroke-width="4" opacity="0.7"/>
+      <path d="M 594 540 L 610 400" stroke="url(#magma)" stroke-width="4" opacity="0.7"/>
+    </g>
+
+    <!-- central sovereign gem -->
+    <g filter="url(#emberGlow)">
+      <path d="M 512 300 L 532 340 L 512 372 L 492 340 Z" fill="url(#magma)" stroke="#ffe27a" stroke-width="3"/>
+      <circle cx="512" cy="332" r="7" fill="#fff3d0"/>
+    </g>
+
+    <!-- gems on band -->
+    <circle cx="420" cy="600" r="10" fill="url(#magma)" stroke="#ffe27a" stroke-width="2.5" filter="url(#emberGlow)"/>
+    <circle cx="604" cy="600" r="10" fill="url(#magma)" stroke="#ffe27a" stroke-width="2.5" filter="url(#emberGlow)"/>
+    <circle cx="512" cy="612" r="12" fill="url(#magma)" stroke="#ffe27a" stroke-width="2.5" filter="url(#emberGlow)"/>
+  </g>
+</svg>

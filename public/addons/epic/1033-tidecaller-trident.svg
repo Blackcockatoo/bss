@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Tidecaller Trident">
+  <defs>
+    <linearGradient id="bgGradient" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#02121f"/>
+      <stop offset="55%" stop-color="#041d33"/>
+      <stop offset="100%" stop-color="#010b16"/>
+    </linearGradient>
+    <radialGradient id="tideGlow" cx="50%" cy="46%" r="60%">
+      <stop offset="0%" stop-color="#39d6ff" stop-opacity="0.35"/>
+      <stop offset="55%" stop-color="#1a6fa8" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="coral" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#eafaff"/>
+      <stop offset="35%" stop-color="#7fe4ff"/>
+      <stop offset="70%" stop-color="#2c9fd6"/>
+      <stop offset="100%" stop-color="#155a86"/>
+    </linearGradient>
+    <linearGradient id="shaftTeal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1b4b63"/>
+      <stop offset="55%" stop-color="#0c2c40"/>
+      <stop offset="100%" stop-color="#061722"/>
+    </linearGradient>
+    <filter id="tideSoft" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="cardClip1033"><rect x="36" y="36" width="952" height="952" rx="48"/></clipPath>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bgGradient)"/>
+  <g clip-path="url(#cardClip1033)">
+    <rect x="36" y="36" width="952" height="952" rx="48" fill="url(#bgGradient)"/>
+    <circle cx="512" cy="470" r="300" fill="url(#tideGlow)"/>
+
+    <g opacity="0.4" stroke="#3aa9d6" fill="none">
+      <path d="M 120 700 Q 200 660 280 700 T 440 700 T 600 700 T 760 700 T 920 700" stroke-width="3"/>
+      <path d="M 120 760 Q 210 716 300 760 T 480 760 T 660 760 T 840 760" stroke-width="2.4" opacity="0.7"/>
+      <path d="M 140 820 Q 240 782 340 820 T 540 820 T 740 820 T 900 820" stroke-width="2" opacity="0.5"/>
+    </g>
+
+    <g opacity="0.5">
+      <circle cx="320" cy="300" r="4" fill="#8fe8ff"/>
+      <circle cx="720" cy="260" r="3" fill="#8fe8ff"/>
+      <circle cx="800" cy="520" r="3.4" fill="#bff2ff"/>
+      <circle cx="230" cy="500" r="2.6" fill="#bff2ff"/>
+      <circle cx="640" cy="360" r="2.2" fill="#e6fbff"/>
+    </g>
+
+    <g filter="url(#tideSoft)">
+      <!-- shaft -->
+      <path d="M 500 360 L 524 360 L 520 812 C 520 828 514 840 512 848 C 510 840 504 828 504 812 Z" fill="url(#shaftTeal)" stroke="url(#coral)" stroke-width="5"/>
+      <!-- crossbar with wave scrolls -->
+      <path d="M 430 372 C 470 356 554 356 594 372 C 560 388 464 388 430 372 Z" fill="#0c2c40" stroke="url(#coral)" stroke-width="4"/>
+      <!-- center prong -->
+      <path d="M 500 360 L 512 150 L 524 360 Z" fill="#0c2c40" stroke="url(#coral)" stroke-width="5"/>
+      <path d="M 512 150 L 512 120 L 505 138 L 512 120 L 519 138 Z" fill="#7fe4ff" stroke="url(#coral)" stroke-width="3"/>
+      <!-- left prong -->
+      <path d="M 470 366 C 430 320 408 260 414 196 C 386 250 372 316 396 372 Z" fill="#0c2c40" stroke="url(#coral)" stroke-width="4.5"/>
+      <path d="M 414 196 C 404 178 388 172 372 178 C 388 186 398 200 402 218 Z" fill="#7fe4ff" stroke="url(#coral)" stroke-width="3"/>
+      <!-- right prong -->
+      <path d="M 554 366 C 594 320 616 260 610 196 C 638 250 652 316 628 372 Z" fill="#0c2c40" stroke="url(#coral)" stroke-width="4.5"/>
+      <path d="M 610 196 C 620 178 636 172 652 178 C 636 186 626 200 622 218 Z" fill="#7fe4ff" stroke="url(#coral)" stroke-width="3"/>
+      <!-- central pearl -->
+      <circle cx="512" cy="372" r="20" fill="#0c2c40" stroke="url(#coral)" stroke-width="4"/>
+      <circle cx="512" cy="372" r="9" fill="#bff2ff"/>
+    </g>
+
+    <g opacity="0.7">
+      <circle cx="512" cy="372" r="52" fill="none" stroke="#39d6ff" stroke-opacity="0.35" stroke-width="2"/>
+      <circle cx="512" cy="372" r="72" fill="none" stroke="#39d6ff" stroke-opacity="0.18" stroke-width="1.6"/>
+    </g>
+  </g>
+</svg>

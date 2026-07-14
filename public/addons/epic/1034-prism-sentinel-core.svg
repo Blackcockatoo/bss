@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Prism Sentinel Core">
+  <defs>
+    <linearGradient id="bgGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0812"/>
+      <stop offset="50%" stop-color="#120c1e"/>
+      <stop offset="100%" stop-color="#080610"/>
+    </linearGradient>
+    <radialGradient id="prismGlow" cx="50%" cy="48%" r="55%">
+      <stop offset="0%" stop-color="#eef2ff" stop-opacity="0.30"/>
+      <stop offset="55%" stop-color="#8a7bd6" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="faceA" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff6fae"/>
+      <stop offset="100%" stop-color="#7b5cff"/>
+    </linearGradient>
+    <linearGradient id="faceB" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5cc8ff"/>
+      <stop offset="100%" stop-color="#4be0c0"/>
+    </linearGradient>
+    <linearGradient id="faceC" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffd86f"/>
+      <stop offset="100%" stop-color="#ff9a5c"/>
+    </linearGradient>
+    <filter id="prismSoft" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="9" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="cardClip1034"><rect x="36" y="36" width="952" height="952" rx="48"/></clipPath>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bgGradient)"/>
+  <g clip-path="url(#cardClip1034)">
+    <rect x="36" y="36" width="952" height="952" rx="48" fill="url(#bgGradient)"/>
+    <circle cx="512" cy="500" r="320" fill="url(#prismGlow)"/>
+
+    <g opacity="0.55">
+      <circle cx="220" cy="240" r="2.2" fill="#fff"/>
+      <circle cx="820" cy="300" r="2.6" fill="#fff"/>
+      <circle cx="760" cy="180" r="1.6" fill="#cdf"/>
+      <circle cx="270" cy="760" r="2" fill="#fdf"/>
+      <circle cx="800" cy="720" r="2.4" fill="#fff"/>
+      <circle cx="160" cy="520" r="1.8" fill="#dff"/>
+    </g>
+
+    <!-- orbit rings -->
+    <g opacity="0.6" fill="none" stroke-width="2">
+      <ellipse cx="512" cy="500" rx="240" ry="96" stroke="#6c5cff" stroke-opacity="0.4" transform="rotate(18 512 500)"/>
+      <ellipse cx="512" cy="500" rx="240" ry="96" stroke="#4be0c0" stroke-opacity="0.35" transform="rotate(-24 512 500)"/>
+    </g>
+    <circle cx="726" cy="440" r="6" fill="#5cc8ff" filter="url(#prismSoft)"/>
+    <circle cx="300" cy="560" r="5" fill="#ff6fae" filter="url(#prismSoft)"/>
+
+    <!-- octahedron drone body -->
+    <g filter="url(#prismSoft)">
+      <path d="M 512 300 L 636 500 L 512 700 L 388 500 Z" fill="#0e0a1a" stroke="#dfe4ff" stroke-width="4"/>
+      <path d="M 512 300 L 636 500 L 512 500 Z" fill="url(#faceC)" opacity="0.85"/>
+      <path d="M 512 300 L 388 500 L 512 500 Z" fill="url(#faceA)" opacity="0.85"/>
+      <path d="M 512 700 L 636 500 L 512 500 Z" fill="url(#faceB)" opacity="0.8"/>
+      <path d="M 512 700 L 388 500 L 512 500 Z" fill="#1a1430" opacity="0.9"/>
+      <path d="M 512 300 L 512 700 M 388 500 L 636 500" stroke="#eef2ff" stroke-width="2" opacity="0.7"/>
+    </g>
+
+    <!-- sentinel eye -->
+    <g filter="url(#prismSoft)">
+      <ellipse cx="512" cy="500" rx="44" ry="30" fill="#05030c" stroke="#dfe4ff" stroke-width="3"/>
+      <circle cx="512" cy="500" r="15" fill="#8ff0ff"/>
+      <circle cx="512" cy="500" r="6" fill="#05030c"/>
+      <circle cx="504" cy="493" r="3" fill="#fff"/>
+    </g>
+
+    <!-- lower beam -->
+    <path d="M 500 700 L 524 700 L 540 780 L 484 780 Z" fill="#8ff0ff" opacity="0.25"/>
+  </g>
+</svg>

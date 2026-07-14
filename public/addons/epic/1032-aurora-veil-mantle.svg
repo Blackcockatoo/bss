@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Aurora Veil Mantle">
+  <defs>
+    <linearGradient id="bgGradient" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#020610"/>
+      <stop offset="55%" stop-color="#04101c"/>
+      <stop offset="100%" stop-color="#010409"/>
+    </linearGradient>
+    <radialGradient id="polarGlow" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#1b6b6b" stop-opacity="0.30"/>
+      <stop offset="55%" stop-color="#123a5a" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ribbonA" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6ef7c6" stop-opacity="0"/>
+      <stop offset="30%" stop-color="#4fe0a8" stop-opacity="0.85"/>
+      <stop offset="70%" stop-color="#3aa7c8" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#7b5cff" stop-opacity="0.15"/>
+    </linearGradient>
+    <linearGradient id="ribbonB" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c37bff" stop-opacity="0"/>
+      <stop offset="35%" stop-color="#a95cff" stop-opacity="0.8"/>
+      <stop offset="75%" stop-color="#ec6fc4" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#ff9ad2" stop-opacity="0.12"/>
+    </linearGradient>
+    <filter id="veilGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="14" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="cardClip1032"><rect x="36" y="36" width="952" height="952" rx="48"/></clipPath>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bgGradient)"/>
+  <g clip-path="url(#cardClip1032)">
+    <rect x="36" y="36" width="952" height="952" rx="48" fill="url(#bgGradient)"/>
+    <ellipse cx="512" cy="340" rx="440" ry="330" fill="url(#polarGlow)"/>
+
+    <circle cx="180" cy="180" r="1.8" fill="#eaf" opacity="0.55"/>
+    <circle cx="840" cy="220" r="2.4" fill="#fff" opacity="0.6"/>
+    <circle cx="720" cy="120" r="1.6" fill="#fff" opacity="0.45"/>
+    <circle cx="300" cy="120" r="2" fill="#cfe" opacity="0.5"/>
+    <circle cx="900" cy="420" r="1.6" fill="#fff" opacity="0.4"/>
+    <circle cx="130" cy="400" r="2.2" fill="#fff" opacity="0.5"/>
+    <circle cx="620" cy="200" r="1.4" fill="#dff" opacity="0.5"/>
+    <circle cx="470" cy="90" r="1.8" fill="#fff" opacity="0.5"/>
+
+    <g filter="url(#veilGlow)" opacity="0.92">
+      <path d="M 250 220 C 230 380 300 540 260 720 C 300 760 360 770 400 740 C 380 560 430 400 430 240 C 380 210 300 205 250 220 Z" fill="url(#ribbonA)"/>
+      <path d="M 430 200 C 420 380 470 540 440 760 C 490 800 560 800 600 764 C 580 560 610 380 620 210 C 560 186 480 184 430 200 Z" fill="url(#ribbonB)"/>
+      <path d="M 620 214 C 620 400 660 560 640 740 C 690 776 760 772 796 732 C 770 560 800 400 792 236 C 736 210 668 206 620 214 Z" fill="url(#ribbonA)"/>
+    </g>
+
+    <g opacity="0.5">
+      <path d="M 250 220 C 230 380 300 540 260 720" fill="none" stroke="#9ffee0" stroke-width="2" opacity="0.6"/>
+      <path d="M 430 200 C 420 380 470 540 440 760" fill="none" stroke="#e6b9ff" stroke-width="2" opacity="0.6"/>
+      <path d="M 620 214 C 620 400 660 560 640 740" fill="none" stroke="#9ffee0" stroke-width="2" opacity="0.55"/>
+    </g>
+
+    <g opacity="0.85">
+      <circle cx="512" cy="742" r="10" fill="#bffff0" filter="url(#veilGlow)"/>
+      <path d="M 380 748 Q 512 700 644 748" fill="none" stroke="#7be3c9" stroke-width="3" opacity="0.6"/>
+      <circle cx="340" cy="620" r="3" fill="#d9c2ff" opacity="0.8"/>
+      <circle cx="700" cy="600" r="3" fill="#aef7df" opacity="0.8"/>
+      <circle cx="512" cy="520" r="2.4" fill="#fff" opacity="0.7"/>
+    </g>
+  </g>
+</svg>
