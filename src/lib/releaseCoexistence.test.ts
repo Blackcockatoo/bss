@@ -25,8 +25,10 @@ describe("BSS release coexistence contract", () => {
     expect(vimanaMap).toContain("Vimana Field Atlas");
     expect(bodyForgeRoute).toContain("<BodyForge />");
     expect(bodyForgeWorkshop).toContain("Set inherited body");
-    expect(bodyForgeWorkshop).toContain("setPetType('geometric')");
-    expect(bodyForgeWorkshop).toContain("router.push('/pet')");
+    expect(bodyForgeWorkshop).toContain("Aura lab");
+    expect(bodyForgeWorkshop).toContain("Import Body Forge packet");
+    expect(bodyForgeWorkshop).toContain('setPetType("geometric")');
+    expect(bodyForgeWorkshop).toContain('router.push("/pet")');
     expect(canonicalPetRoute).toContain("<PetRuntimeStage");
     expect(duplicatePetRoute).toContain("redirect('/pet')");
     expect(petRuntimeStage).toContain("<VisualDNAPet");
@@ -36,8 +38,11 @@ describe("BSS release coexistence contract", () => {
     expect(canonicalPetRoute).not.toContain("avatarDataUrl");
     expect(petHero).toContain("<GeometryAvatarRenderer");
     expect(visualDnaPet).toContain("resolveBodySpec");
+    expect(visualDnaPet).toContain("runtimeAura");
     expect(bodyResolver).toContain("genomeToVisualGenes");
     expect(bodyResolver).toContain("loadForgedBody");
+    expect(bodyResolver).toContain("body-spec:v3");
+    expect(bodyResolver).toContain("PREVIOUS_BODY_FORGE_STORAGE_KEY");
   });
 
   it("shows the same identity avatar without feeding it into the Meta-Pet body", () => {
