@@ -83,7 +83,7 @@ export const PetProfilePanel: React.FC<PetProfilePanelProps> = ({
               <img
                 src={profile.avatarDataUrl}
                 alt="Owner avatar"
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain"
               />
             ) : (
               <span className="text-xs text-slate-400">👤</span>

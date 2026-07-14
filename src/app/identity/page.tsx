@@ -7,6 +7,7 @@ import { useEnforceChildSafeClientRoute } from "@/lib/childSafeRoute.client";
 import {
   type IdentityProfile,
   MAX_AVATAR_BYTES,
+  getAvatarDataUrlError,
   getAvatarSizeError,
   getEmailError,
   getPreferredIdentity,
@@ -44,7 +45,8 @@ export default function IdentityPage() {
   }, [refreshProfile]);
 
   useEffect(() => {
-    setForm(profile);
+    const syncProfile = window.setTimeout(() => setForm(profile), 0);
+    return () => window.clearTimeout(syncProfile);
   }, [profile]);
 
   useEffect(
@@ -73,11 +75,18 @@ export default function IdentityPage() {
       setSaveNotice("Fix the highlighted fields before saving.");
       return;
     }
-    const saved = saveProfile(form);
-    setLocalIdentity(getPreferredIdentity(saved));
-    setForm(saved);
-    setSaveNotice("Profile saved successfully.");
-    markCompleted();
+    try {
+      const saved = saveProfile(form);
+      setLocalIdentity(getPreferredIdentity(saved));
+      setForm(saved);
+      setSaveNotice("Profile saved successfully.");
+      markCompleted();
+    } catch (error) {
+      setSaveNotice(
+        error instanceof Error ? error.message : "Profile could not be saved.",
+      );
+      return;
+    }
     if (noticeTimeoutRef.current) {
       clearTimeout(noticeTimeoutRef.current);
     }
@@ -100,9 +109,16 @@ export default function IdentityPage() {
     setAvatarError(null);
     const reader = new FileReader();
     reader.onload = () => {
+      const avatarDataUrl = typeof reader.result === "string" ? reader.result : "";
+      const dataError = getAvatarDataUrlError(avatarDataUrl);
+      if (dataError) {
+        setAvatarError(dataError);
+        event.target.value = "";
+        return;
+      }
       setForm((prev) => ({
         ...prev,
-        avatarDataUrl: typeof reader.result === "string" ? reader.result : "",
+        avatarDataUrl,
       }));
     };
     reader.readAsDataURL(file);
@@ -198,7 +214,7 @@ export default function IdentityPage() {
                     <img
                       src={form.avatarDataUrl}
                       alt="Avatar preview"
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-contain"
                     />
                   ) : (
                     <ImageIcon className="w-8 h-8 text-slate-500" />
@@ -208,7 +224,7 @@ export default function IdentityPage() {
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/*"
+                    accept="image/png,image/jpeg,image/webp,image/gif"
                     onChange={handleAvatarSelect}
                     className="hidden"
                   />
@@ -282,7 +298,7 @@ export default function IdentityPage() {
                   <img
                     src={form.avatarDataUrl}
                     alt="Avatar preview"
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-contain"
                   />
                 ) : (
                   <ImageIcon className="w-6 h-6 text-slate-500" />
