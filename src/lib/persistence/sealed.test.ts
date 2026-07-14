@@ -38,7 +38,7 @@ describe('Sealed Export/Import', () => {
         sicknessType: 'none',
         deathCount: 0,
       },
-      petType: 'geometric',
+      petType: 'evolved',
       witness,
       petOntology: 'living',
       systemState: 'active',

@@ -12,6 +12,7 @@ import {
   createGenomeBodySpec,
   genomeToVisualGenes,
   getGenomeVisualFingerprint,
+  importBodyForgeTransfer,
   LEGACY_BODY_FORGE_STORAGE_KEY,
   loadForgedBody,
   resolveBodySpec,
@@ -103,6 +104,31 @@ function phenotype(hunger = 35) {
 }
 
 describe('Body Forge visual genome bridge', () => {
+  it('imports the standalone Body Forge envelope without allowing preview aura or emotion to replace live Meta-Pet systems', () => {
+    const imported = importBodyForgeTransfer({
+      version: 1,
+      kind: 'bss.body-forge-transfer',
+      source: 'bs-body-forge',
+      body: {
+        name: 'Manta Witness', shape: 'manta', pattern: 'pearl', expression: 'fierce',
+        primary: '#123456', shadow: '#07101f', accent: '#f7c94b',
+        width: 144, height: 121, genderFrame: 'female', shoulders: 38, waist: 34, hips: 78,
+        textureScale: 62, textureDepth: 74, textureRoughness: 19,
+        eyes: 17, eyeGap: 55, gazeX: 3, wing: 96, wingStyle: 'moth', wingPurpose: 'attract', horn: 31,
+        glow: 73, tilt: -4, bounce: 12, wings: true, horns: false, thirdEye: true, flame: false,
+        auraStyle: 'void', auraMotion: 'implode', emotionIndex: -100,
+      },
+    });
+
+    expect(imported).toMatchObject({
+      name: 'Manta Witness', shape: 'manta', pattern: 'pearl', expression: 'focused',
+      genderFrame: 'female', shoulders: 38, waist: 34, hips: 78,
+      wingStyle: 'moth', wingPurpose: 'attract', features: ['wings', 'thirdEye'],
+    });
+    expect(imported).not.toHaveProperty('auraStyle');
+    expect(imported).not.toHaveProperty('emotionIndex');
+  });
+
   it('splits all 180 digits into thirty stable six-digit visual genes', () => {
     const genome: Genome = {
       red60: Array.from({ length: 60 }, (_, index) => index % 10),

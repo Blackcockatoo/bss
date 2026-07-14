@@ -5,6 +5,9 @@ import {
   type BodyShape,
   type BodySpec,
   type FaceExpression,
+  type GenderFrame,
+  type WingPurpose,
+  type WingStyle,
 } from '@/components/body-forge/PetBodyRenderer';
 import { EVOLUTION_ORDER } from '@/evolution/types';
 import type { Genome } from '@/genome/types';
@@ -20,10 +23,13 @@ const GENE_COUNT = 30;
 const DIGITS_PER_GENE = 6;
 const GENE_MAX = 999_999;
 
-const BODY_SHAPES: readonly BodyShape[] = ['round', 'bean', 'cubic', 'crystal', 'toroid'];
-const BODY_PATTERNS: readonly BodyPattern[] = ['solid', 'gradient', 'striped', 'spotted'];
+const BODY_SHAPES: readonly BodyShape[] = ['round', 'orb', 'bean', 'cubic', 'block', 'crystal', 'toroid', 'droplet', 'bell', 'seed', 'manta', 'lantern', 'crown', 'hourglass', 'wisp'];
+const BODY_PATTERNS: readonly BodyPattern[] = ['solid', 'gradient', 'striped', 'spotted', 'stripes', 'spots', 'velvet', 'pearl', 'glass', 'chrome', 'scales', 'moss', 'stone', 'ink'];
 const FACE_EXPRESSIONS: readonly FaceExpression[] = ['neutral', 'smile', 'frown', 'focused', 'sleepy'];
 const BODY_FEATURES: readonly BodyFeature[] = ['wings', 'horns', 'crown', 'thirdEye', 'tailFlame'];
+const GENDER_FRAMES: readonly GenderFrame[] = ['male', 'neutral', 'female'];
+const WING_STYLES: readonly WingStyle[] = ['feather', 'moth', 'blade', 'veil'];
+const WING_PURPOSES: readonly WingPurpose[] = ['flight', 'attack', 'attract', 'defend', 'decorative'];
 
 const shapeMap: Record<string, BodyShape> = {
   Spherical: 'round',
@@ -212,6 +218,13 @@ export function createGenomeBodySpec(
     bodyHeight: lerp(78, 158, geneUnit(genes, 1)) * lerp(0.9, 1.1, geneUnit(genes, 27)),
     bodyScale: clamp(phenotype.identity.bodyScale * lerp(0.86, 1.14, geneUnit(genes, 2)), 0.58, 1.45),
     cornerRoundness: lerp(2, 50, geneUnit(genes, 3)) * lerp(0.94, 1.06, geneUnit(genes, 25)),
+    genderFrame: GENDER_FRAMES[Math.floor(geneUnit(genes, 3) * GENDER_FRAMES.length) % GENDER_FRAMES.length],
+    shoulders: lerp(24, 86, geneUnit(genes, 0)),
+    waist: lerp(24, 82, geneUnit(genes, 1)),
+    hips: lerp(24, 86, geneUnit(genes, 2)),
+    textureScale: lerp(8, 96, geneUnit(genes, 20)),
+    textureDepth: lerp(8, 96, geneUnit(genes, 21)),
+    textureRoughness: lerp(0, 100, geneUnit(genes, 22)),
     eyeSize: lerp(6.5, 19, geneUnit(genes, 4)) * lerp(0.94, 1.06, geneUnit(genes, 28)),
     eyeSpacing: lerp(22, 70, geneUnit(genes, 5)),
     eyeHeight: lerp(86, 120, geneUnit(genes, 6)),
@@ -221,6 +234,8 @@ export function createGenomeBodySpec(
     mouthWidth: lerp(12, 56, geneUnit(genes, 10)) * lerp(0.95, 1.05, geneUnit(genes, 28)),
     mouthHeight: lerp(3, 22, geneUnit(genes, 11)),
     wingSpread: lerp(0.3, 1.4, geneUnit(genes, 12)) * clamp(phenotype.identity.limbRatio, 0.7, 1.35) * lerp(0.94, 1.06, geneUnit(genes, 23)),
+    wingStyle: WING_STYLES[Math.floor(geneUnit(genes, 12) * WING_STYLES.length) % WING_STYLES.length],
+    wingPurpose: WING_PURPOSES[Math.floor(geneUnit(genes, 13) * WING_PURPOSES.length) % WING_PURPOSES.length],
     hornLength: lerp(11, 54, geneUnit(genes, 13)) * lerp(0.94, 1.06, geneUnit(genes, 24)),
     outlineWidth: lerp(1.2, 7.5, geneUnit(genes, 14)) * lerp(0.96, 1.04, geneUnit(genes, 23)),
     glow: clamp(lerp(0.04, 0.86, geneUnit(genes, 15)) + (phenotype.identity.texture === 'Glowing' ? 0.14 : 0), 0, 1),
@@ -386,6 +401,13 @@ export function sanitizeBodySpec(value: unknown): BodySpec {
     bodyHeight: sanitizeNumber(candidate.bodyHeight, DEFAULT_BODY_SPEC.bodyHeight),
     bodyScale: sanitizeNumber(candidate.bodyScale, DEFAULT_BODY_SPEC.bodyScale),
     cornerRoundness: sanitizeNumber(candidate.cornerRoundness, DEFAULT_BODY_SPEC.cornerRoundness),
+    genderFrame: sanitizeEnum(candidate.genderFrame, GENDER_FRAMES, DEFAULT_BODY_SPEC.genderFrame),
+    shoulders: sanitizeNumber(candidate.shoulders, DEFAULT_BODY_SPEC.shoulders),
+    waist: sanitizeNumber(candidate.waist, DEFAULT_BODY_SPEC.waist),
+    hips: sanitizeNumber(candidate.hips, DEFAULT_BODY_SPEC.hips),
+    textureScale: sanitizeNumber(candidate.textureScale, DEFAULT_BODY_SPEC.textureScale),
+    textureDepth: sanitizeNumber(candidate.textureDepth, DEFAULT_BODY_SPEC.textureDepth),
+    textureRoughness: sanitizeNumber(candidate.textureRoughness, DEFAULT_BODY_SPEC.textureRoughness),
     eyeSize: sanitizeNumber(candidate.eyeSize, DEFAULT_BODY_SPEC.eyeSize),
     eyeSpacing: sanitizeNumber(candidate.eyeSpacing, DEFAULT_BODY_SPEC.eyeSpacing),
     eyeHeight: sanitizeNumber(candidate.eyeHeight, DEFAULT_BODY_SPEC.eyeHeight),
@@ -395,6 +417,8 @@ export function sanitizeBodySpec(value: unknown): BodySpec {
     mouthWidth: sanitizeNumber(candidate.mouthWidth, DEFAULT_BODY_SPEC.mouthWidth),
     mouthHeight: sanitizeNumber(candidate.mouthHeight, DEFAULT_BODY_SPEC.mouthHeight),
     wingSpread: sanitizeNumber(candidate.wingSpread, DEFAULT_BODY_SPEC.wingSpread),
+    wingStyle: sanitizeEnum(candidate.wingStyle, WING_STYLES, DEFAULT_BODY_SPEC.wingStyle),
+    wingPurpose: sanitizeEnum(candidate.wingPurpose, WING_PURPOSES, DEFAULT_BODY_SPEC.wingPurpose),
     hornLength: sanitizeNumber(candidate.hornLength, DEFAULT_BODY_SPEC.hornLength),
     outlineWidth: sanitizeNumber(candidate.outlineWidth, DEFAULT_BODY_SPEC.outlineWidth),
     glow: sanitizeNumber(candidate.glow, DEFAULT_BODY_SPEC.glow),
@@ -404,6 +428,78 @@ export function sanitizeBodySpec(value: unknown): BodySpec {
     animationSpeed: sanitizeNumber(candidate.animationSpeed, DEFAULT_BODY_SPEC.animationSpeed),
     features: sanitizeFeatures(candidate.features) ?? DEFAULT_BODY_SPEC.features,
   };
+}
+
+/**
+ * Accepts the standalone bs-body-forge transfer envelope. The workshop owns
+ * inherited anatomy/material choices; its aura and emotion preview controls
+ * deliberately do not replace Meta-Pet's live dosha, vitals, evolution or
+ * behaviour layers.
+ */
+export function importBodyForgeTransfer(value: unknown): BodySpec | null {
+  if (!isPlainObject(value) || value.version !== 1 || value.kind !== 'bss.body-forge-transfer' || !isPlainObject(value.body)) return null;
+  const body = value.body;
+  const expression: Record<string, FaceExpression> = {
+    mischief: 'smile', calm: 'neutral', fierce: 'focused', sleepy: 'sleepy',
+  };
+  const features: BodyFeature[] = [];
+  if (body.wings === true) features.push('wings');
+  if (body.horns === true) features.push('horns');
+  if (body.thirdEye === true) features.push('thirdEye');
+  if (body.flame === true) features.push('tailFlame');
+  if (body.shape === 'crown') features.push('crown');
+
+  return sanitizeBodySpec({
+    name: body.name,
+    shape: body.shape,
+    pattern: body.pattern,
+    expression: typeof body.expression === 'string' ? expression[body.expression] : undefined,
+    primaryColor: body.primary,
+    secondaryColor: body.shadow,
+    highlightColor: body.accent,
+    bodyWidth: body.width,
+    bodyHeight: body.height,
+    bodyScale: 1,
+    cornerRoundness: 20,
+    genderFrame: body.genderFrame,
+    shoulders: body.shoulders,
+    waist: body.waist,
+    hips: body.hips,
+    textureScale: body.textureScale,
+    textureDepth: body.textureDepth,
+    textureRoughness: body.textureRoughness,
+    eyeSize: body.eyes,
+    eyeSpacing: body.eyeGap,
+    eyeHeight: 104,
+    pupilSize: isFiniteNumber(body.eyes) ? clamp(body.eyes * .42, 2, 10) : undefined,
+    gazeX: body.gazeX,
+    gazeY: 0,
+    mouthWidth: 30,
+    mouthHeight: 11,
+    wingSpread: isFiniteNumber(body.wing) ? clamp(body.wing / 82, .2, 1.65) : undefined,
+    wingStyle: body.wingStyle,
+    wingPurpose: body.wingPurpose,
+    hornLength: body.horn,
+    outlineWidth: 4,
+    glow: isFiniteNumber(body.glow) ? clamp(body.glow / 100, 0, 1) : undefined,
+    tilt: body.tilt,
+    bob: body.bounce,
+    breathe: .035,
+    animationSpeed: 1,
+    features,
+  });
+}
+
+export function decodeBodyForgeTransfer(encoded: string): BodySpec | null {
+  try {
+    const normalized = encoded.replaceAll('-', '+').replaceAll('_', '/');
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+    const binary = window.atob(padded);
+    const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+    return importBodyForgeTransfer(JSON.parse(new TextDecoder().decode(bytes)) as unknown);
+  } catch {
+    return null;
+  }
 }
 
 /**

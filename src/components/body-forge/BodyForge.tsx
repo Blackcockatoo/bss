@@ -12,6 +12,9 @@ import {
   type BodyShape,
   type BodySpec,
   type FaceExpression,
+  type GenderFrame,
+  type WingPurpose,
+  type WingStyle,
 } from '@/components/body-forge/PetBodyRenderer';
 import { useStore } from '@/lib/store';
 import { getAvatarDataUrlError, useIdentityProfileStore } from '@/lib/identity/profile';
@@ -23,6 +26,7 @@ import {
   clearForgedBody,
   createDNAReadyBodyPacket,
   createGenomeBodySpec,
+  decodeBodyForgeTransfer,
   getGenomeVisualFingerprint,
   loadForgedBody,
   saveForgedBody,
@@ -66,6 +70,7 @@ export function BodyForge() {
   const [background, setBackground] = useState<'void' | 'light' | 'grid'>('void');
   const [copied, setCopied] = useState(false);
   const [hasSavedForge, setHasSavedForge] = useState(false);
+  const [importedFromWorkshop, setImportedFromWorkshop] = useState(false);
   const [confirmAvatarReplace, setConfirmAvatarReplace] = useState(false);
   const [avatarExporting, setAvatarExporting] = useState(false);
   const [avatarExportStatus, setAvatarExportStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -73,6 +78,14 @@ export function BodyForge() {
     // Deferred so the initial load happens outside the effect body, rather
     // than setting state synchronously during mount.
     const initialLoad = window.setTimeout(() => {
+      const encoded = new URLSearchParams(window.location.hash.slice(1)).get('forge');
+      const transferred = encoded ? decodeBodyForgeTransfer(encoded) : null;
+      if (transferred) {
+        setSpec(transferred);
+        setImportedFromWorkshop(true);
+        window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+        return;
+      }
       const stored = loadForgedBody();
       if (stored) {
         setSpec(stored);
@@ -122,10 +135,22 @@ export function BodyForge() {
     const colors = ['#1677ff', '#12b8a6', '#8528d8', '#d12f5b', '#e28723', '#151b2d'];
     const highlights = ['#f5c451', '#7ef9ff', '#ff82ce', '#d9ff75', '#ffffff'];
     const featurePool: BodyFeature[] = ['wings', 'horns', 'crown', 'thirdEye', 'tailFlame'];
+    const shapes: BodyShape[] = ['round', 'orb', 'bean', 'cubic', 'block', 'crystal', 'toroid', 'droplet', 'bell', 'seed', 'manta', 'lantern', 'crown', 'hourglass', 'wisp'];
+    const patterns: BodyPattern[] = ['solid', 'gradient', 'striped', 'spotted', 'velvet', 'pearl', 'glass', 'chrome', 'scales', 'moss', 'stone', 'ink'];
+    const frames: GenderFrame[] = ['male', 'neutral', 'female'];
+    const wingStyles: WingStyle[] = ['feather', 'moth', 'blade', 'veil'];
+    const wingPurposes: WingPurpose[] = ['flight', 'attack', 'attract', 'defend', 'decorative'];
     setSpec((current) => ({
       ...current,
-      shape: (['round', 'bean', 'cubic', 'crystal', 'toroid'] as BodyShape[])[Math.floor(Math.random() * 5)],
-      pattern: (['solid', 'gradient', 'striped', 'spotted'] as BodyPattern[])[Math.floor(Math.random() * 4)],
+      shape: shapes[Math.floor(Math.random() * shapes.length)],
+      pattern: patterns[Math.floor(Math.random() * patterns.length)],
+      genderFrame: frames[Math.floor(Math.random() * frames.length)],
+      shoulders: 24 + Math.random() * 62,
+      waist: 24 + Math.random() * 58,
+      hips: 24 + Math.random() * 62,
+      textureScale: 8 + Math.random() * 88,
+      textureDepth: 8 + Math.random() * 88,
+      textureRoughness: Math.random() * 100,
       primaryColor: colors[Math.floor(Math.random() * colors.length)],
       secondaryColor: colors[Math.floor(Math.random() * colors.length)],
       highlightColor: highlights[Math.floor(Math.random() * highlights.length)],
@@ -136,6 +161,8 @@ export function BodyForge() {
       eyeSize: 6.5 + Math.random() * 12.5,
       pupilSize: 2.5 + Math.random() * 7,
       wingSpread: 0.3 + Math.random() * 1.1,
+      wingStyle: wingStyles[Math.floor(Math.random() * wingStyles.length)],
+      wingPurpose: wingPurposes[Math.floor(Math.random() * wingPurposes.length)],
       hornLength: 11 + Math.random() * 43,
       glow: 0.05 + Math.random() * 0.9,
       bob: 1 + Math.random() * 14,
@@ -198,7 +225,7 @@ export function BodyForge() {
 
   const sendToMetaPet = () => {
     saveForgedBody(spec, genome, phenotype?.identity.seed ?? 0);
-    setPetType('geometric');
+    setPetType('evolved');
     setHasSavedForge(true);
     router.push('/pet');
   };
@@ -213,7 +240,7 @@ export function BodyForge() {
     <main className="min-h-screen bg-[#030610] text-white">
       <header className="border-b border-cyan-950/80 bg-slate-950/85 px-4 py-4 backdrop-blur">
         <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-3">
-          <div><p className="text-[10px] uppercase tracking-[0.32em] text-cyan-300">B$S creature workshop</p><h1 className="text-2xl font-black tracking-tight">BODY FORGE</h1><p className="mt-1 font-mono text-[9px] uppercase tracking-[0.16em] text-cyan-200/65">180 digits → 30 visual genes · {fingerprint}</p></div>
+          <div><p className="text-[10px] uppercase tracking-[0.32em] text-cyan-300">B$S creature workshop</p><h1 className="text-2xl font-black tracking-tight">BODY FORGE</h1><p className="mt-1 font-mono text-[9px] uppercase tracking-[0.16em] text-cyan-200/65">180 digits → 30 visual genes · {fingerprint}</p>{importedFromWorkshop && <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-300">Standalone Forge packet loaded · review, then set inherited body</p>}</div>
           <div className="flex flex-wrap gap-2">
             {Object.entries(PRESETS).map(([name, value]) => <button key={name} onClick={() => setSpec(value)} className="rounded-full border border-slate-700 px-3 py-1.5 text-xs hover:border-cyan-400">{name}</button>)}
             {dnaBody && <button onClick={() => setSpec(dnaBody)} className="rounded-full border border-amber-400/60 bg-amber-300/10 px-3 py-1.5 text-xs font-bold text-amber-100" title="Reset the edit below to the pure genome-derived body">Load live DNA</button>}
@@ -230,12 +257,17 @@ export function BodyForge() {
             Editing the <span className="text-amber-200">forged customisation</span>. It starts from a preset or the live DNA body; nothing here is saved until you press &ldquo;Set inherited body&rdquo;.
           </p>
           <label className="grid gap-1 text-xs text-zinc-300">Preset name<input className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white" value={spec.name} onChange={(event) => patch('name', event.target.value)} /></label>
-          <div className="grid grid-cols-2 gap-3"><Select label="Shape" value={spec.shape} values={['round', 'bean', 'cubic', 'crystal', 'toroid']} onChange={(value) => patch('shape', value)} /><Select label="Pattern" value={spec.pattern} values={['solid', 'gradient', 'striped', 'spotted']} onChange={(value) => patch('pattern', value)} /></div>
+          <div className="grid grid-cols-2 gap-3"><Select label="Shape" value={spec.shape} values={['round', 'orb', 'bean', 'cubic', 'block', 'crystal', 'toroid', 'droplet', 'bell', 'seed', 'manta', 'lantern', 'crown', 'hourglass', 'wisp']} onChange={(value) => patch('shape', value)} /><Select label="Pattern" value={spec.pattern} values={['solid', 'gradient', 'striped', 'spotted', 'velvet', 'pearl', 'glass', 'chrome', 'scales', 'moss', 'stone', 'ink']} onChange={(value) => patch('pattern', value)} /></div>
+          <Select label="Gender frame" value={spec.genderFrame} values={['male', 'neutral', 'female']} onChange={(value) => patch('genderFrame', value)} />
           <Slider label="Body width" value={spec.bodyWidth} min={58} max={170} onChange={(value) => patch('bodyWidth', value)} />
           <Slider label="Body height" value={spec.bodyHeight} min={62} max={180} onChange={(value) => patch('bodyHeight', value)} />
+          <Slider label="Shoulders" value={spec.shoulders} min={20} max={90} onChange={(value) => patch('shoulders', value)} />
+          <Slider label="Waist" value={spec.waist} min={20} max={90} onChange={(value) => patch('waist', value)} />
+          <Slider label="Hips" value={spec.hips} min={20} max={90} onChange={(value) => patch('hips', value)} />
           <Slider label="Body scale" value={spec.bodyScale} min={0.48} max={1.65} step={0.01} onChange={(value) => patch('bodyScale', value)} />
           <Slider label="Corner softness" value={spec.cornerRoundness} min={0} max={50} onChange={(value) => patch('cornerRoundness', value)} />
           <Slider label="Wing spread" value={spec.wingSpread} min={0.2} max={1.65} step={0.01} onChange={(value) => patch('wingSpread', value)} />
+          <div className="grid grid-cols-2 gap-3"><Select label="Wing style" value={spec.wingStyle} values={['feather', 'moth', 'blade', 'veil']} onChange={(value) => patch('wingStyle', value)} /><Select label="Wing purpose" value={spec.wingPurpose} values={['flight', 'attack', 'attract', 'defend', 'decorative']} onChange={(value) => patch('wingPurpose', value)} /></div>
           <Slider label="Horn length" value={spec.hornLength} min={8} max={64} onChange={(value) => patch('hornLength', value)} />
           <div><p className="mb-2 text-xs text-zinc-400">Features</p><div className="flex flex-wrap gap-2">{(['wings', 'horns', 'crown', 'thirdEye', 'tailFlame'] as BodyFeature[]).map((feature) => <button key={feature} onClick={() => toggleFeature(feature)} className={`rounded-full border px-3 py-1 text-xs ${spec.features.includes(feature) ? 'border-cyan-300 bg-cyan-300/15 text-cyan-200' : 'border-slate-700 text-zinc-400'}`}>{feature}</button>)}</div></div>
         </aside>
@@ -266,6 +298,9 @@ export function BodyForge() {
           <Slider label="Gaze Y" value={spec.gazeY} min={-6} max={6} step={0.5} onChange={(value) => patch('gazeY', value)} />
           <Slider label="Mouth width" value={spec.mouthWidth} min={10} max={58} onChange={(value) => patch('mouthWidth', value)} />
           <Slider label="Mouth curve" value={spec.mouthHeight} min={2} max={24} onChange={(value) => patch('mouthHeight', value)} />
+          <Slider label="Texture scale" value={spec.textureScale} min={5} max={100} onChange={(value) => patch('textureScale', value)} />
+          <Slider label="Texture depth" value={spec.textureDepth} min={0} max={100} onChange={(value) => patch('textureDepth', value)} />
+          <Slider label="Roughness" value={spec.textureRoughness} min={0} max={100} onChange={(value) => patch('textureRoughness', value)} />
           <div className="grid grid-cols-3 gap-2">{(['primaryColor', 'secondaryColor', 'highlightColor'] as const).map((key) => <label key={key} className="grid gap-1 text-[10px] text-zinc-400">{key.replace('Color', '')}<input type="color" value={spec[key]} onChange={(event) => patch(key, event.target.value)} className="h-10 w-full rounded bg-transparent" /></label>)}</div>
           <Slider label="Outline" value={spec.outlineWidth} min={0} max={9} step={0.5} onChange={(value) => patch('outlineWidth', value)} />
           <Slider label="Glow" value={spec.glow} min={0} max={1} step={0.01} onChange={(value) => patch('glow', value)} />

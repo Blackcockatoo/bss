@@ -94,7 +94,7 @@ const storeState = {
   },
   lastAction: null,
   lastActionAt: 0,
-  petType: "geometric" as const,
+  petType: "auralia" as const,
   setPetType,
 };
 
@@ -141,9 +141,15 @@ describe("PetPage", () => {
     fireEvent.click(
       screen.getByRole("button", { name: /Advanced \/ Mechanics Lab/i }),
     );
-    fireEvent.click(screen.getByRole("button", { name: /Auralia Guardian/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /Evolved \/ Body Forge/i }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: /Geometry \/ Moss60/i }),
+    );
 
-    expect(setPetType).toHaveBeenCalledWith("auralia");
+    expect(setPetType).toHaveBeenNthCalledWith(1, "evolved");
+    expect(setPetType).toHaveBeenNthCalledWith(2, "geometry");
     expect(
       screen.getByRole("link", { name: /Open Body Forge/i }),
     ).toHaveAttribute("href", "/body-forge");

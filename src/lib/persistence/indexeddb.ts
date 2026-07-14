@@ -28,6 +28,7 @@ import {
   type RitualProgress,
   createDefaultRitualProgress,
 } from "@/lib/ritual/types";
+import { normalizePetForm } from "@/lib/petForms";
 import type { MirrorModeState, PetType, Vitals } from "@/lib/store";
 import {
   type InvariantIssue,
@@ -481,16 +482,9 @@ export function importPetFromJSON(
         }
       : parsed.genome!;
 
-  // PetType validation and default
-  const petType: PetType = (() => {
-    if (
-      parsed.petType &&
-      ["organic", "geometric", "hybrid"].includes(parsed.petType)
-    ) {
-      return parsed.petType as PetType;
-    }
-    return "geometric"; // Default to geometric if not specified
-  })();
+  // Auralia is the default. Historical `geometric` saves represented the
+  // Visual DNA / Body Forge runtime and therefore migrate to Evolved.
+  const petType: PetType = normalizePetForm(parsed.petType);
 
   if (!parsed.genomeHash || !isValidGenomeHash(parsed.genomeHash)) {
     throw new Error("Invalid pet file: genome hashes are malformed");
@@ -735,7 +729,7 @@ function normalizePetData(raw: unknown): PetSaveData {
     essence,
     lastRewardSource,
     lastRewardAmount,
-    petType: isValidPetType(typed.petType) ? typed.petType : "geometric",
+    petType: normalizePetForm(typed.petType),
     witness: normalizedWitness,
     petOntology,
     systemState,
@@ -832,10 +826,6 @@ function isValidGenomeHash(value: unknown): value is GenomeHash {
     typeof hash.blueHash === "string" &&
     typeof hash.blackHash === "string"
   );
-}
-
-function isValidPetType(value: unknown): value is PetType {
-  return value === "geometric" || value === "auralia";
 }
 
 function isValidInvariantIssue(value: unknown): value is InvariantIssue {
