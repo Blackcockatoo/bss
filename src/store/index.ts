@@ -62,9 +62,10 @@ import {
   type SystemState,
   shouldSealSystem,
 } from '../lib/system/invariants';
+import { normalizePetForm, type PetForm } from '../lib/petForms';
 
 export type { Vitals };
-export type PetType = 'geometric' | 'auralia';
+export type PetType = PetForm;
 export type RewardSource =
   | 'battle'
   | 'exploration'
@@ -335,7 +336,7 @@ export function createMetaPetWebStore(
     vimana: createDefaultVimanaState(),
     rewardHistory: [],
     lastReward: null,
-    petType: 'geometric',
+    petType: 'auralia',
     mirrorMode: { ...DEFAULT_MIRROR_MODE },
     lastAction: null,
     lastActionAt: 0,
@@ -386,7 +387,7 @@ export function createMetaPetWebStore(
 
     setPetType(petType) {
       if (get().systemState === 'sealed') return;
-      set({ petType });
+      set({ petType: normalizePetForm(petType) });
     },
 
     hydrate({
@@ -448,7 +449,7 @@ export function createMetaPetWebStore(
           : state.vimana,
         rewardHistory: rewardHistory ? rewardHistory.map(entry => ({ ...entry, reward: { ...entry.reward } })) : state.rewardHistory,
         lastReward: lastReward ?? state.lastReward,
-        petType: petType ?? state.petType,
+        petType: normalizePetForm(petType, state.petType),
         mirrorMode: mirrorMode ? { ...mirrorMode } : state.mirrorMode,
         tickId: state.tickId,
       }));

@@ -181,7 +181,7 @@ export function BodyForge() {
 
   const sendToMetaPet = () => {
     saveForgedBody(spec, genome, phenotype?.identity.seed ?? 0);
-    setPetType('geometric');
+    setPetType('evolved');
     setHasSavedForge(true);
     router.push('/pet');
   };
@@ -263,7 +263,7 @@ export function BodyForge() {
           <Slider label="Breathing" value={spec.breathe} min={0} max={0.12} step={0.005} onChange={(value) => patch('breathe', value)} />
           <Slider label="Motion speed" value={spec.animationSpeed} min={0.25} max={2.5} step={0.05} onChange={(value) => patch('animationSpeed', value)} />
           <div className="grid grid-cols-2 gap-2"><button onClick={copyJson} className="rounded-lg border border-slate-700 px-3 py-2 text-xs hover:border-cyan-400">{copied ? 'Copied' : 'Copy JSON'}</button><button onClick={exportJson} className="rounded-lg border border-cyan-500 px-3 py-2 text-xs font-bold text-cyan-200">DNA packet</button><button onClick={sendToMetaPet} className="col-span-2 rounded-lg bg-cyan-300 px-3 py-3 text-xs font-black uppercase tracking-[0.16em] text-slate-950">Set inherited body</button></div>
-          <p className="text-[10px] leading-4 text-zinc-500">Saves this customisation as the pet&rsquo;s inherited anatomy, selects the canonical DNA / Forge renderer, and returns to the single `/pet` runtime. Evolution can still add revealed features on top; hunger, mood, energy, sickness and actions only ever deform it temporarily.</p>
+          <p className="text-[10px] leading-4 text-zinc-500">Saves this customisation as the pet&rsquo;s inherited anatomy, selects the Evolved form, and returns to the single `/pet` runtime. Evolution can still add revealed features on top; hunger, mood, energy, sickness and actions only ever deform it temporarily.</p>
         </aside>
       </div>
     </main>

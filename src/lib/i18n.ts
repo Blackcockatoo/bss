@@ -21,8 +21,9 @@ const UI_STRINGS = {
       nameLabel: 'Companion name',
       namePlaceholder: 'Name your companion',
       petType: {
-        geometric: 'Geometric',
         auralia: 'Auralia',
+        evolved: 'Evolved / Body Forge',
+        geometry: 'Geometry / Moss60',
       },
       viewCertificate: 'View Certificate',
       actions: {
@@ -148,8 +149,9 @@ const UI_STRINGS = {
       nameLabel: 'Nombre del compañero',
       namePlaceholder: 'Nombra a tu compañero',
       petType: {
-        geometric: 'Geométrico',
         auralia: 'Auralia',
+        evolved: 'Evolucionado / Body Forge',
+        geometry: 'Geometría / Moss60',
       },
       viewCertificate: 'Ver certificado',
       actions: {
@@ -258,8 +260,9 @@ const UI_STRINGS = {
       nameLabel: 'コンパニオン名',
       namePlaceholder: 'コンパニオンに名前をつける',
       petType: {
-        geometric: 'ジオメトリック',
         auralia: 'オーラリア',
+        evolved: '進化形 / Body Forge',
+        geometry: '幾何形 / Moss60',
       },
       viewCertificate: '証明書を見る',
       actions: {
@@ -366,8 +369,9 @@ const UI_STRINGS = {
       nameLabel: 'साथी का नाम',
       namePlaceholder: 'अपने साथी का नाम रखें',
       petType: {
-        geometric: 'ज्यामितीय',
         auralia: 'ऑरेलिया',
+        evolved: 'विकसित / Body Forge',
+        geometry: 'ज्यामिति / Moss60',
       },
       viewCertificate: 'प्रमाणपत्र देखें',
       actions: {
@@ -474,8 +478,9 @@ const UI_STRINGS = {
       nameLabel: 'Имя питомца',
       namePlaceholder: 'Назовите своего питомца',
       petType: {
-        geometric: 'Геометрический',
         auralia: 'Ауралия',
+        evolved: 'Эволюционный / Body Forge',
+        geometry: 'Геометрия / Moss60',
       },
       viewCertificate: 'Открыть сертификат',
       actions: {
@@ -583,8 +588,9 @@ const UI_STRINGS = {
       nameLabel: 'Nom du compagnon',
       namePlaceholder: 'Nommez votre compagnon',
       petType: {
-        geometric: 'Géométrique',
         auralia: 'Auralia',
+        evolved: 'Évolué / Body Forge',
+        geometry: 'Géométrie / Moss60',
       },
       viewCertificate: 'Voir le certificat',
       actions: {

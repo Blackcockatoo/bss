@@ -72,7 +72,11 @@ export default function StudentAppHomePage() {
           <div>
             <h2 className="text-lg font-medium text-cyan-100">Active companion</h2>
             <p className="mt-2 text-sm text-zinc-300">
-              {petType === 'auralia' ? 'Auralia Guardian' : 'DNA / Forge body'} · {evolution.state} stage · Level{' '}
+              {petType === 'auralia'
+                ? 'Auralia Companion'
+                : petType === 'evolved'
+                  ? 'Evolved / Body Forge'
+                  : 'Geometry / Moss60'} · {evolution.state} stage · Level{' '}
               {evolution.level}
             </p>
           </div>
