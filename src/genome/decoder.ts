@@ -31,6 +31,17 @@ const textures = [
   'Cloudy', 'Metallic', 'Glowing',
 ];
 
+const physicalFeatureOptions = [
+  'Wings',
+  'Horns',
+  'Crown',
+  'Third Eye',
+  'Tail Flame',
+  'Fins',
+  'Antennae',
+  'Crest',
+];
+
 const temperaments = [
   'Gentle', 'Energetic', 'Curious', 'Calm',
   'Mischievous', 'Protective', 'Adventurous',
@@ -106,8 +117,9 @@ function decodePhysicalTraits(red60: number[]): PhysicalTraits {
   const features: string[] = [];
   for (let i = 45; i < 60; i += 3) {
     if (red60[i] >= 5) {
-      const featureIndex = digitSum(red60.slice(i, i + 3)) % quirkOptions.length;
-      features.push(quirkOptions[featureIndex]);
+      const featureIndex = digitSum(red60.slice(i, i + 3)) % physicalFeatureOptions.length;
+      const feature = physicalFeatureOptions[featureIndex];
+      if (!features.includes(feature)) features.push(feature);
     }
   }
 
