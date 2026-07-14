@@ -145,7 +145,7 @@ describe("PetPage", () => {
       screen.getByRole("button", { name: /Evolved \/ Body Forge/i }),
     );
     fireEvent.click(
-      screen.getByRole("button", { name: /Geometry \/ Moss60/i }),
+      screen.getByRole("button", { name: /Geometry \/ Sri Yantra/i }),
     );
 
     expect(setPetType).toHaveBeenNthCalledWith(1, "evolved");

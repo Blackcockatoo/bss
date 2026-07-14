@@ -12,7 +12,9 @@ import {
   IS_SCHOOLS_PROFILE,
 } from "@/lib/env/features";
 import { useIdentityProfileStore } from "@/lib/identity/profile";
+import { normalizePetForm, PET_FORM_STORAGE_KEY } from "@/lib/petForms";
 import { SCHOOLS_LOCAL_DATA_RETENTION_DAYS } from "@/lib/schools/storage";
+import { useStore } from "@/lib/store";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -45,6 +47,28 @@ export default function ClientBody({
 
   useEffect(() => {
     document.body.classList.add("antialiased");
+  }, []);
+
+  // Remember the chosen visual form across reloads so returning from the
+  // Body Forge (or any session) never silently reverts the renderer.
+  // Restored after hydration to keep server markup deterministic.
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(PET_FORM_STORAGE_KEY);
+      if (stored) {
+        useStore.getState().setPetType(normalizePetForm(stored));
+      }
+    } catch {
+      // Storage may be unavailable (private mode); form simply defaults.
+    }
+    return useStore.subscribe((state, previous) => {
+      if (state.petType === previous.petType) return;
+      try {
+        window.localStorage.setItem(PET_FORM_STORAGE_KEY, state.petType);
+      } catch {
+        // Non-fatal: the session keeps working without the preference.
+      }
+    });
   }, []);
 
   useEffect(() => {

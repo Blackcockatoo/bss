@@ -101,7 +101,7 @@ export function deriveMoss60PetProfile(
   const petTypeLabels: Record<PetForm, string> = {
     auralia: 'Auralia companion',
     evolved: 'Evolved / Body Forge companion',
-    geometry: 'Geometry / Moss60 companion',
+    geometry: 'Geometry / Sri Yantra companion',
   };
   const petTypeLabel = petTypeLabels[normalizePetForm(source.petType)];
   const baseSeed = [
