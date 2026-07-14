@@ -4,7 +4,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { useStore } from '@/lib/store';
 import { triggerHaptic } from '@/lib/haptics';
 import AuraliaSprite from './AuraliaSprite';
-import { SriYantraPetDisplay } from './SriYantraPetDisplay';
+import { GeometryAvatarRenderer } from './GeometryAvatarRenderer';
 
 interface PetHeroProps {
   className?: string;
@@ -128,7 +128,7 @@ export function PetHero({ className = '', staticMode = false }: PetHeroProps) {
     >
       <div className="relative w-64 h-64 flex items-center justify-center">
         {petType === 'geometric' ? (
-          <SriYantraPetDisplay animated={!staticMode} />
+          <GeometryAvatarRenderer animated={!staticMode} />
         ) : (
           <AuraliaSprite size="large" interactive staticMode={staticMode} />
         )}

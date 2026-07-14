@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 import {
   DEFAULT_BODY_SPEC,
@@ -13,6 +14,8 @@ import {
   type FaceExpression,
 } from '@/components/body-forge/PetBodyRenderer';
 import { useStore } from '@/lib/store';
+import { getAvatarSizeError, useIdentityProfileStore } from '@/lib/identity/profile';
+import { dataUrlByteLength, svgElementToPngDataUrl } from '@/lib/media/svgToPngDataUrl';
 import { resolveVisualDNA } from '@/visual-dna';
 import {
   applyEvolutionGrowth,
@@ -50,6 +53,9 @@ export function BodyForge() {
   const lastAction = useStore((state) => state.lastAction);
   const lastActionAt = useStore((state) => state.lastActionAt);
   const setPetType = useStore((state) => state.setPetType);
+  const identityProfile = useIdentityProfileStore((state) => state.profile);
+  const saveIdentityProfile = useIdentityProfileStore((state) => state.saveProfile);
+  const previewRef = useRef<HTMLDivElement>(null);
   const [spec, setSpec] = useState<BodySpec>(DEFAULT_BODY_SPEC);
   // Tracks which action timestamp has aged past the reaction window. Keeps
   // render pure (no Date.now during render): while an action is fresh the
@@ -60,6 +66,7 @@ export function BodyForge() {
   const [background, setBackground] = useState<'void' | 'light' | 'grid'>('void');
   const [copied, setCopied] = useState(false);
   const [hasSavedForge, setHasSavedForge] = useState(false);
+  const [avatarExportStatus, setAvatarExportStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   useEffect(() => {
     // Deferred so the initial load happens outside the effect body, rather
     // than setting state synchronously during mount.
@@ -152,6 +159,26 @@ export function BodyForge() {
     URL.revokeObjectURL(url);
   };
 
+  const exportAsAvatar = async () => {
+    const svg = previewRef.current?.querySelector('svg');
+    if (!svg) {
+      setAvatarExportStatus({ type: 'error', message: 'Could not find the body preview to export.' });
+      return;
+    }
+    try {
+      const dataUrl = await svgElementToPngDataUrl(svg);
+      const sizeError = getAvatarSizeError(dataUrlByteLength(dataUrl));
+      if (sizeError) {
+        setAvatarExportStatus({ type: 'error', message: sizeError });
+        return;
+      }
+      saveIdentityProfile({ ...identityProfile, avatarDataUrl: dataUrl });
+      setAvatarExportStatus({ type: 'success', message: 'Saved as your owner avatar.' });
+    } catch {
+      setAvatarExportStatus({ type: 'error', message: 'Could not export this body as an avatar.' });
+    }
+  };
+
   const sendToMetaPet = () => {
     saveForgedBody(spec, genome, phenotype?.identity.seed ?? 0);
     setPetType('geometric');
@@ -202,7 +229,9 @@ export function BodyForge() {
             <label className="flex items-center gap-2"><input type="checkbox" checked={animate} onChange={(event) => setAnimate(event.target.checked)} />Animate</label>
           </div>
           <div className={`relative flex min-h-[570px] items-center justify-center overflow-hidden ${background === 'light' ? 'bg-zinc-100' : background === 'grid' ? 'bg-[#08101d] bg-[linear-gradient(rgba(34,211,238,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,.08)_1px,transparent_1px)] bg-[size:28px_28px]' : 'bg-[radial-gradient(circle_at_center,#132945_0%,#050814_58%,#010207_100%)]'}`}>
-            <PetBodyRenderer spec={previewSpec} animate={animate} className="h-auto w-full max-w-[720px]" />
+            <div ref={previewRef} className="contents">
+              <PetBodyRenderer spec={previewSpec} animate={animate} className="h-auto w-full max-w-[720px]" />
+            </div>
             <div className="absolute bottom-4 left-4 max-w-[80%] rounded-lg border border-white/10 bg-black/45 px-3 py-2 text-[10px] uppercase tracking-[0.16em] text-white/65">
               Live preview · forged anatomy stays inherited; current mood, hunger, evolution and dosha only preview a temporary deformation here
             </div>
@@ -227,7 +256,13 @@ export function BodyForge() {
           <Slider label="Bob" value={spec.bob} min={0} max={20} onChange={(value) => patch('bob', value)} />
           <Slider label="Breathing" value={spec.breathe} min={0} max={0.12} step={0.005} onChange={(value) => patch('breathe', value)} />
           <Slider label="Motion speed" value={spec.animationSpeed} min={0.25} max={2.5} step={0.05} onChange={(value) => patch('animationSpeed', value)} />
-          <div className="grid grid-cols-2 gap-2"><button onClick={copyJson} className="rounded-lg border border-slate-700 px-3 py-2 text-xs hover:border-cyan-400">{copied ? 'Copied' : 'Copy JSON'}</button><button onClick={exportJson} className="rounded-lg border border-cyan-500 px-3 py-2 text-xs font-bold text-cyan-200">DNA packet</button><button onClick={sendToMetaPet} className="col-span-2 rounded-lg bg-cyan-300 px-3 py-3 text-xs font-black uppercase tracking-[0.16em] text-slate-950">Set inherited body</button></div>
+          <div className="grid grid-cols-2 gap-2"><button onClick={copyJson} className="rounded-lg border border-slate-700 px-3 py-2 text-xs hover:border-cyan-400">{copied ? 'Copied' : 'Copy JSON'}</button><button onClick={exportJson} className="rounded-lg border border-cyan-500 px-3 py-2 text-xs font-bold text-cyan-200">DNA packet</button><button onClick={exportAsAvatar} className="col-span-2 rounded-lg border border-amber-400/60 bg-amber-300/10 px-3 py-2 text-xs font-bold text-amber-100">Save as avatar</button><button onClick={sendToMetaPet} className="col-span-2 rounded-lg bg-cyan-300 px-3 py-3 text-xs font-black uppercase tracking-[0.16em] text-slate-950">Set inherited body</button></div>
+          {avatarExportStatus && (
+            <p className={`text-[10px] leading-4 ${avatarExportStatus.type === 'success' ? 'text-cyan-300' : 'text-rose-400'}`}>
+              {avatarExportStatus.message}
+              {avatarExportStatus.type === 'success' && <> · <Link href="/identity" className="underline">View in Identity</Link></>}
+            </p>
+          )}
           <p className="text-[10px] leading-4 text-zinc-500">Saves this customisation as the pet&rsquo;s inherited anatomy, selects the canonical DNA / Forge renderer, and returns to the single `/pet` runtime. Evolution can still add revealed features on top; hunger, mood, energy, sickness and actions only ever deform it temporarily.</p>
         </aside>
       </div>
