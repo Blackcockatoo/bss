@@ -30,9 +30,12 @@ export const defaultIdentityProfile: IdentityProfile = {
 };
 
 function normalizeIdentityProfile(profile?: Partial<IdentityProfile>): IdentityProfile {
+  const avatarDataUrl =
+    typeof profile?.avatarDataUrl === 'string' ? profile.avatarDataUrl : '';
   return {
     ...defaultIdentityProfile,
     ...profile,
+    avatarDataUrl: getAvatarDataUrlError(avatarDataUrl) ? '' : avatarDataUrl,
   };
 }
 
