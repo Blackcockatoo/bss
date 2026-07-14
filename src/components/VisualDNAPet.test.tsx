@@ -1,0 +1,147 @@
+import { act, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import type { EvolutionData } from '@/evolution/types';
+import type { DerivedTraits, Genome } from '@/genome/types';
+import { DEFAULT_VITALS, type Vitals } from '@/vitals';
+
+const traits: DerivedTraits = {
+  physical: {
+    bodyType: 'Crystalline',
+    primaryColor: '#123456',
+    secondaryColor: '#abcdef',
+    pattern: 'Gradient',
+    texture: 'Glowing',
+    size: 0.92,
+    proportions: { headRatio: 1, limbRatio: 0.8, tailRatio: 1.15 },
+    features: ['Wings', 'Third Eye'],
+  },
+  personality: {
+    temperament: 'Curious',
+    energy: 76,
+    social: 65,
+    curiosity: 88,
+    discipline: 52,
+    affection: 72,
+    independence: 48,
+    playfulness: 81,
+    loyalty: 79,
+    quirks: [],
+  },
+  latent: {
+    evolutionPath: 'Mystic Sage',
+    rareAbilities: [],
+    potential: { physical: 70, mental: 80, social: 75 },
+    hiddenGenes: [3, 7, 11, 23],
+  },
+  elementWeb: {
+    usedResidues: [1, 3, 7],
+    pairSlots: [2, 8],
+    frontierSlots: [5],
+    voidSlotsHit: [0],
+    coverage: 0.74,
+    frontierAffinity: 0.22,
+    bridgeCount: 6,
+    voidDrift: 0.12,
+  },
+};
+
+const genome: Genome = {
+  red60: Array.from({ length: 60 }, (_, i) => (i * 7 + 3) % 10),
+  blue60: Array.from({ length: 60 }, (_, i) => (i * 5 + 1) % 10),
+  black60: Array.from({ length: 60 }, (_, i) => (i * 3 + 2) % 10),
+};
+
+const evolution: EvolutionData = {
+  state: 'NEURO',
+  birthTime: 0,
+  lastEvolutionTime: 0,
+  experience: 0,
+  level: 5,
+  currentLevelXp: 0,
+  totalXp: 0,
+  totalInteractions: 20,
+  canEvolve: false,
+};
+
+interface MockStoreState {
+  genome: Genome | null;
+  traits: DerivedTraits | null;
+  vitals: Vitals;
+  evolution: EvolutionData;
+  lastAction: null | 'feed' | 'clean' | 'play' | 'sleep';
+  lastActionAt: number;
+}
+
+let storeState: MockStoreState;
+
+async function loadVisualDNAPet() {
+  vi.resetModules();
+  vi.doMock('@/lib/store', () => ({
+    useStore: (selector: (state: MockStoreState) => unknown) => selector(storeState),
+  }));
+  const mod = await import('./VisualDNAPet');
+  return mod.VisualDNAPet;
+}
+
+beforeEach(() => {
+  window.localStorage.clear();
+  storeState = {
+    genome,
+    traits,
+    vitals: { ...DEFAULT_VITALS },
+    evolution,
+    lastAction: null,
+    lastActionAt: 0,
+  };
+});
+
+afterEach(() => {
+  vi.resetModules();
+  vi.doUnmock('@/lib/store');
+  window.localStorage.clear();
+});
+
+describe('VisualDNAPet renderer', () => {
+  it('mounts exactly one authoritative body renderer and no hidden legacy body', async () => {
+    const VisualDNAPet = await loadVisualDNAPet();
+    const { container } = render(<VisualDNAPet />);
+
+    await waitFor(() => {
+      expect(container.querySelectorAll('svg[aria-label$="body"]')).toHaveLength(1);
+    });
+    expect(container.querySelectorAll('.opacity-0')).toHaveLength(0);
+  });
+
+  it('shows the pure DNA body source until a forged body is saved, then reflects the forge', async () => {
+    const VisualDNAPet = await loadVisualDNAPet();
+    render(<VisualDNAPet />);
+
+    await screen.findByText('180-digit DNA');
+
+    const { saveForgedBody } = await import('@/visual-dna/bodyForgeAdapter');
+    const { DEFAULT_BODY_SPEC } = await import('@/components/body-forge/PetBodyRenderer');
+
+    act(() => {
+      saveForgedBody({ ...DEFAULT_BODY_SPEC, name: 'Test Forge' }, genome, 1);
+    });
+
+    await screen.findByText('Forge + live DNA');
+  });
+
+  it('returns to the pure DNA body once the forged body is cleared', async () => {
+    const { saveForgedBody } = await import('@/visual-dna/bodyForgeAdapter');
+    const { DEFAULT_BODY_SPEC } = await import('@/components/body-forge/PetBodyRenderer');
+    saveForgedBody({ ...DEFAULT_BODY_SPEC, name: 'Test Forge' }, genome, 1);
+
+    const VisualDNAPet = await loadVisualDNAPet();
+    render(<VisualDNAPet />);
+
+    const clearButton = await screen.findByRole('button', { name: /use pure dna body/i });
+    act(() => {
+      clearButton.click();
+    });
+
+    await screen.findByText('180-digit DNA');
+  });
+});
