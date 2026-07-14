@@ -17,6 +17,9 @@ describe("BSS release coexistence contract", () => {
     const canonicalPetRoute = readSource("src/app/pet/page.tsx");
     const duplicatePetRoute = readSource("src/app/app/pet/page.tsx");
     const petRuntimeStage = readSource("src/components/PetRuntimeStage.tsx");
+    const petRendererRouter = readSource(
+      "src/components/PetRendererRouter.tsx",
+    );
     const visualDnaPet = readSource("src/components/VisualDNAPet.tsx");
     const bodyResolver = readSource("src/visual-dna/bodyForgeAdapter.ts");
 
@@ -24,12 +27,14 @@ describe("BSS release coexistence contract", () => {
     expect(vimanaMap).toContain("Vimana Field Atlas");
     expect(bodyForgeRoute).toContain("<BodyForge />");
     expect(bodyForgeWorkshop).toContain("Set inherited body");
-    expect(bodyForgeWorkshop).toContain("setPetType('geometric')");
+    expect(bodyForgeWorkshop).toContain("setPetType('evolved')");
     expect(bodyForgeWorkshop).toContain("router.push('/pet')");
     expect(canonicalPetRoute).toContain("<PetRuntimeStage");
     expect(duplicatePetRoute).toContain("redirect('/pet')");
-    expect(petRuntimeStage).toContain("<VisualDNAPet");
-    expect(petRuntimeStage).toContain("<AuraliaMetaPet");
+    expect(petRuntimeStage).toContain("<PetRendererRouter");
+    expect(petRendererRouter).toContain("<VisualDNAPet");
+    expect(petRendererRouter).toContain("<AuraliaMetaPet");
+    expect(petRendererRouter).toContain("<SriYantraPetDisplay");
     expect(visualDnaPet).toContain("resolveBodySpec");
     expect(bodyResolver).toContain("genomeToVisualGenes");
     expect(bodyResolver).toContain("loadForgedBody");

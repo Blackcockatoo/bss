@@ -94,7 +94,7 @@ const storeState = {
   },
   lastAction: null,
   lastActionAt: 0,
-  petType: "geometric" as const,
+  petType: "evolved" as const,
   setPetType,
 };
 
@@ -135,15 +135,18 @@ describe("PetPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("switches the active body engine from the mechanics lab", async () => {
+  it("switches between the three visual forms from the overview selector", async () => {
     render(<PetPage />);
 
-    fireEvent.click(
-      screen.getByRole("button", { name: /Advanced \/ Mechanics Lab/i }),
-    );
-    fireEvent.click(screen.getByRole("button", { name: /Auralia Guardian/i }));
-
+    fireEvent.click(screen.getByRole("button", { name: /^Auralia$/i }));
     expect(setPetType).toHaveBeenCalledWith("auralia");
+
+    fireEvent.click(screen.getByRole("button", { name: /^Geometry$/i }));
+    expect(setPetType).toHaveBeenCalledWith("geometry");
+
+    fireEvent.click(screen.getByRole("button", { name: /^Evolved$/i }));
+    expect(setPetType).toHaveBeenCalledWith("evolved");
+
     expect(
       screen.getByRole("link", { name: /Open Body Forge/i }),
     ).toHaveAttribute("href", "/body-forge");

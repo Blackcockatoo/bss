@@ -3,8 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useStore } from '@/lib/store';
 import { triggerHaptic } from '@/lib/haptics';
-import AuraliaSprite from './AuraliaSprite';
-import { SriYantraPetDisplay } from './SriYantraPetDisplay';
+import { PetRendererRouter } from './PetRendererRouter';
 
 interface PetHeroProps {
   className?: string;
@@ -16,7 +15,6 @@ interface PetHeroProps {
  * Supports gesture controls and shows the pet prominently
  */
 export function PetHero({ className = '', staticMode = false }: PetHeroProps) {
-  const petType = useStore(state => state.petType);
   const feed = useStore(state => state.feed);
   const play = useStore(state => state.play);
   const clean = useStore(state => state.clean);
@@ -127,11 +125,7 @@ export function PetHero({ className = '', staticMode = false }: PetHeroProps) {
       onTouchEnd={handleTouchEnd}
     >
       <div className="relative w-64 h-64 flex items-center justify-center">
-        {petType === 'geometric' ? (
-          <SriYantraPetDisplay animated={!staticMode} />
-        ) : (
-          <AuraliaSprite size="large" interactive staticMode={staticMode} />
-        )}
+        <PetRendererRouter variant="compact" staticMode={staticMode} />
 
         {/* Gesture Indicator Overlay */}
         {gestureIndicator && (

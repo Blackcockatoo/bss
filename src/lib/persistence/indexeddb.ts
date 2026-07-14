@@ -28,7 +28,12 @@ import {
   type RitualProgress,
   createDefaultRitualProgress,
 } from "@/lib/ritual/types";
-import type { MirrorModeState, PetType, Vitals } from "@/lib/store";
+import {
+  type MirrorModeState,
+  type PetType,
+  type Vitals,
+  normalizePetType,
+} from "@/lib/store";
 import {
   type InvariantIssue,
   type SystemState,
@@ -481,16 +486,9 @@ export function importPetFromJSON(
         }
       : parsed.genome!;
 
-  // PetType validation and default
-  const petType: PetType = (() => {
-    if (
-      parsed.petType &&
-      ["organic", "geometric", "hybrid"].includes(parsed.petType)
-    ) {
-      return parsed.petType as PetType;
-    }
-    return "geometric"; // Default to geometric if not specified
-  })();
+  // PetType validation and default; legacy two-form saves are normalized
+  // onto the three-form model instead of being rejected.
+  const petType: PetType = normalizePetType(parsed.petType) ?? "auralia";
 
   if (!parsed.genomeHash || !isValidGenomeHash(parsed.genomeHash)) {
     throw new Error("Invalid pet file: genome hashes are malformed");
@@ -735,7 +733,7 @@ function normalizePetData(raw: unknown): PetSaveData {
     essence,
     lastRewardSource,
     lastRewardAmount,
-    petType: isValidPetType(typed.petType) ? typed.petType : "geometric",
+    petType: normalizePetType(typed.petType) ?? "auralia",
     witness: normalizedWitness,
     petOntology,
     systemState,
@@ -832,10 +830,6 @@ function isValidGenomeHash(value: unknown): value is GenomeHash {
     typeof hash.blueHash === "string" &&
     typeof hash.blackHash === "string"
   );
-}
-
-function isValidPetType(value: unknown): value is PetType {
-  return value === "geometric" || value === "auralia";
 }
 
 function isValidInvariantIssue(value: unknown): value is InvariantIssue {

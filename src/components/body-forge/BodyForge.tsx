@@ -154,7 +154,7 @@ export function BodyForge() {
 
   const sendToMetaPet = () => {
     saveForgedBody(spec, genome, phenotype?.identity.seed ?? 0);
-    setPetType('geometric');
+    setPetType('evolved');
     setHasSavedForge(true);
     router.push('/pet');
   };
