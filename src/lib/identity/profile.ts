@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 
+import { dataUrlByteLength } from '@/lib/media/svgToPngDataUrl';
+
 export interface IdentityProfile {
   email: string;
   username: string;
@@ -8,6 +10,13 @@ export interface IdentityProfile {
 }
 
 const STORAGE_KEY = 'metapet-identity-profile';
+
+const SAFE_AVATAR_PREFIXES: Record<string, string[]> = {
+  'image/gif': ['R0lGOD'],
+  'image/jpeg': ['/9j/'],
+  'image/png': ['iVBORw0KGgo'],
+  'image/webp': ['UklGR'],
+};
 
 export const MAX_AVATAR_BYTES = 512 * 1024;
 export const MIN_USERNAME_LENGTH = 2;
@@ -62,6 +71,24 @@ export function getAvatarSizeError(bytes: number): string | null {
   return null;
 }
 
+export function getAvatarDataUrlError(dataUrl: string): string | null {
+  if (!dataUrl) return null;
+
+  const match = /^data:(image\/(?:gif|jpeg|png|webp));base64,([a-zA-Z0-9+/]+={0,2})$/.exec(
+    dataUrl,
+  );
+  if (!match) {
+    return 'Avatar must be a valid PNG, JPEG, WebP, or GIF image.';
+  }
+
+  const [, mediaType, payload] = match;
+  if (!SAFE_AVATAR_PREFIXES[mediaType].some((prefix) => payload.startsWith(prefix))) {
+    return 'Avatar image data is invalid.';
+  }
+
+  return getAvatarSizeError(dataUrlByteLength(dataUrl));
+}
+
 export function loadIdentityProfile(): IdentityProfile {
   if (typeof window === 'undefined') {
     return defaultIdentityProfile;
@@ -79,17 +106,18 @@ export function loadIdentityProfile(): IdentityProfile {
 }
 
 export function saveIdentityProfile(profile: IdentityProfile): IdentityProfile {
+  const avatarError = getAvatarDataUrlError(profile.avatarDataUrl);
+  if (avatarError) {
+    throw new Error(avatarError);
+  }
+
   const normalized = {
     ...normalizeIdentityProfile(profile),
     updatedAt: Date.now(),
   };
 
   if (typeof window !== 'undefined') {
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
-    } catch (error) {
-      console.warn('Failed to persist identity profile:', error);
-    }
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
   }
 
   return normalized;

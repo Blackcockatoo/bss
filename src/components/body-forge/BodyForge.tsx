@@ -14,8 +14,8 @@ import {
   type FaceExpression,
 } from '@/components/body-forge/PetBodyRenderer';
 import { useStore } from '@/lib/store';
-import { getAvatarSizeError, useIdentityProfileStore } from '@/lib/identity/profile';
-import { dataUrlByteLength, svgElementToPngDataUrl } from '@/lib/media/svgToPngDataUrl';
+import { getAvatarDataUrlError, useIdentityProfileStore } from '@/lib/identity/profile';
+import { svgElementToPngDataUrl } from '@/lib/media/svgToPngDataUrl';
 import { resolveVisualDNA } from '@/visual-dna';
 import {
   applyEvolutionGrowth,
@@ -66,6 +66,8 @@ export function BodyForge() {
   const [background, setBackground] = useState<'void' | 'light' | 'grid'>('void');
   const [copied, setCopied] = useState(false);
   const [hasSavedForge, setHasSavedForge] = useState(false);
+  const [confirmAvatarReplace, setConfirmAvatarReplace] = useState(false);
+  const [avatarExporting, setAvatarExporting] = useState(false);
   const [avatarExportStatus, setAvatarExportStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   useEffect(() => {
     // Deferred so the initial load happens outside the effect body, rather
@@ -159,23 +161,38 @@ export function BodyForge() {
     URL.revokeObjectURL(url);
   };
 
-  const exportAsAvatar = async () => {
+  const exportAsAvatar = async (replaceExisting = false) => {
+    if (identityProfile.avatarDataUrl && !replaceExisting) {
+      setConfirmAvatarReplace(true);
+      setAvatarExportStatus(null);
+      return;
+    }
+
     const svg = previewRef.current?.querySelector('svg');
     if (!svg) {
       setAvatarExportStatus({ type: 'error', message: 'Could not find the body preview to export.' });
       return;
     }
+
+    setConfirmAvatarReplace(false);
+    setAvatarExporting(true);
+    setAvatarExportStatus(null);
     try {
       const dataUrl = await svgElementToPngDataUrl(svg);
-      const sizeError = getAvatarSizeError(dataUrlByteLength(dataUrl));
-      if (sizeError) {
-        setAvatarExportStatus({ type: 'error', message: sizeError });
+      const avatarError = getAvatarDataUrlError(dataUrl);
+      if (avatarError) {
+        setAvatarExportStatus({ type: 'error', message: avatarError });
         return;
       }
       saveIdentityProfile({ ...identityProfile, avatarDataUrl: dataUrl });
-      setAvatarExportStatus({ type: 'success', message: 'Saved as your owner avatar.' });
+      setAvatarExportStatus({ type: 'success', message: 'Saved as your avatar' });
     } catch {
-      setAvatarExportStatus({ type: 'error', message: 'Could not export this body as an avatar.' });
+      setAvatarExportStatus({
+        type: 'error',
+        message: 'Could not save this avatar. Your browser may be blocking image or local storage access.',
+      });
+    } finally {
+      setAvatarExporting(false);
     }
   };
 
@@ -256,12 +273,30 @@ export function BodyForge() {
           <Slider label="Bob" value={spec.bob} min={0} max={20} onChange={(value) => patch('bob', value)} />
           <Slider label="Breathing" value={spec.breathe} min={0} max={0.12} step={0.005} onChange={(value) => patch('breathe', value)} />
           <Slider label="Motion speed" value={spec.animationSpeed} min={0.25} max={2.5} step={0.05} onChange={(value) => patch('animationSpeed', value)} />
-          <div className="grid grid-cols-2 gap-2"><button onClick={copyJson} className="rounded-lg border border-slate-700 px-3 py-2 text-xs hover:border-cyan-400">{copied ? 'Copied' : 'Copy JSON'}</button><button onClick={exportJson} className="rounded-lg border border-cyan-500 px-3 py-2 text-xs font-bold text-cyan-200">DNA packet</button><button onClick={exportAsAvatar} className="col-span-2 rounded-lg border border-amber-400/60 bg-amber-300/10 px-3 py-2 text-xs font-bold text-amber-100">Save as avatar</button><button onClick={sendToMetaPet} className="col-span-2 rounded-lg bg-cyan-300 px-3 py-3 text-xs font-black uppercase tracking-[0.16em] text-slate-950">Set inherited body</button></div>
+          <div className="grid grid-cols-2 gap-2"><button onClick={copyJson} className="rounded-lg border border-slate-700 px-3 py-2 text-xs hover:border-cyan-400">{copied ? 'Copied' : 'Copy JSON'}</button><button onClick={exportJson} className="rounded-lg border border-cyan-500 px-3 py-2 text-xs font-bold text-cyan-200">DNA packet</button><button onClick={() => void exportAsAvatar()} disabled={avatarExporting} className="col-span-2 rounded-lg border border-amber-400/60 bg-amber-300/10 px-3 py-2 text-xs font-bold text-amber-100 disabled:cursor-wait disabled:opacity-60">{avatarExporting ? 'Saving avatar…' : 'Save as avatar'}</button><button onClick={sendToMetaPet} className="col-span-2 rounded-lg bg-cyan-300 px-3 py-3 text-xs font-black uppercase tracking-[0.16em] text-slate-950">Set inherited body</button></div>
+          {confirmAvatarReplace && (
+            <div role="alertdialog" aria-labelledby="replace-avatar-title" className="space-y-3 rounded-xl border border-amber-400/40 bg-amber-300/10 p-3">
+              <div className="flex items-center gap-3">
+                <img src={identityProfile.avatarDataUrl} alt="Current identity avatar" className="h-12 w-12 rounded-lg border border-white/15 bg-slate-950 object-contain" />
+                <div>
+                  <p id="replace-avatar-title" className="text-xs font-bold text-amber-100">Replace your current avatar?</p>
+                  <p className="mt-1 text-[10px] leading-4 text-amber-100/70">Your existing identity avatar will be replaced on this device.</p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => void exportAsAvatar(true)} className="rounded-lg bg-amber-300 px-3 py-2 text-xs font-bold text-slate-950">Replace avatar</button>
+                <button onClick={() => setConfirmAvatarReplace(false)} className="rounded-lg border border-slate-600 px-3 py-2 text-xs text-zinc-200">Keep current</button>
+              </div>
+            </div>
+          )}
           {avatarExportStatus && (
-            <p className={`text-[10px] leading-4 ${avatarExportStatus.type === 'success' ? 'text-cyan-300' : 'text-rose-400'}`}>
-              {avatarExportStatus.message}
-              {avatarExportStatus.type === 'success' && <> · <Link href="/identity" className="underline">View in Identity</Link></>}
-            </p>
+            <div role="status" className={`flex items-center gap-3 rounded-xl border p-3 ${avatarExportStatus.type === 'success' ? 'border-cyan-400/35 bg-cyan-400/10 text-cyan-200' : 'border-rose-400/35 bg-rose-400/10 text-rose-300'}`}>
+              {avatarExportStatus.type === 'success' && identityProfile.avatarDataUrl && <img src={identityProfile.avatarDataUrl} alt="Saved identity avatar" className="h-12 w-12 rounded-lg border border-white/15 bg-slate-950 object-contain" />}
+              <p className="text-[10px] leading-4">
+                <span className="font-bold">{avatarExportStatus.message}</span>
+                {avatarExportStatus.type === 'success' && <> · <Link href="/identity" className="underline">View in Identity</Link></>}
+              </p>
+            </div>
           )}
           <p className="text-[10px] leading-4 text-zinc-500">Saves this customisation as the pet&rsquo;s inherited anatomy, selects the canonical DNA / Forge renderer, and returns to the single `/pet` runtime. Evolution can still add revealed features on top; hunger, mood, energy, sickness and actions only ever deform it temporarily.</p>
         </aside>
