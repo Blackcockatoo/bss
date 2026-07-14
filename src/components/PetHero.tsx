@@ -4,8 +4,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { useStore } from '@/lib/store';
 import { triggerHaptic } from '@/lib/haptics';
 import AuraliaSprite from './AuraliaSprite';
-import { SriYantraPetDisplay } from './SriYantraPetDisplay';
-import { VisualDNAPet } from './VisualDNAPet';
+import { GeometryAvatarRenderer } from './GeometryAvatarRenderer';
 
 interface PetHeroProps {
   className?: string;
@@ -129,15 +128,8 @@ export function PetHero({ className = '', staticMode = false }: PetHeroProps) {
       onTouchEnd={handleTouchEnd}
     >
       <div className="relative w-64 h-64 flex items-center justify-center">
-        {petType === 'geometry' ? (
-          <SriYantraPetDisplay
-            red={genome?.red60.join('')}
-            blue={genome?.blue60.join('')}
-            black={genome?.black60.join('')}
-            animated={!staticMode}
-          />
-        ) : petType === 'evolved' ? (
-          <VisualDNAPet className="w-full" showReadout={false} />
+        {petType === 'geometric' ? (
+          <GeometryAvatarRenderer animated={!staticMode} />
         ) : (
           <AuraliaSprite size="large" interactive staticMode={staticMode} />
         )}
