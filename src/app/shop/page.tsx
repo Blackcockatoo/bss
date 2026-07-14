@@ -229,7 +229,7 @@ export default function ShopPage() {
           <div>
             <h2 className="text-xl font-semibold">Custom Collection</h2>
             <p className="text-sm text-zinc-500">
-              IDs 1008–1023 · ready to mint and equip.
+              IDs 1008–1031 · ready to mint and equip.
             </p>
           </div>
         </div>

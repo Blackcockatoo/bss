@@ -514,6 +514,252 @@ const CUSTOM_ADDON_LIST: AddonTemplate[] = [
       maxEditions: 3,
     },
   },
+
+  // ── SUPERIOR SERIES ─────────────────────────────────────────────────────
+  // Higher-detail "trading card" style art, hand-composed from full 1024px
+  // gradient scenes rather than a single flat path.
+  {
+    id: "custom-addon-1025",
+    name: "Parallax Gyre Matrix",
+    description:
+      "Layered spiral bands generate a quiet vortex of gold arcs, cyan currents, and violet seam flares — a woven weapon-construct rather than a blade.",
+    category: "weapon",
+    rarity: "legendary",
+    attachment: {
+      anchorPoint: "right-hand",
+      offset: { x: 16, y: 4, z: 0 },
+      scale: 1.1,
+      rotation: 0,
+      followAnimation: true,
+    },
+    visual: {
+      // Triple concentric gyre rings with radial tick marks
+      svgPath:
+        "M 50 50 A 40 40 0 1 1 50.01 50 Z M 50 50 A 30 30 0 1 0 50.01 50 Z M 50 50 A 20 20 0 1 1 50.01 50 Z M 50 10 L 50 18 M 90 50 L 82 50 M 50 90 L 50 82 M 10 50 L 18 50 M 22 22 L 28 28 M 78 22 L 72 28 M 78 78 L 72 72 M 22 78 L 28 72",
+      previewAsset: previewAsset("1025-parallax-gyre-matrix.svg"),
+      colors: {
+        primary: "#171928",
+        secondary: "#3F2A8E",
+        accent: "#F4C451",
+        glow: "rgba(159, 247, 255, 0.55)",
+      },
+      animation: { type: "rotate", duration: 6000, easing: "linear" },
+      particles: { count: 30, color: "#9FFAFF", size: 1.8, behavior: "orbit" },
+    },
+    modifiers: { energy: 22, curiosity: 14, luck: 10 },
+    metadata: {
+      creator,
+      tags: ["gyre", "matrix", "parallax", "void", "rings", "weapon"],
+      maxEditions: 16,
+    },
+  },
+  {
+    id: "custom-addon-1026",
+    name: "Obsidian Feather Scepter",
+    description:
+      "A void-black scepter crowned with a golden solar crystal — a radial crown of feathered blades channels light into a single blazing star at its heart.",
+    category: "weapon",
+    rarity: "legendary",
+    attachment: {
+      anchorPoint: "right-hand",
+      offset: { x: 14, y: 8, z: 0 },
+      scale: 1.3,
+      rotation: -20,
+      followAnimation: true,
+    },
+    visual: {
+      // Diamond-tipped rod over a radiating feather-blade star burst
+      svgPath:
+        "M 50 6 L 56 16 L 50 30 L 44 16 Z M 50 30 L 50 78 M 50 50 L 20 38 M 50 50 L 80 38 M 50 50 L 22 62 M 50 50 L 78 62 M 50 50 L 34 24 M 50 50 L 66 24 M 42 82 L 58 82 L 54 92 L 46 92 Z",
+      previewAsset: previewAsset("1026-obsidian-feather-scepter.svg"),
+      colors: {
+        primary: "#0B0B0B",
+        secondary: "#D3A320",
+        accent: "#FFE98C",
+        glow: "rgba(242, 197, 58, 0.6)",
+      },
+      animation: { type: "glow", duration: 1400, easing: "ease-in-out" },
+      particles: { count: 18, color: "#F2C53A", size: 2, behavior: "burst" },
+    },
+    modifiers: { energy: 24, bond: 8, luck: 14 },
+    metadata: {
+      creator,
+      tags: ["scepter", "feather", "obsidian", "solar", "weapon"],
+      maxEditions: 14,
+    },
+  },
+  {
+    id: "custom-addon-1027",
+    name: "Solaris Wings",
+    description:
+      "Twin midnight-blue wings edged in gold, unfurled around a radiant solar medallion — a dynamic, full-span silhouette built for dramatic flight poses.",
+    category: "accessory",
+    rarity: "mythic",
+    attachment: {
+      ...ACCESSORY_ATTACHMENT,
+      offset: { x: 0, y: -8, z: -6 },
+      scale: 1.5,
+    },
+    visual: {
+      // Mirrored wing-swoosh pair around a central solar medallion
+      svgPath:
+        "M 0 0 Q -20 -14 -34 -6 Q -26 2 -14 4 Q -22 10 -30 20 Q -16 18 -6 12 Q -10 20 -12 30 Q 0 18 4 4 Z M 0 0 Q 20 -14 34 -6 Q 26 2 14 4 Q 22 10 30 20 Q 16 18 6 12 Q 10 20 12 30 Q 0 18 -4 4 Z M 0 2 A 6 6 0 1 1 0.01 2 Z",
+      previewAsset: previewAsset("1027-solaris-wings.svg"),
+      colors: {
+        primary: "#11264D",
+        secondary: "#F0C96B",
+        accent: "#FFE8A3",
+        glow: "rgba(207, 166, 74, 0.55)",
+      },
+      animation: { type: "float", duration: 2600, easing: "ease-in-out" },
+      particles: { count: 14, color: "#FFD97A", size: 1.6, behavior: "ambient" },
+    },
+    modifiers: { energy: 20, bond: 15, luck: 10 },
+    metadata: {
+      creator,
+      tags: ["wings", "solaris", "gold", "flight"],
+      maxEditions: 12,
+    },
+  },
+  {
+    id: "custom-addon-1028",
+    name: "Solaris Wings — Vortex Static",
+    description:
+      "A stabilised, vortex-anchored form of the Solaris wingset — plumage held in a fixed radiant pose, prized for its poised, statuesque silhouette.",
+    category: "accessory",
+    rarity: "mythic",
+    attachment: {
+      ...ACCESSORY_ATTACHMENT,
+      offset: { x: 0, y: -8, z: -6 },
+      scale: 1.5,
+      followAnimation: false,
+    },
+    visual: {
+      // Same wing pair with a double-ringed vortex core instead of a single medallion
+      svgPath:
+        "M 0 0 Q -20 -14 -34 -6 Q -26 2 -14 4 Q -22 10 -30 20 Q -16 18 -6 12 Q -10 20 -12 30 Q 0 18 4 4 Z M 0 0 Q 20 -14 34 -6 Q 26 2 14 4 Q 22 10 30 20 Q 16 18 6 12 Q 10 20 12 30 Q 0 18 -4 4 Z M 0 2 A 9 9 0 1 1 0.01 2 Z M 0 2 A 4 4 0 1 0 0.01 2 Z",
+      previewAsset: previewAsset("1028-solaris-wings-vortex-static.svg"),
+      colors: {
+        primary: "#0D1E3C",
+        secondary: "#E6BE67",
+        accent: "#FFD97A",
+        glow: "rgba(207, 166, 74, 0.5)",
+      },
+      animation: { type: "shimmer", duration: 3200, easing: "ease-in-out" },
+      particles: { count: 10, color: "#CFA64A", size: 1.4, behavior: "ambient" },
+    },
+    modifiers: { bond: 18, luck: 14 },
+    metadata: {
+      creator,
+      tags: ["wings", "solaris", "vortex", "static", "pose"],
+      maxEditions: 8,
+    },
+  },
+  {
+    id: "custom-addon-1029",
+    name: "Ouroboros Cockatoo Mask",
+    description:
+      "An ornate crested mask forged in gold and obsidian, its cyan-lit eyes ringed by a slow-spinning halo of ancient glyphs — cyclical, watchful, eternal.",
+    category: "headwear",
+    rarity: "mythic",
+    attachment: {
+      anchorPoint: "head",
+      offset: { x: 0, y: -4, z: 0 },
+      scale: 1.05,
+      rotation: 0,
+      followAnimation: true,
+    },
+    visual: {
+      // Crested mask silhouette with almond eye-holes and brow flourishes
+      svgPath:
+        "M 50 8 Q 66 14 74 28 Q 80 42 74 56 Q 66 72 50 78 Q 34 72 26 56 Q 20 42 26 28 Q 34 14 50 8 Z M 38 36 A 5 6 0 1 1 38 48 A 5 6 0 1 1 38 36 M 62 36 A 5 6 0 1 1 62 48 A 5 6 0 1 1 62 36 M 50 8 L 50 0 M 40 12 L 34 4 M 60 12 L 66 4",
+      previewAsset: previewAsset("1029-ouroboros-cockatoo-mask.svg"),
+      colors: {
+        primary: "#0B1E30",
+        secondary: "#F1CC6B",
+        accent: "#8FF8FF",
+        glow: "rgba(158, 107, 255, 0.45)",
+      },
+      animation: { type: "shimmer", duration: 2000, easing: "ease-in-out" },
+      particles: { count: 12, color: "#6FF8FF", size: 1.5, behavior: "ambient" },
+    },
+    modifiers: { curiosity: 26, bond: 14, luck: 10 },
+    metadata: {
+      creator,
+      tags: ["mask", "cockatoo", "ouroboros", "crest", "mythic"],
+      maxEditions: 5,
+    },
+  },
+  {
+    id: "custom-addon-1030",
+    name: "Comet Kit Familiar",
+    description:
+      "A small fox-spirit condensed from stardust and ember light, trailing a fading comet tail wherever it darts.",
+    category: "companion",
+    rarity: "epic",
+    attachment: {
+      anchorPoint: "floating",
+      offset: { x: -34, y: -12, z: 0 },
+      scale: 0.45,
+      rotation: 0,
+      followAnimation: false,
+    },
+    visual: {
+      // Fox-kit silhouette: pointed ears, rounded head/body, no tail (tail is the particle trail)
+      svgPath:
+        "M 50 46 C 40 46 32 54 30 64 C 28 74 34 82 44 86 L 50 90 L 56 86 C 66 82 72 74 70 64 C 68 54 60 46 50 46 Z M 38 34 L 44 46 L 34 48 Z M 62 34 L 56 46 L 66 48 Z M 44 60 A 3 4 0 1 1 44 68 A 3 4 0 1 1 44 60 M 56 60 A 3 4 0 1 1 56 68 A 3 4 0 1 1 56 60",
+      previewAsset: previewAsset("1030-comet-kit-familiar.svg"),
+      colors: {
+        primary: "#E8703A",
+        secondary: "#FFB86B",
+        accent: "#FFDCA0",
+        glow: "rgba(255, 138, 61, 0.55)",
+      },
+      animation: { type: "sparkle", duration: 1700, easing: "ease-in-out" },
+      particles: { count: 16, color: "#FFCF94", size: 1.6, behavior: "trail" },
+    },
+    modifiers: { bond: 22, luck: 16 },
+    metadata: {
+      creator,
+      tags: ["companion", "kit", "comet", "familiar", "fox"],
+      maxEditions: 40,
+    },
+  },
+  {
+    id: "custom-addon-1031",
+    name: "Verdant Bloom Halo",
+    description:
+      "A ring of living vines and gold-hearted blossoms that unfurls around Auralia, shedding petals that never quite touch the ground.",
+    category: "aura",
+    rarity: "rare",
+    attachment: {
+      anchorPoint: "aura",
+      offset: { x: 0, y: 0, z: 0 },
+      scale: 1.4,
+      rotation: 0,
+      followAnimation: false,
+    },
+    visual: {
+      // Ring with four simple bud accents at the cardinal points
+      svgPath:
+        "M 50 50 A 30 30 0 1 1 50.01 50 Z M 50 20 Q 54 28 50 34 Q 46 28 50 20 M 80 50 Q 72 54 66 50 Q 72 46 80 50 M 50 80 Q 46 72 50 66 Q 54 72 50 80 M 20 50 Q 28 46 34 50 Q 28 54 20 50",
+      previewAsset: previewAsset("1031-verdant-bloom-halo.svg"),
+      colors: {
+        primary: "#356B3C",
+        secondary: "#BFE6A0",
+        accent: "#F2C86B",
+        glow: "rgba(191, 242, 154, 0.4)",
+      },
+      animation: { type: "pulse", duration: 2600, easing: "ease-in-out" },
+      particles: { count: 14, color: "#BFE6A0", size: 1.4, behavior: "ambient" },
+    },
+    modifiers: { energy: 12, curiosity: 10, bond: 8 },
+    metadata: {
+      creator,
+      tags: ["aura", "bloom", "verdant", "nature", "halo"],
+      maxEditions: 60,
+    },
+  },
 ];
 
 export const CUSTOM_ADDONS: Record<string, AddonTemplate> = Object.fromEntries(

@@ -1,0 +1,275 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="900"
+              viewBox="0 0 900 900"
+              role="img"
+              aria-label="Ouroboros Cockatoo Mask"
+            >
+              <defs>
+<style>
+.spin36{transform-box:fill-box;transform-origin:center;animation:spin36 36s linear infinite}.pulse6{animation:pulse 6s ease-in-out infinite}.pulse7{animation:pulse 7s ease-in-out infinite}.pulse8{animation:pulse 8s ease-in-out infinite}@keyframes spin36{to{transform:rotate(360deg)}}@keyframes pulse{0%,100%{opacity:.55}50%{opacity:1}}
+</style>
+                <linearGradient id="shell" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#0b1e30"/>
+                  <stop offset="40%" stop-color="#10263d"/>
+                  <stop offset="100%" stop-color="#050b13"/>
+                </linearGradient>
+                <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#7c5b16"/>
+                  <stop offset="30%" stop-color="#f1cc6b"/>
+                  <stop offset="60%" stop-color="#a77d24"/>
+                  <stop offset="100%" stop-color="#5c4312"/>
+                </linearGradient>
+                <linearGradient id="obsidian" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#10151d"/>
+                  <stop offset="100%" stop-color="#020409"/>
+                </linearGradient>
+                <radialGradient id="cyanGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#8ff8ff" stop-opacity="0.95"/>
+                  <stop offset="35%" stop-color="#46d9e8" stop-opacity="0.65"/>
+                  <stop offset="100%" stop-color="#46d9e8" stop-opacity="0"/>
+                </radialGradient>
+                <radialGradient id="violetGlow" cx="50%" cy="50%" r="60%">
+                  <stop offset="0%" stop-color="#9e6bff" stop-opacity="0.5"/>
+                  <stop offset="100%" stop-color="#9e6bff" stop-opacity="0"/>
+                </radialGradient>
+                <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="7" result="blur"/>
+                  <feMerge>
+                    <feMergeNode in="blur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+                <filter id="goldGlow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="3.5" result="blur"/>
+                  <feColorMatrix
+                    in="blur"
+                    type="matrix"
+                    values="1 0 0 0 0
+                            0 0.9 0 0 0
+                            0 0 0.5 0 0
+                            0 0 0 0.8 0"
+                 />
+                  <feMerge>
+                    <feMergeNode in="blur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+
+              <g opacity="0.55">
+                <circle cx="450" cy="430" r="255" fill="url(#violetGlow)"/>
+                <circle cx="450" cy="450" r="320" fill="none" stroke="#8f6b26" stroke-opacity="0.16" stroke-width="2"/>
+              </g>
+
+              <g class="spin36">
+                <path
+                  d="M450 120
+                     L498 214
+                     L602 214
+                     L548 300
+                     L602 386
+                     L498 386
+                     L450 480
+                     L402 386
+                     L298 386
+                     L352 300
+                     L298 214
+                     L402 214 Z"
+                  fill="none"
+                  stroke="#d1a94b"
+                  stroke-opacity="0.18"
+                  stroke-width="5"
+               />
+                <circle cx="450" cy="300" r="144" fill="none" stroke="#d1a94b" stroke-opacity="0.22" stroke-width="3" stroke-dasharray="10 18"/>
+                <circle cx="450" cy="300" r="182" fill="none" stroke="#56e7ef" stroke-opacity="0.12" stroke-width="2" stroke-dasharray="5 14"/>
+              </g>
+
+              <g filter="url(#goldGlow)">
+                <path
+                  d="M260 274
+                     C294 182, 366 134, 450 120
+                     C534 134, 606 182, 640 274"
+                  fill="none"
+                  stroke="url(#gold)"
+                  stroke-width="22"
+                  stroke-linecap="round"
+               />
+                <path
+                  d="M650 276
+                     C718 294, 764 348, 770 416
+                     C774 470, 744 516, 693 540"
+                  fill="none"
+                  stroke="url(#gold)"
+                  stroke-width="18"
+                  stroke-linecap="round"
+               />
+                <path
+                  d="M250 276
+                     C182 294, 136 348, 130 416
+                     C126 470, 156 516, 207 540"
+                  fill="none"
+                  stroke="url(#gold)"
+                  stroke-width="18"
+                  stroke-linecap="round"
+               />
+              </g>
+
+              <g>
+                <path
+                  d="M450 140
+                     C504 160, 574 204, 622 264
+                     C674 330, 688 406, 662 484
+                     C632 576, 558 646, 450 688
+                     C342 646, 268 576, 238 484
+                     C212 406, 226 330, 278 264
+                     C326 204, 396 160, 450 140 Z"
+                  fill="url(#shell)"
+                  stroke="url(#gold)"
+                  stroke-width="10"
+               />
+
+                <path
+                  d="M450 174
+                     C496 192, 553 230, 592 282
+                     C633 336, 644 397, 624 462
+                     C600 540, 538 600, 450 638
+                     C362 600, 300 540, 276 462
+                     C256 397, 267 336, 308 282
+                     C347 230, 404 192, 450 174 Z"
+                  fill="none"
+                  stroke="#d8b45a"
+                  stroke-opacity="0.16"
+                  stroke-width="2"
+                  stroke-dasharray="5 10"
+               />
+              </g>
+
+              <g>
+                <path
+                  d="M450 186
+                     C468 236, 474 304, 472 380
+                     C470 480, 460 570, 450 702
+                     C440 570, 430 480, 428 380
+                     C426 304, 432 236, 450 186 Z"
+                  fill="url(#obsidian)"
+                  stroke="url(#gold)"
+                  stroke-width="8"
+               />
+                <path
+                  d="M450 218
+                     C458 256, 460 302, 458 356
+                     C456 420, 452 488, 450 572
+                     C448 488, 444 420, 442 356
+                     C440 302, 442 256, 450 218 Z"
+                  fill="none"
+                  stroke="#4df0ff"
+                  stroke-opacity="0.16"
+                  stroke-width="2"
+               />
+              </g>
+
+              <g>
+                <path
+                  d="M252 438
+                     C216 422, 186 430, 172 454
+                     C160 476, 168 504, 194 524
+                     C224 548, 280 560, 334 560
+                     C300 538, 284 510, 280 474
+                     C276 458, 266 446, 252 438 Z"
+                  fill="#0a1725"
+                  stroke="url(#gold)"
+                  stroke-width="8"
+               />
+                <path
+                  d="M648 438
+                     C684 422, 714 430, 728 454
+                     C740 476, 732 504, 706 524
+                     C676 548, 620 560, 566 560
+                     C600 538, 616 510, 620 474
+                     C624 458, 634 446, 648 438 Z"
+                  fill="#0a1725"
+                  stroke="url(#gold)"
+                  stroke-width="8"
+               />
+              </g>
+
+              <g>
+                <path
+                  d="M332 352
+                     C294 364, 270 394, 260 434
+                     C286 424, 318 420, 352 422
+                     C382 424, 404 438, 424 458
+                     C420 416, 412 388, 392 368
+                     C376 352, 356 346, 332 352 Z"
+                  fill="#08111d"
+                  stroke="url(#gold)"
+                  stroke-width="7"
+               />
+                <path
+                  d="M568 352
+                     C606 364, 630 394, 640 434
+                     C614 424, 582 420, 548 422
+                     C518 424, 496 438, 476 458
+                     C480 416, 488 388, 508 368
+                     C524 352, 544 346, 568 352 Z"
+                  fill="#08111d"
+                  stroke="url(#gold)"
+                  stroke-width="7"
+               />
+                <ellipse cx="338" cy="430" rx="62" ry="40" fill="url(#cyanGlow)" opacity="0.75"/>
+                <ellipse cx="562" cy="430" rx="62" ry="40" fill="url(#cyanGlow)" opacity="0.75"/>
+                <path
+                  d="M290 426 C320 410, 352 410, 386 424"
+                  fill="none"
+                  stroke="#8df7ff"
+                  stroke-width="4"
+                  stroke-linecap="round"
+                  opacity="0.9"
+               />
+                <path
+                  d="M610 426 C580 410, 548 410, 514 424"
+                  fill="none"
+                  stroke="#8df7ff"
+                  stroke-width="4"
+                  stroke-linecap="round"
+                  opacity="0.9"
+               />
+              </g>
+
+              <g opacity="0.65">
+                <path d="M308 276 C326 290, 338 306, 344 326" fill="none" stroke="#c6a24b" stroke-width="4" stroke-linecap="round"/>
+                <path d="M356 238 C380 258, 396 280, 404 306" fill="none" stroke="#c6a24b" stroke-width="4" stroke-linecap="round"/>
+                <path d="M592 276 C574 290, 562 306, 556 326" fill="none" stroke="#c6a24b" stroke-width="4" stroke-linecap="round"/>
+                <path d="M544 238 C520 258, 504 280, 496 306" fill="none" stroke="#c6a24b" stroke-width="4" stroke-linecap="round"/>
+                <path d="M272 508 C310 532, 350 546, 392 550" fill="none" stroke="#c6a24b" stroke-width="3" stroke-dasharray="4 12"/>
+                <path d="M628 508 C590 532, 550 546, 508 550" fill="none" stroke="#c6a24b" stroke-width="3" stroke-dasharray="4 12"/>
+              </g>
+
+              <g filter="url(#softGlow)">
+                <circle class="pulse7" cx="286" cy="312" r="8" fill="#6ff8ff"/>
+                <circle class="pulse7" cx="614" cy="312" r="8" fill="#6ff8ff"/>
+                <circle class="pulse8" cx="230" cy="480" r="7" fill="#6ff8ff"/>
+                <circle class="pulse8" cx="670" cy="480" r="7" fill="#6ff8ff"/>
+                <circle class="pulse6" cx="450" cy="724" r="10" fill="#6ff8ff"/>
+              </g>
+
+              <g opacity="0.7">
+                <path
+                  d="M164 432
+                     C174 364, 214 302, 274 268"
+                  fill="none"
+                  stroke="#d8b45a"
+                  stroke-opacity="0.3"
+                  stroke-width="3"
+                  stroke-dasharray="4 12"
+               />
+                <path
+                  d="M736 432
+                     C726 364, 686 302, 626 268"
+                  fill="none"
+                  stroke="#d8b45a"
+                  stroke-opacity="0.3"
+                  stroke-width="3"
+                  stroke-dasharray="4 12"
+               />
+              </g>
+            </svg>

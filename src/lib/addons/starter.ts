@@ -18,6 +18,13 @@ const STARTER_TEMPLATE_IDS = [
   "custom-addon-1009",
   "custom-addon-1010",
   "custom-addon-1024",
+  "custom-addon-1025",
+  "custom-addon-1026",
+  "custom-addon-1027",
+  "custom-addon-1028",
+  "custom-addon-1029",
+  "custom-addon-1030",
+  "custom-addon-1031",
 ] as const;
 
 /**

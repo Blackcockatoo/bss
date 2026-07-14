@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="900" viewBox="0 0 900 900" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <linearGradient id="bgGlow" x1="450" y1="80" x2="450" y2="820" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#161616"/>
+          <stop offset="52%" stop-color="#080808"/>
+          <stop offset="100%" stop-color="#020202"/>
+        </linearGradient>
+        <linearGradient id="goldEdge" x1="260" y1="190" x2="640" y2="710" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#FFF0A8"/>
+          <stop offset="35%" stop-color="#F5D14B"/>
+          <stop offset="68%" stop-color="#D3A320"/>
+          <stop offset="100%" stop-color="#7F5B00"/>
+        </linearGradient>
+        <linearGradient id="obsidianFill" x1="450" y1="110" x2="450" y2="800" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#161616"/>
+          <stop offset="45%" stop-color="#090909"/>
+          <stop offset="100%" stop-color="#000000"/>
+        </linearGradient>
+        <linearGradient id="shaftFill" x1="450" y1="194" x2="450" y2="782" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#171717"/>
+          <stop offset="55%" stop-color="#070707"/>
+          <stop offset="100%" stop-color="#1A1203"/>
+        </linearGradient>
+        <radialGradient id="solarCore" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(450 450) rotate(90) scale(180 180)">
+          <stop offset="0%" stop-color="#FFE98C" stop-opacity="0.86"/>
+          <stop offset="28%" stop-color="#F2C53A" stop-opacity="0.4"/>
+          <stop offset="60%" stop-color="#8A650C" stop-opacity="0.12"/>
+          <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+        </radialGradient>
+        <filter id="softGold" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="7" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+
+      <rect width="900" height="900" fill="url(#bgGlow)"/>
+      <circle cx="450" cy="450" r="210" fill="url(#solarCore)"/>
+
+      <g opacity="0.24">
+        <circle cx="450" cy="450" r="198" stroke="#A57B14" stroke-width="1.5"/>
+        <circle cx="450" cy="450" r="154" stroke="#F0CA54" stroke-opacity="0.8" stroke-width="1.2"/>
+        <circle cx="450" cy="450" r="104" stroke="#A57B14" stroke-width="1.2"/>
+        <path d="M450 180V720M180 450H720M258 258L642 642M642 258L258 642" stroke="#F4D15A" stroke-opacity="0.18" stroke-width="1"/>
+      </g>
+
+      <g filter="url(#softGold)">
+        <path d="M450 126L482 178L469 286L431 286L418 178L450 126Z" fill="url(#obsidianFill)" stroke="url(#goldEdge)" stroke-width="5"/>
+        <path d="M450 168L466 198L458 262L442 262L434 198L450 168Z" fill="#0C0C0C" stroke="#F4CF57" stroke-opacity="0.7" stroke-width="2"/>
+
+        <path d="M434 276H466L476 710C477 741 465 765 450 782C435 765 423 741 424 710L434 276Z" fill="url(#shaftFill)" stroke="url(#goldEdge)" stroke-width="4.5"/>
+        <path d="M442 308H458L463 686C464 706 458 723 450 734C442 723 436 706 437 686L442 308Z" fill="#0A0A0A" stroke="#E9C449" stroke-opacity="0.45" stroke-width="1.5"/>
+
+        <path d="M450 328C501 275 559 242 628 226C606 258 596 296 596 341C643 329 688 332 732 350C694 381 668 421 651 468C706 472 752 489 790 518C733 534 688 560 654 602C700 622 732 657 748 705C684 683 624 679 567 691C558 726 539 755 510 778C500 730 475 694 436 668L450 328Z" fill="#0B0B0B" stroke="url(#goldEdge)" stroke-width="4"/>
+        <path d="M450 328C399 275 341 242 272 226C294 258 304 296 304 341C257 329 212 332 168 350C206 381 232 421 249 468C194 472 148 489 110 518C167 534 212 560 246 602C200 622 168 657 152 705C216 683 276 679 333 691C342 726 361 755 390 778C400 730 425 694 464 668L450 328Z" fill="#0B0B0B" stroke="url(#goldEdge)" stroke-width="4"/>
+
+        <path d="M451 355C493 313 540 286 592 274C573 304 565 337 568 373C608 367 645 370 682 385C649 409 626 438 611 472C658 476 697 489 730 511C682 525 644 547 615 581C655 599 683 628 698 667C645 649 596 647 548 657C540 685 525 709 503 728C493 687 475 656 450 635L451 355Z" fill="#121212" stroke="#E8C048" stroke-opacity="0.7" stroke-width="2"/>
+        <path d="M449 355C407 313 360 286 308 274C327 304 335 337 332 373C292 367 255 370 218 385C251 409 274 438 289 472C242 476 203 489 170 511C218 525 256 547 285 581C245 599 217 628 202 667C255 649 304 647 352 657C360 685 375 709 397 728C407 687 425 656 450 635L449 355Z" fill="#121212" stroke="#E8C048" stroke-opacity="0.7" stroke-width="2"/>
+
+        <path d="M450 380C482 347 517 326 556 317C542 340 536 365 538 391C568 386 596 389 623 401C599 420 582 442 571 468C606 472 636 481 661 497C625 507 597 523 575 548C604 561 625 583 635 611C595 598 558 596 522 604C516 625 504 643 488 658C481 627 468 603 450 587V380Z" fill="#171717" stroke="#FFE89C" stroke-opacity="0.45" stroke-width="1.3"/>
+        <path d="M450 380C418 347 383 326 344 317C358 340 364 365 362 391C332 386 304 389 277 401C301 420 318 442 329 468C294 472 264 481 239 497C275 507 303 523 325 548C296 561 275 583 265 611C305 598 342 596 378 604C384 625 396 643 412 658C419 627 432 603 450 587V380Z" fill="#171717" stroke="#FFE89C" stroke-opacity="0.45" stroke-width="1.3"/>
+
+        <circle cx="450" cy="455" r="44" fill="#0A0A0A" stroke="url(#goldEdge)" stroke-width="4"/>
+        <circle cx="450" cy="455" r="24" fill="#121212" stroke="#F6D45E" stroke-width="2"/>
+        <path d="M450 423L460 446L485 448L466 464L472 489L450 476L428 489L434 464L415 448L440 446L450 423Z" fill="#F2C53A" stroke="#FFF0A8" stroke-width="1.7"/>
+
+        <path d="M434 772H466L478 806L450 838L422 806L434 772Z" fill="#0B0B0B" stroke="url(#goldEdge)" stroke-width="4"/>
+        <path d="M450 796L462 812L450 827L438 812L450 796Z" fill="#F2C53A"/>
+      </g>
+    </svg>

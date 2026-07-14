@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Verdant Bloom Halo">
+  <defs>
+    <linearGradient id="bgGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#040b06"/>
+      <stop offset="50%" stop-color="#08150c"/>
+      <stop offset="100%" stop-color="#0c1c10"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="46%" r="55%">
+      <stop offset="0%" stop-color="#bff29a" stop-opacity="0.35"/>
+      <stop offset="55%" stop-color="#4c8f52" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="vineGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#9fe08a"/>
+      <stop offset="100%" stop-color="#356b3c"/>
+    </linearGradient>
+    <radialGradient id="petalGrad" cx="35%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#fff3c4"/>
+      <stop offset="55%" stop-color="#f2c86b"/>
+      <stop offset="100%" stop-color="#c98f2f"/>
+    </radialGradient>
+    <filter id="softGlow1031" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="cardClip1031">
+      <rect x="36" y="36" width="952" height="952" rx="48"/>
+    </clipPath>
+
+    <g id="bloomUnit">
+      <path d="M 512 512 C 512 440 500 380 470 330" fill="none" stroke="url(#vineGrad)" stroke-width="6" stroke-linecap="round"/>
+      <g transform="translate(470 330)">
+        <g filter="url(#softGlow1031)">
+          <ellipse cx="0" cy="-16" rx="15" ry="24" fill="url(#petalGrad)" transform="rotate(0)"/>
+          <ellipse cx="0" cy="-16" rx="15" ry="24" fill="url(#petalGrad)" transform="rotate(72)"/>
+          <ellipse cx="0" cy="-16" rx="15" ry="24" fill="url(#petalGrad)" transform="rotate(144)"/>
+          <ellipse cx="0" cy="-16" rx="15" ry="24" fill="url(#petalGrad)" transform="rotate(216)"/>
+          <ellipse cx="0" cy="-16" rx="15" ry="24" fill="url(#petalGrad)" transform="rotate(288)"/>
+          <circle cx="0" cy="0" r="9" fill="#fff8e2"/>
+        </g>
+      </g>
+    </g>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bgGradient)"/>
+  <g clip-path="url(#cardClip1031)">
+    <rect x="36" y="36" width="952" height="952" rx="48" fill="url(#bgGradient)"/>
+    <circle cx="512" cy="512" r="420" fill="url(#glow)"/>
+
+    <circle cx="512" cy="512" r="182" fill="none" stroke="#6fae63" stroke-opacity="0.25" stroke-width="2"/>
+    <circle cx="512" cy="512" r="150" fill="none" stroke="#bfe6a0" stroke-opacity="0.18" stroke-width="1.4" stroke-dasharray="6 10"/>
+
+    <use href="#bloomUnit" transform="rotate(0 512 512)"/>
+    <use href="#bloomUnit" transform="rotate(45 512 512)"/>
+    <use href="#bloomUnit" transform="rotate(90 512 512)"/>
+    <use href="#bloomUnit" transform="rotate(135 512 512)"/>
+    <use href="#bloomUnit" transform="rotate(180 512 512)"/>
+    <use href="#bloomUnit" transform="rotate(225 512 512)"/>
+    <use href="#bloomUnit" transform="rotate(270 512 512)"/>
+    <use href="#bloomUnit" transform="rotate(315 512 512)"/>
+
+    <circle cx="512" cy="512" r="34" fill="url(#petalGrad)" filter="url(#softGlow1031)"/>
+    <circle cx="512" cy="512" r="14" fill="#fff8e2"/>
+
+    <g opacity="0.65">
+      <ellipse cx="300" cy="760" rx="8" ry="13" fill="#f2c86b" transform="rotate(30 300 760)"/>
+      <ellipse cx="720" cy="800" rx="7" ry="11" fill="#bfe6a0" transform="rotate(-20 720 800)"/>
+      <ellipse cx="230" cy="300" rx="6" ry="10" fill="#f2c86b" transform="rotate(60 230 300)"/>
+      <ellipse cx="800" cy="260" rx="7" ry="12" fill="#bfe6a0" transform="rotate(-45 800 260)"/>
+    </g>
+  </g>
+</svg>
