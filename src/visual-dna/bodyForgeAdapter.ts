@@ -649,10 +649,19 @@ export function resolveBodySpec(
   return applyLivePhenotype(grownAnatomy, phenotype);
 }
 
+/** Where a stored body packet's schema originally came from. */
+export type BodyPacketOrigin = "v3" | "v2" | "v1" | "transfer";
+
 export interface StoredBodyPacket {
   version: 3;
   savedAt: number;
   genomeFingerprint: string;
+  /**
+   * Migration provenance: which schema this save was upgraded from. `v3`
+   * means it was authored under the current schema. Preserved across
+   * re-saves so diagnostics and support can see a body's history.
+   */
+  migratedFrom?: BodyPacketOrigin;
   body: BodySpec;
 }
 
@@ -867,6 +876,21 @@ export function sanitizeBodySpec(value: unknown): BodySpec {
  *   re-saved under the current key.
  */
 export function loadForgedBody(): BodySpec | null {
+  return loadForgedBodyPacket()?.body ?? null;
+}
+
+function sanitizeOrigin(value: unknown): BodyPacketOrigin | undefined {
+  return value === "v1" || value === "v2" || value === "v3" || value === "transfer"
+    ? value
+    : undefined;
+}
+
+/**
+ * Loads the full stored packet (body + version/migration metadata). Used by
+ * the dev diagnostics readout and anywhere provenance matters; `loadForgedBody`
+ * remains the plain body accessor.
+ */
+export function loadForgedBodyPacket(): StoredBodyPacket | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = window.localStorage.getItem(BODY_FORGE_STORAGE_KEY);
@@ -874,13 +898,22 @@ export function loadForgedBody(): BodySpec | null {
       const parsed: unknown = JSON.parse(raw);
       if (!isPlainObject(parsed)) return null;
       const body = isPlainObject(parsed.body) ? parsed.body : parsed;
-      return sanitizeBodySpec(body);
+      return {
+        version: STORED_BODY_PACKET_VERSION,
+        savedAt: isFiniteNumber(parsed.savedAt) ? parsed.savedAt : Date.now(),
+        genomeFingerprint:
+          typeof parsed.genomeFingerprint === "string"
+            ? parsed.genomeFingerprint
+            : "",
+        migratedFrom: sanitizeOrigin(parsed.migratedFrom),
+        body: sanitizeBodySpec(body),
+      };
     }
 
-    for (const legacyKey of [
-      PREVIOUS_BODY_FORGE_STORAGE_KEY,
-      LEGACY_BODY_FORGE_STORAGE_KEY,
-    ]) {
+    for (const [legacyKey, origin] of [
+      [PREVIOUS_BODY_FORGE_STORAGE_KEY, "v2"],
+      [LEGACY_BODY_FORGE_STORAGE_KEY, "v1"],
+    ] as const) {
       const legacyRaw = window.localStorage.getItem(legacyKey);
       if (!legacyRaw) continue;
       const legacyParsed: unknown = JSON.parse(legacyRaw);
@@ -889,9 +922,9 @@ export function loadForgedBody(): BodySpec | null {
         ? legacyParsed.body
         : legacyParsed;
       const migrated = sanitizeBodySpec(legacyBody);
-      saveForgedBody(migrated);
+      saveForgedBody(migrated, undefined, 0, origin);
       window.localStorage.removeItem(legacyKey);
-      return migrated;
+      return loadForgedBodyPacket();
     }
     return null;
   } catch {
@@ -903,12 +936,25 @@ export function saveForgedBody(
   spec: BodySpec,
   genome?: Genome | null,
   fallbackSeed = 0,
+  migratedFrom?: BodyPacketOrigin,
 ): void {
   if (typeof window === "undefined") return;
+  // Re-saves keep the original migration provenance unless told otherwise.
+  let origin = migratedFrom;
+  if (!origin) {
+    try {
+      const raw = window.localStorage.getItem(BODY_FORGE_STORAGE_KEY);
+      const parsed: unknown = raw ? JSON.parse(raw) : null;
+      if (isPlainObject(parsed)) origin = sanitizeOrigin(parsed.migratedFrom);
+    } catch {
+      origin = undefined;
+    }
+  }
   const packet: StoredBodyPacket = {
     version: STORED_BODY_PACKET_VERSION,
     savedAt: Date.now(),
     genomeFingerprint: getGenomeVisualFingerprint(genome, fallbackSeed),
+    ...(origin ? { migratedFrom: origin } : {}),
     body: spec,
   };
   window.localStorage.setItem(BODY_FORGE_STORAGE_KEY, JSON.stringify(packet));

@@ -294,6 +294,15 @@ export function VisualDNAPet({
     paused: sealed,
   });
 
+  // Dev-only: surface the active Moss60 clip for the diagnostics readout.
+  const activeClipId = movement.active.clip.id;
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
+    window.dispatchEvent(
+      new CustomEvent("bss:moss60:active-clip", { detail: activeClipId }),
+    );
+  }, [activeClipId]);
+
   // Care actions choreograph movement sequences. Keyed on lastActionAt so
   // repeating the same action (feed, feed) still reacts each time.
   const { playAction, onAnomaly } = movement;

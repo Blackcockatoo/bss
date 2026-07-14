@@ -9,12 +9,14 @@ import {
   applyEvolutionGrowth,
   BODY_FORGE_STORAGE_KEY,
   clearForgedBody,
+  createDNAReadyBodyPacket,
   createGenomeBodySpec,
   genomeToVisualGenes,
   getGenomeVisualFingerprint,
   importBodyForgeTransfer,
   LEGACY_BODY_FORGE_STORAGE_KEY,
   loadForgedBody,
+  loadForgedBodyPacket,
   PREVIOUS_BODY_FORGE_STORAGE_KEY,
   resolveBodySpec,
   saveForgedBody,
@@ -489,5 +491,75 @@ describe("forged body persistence", () => {
       window.localStorage.getItem(PREVIOUS_BODY_FORGE_STORAGE_KEY),
     ).toBeNull();
     expect(loadForgedBody()).toBeNull();
+  });
+
+  it("records migration provenance and preserves it across re-saves", () => {
+    window.localStorage.setItem(
+      PREVIOUS_BODY_FORGE_STORAGE_KEY,
+      JSON.stringify({
+        version: 2,
+        body: { ...DEFAULT_BODY_SPEC, name: "Provenance" },
+      }),
+    );
+
+    const packet = loadForgedBodyPacket();
+    expect(packet?.version).toBe(3);
+    expect(packet?.migratedFrom).toBe("v2");
+    expect(packet?.body.name).toBe("Provenance");
+
+    // A later plain re-save (e.g. the Forge saving an edit) keeps history.
+    saveForgedBody({ ...packet!.body, bodyWidth: 99 });
+    const resaved = loadForgedBodyPacket();
+    expect(resaved?.migratedFrom).toBe("v2");
+    expect(resaved?.body.bodyWidth).toBe(99);
+
+    // A body authored under v3 carries no migration marker.
+    window.localStorage.clear();
+    saveForgedBody({ ...DEFAULT_BODY_SPEC, name: "Native" });
+    expect(loadForgedBodyPacket()?.migratedFrom).toBeUndefined();
+  });
+
+  it("survives the full lifecycle: create → save → reload → export → import → return → reload", () => {
+    const authored = {
+      ...DEFAULT_BODY_SPEC,
+      name: "Lifecycle Witness",
+      shape: "hourglass" as const,
+      pattern: "chrome" as const,
+      expression: "mischief" as const,
+      genderFrame: "female" as const,
+      shoulders: 71,
+      waist: 28,
+      hips: 66,
+      wingStyle: "veil" as const,
+      wingPurpose: "defend" as const,
+      auraStyle: "ribbons" as const,
+      auraMotion: "breathe" as const,
+      auraDensity: 88,
+      auraRadius: 91,
+      auraSpeed: 17,
+      auraTurbulence: 64,
+      auraDimension: 7,
+      auraColor: "#22ccdd",
+      auraSecondary: "#aa33ff",
+      emotionIndex: -41,
+      features: ["wings", "horns", "thirdEye"] as const,
+    };
+    const spec = { ...authored, features: [...authored.features] };
+
+    // create → save → reload
+    saveForgedBody(spec);
+    const reloaded = loadForgedBody();
+    expect(reloaded).toEqual(spec);
+
+    // export → import (the Forge's JSON packet path)
+    const exported = JSON.parse(
+      JSON.stringify(createDNAReadyBodyPacket(reloaded!)),
+    ) as { body: unknown };
+    const imported = sanitizeBodySpec(exported.body);
+    expect(imported).toEqual(spec);
+
+    // return from Forge (save again) → reload: identity unchanged.
+    saveForgedBody(imported);
+    expect(loadForgedBody()).toEqual(spec);
   });
 });

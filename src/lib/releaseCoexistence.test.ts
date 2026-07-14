@@ -38,6 +38,17 @@ describe("BSS release coexistence contract", () => {
     expect(petRuntimeStage).toContain("<VisualDNAPet");
     expect(petRuntimeStage).toContain("<AuraliaMetaPet");
     expect(petRuntimeStage).toContain("<SriYantraPetDisplay");
+
+    // The Geometry form renders Sri Yantra geometry and must be labelled as
+    // such: Moss60 is the movement/identity layer on the Evolved body, not a
+    // renderer, so no surface may present the Sri Yantra as "Moss60".
+    const i18n = readSource("src/lib/i18n.ts");
+    expect(canonicalPetRoute).toContain("Geometry / Sri Yantra");
+    expect(canonicalPetRoute).not.toContain("Geometry / Moss60");
+    expect(i18n).not.toContain("/ Moss60'");
+    // The Evolved body performs the Moss60 movement vocabulary.
+    expect(visualDnaPet).toContain("useMovementController");
+    expect(visualDnaPet).toContain("interpretMovement");
     expect(petRuntimeStage).not.toContain("avatarDataUrl");
     expect(petRuntimeStage).not.toContain("identity/profile");
     expect(canonicalPetRoute).not.toContain("avatarDataUrl");

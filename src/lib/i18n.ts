@@ -23,7 +23,7 @@ const UI_STRINGS = {
       petType: {
         auralia: 'Auralia',
         evolved: 'Evolved / Body Forge',
-        geometry: 'Geometry / Moss60',
+        geometry: 'Geometry / Sri Yantra',
       },
       viewCertificate: 'View Certificate',
       actions: {
@@ -151,7 +151,7 @@ const UI_STRINGS = {
       petType: {
         auralia: 'Auralia',
         evolved: 'Evolucionado / Body Forge',
-        geometry: 'Geometría / Moss60',
+        geometry: 'Geometría / Sri Yantra',
       },
       viewCertificate: 'Ver certificado',
       actions: {
@@ -262,7 +262,7 @@ const UI_STRINGS = {
       petType: {
         auralia: 'オーラリア',
         evolved: '進化形 / Body Forge',
-        geometry: '幾何形 / Moss60',
+        geometry: '幾何形 / スリ・ヤントラ',
       },
       viewCertificate: '証明書を見る',
       actions: {
@@ -371,7 +371,7 @@ const UI_STRINGS = {
       petType: {
         auralia: 'ऑरेलिया',
         evolved: 'विकसित / Body Forge',
-        geometry: 'ज्यामिति / Moss60',
+        geometry: 'ज्यामिति / श्री यंत्र',
       },
       viewCertificate: 'प्रमाणपत्र देखें',
       actions: {
@@ -480,7 +480,7 @@ const UI_STRINGS = {
       petType: {
         auralia: 'Ауралия',
         evolved: 'Эволюционный / Body Forge',
-        geometry: 'Геометрия / Moss60',
+        geometry: 'Геометрия / Шри-янтра',
       },
       viewCertificate: 'Открыть сертификат',
       actions: {
@@ -590,7 +590,7 @@ const UI_STRINGS = {
       petType: {
         auralia: 'Auralia',
         evolved: 'Évolué / Body Forge',
-        geometry: 'Géométrie / Moss60',
+        geometry: 'Géométrie / Sri Yantra',
       },
       viewCertificate: 'Voir le certificat',
       actions: {

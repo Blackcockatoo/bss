@@ -36,7 +36,7 @@ import { useEffect, useState } from "react";
 const PET_FORM_LABELS: Record<PetType, string> = {
   auralia: "Auralia Companion",
   evolved: "Evolved / Body Forge",
-  geometry: "Geometry / Moss60",
+  geometry: "Geometry / Sri Yantra",
 };
 
 export default function PetPage() {
@@ -280,7 +280,7 @@ export default function PetPage() {
                             : "border-slate-700 bg-slate-900/80 text-zinc-300"
                         }
                       >
-                        Geometry / Moss60
+                        Geometry / Sri Yantra
                       </Button>
                       <Link href="/body-forge">
                         <Button
@@ -294,8 +294,10 @@ export default function PetPage() {
                     </div>
                     <p className="mt-2 text-xs text-slate-400">
                       These are three forms of the same companion. Body Forge
-                      returns here in Evolved form; Geometry reads the same live
-                      Moss60 genome; Auralia is the default form.
+                      returns here in Evolved form, where the Moss60 movement
+                      and identity layer performs on the inherited body;
+                      Geometry is the separate Sri Yantra manifestation of the
+                      same genome; Auralia is the default form.
                     </p>
                   </div>
 

@@ -76,7 +76,7 @@ export default function StudentAppHomePage() {
                 ? 'Auralia Companion'
                 : petType === 'evolved'
                   ? 'Evolved / Body Forge'
-                  : 'Geometry / Moss60'} · {evolution.state} stage · Level{' '}
+                  : 'Geometry / Sri Yantra'} · {evolution.state} stage · Level{' '}
               {evolution.level}
             </p>
           </div>
