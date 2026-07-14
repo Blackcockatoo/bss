@@ -10,16 +10,23 @@ export function verifyMoss60WidgetPayload(payload: Moss60VerifiablePayload): boo
   return verifyMoss60Payload(payload);
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export function renderMoss60Widget(mount: HTMLElement, payload: Moss60VerifiablePayload): Moss60WidgetRenderResult {
   const verified = verifyMoss60WidgetPayload(payload);
-  const {
-    id,
-    seed,
-    scheme,
-    variant,
-    projection,
-    timestamp,
-  } = payload.metadata;
+  const { timestamp } = payload.metadata;
+  const id = escapeHtml(payload.metadata.id);
+  const seed = escapeHtml(payload.metadata.seed);
+  const scheme = escapeHtml(payload.metadata.scheme);
+  const variant = escapeHtml(payload.metadata.variant);
+  const projection = escapeHtml(payload.metadata.projection);
 
   mount.innerHTML = '';
 
