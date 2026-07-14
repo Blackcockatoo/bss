@@ -1,9 +1,42 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { VimanaMap } from './VimanaMap';
 import { useStore } from '@/lib/store';
-import { createDefaultVimanaState, isVimanaNodeDiscovered } from '@/lib/vimana';
+import {
+  VIMANA_STATE_VERSION,
+  createDefaultVimanaState,
+  createVimanaNode,
+  getVimanaEncounterKind,
+  hashString,
+  isVimanaLivingRuin,
+  isVimanaNodeDiscovered,
+  type VimanaState,
+} from '@/lib/vimana';
+import { createGravityFold, rotateGravityTile } from '@/lib/minigames/gravityFold';
+
+/** Builds a single-node Vimana world so an encounter test skips travel/scan. */
+function singleNodeState(
+  nodeId: string,
+  overrides: Partial<Parameters<typeof createVimanaNode>[0]> = {},
+): VimanaState {
+  const node = createVimanaNode({
+    discoveryStage: 'explored',
+    scanQuality: 60,
+    firstRewardClaimed: true,
+    ...overrides,
+    id: nodeId,
+  });
+  return {
+    version: VIMANA_STATE_VERSION,
+    nodes: [node],
+    activeNodeId: node.id,
+    anomaliesFound: node.anomaly && node.anomaly.state !== 'dormant' ? 1 : 0,
+    anomaliesResolved: 0,
+    scansPerformed: 1,
+    lastScanAt: Date.now(),
+  };
+}
 
 describe('VimanaMap', () => {
   beforeEach(() => {
@@ -179,6 +212,130 @@ describe('VimanaMap', () => {
       expect(screen.getByTestId('vimana-bottom-sheet')).toBeInTheDocument();
       expect(screen.getByText(/Intensity/)).toBeInTheDocument();
       expect(screen.getByText('The craft is holding position here.')).toBeInTheDocument();
+    });
+  });
+
+  describe('anomaly encounters', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    // Node ids whose deterministic getVimanaEncounterKind() hash lands on
+    // each of the four kinds (found offline; asserted below so a future
+    // hash change fails loudly here rather than silently testing nothing).
+    const GRAVITY_FOLD_NODE = 'test-node-1';
+    const GUARDIAN_SIGNAL_NODE = 'test-node-3';
+
+    it('resolving an anomaly launches its deterministic encounter, and success resolves it', () => {
+      expect(getVimanaEncounterKind(GRAVITY_FOLD_NODE)).toBe('gravity-fold');
+
+      act(() => {
+        useStore.setState({
+          vimana: singleNodeState(GRAVITY_FOLD_NODE, {
+            discoveryStage: 'explored',
+            anomaly: { type: 'energy', severity: 'minor', state: 'active' },
+          }),
+        });
+      });
+
+      render(<VimanaMap />);
+      fireEvent.click(screen.getByLabelText(new RegExp(`${GRAVITY_FOLD_NODE} — Explored`)));
+      fireEvent.click(screen.getByRole('button', { name: 'Resolve Anomaly' }));
+
+      expect(screen.getByText(/Gravity Fold/)).toBeInTheDocument();
+
+      // Solve exactly as the pure engine does, driving the rendered tiles.
+      let state = createGravityFold(hashString(GRAVITY_FOLD_NODE));
+      let guard = 0;
+      while (!state.solved && guard < 1000) {
+        const index = state.tiles.findIndex((tile) => tile.rotation !== 0);
+        act(() => {
+          fireEvent.pointerDown(screen.getByLabelText(`Route tile ${index + 1}, rotate`));
+        });
+        state = rotateGravityTile(state, index);
+        guard += 1;
+      }
+
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+
+      const resolvedNode = useStore
+        .getState()
+        .vimana.nodes.find((n) => n.id === GRAVITY_FOLD_NODE)!;
+      expect(resolvedNode.anomaly!.state).toBe('resolved');
+      expect(useStore.getState().vimana.anomaliesResolved).toBe(1);
+    });
+
+    it('a guardian-signal anomaly redirects to the Resonance Arena and can be left without resolving', () => {
+      expect(getVimanaEncounterKind(GUARDIAN_SIGNAL_NODE)).toBe('guardian-signal');
+
+      act(() => {
+        useStore.setState({
+          vimana: singleNodeState(GUARDIAN_SIGNAL_NODE, {
+            discoveryStage: 'explored',
+            anomaly: { type: 'rare', severity: 'severe', state: 'active' },
+          }),
+        });
+      });
+
+      render(<VimanaMap />);
+      fireEvent.click(screen.getByLabelText(new RegExp(`${GUARDIAN_SIGNAL_NODE} — Explored`)));
+      fireEvent.click(screen.getByRole('button', { name: 'Resolve Anomaly' }));
+
+      // The Resonance Arena opens in place of a puzzle.
+      expect(screen.getByText('Consciousness Arena')).toBeInTheDocument();
+
+      // Leaving without winning must not resolve the anomaly.
+      fireEvent.click(screen.getByText('Return to field'));
+      expect(screen.queryByText('Consciousness Arena')).not.toBeInTheDocument();
+      const node = useStore.getState().vimana.nodes.find((n) => n.id === GUARDIAN_SIGNAL_NODE)!;
+      expect(node.anomaly!.state).toBe('active');
+    });
+  });
+
+  describe('Living Ruin repair run', () => {
+    const RUIN_NODE = 'test-node-1';
+
+    it('offers a Repair Run at a Living Ruin node and records the session through the reward pipeline', () => {
+      expect(isVimanaLivingRuin(RUIN_NODE)).toBe(true);
+
+      act(() => {
+        useStore.setState({
+          vimana: singleNodeState(RUIN_NODE, { discoveryStage: 'explored', anomaly: null }),
+        });
+      });
+
+      render(<VimanaMap />);
+      fireEvent.click(screen.getByLabelText(new RegExp(`${RUIN_NODE} — Explored`)));
+      fireEvent.click(screen.getByRole('button', { name: /Repair Run/ }));
+
+      expect(screen.getByText('Choose a flight plan')).toBeInTheDocument();
+
+      const before = useStore.getState().miniGames.vimanaHighScore;
+      act(() => {
+        useStore.getState().recordVimanaRun(500, 3, 1);
+      });
+      expect(useStore.getState().miniGames.vimanaHighScore).toBeGreaterThanOrEqual(before);
+    });
+
+    it('does not offer a Repair Run for a node that is not a Living Ruin', () => {
+      const ordinaryNode = 'test-node-2'; // resolves to 'echo-loop', not a ruin
+      expect(isVimanaLivingRuin(ordinaryNode)).toBe(false);
+
+      act(() => {
+        useStore.setState({
+          vimana: singleNodeState(ordinaryNode, { discoveryStage: 'explored', anomaly: null }),
+        });
+      });
+
+      render(<VimanaMap />);
+      fireEvent.click(screen.getByLabelText(new RegExp(`${ordinaryNode} — Explored`)));
+      expect(screen.queryByRole('button', { name: /Repair Run/ })).not.toBeInTheDocument();
     });
   });
 });

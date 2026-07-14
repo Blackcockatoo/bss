@@ -153,7 +153,7 @@ function mulberry32(seed: number): () => number {
   };
 }
 
-function hashString(value: string): number {
+export function hashString(value: string): number {
   let hash = 2166136261;
   for (let i = 0; i < value.length; i++) {
     hash ^= value.charCodeAt(i);

@@ -2,8 +2,16 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useStore } from '@/lib/store';
-import type { VimanaNode } from '@/lib/vimana';
-import { computeVimanaGenomeSeed, findVimanaRoute, isVimanaNodeDiscovered, vimanaInfoLevel } from '@/lib/vimana';
+import type { VimanaEncounterKind, VimanaNode } from '@/lib/vimana';
+import {
+  computeVimanaGenomeSeed,
+  findVimanaRoute,
+  getVimanaEncounterKind,
+  hashString,
+  isVimanaLivingRuin,
+  isVimanaNodeDiscovered,
+  vimanaInfoLevel,
+} from '@/lib/vimana';
 import {
   EXPEDITION_CHARGE_REGEN_MS,
   createExpeditionCharge,
@@ -15,7 +23,12 @@ import {
 import type { ScanRingResult } from '@/lib/minigames/vimanaScanRing';
 import { VimanaFlightSequence } from './VimanaFlightSequence';
 import { VimanaScanRing } from './VimanaScanRing';
-import { AlertTriangle, MapPin, Radar, Sparkles, X, Zap } from 'lucide-react';
+import { EchoLoopEncounter } from './EchoLoopEncounter';
+import { GravityFoldEncounter } from './GravityFoldEncounter';
+import { PrismStormEncounter } from './PrismStormEncounter';
+import { BattleArena } from './BattleArena';
+import { VimanaTetris } from './VimanaTetris';
+import { AlertTriangle, MapPin, Radar, Sparkles, Wrench, X, Zap } from 'lucide-react';
 
 /** World-space layout: px per coordinate unit, with a slight z parallax. */
 const SPACING = 96;
@@ -90,6 +103,7 @@ export function VimanaMap({ petName = 'Meta-Pet' }: VimanaMapProps) {
   const genome = useStore((s) => s.genome);
   const exploreCell = useStore((s) => s.exploreCell);
   const resolveAnomaly = useStore((s) => s.resolveAnomaly);
+  const recordVimanaRun = useStore((s) => s.recordVimanaRun);
 
   const accentHue = computeVimanaGenomeSeed(genome) % 360;
 
@@ -97,6 +111,14 @@ export function VimanaMap({ petName = 'Meta-Pet' }: VimanaMapProps) {
   const [offset, setOffset] = useState<{ x: number; y: number } | null>(null);
   const [travel, setTravel] = useState<TravelState | null>(null);
   const [charge, setCharge] = useState<ExpeditionCharge>(() => createExpeditionCharge());
+  const [encounter, setEncounter] = useState<
+    { nodeId: string; kind: VimanaEncounterKind } | null
+  >(null);
+  const [repairNodeId, setRepairNodeId] = useState<string | null>(null);
+
+  // Any full-screen overlay (travel, an anomaly encounter, or a repair run)
+  // suspends panning and hides the bottom sheet the same way.
+  const overlayActive = travel !== null || encounter !== null || repairNodeId !== null;
 
   // Session-only regen tick for the expedition charge — never persisted, and
   // never blocks travel itself, only whether the flight flourish plays.
@@ -182,7 +204,7 @@ export function VimanaMap({ petName = 'Meta-Pet' }: VimanaMapProps) {
 
   const handlePointerDown = useCallback(
     (event: React.PointerEvent) => {
-      if (panRef.current || offset === null || travel) return;
+      if (panRef.current || offset === null || overlayActive) return;
       viewportRef.current?.setPointerCapture(event.pointerId);
       panRef.current = {
         pointerId: event.pointerId,
@@ -194,13 +216,13 @@ export function VimanaMap({ petName = 'Meta-Pet' }: VimanaMapProps) {
       };
       pannedRef.current = false;
     },
-    [offset, travel],
+    [offset, overlayActive],
   );
 
   const handlePointerMove = useCallback(
     (event: React.PointerEvent) => {
       const pan = panRef.current;
-      if (!pan || pan.pointerId !== event.pointerId || travel) return;
+      if (!pan || pan.pointerId !== event.pointerId || overlayActive) return;
       const dx = event.clientX - pan.startX;
       const dy = event.clientY - pan.startY;
       if (!pan.panned && Math.hypot(dx, dy) < PAN_THRESHOLD) return;
@@ -208,7 +230,7 @@ export function VimanaMap({ petName = 'Meta-Pet' }: VimanaMapProps) {
       pannedRef.current = true;
       setOffset(clampOffset(pan.originX + dx, pan.originY + dy));
     },
-    [clampOffset, travel],
+    [clampOffset, overlayActive],
   );
 
   const handlePointerEnd = useCallback((event: React.PointerEvent) => {
@@ -249,23 +271,46 @@ export function VimanaMap({ petName = 'Meta-Pet' }: VimanaMapProps) {
 
   const handleScanComplete = useCallback(
     (result: ScanRingResult) => {
-      setTravel((current) => {
-        if (current) {
-          exploreCell(current.targetId, {
-            scanQuality: result.scanQuality,
-            flightBonus: flightBonusEssence(current.phase === 'scan' ? current.gatesHit : 0),
-          });
-        }
-        return null;
-      });
+      // Side effect first, state reset second — a setState updater must stay
+      // a pure computation of the next value, never a place to dispatch
+      // other store actions.
+      if (travel) {
+        exploreCell(travel.targetId, {
+          scanQuality: result.scanQuality,
+          flightBonus: flightBonusEssence(travel.phase === 'scan' ? travel.gatesHit : 0),
+        });
+      }
+      setTravel(null);
     },
-    [exploreCell],
+    [exploreCell, travel],
   );
 
   const handleResolve = useCallback(() => {
+    if (!selectedNode || selectedNode.anomaly?.state !== 'active') return;
+    // Four polished, reusable encounters resolve every anomaly — which one
+    // is deterministic per node, so replaying always shows the same puzzle.
+    setEncounter({ nodeId: selectedNode.id, kind: getVimanaEncounterKind(selectedNode.id) });
+  }, [selectedNode]);
+
+  const handleEncounterComplete = useCallback(() => {
+    if (encounter) resolveAnomaly(encounter.nodeId);
+    setEncounter(null);
+  }, [encounter, resolveAnomaly]);
+
+  const handleEncounterExit = useCallback(() => setEncounter(null), []);
+
+  const handleRepairRun = useCallback(() => {
     if (!selectedNode) return;
-    resolveAnomaly(selectedNode.id);
-  }, [resolveAnomaly, selectedNode]);
+    setRepairNodeId(selectedNode.id);
+  }, [selectedNode]);
+
+  const handleRepairComplete = useCallback(
+    (score: number, lines: number, level: number) => {
+      recordVimanaRun(score, lines, level);
+      setRepairNodeId(null);
+    },
+    [recordVimanaRun],
+  );
 
   // ===== Render =====
 
@@ -507,10 +552,51 @@ export function VimanaMap({ petName = 'Meta-Pet' }: VimanaMapProps) {
         {travel?.phase === 'scan' && (
           <VimanaScanRing accentHue={accentHue} onComplete={handleScanComplete} />
         )}
+
+        {/* Anomaly encounters — one of four polished, reusable puzzles. */}
+        {encounter?.kind === 'echo-loop' && (
+          <EchoLoopEncounter
+            seed={hashString(encounter.nodeId)}
+            accentHue={accentHue}
+            onComplete={handleEncounterComplete}
+          />
+        )}
+        {encounter?.kind === 'gravity-fold' && (
+          <GravityFoldEncounter
+            seed={hashString(encounter.nodeId)}
+            accentHue={accentHue}
+            onComplete={handleEncounterComplete}
+          />
+        )}
+        {encounter?.kind === 'prism-storm' && (
+          <PrismStormEncounter
+            seed={hashString(encounter.nodeId)}
+            accentHue={accentHue}
+            onComplete={handleEncounterComplete}
+          />
+        )}
+        {encounter?.kind === 'guardian-signal' && (
+          <div className="vimana-map-fx absolute inset-0 z-30 overflow-y-auto rounded-2xl bg-slate-950 p-4">
+            <BattleArena onWin={handleEncounterComplete} onExit={handleEncounterExit} />
+          </div>
+        )}
+
+        {/* Living Ruin: an optional short Vimana Stack repair run. */}
+        {repairNodeId && (
+          <div className="absolute inset-0 z-30 rounded-2xl bg-slate-950">
+            <VimanaTetris
+              petName={petName}
+              genomeSeed={computeVimanaGenomeSeed(genome)}
+              startLevel={1}
+              onExit={() => setRepairNodeId(null)}
+              onGameOver={handleRepairComplete}
+            />
+          </div>
+        )}
       </div>
 
       {/* Bottom sheet: destination panel with progressive reveal. */}
-      {selectedNode && !travel && (
+      {selectedNode && !overlayActive && (
         <div
           data-testid="vimana-bottom-sheet"
           className="vimana-map-fx fixed inset-x-0 bottom-0 z-40 mx-auto max-w-xl rounded-t-3xl border border-b-0 border-slate-700 bg-slate-950/95 px-4 pt-2 shadow-[0_-8px_40px_rgba(0,0,0,0.6)] backdrop-blur"
@@ -620,6 +706,16 @@ export function VimanaMap({ petName = 'Meta-Pet' }: VimanaMapProps) {
               >
                 <AlertTriangle className="h-4 w-4" />
                 Resolve Anomaly
+              </button>
+            )}
+            {isVimanaNodeDiscovered(selectedNode) && isVimanaLivingRuin(selectedNode.id) && (
+              <button
+                type="button"
+                onClick={handleRepairRun}
+                className="flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl border border-emerald-400/60 px-4 text-sm font-semibold text-emerald-300 active:bg-emerald-950/40"
+              >
+                <Wrench className="h-4 w-4" />
+                Repair Run
               </button>
             )}
           </div>
