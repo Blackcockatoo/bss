@@ -11,6 +11,7 @@ import {
   ENABLE_CHILD_SAFE_BASELINE,
   IS_SCHOOLS_PROFILE,
 } from "@/lib/env/features";
+import { useIdentityProfileStore } from "@/lib/identity/profile";
 import { SCHOOLS_LOCAL_DATA_RETENTION_DAYS } from "@/lib/schools/storage";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -22,6 +23,9 @@ export default function ClientBody({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const refreshIdentityProfile = useIdentityProfileStore(
+    (state) => state.refreshProfile,
+  );
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const isSchoolPath = useMemo(
     () =>
@@ -42,6 +46,10 @@ export default function ClientBody({
   useEffect(() => {
     document.body.classList.add("antialiased");
   }, []);
+
+  useEffect(() => {
+    refreshIdentityProfile();
+  }, [refreshIdentityProfile]);
 
   useEffect(() => {
     if (!childSafeBlocked || !pathname) {

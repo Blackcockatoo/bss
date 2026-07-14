@@ -6,6 +6,14 @@
 
 ## What's Running Now
 
+### One Companion, Three Forms
+
+- **Auralia** is the default expressive companion form.
+- **Evolved / Body Forge** renders the genome-derived body and any saved forged anatomy.
+- **Geometry / Moss60** renders the same companion through its live Red60, Blue60, and Black60 strands.
+- All three forms share one identity, genome, vitals, progression, and canonical `/pet` runtime. Switching forms changes the renderer, not the companion.
+- Body Forge's **Set inherited body** action stores versioned anatomy locally (`bss:meta-pet:body-spec:v2`). **Save as avatar** separately writes a validated local Identity avatar, so changing inherited anatomy does not replace the avatar and changing the avatar does not replace the pet body.
+
 ✅ **PrimeTail ID System**
 - Mints unique crest with vault/rotation/tail
 - SHA-256 DNA + mirror hashes

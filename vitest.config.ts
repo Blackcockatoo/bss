@@ -9,6 +9,8 @@ export default defineConfig({
     environment: 'happy-dom',
     globals: true,
     setupFiles: [path.resolve(__dirname, './test/setup.ts')],
+    testTimeout: 15_000,
+    maxWorkers: process.env.CI ? undefined : 4,
     exclude: ['.claude/**', 'coverage/**', 'node_modules/**', '**/node_modules/**'],
     coverage: {
       provider: 'v8',

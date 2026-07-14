@@ -4,6 +4,11 @@ import AuraliaMetaPet from '@/components/AuraliaMetaPet';
 import { SriYantraPetDisplay } from '@/components/SriYantraPetDisplay';
 import { VisualDNAPet } from '@/components/VisualDNAPet';
 import { useStore } from '@/lib/store';
+import { useSyncExternalStore } from 'react';
+
+const subscribeToClientReady = () => () => {};
+const getClientReadySnapshot = () => true;
+const getServerReadySnapshot = () => false;
 
 interface PetRuntimeStageProps {
   addonEditMode?: boolean;
@@ -24,8 +29,28 @@ export function PetRuntimeStage({
   onAddonEditModeChange,
   showAdvanced = false,
 }: PetRuntimeStageProps) {
+  const clientReady = useSyncExternalStore(
+    subscribeToClientReady,
+    getClientReadySnapshot,
+    getServerReadySnapshot,
+  );
   const petType = useStore((state) => state.petType);
   const genome = useStore((state) => state.genome);
+
+  // Auralia and the DNA renderers use time, canvas, and reduced-motion state.
+  // Keep them out of the server snapshot so hydration is deterministic, then
+  // mount exactly one authoritative renderer as soon as the client is ready.
+  if (!clientReady) {
+    return (
+      <div
+        data-testid="pet-runtime-loading"
+        role="status"
+        className="flex min-h-[520px] items-center justify-center text-sm text-cyan-200/75"
+      >
+        Preparing companion form…
+      </div>
+    );
+  }
 
   if (petType === 'auralia') {
     return (
