@@ -7,8 +7,8 @@ import { useStore } from '@/lib/store';
 const actionCards = [
   {
     title: 'Go to Pet',
-    description: 'Check mood, vitals, and growth status for your companion.',
-    href: '/app/pet',
+    description: 'Check mood, vitals, growth status, and the active inherited body for your companion.',
+    href: '/pet',
   },
   {
     title: 'View Genome',
@@ -30,7 +30,7 @@ const actionCards = [
   {
     title: 'Body Forge',
     description:
-      'Sculpt a custom body in the visual workshop, then send it straight to your Meta-Pet.',
+      'Sculpt a custom body in the visual workshop, then send it straight to the canonical Meta-Pet runtime.',
     href: '/body-forge',
   },
   {
@@ -63,7 +63,7 @@ export default function StudentAppHomePage() {
         <p className="text-xs uppercase tracking-[0.2em] text-cyan-300">Student App</p>
         <h1 className="mt-2 text-2xl font-semibold text-white">Welcome back, explorer</h1>
         <p className="mt-2 text-sm text-zinc-300">
-          These routes now mirror the active companion&apos;s live vitals instead of a seeded demo profile.
+          These routes mirror the active companion&apos;s live vitals and now return to one canonical pet runtime.
         </p>
       </header>
 
@@ -72,7 +72,7 @@ export default function StudentAppHomePage() {
           <div>
             <h2 className="text-lg font-medium text-cyan-100">Active companion</h2>
             <p className="mt-2 text-sm text-zinc-300">
-              {petType === 'auralia' ? 'Auralia form' : 'Geometric form'} · {evolution.state} stage · Level{' '}
+              {petType === 'auralia' ? 'Auralia Guardian' : 'DNA / Forge body'} · {evolution.state} stage · Level{' '}
               {evolution.level}
             </p>
           </div>
