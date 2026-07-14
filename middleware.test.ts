@@ -3,9 +3,29 @@ import { NextRequest } from "next/server";
 
 type AppProfile = "schools" | "core";
 
-async function loadMiddleware(profile: AppProfile) {
+type MiddlewareEnvironment = {
+  siteUrl?: string;
+  vercelEnv?: string;
+};
+
+async function loadMiddleware(
+  profile: AppProfile,
+  environment: MiddlewareEnvironment = {},
+) {
   vi.resetModules();
   process.env.NEXT_PUBLIC_CHILD_SAFE_BASELINE = "";
+
+  if (environment.siteUrl) {
+    process.env.NEXT_PUBLIC_SITE_URL = environment.siteUrl;
+  } else {
+    delete process.env.NEXT_PUBLIC_SITE_URL;
+  }
+
+  if (environment.vercelEnv) {
+    process.env.VERCEL_ENV = environment.vercelEnv;
+  } else {
+    delete process.env.VERCEL_ENV;
+  }
 
   const mockFeatures = {
     APP_PROFILE: profile,
@@ -23,6 +43,76 @@ afterEach(() => {
   vi.doUnmock("./src/lib/env/features");
   vi.doUnmock("@/lib/env/features");
   delete process.env.NEXT_PUBLIC_CHILD_SAFE_BASELINE;
+  delete process.env.NEXT_PUBLIC_SITE_URL;
+  delete process.env.VERCEL_ENV;
+});
+
+describe("middleware canonical BSS origin", () => {
+  it("redirects the bare production domain to the canonical www origin", async () => {
+    const { middleware } = await loadMiddleware("core");
+
+    const response = middleware(
+      new NextRequest("https://bluesnakestudios.com/body-forge?mode=live"),
+    );
+
+    expect(response.status).toBe(308);
+    expect(response.headers.get("location")).toBe(
+      "https://www.bluesnakestudios.com/body-forge?mode=live",
+    );
+  });
+
+  it("redirects production Vercel aliases to the configured canonical origin", async () => {
+    const { middleware } = await loadMiddleware("core", {
+      siteUrl: "https://www.bluesnakestudios.com",
+      vercelEnv: "production",
+    });
+
+    const response = middleware(
+      new NextRequest("https://bss-l8cw.vercel.app/app/activities?tab=vimana"),
+    );
+
+    expect(response.status).toBe(308);
+    expect(response.headers.get("location")).toBe(
+      "https://www.bluesnakestudios.com/app/activities?tab=vimana",
+    );
+  });
+
+  it("keeps the canonical host and preview deployments available", async () => {
+    const canonical = await loadMiddleware("core", {
+      siteUrl: "https://www.bluesnakestudios.com",
+      vercelEnv: "production",
+    });
+
+    expect(
+      canonical.middleware(
+        new NextRequest("https://www.bluesnakestudios.com/body-forge"),
+      ).headers.get("location"),
+    ).toBeNull();
+
+    const preview = await loadMiddleware("core", {
+      siteUrl: "https://www.bluesnakestudios.com",
+      vercelEnv: "preview",
+    });
+
+    expect(
+      preview.middleware(
+        new NextRequest("https://bss-git-feature.vercel.app/body-forge"),
+      ).headers.get("location"),
+    ).toBeNull();
+  });
+
+  it("does not force school deployments onto the core BSS domain", async () => {
+    const { middleware } = await loadMiddleware("schools", {
+      siteUrl: "https://www.bluesnakestudios.com",
+      vercelEnv: "production",
+    });
+
+    const response = middleware(new NextRequest("https://school-pilot.vercel.app/"));
+
+    expect(response.headers.get("location")).toBe(
+      "https://school-pilot.vercel.app/schools",
+    );
+  });
 });
 
 describe("middleware school profile boundary", () => {
