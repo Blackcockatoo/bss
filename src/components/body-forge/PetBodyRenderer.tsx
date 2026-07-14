@@ -3,6 +3,11 @@
 import { useId } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
+import type {
+  BodyPerformanceState,
+  MovementPerformance,
+} from "@/pet/performance";
+
 export type BodyShape =
   | "round"
   | "orb"
@@ -191,7 +196,15 @@ function mouthPath(spec: BodySpec) {
   return `M ${x1 + 3} ${y + 2} L ${x2 - 3} ${y + 2}`;
 }
 
-function BodySilhouette({ spec, fill }: { spec: BodySpec; fill: string }) {
+function BodySilhouette({
+  spec,
+  fill,
+  outlineOpacity,
+}: {
+  spec: BodySpec;
+  fill: string;
+  outlineOpacity?: number;
+}) {
   const x = 140 - spec.bodyWidth / 2;
   const y = 112 - spec.bodyHeight / 2;
   const shoulder = spec.bodyWidth * (0.37 + spec.shoulders / 420);
@@ -201,6 +214,7 @@ function BodySilhouette({ spec, fill }: { spec: BodySpec; fill: string }) {
     fill,
     stroke: spec.secondaryColor,
     strokeWidth: spec.outlineWidth,
+    ...(outlineOpacity !== undefined ? { strokeOpacity: outlineOpacity } : {}),
   };
   if (spec.shape === "cubic" || spec.shape === "block") {
     return (
@@ -319,7 +333,48 @@ function BodySilhouette({ spec, fill }: { spec: BodySpec; fill: string }) {
   );
 }
 
-function AuraPreview({ spec, moving }: { spec: BodySpec; moving: boolean }) {
+/**
+ * Live-performance mouth: the inherited mouth geometry re-curved by the
+ * living layer. Curve -1..1 replaces the fixed expression path so the same
+ * mouth performs instead of switching stickers.
+ */
+function performedMouthPath(spec: BodySpec, curve: number): string {
+  const x1 = 140 - spec.mouthWidth / 2;
+  const x2 = 140 + spec.mouthWidth / 2;
+  const y = 132;
+  const bend = Math.max(-1, Math.min(1, curve)) * spec.mouthHeight;
+  return `M ${x1} ${y} Q 140 ${y + bend} ${x2} ${y}`;
+}
+
+/** Deterministic dirt-mottle positions as body-size fractions [fx, fy, r]. */
+const DIRT_SPOTS: ReadonlyArray<readonly [number, number, number]> = [
+  [-0.22, -0.08, 3.1],
+  [0.18, 0.16, 2.6],
+  [-0.04, 0.3, 2.2],
+  [0.29, -0.18, 2.0],
+  [-0.3, 0.2, 1.7],
+];
+
+/** Deterministic sparkle-glint positions as body-size fractions. */
+const SPARKLE_SPOTS: ReadonlyArray<readonly [number, number, number]> = [
+  [-0.26, -0.26, 3.4],
+  [0.3, -0.1, 2.6],
+  [0.1, 0.32, 2.2],
+];
+
+function sparklePath(cx: number, cy: number, r: number): string {
+  return `M${cx} ${cy - r} L${cx + r * 0.28} ${cy - r * 0.28} L${cx + r} ${cy} L${cx + r * 0.28} ${cy + r * 0.28} L${cx} ${cy + r} L${cx - r * 0.28} ${cy + r * 0.28} L${cx - r} ${cy} L${cx - r * 0.28} ${cy - r * 0.28}Z`;
+}
+
+function AuraPreview({
+  spec,
+  moving,
+  drive,
+}: {
+  spec: BodySpec;
+  moving: boolean;
+  drive?: { scale: number; pulse: number; rotation: number } | null;
+}) {
   const particleCount = Math.max(4, Math.round(spec.auraDensity / 7));
   const radius = 62 + spec.auraRadius * 0.45;
   const duration = Math.max(1.2, 8 - spec.auraSpeed / 15);
@@ -374,24 +429,15 @@ function AuraPreview({ spec, moving }: { spec: BodySpec; moving: boolean }) {
     );
   });
 
-  return (
-    <motion.g
-      style={{ transformOrigin: "140px 112px" }}
-      opacity={Math.max(0.08, spec.glow)}
-      animate={moving ? auraAnimation : undefined}
-      transition={{
-        duration,
-        repeat: Infinity,
-        ease: spec.auraMotion === "orbit" ? "linear" : "easeInOut",
-      }}
-    >
+  const content = (
+    <>
       <ellipse
         cx="140"
         cy="112"
         rx={radius}
         ry={radius * 0.75}
         fill={spec.auraColor}
-        opacity=".08"
+        opacity={0.08 + (drive ? drive.pulse * 0.06 : 0)}
       />
       {spec.auraStyle === "mist" && (
         <g opacity=".28">
@@ -483,6 +529,33 @@ function AuraPreview({ spec, moving }: { spec: BodySpec; moving: boolean }) {
         </g>
       )}
       {particles}
+    </>
+  );
+
+  if (drive) {
+    // Performance-driven: the movement layer owns aura motion this frame.
+    return (
+      <g
+        transform={`translate(140 112) rotate(${drive.rotation}) scale(${drive.scale}) translate(-140 -112)`}
+        opacity={Math.min(1, Math.max(0.08, spec.glow) + drive.pulse * 0.3)}
+      >
+        {content}
+      </g>
+    );
+  }
+
+  return (
+    <motion.g
+      style={{ transformOrigin: "140px 112px" }}
+      opacity={Math.max(0.08, spec.glow)}
+      animate={moving ? auraAnimation : undefined}
+      transition={{
+        duration,
+        repeat: Infinity,
+        ease: spec.auraMotion === "orbit" ? "linear" : "easeInOut",
+      }}
+    >
+      {content}
     </motion.g>
   );
 }
@@ -492,15 +565,31 @@ export function PetBodyRenderer({
   className = "",
   animate = true,
   showForgeAura = false,
+  performance = null,
+  living = null,
+  activeClipId = null,
 }: {
   spec: BodySpec;
   className?: string;
   animate?: boolean;
   showForgeAura?: boolean;
+  /**
+   * Live movement frame from the performance layer. When present, the
+   * movement layer owns motion for this render and the built-in ambient
+   * loops are disabled. When absent the renderer behaves exactly as before
+   * — the Forge preview and legacy callers are unchanged.
+   */
+  performance?: MovementPerformance | null;
+  /** Slow living-body layer for surface/face detail (never mutates spec). */
+  living?: BodyPerformanceState | null;
+  /** Active clip id, for signature dressings (Moss60 orbit, venom pulse). */
+  activeClipId?: string | null;
 }) {
   const rawId = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const reducedMotion = useReducedMotion();
-  const moving = animate && !reducedMotion;
+  const perf = performance;
+  const driven = perf !== null;
+  const moving = animate && !reducedMotion && !driven;
   const patternId = `body-pattern-${rawId}`;
   const glowId = `body-glow-${rawId}`;
   const grainId = `body-grain-${rawId}`;
@@ -508,10 +597,35 @@ export function PetBodyRenderer({
     spec.pattern === "solid" ? spec.primaryColor : `url(#${patternId})`;
   const leftEye = 140 - spec.eyeSpacing / 2;
   const rightEye = 140 + spec.eyeSpacing / 2;
-  const eyeHeight =
+  const restingEyeRy =
     spec.expression === "sleepy"
       ? Math.max(2.4, spec.eyeSize * 0.22)
       : spec.eyeSize;
+  const eyeHeight = driven
+    ? Math.max(
+        1.1,
+        restingEyeRy * Math.max(0.04, Math.min(1.15, perf.eyelidOpen)),
+      )
+    : restingEyeRy;
+  const eyesNearlyClosed = driven && eyeHeight < 2;
+  const pupilR = driven
+    ? Math.max(1, spec.pupilSize * perf.pupilScale)
+    : spec.pupilSize;
+  const gazeTravelX = Math.max(1.5, spec.eyeSize * 0.34);
+  const gazeTravelY = Math.max(1.2, spec.eyeSize * 0.26);
+  const pupilDX = spec.gazeX + (driven ? perf.gazeX * gazeTravelX : 0);
+  const pupilDY = spec.gazeY + (driven ? perf.gazeY * gazeTravelY : 0);
+  const featureGlow = driven ? perf.featureIntensity : 0;
+  const wingFold = driven ? Math.max(0, Math.min(1, perf.wingFold)) : 0;
+  const outlineOpacity = living
+    ? 0.55 + 0.45 * Math.max(0, Math.min(1, living.outlineCleanliness))
+    : undefined;
+  const dirtStrength = living
+    ? Math.max(0, 0.55 - living.surfaceClarity) * 1.1
+    : 0;
+  const sparkleStrength = living
+    ? Math.max(0, living.sparkle - 0.55) * 1.6
+    : 0;
   const textureSize = 8 + spec.textureScale / 5;
   const wingPurposeScale =
     spec.wingPurpose === "attack"
@@ -523,7 +637,9 @@ export function PetBodyRenderer({
           : spec.wingPurpose === "attract"
             ? 1.04
             : 1;
-  const wingReach = 34 * spec.wingSpread * wingPurposeScale;
+  const effectiveWingSpread =
+    spec.wingSpread * (driven ? Math.max(0.1, perf.wingSpread) : 1);
+  const wingReach = 34 * effectiveWingSpread * wingPurposeScale;
   const wingRootX = 140 - spec.bodyWidth * 0.42;
   const wingPath =
     spec.wingStyle === "blade"
@@ -737,8 +853,48 @@ export function PetBodyRenderer({
         </filter>
       </defs>
 
-      {showForgeAura && <AuraPreview spec={spec} moving={moving} />}
-      {!showForgeAura && (
+      {driven && perf.shadowEnclosure > 0.01 && (
+        // Temporary shadow-field geometry (folded-wing hide, black-wing
+        // bloom on wingless bodies). Purely presentational.
+        <ellipse
+          cx="140"
+          cy="112"
+          rx={spec.bodyWidth * 0.72 + 34}
+          ry={spec.bodyHeight * 0.68 + 30}
+          fill={spec.secondaryColor}
+          opacity={Math.min(0.62, perf.shadowEnclosure * 0.62)}
+        />
+      )}
+
+      {showForgeAura && (
+        <AuraPreview
+          spec={spec}
+          moving={moving}
+          drive={
+            driven
+              ? {
+                  scale: perf.auraScale,
+                  pulse: perf.auraPulse,
+                  rotation: perf.auraRotation,
+                }
+              : null
+          }
+        />
+      )}
+      {!showForgeAura && driven && (
+        <ellipse
+          cx="140"
+          cy="120"
+          rx={(72 + spec.glow * 28) * perf.auraScale}
+          ry={(69 + spec.glow * 25) * perf.auraScale}
+          fill={spec.primaryColor}
+          opacity={Math.min(
+            0.35,
+            0.06 + spec.glow * 0.13 + perf.auraPulse * 0.14,
+          )}
+        />
+      )}
+      {!showForgeAura && !driven && (
         <motion.ellipse
           cx="140"
           cy="120"
@@ -754,6 +910,86 @@ export function PetBodyRenderer({
           transition={{ duration: 3 / spec.animationSpeed, repeat: Infinity }}
         />
       )}
+
+      {driven && activeClipId === "moss60_orbit" && (
+        // The Moss60 red/blue/black strands in precise orbit around the
+        // living body. Rotation is fully owned by the movement frame.
+        <g
+          transform={`rotate(${perf.auraRotation} 140 112)`}
+          opacity={0.45 + perf.auraPulse * 0.4}
+          fill="none"
+          strokeWidth="1.8"
+        >
+          <ellipse cx="140" cy="112" rx="96" ry="34" stroke="#d23c47" />
+          <ellipse
+            cx="140"
+            cy="112"
+            rx="96"
+            ry="34"
+            stroke="#3d7bfd"
+            transform="rotate(60 140 112)"
+          />
+          <ellipse
+            cx="140"
+            cy="112"
+            rx="96"
+            ry="34"
+            stroke="#0c0d16"
+            strokeWidth="2.4"
+            transform="rotate(120 140 112)"
+          />
+        </g>
+      )}
+      {driven && activeClipId === "venom_pulse" && (
+        // Red/black impulse through outline and aura; inherited colours stay.
+        <g fill="none">
+          <ellipse
+            cx="140"
+            cy="112"
+            rx={spec.bodyWidth * 0.58 + perf.auraPulse * 16}
+            ry={spec.bodyHeight * 0.56 + perf.auraPulse * 14}
+            stroke="#c22a3a"
+            strokeWidth={1.6 + perf.auraPulse * 2.6}
+            opacity={perf.auraPulse * 0.65}
+          />
+          <ellipse
+            cx="140"
+            cy="112"
+            rx={spec.bodyWidth * 0.52 + perf.auraPulse * 10}
+            ry={spec.bodyHeight * 0.5 + perf.auraPulse * 9}
+            stroke="#0b0410"
+            strokeWidth={1.2 + perf.auraPulse * 1.6}
+            opacity={perf.auraPulse * 0.5}
+          />
+        </g>
+      )}
+
+      <g
+        transform={
+          driven
+            ? `translate(${140 + perf.bodyX} ${112 + perf.bodyY}) rotate(${perf.rotation}) scale(${perf.scaleX} ${perf.scaleY}) translate(-140 -112)`
+            : undefined
+        }
+      >
+      {driven &&
+        perf.phaseEchoes > 0 &&
+        Array.from({ length: Math.min(3, Math.round(perf.phaseEchoes)) }).map(
+          (_, index) => (
+            // Phase echoes: quantum afterimages that keep the true
+            // silhouette readable (cyan/violet, never opaque).
+            <g
+              key={`echo-${index}`}
+              transform={`translate(${(index + 1) * 5 * (index % 2 === 0 ? 1 : -1)} ${(index + 1) * -2})`}
+              opacity={0.2 - index * 0.05}
+            >
+              <BodySilhouette
+                spec={spec}
+                fill={index % 2 === 0 ? spec.auraColor : spec.auraSecondary}
+                outlineOpacity={0}
+              />
+            </g>
+          ),
+        )}
 
       <motion.g
         style={{ transformOrigin: "140px 112px" }}
@@ -805,10 +1041,30 @@ export function PetBodyRenderer({
             }
             opacity={spec.wingPurpose === "defend" ? 0.82 : 0.9}
           >
-            <path d={wingPath} />
-            <path d={wingPath} transform="translate(280 0) scale(-1 1)" />
+            <g
+              transform={
+                wingFold > 0.005
+                  ? `translate(${wingRootX + 8} 128) rotate(${wingFold * 30}) scale(${1 - wingFold * 0.55} ${1 - wingFold * 0.18}) translate(${-(wingRootX + 8)} -128)`
+                  : undefined
+              }
+            >
+              <path d={wingPath} />
+            </g>
+            <g
+              transform={
+                wingFold > 0.005
+                  ? `translate(${280 - (wingRootX + 8)} 128) rotate(${-wingFold * 30}) scale(${1 - wingFold * 0.55} ${1 - wingFold * 0.18}) translate(${-(280 - (wingRootX + 8))} -128)`
+                  : undefined
+              }
+            >
+              <path d={wingPath} transform="translate(280 0) scale(-1 1)" />
+            </g>
             {spec.wingPurpose === "attract" && (
-              <g fill={spec.highlightColor} stroke="none">
+              <g
+                fill={spec.highlightColor}
+                stroke="none"
+                opacity={driven ? 0.6 + featureGlow * 0.4 : 1}
+              >
                 <circle cx={wingRootX - wingReach * 0.48} cy="106" r="5" />
                 <circle
                   cx={280 - wingRootX + wingReach * 0.48}
@@ -819,7 +1075,17 @@ export function PetBodyRenderer({
             )}
           </g>
         )}
-        {spec.features.includes("tailFlame") && (
+        {spec.features.includes("tailFlame") && driven && (
+          <path
+            d="M 140 161 C 116 190 133 218 140 226 C 147 218 164 190 140 161 Z"
+            fill={spec.highlightColor}
+            stroke={spec.secondaryColor}
+            strokeWidth={spec.outlineWidth}
+            opacity={0.75 + featureGlow * 0.25}
+            transform={`translate(140 161) scale(1 ${0.86 + perf.auraPulse * 0.24 + featureGlow * 0.12}) translate(-140 -161)`}
+          />
+        )}
+        {spec.features.includes("tailFlame") && !driven && (
           <motion.path
             d="M 140 161 C 116 190 133 218 140 226 C 147 218 164 190 140 161 Z"
             fill={spec.highlightColor}
@@ -832,86 +1098,184 @@ export function PetBodyRenderer({
             }}
           />
         )}
-        <BodySilhouette spec={spec} fill={fill} />
-        {spec.features.includes("horns") && (
-          <g
-            fill="none"
-            stroke={spec.highlightColor}
-            strokeWidth={spec.outlineWidth}
-            strokeLinecap="round"
-          >
-            <path
-              d={`M 110 76 Q 93 ${70 - spec.hornLength * 0.45} 101 ${70 - spec.hornLength}`}
-            />
-            <path
-              d={`M 170 76 Q 187 ${70 - spec.hornLength * 0.45} 179 ${70 - spec.hornLength}`}
-            />
+        <BodySilhouette
+          spec={spec}
+          fill={fill}
+          outlineOpacity={outlineOpacity}
+        />
+        {dirtStrength > 0.02 && (
+          // Low hygiene collects deterministic mottling on the surface.
+          <g fill={spec.secondaryColor} opacity={Math.min(0.5, dirtStrength)}>
+            {DIRT_SPOTS.map(([fx, fy, r], index) => (
+              <circle
+                key={`dirt-${index}`}
+                cx={140 + fx * spec.bodyWidth}
+                cy={112 + fy * spec.bodyHeight}
+                r={r}
+              />
+            ))}
           </g>
         )}
-        {spec.features.includes("crown") && (
-          <path
-            d="M 105 70 L 113 46 L 126 66 L 140 38 L 154 66 L 167 46 L 175 70"
-            fill="none"
-            stroke={spec.highlightColor}
-            strokeWidth={spec.outlineWidth}
-            strokeLinejoin="round"
-          />
+        {sparkleStrength > 0.02 && (
+          // High hygiene + cheer earns restrained surface glints.
+          <g
+            fill={spec.highlightColor}
+            opacity={Math.min(0.85, sparkleStrength)}
+          >
+            {SPARKLE_SPOTS.map(([fx, fy, r], index) => (
+              <path
+                key={`sparkle-${index}`}
+                d={sparklePath(
+                  140 + fx * spec.bodyWidth,
+                  112 + fy * spec.bodyHeight,
+                  r,
+                )}
+              />
+            ))}
+          </g>
         )}
-        <g>
-          <ellipse
-            cx={leftEye}
-            cy={spec.eyeHeight}
-            rx={spec.eyeSize}
-            ry={eyeHeight}
-            fill="#fffdf4"
-            stroke={spec.secondaryColor}
-            strokeWidth={Math.max(1.5, spec.outlineWidth * 0.55)}
-          />
-          <ellipse
-            cx={rightEye}
-            cy={spec.eyeHeight}
-            rx={spec.eyeSize}
-            ry={eyeHeight}
-            fill="#fffdf4"
-            stroke={spec.secondaryColor}
-            strokeWidth={Math.max(1.5, spec.outlineWidth * 0.55)}
-          />
-          <circle
-            cx={leftEye + spec.gazeX}
-            cy={spec.eyeHeight + spec.gazeY}
-            r={spec.pupilSize}
-            fill={spec.secondaryColor}
-          />
-          <circle
-            cx={rightEye + spec.gazeX}
-            cy={spec.eyeHeight + spec.gazeY}
-            r={spec.pupilSize}
-            fill={spec.secondaryColor}
-          />
-        </g>
-        {spec.features.includes("thirdEye") && (
+        <g
+          transform={
+            driven && Math.abs(perf.headTilt) > 0.05
+              ? `rotate(${perf.headTilt} 140 ${spec.eyeHeight})`
+              : undefined
+          }
+        >
+          {spec.features.includes("horns") && (
+            <g
+              fill="none"
+              stroke={spec.highlightColor}
+              strokeWidth={spec.outlineWidth}
+              strokeLinecap="round"
+              opacity={driven ? 0.78 + featureGlow * 0.22 : 1}
+            >
+              <path
+                d={`M 110 76 Q 93 ${70 - spec.hornLength * 0.45} 101 ${70 - spec.hornLength}`}
+              />
+              <path
+                d={`M 170 76 Q 187 ${70 - spec.hornLength * 0.45} 179 ${70 - spec.hornLength}`}
+              />
+            </g>
+          )}
+          {spec.features.includes("crown") && (
+            <path
+              d="M 105 70 L 113 46 L 126 66 L 140 38 L 154 66 L 167 46 L 175 70"
+              fill="none"
+              stroke={spec.highlightColor}
+              strokeWidth={spec.outlineWidth}
+              strokeLinejoin="round"
+              opacity={driven ? 0.78 + featureGlow * 0.22 : 1}
+            />
+          )}
+          {living && living.browTension > 0.12 && (
+            // Upper-eye tension: brows only surface under stress/strain.
+            <g
+              stroke={spec.secondaryColor}
+              strokeWidth={Math.max(1.4, spec.outlineWidth * 0.6)}
+              strokeLinecap="round"
+              opacity={0.3 + living.browTension * 0.5}
+              fill="none"
+            >
+              <path
+                d={`M ${leftEye - spec.eyeSize * 0.75} ${spec.eyeHeight - restingEyeRy - 6} L ${leftEye + spec.eyeSize * 0.55} ${spec.eyeHeight - restingEyeRy - 6 + living.browTension * 4.5}`}
+              />
+              <path
+                d={`M ${rightEye + spec.eyeSize * 0.75} ${spec.eyeHeight - restingEyeRy - 6} L ${rightEye - spec.eyeSize * 0.55} ${spec.eyeHeight - restingEyeRy - 6 + living.browTension * 4.5}`}
+              />
+            </g>
+          )}
           <g>
             <ellipse
-              cx="140"
-              cy="76"
-              rx={11}
-              ry={7}
-              fill={spec.highlightColor}
+              cx={leftEye}
+              cy={spec.eyeHeight}
+              rx={spec.eyeSize}
+              ry={eyeHeight}
+              fill="#fffdf4"
               stroke={spec.secondaryColor}
-              strokeWidth={spec.outlineWidth * 0.7}
+              strokeWidth={Math.max(1.5, spec.outlineWidth * 0.55)}
             />
-            <circle cx="140" cy="76" r="3.2" fill={spec.secondaryColor} />
+            <ellipse
+              cx={rightEye}
+              cy={spec.eyeHeight}
+              rx={spec.eyeSize}
+              ry={eyeHeight}
+              fill="#fffdf4"
+              stroke={spec.secondaryColor}
+              strokeWidth={Math.max(1.5, spec.outlineWidth * 0.55)}
+            />
+            {!eyesNearlyClosed && (
+              <>
+                <circle
+                  cx={leftEye + pupilDX}
+                  cy={spec.eyeHeight + pupilDY}
+                  r={pupilR}
+                  fill={spec.secondaryColor}
+                />
+                <circle
+                  cx={rightEye + pupilDX}
+                  cy={spec.eyeHeight + pupilDY}
+                  r={pupilR}
+                  fill={spec.secondaryColor}
+                />
+              </>
+            )}
           </g>
-        )}
-        <motion.path
-          d={mouthPath(spec)}
-          fill="none"
-          stroke={spec.secondaryColor}
-          strokeWidth={spec.outlineWidth * 0.75}
-          strokeLinecap="round"
-          transition={{ duration: 0.25 }}
-        />
+          {spec.features.includes("thirdEye") && (
+            <g opacity={driven ? 0.72 + featureGlow * 0.28 : 1}>
+              <ellipse
+                cx="140"
+                cy="76"
+                rx={11}
+                ry={driven ? 7 * (0.55 + Math.min(1, featureGlow) * 0.45 + 0.24) : 7}
+                fill={spec.highlightColor}
+                stroke={spec.secondaryColor}
+                strokeWidth={spec.outlineWidth * 0.7}
+              />
+              <circle
+                cx="140"
+                cy="76"
+                r={driven ? 3.2 * (0.8 + featureGlow * 0.45) : 3.2}
+                fill={spec.secondaryColor}
+              />
+              {driven && featureGlow > 0.55 && (
+                // Restrained dirty-gold oracle signal at high focus.
+                <circle
+                  cx="140"
+                  cy="76"
+                  r={13 + featureGlow * 4}
+                  fill="none"
+                  stroke={spec.highlightColor}
+                  strokeWidth="1.1"
+                  opacity={(featureGlow - 0.55) * 0.9}
+                />
+              )}
+            </g>
+          )}
+          <motion.path
+            d={
+              living
+                ? performedMouthPath(spec, living.mouthCurve)
+                : mouthPath(spec)
+            }
+            fill="none"
+            stroke={spec.secondaryColor}
+            strokeWidth={spec.outlineWidth * 0.75}
+            strokeLinecap="round"
+            transition={{ duration: 0.25 }}
+          />
+          {living && living.mouthOpen > 0.45 && (
+            <ellipse
+              cx="140"
+              cy={132 + living.mouthCurve * spec.mouthHeight * 0.4}
+              rx={spec.mouthWidth * 0.16}
+              ry={(living.mouthOpen - 0.45) * 6}
+              fill={spec.secondaryColor}
+              opacity="0.85"
+            />
+          )}
+        </g>
       </motion.g>
+      </g>
     </motion.svg>
   );
 }
