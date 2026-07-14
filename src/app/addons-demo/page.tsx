@@ -37,7 +37,7 @@ const ADDON_PACKS: Array<{
 }> = [
   {
     title: 'Core Collection',
-    blurb: 'The original wizard-era artifacts.',
+    blurb: "The arcanist's hat and staff, remastered.",
     match: (id) =>
       !id.startsWith('custom-addon-') &&
       !id.startsWith('girl-') &&

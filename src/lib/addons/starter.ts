@@ -4,16 +4,14 @@
  * This provides an easy way to initialize the addon system with some starter items
  */
 
-import { CELESTIAL_CROWN, WIZARD_HAT, WIZARD_STAFF } from "./catalog";
+import { ADDON_CATALOG, WIZARD_HAT, WIZARD_STAFF } from "./catalog";
 import { generateAddonKeypair } from "./crypto";
-import { CUSTOM_ADDONS } from "./customAddons";
 import { mintAddon } from "./mint";
 import { useAddonStore } from "./store";
 
 const STARTER_TEMPLATE_IDS = [
   WIZARD_HAT.id,
   WIZARD_STAFF.id,
-  CELESTIAL_CROWN.id,
   "custom-addon-1008",
   "custom-addon-1009",
   "custom-addon-1010",
@@ -71,15 +69,9 @@ export async function initializeStarterAddons(): Promise<{
     const { setOwnerPublicKey, addAddon, addons } = useAddonStore.getState();
     setOwnerPublicKey(userKeysData.publicKey);
 
-    const starterTemplates = STARTER_TEMPLATE_IDS.map((id) => {
-      if (id.startsWith("custom-addon-")) {
-        return CUSTOM_ADDONS[id];
-      }
-
-      if (id === WIZARD_HAT.id) return WIZARD_HAT;
-      if (id === WIZARD_STAFF.id) return WIZARD_STAFF;
-      return CELESTIAL_CROWN;
-    }).filter(Boolean);
+    const starterTemplates = STARTER_TEMPLATE_IDS.map(
+      (id) => ADDON_CATALOG[id],
+    ).filter(Boolean);
 
     let created = 0;
 

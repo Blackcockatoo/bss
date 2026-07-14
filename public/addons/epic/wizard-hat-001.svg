@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Mystical Wizard Hat">
+  <defs>
+    <linearGradient id="bgGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0620"/>
+      <stop offset="50%" stop-color="#160a34"/>
+      <stop offset="100%" stop-color="#0c0722"/>
+    </linearGradient>
+    <radialGradient id="nebula" cx="50%" cy="40%" r="65%">
+      <stop offset="0%" stop-color="#4A2F8A" stop-opacity="0.4"/>
+      <stop offset="55%" stop-color="#2D1B69" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="hatFelt" x1="512" y1="180" x2="512" y2="760" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#5b3aa8"/>
+      <stop offset="45%" stop-color="#3a2274"/>
+      <stop offset="100%" stop-color="#1e1147"/>
+    </linearGradient>
+    <linearGradient id="brimFelt" x1="512" y1="700" x2="512" y2="820" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4a2f8a"/>
+      <stop offset="100%" stop-color="#1a0f3e"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fff0b2"/>
+      <stop offset="40%" stop-color="#f4c451"/>
+      <stop offset="75%" stop-color="#be8222"/>
+      <stop offset="100%" stop-color="#6e470f"/>
+    </linearGradient>
+    <radialGradient id="tipGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffe98c" stop-opacity="0.95"/>
+      <stop offset="45%" stop-color="#f4c451" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="hatGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="sparkGlow" x="-120%" y="-120%" width="340%" height="340%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="cardClipHat"><rect x="36" y="36" width="952" height="952" rx="48"/></clipPath>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bgGradient)"/>
+  <g clip-path="url(#cardClipHat)">
+    <rect x="36" y="36" width="952" height="952" rx="48" fill="url(#bgGradient)"/>
+    <ellipse cx="512" cy="380" rx="430" ry="330" fill="url(#nebula)"/>
+
+    <circle cx="200" cy="200" r="2.2" fill="#fff" opacity="0.55"/>
+    <circle cx="840" cy="240" r="2.6" fill="#fff" opacity="0.6"/>
+    <circle cx="720" cy="140" r="1.6" fill="#e9d8ff" opacity="0.5"/>
+    <circle cx="300" cy="150" r="2" fill="#fff" opacity="0.5"/>
+    <circle cx="880" cy="440" r="1.8" fill="#fff" opacity="0.45"/>
+    <circle cx="150" cy="420" r="2.2" fill="#e9d8ff" opacity="0.5"/>
+    <circle cx="640" cy="210" r="1.4" fill="#fff" opacity="0.5"/>
+
+    <!-- tip glow -->
+    <circle cx="452" cy="196" r="90" fill="url(#tipGlow)"/>
+
+    <g filter="url(#hatGlow)">
+      <!-- brim -->
+      <ellipse cx="512" cy="762" rx="300" ry="66" fill="url(#brimFelt)" stroke="url(#gold)" stroke-width="6"/>
+      <ellipse cx="512" cy="754" rx="300" ry="60" fill="url(#hatFelt)" opacity="0.9"/>
+
+      <!-- cone body with a bent, curling tip -->
+      <path d="M 452 196
+               C 470 300 512 470 560 604
+               C 600 690 520 726 512 726
+               C 420 726 372 690 388 620
+               C 404 470 430 320 452 196 Z"
+            fill="url(#hatFelt)" stroke="url(#gold)" stroke-width="6" stroke-linejoin="round"/>
+
+      <!-- hatband -->
+      <path d="M 405 612 C 460 636 566 636 618 610 L 610 660 C 560 684 452 684 400 662 Z"
+            fill="#241452" stroke="url(#gold)" stroke-width="5"/>
+      <!-- buckle -->
+      <rect x="486" y="616" width="44" height="34" rx="6" fill="none" stroke="url(#gold)" stroke-width="6"/>
+    </g>
+
+    <!-- stars on the felt -->
+    <g fill="#f4c451" opacity="0.9">
+      <path d="M 470 360 l 6 16 17 1 -13 11 5 17 -15 -10 -15 10 5 -17 -13 -11 17 -1 Z"/>
+      <path d="M 512 500 l 5 13 14 1 -11 9 4 14 -12 -8 -12 8 4 -14 -11 -9 14 -1 Z" opacity="0.85"/>
+      <path d="M 442 470 l 4 10 11 1 -9 7 3 11 -9 -6 -9 6 3 -11 -9 -7 11 -1 Z" opacity="0.75"/>
+    </g>
+
+    <!-- tip star -->
+    <g filter="url(#sparkGlow)">
+      <path d="M 452 150 l 8 22 23 2 -18 15 6 23 -19 -13 -19 13 6 -23 -18 -15 23 -2 Z" fill="#ffe98c"/>
+    </g>
+
+    <!-- ambient sparkles -->
+    <g fill="#ffe98c" opacity="0.85">
+      <circle cx="620" cy="300" r="3.2" filter="url(#sparkGlow)"/>
+      <circle cx="360" cy="540" r="2.6" filter="url(#sparkGlow)"/>
+      <circle cx="676" cy="470" r="2.4" filter="url(#sparkGlow)"/>
+    </g>
+  </g>
+</svg>

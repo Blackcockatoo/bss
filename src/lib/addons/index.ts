@@ -23,10 +23,6 @@ export type { AddonTemplate } from './catalog';
 export {
   WIZARD_HAT,
   WIZARD_STAFF,
-  CELESTIAL_CROWN,
-  SHADOW_CLOAK,
-  PRISMATIC_AURA,
-  FLOATING_FAMILIAR,
   ADDON_CATALOG,
   getAddonTemplate,
   getAddonsByCategory,
