@@ -470,6 +470,7 @@ export function interpretMovement(
     scaleX: base.scaleX * (1 + ((clip.scaleX ?? 1) - 1) * amplitude),
     scaleY: base.scaleY * (1 + ((clip.scaleY ?? 1) - 1) * amplitude),
     headTilt: base.headTilt + (clip.headTilt ?? 0) * amplitude,
+    mouthBias: base.mouthBias + (clip.mouthBias ?? 0) * amplitude,
     // Eyelids/pupils read as expression, not motion: they keep full range
     // (still bounded) even under reduced motion so state stays legible.
     eyelidOpen: base.eyelidOpen * (clip.eyelidOpen ?? 1),

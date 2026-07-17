@@ -326,7 +326,7 @@ export default function PetPage() {
                         </Link>
                       </>
                     )}
-                    {petType === "auralia" && (
+                    {(petType === "auralia" || petType === "evolved") && (
                       <Button
                         variant="outline"
                         size="sm"
@@ -338,7 +338,7 @@ export default function PetPage() {
                         }`}
                       >
                         <Move className="h-4 w-4" />
-                        {addonEditMode ? "Editing" : "Edit Auralia"}
+                        {addonEditMode ? "Arranging" : "Arrange Mode"}
                       </Button>
                     )}
                     <Button
@@ -354,7 +354,7 @@ export default function PetPage() {
                       <Shield className="h-4 w-4" />
                       Profile
                     </Button>
-                    {petType === "auralia" && (
+                    {(petType === "auralia" || petType === "evolved") && (
                       <Button
                         variant="outline"
                         size="sm"
@@ -387,25 +387,31 @@ export default function PetPage() {
                     />
                   </div>
 
-                  {petType === "auralia" && addonEditMode && (
-                    <div className="rounded-lg border border-blue-500/50 bg-blue-600/20 px-3 py-2 text-xs text-blue-100">
-                      <span className="font-semibold">Edit Mode Active</span> —
-                      Drag addons to reposition, hover for controls.
-                    </div>
-                  )}
+                  {(petType === "auralia" || petType === "evolved") &&
+                    addonEditMode && (
+                      <div className="rounded-lg border border-blue-500/50 bg-blue-600/20 px-3 py-2 text-xs text-blue-100">
+                        <span className="font-semibold">
+                          Arrange Mode active
+                        </span>{" "}
+                        — drag an equipped add-on to reposition it. Tap the
+                        lock button to hold it in place.
+                      </div>
+                    )}
 
                   <div className="grid gap-4 md:grid-cols-2">
                     {showProfilePanel && (
                       <PetProfilePanel
                         petId={petId}
                         petName={petName}
-                        editMode={petType === "auralia" && addonEditMode}
+                        editMode={
+                          (petType === "auralia" || petType === "evolved") &&
+                          addonEditMode
+                        }
                         onEditModeChange={setAddonEditMode}
                       />
                     )}
-                    {petType === "auralia" && showAddonPanel && (
-                      <AddonInventoryPanel />
-                    )}
+                    {(petType === "auralia" || petType === "evolved") &&
+                      showAddonPanel && <AddonInventoryPanel />}
                     {showEvolutionPanel && (
                       <div className="rounded-lg border border-emerald-800/60 bg-zinc-950/60 p-4 md:col-span-2">
                         <EvolutionPanel />

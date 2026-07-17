@@ -568,6 +568,7 @@ export function PetBodyRenderer({
   performance = null,
   living = null,
   activeClipId = null,
+  children = null,
 }: {
   spec: BodySpec;
   className?: string;
@@ -584,6 +585,14 @@ export function PetBodyRenderer({
   living?: BodyPerformanceState | null;
   /** Active clip id, for signature dressings (Moss60 orbit, venom pulse). */
   activeClipId?: string | null;
+  /**
+   * Optional overlay content (currently: Living Wardrobe add-ons) rendered
+   * inside the same 0..280 / 0..250 viewBox and the same body transform
+   * group as the silhouette itself, so it automatically inherits idle
+   * bob/tilt/breathe and the driven bodyX/bodyY/rotation performance frame
+   * without any extra transform bookkeeping by the caller.
+   */
+  children?: React.ReactNode;
 }) {
   const rawId = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const reducedMotion = useReducedMotion();
@@ -1254,7 +1263,10 @@ export function PetBodyRenderer({
           <motion.path
             d={
               living
-                ? performedMouthPath(spec, living.mouthCurve)
+                ? performedMouthPath(
+                    spec,
+                    living.mouthCurve + (driven ? perf.mouthBias : 0),
+                  )
                 : mouthPath(spec)
             }
             fill="none"
@@ -1274,6 +1286,7 @@ export function PetBodyRenderer({
             />
           )}
         </g>
+        {children}
       </motion.g>
       </g>
     </motion.svg>

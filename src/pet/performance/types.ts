@@ -33,6 +33,8 @@ export interface MovementPerformance {
   scaleY: number;
   /** Face-group tilt in degrees (adapts when no separate head exists). */
   headTilt: number;
+  /** Additive mouth-curve nudge, -1 frown-ward .. +1 smile-ward. On top of the living layer's baseline curve, never replacing it. */
+  mouthBias: number;
   /** 0 closed .. 1 fully open (may briefly exceed 1 for surprise). */
   eyelidOpen: number;
   /** Pupil size multiplier. */
@@ -67,6 +69,7 @@ export const NEUTRAL_PERFORMANCE: MovementPerformance = Object.freeze({
   scaleX: 1,
   scaleY: 1,
   headTilt: 0,
+  mouthBias: 0,
   eyelidOpen: 1,
   pupilScale: 1,
   gazeX: 0,
@@ -94,6 +97,7 @@ export const PERFORMANCE_BOUNDS: PerformanceBounds = Object.freeze({
     scaleX: 0.68,
     scaleY: 0.68,
     headTilt: -18,
+    mouthBias: -0.4,
     eyelidOpen: 0.04,
     pupilScale: 0.5,
     gazeX: -1,
@@ -114,6 +118,7 @@ export const PERFORMANCE_BOUNDS: PerformanceBounds = Object.freeze({
     scaleX: 1.32,
     scaleY: 1.32,
     headTilt: 18,
+    mouthBias: 0.4,
     eyelidOpen: 1.12,
     pupilScale: 1.6,
     gazeX: 1,

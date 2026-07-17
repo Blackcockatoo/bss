@@ -93,7 +93,7 @@ export function PetRuntimeStage({
       className="relative flex h-full min-h-[520px] items-center justify-center p-3 sm:p-5"
     >
       <PetRuntimeDiagnostics />
-      <VisualDNAPet className="w-full max-w-3xl" />
+      <VisualDNAPet className="w-full max-w-3xl" arrangeMode={addonEditMode} />
     </div>
   );
 }

@@ -32,15 +32,12 @@ import {
   type CareActionId,
   type MovementBodyContext,
 } from "@/pet/movement";
-import { resolveBodyPerformance } from "@/pet/performance";
+import { PERFORMANCE_BOUNDS, resolveBodyPerformance } from "@/pet/performance";
+import { usePointerInteraction } from "@/pet/interaction/usePointerInteraction";
+import { AddonLayer } from "@/components/wardrobe/AddonLayer";
+import { useAddonStore, type AddonCategory } from "@/lib/addons";
 
 const ACTION_WINDOW_MS = 1_600;
-/** Press shorter than this (without travel) reads as an affectionate tap. */
-const TAP_MS = 340;
-/** Press longer than this reads as a hold (charge/love). */
-const HOLD_MS = 620;
-/** Pointer travel beyond this many px reads as a swipe. */
-const SWIPE_PX = 42;
 
 function clampValue(value: number, min: number, max: number): number {
   if (!Number.isFinite(value)) return min;
@@ -137,9 +134,19 @@ function particleAnimation(
 export function VisualDNAPet({
   className = "",
   showReadout = true,
+  addonPreviewOverrides,
+  arrangeMode = false,
 }: {
   className?: string;
   showReadout?: boolean;
+  /**
+   * Living Wardrobe live try-on: per-category addon id that overrides the
+   * store's actual equipped item for display only (never written back).
+   * A `null` value previews "nothing equipped" for that category.
+   */
+  addonPreviewOverrides?: Partial<Record<AddonCategory, string | null>>;
+  /** Arrange Mode: enables drag-to-reposition on rendered add-ons. */
+  arrangeMode?: boolean;
 }) {
   const genome = useStore((state) => state.genome);
   const traits = useStore((state) => state.traits);
@@ -215,6 +222,27 @@ export function VisualDNAPet({
       phenotype ? resolveBodySpec(phenotype, genome, forgedBody) : forgedBody,
     [forgedBody, genome, phenotype],
   );
+
+  // Living Wardrobe: equipped addons, with any live try-on preview merged in
+  // for display only. The store's real `equipped` map is never written by a
+  // preview — only Equip (in the wardrobe UI) touches it.
+  const equippedAddonMap = useAddonStore((state) => state.equipped);
+  const addonIds = useMemo(() => {
+    const categories = new Set<string>([
+      ...Object.keys(equippedAddonMap),
+      ...Object.keys(addonPreviewOverrides ?? {}),
+    ]);
+    const ids: string[] = [];
+    for (const category of categories) {
+      const overrides = addonPreviewOverrides ?? {};
+      const id =
+        category in overrides
+          ? overrides[category as AddonCategory]
+          : equippedAddonMap[category as AddonCategory];
+      if (id) ids.push(id);
+    }
+    return ids;
+  }, [addonPreviewOverrides, equippedAddonMap]);
 
   // The Forge owns the inherited field material; evolution/Vimana still own
   // topology and live behaviour. Blending here keeps both systems visible
@@ -324,112 +352,32 @@ export function VisualDNAPet({
     anomalyRef.current = anomalyActive;
   }, [sealed, anomalyActive, onAnomaly]);
 
-  // ── Direct interaction: gaze-follow + affectionate touch ─────────────
+  // ── Direct interaction: shared pointer controller ─────────────────────
+  // One normalized controller converts mouse/pen/touch into gaze lean, a
+  // head-tilt/mouth/eyelid overlay, and discrete gesture callbacks. It uses
+  // pointer capture so a jittery finger drifting outside the stage mid-hold
+  // never silently cancels the gesture, and it never mutates React state on
+  // every raw pointer event (refs + a throttled RAF commit, mirroring
+  // useMovementController's own 30fps discipline).
   const stageRef = useRef<HTMLDivElement>(null);
-  // Quantised so pointer movement only re-renders on visible gaze change.
-  const [pointerGaze, setPointerGaze] = useState({ x: 0, y: 0 });
-  const pressRef = useRef<{
-    x: number;
-    y: number;
-    at: number;
-    holdTimer: number;
-    held: boolean;
-  } | null>(null);
-
-  const updateGaze = useCallback(
-    (clientX: number, clientY: number) => {
+  const handleControllerGesture = useCallback(
+    (gesture: "tap" | "hold" | "stroke" | "swipe" | "startle") => {
       if (sealed) return;
-      const rect = stageRef.current?.getBoundingClientRect();
-      if (!rect || rect.width === 0 || rect.height === 0) return;
-      const quantise = (value: number) => Math.round(value * 40) / 40;
-      const next = {
-        x: quantise(
-          clampValue(
-            (clientX - (rect.left + rect.width / 2)) / (rect.width / 2),
-            -1,
-            1,
-          ),
-        ),
-        y: quantise(
-          clampValue(
-            (clientY - (rect.top + rect.height / 2)) / (rect.height / 2),
-            -1,
-            1,
-          ),
-        ),
-      };
-      setPointerGaze((current) =>
-        current.x === next.x && current.y === next.y ? current : next,
-      );
+      if (gesture === "tap") movement.onGesture("tap");
+      else if (gesture === "swipe" || gesture === "startle") {
+        movement.onGesture("swipe");
+      } else if (gesture === "stroke") movement.onGesture("drag");
+      else if (gesture === "hold") movement.onAffection();
     },
-    [sealed],
+    [movement, sealed],
   );
-
-  const handlePointerMove = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>) => {
-      updateGaze(event.clientX, event.clientY);
-      const press = pressRef.current;
-      if (press && !press.held) {
-        const travel = Math.hypot(
-          event.clientX - press.x,
-          event.clientY - press.y,
-        );
-        if (travel > SWIPE_PX) {
-          window.clearTimeout(press.holdTimer);
-          pressRef.current = null;
-          if (!sealed) movement.onGesture("swipe");
-        }
-      }
-    },
-    [movement, sealed, updateGaze],
-  );
-
-  const handlePointerDown = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>) => {
-      if (sealed) return;
-      updateGaze(event.clientX, event.clientY);
-      const holdTimer = window.setTimeout(() => {
-        if (pressRef.current) {
-          pressRef.current.held = true;
-          movement.onGesture("hold");
-        }
-      }, HOLD_MS);
-      pressRef.current = {
-        x: event.clientX,
-        y: event.clientY,
-        at: Date.now(),
-        holdTimer,
-        held: false,
-      };
-    },
-    [movement, sealed, updateGaze],
-  );
-
-  const handlePointerUp = useCallback(() => {
-    const press = pressRef.current;
-    pressRef.current = null;
-    if (!press) return;
-    window.clearTimeout(press.holdTimer);
-    if (sealed) return;
-    const heldFor = Date.now() - press.at;
-    if (press.held) {
-      // Long affectionate press settles into the love response.
-      movement.onAffection();
-    } else if (heldFor <= TAP_MS) {
-      movement.onGesture("tap");
-    }
-  }, [movement, sealed]);
-
-  const handlePointerLeave = useCallback(() => {
-    setPointerGaze((current) =>
-      current.x === 0 && current.y === 0 ? current : { x: 0, y: 0 },
-    );
-    const press = pressRef.current;
-    if (press) {
-      window.clearTimeout(press.holdTimer);
-      pressRef.current = null;
-    }
-  }, []);
+  const interaction = usePointerInteraction({
+    reduceMotion: Boolean(reducedMotion),
+    sealed,
+    onGesture: handleControllerGesture,
+  });
+  const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel, onPointerLeave } =
+    interaction.bind;
 
   const bodyContext = useMemo<MovementBodyContext | null>(() => {
     if (!resolvedBody) return null;
@@ -458,11 +406,12 @@ export function VisualDNAPet({
       reducedMotion: Boolean(reducedMotion),
       seed: movement.seed,
     });
-    const gaze = pointerGaze;
+    const overlay = interaction.overlay;
+    const gaze = { x: overlay.leanX, y: overlay.leanY };
     return {
       ...raw,
       eyelidOpen: clampValue(
-        raw.eyelidOpen / Math.max(0.08, living.eyelidOpen),
+        raw.eyelidOpen / Math.max(0.08, living.eyelidOpen) + overlay.eyelidBias,
         0.04,
         1.15,
       ),
@@ -477,15 +426,28 @@ export function VisualDNAPet({
         -1,
         1,
       ),
+      // Head follows the pointer as a bounded lean on top of whatever the
+      // active clip is already doing — two writers, one clamp, so a
+      // pointer-driven turn never fights an ambient head-tilt clip.
+      headTilt: clampValue(
+        raw.headTilt + overlay.headTiltBias,
+        PERFORMANCE_BOUNDS.min.headTilt,
+        PERFORMANCE_BOUNDS.max.headTilt,
+      ),
+      mouthBias: clampValue(
+        raw.mouthBias + overlay.mouthBias,
+        PERFORMANCE_BOUNDS.min.mouthBias,
+        PERFORMANCE_BOUNDS.max.mouthBias,
+      ),
     };
   }, [
     bodyContext,
+    interaction.overlay,
     living,
     movement.active.clip.id,
     movement.active.clip.intensity,
     movement.progress,
     movement.seed,
-    pointerGaze,
     reducedMotion,
     sealed,
   ]);
@@ -707,11 +669,11 @@ export function VisualDNAPet({
           ref={stageRef}
           className="relative min-h-[360px] select-none"
           style={{ touchAction: "pan-y" }}
-          onPointerMove={handlePointerMove}
-          onPointerDown={handlePointerDown}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerLeave}
-          onPointerLeave={handlePointerLeave}
+          onPointerMove={onPointerMove}
+          onPointerDown={onPointerDown}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerCancel}
+          onPointerLeave={onPointerLeave}
         >
           <div className="absolute inset-0 flex items-center justify-center">
             <PetBodyRenderer
@@ -722,7 +684,16 @@ export function VisualDNAPet({
               performance={performanceFrame}
               living={sealed ? null : living}
               activeClipId={sealed ? null : movement.active.clip.id}
-            />
+            >
+              {!sealed && addonIds.length > 0 && (
+                <AddonLayer
+                  spec={resolvedBody}
+                  addonIds={addonIds}
+                  reduceMotion={Boolean(reducedMotion)}
+                  arrangeMode={arrangeMode}
+                />
+              )}
+            </PetBodyRenderer>
           </div>
         </div>
         {showReadout && (
@@ -792,11 +763,11 @@ export function VisualDNAPet({
           ref={stageRef}
           className="relative min-h-[360px] select-none"
           style={{ touchAction: "pan-y" }}
-          onPointerMove={handlePointerMove}
-          onPointerDown={handlePointerDown}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerLeave}
-          onPointerLeave={handlePointerLeave}
+          onPointerMove={onPointerMove}
+          onPointerDown={onPointerDown}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerCancel}
+          onPointerLeave={onPointerLeave}
         >
           <motion.svg
             viewBox="0 0 220 220"
@@ -874,7 +845,16 @@ export function VisualDNAPet({
                   performance={performanceFrame}
                   living={sealed ? null : living}
                   activeClipId={sealed ? null : movement.active.clip.id}
-                />
+                >
+                  {!sealed && addonIds.length > 0 && (
+                    <AddonLayer
+                      spec={resolvedBody}
+                      addonIds={addonIds}
+                      reduceMotion={Boolean(reducedMotion)}
+                      arrangeMode={arrangeMode}
+                    />
+                  )}
+                </PetBodyRenderer>
               </motion.g>
             )}
           </motion.svg>

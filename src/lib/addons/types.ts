@@ -132,6 +132,39 @@ export interface Addon {
     maxEditions?: number;
     tags?: string[];
   };
+
+  // ── Living Wardrobe compatibility metadata (all optional) ──────────────
+  // Every field below is additive and safe-defaulted for existing catalog
+  // entries and previously-minted addons — see resolveAddonDefaults() in
+  // ./compatibility.ts. None of these fields are part of the signed
+  // ownership payload (see getAddonSigningPayload in crypto.ts), so adding
+  // them can never invalidate an existing signature.
+  /** Equip slot, if different from `category`. Defaults to `category`. */
+  equipSlot?: AddonCategory;
+  /** Anchor points this addon renders correctly at. Defaults to all. */
+  compatibleAnchors?: AddonAttachment["anchorPoint"][];
+  /** Body Forge BodySpec shape ids this addon supports. Defaults to all. */
+  compatibleBodyShapes?: string[];
+  /** Draw order relative to the body silhouette. Defaults to "front". */
+  renderLayer?: "behind" | "body" | "front" | "aura";
+  /** How the addon participates in the living-body performance frame. */
+  interactionProfile?: {
+    /** Whether the addon translates/rotates with the body's movement frame. Defaults to true. */
+    followsBody?: boolean;
+    /** Whether the addon subtly reacts to pointer proximity. Defaults to false. */
+    reactsToPointer?: boolean;
+  };
+  /** Named secondary-motion behaviour for the wardrobe preview. Defaults to "static". */
+  reactiveBehaviour?: "static" | "sway" | "orbit" | "pulseWithMood";
+  /** Grouping for matched sets. */
+  family?: string;
+  setId?: string;
+  /** Alternate colour presets, if any. */
+  colourways?: string[];
+  /** Whether the Living Wardrobe may offer a temporary live try-on. Defaults to true. */
+  tryOnSupported?: boolean;
+  /** How this addon was obtained. Defaults to "starter". */
+  unlockMethod?: "starter" | "purchase" | "achievement" | "gift";
 }
 
 /**

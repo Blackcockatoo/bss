@@ -43,6 +43,21 @@ interface AddonRendererProps {
   onResetPosition?: () => void;
   /** Respect the user's reduced-motion preference */
   reduceMotion?: boolean;
+  /**
+   * Pre-computed base position that replaces the built-in Auralia-coordinate
+   * anchor calculation (see defaultPosition below). Used by renderers whose
+   * body geometry isn't the fixed Auralia layout (e.g. the procedural Body
+   * Forge body) — they supply their own anchor via resolveAddonAnchor().
+   * `positionOverride` (a user's dragged Arrange Mode position) still wins
+   * over this when present, same precedence as the Auralia path.
+   */
+  anchorOverride?: { x: number; y: number };
+  /**
+   * Additive body-movement transform (from the living performance frame) so
+   * a "follows body" addon rides along with breathing/lean/bob instead of
+   * staying perfectly static while the body moves under it.
+   */
+  bodyTransform?: { x: number; y: number; rotation: number };
 }
 
 export const AddonRenderer: React.FC<AddonRendererProps> = ({
@@ -63,6 +78,8 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
   onToggleLock,
   onResetPosition,
   reduceMotion = false,
+  anchorOverride,
+  bodyTransform,
 }) => {
   const { attachment, visual } = addon;
   const popProfile = RARITY_POP[addon.rarity];
@@ -79,8 +96,10 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
     posY: number;
   } | null>(null);
 
-  // Calculate default position based on attachment point
+  // Calculate default position based on attachment point. Skipped entirely
+  // when the caller supplies anchorOverride (a non-Auralia body geometry).
   const defaultPosition = useMemo(() => {
+    if (anchorOverride) return anchorOverride;
     const baseX = petPosition.x;
     const baseY = petPosition.y;
 
@@ -124,7 +143,7 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
       x: anchorX + attachment.offset.x,
       y: anchorY + attachment.offset.y,
     };
-  }, [petPosition, attachment]);
+  }, [petPosition, attachment, anchorOverride]);
 
   // Use custom position if available, otherwise use default
   const position = useMemo(() => {
@@ -235,9 +254,13 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
     reduceMotion,
   );
 
+  const followX = bodyTransform ? position.x + bodyTransform.x : position.x;
+  const followY = bodyTransform ? position.y + bodyTransform.y : position.y;
+  const followRotation = attachment.rotation + (bodyTransform?.rotation ?? 0);
+
   return (
     <g
-      transform={`translate(${position.x}, ${position.y}) rotate(${attachment.rotation}) scale(${attachment.scale * snapOn.scale})`}
+      transform={`translate(${followX}, ${followY}) rotate(${followRotation}) scale(${attachment.scale * snapOn.scale})`}
       opacity={opacity}
       onMouseEnter={() => draggable && setShowControls(true)}
       onMouseLeave={() => !isDragging && setShowControls(false)}
