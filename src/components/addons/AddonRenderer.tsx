@@ -33,7 +33,8 @@ interface AddonRendererProps {
   black60?: number;
   /** Custom position override from store */
   positionOverride?: AddonPositionOverride;
-  /** Whether dragging is enabled */
+  /** Whether Arrange Mode is active for this addon (dragging + always-on
+   * touch-sized controls). Outside Arrange Mode the addon never moves. */
   draggable?: boolean;
   /** Callback when position changes */
   onPositionChange?: (x: number, y: number) => void;
@@ -43,6 +44,29 @@ interface AddonRendererProps {
   onResetPosition?: () => void;
   /** Respect the user's reduced-motion preference */
   reduceMotion?: boolean;
+  /**
+   * Resolves an anchor point to a stage-local coordinate. Defaults to the
+   * built-in Auralia anchor layout (unchanged) when omitted, so existing
+   * Auralia callers need no changes. Pass this to render the same addon on
+   * a different body/stage coordinate system (e.g. Body Forge).
+   */
+  resolveAnchor?: (anchorPoint: Addon["attachment"]["anchorPoint"]) => { x: number; y: number };
+  /** Extra multiplier applied on top of `attachment.scale`/offset, for
+   * stages whose coordinate space isn't the 400-wide Auralia viewBox. */
+  scaleMultiplier?: number;
+  /**
+   * Ref to the actual rendered stage element (the SVG whose viewBox this
+   * addon's coordinates live in). Replaces the previous
+   * `document.querySelector(".auralia-pet-svg")` lookup — drag math now
+   * always measures the real element instead of a global DOM class.
+   */
+  stageRef?: React.RefObject<SVGSVGElement | null>;
+  /** viewBox width of `stageRef`'s element, for the client-px → viewBox-unit
+   * drag scale factor. */
+  viewBoxWidth?: number;
+  /** Outside Arrange Mode, tapping a reactive addon plays a brief local
+   * flourish instead of doing nothing (or, previously, being ignored). */
+  onTap?: () => void;
 }
 
 export const AddonRenderer: React.FC<AddonRendererProps> = ({
@@ -63,6 +87,11 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
   onToggleLock,
   onResetPosition,
   reduceMotion = false,
+  resolveAnchor,
+  scaleMultiplier = 1,
+  stageRef,
+  viewBoxWidth = 400,
+  onTap,
 }) => {
   const { attachment, visual } = addon;
   const popProfile = RARITY_POP[addon.rarity];
@@ -71,16 +100,24 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
   const [mountPhase] = useState(animationPhase);
   const snapOn = getSnapOn(animationPhase - mountPhase, reduceMotion);
   const [isDragging, setIsDragging] = useState(false);
-  const [showControls, setShowControls] = useState(false);
   const dragStartRef = useRef<{
     x: number;
     y: number;
     posX: number;
     posY: number;
   } | null>(null);
+  const tapStartRef = useRef<{ x: number; y: number; at: number } | null>(null);
 
   // Calculate default position based on attachment point
   const defaultPosition = useMemo(() => {
+    if (resolveAnchor) {
+      const anchor = resolveAnchor(attachment.anchorPoint);
+      return {
+        x: anchor.x + attachment.offset.x * scaleMultiplier,
+        y: anchor.y + attachment.offset.y * scaleMultiplier,
+      };
+    }
+
     const baseX = petPosition.x;
     const baseY = petPosition.y;
 
@@ -124,7 +161,7 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
       x: anchorX + attachment.offset.x,
       y: anchorY + attachment.offset.y,
     };
-  }, [petPosition, attachment]);
+  }, [petPosition, attachment, resolveAnchor, scaleMultiplier]);
 
   // Use custom position if available, otherwise use default
   const position = useMemo(() => {
@@ -138,13 +175,27 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
 
   const isLocked = positionOverride?.locked ?? false;
 
+  // Client-px → viewBox-unit factor, measured from the real stage element
+  // (no more `document.querySelector(".auralia-pet-svg")`: a bad match, or
+  // a second instance on the page, could previously scale drags wrong).
+  const getScaleFactor = useCallback(() => {
+    const width = stageRef?.current?.getBoundingClientRect().width;
+    return viewBoxWidth / (width || viewBoxWidth);
+  }, [stageRef, viewBoxWidth]);
+
   const handlePointerDown = useCallback(
     (e: React.PointerEvent<SVGGElement>) => {
-      if (!draggable || isLocked) return;
+      if (!draggable || isLocked) {
+        // Outside Arrange Mode a tap plays the addon's reactive behaviour
+        // instead of doing nothing — it must never reposition anything.
+        if (onTap) {
+          tapStartRef.current = { x: e.clientX, y: e.clientY, at: Date.now() };
+        }
+        return;
+      }
       if (e.button !== 0 && e.pointerType !== "touch") return;
       e.preventDefault();
       e.stopPropagation();
-      setShowControls(true);
 
       (e.currentTarget as SVGGElement).setPointerCapture?.(e.pointerId);
       setIsDragging(true);
@@ -160,12 +211,7 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
 
         const dx = moveEvent.clientX - dragStartRef.current.x;
         const dy = moveEvent.clientY - dragStartRef.current.y;
-
-        // Scale the movement based on SVG viewBox vs actual size
-        const scaleFactor =
-          400 /
-          (document.querySelector(".auralia-pet-svg")?.getBoundingClientRect()
-            .width || 400);
+        const scaleFactor = getScaleFactor();
 
         const newX = dragStartRef.current.posX + dx * scaleFactor;
         const newY = dragStartRef.current.posY + dy * scaleFactor;
@@ -185,7 +231,19 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
       window.addEventListener("pointerup", handlePointerUp);
       window.addEventListener("pointercancel", handlePointerUp);
     },
-    [draggable, isLocked, position, onPositionChange],
+    [draggable, isLocked, position, onPositionChange, getScaleFactor, onTap],
+  );
+
+  const handlePointerUpForTap = useCallback(
+    (e: React.PointerEvent<SVGGElement>) => {
+      const start = tapStartRef.current;
+      tapStartRef.current = null;
+      if (!start || draggable || !onTap) return;
+      const travel = Math.hypot(e.clientX - start.x, e.clientY - start.y);
+      const duration = Date.now() - start.at;
+      if (travel <= 8 && duration <= 350) onTap();
+    },
+    [draggable, onTap],
   );
 
   // Normalized progress through one animation cycle (0..1)
@@ -237,18 +295,21 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
 
   return (
     <g
-      transform={`translate(${position.x}, ${position.y}) rotate(${attachment.rotation}) scale(${attachment.scale * snapOn.scale})`}
+      data-testid="addon-renderer-root"
+      data-addon-id={addon.id}
+      transform={`translate(${position.x}, ${position.y}) rotate(${attachment.rotation}) scale(${attachment.scale * snapOn.scale * scaleMultiplier})`}
       opacity={opacity}
-      onMouseEnter={() => draggable && setShowControls(true)}
-      onMouseLeave={() => !isDragging && setShowControls(false)}
       style={{
-        cursor: draggable && !isLocked ? "grab" : "default",
+        cursor: draggable && !isLocked ? "grab" : onTap ? "pointer" : "default",
         touchAction: "none",
       }}
       onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUpForTap}
     >
-      {/* Drag indicator / selection highlight */}
-      {draggable && showControls && (
+      {/* Drag indicator / selection highlight — visible for the whole of
+          Arrange Mode (no hover requirement: lock/unlock/reset must be
+          reachable on touch, which has no hover state at all). */}
+      {draggable && (
         <g className="addon-controls">
           {/* Selection outline */}
           <circle
@@ -264,32 +325,34 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
 
           {/* Lock indicator */}
           {isLocked && (
-            <g transform="translate(25, -25)">
-              <circle cx="0" cy="0" r="8" fill="#22c55e" />
-              <text x="0" y="4" textAnchor="middle" fontSize="10" fill="white">
+            <g transform="translate(28, -28)">
+              <circle cx="0" cy="0" r="15" fill="#22c55e" />
+              <text x="0" y="5" textAnchor="middle" fontSize="14" fill="white">
                 🔒
               </text>
             </g>
           )}
 
-          {/* Control buttons (when not locked) */}
+          {/* Control buttons (when not locked) — 15-unit radius (≥44px
+              touch target at typical stage render sizes). */}
           {!isLocked && (
             <>
               {/* Lock button */}
               <g
-                transform="translate(30, -20)"
-                style={{ cursor: "pointer" }}
+                transform="translate(34, -24)"
+                style={{ cursor: "pointer", touchAction: "manipulation" }}
+                onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => {
                   e.stopPropagation();
                   onToggleLock?.(true);
                 }}
               >
-                <circle cx="0" cy="0" r="10" fill="#22c55e" opacity="0.9" />
+                <circle cx="0" cy="0" r="15" fill="#22c55e" opacity="0.9" />
                 <text
                   x="0"
-                  y="4"
+                  y="5"
                   textAnchor="middle"
-                  fontSize="10"
+                  fontSize="14"
                   fill="white"
                 >
                   🔓
@@ -298,15 +361,16 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
 
               {/* Reset button */}
               <g
-                transform="translate(30, 10)"
-                style={{ cursor: "pointer" }}
+                transform="translate(34, 14)"
+                style={{ cursor: "pointer", touchAction: "manipulation" }}
+                onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => {
                   e.stopPropagation();
                   onResetPosition?.();
                 }}
               >
-                <circle cx="0" cy="0" r="10" fill="#f59e0b" opacity="0.9" />
-                <text x="0" y="4" textAnchor="middle" fontSize="9" fill="white">
+                <circle cx="0" cy="0" r="15" fill="#f59e0b" opacity="0.9" />
+                <text x="0" y="5" textAnchor="middle" fontSize="13" fill="white">
                   ↺
                 </text>
               </g>
@@ -316,15 +380,16 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
           {/* Unlock button (when locked) */}
           {isLocked && (
             <g
-              transform="translate(30, 0)"
-              style={{ cursor: "pointer" }}
+              transform="translate(34, 0)"
+              style={{ cursor: "pointer", touchAction: "manipulation" }}
+              onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleLock?.(false);
               }}
             >
-              <circle cx="0" cy="0" r="10" fill="#ef4444" opacity="0.9" />
-              <text x="0" y="4" textAnchor="middle" fontSize="9" fill="white">
+              <circle cx="0" cy="0" r="15" fill="#ef4444" opacity="0.9" />
+              <text x="0" y="5" textAnchor="middle" fontSize="13" fill="white">
                 🔓
               </text>
             </g>

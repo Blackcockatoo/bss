@@ -33,14 +33,13 @@ import {
   type MovementBodyContext,
 } from "@/pet/movement";
 import { resolveBodyPerformance } from "@/pet/performance";
+import { useTouchNervousSystem } from "@/pet/interaction";
+import { BodyForgeAddonLayer } from "@/components/addons/BodyForgeAddonOverlay";
+import { useAddonStore } from "@/lib/addons/store";
+import { useWardrobeStore } from "@/lib/addons/wardrobeStore";
+import { getDisplayEquippedAddons } from "@/lib/addons/displayEquipped";
 
 const ACTION_WINDOW_MS = 1_600;
-/** Press shorter than this (without travel) reads as an affectionate tap. */
-const TAP_MS = 340;
-/** Press longer than this reads as a hold (charge/love). */
-const HOLD_MS = 620;
-/** Pointer travel beyond this many px reads as a swipe. */
-const SWIPE_PX = 42;
 
 function clampValue(value: number, min: number, max: number): number {
   if (!Number.isFinite(value)) return min;
@@ -324,112 +323,25 @@ export function VisualDNAPet({
     anomalyRef.current = anomalyActive;
   }, [sealed, anomalyActive, onAnomaly]);
 
-  // ── Direct interaction: gaze-follow + affectionate touch ─────────────
+  // ── Direct interaction: the touch-native nervous system ──────────────
+  // Coordinates eyes/gaze → head → eyelids/brows → mouth → body lean → aura
+  // as one reusable controller (mouse, touch and pen via Pointer Events).
+  // See src/pet/interaction for the state machine and priority docs.
   const stageRef = useRef<HTMLDivElement>(null);
-  // Quantised so pointer movement only re-renders on visible gaze change.
-  const [pointerGaze, setPointerGaze] = useState({ x: 0, y: 0 });
-  const pressRef = useRef<{
-    x: number;
-    y: number;
-    at: number;
-    holdTimer: number;
-    held: boolean;
-  } | null>(null);
-
-  const updateGaze = useCallback(
-    (clientX: number, clientY: number) => {
-      if (sealed) return;
-      const rect = stageRef.current?.getBoundingClientRect();
-      if (!rect || rect.width === 0 || rect.height === 0) return;
-      const quantise = (value: number) => Math.round(value * 40) / 40;
-      const next = {
-        x: quantise(
-          clampValue(
-            (clientX - (rect.left + rect.width / 2)) / (rect.width / 2),
-            -1,
-            1,
-          ),
-        ),
-        y: quantise(
-          clampValue(
-            (clientY - (rect.top + rect.height / 2)) / (rect.height / 2),
-            -1,
-            1,
-          ),
-        ),
-      };
-      setPointerGaze((current) =>
-        current.x === next.x && current.y === next.y ? current : next,
-      );
-    },
-    [sealed],
+  const interaction = useTouchNervousSystem({
+    stageRef,
+    sealed,
+    reducedMotion: Boolean(reducedMotion),
+    trust: living.trust,
+    stress: living.stress,
+    activeClipPriority: movement.active.clip.priority,
+    onGesture: (gesture) => movement.onGesture(gesture),
+    onAffection: () => movement.onAffection(),
+  });
+  const livingWithTouch = useMemo(
+    () => interaction.applyOverlay(living),
+    [interaction, living],
   );
-
-  const handlePointerMove = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>) => {
-      updateGaze(event.clientX, event.clientY);
-      const press = pressRef.current;
-      if (press && !press.held) {
-        const travel = Math.hypot(
-          event.clientX - press.x,
-          event.clientY - press.y,
-        );
-        if (travel > SWIPE_PX) {
-          window.clearTimeout(press.holdTimer);
-          pressRef.current = null;
-          if (!sealed) movement.onGesture("swipe");
-        }
-      }
-    },
-    [movement, sealed, updateGaze],
-  );
-
-  const handlePointerDown = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>) => {
-      if (sealed) return;
-      updateGaze(event.clientX, event.clientY);
-      const holdTimer = window.setTimeout(() => {
-        if (pressRef.current) {
-          pressRef.current.held = true;
-          movement.onGesture("hold");
-        }
-      }, HOLD_MS);
-      pressRef.current = {
-        x: event.clientX,
-        y: event.clientY,
-        at: Date.now(),
-        holdTimer,
-        held: false,
-      };
-    },
-    [movement, sealed, updateGaze],
-  );
-
-  const handlePointerUp = useCallback(() => {
-    const press = pressRef.current;
-    pressRef.current = null;
-    if (!press) return;
-    window.clearTimeout(press.holdTimer);
-    if (sealed) return;
-    const heldFor = Date.now() - press.at;
-    if (press.held) {
-      // Long affectionate press settles into the love response.
-      movement.onAffection();
-    } else if (heldFor <= TAP_MS) {
-      movement.onGesture("tap");
-    }
-  }, [movement, sealed]);
-
-  const handlePointerLeave = useCallback(() => {
-    setPointerGaze((current) =>
-      current.x === 0 && current.y === 0 ? current : { x: 0, y: 0 },
-    );
-    const press = pressRef.current;
-    if (press) {
-      window.clearTimeout(press.holdTimer);
-      pressRef.current = null;
-    }
-  }, []);
 
   const bodyContext = useMemo<MovementBodyContext | null>(() => {
     if (!resolvedBody) return null;
@@ -444,6 +356,81 @@ export function VisualDNAPet({
     };
   }, [resolvedBody]);
 
+  // ── Living Wardrobe: equipped + previewing add-ons on this body ──────
+  // Extends the wardrobe to the Evolved/Body Forge form (previously
+  // Auralia-only). The addon layer renders inside PetBodyRenderer's own
+  // SVG (see addonsBehind/addonsFront), so it shares that coordinate space
+  // exactly — Arrange Mode drag math measures `bodyStageRef` (the real
+  // rendered stage) instead of any global DOM lookup.
+  const bodyStageRef = useRef<SVGSVGElement>(null);
+  const {
+    getEquippedAddons: getEquippedAddonsRaw,
+    positionOverrides,
+    setAddonPosition,
+    lockAddonPosition,
+    resetAddonPosition,
+  } = useAddonStore();
+  const wardrobePreviewAddon = useWardrobeStore((s) =>
+    s.previewForm === "evolved" ? s.previewAddon : null,
+  );
+  const wardrobeArrangeMode = useWardrobeStore((s) => s.arrangeMode);
+  const displayAddons = useMemo(
+    () => getDisplayEquippedAddons(getEquippedAddonsRaw(), wardrobePreviewAddon),
+    [getEquippedAddonsRaw, wardrobePreviewAddon],
+  );
+
+  // Decorative addon float/rotate/pulse effects read a monotonic ms clock
+  // (matching Auralia's `addonAnimationPhase`). Committed at ~10fps — far
+  // below the movement/interaction commit rate — since it only feeds slow,
+  // multi-second particle cycles, never a per-frame re-render cost driver.
+  const [addonClockMs, setAddonClockMs] = useState(0);
+  useEffect(() => {
+    if (displayAddons.length === 0 || sealed || typeof window === "undefined") return;
+    let raf = 0;
+    let lastCommit = 0;
+    const start = window.performance.now();
+    const tick = () => {
+      const now = window.performance.now();
+      if (now - lastCommit >= 100) {
+        lastCommit = now;
+        setAddonClockMs(now - start);
+      }
+      raf = window.requestAnimationFrame(tick);
+    };
+    raf = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(raf);
+  }, [displayAddons.length, sealed]);
+
+  const addonLayers = useMemo(() => {
+    if (!resolvedBody || displayAddons.length === 0) return null;
+    const shared = {
+      addons: displayAddons,
+      spec: resolvedBody,
+      animationPhase: addonClockMs,
+      reduceMotion: Boolean(reducedMotion),
+      arrangeMode: wardrobeArrangeMode,
+      stageRef: bodyStageRef,
+      positionOverrides,
+      onPositionChange: setAddonPosition,
+      onToggleLock: lockAddonPosition,
+      onResetPosition: resetAddonPosition,
+    };
+    return {
+      behind: <BodyForgeAddonLayer {...shared} layer="behind-body" />,
+      front: <BodyForgeAddonLayer {...shared} layer="front" />,
+    };
+  }, [
+    resolvedBody,
+    displayAddons,
+    addonClockMs,
+    reducedMotion,
+    wardrobeArrangeMode,
+    positionOverrides,
+    setAddonPosition,
+    lockAddonPosition,
+    resetAddonPosition,
+  ]);
+
   // One movement frame per render. `movement.progress` advances every
   // animation frame, so this stays live without extra timers. The state
   // layer (applyLivePhenotype) already baked slow eyelid/pupil values into
@@ -453,39 +440,43 @@ export function VisualDNAPet({
     if (!bodyContext || sealed) return null;
     const raw = interpretMovement(movement.active.clip.id, movement.progress, {
       body: bodyContext,
-      performance: living,
+      performance: livingWithTouch,
       intensity: movement.active.clip.intensity,
       reducedMotion: Boolean(reducedMotion),
       seed: movement.seed,
     });
-    const gaze = pointerGaze;
+    const gaze = interaction.gaze;
     return {
       ...raw,
       eyelidOpen: clampValue(
-        raw.eyelidOpen / Math.max(0.08, living.eyelidOpen),
+        raw.eyelidOpen / Math.max(0.08, livingWithTouch.eyelidOpen),
         0.04,
         1.15,
       ),
       pupilScale: clampValue(
-        raw.pupilScale / Math.max(0.5, living.pupilDilation),
+        raw.pupilScale / Math.max(0.5, livingWithTouch.pupilDilation),
         0.5,
         1.6,
       ),
-      gazeX: clampValue(raw.gazeX + gaze.x * living.gazeTracking, -1, 1),
+      gazeX: clampValue(
+        raw.gazeX + gaze.x * livingWithTouch.gazeTracking,
+        -1,
+        1,
+      ),
       gazeY: clampValue(
-        raw.gazeY + gaze.y * living.gazeTracking * 0.7,
+        raw.gazeY + gaze.y * livingWithTouch.gazeTracking * 0.7,
         -1,
         1,
       ),
     };
   }, [
     bodyContext,
-    living,
+    livingWithTouch,
+    interaction.gaze,
     movement.active.clip.id,
     movement.active.clip.intensity,
     movement.progress,
     movement.seed,
-    pointerGaze,
     reducedMotion,
     sealed,
   ]);
@@ -706,22 +697,22 @@ export function VisualDNAPet({
         <div
           ref={stageRef}
           className="relative min-h-[360px] select-none"
-          style={{ touchAction: "pan-y" }}
-          onPointerMove={handlePointerMove}
-          onPointerDown={handlePointerDown}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerLeave}
-          onPointerLeave={handlePointerLeave}
+          style={interaction.stageStyle}
+          data-interaction-state={interaction.state}
+          {...interaction.pointerHandlers}
         >
           <div className="absolute inset-0 flex items-center justify-center">
             <PetBodyRenderer
+              ref={bodyStageRef}
               spec={resolvedBody}
               animate={!reducedMotion}
               className="h-auto w-full max-w-xl overflow-visible"
               showForgeAura
               performance={performanceFrame}
-              living={sealed ? null : living}
+              living={sealed ? null : livingWithTouch}
               activeClipId={sealed ? null : movement.active.clip.id}
+              addonsBehind={addonLayers?.behind}
+              addonsFront={addonLayers?.front}
             />
           </div>
         </div>
@@ -791,12 +782,9 @@ export function VisualDNAPet({
         <div
           ref={stageRef}
           className="relative min-h-[360px] select-none"
-          style={{ touchAction: "pan-y" }}
-          onPointerMove={handlePointerMove}
-          onPointerDown={handlePointerDown}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerLeave}
-          onPointerLeave={handlePointerLeave}
+          style={interaction.stageStyle}
+          data-interaction-state={interaction.state}
+          {...interaction.pointerHandlers}
         >
           <motion.svg
             viewBox="0 0 220 220"
@@ -868,12 +856,15 @@ export function VisualDNAPet({
                 }}
               >
                 <PetBodyRenderer
+                  ref={bodyStageRef}
                   spec={resolvedBody}
                   animate={!reducedMotion}
                   className="overflow-visible"
                   performance={performanceFrame}
-                  living={sealed ? null : living}
+                  living={sealed ? null : livingWithTouch}
                   activeClipId={sealed ? null : movement.active.clip.id}
+                  addonsBehind={addonLayers?.behind}
+                  addonsFront={addonLayers?.front}
                 />
               </motion.g>
             )}

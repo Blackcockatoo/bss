@@ -36,6 +36,8 @@ import {
   useGuardianInteraction,
 } from "../../shared/auralia/guardianBehavior";
 import { AddonRenderer, AddonSVGDefs } from "./addons/AddonRenderer";
+import { useWardrobeStore } from "@/lib/addons/wardrobeStore";
+import { getDisplayEquippedAddons } from "@/lib/addons/displayEquipped";
 import { EyeEmotionFilters } from "./auralia/EyeFilters";
 import {
   EyeRenderer,
@@ -522,7 +524,15 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
     resetAddonPosition,
     positionOverrides,
   } = useAddonStore();
-  const equippedAddons = getEquippedAddons();
+  // The Living Wardrobe's temporary try-on preview overlays the display
+  // list only — it never touches the equipment store until Equip commits.
+  const wardrobePreviewAddon = useWardrobeStore((s) =>
+    s.previewForm === "auralia" ? s.previewAddon : null,
+  );
+  const equippedAddons = getDisplayEquippedAddons(
+    getEquippedAddons(),
+    wardrobePreviewAddon,
+  );
   const [addonAnimationPhase, setAddonAnimationPhase] = useState(0);
   const [internalEditMode, setInternalEditMode] = useState(false);
 
@@ -3077,6 +3087,8 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
                     positionOverride={positionOverrides?.[addon.id]}
                     reduceMotion={reduceMotion}
                     draggable={addonEditMode}
+                    stageRef={svgRef}
+                    viewBoxWidth={400}
                     onPositionChange={(x, y) =>
                       setAddonPosition(addon.id, x, y)
                     }

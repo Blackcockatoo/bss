@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { forwardRef, useId, type ReactNode } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
 import type {
@@ -560,15 +560,7 @@ function AuraPreview({
   );
 }
 
-export function PetBodyRenderer({
-  spec,
-  className = "",
-  animate = true,
-  showForgeAura = false,
-  performance = null,
-  living = null,
-  activeClipId = null,
-}: {
+export interface PetBodyRendererProps {
   spec: BodySpec;
   className?: string;
   animate?: boolean;
@@ -584,7 +576,36 @@ export function PetBodyRenderer({
   living?: BodyPerformanceState | null;
   /** Active clip id, for signature dressings (Moss60 orbit, venom pulse). */
   activeClipId?: string | null;
-}) {
+  /**
+   * Wardrobe add-on layer rendered behind the body silhouette, inside the
+   * same whole-body movement transform (so equipped items follow the body
+   * exactly as forged — no separate scale/offset math needed by callers).
+   */
+  addonsBehind?: ReactNode;
+  /** Wardrobe add-on layer rendered in front of the body/face. */
+  addonsFront?: ReactNode;
+}
+
+/**
+ * `ref` resolves to the root `<svg>` element so callers (Arrange Mode drag
+ * math, wardrobe try-on) can measure the actual rendered stage instead of a
+ * global DOM lookup.
+ */
+export const PetBodyRenderer = forwardRef<SVGSVGElement, PetBodyRendererProps>(
+  function PetBodyRenderer(
+    {
+      spec,
+      className = "",
+      animate = true,
+      showForgeAura = false,
+      performance = null,
+      living = null,
+      activeClipId = null,
+      addonsBehind = null,
+      addonsFront = null,
+    },
+    ref,
+  ) {
   const rawId = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const reducedMotion = useReducedMotion();
   const perf = performance;
@@ -653,6 +674,7 @@ export function PetBodyRenderer({
 
   return (
     <motion.svg
+      ref={ref}
       viewBox="0 0 280 250"
       className={className}
       role="img"
@@ -971,6 +993,7 @@ export function PetBodyRenderer({
             : undefined
         }
       >
+      {addonsBehind}
       {driven &&
         perf.phaseEchoes > 0 &&
         Array.from({ length: Math.min(3, Math.round(perf.phaseEchoes)) }).map(
@@ -1275,7 +1298,9 @@ export function PetBodyRenderer({
           )}
         </g>
       </motion.g>
+      {addonsFront}
       </g>
     </motion.svg>
   );
-}
+  },
+);

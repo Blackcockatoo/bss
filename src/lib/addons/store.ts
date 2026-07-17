@@ -7,6 +7,7 @@ import { persist } from 'zustand/middleware';
 import type { Addon, AddonInventory, AddonTransfer, AddonPositionOverride } from './types';
 import { verifyAddon, verifyTransfer, generateNonce } from './crypto';
 import { signTransfer } from './crypto';
+import { normalizeAddon, normalizeAddons } from './normalize';
 
 interface AddonStore extends AddonInventory {
   // Actions
@@ -69,7 +70,7 @@ export const useAddonStore = create<AddonStore>()(
         set((state) => ({
           addons: {
             ...state.addons,
-            [addon.id]: addon,
+            [addon.id]: normalizeAddon(addon),
           },
         }));
 
@@ -106,11 +107,13 @@ export const useAddonStore = create<AddonStore>()(
           return false;
         }
 
-        // Unequip any addon in the same category
+        // Unequip any addon in the same slot (equipSlot defaults to
+        // category for items minted before slots existed).
+        const slot = addon.equipSlot ?? addon.category;
         set((state) => ({
           equipped: {
             ...state.equipped,
-            [addon.category]: addonId,
+            [slot]: addonId,
           },
         }));
 
@@ -287,10 +290,31 @@ export const useAddonStore = create<AddonStore>()(
     }),
     {
       name: 'auralia-addon-storage',
-      version: 1,
+      // v2 added the Living Wardrobe fields (equipSlot, compatibleForms,
+      // renderLayer, etc. — see types.ts). The migration only *adds*
+      // defaulted fields; it never touches id, ownership, equipped, or
+      // positionOverrides, so v1 saves keep their identity, ownership
+      // proofs, equipped items and drag-arranged positions intact.
+      version: 2,
+      migrate: migrateAddonStore,
     }
   )
 );
+
+/**
+ * Exported standalone so the migration can be unit-tested without going
+ * through zustand's persist rehydration machinery.
+ */
+export function migrateAddonStore(persistedState: unknown, version: number): unknown {
+  const state = persistedState as AddonInventory;
+  if (version < 2) {
+    return {
+      ...state,
+      addons: normalizeAddons(state.addons ?? {}),
+    };
+  }
+  return state;
+}
 
 /**
  * Initialize the addon store with a user's public key
@@ -332,9 +356,10 @@ export async function importAddonInventory(jsonData: string): Promise<boolean> {
       }
     }
 
-    // Import the data
+    // Import the data (normalized so backups made before the Living
+    // Wardrobe schema fields existed still load with safe defaults).
     useAddonStore.setState({
-      addons: data.addons,
+      addons: normalizeAddons(data.addons),
       equipped: data.equipped || {},
       ownerPublicKey: data.ownerPublicKey,
     });

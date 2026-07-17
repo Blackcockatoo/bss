@@ -15,7 +15,22 @@ import type {
   AddonVisual,
 } from "./types";
 
-export interface AddonTemplate {
+export interface AddonTemplate
+  extends Pick<
+    Addon,
+    | "equipSlot"
+    | "compatibleForms"
+    | "compatibleAnchors"
+    | "compatibleBodyShapes"
+    | "renderLayer"
+    | "interactionProfile"
+    | "reactiveBehaviour"
+    | "family"
+    | "setId"
+    | "colourways"
+    | "tryOnSupported"
+    | "unlockMethod"
+  > {
   id: string;
   name: string;
   description: string;
