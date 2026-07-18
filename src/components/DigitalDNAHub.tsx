@@ -2620,56 +2620,56 @@ export default function DigitalDNAHub({
       id: "spiral",
       icon: "🌀",
       label: "DNA Helix",
-      desc: "Drag · pinch · tap nodes",
+      desc: "Spin it and tap the glowing dots",
       requiresWebgl: true,
     },
     {
       id: "mandala",
       icon: "🔮",
       label: "Symmetry Studio",
-      desc: "Finger-paint symmetry",
+      desc: "Draw a magic mirror picture",
     },
     {
       id: "triangle",
       icon: "📐",
       label: "Triangle Instrument",
-      desc: "Trace the 60-step edge",
+      desc: "Trace the dots to make music",
     },
     {
       id: "pentagon",
       icon: "⬠",
       label: "Pentagon Instrument",
-      desc: "5 sides × 12 steps",
+      desc: "Play a five-sided pattern",
     },
     {
       id: "hexagon",
       icon: "⬡",
       label: "Hexagon Instrument",
-      desc: "6 sides × 10 steps",
+      desc: "Play a six-sided pattern",
     },
     {
       id: "decagon",
       icon: "🔟",
       label: "Decagon Instrument",
-      desc: "10 sides × 6 steps",
+      desc: "Play a ten-sided pattern",
     },
     {
       id: "circle",
       icon: "⭕",
       label: "Circle Instrument",
-      desc: "60 points on circle",
+      desc: "Make music around a circle",
     },
     {
       id: "sound",
       icon: "🎵",
       label: "Sound Lab",
-      desc: "Tap bars to play notes",
+      desc: "Tap the colourful bars",
     },
     {
       id: "journey",
       icon: "🧭",
       label: "Guided Journey",
-      desc: "All-ages setup guide",
+      desc: "Take an easy step-by-step tour",
     },
   ];
   const recommendedMode =
@@ -2707,10 +2707,10 @@ export default function DigitalDNAHub({
         {/* ── Header (compact on mobile) ──────────────────────────────────── */}
         <div className="text-center mb-5 sm:mb-10">
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold mb-2 sm:mb-3 bg-gradient-to-r from-amber-400 via-amber-200 to-amber-400 bg-clip-text text-transparent motion-safe:animate-pulse">
-            ✨ Digital DNA ✨
+            Digital DNA Play Lab
           </h1>
           <p className="text-base sm:text-2xl text-blue-300 font-light mb-1 sm:mb-2">
-            All-Ages Learning Hub · Touch · Sound · Patterns
+            Turn number patterns into pictures and music
           </p>
           {lessonContext && (
             <p className="text-xs text-cyan-300 mt-1">
@@ -2874,7 +2874,7 @@ export default function DigitalDNAHub({
           className="sm:hidden mb-3 flex min-h-[44px] w-full items-center justify-between rounded-2xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-sm font-semibold text-slate-200"
           aria-expanded={introExpanded}
         >
-          <span>Guide &amp; decode tips</span>
+          <span>Show me how it works</span>
           <span aria-hidden>{introExpanded ? "▴" : "▾"}</span>
         </button>
         <div
@@ -2884,13 +2884,12 @@ export default function DigitalDNAHub({
         >
           <section className="rounded-[1.75rem] border border-slate-800 bg-slate-900/70 p-5">
             <p className="text-xs uppercase tracking-[0.3em] text-cyan-300/80">
-              What can I do here?
+              Pick something fun
             </p>
             <p className="mt-3 text-sm leading-6 text-slate-300">
-              Start with <strong className="text-white">{recommendedMode.label}</strong>,
-              then branch into the modes that fit your device. Every view reads
-              the same strand and turns it into geometry, rhythm, or a playable
-              path.
+              Start with <strong className="text-white">{recommendedMode.label}</strong>.
+              Each activity uses the same DNA numbers to make a different
+              picture, pattern, or song.
             </p>
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
               {modes.map((mode) => (
@@ -2918,7 +2917,7 @@ export default function DigitalDNAHub({
 
           <section className="rounded-[1.75rem] border border-cyan-500/20 bg-cyan-950/15 p-5">
             <p className="text-xs uppercase tracking-[0.3em] text-cyan-200/80">
-              Decode Guide
+              Your DNA clues
             </p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
               <div className="rounded-2xl border border-slate-800 bg-slate-950/55 p-4">
@@ -2929,7 +2928,7 @@ export default function DigitalDNAHub({
                   {currentSeedMeta.label}
                 </p>
                 <p className="mt-2 text-sm text-slate-300">
-                  The seed chooses which strand story you are currently reading.
+                  Pick a colour to explore a different number pattern.
                 </p>
               </div>
               <div className="rounded-2xl border border-slate-800 bg-slate-950/55 p-4">
@@ -2940,32 +2939,29 @@ export default function DigitalDNAHub({
                   {harmony}
                 </p>
                 <p className="mt-2 text-sm text-slate-300">
-                  Harmony changes how many mirrored arms or repeating structures
-                  the strand uses in each instrument.
+                  This chooses how many times your picture repeats like a mirror.
                 </p>
               </div>
               <div className="rounded-2xl border border-slate-800 bg-slate-950/55 p-4">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">
-                  Mutation seed
+                  Five-number code
                 </p>
                 <p className="mt-2 font-mono text-lg font-semibold text-white">
                   {revealModel.liveMutationSeed}
                 </p>
                 <p className="mt-2 text-sm text-slate-300">
-                  This short code is the visible handoff between the reveal card
-                  and the deeper instruments below.
+                  Keep an eye out for these five numbers in the activities.
                 </p>
               </div>
               <div className="rounded-2xl border border-slate-800 bg-slate-950/55 p-4">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">
-                  Dominant lattice
+                  Brightest shapes
                 </p>
                 <p className="mt-2 text-lg font-semibold text-white">
                   {revealModel.dominantLattice}
                 </p>
                 <p className="mt-2 text-sm text-slate-300">
-                  These anchors are the easiest places to start explaining what
-                  the scene is showing.
+                  These are the shapes that shine the strongest in your pattern.
                 </p>
               </div>
             </div>

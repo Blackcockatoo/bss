@@ -45,7 +45,7 @@ export default function DigitalDNAPage() {
   return (
     <div className="relative min-h-screen bg-slate-950">
       <Link
-        href="/"
+        href="/pet"
         className="fixed z-50 rounded-full text-sm font-semibold
                    px-4 py-2.5 top-[calc(0.75rem+env(safe-area-inset-top))]
                    left-3 sm:left-4

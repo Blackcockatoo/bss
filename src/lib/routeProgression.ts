@@ -122,23 +122,23 @@ export const ROUTE_PROGRESSION: Record<
     step: 4,
     href: "/digital-dna",
     tutorialScope: "dna",
-    shortLabel: "DNA Engine",
-    title: "The hidden engine is now visible",
-    role: "This is the decoded system layer: the structures, signal ownership, and resonant patterns behind the companion.",
+    shortLabel: "DNA Play Lab",
+    title: "Your pet's secret pattern is ready",
+    role: "Discover how your pet's number recipe becomes colours, shapes, and musical notes.",
     summary:
-      "The DNA route turns the earlier promise into a visible mechanism instead of a loading ritual or a delayed explanation.",
+      "Spot the brightest numbers, then use the same pattern to draw pictures and make music.",
     entryCta: {
       href: "/digital-dna",
-      label: "Decode the genome engine",
+      label: "Explore the DNA pattern",
       description:
-        "Start with the guided journey, then branch into the helix, sound, and shape instruments.",
+        "Start with an easy tour, then try the spinning helix, music, and shape games.",
     },
     advanced: {
       href: "/app/moss60",
-      title: "Beyond DNA: MOSS60",
-      label: "Enter the Advanced Studio",
+      title: "Ready for a bigger challenge?",
+      label: "Try the Advanced Studio",
       description:
-        "Carry the decoded genome into the proof-first studio for glyphs, network views, and security-oriented exports.",
+        "Explore extra shapes, maps, and pattern tools when you want to go deeper.",
     },
   },
 };

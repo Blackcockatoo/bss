@@ -7,6 +7,7 @@ import {
   BookOpen,
   HeartPulse,
   Home,
+  Compass,
   PawPrint,
   UserCircle,
 } from "lucide-react";
@@ -30,6 +31,7 @@ type BeforeInstallPromptEvent = Event & {
 export const CORE_QUICK_NAV_ITEMS = [
   { href: "/", label: "Home", icon: Home },
   { href: "/pet", label: "Pet", icon: PawPrint },
+  { href: "/app/activities", label: "Explore", icon: Compass },
   { href: "/app/wellness", label: "Wellness", icon: HeartPulse },
   { href: "/school-game", label: "School", icon: BookOpen },
   { href: "/identity", label: "Identity", icon: UserCircle },
@@ -134,7 +136,7 @@ export function QuickNav() {
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4">
-      <div className="max-w-lg mx-auto">
+      <div className="mx-auto max-w-2xl">
         <div className={`pointer-events-auto flex items-center justify-between rounded-2xl border px-1.5 py-1.5 backdrop-blur-lg sm:px-2 sm:py-2 ${effectiveSchoolsMode ? "border-border bg-background/95 shadow-lg shadow-black/5" : "border-slate-700/70 bg-slate-950/90 shadow-lg shadow-slate-950/60"}`}>
           {/* Back button */}
           <Button
@@ -166,7 +168,7 @@ export function QuickNav() {
                   <div
                     className={`
                       flex flex-col items-center justify-center gap-0.5
-                      min-w-[44px] h-11 px-1.5 rounded-xl
+                      min-w-[42px] h-11 px-1 rounded-xl
                       transition-all duration-200
                       touch-manipulation
                       sm:min-w-[52px] sm:h-12 sm:px-2

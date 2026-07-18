@@ -1,5 +1,5 @@
 export type SteeringColor = "red" | "blue" | "black";
-export type SteeringMode = "compass" | "network" | "geometry";
+export type SteeringMode = "cards" | "compass" | "network" | "geometry";
 export type DataSource = "seed" | "pet";
 
 export interface NavigationTarget {

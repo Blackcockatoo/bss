@@ -12,6 +12,7 @@ describe("QuickNav items", () => {
     expect(hrefs).toEqual([
       "/",
       "/pet",
+      "/app/activities",
       "/app/wellness",
       "/school-game",
       "/identity",

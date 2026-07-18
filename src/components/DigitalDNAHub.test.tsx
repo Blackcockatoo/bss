@@ -92,7 +92,7 @@ describe("DigitalDNAHub", () => {
     expect(
       screen.getByText(/3D helix unavailable on this device/i),
     ).toBeInTheDocument();
-    expect(screen.getByText(/Mutation seed/i)).toBeInTheDocument();
+    expect(screen.getByText(/Five-number code/i)).toBeInTheDocument();
 
     const soundLabButton = screen.getAllByRole("button", {
       name: /Sound Lab/i,
