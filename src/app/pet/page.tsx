@@ -8,6 +8,7 @@ import { RouteProgressionCard } from "@/components/RouteProgressionCard";
 import { RouteTutorialControls } from "@/components/RouteTutorialControls";
 import { AddonInventoryPanel } from "@/components/addons/AddonInventoryPanel";
 import { PetProfilePanel } from "@/components/addons/PetProfilePanel";
+import { LivingWardrobe } from "@/components/wardrobe/LivingWardrobe";
 import {
   CertificateButton,
   RegistrationCertificate,
@@ -26,6 +27,7 @@ import {
   Compass,
   Move,
   Shield,
+  Shirt,
   Sparkles,
   UserCircle,
   Zap,
@@ -53,6 +55,7 @@ export default function PetPage() {
   const [showProfilePanel, setShowProfilePanel] = useState(false);
   const [showEvolutionPanel, setShowEvolutionPanel] = useState(false);
   const [addonEditMode, setAddonEditMode] = useState(false);
+  const [wardrobeOpen, setWardrobeOpen] = useState(false);
   const [addonsInitialized, setAddonsInitialized] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showCertificate, setShowCertificate] = useState(false);
@@ -166,7 +169,9 @@ export default function PetPage() {
     >
       <PetResponseOverlay enableAudio={true} enableAnticipation={true} />
 
-      <div className="flex min-h-[calc(100dvh-11rem)] flex-col items-center justify-start p-3 sm:p-4">
+      <div
+        className={`flex min-h-[calc(100dvh-11rem)] flex-col items-center justify-start p-3 transition-[padding] sm:p-4 ${wardrobeOpen ? "lg:pr-[480px]" : ""}`}
+      >
         <div className="flex h-full w-full max-w-4xl flex-col overflow-hidden rounded-[1.75rem] border border-slate-700/50 bg-slate-900/80 shadow-2xl backdrop-blur-sm sm:rounded-3xl">
           <div className="border-b border-slate-800/80 bg-slate-950/70 px-4 py-4 sm:px-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -196,15 +201,25 @@ export default function PetPage() {
                 )}
               </div>
 
-              <RouteTutorialControls
-                scope="pet"
-                className="self-start text-cyan-200 hover:text-white"
-              />
+              <div className="flex flex-shrink-0 flex-col items-stretch gap-2 sm:items-end">
+                <Button
+                  type="button"
+                  onClick={() => setWardrobeOpen(true)}
+                  className="gap-2 border border-cyan-400/40 bg-gradient-to-r from-cyan-600 to-fuchsia-600 text-white hover:from-cyan-500 hover:to-fuchsia-500"
+                >
+                  <Shirt className="h-4 w-4" />
+                  Open Wardrobe
+                </Button>
+                <RouteTutorialControls
+                  scope="pet"
+                  className="self-start text-cyan-200 hover:text-white sm:self-end"
+                />
+              </div>
             </div>
           </div>
 
           <div
-            className={`relative flex-1 bg-gradient-to-br from-slate-900 ${imprintAccentClass} to-slate-900`}
+            className={`relative flex-1 bg-gradient-to-br from-slate-900 ${imprintAccentClass} to-slate-900 ${wardrobeOpen ? "max-h-[38vh] overflow-hidden lg:max-h-none" : ""}`}
           >
             <PetRuntimeStage
               addonEditMode={addonEditMode}
@@ -453,6 +468,12 @@ export default function PetPage() {
         isOpen={showWellnessSync}
         onClose={() => setShowWellnessSync(false)}
         lastAction={lastAction}
+      />
+
+      <LivingWardrobe
+        isOpen={wardrobeOpen}
+        onClose={() => setWardrobeOpen(false)}
+        form={petType}
       />
     </div>
   );

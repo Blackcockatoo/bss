@@ -144,4 +144,37 @@ describe('VisualDNAPet renderer', () => {
 
     await screen.findByText('180-digit DNA');
   });
+
+  it('renders equipped wardrobe cosmetics on the live pet and removes them on unequip', async () => {
+    const VisualDNAPet = await loadVisualDNAPet();
+    const { useWardrobeProgressionStore } = await import('@/lib/wardrobe/store');
+    const { createDefaultProgress } = await import('@/lib/wardrobe/progress');
+
+    // Own + equip the crown through the real store APIs.
+    act(() => {
+      useWardrobeProgressionStore.setState({
+        progress: createDefaultProgress(),
+        inventory: {
+          ownedItemIds: ['effect-sparkle', 'crown-gold'],
+          equippedBySlot: {},
+          newlyUnlockedItemIds: [],
+          unlockHistory: [],
+        },
+      });
+      const result = useWardrobeProgressionStore.getState().equipWardrobeItem('crown-gold');
+      expect(result.ok).toBe(true);
+    });
+
+    const { container } = render(<VisualDNAPet />);
+    await waitFor(() => {
+      expect(container.querySelector('[data-cosmetic-id="crown-gold"]')).toBeTruthy();
+    });
+
+    act(() => {
+      useWardrobeProgressionStore.getState().unequipWardrobeSlot('head');
+    });
+    await waitFor(() => {
+      expect(container.querySelector('[data-cosmetic-id="crown-gold"]')).toBeNull();
+    });
+  });
 });
