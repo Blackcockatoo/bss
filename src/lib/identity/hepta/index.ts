@@ -36,7 +36,9 @@ export function createHeptaPayload(
   preset: PrivacyPreset
 ): HeptaPayload {
   const minutes = Math.floor(Date.now() / 60000) % 8192;
-  const nonce = Math.floor(Math.random() * 16384);
+  // 14-bit nonce (0-16383) via CSPRNG rather than Math.random(), consistent
+  // with the rest of the identity module's use of the Web Crypto API.
+  const nonce = crypto.getRandomValues(new Uint16Array(1))[0] % 16384;
 
   return {
     version: 1,

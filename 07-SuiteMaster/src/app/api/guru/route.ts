@@ -25,6 +25,16 @@ export async function POST(request: Request): Promise<Response> {
     });
   }
 
+  // Cap conversation length: this endpoint is unauthenticated, so bound the
+  // worst-case cost of a single request against the paid Anthropic API.
+  const MAX_MESSAGES = 20;
+  if (messages.length > MAX_MESSAGES) {
+    return new Response(
+      JSON.stringify({ error: `messages array must not exceed ${MAX_MESSAGES} entries` }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
   // Sanitize: only user/assistant, truncate long content
   const sanitized = messages
     .filter((m) => m.role === "user" || m.role === "assistant")
@@ -83,13 +93,6 @@ export async function POST(request: Request): Promise<Response> {
   });
 }
 
-export async function OPTIONS(): Promise<Response> {
-  return new Response(null, {
-    status: 204,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
-  });
-}
+// No OPTIONS/CORS handler: the dashboard calls this route same-origin
+// ("/api/guru"), and this endpoint is unauthenticated, so it should not
+// invite cross-site callers to spend this project's Anthropic API budget.

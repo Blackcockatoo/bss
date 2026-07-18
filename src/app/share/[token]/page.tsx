@@ -7,6 +7,13 @@ interface SharePageProps {
   params: Promise<{ token: string }>;
 }
 
+// Prevents payload strings (e.g. metadata.id) containing "</script>" from
+// closing the tag early and injecting markup; < round-trips through
+// JSON.parse identically to a literal "<".
+function escapeForInlineJsonScript(json: string): string {
+  return json.replace(/</g, "\\u003c");
+}
+
 export const dynamicParams = false;
 
 export async function generateStaticParams(): Promise<
@@ -93,7 +100,7 @@ export default async function Moss60SharePage({ params }: SharePageProps) {
         <script
           id="moss60-verifiable-payload"
           type="application/json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(payload) }}
+          dangerouslySetInnerHTML={{ __html: escapeForInlineJsonScript(JSON.stringify(payload)) }}
         />
 
         <pre className="text-xs bg-zinc-950 border border-zinc-800 rounded-lg p-3 overflow-x-auto">
