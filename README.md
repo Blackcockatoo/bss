@@ -157,6 +157,7 @@ Visit `http://localhost:3000`
 ## Planning Docs
 
 - Success criteria planning gate + one-page template: `docs/planning/success-criteria.md`
+- MetaPet Schools pilot charter, decision thresholds, and rollback rules: `docs/deployment/metapet-schools-smoke.md`
 - Child-safe baseline for student deployments: `docs/compliance/child-safe-baseline.md`
 - Teacher-facing digital engagement taxonomy: `docs/compliance/digital-engagement-taxonomy.md`
 
@@ -448,6 +449,10 @@ Changing the preset regenerates the digits with a fresh nonce and stores the cho
 
 ## Current Status
 
+**Release posture (2026-07-18): MetaPet Schools pilot candidate.** This is not a general consumer release or a school-wide rollout. Promotion requires Node 22 CI, lint, the complete test suite, the child-safe deployment assertion, a production build, and the manual schools smoke runbook. Major feature expansion is frozen until the pilot produces a decision record.
+
+The lists below are a historical feature inventory, not release certification. The code and current release gates are authoritative when this inventory disagrees with tests or implementation.
+
 **Version 8 - Addon & Lineage Systems Complete** ✅
 - Identity core: **WORKING**
 - Genome system: **WORKING** (Red60/Blue60/Black60 encoding + trait derivation)
@@ -466,7 +471,7 @@ Changing the preset regenerates the digits with a fresh nonce and stores the cho
 - HeptaCode: **PARTIAL** (needs ECC fix)
 - Visual components: **WORKING**
 
-**Phases 1-4 All Complete:**
+**Historical phase checklist (release validation still required):**
 - ✅ Real-time vitals tick with background-pause
 - ✅ 4-state evolution (GENETICS → NEURO → QUANTUM → SPECIATION)
 - ✅ Evolution gates and transitions with requirements
@@ -483,7 +488,7 @@ Changing the preset regenerates the digits with a fresh nonce and stores the cho
 - ✅ **Heraldic lineage system with breeding inheritance**
 - ✅ **12 addon templates (6 standard + 6 premium)**
 
-**Known Issues:**
+**Documented technical debt (revalidate against current code):**
 - HeptaCode ECC needs to output 42 digits (currently variable)
 - Need to test decode path
 - Audio (playHepta) not implemented yet
