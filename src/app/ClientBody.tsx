@@ -3,6 +3,8 @@
 import LegalNotice from "@/components/LegalNotice";
 import { JourneyProgressStrip } from "@/components/JourneyProgressStrip";
 import { QuickNav } from "@/components/QuickNav";
+import { WardrobeUnlockCeremony } from "@/components/wardrobe/WardrobeUnlockCeremony";
+import { WardrobeProgressBridge } from "@/lib/wardrobe/WardrobeProgressBridge";
 import {
   getChildSafeFallbackPathname,
   isChildSafeAllowedPathname,
@@ -124,6 +126,10 @@ export default function ClientBody({
       </div>
 
       <div className="flex-1 pb-2">{children}</div>
+      {/* Wardrobe progression: the bridge feeds live gameplay into the
+          persistent progress record; the ceremony surfaces new unlocks. */}
+      <WardrobeProgressBridge />
+      <WardrobeUnlockCeremony />
       <footer className="px-4 pb-24 pt-4 text-center sm:pb-6">
         <a
           href="mailto:bluesssnakestudio@gmail.com?subject=Meta-Pet%20School%20Pilot%20Enquiry"

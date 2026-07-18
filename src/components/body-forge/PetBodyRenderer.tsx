@@ -1,6 +1,6 @@
 'use client';
 
-import { useId } from 'react';
+import { useId, type ReactNode } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 
 export type BodyShape = 'round' | 'orb' | 'bean' | 'cubic' | 'block' | 'crystal' | 'toroid' | 'droplet' | 'bell' | 'seed' | 'manta' | 'lantern' | 'crown' | 'hourglass' | 'wisp';
@@ -148,7 +148,19 @@ function WingPair({ spec }: { spec: BodySpec }) {
   </g>;
 }
 
-export function PetBodyRenderer({ spec, className = '', animate = true }: { spec: BodySpec; className?: string; animate?: boolean }) {
+export function PetBodyRenderer({
+  spec,
+  className = '',
+  animate = true,
+  addonsBehind,
+  addonsFront,
+}: {
+  spec: BodySpec;
+  className?: string;
+  animate?: boolean;
+  addonsBehind?: ReactNode;
+  addonsFront?: ReactNode;
+}) {
   const rawId = useId().replace(/[^a-zA-Z0-9_-]/g, '');
   const reducedMotion = useReducedMotion();
   const moving = animate && !reducedMotion;
@@ -183,6 +195,8 @@ export function PetBodyRenderer({ spec, className = '', animate = true }: { spec
 
       <motion.ellipse cx="140" cy="120" rx={72 + spec.glow * 28} ry={69 + spec.glow * 25} fill={spec.primaryColor} opacity={0.06 + spec.glow * 0.13} animate={moving ? { scale: [0.96, 1.05, 0.96], opacity: [0.05, 0.18, 0.05] } : undefined} transition={{ duration: 3 / spec.animationSpeed, repeat: Infinity }} />
 
+      {addonsBehind}
+
       <motion.g
         style={{ transformOrigin: '140px 112px' }}
         animate={moving ? { y: [0, -spec.bob, 0], rotate: [spec.tilt - 1, spec.tilt + 1, spec.tilt - 1], scaleX: [spec.bodyScale, spec.bodyScale * (1 + spec.breathe), spec.bodyScale], scaleY: [spec.bodyScale, spec.bodyScale * (1 - spec.breathe * 0.45), spec.bodyScale] } : { rotate: spec.tilt, scale: spec.bodyScale }}
@@ -203,6 +217,8 @@ export function PetBodyRenderer({ spec, className = '', animate = true }: { spec
         {spec.features.includes('thirdEye') && <g><ellipse cx="140" cy="76" rx={11} ry={7} fill={spec.highlightColor} stroke={spec.secondaryColor} strokeWidth={spec.outlineWidth * 0.7} /><circle cx="140" cy="76" r="3.2" fill={spec.secondaryColor} /></g>}
         <motion.path d={mouthPath(spec)} fill="none" stroke={spec.secondaryColor} strokeWidth={spec.outlineWidth * 0.75} strokeLinecap="round" transition={{ duration: 0.25 }} />
       </motion.g>
+
+      {addonsFront}
     </motion.svg>
   );
 }

@@ -479,7 +479,13 @@ export function createMetaPetWebStore(
 
     setLastAction(action) {
       if (get().systemState === 'sealed') return;
-      set({ lastAction: action, lastActionAt: Date.now() });
+      // Strictly monotonic so two actions landing in the same millisecond
+      // still produce distinct timestamps — subscribers (reaction window,
+      // wardrobe care counters) key off lastActionAt transitions.
+      set(state => ({
+        lastAction: action,
+        lastActionAt: Math.max(Date.now(), state.lastActionAt + 1),
+      }));
     },
 
     addEssence({ amount, source }) {
@@ -896,6 +902,13 @@ export function createMetaPetWebStore(
           evolution: gainExperience(state.evolution, 20),
         };
       });
+
+      // The persistent wardrobe-progress layer counts offspring without a
+      // reverse import into this core module (same CustomEvent pattern the
+      // Body Forge uses for cross-layer updates).
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('bss:metapet:offspring-created'));
+      }
 
       if (rewardPayload) {
         get().recordReward(rewardPayload);

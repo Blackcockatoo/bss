@@ -7,7 +7,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { AddonInventoryPanel } from '@/components/addons/AddonInventoryPanel';
 import { AddonRenderer, AddonSVGDefs } from '@/components/addons/AddonRenderer';
 import { PetProfilePanel } from '@/components/addons/PetProfilePanel';
@@ -85,6 +85,7 @@ export default function AddonsDemoPage() {
   const [showEvalPanel, setShowEvalPanel] = useState(false);
   const [mirrorSignal, setMirrorSignal] = useState(0);
   const reduceMotion = useReducedMotion();
+  const petSvgRef = useRef<SVGSVGElement>(null);
 
   const { addAddon, getEquippedAddons, getAddonPosition, setAddonPosition, lockAddonPosition, resetAddonPosition, positionOverrides } = useAddonStore();
 
@@ -244,6 +245,7 @@ export default function AddonsDemoPage() {
                 {/* In edit mode the pet svg takes pointer input for addon
                     dragging; otherwise gestures fall through to the field */}
                 <svg
+                  ref={petSvgRef}
                   viewBox="0 0 200 200"
                   className={`auralia-pet-svg w-full h-full relative ${addonEditMode ? '' : 'pointer-events-none'}`}
                 >
@@ -301,6 +303,8 @@ export default function AddonsDemoPage() {
                       positionOverride={positionOverrides?.[addon.id]}
                       reduceMotion={reduceMotion}
                       draggable={addonEditMode}
+                      stageRef={petSvgRef}
+                      viewBoxWidth={200}
                       onPositionChange={(x, y) => setAddonPosition(addon.id, x, y)}
                       onToggleLock={(locked) => lockAddonPosition(addon.id, locked)}
                       onResetPosition={() => resetAddonPosition(addon.id)}

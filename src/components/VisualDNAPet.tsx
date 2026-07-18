@@ -12,6 +12,14 @@ import {
   resolveBodySpec,
 } from '@/visual-dna/bodyForgeAdapter';
 import { resolveVisualDNA, type ParticleMode, type VisualPhenotype } from '@/visual-dna';
+import {
+  WardrobeCosmeticLayer,
+  resolveBodyForgeCosmeticAnchor,
+} from '@/components/wardrobe/WardrobeCosmeticLayer';
+import {
+  getEquippedWardrobeItems,
+  useWardrobeProgressionStore,
+} from '@/lib/wardrobe/store';
 
 const ACTION_WINDOW_MS = 1_600;
 
@@ -128,6 +136,29 @@ export function VisualDNAPet({
     () => getGenomeVisualFingerprint(genome, phenotype?.identity.seed ?? 0),
     [genome, phenotype?.identity.seed],
   );
+
+  const wardrobeInventory = useWardrobeProgressionStore((state) => state.inventory);
+  const equippedCosmetics = useMemo(
+    () => getEquippedWardrobeItems(wardrobeInventory),
+    [wardrobeInventory],
+  );
+
+  const wardrobeLayers = useMemo(() => {
+    if (!resolvedBody || equippedCosmetics.length === 0) return null;
+
+    const shared = {
+      items: equippedCosmetics,
+      resolveAnchor: (anchor: Parameters<typeof resolveBodyForgeCosmeticAnchor>[1]) =>
+        resolveBodyForgeCosmeticAnchor(resolvedBody, anchor),
+      reduceMotion: Boolean(reducedMotion),
+      bodyRadius: Math.max(resolvedBody.bodyWidth, resolvedBody.bodyHeight) / 2,
+    };
+
+    return {
+      behind: <WardrobeCosmeticLayer {...shared} layer="behind" />,
+      front: <WardrobeCosmeticLayer {...shared} layer="front" />,
+    };
+  }, [equippedCosmetics, reducedMotion, resolvedBody]);
 
   const particles = useMemo(() => {
     if (!phenotype) return [];
@@ -286,7 +317,13 @@ export function VisualDNAPet({
                 animate={!reducedMotion && phenotype.body.shiver > 0 ? { x: [0, phenotype.body.shiver, -phenotype.body.shiver, 0] } : undefined}
                 transition={{ duration: 0.42, repeat: Number.POSITIVE_INFINITY }}
               >
-                <PetBodyRenderer spec={resolvedBody} animate={!reducedMotion} className="overflow-visible" />
+                <PetBodyRenderer
+                  spec={resolvedBody}
+                  animate={!reducedMotion}
+                  className="overflow-visible"
+                  addonsBehind={wardrobeLayers?.behind}
+                  addonsFront={wardrobeLayers?.front}
+                />
               </motion.g>
             )}
           </motion.svg>
