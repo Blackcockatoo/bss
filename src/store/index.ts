@@ -479,7 +479,13 @@ export function createMetaPetWebStore(
 
     setLastAction(action) {
       if (get().systemState === 'sealed') return;
-      set({ lastAction: action, lastActionAt: Date.now() });
+      // Strictly monotonic so two actions landing in the same millisecond
+      // still produce distinct timestamps — subscribers (reaction window,
+      // wardrobe care counters) key off lastActionAt transitions.
+      set(state => ({
+        lastAction: action,
+        lastActionAt: Math.max(Date.now(), state.lastActionAt + 1),
+      }));
     },
 
     addEssence({ amount, source }) {
