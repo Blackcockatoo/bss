@@ -38,6 +38,14 @@ import { BodyForgeAddonLayer } from "@/components/addons/BodyForgeAddonOverlay";
 import { useAddonStore } from "@/lib/addons/store";
 import { useWardrobeStore } from "@/lib/addons/wardrobeStore";
 import { getDisplayEquippedAddons } from "@/lib/addons/displayEquipped";
+import {
+  WardrobeCosmeticLayer,
+  resolveBodyForgeCosmeticAnchor,
+} from "@/components/wardrobe/WardrobeCosmeticLayer";
+import {
+  getEquippedWardrobeItems,
+  useWardrobeProgressionStore,
+} from "@/lib/wardrobe/store";
 
 const ACTION_WINDOW_MS = 1_600;
 
@@ -401,8 +409,17 @@ export function VisualDNAPet({
     return () => window.cancelAnimationFrame(raf);
   }, [displayAddons.length, sealed]);
 
+  // Equipped gameplay cosmetics (wardrobe progression rewards) render on
+  // the same stage as the verified add-ons, on their own layers.
+  const wardrobeInventory = useWardrobeProgressionStore((s) => s.inventory);
+  const equippedCosmetics = useMemo(
+    () => getEquippedWardrobeItems(wardrobeInventory),
+    [wardrobeInventory],
+  );
+
   const addonLayers = useMemo(() => {
-    if (!resolvedBody || displayAddons.length === 0) return null;
+    if (!resolvedBody) return null;
+    if (displayAddons.length === 0 && equippedCosmetics.length === 0) return null;
     const shared = {
       addons: displayAddons,
       spec: resolvedBody,
@@ -415,13 +432,33 @@ export function VisualDNAPet({
       onToggleLock: lockAddonPosition,
       onResetPosition: resetAddonPosition,
     };
+    const cosmeticShared = {
+      items: equippedCosmetics,
+      resolveAnchor: (anchor: Parameters<typeof resolveBodyForgeCosmeticAnchor>[1]) =>
+        resolveBodyForgeCosmeticAnchor(resolvedBody, anchor),
+      reduceMotion: Boolean(reducedMotion),
+      bodyRadius: Math.max(resolvedBody.bodyWidth, resolvedBody.bodyHeight) / 2,
+    };
     return {
-      behind: <BodyForgeAddonLayer {...shared} layer="behind-body" />,
-      front: <BodyForgeAddonLayer {...shared} layer="front" />,
+      behind: (
+        <>
+          <WardrobeCosmeticLayer {...cosmeticShared} layer="behind" />
+          {displayAddons.length > 0 && (
+            <BodyForgeAddonLayer {...shared} layer="behind-body" />
+          )}
+        </>
+      ),
+      front: (
+        <>
+          <WardrobeCosmeticLayer {...cosmeticShared} layer="front" />
+          {displayAddons.length > 0 && <BodyForgeAddonLayer {...shared} layer="front" />}
+        </>
+      ),
     };
   }, [
     resolvedBody,
     displayAddons,
+    equippedCosmetics,
     addonClockMs,
     reducedMotion,
     wardrobeArrangeMode,

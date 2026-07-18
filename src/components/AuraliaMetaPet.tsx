@@ -38,6 +38,14 @@ import {
 import { AddonRenderer, AddonSVGDefs } from "./addons/AddonRenderer";
 import { useWardrobeStore } from "@/lib/addons/wardrobeStore";
 import { getDisplayEquippedAddons } from "@/lib/addons/displayEquipped";
+import {
+  WardrobeCosmeticLayer,
+  resolveAuraliaCosmeticAnchor,
+} from "@/components/wardrobe/WardrobeCosmeticLayer";
+import {
+  getEquippedWardrobeItems,
+  useWardrobeProgressionStore,
+} from "@/lib/wardrobe/store";
 import { EyeEmotionFilters } from "./auralia/EyeFilters";
 import {
   EyeRenderer,
@@ -532,6 +540,13 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
   const equippedAddons = getDisplayEquippedAddons(
     getEquippedAddons(),
     wardrobePreviewAddon,
+  );
+  // Equipped gameplay cosmetics (progression rewards) share the stage with
+  // the verified add-ons but render through their own layer.
+  const wardrobeInventory = useWardrobeProgressionStore((s) => s.inventory);
+  const equippedCosmetics = useMemo(
+    () => getEquippedWardrobeItems(wardrobeInventory),
+    [wardrobeInventory],
   );
   const [addonAnimationPhase, setAddonAnimationPhase] = useState(0);
   const [internalEditMode, setInternalEditMode] = useState(false);
@@ -3068,6 +3083,24 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
                     </>
                   )}
                 </g>
+
+                {/* Equipped gameplay cosmetics (front layers; the aura/back
+                    layers sit here too since Auralia's orb has no separate
+                    behind-body slot — draw order inside the group applies). */}
+                <WardrobeCosmeticLayer
+                  items={equippedCosmetics}
+                  layer="behind"
+                  resolveAnchor={resolveAuraliaCosmeticAnchor}
+                  reduceMotion={reduceMotion}
+                  bodyRadius={72}
+                />
+                <WardrobeCosmeticLayer
+                  items={equippedCosmetics}
+                  layer="front"
+                  resolveAnchor={resolveAuraliaCosmeticAnchor}
+                  reduceMotion={reduceMotion}
+                  bodyRadius={72}
+                />
 
                 {/* Equipped addons */}
                 {equippedAddons.map((addon) => (

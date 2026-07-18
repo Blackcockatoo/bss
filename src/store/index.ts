@@ -897,6 +897,13 @@ export function createMetaPetWebStore(
         };
       });
 
+      // The persistent wardrobe-progress layer counts offspring without a
+      // reverse import into this core module (same CustomEvent pattern the
+      // Body Forge uses for cross-layer updates).
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('bss:metapet:offspring-created'));
+      }
+
       if (rewardPayload) {
         get().recordReward(rewardPayload);
       }
