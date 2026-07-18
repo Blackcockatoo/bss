@@ -278,6 +278,37 @@ describe('forged body persistence', () => {
     expect(loaded?.features).toEqual(['wings']);
   });
 
+  it('clamps extreme imported and stored anatomy to renderer-safe control ranges', () => {
+    const sanitized = sanitizeBodySpec({
+      ...DEFAULT_BODY_SPEC,
+      bodyWidth: 1_000_000,
+      bodyHeight: -100,
+      gazeX: 90,
+      glow: -4,
+      animationSpeed: 0,
+      breathe: 12,
+    });
+
+    expect(sanitized).toMatchObject({
+      bodyWidth: 170,
+      bodyHeight: 62,
+      gazeX: 7,
+      glow: 0,
+      animationSpeed: 0.25,
+      breathe: 0.12,
+    });
+
+    saveForgedBody({
+      ...DEFAULT_BODY_SPEC,
+      bodyScale: 99,
+      outlineWidth: -12,
+    });
+    expect(loadForgedBody()).toMatchObject({
+      bodyScale: 1.65,
+      outlineWidth: 0,
+    });
+  });
+
   it('returns null instead of inventing a body from unusable saved data', () => {
     window.localStorage.setItem(BODY_FORGE_STORAGE_KEY, 'not json{');
     expect(loadForgedBody()).toBeNull();

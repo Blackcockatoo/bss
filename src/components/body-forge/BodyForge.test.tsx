@@ -10,12 +10,14 @@ import {
   useIdentityProfileStore,
 } from '@/lib/identity/profile';
 import { svgElementToPngDataUrl } from '@/lib/media/svgToPngDataUrl';
+import { DEFAULT_BODY_SPEC } from './PetBodyRenderer';
 
 const VALID_PNG =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
 
 const mocks = vi.hoisted(() => ({
   renderSvg: true,
+  storedBody: null as import('./PetBodyRenderer').BodySpec | null,
   push: vi.fn(),
   setPetType: vi.fn(),
   store: {
@@ -63,8 +65,8 @@ vi.mock('@/components/body-forge/PetBodyRenderer', async (importOriginal) => {
   >();
   return {
     ...actual,
-    PetBodyRenderer: () =>
-      mocks.renderSvg ? <svg viewBox="0 0 280 250" aria-label="Body preview" /> : <div />,
+    PetBodyRenderer: ({ spec }: { spec: { name: string } }) =>
+      mocks.renderSvg ? <svg role="img" viewBox="0 0 280 250" aria-label={`Body preview: ${spec.name}`} /> : <div />,
   };
 });
 
@@ -74,8 +76,9 @@ vi.mock('@/visual-dna/bodyForgeAdapter', () => ({
   clearForgedBody: vi.fn(),
   createDNAReadyBodyPacket: () => ({}),
   createGenomeBodySpec: () => null,
+  decodeBodyForgeTransfer: () => null,
   getGenomeVisualFingerprint: () => 'forge-test',
-  loadForgedBody: () => null,
+  loadForgedBody: () => mocks.storedBody,
   saveForgedBody: vi.fn(),
 }));
 
@@ -93,6 +96,7 @@ describe('Body Forge identity avatar export', () => {
   beforeEach(() => {
     window.localStorage.clear();
     mocks.renderSvg = true;
+    mocks.storedBody = null;
     mocks.push.mockClear();
     mocks.store.setPetType.mockClear();
     exportAvatar.mockReset();
@@ -188,5 +192,19 @@ describe('Body Forge identity avatar export', () => {
       expect(screen.getByText(/could not find the body preview/i)).toBeInTheDocument();
     });
     expect(exportAvatar).not.toHaveBeenCalled();
+  });
+
+  it('clears a saved body back to the default when live DNA is unavailable', async () => {
+    mocks.storedBody = { ...DEFAULT_BODY_SPEC, name: 'Saved body' };
+    render(<BodyForge />);
+
+    expect(
+      await screen.findByRole('img', { name: 'Body preview: Saved body' }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Clear forged body' }));
+
+    expect(
+      screen.getByRole('img', { name: `Body preview: ${DEFAULT_BODY_SPEC.name}` }),
+    ).toBeInTheDocument();
   });
 });

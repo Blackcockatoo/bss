@@ -78,6 +78,8 @@ export function BodyForge() {
     // Deferred so the initial load happens outside the effect body, rather
     // than setting state synchronously during mount.
     const initialLoad = window.setTimeout(() => {
+      const stored = loadForgedBody();
+      setHasSavedForge(stored !== null);
       const encoded = new URLSearchParams(window.location.hash.slice(1)).get('forge');
       const transferred = encoded ? decodeBodyForgeTransfer(encoded) : null;
       if (transferred) {
@@ -86,10 +88,8 @@ export function BodyForge() {
         window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
         return;
       }
-      const stored = loadForgedBody();
       if (stored) {
         setSpec(stored);
-        setHasSavedForge(true);
       }
     }, 0);
     return () => window.clearTimeout(initialLoad);
@@ -129,7 +129,12 @@ export function BodyForge() {
   const fingerprint = getGenomeVisualFingerprint(genome, phenotype?.identity.seed ?? 0);
   const json = useMemo(() => JSON.stringify(spec, null, 2), [spec]);
   const patch = <K extends keyof BodySpec>(key: K, value: BodySpec[K]) => setSpec((current) => ({ ...current, [key]: value }));
-  const toggleFeature = (feature: BodyFeature) => patch('features', spec.features.includes(feature) ? spec.features.filter((item) => item !== feature) : [...spec.features, feature]);
+  const toggleFeature = (feature: BodyFeature) => setSpec((current) => ({
+    ...current,
+    features: current.features.includes(feature)
+      ? current.features.filter((item) => item !== feature)
+      : [...current.features, feature],
+  }));
 
   const randomize = () => {
     const colors = ['#1677ff', '#12b8a6', '#8528d8', '#d12f5b', '#e28723', '#151b2d'];
@@ -233,7 +238,8 @@ export function BodyForge() {
   const clearForge = () => {
     clearForgedBody();
     setHasSavedForge(false);
-    if (dnaBody) setSpec(dnaBody);
+    setImportedFromWorkshop(false);
+    setSpec(dnaBody ?? DEFAULT_BODY_SPEC);
   };
 
   return (
