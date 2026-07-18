@@ -346,6 +346,10 @@ const PRESET_NODES: PresetNodeSpec[] = [
   { id: 'earth-2', label: 'Crystal Vale', fieldType: 'earth', intensity: 85, coordinates: { x: 0, y: -2, z: -1 }, anomalyChance: 0.35 },
 ];
 
+/** Cell count of the default preset overworld; the wardrobe "explore
+ * everything" fallback target when a live map has not reported its size. */
+export const VIMANA_PRESET_CELL_COUNT = PRESET_NODES.length;
+
 function createPresetNodes(random: () => number, now: number): VimanaNode[] {
   return PRESET_NODES.map((spec, index) => {
     const isHome = index === 0;

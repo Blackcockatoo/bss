@@ -3,6 +3,8 @@
 import LegalNotice from "@/components/LegalNotice";
 import { JourneyProgressStrip } from "@/components/JourneyProgressStrip";
 import { QuickNav } from "@/components/QuickNav";
+import { WardrobeSystemBridge } from "@/components/wardrobe/WardrobeSystemBridge";
+import { WardrobeUnlockCeremony } from "@/components/wardrobe/WardrobeUnlockCeremony";
 import {
   getChildSafeFallbackPathname,
   isChildSafeAllowedPathname,
@@ -146,6 +148,15 @@ export default function ClientBody({
         )}
         {!effectiveSchoolsMode && <JourneyProgressStrip />}
       </div>
+
+      {/* Wardrobe progression: persistent progress sync + one-shot unlock
+          ceremonies. Kept out of the schools deployment surface. */}
+      {!effectiveSchoolsMode && (
+        <>
+          <WardrobeSystemBridge />
+          <WardrobeUnlockCeremony />
+        </>
+      )}
 
       <div className="flex-1 pb-2">{children}</div>
       <footer className="px-4 pb-24 pt-4 text-center sm:pb-6">

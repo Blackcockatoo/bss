@@ -36,6 +36,7 @@ import {
   useGuardianInteraction,
 } from "../../shared/auralia/guardianBehavior";
 import { AddonRenderer, AddonSVGDefs } from "./addons/AddonRenderer";
+import { WardrobeEquippedLayer } from "./wardrobe/WardrobeEquippedLayer";
 import { EyeEmotionFilters } from "./auralia/EyeFilters";
 import {
   EyeRenderer,
@@ -2778,6 +2779,14 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
                     })}
                   </g>
 
+                  {/* Wardrobe items that render behind the body (auras, back, patterns) */}
+                  <WardrobeEquippedLayer
+                    layer="behind"
+                    petPosition={{ x: 200, y: 210 }}
+                    animationPhase={addonAnimationPhase}
+                    reduceMotion={reduceMotion}
+                  />
+
                   <g
                     className={`
                     ${aiState.mode === "idle" ? "ai-idle" : ""}
@@ -3086,6 +3095,14 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
                     onResetPosition={() => resetAddonPosition(addon.id)}
                   />
                 ))}
+
+                {/* Wardrobe items that render in front of the body (head, horns, held, trails) */}
+                <WardrobeEquippedLayer
+                  layer="front"
+                  petPosition={{ x: 200, y: 210 }}
+                  animationPhase={addonAnimationPhase}
+                  reduceMotion={reduceMotion}
+                />
 
                 {auraRipples.map((r) => (
                   <g key={r.id} opacity={r.life}>

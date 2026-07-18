@@ -19,8 +19,17 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { SeraphicPendantField } from "./SeraphicPendantField";
 import { WizardStaffSoulEngine } from "./WizardStaffSoulEngine";
 
+/**
+ * Minimal shape the renderer needs. Verified Addons satisfy it directly;
+ * wardrobe cosmetics are adapted into it (see @/lib/wardrobe/adapter).
+ */
+export type RenderableAddon = Pick<
+  Addon,
+  "id" | "rarity" | "attachment" | "visual"
+>;
+
 interface AddonRendererProps {
-  addon: Addon;
+  addon: RenderableAddon;
   petSize?: number;
   petPosition?: { x: number; y: number };
   animationPhase?: number;
