@@ -72,8 +72,13 @@ export async function initializeStarterAddons(): Promise<{
     let created = 0;
 
     for (const template of starterTemplates) {
-      // idempotent: only mint if user doesn't already own this template id
-      if (addons[template.id]) {
+      // idempotent: mintAddon composes the stored id as `${template.id}-${edition}`
+      // (edition is always 1 here), so check that composite id rather than the
+      // bare template id, which never matches and previously caused every
+      // starter addon to be silently re-minted (and its equip state wiped) on
+      // every visit to /pet.
+      const starterAddonId = `${template.id}-1`;
+      if (addons[starterAddonId]) {
         continue;
       }
 
