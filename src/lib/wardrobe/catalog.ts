@@ -68,7 +68,8 @@ export const WARDROBE_CATALOG: readonly WardrobeItem[] = [
       svgPath:
         'M -16 8 L -16 -4 L -9 2 L 0 -12 L 9 2 L 16 -4 L 16 8 Z M -16 10 L 16 10 L 16 13 L -16 13 Z',
       animation: 'shimmer',
-      offset: { x: 0, y: -26 },
+      scale: 1.6,
+      offset: { x: 0, y: -30 },
     },
   },
   {
@@ -87,7 +88,8 @@ export const WARDROBE_CATALOG: readonly WardrobeItem[] = [
       svgPath:
         'M -18 0 A 18 7 0 1 0 18 0 A 18 7 0 1 0 -18 0 Z M -13 0 A 13 4.5 0 1 1 13 0 A 13 4.5 0 1 1 -13 0 Z',
       animation: 'pulse',
-      offset: { x: 0, y: -40 },
+      scale: 1.7,
+      offset: { x: 0, y: -46 },
     },
   },
   {
@@ -108,7 +110,8 @@ export const WARDROBE_CATALOG: readonly WardrobeItem[] = [
       svgPath:
         'M -18 6 L -24 -14 L -18 -8 L -16 -20 L -11 -4 L -13 6 Z M 18 6 L 24 -14 L 18 -8 L 16 -20 L 11 -4 L 13 6 Z',
       animation: 'shimmer',
-      offset: { x: 0, y: -14 },
+      scale: 1.5,
+      offset: { x: 0, y: -18 },
     },
   },
   {
@@ -197,6 +200,7 @@ export const WARDROBE_CATALOG: readonly WardrobeItem[] = [
         'M -20 4 L -18.5 8 L -14 8 L -17.5 10.5 L -16 15 L -20 12 L -24 15 L -22.5 10.5 L -26 8 L -21.5 8 Z ' +
         'M 20 -2 L 21.5 2 L 26 2 L 22.5 4.5 L 24 9 L 20 6 L 16 9 L 17.5 4.5 L 14 2 L 18.5 2 Z',
       animation: 'sparkle',
+      scale: 1.5,
       particles: { count: 5, color: '#E0E7FF', size: 1.2, behavior: 'ambient' },
     },
   },
@@ -219,6 +223,7 @@ export const WARDROBE_CATALOG: readonly WardrobeItem[] = [
       svgPath:
         'M 0 -26 L 22.5 13 L -22.5 13 Z M 0 26 L 22.5 -13 L -22.5 -13 Z',
       animation: 'shimmer',
+      scale: 1.5,
     },
   },
   {

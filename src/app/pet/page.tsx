@@ -1,5 +1,6 @@
 "use client";
 
+import { CosmeticsPanel } from "@/components/CosmeticsPanel";
 import { EvolutionPanel } from "@/components/EvolutionPanel";
 import { HUD, HUDAdvancedStats } from "@/components/HUD";
 import { PetResponseOverlay } from "@/components/PetResponseOverlay";
@@ -26,6 +27,7 @@ import {
   Compass,
   Move,
   Shield,
+  Shirt,
   Sparkles,
   UserCircle,
   Zap,
@@ -55,6 +57,7 @@ export default function PetPage() {
   const [addonEditMode, setAddonEditMode] = useState(false);
   const [addonsInitialized, setAddonsInitialized] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showWardrobe, setShowWardrobe] = useState(false);
   const [showCertificate, setShowCertificate] = useState(false);
   const [showWellnessSync, setShowWellnessSync] = useState(false);
   useJourneyProgressTracker("pet", { completeOnVisit: true });
@@ -215,6 +218,36 @@ export default function PetPage() {
 
           <div className="flex-shrink-0 border-t border-slate-700/50 bg-slate-900/90 p-4 sm:p-6">
             <HUD mode="simple" />
+
+            {/* Wardrobe lives beside the live pet so equipping is instantly
+                visible above. */}
+            <div className="mt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowWardrobe((prev) => !prev)}
+                className={`w-full justify-between border-slate-700 text-slate-200 hover:bg-slate-800 ${
+                  showWardrobe ? "bg-slate-800/90" : "bg-slate-900/70"
+                }`}
+                aria-expanded={showWardrobe}
+              >
+                <span className="flex items-center gap-2 font-semibold">
+                  <Shirt className="h-4 w-4 text-cyan-300" />
+                  Wardrobe
+                </span>
+                {showWardrobe ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </Button>
+              {showWardrobe && (
+                <div className="mt-4 rounded-2xl border border-slate-800/80 bg-slate-950/60 p-4">
+                  <CosmeticsPanel />
+                </div>
+              )}
+            </div>
+
             <div className="mt-6 border-t border-slate-800/80 pt-4">
               <Button
                 type="button"

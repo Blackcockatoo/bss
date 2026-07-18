@@ -49,7 +49,9 @@ export function WardrobeUnlockCeremony() {
 
   return (
     <div
-      className="fixed inset-x-0 bottom-24 z-50 flex justify-center px-4 sm:bottom-10"
+      // Sits above the fixed QuickNav bar (z-50) and clears its height so
+      // the Equip Now / Continue buttons are always clickable.
+      className="fixed inset-x-0 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-[60] flex justify-center px-4 sm:bottom-[calc(6.5rem+env(safe-area-inset-bottom))]"
       role="dialog"
       aria-label={`New wardrobe item unlocked: ${item.name}`}
       data-testid="wardrobe-unlock-ceremony"
