@@ -359,8 +359,8 @@ function isHexColor(value: unknown): value is string {
   return typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value);
 }
 
-function sanitizeNumber(value: unknown, fallback: number): number {
-  return isFiniteNumber(value) ? value : fallback;
+function sanitizeNumber(value: unknown, fallback: number, min: number, max: number): number {
+  return isFiniteNumber(value) ? clamp(value, min, max) : fallback;
 }
 
 function sanitizeColor(value: unknown, fallback: string): string {
@@ -397,36 +397,36 @@ export function sanitizeBodySpec(value: unknown): BodySpec {
     primaryColor: sanitizeColor(candidate.primaryColor, DEFAULT_BODY_SPEC.primaryColor),
     secondaryColor: sanitizeColor(candidate.secondaryColor, DEFAULT_BODY_SPEC.secondaryColor),
     highlightColor: sanitizeColor(candidate.highlightColor, DEFAULT_BODY_SPEC.highlightColor),
-    bodyWidth: sanitizeNumber(candidate.bodyWidth, DEFAULT_BODY_SPEC.bodyWidth),
-    bodyHeight: sanitizeNumber(candidate.bodyHeight, DEFAULT_BODY_SPEC.bodyHeight),
-    bodyScale: sanitizeNumber(candidate.bodyScale, DEFAULT_BODY_SPEC.bodyScale),
-    cornerRoundness: sanitizeNumber(candidate.cornerRoundness, DEFAULT_BODY_SPEC.cornerRoundness),
+    bodyWidth: sanitizeNumber(candidate.bodyWidth, DEFAULT_BODY_SPEC.bodyWidth, 58, 170),
+    bodyHeight: sanitizeNumber(candidate.bodyHeight, DEFAULT_BODY_SPEC.bodyHeight, 62, 180),
+    bodyScale: sanitizeNumber(candidate.bodyScale, DEFAULT_BODY_SPEC.bodyScale, 0.48, 1.65),
+    cornerRoundness: sanitizeNumber(candidate.cornerRoundness, DEFAULT_BODY_SPEC.cornerRoundness, 0, 50),
     genderFrame: sanitizeEnum(candidate.genderFrame, GENDER_FRAMES, DEFAULT_BODY_SPEC.genderFrame),
-    shoulders: sanitizeNumber(candidate.shoulders, DEFAULT_BODY_SPEC.shoulders),
-    waist: sanitizeNumber(candidate.waist, DEFAULT_BODY_SPEC.waist),
-    hips: sanitizeNumber(candidate.hips, DEFAULT_BODY_SPEC.hips),
-    textureScale: sanitizeNumber(candidate.textureScale, DEFAULT_BODY_SPEC.textureScale),
-    textureDepth: sanitizeNumber(candidate.textureDepth, DEFAULT_BODY_SPEC.textureDepth),
-    textureRoughness: sanitizeNumber(candidate.textureRoughness, DEFAULT_BODY_SPEC.textureRoughness),
-    eyeSize: sanitizeNumber(candidate.eyeSize, DEFAULT_BODY_SPEC.eyeSize),
-    eyeSpacing: sanitizeNumber(candidate.eyeSpacing, DEFAULT_BODY_SPEC.eyeSpacing),
-    eyeHeight: sanitizeNumber(candidate.eyeHeight, DEFAULT_BODY_SPEC.eyeHeight),
-    pupilSize: sanitizeNumber(candidate.pupilSize, DEFAULT_BODY_SPEC.pupilSize),
-    gazeX: sanitizeNumber(candidate.gazeX, DEFAULT_BODY_SPEC.gazeX),
-    gazeY: sanitizeNumber(candidate.gazeY, DEFAULT_BODY_SPEC.gazeY),
-    mouthWidth: sanitizeNumber(candidate.mouthWidth, DEFAULT_BODY_SPEC.mouthWidth),
-    mouthHeight: sanitizeNumber(candidate.mouthHeight, DEFAULT_BODY_SPEC.mouthHeight),
-    wingSpread: sanitizeNumber(candidate.wingSpread, DEFAULT_BODY_SPEC.wingSpread),
+    shoulders: sanitizeNumber(candidate.shoulders, DEFAULT_BODY_SPEC.shoulders, 20, 90),
+    waist: sanitizeNumber(candidate.waist, DEFAULT_BODY_SPEC.waist, 20, 90),
+    hips: sanitizeNumber(candidate.hips, DEFAULT_BODY_SPEC.hips, 20, 90),
+    textureScale: sanitizeNumber(candidate.textureScale, DEFAULT_BODY_SPEC.textureScale, 5, 100),
+    textureDepth: sanitizeNumber(candidate.textureDepth, DEFAULT_BODY_SPEC.textureDepth, 0, 100),
+    textureRoughness: sanitizeNumber(candidate.textureRoughness, DEFAULT_BODY_SPEC.textureRoughness, 0, 100),
+    eyeSize: sanitizeNumber(candidate.eyeSize, DEFAULT_BODY_SPEC.eyeSize, 5, 22),
+    eyeSpacing: sanitizeNumber(candidate.eyeSpacing, DEFAULT_BODY_SPEC.eyeSpacing, 20, 72),
+    eyeHeight: sanitizeNumber(candidate.eyeHeight, DEFAULT_BODY_SPEC.eyeHeight, 82, 125),
+    pupilSize: sanitizeNumber(candidate.pupilSize, DEFAULT_BODY_SPEC.pupilSize, 2, 10),
+    gazeX: sanitizeNumber(candidate.gazeX, DEFAULT_BODY_SPEC.gazeX, -7, 7),
+    gazeY: sanitizeNumber(candidate.gazeY, DEFAULT_BODY_SPEC.gazeY, -6, 6),
+    mouthWidth: sanitizeNumber(candidate.mouthWidth, DEFAULT_BODY_SPEC.mouthWidth, 10, 58),
+    mouthHeight: sanitizeNumber(candidate.mouthHeight, DEFAULT_BODY_SPEC.mouthHeight, 2, 24),
+    wingSpread: sanitizeNumber(candidate.wingSpread, DEFAULT_BODY_SPEC.wingSpread, 0.2, 1.65),
     wingStyle: sanitizeEnum(candidate.wingStyle, WING_STYLES, DEFAULT_BODY_SPEC.wingStyle),
     wingPurpose: sanitizeEnum(candidate.wingPurpose, WING_PURPOSES, DEFAULT_BODY_SPEC.wingPurpose),
-    hornLength: sanitizeNumber(candidate.hornLength, DEFAULT_BODY_SPEC.hornLength),
-    outlineWidth: sanitizeNumber(candidate.outlineWidth, DEFAULT_BODY_SPEC.outlineWidth),
-    glow: sanitizeNumber(candidate.glow, DEFAULT_BODY_SPEC.glow),
-    tilt: sanitizeNumber(candidate.tilt, DEFAULT_BODY_SPEC.tilt),
-    bob: sanitizeNumber(candidate.bob, DEFAULT_BODY_SPEC.bob),
-    breathe: sanitizeNumber(candidate.breathe, DEFAULT_BODY_SPEC.breathe),
-    animationSpeed: sanitizeNumber(candidate.animationSpeed, DEFAULT_BODY_SPEC.animationSpeed),
-    features: sanitizeFeatures(candidate.features) ?? DEFAULT_BODY_SPEC.features,
+    hornLength: sanitizeNumber(candidate.hornLength, DEFAULT_BODY_SPEC.hornLength, 8, 64),
+    outlineWidth: sanitizeNumber(candidate.outlineWidth, DEFAULT_BODY_SPEC.outlineWidth, 0, 9),
+    glow: sanitizeNumber(candidate.glow, DEFAULT_BODY_SPEC.glow, 0, 1),
+    tilt: sanitizeNumber(candidate.tilt, DEFAULT_BODY_SPEC.tilt, -18, 18),
+    bob: sanitizeNumber(candidate.bob, DEFAULT_BODY_SPEC.bob, 0, 20),
+    breathe: sanitizeNumber(candidate.breathe, DEFAULT_BODY_SPEC.breathe, 0, 0.12),
+    animationSpeed: sanitizeNumber(candidate.animationSpeed, DEFAULT_BODY_SPEC.animationSpeed, 0.25, 2.5),
+    features: sanitizeFeatures(candidate.features) ?? [...DEFAULT_BODY_SPEC.features],
   };
 }
 
@@ -539,14 +539,15 @@ export function loadForgedBody(): BodySpec | null {
 
 export function saveForgedBody(spec: BodySpec, genome?: Genome | null, fallbackSeed = 0): void {
   if (typeof window === 'undefined') return;
+  const body = sanitizeBodySpec(spec);
   const packet: StoredBodyPacket = {
     version: STORED_BODY_PACKET_VERSION,
     savedAt: Date.now(),
     genomeFingerprint: getGenomeVisualFingerprint(genome, fallbackSeed),
-    body: spec,
+    body,
   };
   window.localStorage.setItem(BODY_FORGE_STORAGE_KEY, JSON.stringify(packet));
-  window.dispatchEvent(new CustomEvent('bss:body-forge:updated', { detail: spec }));
+  window.dispatchEvent(new CustomEvent('bss:body-forge:updated', { detail: body }));
 }
 
 export function clearForgedBody(): void {
@@ -576,6 +577,6 @@ export function createDNAReadyBodyPacket(
     createdAt: new Date().toISOString(),
     source: 'body-forge',
     genomeFingerprint: getGenomeVisualFingerprint(genome, fallbackSeed),
-    body: spec,
+    body: sanitizeBodySpec(spec),
   };
 }
