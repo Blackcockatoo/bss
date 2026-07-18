@@ -43,6 +43,18 @@ interface AddonRendererProps {
   onResetPosition?: () => void;
   /** Respect the user's reduced-motion preference */
   reduceMotion?: boolean;
+  /**
+   * Override the built-in Auralia-proportioned anchor math for a
+   * differently-scaled body canvas (e.g. Body Forge). Receives the addon's
+   * own anchor point and offset; `petPosition`/`petSize` are ignored when
+   * this is provided.
+   */
+  resolveAnchor?: (
+    anchorPoint: Addon["attachment"]["anchorPoint"],
+    offset: Addon["attachment"]["offset"],
+  ) => { x: number; y: number };
+  /** Extra uniform scale on top of attachment.scale, for reuse on a canvas sized differently than Auralia's 400x400. */
+  scaleMultiplier?: number;
 }
 
 export const AddonRenderer: React.FC<AddonRendererProps> = ({
@@ -63,6 +75,8 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
   onToggleLock,
   onResetPosition,
   reduceMotion = false,
+  resolveAnchor,
+  scaleMultiplier = 1,
 }) => {
   const { attachment, visual } = addon;
   const popProfile = RARITY_POP[addon.rarity];
@@ -81,6 +95,8 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
 
   // Calculate default position based on attachment point
   const defaultPosition = useMemo(() => {
+    if (resolveAnchor) return resolveAnchor(attachment.anchorPoint, attachment.offset);
+
     const baseX = petPosition.x;
     const baseY = petPosition.y;
 
@@ -124,7 +140,7 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
       x: anchorX + attachment.offset.x,
       y: anchorY + attachment.offset.y,
     };
-  }, [petPosition, attachment]);
+  }, [petPosition, attachment, resolveAnchor]);
 
   // Use custom position if available, otherwise use default
   const position = useMemo(() => {
@@ -237,7 +253,7 @@ export const AddonRenderer: React.FC<AddonRendererProps> = ({
 
   return (
     <g
-      transform={`translate(${position.x}, ${position.y}) rotate(${attachment.rotation}) scale(${attachment.scale * snapOn.scale})`}
+      transform={`translate(${position.x}, ${position.y}) rotate(${attachment.rotation}) scale(${attachment.scale * snapOn.scale * scaleMultiplier})`}
       opacity={opacity}
       onMouseEnter={() => draggable && setShowControls(true)}
       onMouseLeave={() => !isDragging && setShowControls(false)}

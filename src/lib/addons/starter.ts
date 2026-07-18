@@ -70,10 +70,13 @@ export async function initializeStarterAddons(): Promise<{
     }).filter(Boolean);
 
     let created = 0;
+    // mintAddon composes ids as `${templateId}-${edition}`, not the bare
+    // template id, so ownership is checked by prefix.
+    const ownedIds = Object.values(addons).map((addon) => addon.id);
 
     for (const template of starterTemplates) {
       // idempotent: only mint if user doesn't already own this template id
-      if (addons[template.id]) {
+      if (ownedIds.some((id) => id.startsWith(template.id))) {
         continue;
       }
 

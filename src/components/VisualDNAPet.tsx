@@ -11,6 +11,7 @@ import {
 import { motion, useReducedMotion } from "framer-motion";
 
 import { useStore } from "@/lib/store";
+import { useAddonStore } from "@/lib/addons";
 import {
   PetBodyRenderer,
   type BodySpec,
@@ -151,6 +152,10 @@ export function VisualDNAPet({
   const essence = useStore((state) => state.essence);
   const vimanaNodes = useStore((state) => state.vimana?.nodes);
   const reducedMotion = useReducedMotion();
+  // Same equipped wardrobe as the Auralia form — one inventory, rendered on
+  // whichever body is currently on stage.
+  const { getEquippedAddons } = useAddonStore();
+  const equippedAddons = getEquippedAddons();
   const sealed = systemState === "sealed";
   // Tracks which action timestamp has aged past the reaction window. Keeps
   // render pure (no Date.now during render): while an action is fresh the
@@ -722,6 +727,7 @@ export function VisualDNAPet({
               performance={performanceFrame}
               living={sealed ? null : living}
               activeClipId={sealed ? null : movement.active.clip.id}
+              addons={equippedAddons}
             />
           </div>
         </div>
@@ -874,6 +880,7 @@ export function VisualDNAPet({
                   performance={performanceFrame}
                   living={sealed ? null : living}
                   activeClipId={sealed ? null : movement.active.clip.id}
+                  addons={equippedAddons}
                 />
               </motion.g>
             )}

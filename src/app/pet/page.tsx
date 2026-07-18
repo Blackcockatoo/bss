@@ -8,6 +8,7 @@ import { RouteProgressionCard } from "@/components/RouteProgressionCard";
 import { RouteTutorialControls } from "@/components/RouteTutorialControls";
 import { AddonInventoryPanel } from "@/components/addons/AddonInventoryPanel";
 import { PetProfilePanel } from "@/components/addons/PetProfilePanel";
+import { CosmeticsPanel } from "@/components/CosmeticsPanel";
 import {
   CertificateButton,
   RegistrationCertificate,
@@ -150,8 +151,13 @@ export default function PetPage() {
 
   const selectPetRuntime = (nextPetType: PetType) => {
     setPetType(nextPetType);
+    // Drag-to-reposition is Auralia-only; the wardrobe itself (equip panel,
+    // rendering) now follows the companion across Auralia and Evolved forms.
+    // Geometry is an abstract Sri Yantra manifestation with no body to dress.
     if (nextPetType !== "auralia") {
       setAddonEditMode(false);
+    }
+    if (nextPetType === "geometry") {
       setShowAddonPanel(false);
     }
   };
@@ -297,7 +303,9 @@ export default function PetPage() {
                       returns here in Evolved form, where the Moss60 movement
                       and identity layer performs on the inherited body;
                       Geometry is the separate Sri Yantra manifestation of the
-                      same genome; Auralia is the default form.
+                      same genome; Auralia is the default form. Wardrobe items
+                      are equipped once and render on both Auralia and
+                      Evolved — Geometry has no body to dress.
                     </p>
                   </div>
 
@@ -354,7 +362,7 @@ export default function PetPage() {
                       <Shield className="h-4 w-4" />
                       Profile
                     </Button>
-                    {petType === "auralia" && (
+                    {petType !== "geometry" && (
                       <Button
                         variant="outline"
                         size="sm"
@@ -366,7 +374,7 @@ export default function PetPage() {
                         }`}
                       >
                         <Sparkles className="h-4 w-4" />
-                        Addons
+                        Wardrobe
                       </Button>
                     )}
                     <Button
@@ -403,8 +411,11 @@ export default function PetPage() {
                         onEditModeChange={setAddonEditMode}
                       />
                     )}
-                    {petType === "auralia" && showAddonPanel && (
-                      <AddonInventoryPanel />
+                    {petType !== "geometry" && showAddonPanel && (
+                      <div className="space-y-4 md:col-span-2">
+                        <AddonInventoryPanel />
+                        <CosmeticsPanel />
+                      </div>
                     )}
                     {showEvolutionPanel && (
                       <div className="rounded-lg border border-emerald-800/60 bg-zinc-950/60 p-4 md:col-span-2">

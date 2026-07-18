@@ -1,12 +1,15 @@
 "use client";
 
-import { useId } from "react";
+import { useEffect, useId, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
 import type {
   BodyPerformanceState,
   MovementPerformance,
 } from "@/pet/performance";
+import type { Addon } from "@/lib/addons/types";
+import { resolveBodyForgeAnchor, BODY_FORGE_ADDON_SCALE } from "@/lib/addons/bodyForgeAnchors";
+import { AddonRenderer, AddonSVGDefs } from "@/components/addons/AddonRenderer";
 
 export type BodyShape =
   | "round"
@@ -568,6 +571,7 @@ export function PetBodyRenderer({
   performance = null,
   living = null,
   activeClipId = null,
+  addons = [],
 }: {
   spec: BodySpec;
   className?: string;
@@ -584,6 +588,8 @@ export function PetBodyRenderer({
   living?: BodyPerformanceState | null;
   /** Active clip id, for signature dressings (Moss60 orbit, venom pulse). */
   activeClipId?: string | null;
+  /** Equipped wardrobe addons to render on this body (same inventory as Auralia). */
+  addons?: Addon[];
 }) {
   const rawId = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const reducedMotion = useReducedMotion();
@@ -593,6 +599,24 @@ export function PetBodyRenderer({
   const patternId = `body-pattern-${rawId}`;
   const glowId = `body-glow-${rawId}`;
   const grainId = `body-grain-${rawId}`;
+
+  // Wardrobe addons share Auralia's clock convention: a monotonic ms value
+  // driving float/rotate/pulse cycles. Owned locally since Body Forge has no
+  // other need for a live time source.
+  const [addonAnimationPhase, setAddonAnimationPhase] = useState(0);
+  useEffect(() => {
+    if (addons.length === 0 || !animate || reducedMotion) return;
+    let rafId: number;
+    let lastTime = Date.now();
+    const tick = () => {
+      const now = Date.now();
+      setAddonAnimationPhase((prev) => prev + (now - lastTime));
+      lastTime = now;
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [addons.length, animate, reducedMotion]);
   const fill =
     spec.pattern === "solid" ? spec.primaryColor : `url(#${patternId})`;
   const leftEye = 140 - spec.eyeSpacing / 2;
@@ -1276,6 +1300,26 @@ export function PetBodyRenderer({
         </g>
       </motion.g>
       </g>
+
+      {addons.length > 0 && (
+        <>
+          <AddonSVGDefs />
+          <g data-testid="body-forge-addon-layer">
+            {addons.map((addon) => (
+              <AddonRenderer
+                key={addon.id}
+                addon={addon}
+                animationPhase={addonAnimationPhase}
+                reduceMotion={Boolean(reducedMotion)}
+                resolveAnchor={(anchorPoint, offset) =>
+                  resolveBodyForgeAnchor(spec, anchorPoint, offset)
+                }
+                scaleMultiplier={BODY_FORGE_ADDON_SCALE}
+              />
+            ))}
+          </g>
+        </>
+      )}
     </motion.svg>
   );
 }
