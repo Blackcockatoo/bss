@@ -2,6 +2,7 @@
 
 import { EvolutionPanel } from "@/components/EvolutionPanel";
 import { HUD, HUDAdvancedStats } from "@/components/HUD";
+import { PetRegistryBootstrap } from "@/components/PetRegistryBootstrap";
 import { PetResponseOverlay } from "@/components/PetResponseOverlay";
 import { PetRuntimeStage } from "@/components/PetRuntimeStage";
 import { RouteProgressionCard } from "@/components/RouteProgressionCard";
@@ -167,6 +168,7 @@ export default function PetPage() {
     <div
       className={`min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-slate-950 ${imprintAccentClass} to-slate-900 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]`}
     >
+      <PetRegistryBootstrap />
       <PetResponseOverlay enableAudio={true} enableAnticipation={true} />
 
       <div

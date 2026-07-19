@@ -101,6 +101,11 @@ The `/pet` route stops invoking `SriYantraPetDisplay` directly.
 
 ### Phase 1 — Establish one canonical pet and genome record
 
+> **Status: implemented** — see `src/lib/registry/` (record, genesis,
+> registration, repository, bootstrap) and `PetRegistryBootstrap` on `/pet`.
+> `heptaProfile` stays null until the Phase 2 ruleset lands; ongoing
+> vitals/evolution write-back into the record arrives with the later phases.
+
 Create `PetRecordV2` as the single source of truth:
 
 ```
