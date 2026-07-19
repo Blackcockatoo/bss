@@ -366,6 +366,20 @@ function sparklePath(cx: number, cy: number, r: number): string {
   return `M${cx} ${cy - r} L${cx + r * 0.28} ${cy - r * 0.28} L${cx + r} ${cy} L${cx + r * 0.28} ${cy + r * 0.28} L${cx} ${cy + r} L${cx - r * 0.28} ${cy + r * 0.28} L${cx - r} ${cy} L${cx - r * 0.28} ${cy - r * 0.28}Z`;
 }
 
+// Rounded to sidestep last-bit differences between the server's and
+// browser's Math.sin/Math.cos, which otherwise trip a React hydration
+// mismatch on every particle coordinate.
+function round(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
+// Deterministic per-particle pseudo-random jitter (no Math.random, so it
+// stays identical between server and client render).
+function jitterFor(index: number): number {
+  const seed = Math.sin(index * 12.9898) * 43758.5453;
+  return seed - Math.floor(seed);
+}
+
 function AuraPreview({
   spec,
   moving,
@@ -393,10 +407,16 @@ function AuraPreview({
             : spec.auraMotion === "drift"
               ? { x: [-6, 7, -4], y: [5, -6, 5] }
               : { rotate: [0, 360] };
+  // Turbulence roughens the field: each particle drifts off its clean
+  // orbit by an amount proportional to the turbulence gene.
+  const turbulence = spec.auraTurbulence / 100;
   const particles = Array.from({ length: particleCount }, (_, index) => {
-    const angle = (index / particleCount) * Math.PI * 2;
-    const x = 140 + Math.cos(angle) * radius;
-    const y = 112 + Math.sin(angle) * radius * 0.75;
+    const angle =
+      (index / particleCount) * Math.PI * 2 +
+      (jitterFor(index) - 0.5) * turbulence;
+    const particleRadius = radius * (1 + (jitterFor(index + 97) - 0.5) * turbulence * 0.6);
+    const x = round(140 + Math.cos(angle) * particleRadius);
+    const y = round(112 + Math.sin(angle) * particleRadius * 0.75);
     const color = index % 2 ? spec.auraColor : spec.auraSecondary;
     if (spec.auraStyle === "sparkle")
       return (
