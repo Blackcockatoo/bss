@@ -1,7 +1,7 @@
 'use client';
 
 import AuraliaMetaPet from '@/components/AuraliaMetaPet';
-import { SriYantraPetDisplay } from '@/components/SriYantraPetDisplay';
+import { GeometryAvatarRenderer } from '@/components/GeometryAvatarRenderer';
 import { VisualDNAPet } from '@/components/VisualDNAPet';
 import { PetRuntimeDiagnostics } from '@/components/dev/PetRuntimeDiagnostics';
 import { useStore } from '@/lib/store';
@@ -37,7 +37,6 @@ export function PetRuntimeStage({
     getServerReadySnapshot,
   );
   const petType = useStore((state) => state.petType);
-  const genome = useStore((state) => state.genome);
 
   // Auralia and the DNA renderers use time, canvas, and reduced-motion state.
   // Keep them out of the server snapshot so hydration is deterministic, then
@@ -77,12 +76,7 @@ export function PetRuntimeStage({
         className="relative flex h-full min-h-[520px] items-center justify-center p-3 sm:p-5"
       >
         <PetRuntimeDiagnostics />
-        <SriYantraPetDisplay
-          red={genome?.red60.join('')}
-          blue={genome?.blue60.join('')}
-          black={genome?.black60.join('')}
-          animated
-        />
+        <GeometryAvatarRenderer animated />
       </div>
     );
   }

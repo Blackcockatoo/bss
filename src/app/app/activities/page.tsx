@@ -46,13 +46,13 @@ export default function AppActivitiesPage() {
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-8 space-y-6">
-      <header className="rounded-xl border border-slate-800 bg-slate-900/60 p-5">
-        <h1 className="text-2xl font-semibold text-white">Activities</h1>
+      <header className="rounded-[2rem] border border-cyan-400/20 bg-gradient-to-br from-cyan-950/70 via-slate-900 to-violet-950/60 p-5 sm:p-7">
+        <p className="text-xs font-bold uppercase tracking-[0.22em] text-cyan-300">Pick your next adventure</p>
+        <h1 className="mt-2 text-3xl font-black text-white">What sounds fun today?</h1>
         <p className="mt-2 text-zinc-300">
-          Battle, explore, play mini-games, unlock cosmetics, and track
-          achievements for your active companion.
+          Play a game, explore a new world, style your pet, or collect a win.
           {showNavigator &&
-            " Use the navigator wheel to jump between core tools from the dashboard."}
+            " The Navigator starts with easy adventure cards, so no spinning is required."}
         </p>
         <p className="mt-2 text-xs text-zinc-500">
           Live progress: Level {evolution.level} · Battle streak {battle.streak}

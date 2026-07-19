@@ -24,6 +24,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Geometry sprite lock
+        run: npm run check:geometry-sprite-lock
+
   unit:
     name: Unit tests
     runs-on: ubuntu-latest

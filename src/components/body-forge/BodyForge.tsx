@@ -208,6 +208,11 @@ export function BodyForge() {
     // Deferred so the initial load happens outside the effect body, rather
     // than setting state synchronously during mount.
     const initialLoad = window.setTimeout(() => {
+      // Checked up front (independent of the transfer-packet branch below)
+      // so a saved forge is still detected — and "Clear forged body" still
+      // shows — even when a workshop transfer link is also present.
+      const stored = loadForgedBody();
+      setHasSavedForge(stored !== null);
       // A standalone-workshop transfer packet in the URL hash takes
       // precedence: review it here, then explicitly set the inherited body.
       const encoded = new URLSearchParams(window.location.hash.slice(1)).get(
@@ -224,10 +229,8 @@ export function BodyForge() {
         );
         return;
       }
-      const stored = loadForgedBody();
       if (stored) {
         setSpec(stored);
-        setHasSavedForge(true);
       }
     }, 0);
     return () => window.clearTimeout(initialLoad);
@@ -277,13 +280,15 @@ export function BodyForge() {
   const json = useMemo(() => JSON.stringify(spec, null, 2), [spec]);
   const patch = <K extends keyof BodySpec>(key: K, value: BodySpec[K]) =>
     setSpec((current) => ({ ...current, [key]: value }));
+  // Functional update so rapid toggles (e.g. two features tapped before a
+  // re-render lands) never read a stale `spec` from the render closure.
   const toggleFeature = (feature: BodyFeature) =>
-    patch(
-      "features",
-      spec.features.includes(feature)
-        ? spec.features.filter((item) => item !== feature)
-        : [...spec.features, feature],
-    );
+    setSpec((current) => ({
+      ...current,
+      features: current.features.includes(feature)
+        ? current.features.filter((item) => item !== feature)
+        : [...current.features, feature],
+    }));
   const applyFrame = (frame: GenderFrame) =>
     setSpec((current) => ({ ...current, ...FRAME_PROFILES[frame] }));
 
@@ -496,7 +501,8 @@ export function BodyForge() {
   const clearForge = () => {
     clearForgedBody();
     setHasSavedForge(false);
-    if (dnaBody) setSpec(dnaBody);
+    setImportedFromWorkshop(false);
+    setSpec(dnaBody ?? DEFAULT_BODY_SPEC);
   };
 
   return (

@@ -137,12 +137,12 @@ export function buildDigitalDNARevealModel(): DigitalDNARevealModel {
   const leadNodes = nodes.slice(0, 3);
   const dominantLattice = leadNodes
     .map((node) => `${node.digit} ${node.shape}`)
-    .join(" · ");
+    .join(" + ");
   const liveMutationSeed = nodes
     .slice(0, 5)
     .map((node) => node.digit)
     .join("-");
-  const insight = `${dominantStrandLabel} is leading the shared score, with digit ${nodes[0]?.digit ?? 0} shining brightest across the visible lattice.`;
+  const insight = `${dominantStrandLabel} has the brightest pattern today. Number ${nodes[0]?.digit ?? 0} appears the most. Can you spot it in the star map?`;
 
   return {
     dominantStrand,
@@ -152,7 +152,7 @@ export function buildDigitalDNARevealModel(): DigitalDNARevealModel {
     dominantLattice,
     insight,
     progressionNote:
-      "Pet care creates the bond, School teaches the patterns, Identity secures ownership, and DNA reveals the mechanism underneath all three.",
+      "Your pet's DNA is a number pattern. The same pattern can become colours, shapes, and sounds. Try a tool below and see what it makes!",
     nodes,
   };
 }
