@@ -73,7 +73,8 @@ export async function initializeStarterAddons(): Promise<{
 
     for (const template of starterTemplates) {
       // idempotent: only mint if user doesn't already own this template id
-      if (addons[template.id]) {
+      const mintedEditionId = `${template.id}-1`;
+      if (addons[template.id] || addons[mintedEditionId]) {
         continue;
       }
 

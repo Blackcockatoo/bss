@@ -17,6 +17,8 @@ import { useIdentityProfileStore } from "@/lib/identity/profile";
 import { normalizePetForm, PET_FORM_STORAGE_KEY } from "@/lib/petForms";
 import { SCHOOLS_LOCAL_DATA_RETENTION_DAYS } from "@/lib/schools/storage";
 import { useStore } from "@/lib/store";
+import { WalletCards } from "lucide-react";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -127,14 +129,25 @@ export default function ClientBody({
           <div className={`text-sm ${effectiveSchoolsMode ? "text-foreground font-medium" : "text-zinc-200"}`}>
             {effectiveSchoolsMode ? "MetaPet Schools" : "Meta-Pet"}
           </div>
-          <button
-            type="button"
-            onClick={() => setPrivacyOpen((current) => !current)}
-            className={`min-h-9 rounded-full border px-3 py-1 text-xs transition-colors ${effectiveSchoolsMode ? "border-emerald-600/30 bg-emerald-50 text-emerald-700 hover:border-emerald-600/50 hover:bg-emerald-100" : "border-emerald-400/25 bg-emerald-500/10 text-emerald-200 hover:border-emerald-300/45 hover:bg-emerald-500/15"}`}
-            aria-expanded={privacyOpen}
-          >
-            Local-first / child-safe
-          </button>
+          <div className="flex items-center gap-2">
+            {!effectiveSchoolsMode && (
+              <Link
+                href="/wallet"
+                className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-cyan-400/25 bg-cyan-500/10 px-3 py-1 text-xs font-semibold text-cyan-200 transition hover:border-cyan-300/45 hover:bg-cyan-500/15"
+              >
+                <WalletCards className="h-3.5 w-3.5" />
+                B$S Vault
+              </Link>
+            )}
+            <button
+              type="button"
+              onClick={() => setPrivacyOpen((current) => !current)}
+              className={`min-h-9 rounded-full border px-3 py-1 text-xs transition-colors ${effectiveSchoolsMode ? "border-emerald-600/30 bg-emerald-50 text-emerald-700 hover:border-emerald-600/50 hover:bg-emerald-100" : "border-emerald-400/25 bg-emerald-500/10 text-emerald-200 hover:border-emerald-300/45 hover:bg-emerald-500/15"}`}
+              aria-expanded={privacyOpen}
+            >
+              Local-first / child-safe
+            </button>
+          </div>
         </div>
         {privacyOpen && (
           <div className={`mx-auto mt-3 w-full max-w-6xl rounded-2xl border p-3 text-xs leading-5 sm:leading-6 ${effectiveSchoolsMode ? "border-border bg-card text-muted-foreground" : "border-slate-800 bg-slate-900/60 text-zinc-300"}`}>

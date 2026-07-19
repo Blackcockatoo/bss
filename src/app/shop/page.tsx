@@ -207,6 +207,12 @@ export default function ShopPage() {
           >
             Go to Pet & Equip →
           </Link>
+          <Link
+            href="/wallet"
+            className="w-full rounded-xl border border-cyan-400/40 bg-cyan-500/10 px-4 py-2 text-center text-[13px] font-semibold text-cyan-200 transition hover:border-cyan-300 sm:w-auto sm:text-sm"
+          >
+            Open B$S Vault →
+          </Link>
           {subscription.planId === "free" && (
             <Link
               href="/pricing"
@@ -283,7 +289,7 @@ export default function ShopPage() {
             </h3>
             <p className="mt-2 max-w-xl text-sm text-zinc-400 leading-relaxed">
               Buy individual addon packs from $1.99. Creators earn 70% of each
-              sale. Limited-edition mythic drops with on-chain scarcity.
+              sale. Limited-edition mythic drops with signed edition limits.
               Educators can share curriculum-themed addon bundles. The
               marketplace opens when the ecosystem is ready.
             </p>
