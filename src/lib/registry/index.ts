@@ -1,6 +1,7 @@
 export {
   detectGenomeRadix,
   HEPTA_CODE_VERSION_V1,
+  HEPTA_CODE_VERSION_V2,
   isGenomeOfRadix,
   isPetRecordV2,
   PET_RECORD_SCHEMA_VERSION,

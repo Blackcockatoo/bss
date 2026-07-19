@@ -139,6 +139,13 @@ silently regenerated.
 
 ### Phase 2 — Implement proper Hepta and characteristic maths
 
+> **Status: implemented** — `src/lib/heptaProfile/` (seven-axis profile with
+> published vectors in `docs/protocol/vectors/hepta-profile-v2.json`) and
+> `src/lib/identity/hepta/eccV2.ts` (GF(7) single-symbol-correcting code,
+> all 252 corruption cases tested; V1 kept read-only). Registration mints
+> hepta-ecc/v2 codes and derives the profile; pre-ruleset records backfill
+> idempotently. The vitals/bond expression overlay lands with Phase 4.
+
 Two deliberately separate concepts:
 
 - **HeptaCode**: the portable 42-digit identity/error-correction code.

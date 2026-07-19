@@ -9,6 +9,7 @@
  * crest, and HeptaCode; no existing genome is ever silently regenerated.
  */
 
+import { deriveHeptaProfile } from '@/lib/heptaProfile';
 import type { PetSaveData } from '@/lib/persistence/indexeddb';
 import { getAllPets } from '@/lib/persistence/indexeddb';
 
@@ -228,7 +229,16 @@ export function createPetRepository(
 
     async ensureRegisteredPet(options = {}) {
       const active = await this.loadActiveRecord();
-      if (active) return active;
+      if (active) {
+        // Idempotent backfill: records minted before the hepta-profile/v2
+        // ruleset gain their profile on load. Derived data only — the genome
+        // and identity artifacts are untouched.
+        if (!active.heptaProfile) {
+          active.heptaProfile = deriveHeptaProfile(active.genome);
+          await this.saveRecord(active);
+        }
+        return active;
+      }
 
       const legacyLoader = options.loadLegacyPets ?? getAllPets;
       const legacy = newestLegacyPet(await loadLegacyPetsSafely(legacyLoader));

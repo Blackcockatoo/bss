@@ -9,6 +9,7 @@
 
 import type { EvolutionData } from '@/lib/evolution';
 import type { DerivedTraits, Genome, GenomeHash } from '@/lib/genome';
+import type { HeptaProfileV2 } from '@/lib/heptaProfile';
 import type { HeptaDigits, PrimeTailID } from '@/lib/identity/types';
 import type { Vitals } from '@metapet/core/vitals';
 
@@ -26,8 +27,10 @@ export const RULESET_VERSION = 'bss-ruleset/v1';
  */
 export const PROJECTION_VERSION_V1 = 'moss60-profile/v1';
 
-/** Version of the HeptaCode error-correction layer. */
+/** Versions of the HeptaCode error-correction layer. V1 (single weighted
+ * checksum) is read-only for codes minted before the V2 GF(7) code. */
 export const HEPTA_CODE_VERSION_V1 = 'hepta-ecc/v1';
+export const HEPTA_CODE_VERSION_V2 = 'hepta-ecc/v2';
 
 /**
  * Digit base of the genome strands. Legacy genomes were generated in base 7
@@ -68,11 +71,11 @@ export interface PetRecordV2 {
   genomeRadix: GenomeRadix;
   traits: DerivedTraits;
   /**
-   * Seven-axis inherited characteristic profile. Derived in Phase 2
-   * (hepta-profile/v2); null until that ruleset lands. Existing records are
-   * backfilled idempotently when it does.
+   * Seven-axis inherited characteristic profile (hepta-profile/v2). Null
+   * only for records minted before the ruleset landed; the repository
+   * backfills those idempotently on load.
    */
-  heptaProfile: null;
+  heptaProfile: HeptaProfileV2 | null;
   heptaCode: HeptaCodeRecord | null;
   crest: PrimeTailID | null;
   /** Crest HMAC over the registration payload; verification state for the certificate. */

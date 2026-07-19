@@ -108,6 +108,29 @@ describe('PetRepository.ensureRegisteredPet', () => {
   });
 });
 
+describe('PetRepository hepta-profile backfill', () => {
+  it('backfills records minted before the profile ruleset, idempotently', async () => {
+    const repository = createPetRepository(createMemoryStorage());
+    const record = await repository.ensureRegisteredPet({
+      loadLegacyPets: async () => [],
+      hmacKey,
+    });
+
+    // Simulate a pre-ruleset record already on disk.
+    const preRuleset = { ...record, heptaProfile: null };
+    await repository.saveRecord(preRuleset);
+    expect((await repository.loadActiveRecord())?.heptaProfile).toBeNull();
+
+    const backfilled = await repository.ensureRegisteredPet({ hmacKey });
+    expect(backfilled.heptaProfile).toEqual(record.heptaProfile);
+    expect(backfilled.genome).toEqual(record.genome);
+    // Persisted, so the next load sees the profile without re-deriving.
+    expect((await repository.loadActiveRecord())?.heptaProfile).toEqual(
+      record.heptaProfile,
+    );
+  });
+});
+
 describe('PetRepository.saveRecord', () => {
   it('refuses to overwrite a registered pet with a different genome', async () => {
     const repository = createPetRepository(createMemoryStorage());

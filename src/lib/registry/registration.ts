@@ -11,8 +11,9 @@
 
 import { decodeGenome, hashGenome, type Genome } from '@/lib/genome';
 import { webGenomeCryptoAdapter } from '@/lib/genome/webCrypto';
+import { deriveHeptaProfile } from '@/lib/heptaProfile';
 import { getDeviceHmacKey, mintPrimeTailId } from '@/lib/identity/crest';
-import { createHeptaPayload, heptaEncode42 } from '@/lib/identity/hepta';
+import { createHeptaPayload, heptaEncode42V2 } from '@/lib/identity/hepta';
 import type { Rotation, Vault } from '@/lib/identity/types';
 import { initializeEvolution } from '@/lib/evolution';
 import { deriveMoss60PetProfile } from '@/lib/moss60/petProfile';
@@ -21,7 +22,7 @@ import { DEFAULT_VITALS, type Vitals } from '@metapet/core/vitals';
 import { generateGenomeV2, genomeDnaString } from './genesis';
 import {
   detectGenomeRadix,
-  HEPTA_CODE_VERSION_V1,
+  HEPTA_CODE_VERSION_V2,
   PET_RECORD_SCHEMA_VERSION,
   PROJECTION_VERSION_V1,
   RULESET_VERSION,
@@ -109,8 +110,10 @@ export async function buildPetRecord(
   // 2. Hash it.
   const genomeHash = await hashGenome(genome);
 
-  // 3. Birth traits come from the genome digits alone.
+  // 3. Birth traits and the seven-axis Hepta profile come from the genome
+  //    digits alone.
   const traits = decodeGenome(genome);
+  const heptaProfile = deriveHeptaProfile(genome);
 
   // 4. Geometry projection fingerprint under the pinned projection version.
   const projection = await deriveGeometryProjectionV1(genome);
@@ -124,7 +127,7 @@ export async function buildPetRecord(
     ...crestCoordinatesFromHash(genomeHash.redHash),
     hmacKey,
   });
-  const heptaDigits = await heptaEncode42(
+  const heptaDigits = await heptaEncode42V2(
     createHeptaPayload(crest, 'standard'),
     hmacKey,
   );
@@ -140,8 +143,8 @@ export async function buildPetRecord(
     genomeHash,
     genomeRadix,
     traits,
-    heptaProfile: null,
-    heptaCode: { version: HEPTA_CODE_VERSION_V1, digits: heptaDigits },
+    heptaProfile,
+    heptaCode: { version: HEPTA_CODE_VERSION_V2, digits: heptaDigits },
     crest,
     registrationSignature: crest.signature,
     projectionVersion: PROJECTION_VERSION_V1,

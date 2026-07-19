@@ -1,0 +1,42 @@
+{
+  "version": "hepta-profile/v2",
+  "note": "Fixed test vectors for the seven-axis HeptaProfile derivation (src/lib/heptaProfile). Axes are normalized 0-100 intensities from the 7x7 lane-by-family matrix; see the module header for the full contract. These vectors are frozen: a derivation change that alters them is a ruleset version bump, never a silent edit.",
+  "vectors": [
+    {
+      "name": "decimal-ramp",
+      "genome": {
+        "red60": "012345678901234567890123456789012345678901234567890123456789",
+        "blue60": "036925814703692581470369258147036925814703692581470369258147",
+        "black60": "074185296307418529630741852963074185296307418529630741852963"
+      },
+      "axes": { "void": 13, "spark": 15, "sense": 25, "voice": 8, "frame": 25, "flux": 8, "crown": 7 },
+      "dominantAxis": "sense",
+      "secondaryAxis": "frame",
+      "temperament": "curious-steadfast"
+    },
+    {
+      "name": "legacy-base7-ramp",
+      "genome": {
+        "red60": "012345601234560123456012345601234560123456012345601234560123",
+        "blue60": "024613502461350246135024613502461350246135024613502461350246",
+        "black60": "041526304152630415263041526304152630415263041526304152630415"
+      },
+      "axes": { "void": 26, "spark": 17, "sense": 16, "voice": 12, "frame": 17, "flux": 11, "crown": 1 },
+      "dominantAxis": "void",
+      "secondaryAxis": "spark",
+      "temperament": "still-fiery"
+    },
+    {
+      "name": "moss-species-strands",
+      "genome": {
+        "red60": "113031491493585389543778774590997079619617525721567332336510",
+        "blue60": "012776329785893036118967145479098334781325217074992143965631",
+        "black60": "011235831459437077415617853819099875279651673033695493257291"
+      },
+      "axes": { "void": 6, "spark": 30, "sense": 14, "voice": 12, "frame": 13, "flux": 12, "crown": 13 },
+      "dominantAxis": "spark",
+      "secondaryAxis": "sense",
+      "temperament": "fiery-curious"
+    }
+  ]
+}

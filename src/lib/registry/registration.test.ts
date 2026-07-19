@@ -90,8 +90,28 @@ describe('buildPetRecord', () => {
     });
     expect(record.mutationLog).toEqual([]);
     expect(record.heptaCode?.digits).toHaveLength(42);
+    expect(record.heptaCode?.version).toBe('hepta-ecc/v2');
     expect(record.crest?.signature).toBe(record.registrationSignature);
     expect(record.petId).toMatch(/^mp2-[0-9a-f]{16}$/);
+  });
+
+  it('derives the seven-axis Hepta profile at registration', async () => {
+    const record = await buildPetRecord({
+      genome: fixedDecimalGenome(),
+      hmacKey,
+    });
+
+    expect(record.heptaProfile?.version).toBe('hepta-profile/v2');
+    expect(record.heptaProfile?.dominantAxis).toBeDefined();
+    const axes = record.heptaProfile?.axes;
+    expect(axes && Object.keys(axes)).toHaveLength(7);
+
+    // The profile is genome-determined, so re-registration reproduces it.
+    const again = await buildPetRecord({
+      genome: fixedDecimalGenome(),
+      hmacKey,
+    });
+    expect(again.heptaProfile).toEqual(record.heptaProfile);
   });
 
   it('never modifies an explicit genome and detects its radix', async () => {
