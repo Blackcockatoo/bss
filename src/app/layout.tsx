@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import Link from "next/link";
 import type { CSSProperties } from "react";
 import "./globals.css";
 import { findSiteUrl, findSiteUrlObject } from "@/lib/env/siteUrl";
@@ -82,14 +81,6 @@ export default function RootLayout({
         <meta name="copyright" content={legalMetaContent} />
       </head>
       <body suppressHydrationWarning className="antialiased">
-        {!IS_SCHOOLS_PROFILE && (
-          <Link
-            href="/app/activities"
-            className="fixed bottom-[calc(5.75rem+env(safe-area-inset-bottom))] right-3 z-[70] inline-flex min-h-11 items-center rounded-full border border-cyan-200/50 bg-cyan-300 px-4 py-2 text-sm font-bold text-slate-950 shadow-xl shadow-cyan-950/40 transition-colors hover:bg-cyan-200 sm:bottom-6 sm:right-6"
-          >
-            Open Navigator
-          </Link>
-        )}
         <ClientBody>{children}</ClientBody>
         <Analytics />
       </body>

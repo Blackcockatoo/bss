@@ -17,16 +17,15 @@ export function DigitalDNAReveal() {
         <div className="space-y-5">
           <div className="space-y-3">
             <p className="text-xs uppercase tracking-[0.36em] text-cyan-200/80">
-              Genome Constellation Theatre
+              Your pet&apos;s DNA star map
             </p>
             <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-              The genome pays off instantly instead of asking for patience
+              Every pet has a secret pattern. Let&apos;s explore yours!
             </h1>
             <p className="max-w-3xl text-sm leading-7 text-slate-300 sm:text-base">
-              This is the hidden engine behind the companion. The star map below
-              shows which digits dominate the visible score, which strand owns
-              the loudest signals, and which mutation seed is currently shaping
-              the decoded lattice.
+              DNA is like a recipe made from numbers. Your pet&apos;s recipe turns
+              into colours, shapes, and musical notes. Find the brightest stars,
+              then try the playful tools below.
             </p>
           </div>
 
@@ -81,13 +80,13 @@ export function DigitalDNAReveal() {
                   className="rounded-2xl border border-white/10 bg-slate-950/60 p-3"
                 >
                   <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">
-                    Signal {node.digit}
+                    DNA number {node.digit}
                   </p>
                   <p className="mt-2 text-lg font-semibold text-white">
                     {node.strandLabel}
                   </p>
                   <p className="mt-1 text-sm text-slate-300">
-                    {node.note} · {node.shape}
+                    Note {node.note} &middot; {node.shape}
                   </p>
                 </div>
               ))}
@@ -98,7 +97,7 @@ export function DigitalDNAReveal() {
         <div className="space-y-4">
           <div className="rounded-[1.75rem] border border-amber-400/20 bg-amber-500/10 p-5">
             <p className="text-xs uppercase tracking-[0.26em] text-amber-200/75">
-              Instant decode
+              Your pattern power
             </p>
             <h2 className="mt-2 text-2xl font-semibold text-white">
               {model.resonanceClass}
@@ -111,33 +110,32 @@ export function DigitalDNAReveal() {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
             <div className="rounded-[1.5rem] border border-cyan-400/15 bg-slate-950/60 p-4">
               <p className="text-xs uppercase tracking-[0.24em] text-cyan-200/75">
-                Dominant lattice
+                Brightest shapes
               </p>
               <p className="mt-2 text-lg font-semibold text-white">
                 {model.dominantLattice}
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-400">
-                Three bright anchors define the first visible scaffold.
+                These three shapes appear most strongly in the pattern.
               </p>
             </div>
 
             <div className="rounded-[1.5rem] border border-fuchsia-400/15 bg-slate-950/60 p-4">
               <p className="text-xs uppercase tracking-[0.24em] text-fuchsia-200/75">
-                Live mutation seed
+                Your five-number code
               </p>
               <p className="mt-2 font-mono text-2xl font-semibold text-white">
                 {model.liveMutationSeed}
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-400">
-                Use this seed as the visible handoff into the deeper helix and
-                sound instruments below.
+                Look for these numbers again in the helix and music games below.
               </p>
             </div>
           </div>
 
           <div className="rounded-[1.5rem] border border-white/10 bg-slate-950/70 p-4">
             <p className="text-xs uppercase tracking-[0.24em] text-slate-500">
-              Why this matters
+              How the magic works
             </p>
             <p className="mt-3 text-sm leading-6 text-slate-300">
               {model.progressionNote}

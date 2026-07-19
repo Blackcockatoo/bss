@@ -1,7 +1,6 @@
 "use client";
 
 import { DigitalDNAReveal } from "@/components/DigitalDNAReveal";
-import { RouteProgressionCard } from "@/components/RouteProgressionCard";
 import { RouteShellLoading } from "@/components/RouteShellLoading";
 import { RouteTutorialControls } from "@/components/RouteTutorialControls";
 import dynamic from "next/dynamic";
@@ -45,7 +44,7 @@ export default function DigitalDNAPage() {
   return (
     <div className="relative min-h-screen bg-slate-950">
       <Link
-        href="/"
+        href="/pet"
         className="fixed z-50 rounded-full text-sm font-semibold
                    px-4 py-2.5 top-[calc(0.75rem+env(safe-area-inset-top))]
                    left-3 sm:left-4
@@ -56,15 +55,34 @@ export default function DigitalDNAPage() {
         &larr; Back to Pet
       </Link>
 
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 pb-8 pt-20 sm:px-6">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 pt-6 sm:px-6">
         <div className="flex justify-end">
           <RouteTutorialControls
             scope="dna"
             className="text-slate-300 hover:text-white"
           />
         </div>
-        <RouteProgressionCard route="dna" showAdvanced />
-        <DigitalDNAReveal />
+        <details className="group rounded-[1.5rem] border border-cyan-400/20 bg-cyan-950/20 p-3 text-white shadow-lg shadow-cyan-950/20">
+          <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 rounded-2xl px-3 py-2 text-left">
+            <span>
+              <span className="block text-xs font-bold uppercase tracking-[0.22em] text-cyan-300">
+                Bonus discovery
+              </span>
+              <span className="mt-1 block text-base font-semibold text-white sm:text-lg">
+                ✨ Peek at your pet&apos;s DNA star map
+              </span>
+            </span>
+            <span className="rounded-full bg-cyan-400/10 px-3 py-2 text-sm font-bold text-cyan-200 group-open:hidden">
+              Show
+            </span>
+            <span className="hidden rounded-full bg-cyan-400/10 px-3 py-2 text-sm font-bold text-cyan-200 group-open:block">
+              Hide
+            </span>
+          </summary>
+          <div className="mt-3">
+            <DigitalDNAReveal />
+          </div>
+        </details>
       </div>
 
       <DigitalDNAHub />
