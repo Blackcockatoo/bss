@@ -1,0 +1,6 @@
+{
+  "note": "Approved checksum for the locked Sri Yantra geometry sprite. The engine's paths, constants, movement profiles, SVG structure, and assets are outside the normal edit surface. To intentionally re-approve a sprite change: update sha256 here, regenerate the golden snapshots in src/components/SriYantraPetEngine.golden.test.tsx, and explain the visual change in the PR. See docs/protocol/geometry-sprite-lock.md.",
+  "files": {
+    "src/components/SriYantraPetEngine.tsx": "93ac4b2510b5f9b0601a926a5e0f0e505519ea7eb25e9d071e60b4c5aa1d6690"
+  }
+}

@@ -84,6 +84,10 @@ on current `main`.
 
 ### Phase 0 — Lock the new geometry sprite
 
+> **Status: implemented** — see `docs/protocol/geometry-sprite-lock.md`,
+> `scripts/check-geometry-sprite-lock.mjs`, and
+> `src/components/SriYantraPetEngine.golden.test.tsx`.
+
 Protect `SriYantraPetEngine.tsx` with:
 
 - An approved source checksum in CI.

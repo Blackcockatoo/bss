@@ -67,14 +67,16 @@ describe('PetRuntimeStage', () => {
     expect(screen.queryByTestId('auralia-renderer')).not.toBeInTheDocument();
   });
 
-  it('projects the same Moss60 genome through the Geometry form', () => {
+  it('projects the live Moss60 genome through the Geometry wrapper', () => {
     petType = 'geometry';
     render(<PetRuntimeStage />);
 
+    // The stage must not talk to SriYantraPetDisplay directly: the strands it
+    // receives are derived (and padded to 60 digits) by GeometryAvatarRenderer.
     const renderer = screen.getByTestId('geometry-renderer');
     expect(screen.getByTestId('geometry-pet-runtime')).toBeInTheDocument();
-    expect(renderer).toHaveAttribute('data-red', '123');
-    expect(renderer).toHaveAttribute('data-blue', '456');
-    expect(renderer).toHaveAttribute('data-black', '061');
+    expect(renderer.getAttribute('data-red')).toMatch(/^123\d{57}$/);
+    expect(renderer.getAttribute('data-blue')).toMatch(/^456\d{57}$/);
+    expect(renderer.getAttribute('data-black')).toMatch(/^061\d{57}$/);
   });
 });

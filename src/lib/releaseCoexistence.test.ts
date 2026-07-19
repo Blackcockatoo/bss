@@ -37,7 +37,10 @@ describe("BSS release coexistence contract", () => {
     expect(duplicatePetRoute).toContain("redirect('/pet')");
     expect(petRuntimeStage).toContain("<VisualDNAPet");
     expect(petRuntimeStage).toContain("<AuraliaMetaPet");
-    expect(petRuntimeStage).toContain("<SriYantraPetDisplay");
+    // The Sri Yantra sprite is a locked asset: the stage must reach it only
+    // through the GeometryAvatarRenderer wrapper, never the display directly.
+    expect(petRuntimeStage).toContain("<GeometryAvatarRenderer");
+    expect(petRuntimeStage).not.toContain("SriYantraPetDisplay");
 
     // The Geometry form renders Sri Yantra geometry and must be labelled as
     // such: Moss60 is the movement/identity layer on the Evolved body, not a
