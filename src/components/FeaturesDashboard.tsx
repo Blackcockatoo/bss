@@ -92,7 +92,7 @@ export function FeaturesDashboard({
 
         {includeNavigator && (
           <TabsContent value="navigator" className="mt-0">
-            <div className="bg-zinc-900/80 backdrop-blur rounded-xl p-3 sm:p-6 border border-zinc-800">
+            <div className="rounded-[2rem] border border-cyan-400/20 bg-gradient-to-b from-slate-900/95 to-cyan-950/35 p-3 sm:p-6">
               <SteeringWheel />
             </div>
           </TabsContent>

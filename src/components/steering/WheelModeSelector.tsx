@@ -13,9 +13,10 @@ interface WheelModeSelectorProps {
 }
 
 const MODE_OPTIONS: { value: SteeringMode; label: string }[] = [
-  { value: 'compass', label: 'Compass' },
-  { value: 'network', label: 'Network' },
-  { value: 'geometry', label: 'Geometry' },
+  { value: 'cards', label: 'Adventure cards' },
+  { value: 'compass', label: 'Spin wheel' },
+  { value: 'network', label: 'Star map' },
+  { value: 'geometry', label: 'Shapes' },
 ];
 
 const COLOR_OPTIONS: { value: SteeringColor; label: string; activeClass: string }[] = [
@@ -34,18 +35,18 @@ export function WheelModeSelector({
   hasGenome,
 }: WheelModeSelectorProps) {
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center sm:gap-6">
-      {/* Mode */}
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-zinc-500 uppercase tracking-wider">Mode</span>
-        <div className="flex gap-1">
+    <div className="w-full space-y-3">
+      <div>
+        <p className="mb-2 text-center text-xs font-bold uppercase tracking-[0.2em] text-cyan-300">Choose a view</p>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {MODE_OPTIONS.map(opt => (
             <button
               key={opt.value}
-              className={`px-3 py-1.5 rounded-md text-sm transition-colors ${
+              type="button"
+              className={`min-h-11 rounded-2xl px-3 py-2 text-sm font-bold transition-all ${
                 mode === opt.value
-                  ? 'bg-zinc-600 text-white'
-                  : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                  ? 'bg-cyan-300 text-slate-950 shadow-lg shadow-cyan-950/30'
+                  : 'border border-slate-700 bg-slate-900 text-slate-300 hover:border-cyan-400/60 hover:bg-slate-800'
               }`}
               onClick={() => onModeChange(opt.value)}
             >
@@ -55,9 +56,12 @@ export function WheelModeSelector({
         </div>
       </div>
 
-      {/* Color */}
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-zinc-500 uppercase tracking-wider">Color</span>
+      {mode !== 'cards' && (
+        <details className="rounded-2xl border border-slate-800 bg-slate-950/55 p-3">
+          <summary className="cursor-pointer text-sm font-semibold text-slate-300">Change colours or DNA source</summary>
+          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center sm:gap-6">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs text-zinc-400 uppercase tracking-wider">Colour</span>
         <div className="flex gap-1">
           {COLOR_OPTIONS.map(opt => (
             <button
@@ -75,9 +79,8 @@ export function WheelModeSelector({
         </div>
       </div>
 
-      {/* Data source */}
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-zinc-500 uppercase tracking-wider">Source</span>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs text-zinc-400 uppercase tracking-wider">DNA</span>
         <div className="flex gap-1">
           <button
             className={`px-3 py-1.5 rounded-md text-sm transition-colors ${
@@ -104,6 +107,9 @@ export function WheelModeSelector({
           </button>
         </div>
       </div>
+          </div>
+        </details>
+      )}
     </div>
   );
 }
