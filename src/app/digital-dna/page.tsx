@@ -1,8 +1,10 @@
 "use client";
 
 import { DigitalDNAReveal } from "@/components/DigitalDNAReveal";
+import { PetRegistryBootstrap } from "@/components/PetRegistryBootstrap";
 import { RouteShellLoading } from "@/components/RouteShellLoading";
 import { RouteTutorialControls } from "@/components/RouteTutorialControls";
+import { AdvancedDNAVisualisations } from "@/components/advanced-dna/AdvancedDNAVisualisations";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
@@ -43,6 +45,7 @@ export default function DigitalDNAPage() {
 
   return (
     <div className="relative min-h-screen bg-slate-950">
+      <PetRegistryBootstrap />
       <Link
         href="/pet"
         className="fixed z-50 rounded-full text-sm font-semibold
@@ -86,6 +89,9 @@ export default function DigitalDNAPage() {
       </div>
 
       <DigitalDNAHub />
+      <div className="mx-auto w-full max-w-7xl px-4 pb-10 sm:px-6">
+        <AdvancedDNAVisualisations />
+      </div>
     </div>
   );
 }
