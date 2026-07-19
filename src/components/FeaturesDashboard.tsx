@@ -79,7 +79,7 @@ export function FeaturesDashboard({
             className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 touch-manipulation"
           >
             <Sparkles className="w-5 h-5 sm:w-4 sm:h-4" />
-            <span className="text-[10px] sm:text-sm">Style</span>
+            <span className="text-[10px] sm:text-sm">Wardrobe</span>
           </TabsTrigger>
           <TabsTrigger
             value="achievements"

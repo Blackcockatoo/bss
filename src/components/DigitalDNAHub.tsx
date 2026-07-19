@@ -553,7 +553,9 @@ export default function DigitalDNAHub({
 }: { lessonContext?: LessonContext }) {
   // ── UI state ──────────────────────────────────────────────────────────────
   const [webglSupport] = useState(() => detectWebGLSupport());
-  const initialMode: ModeKey = webglSupport.supported ? "spiral" : "journey";
+  // Start with the simplest touch-first activity. Kids can make something
+  // immediately without needing 3-D support or setup choices.
+  const initialMode: ModeKey = "mandala";
   const [activeMode, setActiveMode] = useState<ModeKey>(initialMode);
   const [selectedSeed, setSelectedSeed] = useState<SeedKey>("red");
   const [sequenceSource, setSequenceSource] = useState<SequenceSource>("core");
@@ -1414,7 +1416,7 @@ export default function DigitalDNAHub({
     : soundSource === "decagon" ? "Decagon Trace"
     : soundSource === "circle" ? "Circle Trace"
     : "Toolkit Phrase";
-  const recommendedModeId = webglSupport.supported ? "spiral" : "journey";
+  const recommendedModeId: ModeKey = "mandala";
   const noteBoardDigits = useMemo(
     () => noteBoard.filter((digit): digit is number => digit !== null),
     [noteBoard],
@@ -2688,6 +2690,14 @@ export default function DigitalDNAHub({
   const selectableModes = modes.filter(
     (mode) => !mode.requiresWebgl || webglSupport.supported,
   );
+  const starterModes = modes.filter((mode) =>
+    ["mandala", "sound", "spiral", "journey"].includes(mode.id),
+  );
+  const shapeModes = modes.filter((mode) =>
+    ["triangle", "pentagon", "hexagon", "decagon", "circle"].includes(
+      mode.id,
+    ),
+  );
   const scrollToElement = useCallback((element: HTMLElement | null) => {
     element?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
@@ -2703,15 +2713,29 @@ export default function DigitalDNAHub({
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900 via-transparent to-transparent" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-7xl px-3 py-4 sm:px-6 sm:py-6">
+      <div className="relative z-10 mx-auto flex max-w-7xl flex-col px-3 py-4 sm:px-6 sm:py-6">
         {/* ── Header (compact on mobile) ──────────────────────────────────── */}
-        <div className="text-center mb-5 sm:mb-10">
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold mb-2 sm:mb-3 bg-gradient-to-r from-amber-400 via-amber-200 to-amber-400 bg-clip-text text-transparent motion-safe:animate-pulse">
-            ✨ Digital DNA ✨
+        <div className="order-[1] mb-5 text-center sm:mb-7">
+          <div className="mx-auto mb-3 inline-flex items-center gap-2 rounded-full border border-amber-300/25 bg-amber-400/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-amber-200">
+            <span aria-hidden>🧬</span> Your pet&apos;s pattern playground
+          </div>
+          <h1 className="mb-2 bg-gradient-to-r from-amber-400 via-amber-100 to-pink-300 bg-clip-text text-3xl font-black text-transparent sm:text-5xl lg:text-6xl">
+            Digital DNA Lab
           </h1>
-          <p className="text-base sm:text-2xl text-blue-300 font-light mb-1 sm:mb-2">
-            All-Ages Learning Hub · Touch · Sound · Patterns
+          <p className="mb-1 text-base font-medium text-blue-200 sm:mb-2 sm:text-2xl">
+            Pick a game. Tap, draw, or listen. Make your pet&apos;s pattern come alive!
           </p>
+          <div className="mx-auto mt-4 grid max-w-2xl grid-cols-3 gap-2 text-xs font-bold sm:text-sm">
+            <div className="rounded-2xl border border-pink-400/20 bg-pink-500/10 px-2 py-3 text-pink-100">
+              <span className="mr-1" aria-hidden>1️⃣</span> Pick
+            </div>
+            <div className="rounded-2xl border border-cyan-400/20 bg-cyan-500/10 px-2 py-3 text-cyan-100">
+              <span className="mr-1" aria-hidden>2️⃣</span> Play
+            </div>
+            <div className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-2 py-3 text-emerald-100">
+              <span className="mr-1" aria-hidden>3️⃣</span> Try a quest
+            </div>
+          </div>
           {lessonContext && (
             <p className="text-xs text-cyan-300 mt-1">
               Lesson mode — student:{" "}
@@ -2867,19 +2891,20 @@ export default function DigitalDNAHub({
           />
         )}
 
-        {/* Mobile: intro guide collapsed by default to cut visual bulk */}
+        <div className="order-[2]">
+        {/* The longer guide stays optional so the games remain close to the top. */}
         <button
           type="button"
           onClick={() => setIntroExpanded((v) => !v)}
-          className="sm:hidden mb-3 flex min-h-[44px] w-full items-center justify-between rounded-2xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-sm font-semibold text-slate-200"
+          className="mb-4 flex min-h-[48px] w-full items-center justify-between rounded-2xl border border-slate-700/70 bg-slate-900/70 px-4 py-3 text-sm font-bold text-slate-100 transition-colors hover:bg-slate-800/80 sm:mx-auto sm:max-w-xl"
           aria-expanded={introExpanded}
         >
-          <span>Guide &amp; decode tips</span>
+          <span>💡 Need help choosing a game?</span>
           <span aria-hidden>{introExpanded ? "▴" : "▾"}</span>
         </button>
         <div
-          className={`mb-8 gap-4 lg:grid-cols-[1.15fr_0.85fr] ${
-            introExpanded ? "grid" : "hidden sm:grid"
+          className={`mb-6 gap-4 lg:grid-cols-[1.15fr_0.85fr] ${
+            introExpanded ? "grid" : "hidden"
           }`}
         >
           <section className="rounded-[1.75rem] border border-slate-800 bg-slate-900/70 p-5">
@@ -2976,31 +3001,46 @@ export default function DigitalDNAHub({
             )}
           </section>
         </div>
+        </div>
 
         {/* ── Mode selector ─────────────────────────────────────────────────── */}
-        <div
+        <section
           ref={modeSelectorRef}
-          className="mb-8 grid scroll-mt-28 grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5"
+          className="order-[3] mb-6 scroll-mt-28 rounded-[2rem] border border-white/10 bg-slate-900/45 p-4 sm:p-6"
         >
-          {modes.map((mode) => (
+          <div className="mb-4 text-center">
+            <p className="text-xs font-black uppercase tracking-[0.24em] text-pink-300">
+              Step 1 · Pick an adventure
+            </p>
+            <h2 className="mt-2 text-2xl font-black text-white sm:text-3xl">
+              What do you want to make?
+            </h2>
+          </div>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {starterModes.map((mode) => (
             <button
               key={mode.id}
               type="button"
               onClick={() => handleModeSelect(mode.id)}
               disabled={mode.requiresWebgl && !webglSupport.supported}
-              className={`group relative min-h-[104px] rounded-2xl px-3 py-3 transition-all duration-300 ${
+              className={`group relative min-h-[132px] rounded-[1.4rem] px-3 py-4 transition-all duration-300 ${
                 activeMode === mode.id
-                  ? "bg-gradient-to-br from-amber-500 to-amber-600 shadow-xl shadow-amber-500/35 scale-[1.03]"
+                  ? "bg-gradient-to-br from-amber-400 to-orange-500 text-slate-950 shadow-xl shadow-amber-500/35 scale-[1.02] ring-2 ring-white/40"
                   : mode.requiresWebgl && !webglSupport.supported
                     ? "cursor-not-allowed border border-slate-800 bg-slate-900/45 text-slate-500"
-                    : "bg-slate-800/60 hover:bg-slate-700/60 border border-slate-600/40 hover:border-slate-500/60"
+                    : "border border-slate-600/50 bg-slate-800/70 hover:-translate-y-1 hover:border-cyan-300/50 hover:bg-slate-700/70"
               }`}
             >
-              <div className="text-3xl mb-1">{mode.icon}</div>
-              <div className="text-sm font-bold leading-tight">
+              {mode.id === recommendedMode.id && (
+                <span className="absolute right-2 top-2 rounded-full bg-emerald-300 px-2 py-1 text-[9px] font-black uppercase tracking-wider text-emerald-950">
+                  Start here
+                </span>
+              )}
+              <div className="mb-2 text-4xl">{mode.icon}</div>
+              <div className="text-base font-black leading-tight">
                 {mode.label}
               </div>
-              <div className="text-[11px] text-slate-300 mt-1 leading-tight">
+              <div className={`mt-2 text-xs leading-snug ${activeMode === mode.id ? "text-slate-900" : "text-slate-300"}`}>
                 {mode.desc}
               </div>
               {mode.requiresWebgl && !webglSupport.supported && (
@@ -3013,13 +3053,41 @@ export default function DigitalDNAHub({
               )}
             </button>
           ))}
-        </div>
+          </div>
 
-        <div className="sticky top-3 z-30 mb-8 rounded-[1.75rem] border border-amber-600/30 bg-slate-950/92 px-4 py-4 shadow-2xl shadow-amber-500/15 backdrop-blur">
+          <details className="group mt-4 rounded-2xl border border-cyan-400/20 bg-cyan-500/5 p-2">
+            <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between rounded-xl px-3 py-2 text-sm font-bold text-cyan-100">
+              <span>🔷 More shape instruments</span>
+              <span className="text-cyan-300 group-open:rotate-180" aria-hidden>▾</span>
+            </summary>
+            <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+              {shapeModes.map((mode) => (
+                <button
+                  key={mode.id}
+                  type="button"
+                  onClick={() => handleModeSelect(mode.id)}
+                  className={`min-h-[96px] rounded-2xl border px-3 py-3 transition-all ${
+                    activeMode === mode.id
+                      ? "border-amber-200 bg-amber-400 text-slate-950 ring-2 ring-white/30"
+                      : "border-slate-700 bg-slate-900/80 text-white hover:border-cyan-300/50 hover:bg-slate-800"
+                  }`}
+                >
+                  <span className="block text-3xl" aria-hidden>{mode.icon}</span>
+                  <span className="mt-1 block text-sm font-black">{mode.label.replace(" Instrument", "")}</span>
+                </button>
+              ))}
+            </div>
+          </details>
+        </section>
+
+        <div className="order-[4] sticky top-3 z-30 mb-6 hidden rounded-[1.75rem] border border-amber-300/30 bg-slate-950/92 px-4 py-4 shadow-2xl shadow-amber-500/15 backdrop-blur sm:block">
+          <p className="mb-3 text-center text-xs font-black uppercase tracking-[0.24em] text-amber-200">
+            Step 2 · Change it, then play
+          </p>
           <div className="flex flex-wrap items-center justify-center gap-4 lg:gap-6">
             <div className="flex items-center gap-2 rounded-full border border-slate-700/80 bg-slate-900/80 px-3 py-2">
               <span className="text-xs uppercase tracking-[0.22em] text-slate-400">
-                Seed
+                Colour
               </span>
               {(["red", "blue", "black"] as SeedKey[]).map((seed) => (
                 <button
@@ -3051,7 +3119,7 @@ export default function DigitalDNAHub({
 
             <div className="rounded-[1.25rem] border border-slate-700/80 bg-slate-900/80 px-3 py-3">
               <div className="text-[11px] uppercase tracking-[0.22em] text-slate-400">
-                Harmony
+                Mirror magic
               </div>
               <div className="mt-2 flex flex-wrap justify-center gap-2">
                 {[3, 5, 7, 9, 12].map((value) => (
@@ -3073,7 +3141,7 @@ export default function DigitalDNAHub({
 
             <div className="min-w-[220px] flex-1 rounded-[1.25rem] border border-slate-700/80 bg-slate-900/80 px-4 py-3 sm:max-w-xs">
               <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.22em] text-slate-400">
-                <span>Tempo</span>
+                <span>Music speed</span>
                 <span className="font-mono text-amber-300">{tempo} BPM</span>
               </div>
               <input
@@ -3093,7 +3161,7 @@ export default function DigitalDNAHub({
                     audioReady ? "bg-emerald-400" : "bg-slate-600"
                   }`}
                 />
-                <span>{audioReady ? "Audio on" : "Tap to enable audio"}</span>
+                <span>{audioReady ? "Sound is on" : "Sound starts when you play"}</span>
               </div>
               <button
                 onClick={playSequence}
@@ -3104,12 +3172,25 @@ export default function DigitalDNAHub({
                     : "bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-lg shadow-pink-500/30 hover:from-pink-500 hover:to-purple-500 active:scale-95"
                 }`}
               >
-                {isPlaying ? "Playing..." : "▶ Play Source"}
+                {isPlaying ? "Playing..." : "▶ Play my DNA"}
               </button>
             </div>
           </div>
         </div>
 
+        <details className="group order-[7] mb-5 rounded-[1.75rem] border border-violet-400/20 bg-violet-500/5 p-3">
+          <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 rounded-2xl px-3 py-2">
+            <span>
+              <span className="block text-xs font-black uppercase tracking-[0.22em] text-violet-300">
+                Grown-up &amp; creator tools
+              </span>
+              <span className="mt-1 block text-sm font-semibold text-slate-200 sm:text-base">
+                Open the full DNA toolkit, mini paths, and pattern controls
+              </span>
+            </span>
+            <span className="text-xl text-violet-300 transition-transform group-open:rotate-180" aria-hidden>▾</span>
+          </summary>
+          <div className="mt-4">
         <section className="mb-8 rounded-[2rem] border border-purple-500/20 bg-slate-900/45 p-4 sm:p-6">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
@@ -3959,7 +4040,18 @@ export default function DigitalDNAHub({
             </div>
           </div>
         </section>
+          </div>
+        </details>
 
+        <div className="order-[6]">
+        <div className="mb-4 text-center">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-emerald-300">
+            Step 3 · Try a quest
+          </p>
+          <p className="mt-2 text-sm text-slate-300">
+            Play first, then see which mini missions you completed.
+          </p>
+        </div>
         <PatternQuestBoard
           progress={questProgress}
           activeMode={activeMode}
@@ -3974,8 +4066,22 @@ export default function DigitalDNAHub({
             {completionFeedback}
           </div>
         )}
+        </div>
 
-        <section className="mb-8 rounded-[2rem] border border-amber-500/20 bg-slate-900/45 p-4 sm:p-6">
+        <details className="group order-[8] mb-5 rounded-[1.75rem] border border-amber-400/20 bg-amber-500/5 p-3">
+          <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 rounded-2xl px-3 py-2">
+            <span>
+              <span className="block text-xs font-black uppercase tracking-[0.22em] text-amber-300">
+                Music maker
+              </span>
+              <span className="mt-1 block text-sm font-semibold text-slate-200 sm:text-base">
+                Build and remix a longer note board
+              </span>
+            </span>
+            <span className="text-xl text-amber-300 transition-transform group-open:rotate-180" aria-hidden>▾</span>
+          </summary>
+          <div className="mt-4">
+        <section className="mb-0 rounded-[2rem] border border-amber-500/20 bg-slate-900/45 p-4 sm:p-6">
           <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-[11px] uppercase tracking-[0.34em] text-amber-200/70">
@@ -4200,6 +4306,8 @@ export default function DigitalDNAHub({
               </div>
             </div>
         </section>
+          </div>
+        </details>
 
         {/* ══════════════════════════════════════════════════════════════════
             Active mode panels
@@ -4207,7 +4315,7 @@ export default function DigitalDNAHub({
             divs. It creates a GPU stacking-context conflict that blanks WebGL
             and 2-D canvas output in many Chrome/Safari/driver combinations.
         ══════════════════════════════════════════════════════════════════ */}
-        <div className="mb-10">
+        <div className="order-[5] mb-8 scroll-mt-28">
           {/* ── Spiral ──────────────────────────────────────────────────── */}
           {activeMode === "spiral" && (
             <div className="bg-slate-900/60 rounded-3xl p-4 sm:p-8 border border-blue-800/30">
@@ -4246,14 +4354,17 @@ export default function DigitalDNAHub({
           {activeMode === "mandala" && (
             <div className="bg-slate-900/60 rounded-3xl p-4 sm:p-8 border border-purple-800/30">
               <div className="text-center mb-5">
+                <p className="mb-2 text-xs font-black uppercase tracking-[0.24em] text-pink-300">
+                  Your game is ready!
+                </p>
                 <h2 className="text-2xl sm:text-3xl font-bold text-amber-300 mb-1">
                   🔮 Symmetry Studio
                 </h2>
                 <p className="text-purple-300 text-sm sm:text-base">
-                  Press and glide to paint mirrored geometry with instant tones
+                  Touch the dark canvas and wiggle your finger to paint mirror magic
                 </p>
                 <p className="text-slate-500 text-xs mt-1 italic">
-                  Guide tip: raise harmony to create more symmetry arms
+                  Try changing Mirror magic above to make a new pattern
                 </p>
               </div>
               <div
@@ -5910,7 +6021,7 @@ export default function DigitalDNAHub({
         </div>
 
         {/* ── About section ────────────────────────────────────────────────── */}
-        <div className="mt-10 text-center">
+        <div className="order-[9] mt-4 text-center">
           <details className="bg-slate-900/40 rounded-xl p-5 sm:p-6 border border-slate-700/30 text-left">
             <summary className="cursor-pointer text-lg font-bold text-amber-300 hover:text-amber-200 transition-colors text-center list-none">
               📖 About This Experience
