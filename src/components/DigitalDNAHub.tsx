@@ -2755,44 +2755,18 @@ export default function DigitalDNAHub({
           </p>
           <div className="mt-5 hidden sm:flex flex-wrap items-center justify-center gap-2">
             <span className="rounded-full border border-white/10 bg-slate-900/70 px-4 py-2 text-xs uppercase tracking-[0.22em] text-slate-300">
-              Active strand:{" "}
+              Your colour:{" "}
               <strong className="text-white">{currentSeedMeta.label}</strong>
             </span>
             <span className="rounded-full border border-purple-400/20 bg-purple-500/10 px-4 py-2 text-xs uppercase tracking-[0.22em] text-purple-100">
-              Source:{" "}
+              Pattern:{" "}
               <strong className="text-white">
                 {sequenceSource === "packet" ? "Mini Path" : "Core 60"}
               </strong>
             </span>
             <span className="rounded-full border border-cyan-400/20 bg-cyan-500/10 px-4 py-2 text-xs uppercase tracking-[0.22em] text-cyan-200">
-              Phrase: {soundLabSequence.length} digits
+              Song: {soundLabSequence.length} notes
             </span>
-            <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-4 py-2 text-xs uppercase tracking-[0.22em] text-amber-100">
-              Transform: {toolTransform}
-            </span>
-            <button
-              type="button"
-              onClick={() =>
-                setVisualQuality(
-                  (q) =>
-                    QUALITY_ORDER[
-                      (QUALITY_ORDER.indexOf(q) + 1) % QUALITY_ORDER.length
-                    ],
-                )
-              }
-              className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-4 py-2 text-xs uppercase tracking-[0.22em] text-emerald-100 hover:bg-emerald-500/20"
-              aria-label={`Visual quality: ${visualQuality}. Tap to change.`}
-            >
-              Quality: <strong className="text-white">{visualQuality}</strong>
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowEvalPanel((v) => !v)}
-              className="rounded-full border border-slate-700 bg-slate-900/70 px-4 py-2 text-xs uppercase tracking-[0.22em] text-slate-400 hover:bg-slate-800"
-              aria-label="Toggle visual evaluation dev panel"
-            >
-              Dev
-            </button>
           </div>
         </div>
 
@@ -2840,37 +2814,14 @@ export default function DigitalDNAHub({
                 Settings
               </button>
             </div>
-            {/* Row 2: mode switcher link + quality cycle */}
-            <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto_auto] gap-2">
+            {/* Row 2: a single, predictable way back to the activity cards. */}
+            <div className="mt-2 grid grid-cols-1 gap-2">
               <button
                 type="button"
                 onClick={() => scrollToElement(modeSelectorRef.current)}
                 className="min-h-[44px] rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-300 transition-colors hover:bg-slate-800"
               >
-                All modes
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  setVisualQuality(
-                    (q) =>
-                      QUALITY_ORDER[
-                        (QUALITY_ORDER.indexOf(q) + 1) % QUALITY_ORDER.length
-                      ],
-                  )
-                }
-                className="min-h-[44px] rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-100 transition-colors hover:bg-emerald-500/20"
-                aria-label={`Visual quality: ${visualQuality}. Tap to change.`}
-              >
-                Q: {visualQuality}
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowEvalPanel((v) => !v)}
-                className="min-h-[44px] rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-xs font-semibold text-slate-400 transition-colors hover:bg-slate-800"
-                aria-label="Toggle visual evaluation dev panel"
-              >
-                Dev
+                Pick another game
               </button>
             </div>
           </div>
@@ -3187,6 +3138,29 @@ export default function DigitalDNAHub({
             <span className="text-xl text-violet-300 transition-transform group-open:rotate-180" aria-hidden>▾</span>
           </summary>
           <div className="mt-4">
+            <div className="mb-4 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  setVisualQuality(
+                    (quality) =>
+                      QUALITY_ORDER[
+                        (QUALITY_ORDER.indexOf(quality) + 1) % QUALITY_ORDER.length
+                      ],
+                  )
+                }
+                className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-emerald-100 hover:bg-emerald-500/20"
+              >
+                Visual quality: {visualQuality}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowEvalPanel((visible) => !visible)}
+                className="rounded-full border border-slate-700 bg-slate-900/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-slate-400 hover:bg-slate-800"
+              >
+                Visual check
+              </button>
+            </div>
         <section className="mb-8 rounded-[2rem] border border-purple-500/20 bg-slate-900/45 p-4 sm:p-6">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>

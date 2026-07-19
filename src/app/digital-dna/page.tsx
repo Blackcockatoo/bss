@@ -55,7 +55,7 @@ export default function DigitalDNAPage() {
         &larr; Back to Pet
       </Link>
 
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 pt-20 sm:px-6">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 pt-6 sm:px-6">
         <div className="flex justify-end">
           <RouteTutorialControls
             scope="dna"
