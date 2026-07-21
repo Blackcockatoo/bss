@@ -6,7 +6,13 @@ import { Eye, HandHelping } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DEMO_PET_CONFIG,
+  applyAlias,
+  getAliasError,
+  toAppliedChange,
+  undoAlias,
+  type AppliedChangeMeta,
   type PetObservationCardEvidence,
+  type PetUpdateResult,
   evidenceTimestamp,
 } from "@/lib/teacher-lessons";
 import type { LessonActivityProps } from "./types";
@@ -18,6 +24,12 @@ import {
   STEP_KIND_LABEL,
   StepShell,
 } from "./shared";
+import {
+  ApplyResultBanner,
+  MissingPetNotice,
+  buildUpdateContext,
+  useHasRealPet,
+} from "./petUpdateUi";
 
 const SHAPE_OBSERVATIONS = [
   { id: "round-soft", label: "Round and soft" },
@@ -67,8 +79,13 @@ export function MeetActivity({
   );
   const [question, setQuestion] = useState(existing?.question ?? "");
   const [saved, setSaved] = useState(false);
+  const [aliasResult, setAliasResult] = useState<PetUpdateResult | null>(null);
+  const hasRealPet = useHasRealPet();
 
-  const persist = (overrides: Partial<PetObservationCardEvidence> = {}) => {
+  const persist = (
+    overrides: Partial<PetObservationCardEvidence> = {},
+    appliedChange?: AppliedChangeMeta,
+  ) => {
     if (isPreview) return;
     const evidence: PetObservationCardEvidence = {
       kind: "pet-observation-card",
@@ -84,8 +101,24 @@ export function MeetActivity({
       },
       question: overrides.question ?? question,
       petConfigRef: { ...DEMO_PET_CONFIG },
+      ...(appliedChange ? { appliedChange } : existing?.appliedChange ? { appliedChange: existing.appliedChange } : {}),
     };
     saveEvidence(evidence);
+  };
+
+  const saveAliasToPet = () => {
+    const result = applyAlias(
+      alias,
+      buildUpdateContext(isPreview, hasRealPet, lesson.id),
+    );
+    setAliasResult(result);
+    persist({}, toAppliedChange(result));
+  };
+
+  const handleUndoAlias = () => {
+    const result = undoAlias();
+    setAliasResult(result);
+    if (result.ok) persist({}, { appliedToPet: false, updateType: "alias" });
   };
 
   switch (step.kind) {
@@ -176,6 +209,29 @@ export function MeetActivity({
                 An alias keeps you private. Never use a real full name.
               </p>
             </div>
+
+            {/* Optional: save the alias to the real Meta-Pet (explicit + safe). */}
+            {hasRealPet ? (
+              <div className="w-full space-y-2">
+                <Button
+                  type="button"
+                  onClick={saveAliasToPet}
+                  disabled={isPreview || getAliasError(alias) !== null}
+                  className="w-full bg-amber-300 text-slate-950 hover:bg-amber-200 disabled:opacity-50"
+                >
+                  Save Alias to My Meta-Pet
+                </Button>
+                <p className="text-xs text-slate-500">
+                  This is optional. Your previous alias can be restored.
+                </p>
+                <ApplyResultBanner
+                  result={aliasResult}
+                  onUndo={handleUndoAlias}
+                />
+              </div>
+            ) : (
+              <MissingPetNotice message="Saving an alias to your own pet is optional. You can still complete this lesson with a classroom example." />
+            )}
           </div>
         </StepShell>
       );

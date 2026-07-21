@@ -7,6 +7,7 @@ import { MOSS_STRANDS } from "@/lib/moss60/strandSequences";
 import { usePetRegistryStore } from "@/lib/registry";
 import { useStore } from "@/lib/store";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { usePetProfileStore } from "@/lib/teacher-lessons/petProfile";
 import {
   AdvancedDNACanvas,
   type AdvancedDNACanvasHandle,
@@ -82,7 +83,11 @@ export function AdvancedDNAVisualisations() {
   const canvasRef = useRef<AdvancedDNACanvasHandle>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const detectedPerformance = useMemo(() => detectDevicePerformance(), []);
-  const state = useAdvancedDNAState(reducedMotion);
+  // Start on the student's saved preferred DNA view when they have one (a
+  // lesson preference; it never changes the genome and the teacher-facing
+  // controls can still switch modes freely).
+  const preferredDnaView = usePetProfileStore((s) => s.preferredDnaView);
+  const state = useAdvancedDNAState(reducedMotion, preferredDnaView ?? undefined);
 
   const source = useMemo<DnaVisualSource>(() => {
     const genome = activeRecord?.genome ?? runtimeGenome ?? FALLBACK_GENOME;

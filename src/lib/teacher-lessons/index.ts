@@ -66,3 +66,47 @@ export {
   type LessonTimingMode,
   type LessonTimingModeMeta,
 } from "./timing";
+export {
+  PET_PROFILE_STORAGE_KEY,
+  MIN_ALIAS_LENGTH,
+  MAX_ALIAS_LENGTH,
+  usePetProfileStore,
+  usePetProfileHydrated,
+  normaliseAlias,
+  getAliasError,
+  isPreferredDnaView,
+  sanitizePetProfile,
+  type PreferredDnaView,
+  type PetProfileState,
+} from "./petProfile";
+export {
+  PET_UPDATE_STORAGE_KEY,
+  usePetUpdateStore,
+  readRealPetSnapshot,
+  isValidGenome,
+  toAppliedChange,
+  applyAlias,
+  undoAlias,
+  applyBodyDesign,
+  undoBodyDesign,
+  applyDnaVariation,
+  restorePreviousDna,
+  applyPreferredVisualisation,
+  undoPreferredVisualisation,
+  type PetUpdateType,
+  type PetUpdateContext,
+  type PetUpdateResult,
+  type RealPetSnapshot,
+} from "./petUpdate";
+export {
+  LEARNING_PASSPORT_VERSION,
+  deriveLearningPassport,
+  passportHasContent,
+  type LearningPassport,
+  type PassportLessonSection,
+  type PassportAppliedChange,
+  type PassportInputs,
+} from "./passport";
+export {
+  type AppliedChangeMeta,
+} from "./evidence";

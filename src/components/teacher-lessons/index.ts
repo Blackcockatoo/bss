@@ -8,4 +8,6 @@ export { TeacherNotes } from "./TeacherNotes";
 export { ClassroomFocusMode } from "./ClassroomFocusMode";
 export { LessonCompletion } from "./LessonCompletion";
 export { LessonModal } from "./LessonModal";
+export { LearningPassport } from "./LearningPassport";
+export { TeacherReview } from "./TeacherReview";
 export { ActivityHost } from "./activities";

@@ -2,16 +2,28 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, GraduationCap, Play, RotateCcw } from "lucide-react";
+import {
+  ArrowLeft,
+  BookOpenCheck,
+  FileText,
+  GraduationCap,
+  PawPrint,
+  Play,
+  RotateCcw,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useStore } from "@/lib/store";
 import {
   LESSON_DEFINITIONS,
   buildLessonPath,
+  deriveLearningPassport,
   getLessonById,
+  passportHasContent,
   selectLessonStatus,
   selectProgressSummary,
   selectRecord,
+  usePetProfileStore,
   useLessonProgressHydrated,
   useLessonProgressStore,
   type LessonDefinition,
@@ -19,6 +31,9 @@ import {
 import { LessonCard } from "./LessonCard";
 import { LessonPreview } from "./LessonPreview";
 import { TeacherNotes } from "./TeacherNotes";
+
+const PASSPORT_PATH = "/teachers/passport";
+const REVIEW_PATH = "/teachers/review";
 
 /** Route back to the main Meta-Pet area. */
 const META_PET_HOME_PATH = "/pet";
@@ -36,10 +51,20 @@ export function TeacherHub() {
   const [notesLesson, setNotesLesson] = useState<LessonDefinition | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
 
+  const alias = usePetProfileStore((store) => store.alias);
+  const hasPet = useStore((store) => store.genome !== null);
+
   const summary = useMemo(
     () => selectProgressSummary(state),
     [state],
   );
+
+  const passport = useMemo(
+    () => deriveLearningPassport({ progress: state, alias, hasPet }),
+    [state, alias, hasPet],
+  );
+  const hasEvidence = passportHasContent(passport);
+  const appliedCount = passport.appliedChanges.length;
 
   const resumeLesson = summary.resumeLessonId
     ? getLessonById(summary.resumeLessonId)
@@ -86,7 +111,42 @@ export function TeacherHub() {
                   Return to Meta-Pet
                 </Link>
               </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="border-cyan-500/30 bg-cyan-500/10 text-cyan-100 hover:bg-cyan-500/20"
+              >
+                <Link href={PASSPORT_PATH}>
+                  <FileText className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  View Learning Passport
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
+              >
+                <Link href={REVIEW_PATH}>
+                  <BookOpenCheck className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  Review Evidence
+                </Link>
+              </Button>
             </div>
+            {hasEvidence ? (
+              <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-slate-400">
+                <span>
+                  {passport.completedLessons} of {passport.totalLessons} lessons
+                  with saved evidence-ready progress
+                </span>
+                {appliedCount > 0 ? (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-0.5 text-emerald-200">
+                    <PawPrint className="h-3.5 w-3.5" aria-hidden="true" />
+                    {appliedCount} change{appliedCount === 1 ? "" : "s"} applied
+                    to pet
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         </header>
 

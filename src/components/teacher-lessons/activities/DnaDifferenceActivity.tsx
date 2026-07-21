@@ -5,11 +5,16 @@ import { Dna, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
+  applyDnaVariation,
   buildDnaStrip,
   cloneLessonPetConfig,
   getLessonGene,
+  restorePreviousDna,
+  toAppliedChange,
+  type AppliedChangeMeta,
   type DnaComparisonEvidence,
   type LessonPetConfig,
+  type PetUpdateResult,
   evidenceTimestamp,
 } from "@/lib/teacher-lessons";
 import type { LessonActivityProps } from "./types";
@@ -21,6 +26,12 @@ import {
   STEP_KIND_LABEL,
   StepShell,
 } from "./shared";
+import {
+  ApplyResultBanner,
+  MissingPetNotice,
+  buildUpdateContext,
+  useHasRealPet,
+} from "./petUpdateUi";
 
 /** A fixed, clearly-visible gene keeps the classroom outcome predictable. */
 const LESSON_GENE_ID = "gene-pattern";
@@ -90,11 +101,14 @@ export function DnaDifferenceActivity({
   const [stayedSame, setStayedSame] = useState(existing?.stayedSame ?? "");
   const [kept, setKept] = useState(existing?.keptVariation ?? false);
   const [saved, setSaved] = useState(false);
+  const [dnaResult, setDnaResult] = useState<PetUpdateResult | null>(null);
+  const hasRealPet = useHasRealPet();
 
   const seed = `${original.alias}-${original.shape}-${original.pattern}`;
 
   const buildEvidence = (
     overrides: Partial<DnaComparisonEvidence> = {},
+    appliedChange?: AppliedChangeMeta,
   ): DnaComparisonEvidence => ({
     kind: "dna-comparison",
     version: 1,
@@ -108,7 +122,45 @@ export function DnaDifferenceActivity({
     beforeConfigRef: { ...original },
     afterConfigRef: mutated ? { ...mutated } : undefined,
     keptVariation: overrides.keptVariation ?? kept,
+    ...(appliedChange
+      ? { appliedChange }
+      : existing?.appliedChange
+        ? { appliedChange: existing.appliedChange }
+        : {}),
   });
+
+  // "Keep This Variation" applies a controlled one-position genome change to
+  // the REAL pet via the safe update API. The classroom mutation above stays
+  // temporary until this explicit action.
+  const keepVariation = () => {
+    const result = applyDnaVariation(
+      buildUpdateContext(isPreview, hasRealPet, lesson.id),
+      { strand: "red60", index: 15 },
+    );
+    setDnaResult(result);
+    if (result.ok) setKept(true);
+    if (!isPreview) {
+      saveEvidence(
+        buildEvidence({ keptVariation: result.ok }, toAppliedChange(result)),
+      );
+    }
+  };
+
+  const restoreDna = () => {
+    const result = restorePreviousDna();
+    setDnaResult(result);
+    if (result.ok) {
+      setKept(false);
+      if (!isPreview) {
+        saveEvidence(
+          buildEvidence({ keptVariation: false }, {
+            appliedToPet: false,
+            updateType: "dna-variation",
+          }),
+        );
+      }
+    }
+  };
 
   if (step.kind === "introduce") {
     return (
@@ -246,23 +298,43 @@ export function DnaDifferenceActivity({
           onBlur={() => !isPreview && saveEvidence(buildEvidence())}
           disabled={isPreview}
         />
-        {pet.canPersist ? (
-          <label className="flex items-center gap-2 text-sm text-slate-200">
-            <input
-              type="checkbox"
-              checked={kept}
-              disabled={isPreview}
-              onChange={(e) => {
-                setKept(e.target.checked);
-                if (!isPreview)
-                  saveEvidence(buildEvidence({ keptVariation: e.target.checked }));
-              }}
-              className="h-5 w-5 rounded border-slate-600"
+        <p className="rounded-2xl border border-slate-700/60 bg-slate-800/30 px-3 py-2 text-xs text-slate-400">
+          The change you made earlier was a temporary experiment. Your real
+          Meta-Pet only changes if you press <strong>Keep This Variation</strong>.
+        </p>
+        {hasRealPet ? (
+          <div className="space-y-2">
+            <div className="flex flex-wrap justify-center gap-2">
+              <Button
+                type="button"
+                onClick={keepVariation}
+                disabled={isPreview}
+                className="bg-amber-300 text-slate-950 hover:bg-amber-200"
+              >
+                <Sparkles className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                Keep This Variation
+              </Button>
+              {kept ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={restoreDna}
+                  disabled={isPreview}
+                  className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
+                >
+                  Restore Previous DNA
+                </Button>
+              ) : null}
+            </div>
+            <ApplyResultBanner
+              result={dnaResult}
+              onUndo={kept ? restoreDna : undefined}
+              showViewPet
             />
-            <Sparkles className="h-4 w-4 text-amber-300" aria-hidden="true" />
-            Keep this variation
-          </label>
-        ) : null}
+          </div>
+        ) : (
+          <MissingPetNotice message="You can still record your discovery. Create a Meta-Pet to keep a real DNA variation." />
+        )}
         <div className="flex justify-center">
           <SaveButton
             onClick={() => {

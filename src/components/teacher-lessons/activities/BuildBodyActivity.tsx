@@ -9,10 +9,15 @@ import {
   LESSON_MOVEMENT_OPTIONS,
   LESSON_PATTERN_OPTIONS,
   LESSON_SHAPE_OPTIONS,
+  applyBodyDesign,
   cloneLessonPetConfig,
+  toAppliedChange,
+  undoBodyDesign,
+  type AppliedChangeMeta,
   type BodyDesignComparisonEvidence,
   type LessonMovementStyle,
   type LessonPetConfig,
+  type PetUpdateResult,
   evidenceTimestamp,
 } from "@/lib/teacher-lessons";
 import type { LessonActivityProps } from "./types";
@@ -24,6 +29,13 @@ import {
   STEP_KIND_LABEL,
   StepShell,
 } from "./shared";
+import { configToBodySpec } from "./petSpec";
+import {
+  ApplyResultBanner,
+  MissingPetNotice,
+  buildUpdateContext,
+  useHasRealPet,
+} from "./petUpdateUi";
 
 /**
  * Lesson 2 — Build a Body. A simplified mini Body Forge exposing only four
@@ -55,6 +67,8 @@ export function BuildBodyActivity({
   const [reason, setReason] = useState(existing?.reason ?? "");
   const [applied, setApplied] = useState(existing?.applied ?? false);
   const [saved, setSaved] = useState(false);
+  const [bodyResult, setBodyResult] = useState<PetUpdateResult | null>(null);
+  const hasRealPet = useHasRealPet();
 
   const update = (patch: Partial<LessonPetConfig>) => {
     if (isPreview) return;
@@ -78,6 +92,7 @@ export function BuildBodyActivity({
 
   const buildEvidence = (
     overrides: Partial<BodyDesignComparisonEvidence> = {},
+    appliedChange?: AppliedChangeMeta,
   ): BodyDesignComparisonEvidence => ({
     kind: "body-design-comparison",
     version: 1,
@@ -94,7 +109,44 @@ export function BuildBodyActivity({
     },
     reason: overrides.reason ?? reason,
     applied: overrides.applied ?? applied,
+    ...(appliedChange
+      ? { appliedChange }
+      : existing?.appliedChange
+        ? { appliedChange: existing.appliedChange }
+        : {}),
   });
+
+  // Apply the approved design to the REAL Meta-Pet via the safe update API.
+  const applyToPet = () => {
+    const result = applyBodyDesign(
+      configToBodySpec(working),
+      buildUpdateContext(isPreview, hasRealPet, lesson.id),
+    );
+    setBodyResult(result);
+    if (result.ok) setApplied(true);
+    if (!isPreview) {
+      saveEvidence(buildEvidence({ applied: result.ok }, toAppliedChange(result)));
+    }
+  };
+
+  const undoApplyToPet = () => {
+    const result = undoBodyDesign();
+    setBodyResult(result);
+    if (result.ok) {
+      setApplied(false);
+      if (!isPreview) {
+        saveEvidence(
+          buildEvidence({ applied: false }, {
+            appliedToPet: false,
+            updateType: "body-design",
+          }),
+        );
+      }
+    }
+  };
+
+  // Textual before/after description (accessibility: not images alone).
+  const changeDescription = `Before: ${before.shape} shape, ${before.pattern} surface, ${before.expression} face. After: ${working.shape} shape, ${working.pattern} surface, ${working.expression} face.`;
 
   const undoControls = (
     <div className="flex flex-wrap gap-2">
@@ -246,6 +298,7 @@ export function BuildBodyActivity({
             <PetStage config={working} reducedMotion={reducedMotion} size="sm" />
           </div>
         </div>
+        <p className="text-center text-xs text-slate-400">{changeDescription}</p>
 
         <div className="mx-auto max-w-md space-y-3">
           <EvidenceText
@@ -255,42 +308,43 @@ export function BuildBodyActivity({
             onBlur={() => !isPreview && saveEvidence(buildEvidence())}
             disabled={isPreview}
           />
+          <p className="rounded-2xl border border-slate-700/60 bg-slate-800/30 px-3 py-2 text-xs text-slate-400">
+            Trying designs here is temporary. Nothing changes your real Meta-Pet
+            until you press <strong>Apply Design to My Meta-Pet</strong>.
+          </p>
           <div className="flex flex-wrap justify-center gap-2">
             <Button
               type="button"
               variant="outline"
               onClick={() => {
                 resetToStart();
-                setApplied(false);
-                if (!isPreview) {
-                  saveEvidence(buildEvidence({ applied: false }));
-                }
+                if (!isPreview) saveEvidence(buildEvidence({ applied }));
               }}
               disabled={isPreview}
               className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
             >
               Keep my original design
             </Button>
-            {pet.canPersist ? (
+            {hasRealPet ? (
               <Button
                 type="button"
-                onClick={() => {
-                  setApplied(true);
-                  if (!isPreview) {
-                    saveEvidence(buildEvidence({ applied: true }));
-                  }
-                }}
+                onClick={applyToPet}
+                disabled={isPreview}
                 className="bg-amber-300 text-slate-950 hover:bg-amber-200"
               >
                 Apply Design to My Meta-Pet
               </Button>
             ) : null}
           </div>
-          {applied ? (
-            <p className="text-center text-xs text-emerald-300" role="status">
-              Design applied to your lesson pet.
-            </p>
-          ) : null}
+          {hasRealPet ? (
+            <ApplyResultBanner
+              result={bodyResult}
+              onUndo={undoApplyToPet}
+              showViewPet
+            />
+          ) : (
+            <MissingPetNotice message="You can still finish this lesson with a classroom example. Create a Meta-Pet to apply your design to your own pet." />
+          )}
           <div className="flex justify-center">
             <SaveButton
               onClick={() => {

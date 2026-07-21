@@ -17,8 +17,17 @@ import { Button } from "@/components/ui/button";
 import type { Genome } from "@/lib/genome";
 import { MOSS_STRANDS } from "@/lib/moss60/strandSequences";
 import { DEFAULT_VITALS } from "@/vitals";
-import type { VisualisationSelectionEvidence } from "@/lib/teacher-lessons";
-import { evidenceTimestamp } from "@/lib/teacher-lessons";
+import type {
+  AppliedChangeMeta,
+  PetUpdateResult,
+  VisualisationSelectionEvidence,
+} from "@/lib/teacher-lessons";
+import {
+  applyPreferredVisualisation,
+  evidenceTimestamp,
+  toAppliedChange,
+  undoPreferredVisualisation,
+} from "@/lib/teacher-lessons";
 import type { LessonActivityProps } from "./types";
 import {
   ChoiceGrid,
@@ -27,6 +36,12 @@ import {
   STEP_KIND_LABEL,
   StepShell,
 } from "./shared";
+import {
+  ApplyResultBanner,
+  MissingPetNotice,
+  buildUpdateContext,
+  useHasRealPet,
+} from "./petUpdateUi";
 
 /** One fixed DNA seed is shared across every visual mode in this lesson. */
 const LESSON_GENOME: Genome = {
@@ -141,8 +156,12 @@ export function PatternsActivity({
   );
   const [reason, setReason] = useState(existing?.reason ?? "");
   const [saved, setSaved] = useState(false);
+  const [viewResult, setViewResult] = useState<PetUpdateResult | null>(null);
+  const hasRealPet = useHasRealPet();
 
-  const buildEvidence = (): VisualisationSelectionEvidence => ({
+  const buildEvidence = (
+    appliedChange?: AppliedChangeMeta,
+  ): VisualisationSelectionEvidence => ({
     kind: "visualisation-selection",
     version: 1,
     lessonId: lesson.id,
@@ -152,7 +171,35 @@ export function PatternsActivity({
     patternNoticed,
     sharedFeature,
     reason,
+    ...(appliedChange
+      ? { appliedChange }
+      : existing?.appliedChange
+        ? { appliedChange: existing.appliedChange }
+        : {}),
   });
+
+  // Save the chosen mode as the preferred DNA view (no genome change).
+  const savePreferredView = () => {
+    const result = applyPreferredVisualisation(
+      mode,
+      buildUpdateContext(isPreview, hasRealPet, lesson.id),
+    );
+    setViewResult(result);
+    if (!isPreview) saveEvidence(buildEvidence(toAppliedChange(result)));
+  };
+
+  const undoPreferredView = () => {
+    const result = undoPreferredVisualisation();
+    setViewResult(result);
+    if (result.ok && !isPreview) {
+      saveEvidence(
+        buildEvidence({
+          appliedToPet: false,
+          updateType: "preferred-visualisation",
+        }),
+      );
+    }
+  };
 
   const playToggle = (
     <Button
@@ -307,6 +354,25 @@ export function PatternsActivity({
           onBlur={() => !isPreview && saveEvidence(buildEvidence())}
           disabled={isPreview}
         />
+        {hasRealPet ? (
+          <div className="space-y-2">
+            <Button
+              type="button"
+              onClick={savePreferredView}
+              disabled={isPreview}
+              className="w-full bg-amber-300 text-slate-950 hover:bg-amber-200"
+            >
+              Use This as My Preferred DNA View
+            </Button>
+            <p className="text-xs text-slate-500">
+              This only changes your preferred view. It does not change your
+              pet&apos;s DNA.
+            </p>
+            <ApplyResultBanner result={viewResult} onUndo={undoPreferredView} />
+          </div>
+        ) : (
+          <MissingPetNotice message="You can still record your choice. Create a Meta-Pet to save a preferred DNA view." />
+        )}
         <div className="flex justify-center">
           <SaveButton
             onClick={() => {

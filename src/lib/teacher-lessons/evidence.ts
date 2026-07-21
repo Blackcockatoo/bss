@@ -24,6 +24,24 @@ export function evidenceTimestamp(): number {
   return Date.now();
 }
 
+/**
+ * Optional record of whether/how an evidence entry's choice was applied to the
+ * student's real Meta-Pet. Compact by design — never a full pet snapshot.
+ */
+export interface AppliedChangeMeta {
+  appliedToPet: boolean;
+  appliedAt?: number;
+  updateType?:
+    | "alias"
+    | "body-design"
+    | "dna-variation"
+    | "preferred-visualisation";
+  previousSnapshotAvailable?: boolean;
+  undoAvailable?: boolean;
+  applicationError?: string;
+  appliedSummary?: string;
+}
+
 /** Fields shared by every evidence entry. */
 export interface LessonEvidenceBase {
   kind: LessonEvidenceType;
@@ -34,6 +52,8 @@ export interface LessonEvidenceBase {
   text?: string;
   /** Epoch ms when the evidence was saved. */
   createdAt: number;
+  /** Optional real-pet application metadata (Pass 3). */
+  appliedChange?: AppliedChangeMeta;
 }
 
 /** Lesson 1 — pet observation card. */
@@ -170,6 +190,7 @@ export function validateEvidence(raw: unknown): LessonEvidence | null {
     text: typeof value.text === "string" ? value.text : undefined,
     createdAt:
       typeof value.createdAt === "number" ? value.createdAt : Date.now(),
+    appliedChange: sanitizeAppliedChange(value.appliedChange),
   } satisfies LessonEvidenceBase;
 
   // Each kind keeps its own extra fields; we trust the activity that wrote them
@@ -268,6 +289,41 @@ export function validateEvidence(raw: unknown): LessonEvidence | null {
     default:
       return null;
   }
+}
+
+const UPDATE_TYPES = [
+  "alias",
+  "body-design",
+  "dna-variation",
+  "preferred-visualisation",
+] as const;
+
+/** Validate optional applied-change metadata, or return undefined. */
+function sanitizeAppliedChange(raw: unknown): AppliedChangeMeta | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const value = raw as Partial<AppliedChangeMeta> & Record<string, unknown>;
+  const updateType =
+    typeof value.updateType === "string" &&
+    (UPDATE_TYPES as readonly string[]).includes(value.updateType)
+      ? (value.updateType as AppliedChangeMeta["updateType"])
+      : undefined;
+  return {
+    appliedToPet: value.appliedToPet === true,
+    appliedAt: typeof value.appliedAt === "number" ? value.appliedAt : undefined,
+    updateType,
+    previousSnapshotAvailable:
+      typeof value.previousSnapshotAvailable === "boolean"
+        ? value.previousSnapshotAvailable
+        : undefined,
+    undoAvailable:
+      typeof value.undoAvailable === "boolean" ? value.undoAvailable : undefined,
+    applicationError:
+      typeof value.applicationError === "string"
+        ? value.applicationError
+        : undefined,
+    appliedSummary:
+      typeof value.appliedSummary === "string" ? value.appliedSummary : undefined,
+  };
 }
 
 function asString(value: unknown): string {

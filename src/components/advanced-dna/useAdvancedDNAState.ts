@@ -20,10 +20,14 @@ const DEFAULT_CONTROLS: Omit<AdvancedDnaControlsState, "playing"> = {
   animationNonce: 0,
 };
 
-export function useAdvancedDNAState(reducedMotion: boolean) {
+export function useAdvancedDNAState(
+  reducedMotion: boolean,
+  initialMode?: AdvancedDnaMode,
+) {
   const [storedControls, setControls] = useState<AdvancedDnaControlsState>(
     () => ({
       ...DEFAULT_CONTROLS,
+      mode: initialMode ?? DEFAULT_CONTROLS.mode,
       playing: !reducedMotion,
     }),
   );
