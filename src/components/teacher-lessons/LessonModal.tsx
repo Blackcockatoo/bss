@@ -28,10 +28,13 @@ export function LessonModal({
   footer,
 }: LessonModalProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
   const titleId = useId();
 
   useEffect(() => {
     if (!open) return;
+    // Remember the control that opened the dialog so focus can return to it.
+    triggerRef.current = document.activeElement as HTMLElement | null;
     closeRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -39,7 +42,11 @@ export function LessonModal({
       }
     };
     document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      // Return focus to the triggering control after the dialog closes.
+      triggerRef.current?.focus?.();
+    };
   }, [open, onClose]);
 
   if (!open) return null;

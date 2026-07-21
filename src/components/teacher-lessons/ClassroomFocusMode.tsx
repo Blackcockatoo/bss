@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect } from "react";
 import { Focus, Minimize2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { setClassroomFocusActive } from "@/lib/teacher-lessons/classroomFocusSignal";
 
 interface ClassroomFocusModeProps {
   active: boolean;
@@ -27,6 +29,14 @@ export function ClassroomFocusMode({
   onExit,
   children,
 }: ClassroomFocusModeProps) {
+  // Tell the global app chrome (bottom nav bar) to step aside while focus mode
+  // is active, and to reappear the moment it ends or this component unmounts
+  // (route change, exit, completion). Lifecycle-driven so refresh restores it.
+  useEffect(() => {
+    setClassroomFocusActive(active);
+    return () => setClassroomFocusActive(false);
+  }, [active]);
+
   return (
     <div
       className={

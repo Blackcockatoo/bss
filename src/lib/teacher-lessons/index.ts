@@ -110,3 +110,16 @@ export {
 export {
   type AppliedChangeMeta,
 } from "./evidence";
+export {
+  setClassroomFocusActive,
+  isClassroomFocusActive,
+  useClassroomFocusActive,
+} from "./classroomFocusSignal";
+export {
+  PILOT_STORAGE_KEY,
+  PILOT_CHECKLIST,
+  PILOT_FEEDBACK_QUESTIONS,
+  usePilotStore,
+  sanitizePilotState,
+  type PilotFeedbackEntry,
+} from "./pilot";

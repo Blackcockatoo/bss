@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   ArrowLeft,
   BookOpenCheck,
+  ClipboardList,
   FileText,
   GraduationCap,
   PawPrint,
@@ -34,6 +35,7 @@ import { TeacherNotes } from "./TeacherNotes";
 
 const PASSPORT_PATH = "/teachers/passport";
 const REVIEW_PATH = "/teachers/review";
+const PILOT_PATH = "/teachers/pilot";
 
 /** Route back to the main Meta-Pet area. */
 const META_PET_HOME_PATH = "/pet";
@@ -131,7 +133,23 @@ export function TeacherHub() {
                   Review Evidence
                 </Link>
               </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
+              >
+                <Link href={PILOT_PATH}>
+                  <ClipboardList className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  Pilot Checklist
+                </Link>
+              </Button>
             </div>
+            <p className="pt-1 text-xs text-slate-500">
+              Local-first: lesson progress and evidence are saved on this device
+              only, use a safe alias (no real names), and can be cleared from
+              Review Evidence. Deleting evidence never deletes the Meta-Pet. On a
+              shared school device, clear local data after use.
+            </p>
             {hasEvidence ? (
               <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-slate-400">
                 <span>

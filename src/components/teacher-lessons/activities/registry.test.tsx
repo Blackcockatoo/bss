@@ -41,6 +41,7 @@ function makeProps(
     presentationMode: "standard",
     timing: getTimingModeMeta("standard"),
     reducedMotion: true,
+    lowPerformance: false,
     pet: {
       startingConfig: cloneLessonPetConfig(DEMO_PET_CONFIG),
       isDemo: true,

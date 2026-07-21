@@ -297,6 +297,41 @@ export function LearningPassport() {
           ))}
         </div>
 
+        {/* Journey summary + closing messages (printed with the passport). */}
+        <section className="passport-section mt-6 space-y-3 rounded-2xl border border-slate-700/60 bg-slate-900/50 p-4">
+          <h2 className="text-base font-semibold text-white">
+            The seven-lesson journey
+          </h2>
+          <p className="text-sm text-slate-300">
+            This passport records a student&apos;s journey across seven guided
+            Meta-Pet lessons: meeting a companion, building a body, exploring
+            DNA and difference, caring for needs, reading feelings, finding
+            patterns, and becoming a responsible creator.
+          </p>
+          <p className="text-sm text-slate-300">
+            <span className="font-medium text-slate-100">For teachers:</span>{" "}
+            each section shows the student&apos;s own words and choices as
+            classroom evidence — observations, predictions, reflections and any
+            changes they chose to apply to their Meta-Pet. It is a record of
+            thinking, not a graded test.
+          </p>
+          <p className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-100">
+            <span className="font-medium">Well done, creator!</span> You met,
+            built, cared for and understood your Meta-Pet — and thought about how
+            to be responsible with your creations. That is real science and real
+            kindness.
+          </p>
+          <p className="text-xs text-slate-400">
+            Generated {new Date(passport.createdAt).toLocaleString()} ·
+            Completion {passport.completionPercent}%
+          </p>
+          <p className="text-xs text-slate-500">
+            Privacy: this passport uses a safe alias only and is generated on
+            this device from local lesson evidence. No real student name is
+            required. Deleting lesson evidence does not delete the Meta-Pet.
+          </p>
+        </section>
+
         <footer className="no-print mt-8 flex justify-center">
           <Button
             asChild

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
   FastForward,
@@ -94,6 +95,7 @@ export function LessonRunner({
   const lesson = getLessonBySlug(slug);
   const hydrated = useLessonProgressHydrated();
   const reducedMotion = useReducedMotion();
+  const router = useRouter();
 
   // Store bindings (hooks must run unconditionally, before any early return).
   const state = useLessonProgressStore();
@@ -114,6 +116,7 @@ export function LessonRunner({
     (s) => s.setPresentationMode,
   );
   const setTimingMode = useLessonProgressStore((s) => s.setTimingMode);
+  const setLowPerformance = useLessonProgressStore((s) => s.setLowPerformance);
 
   // Lesson pet context (safe demo/real resolution). Called unconditionally with
   // a fallback so the hook order is stable even on an unknown slug.
@@ -168,6 +171,9 @@ export function LessonRunner({
   const totalSteps = lesson.steps.length;
   const viewMode: LessonViewMode = state.viewMode;
   const focusMode = !preview && state.focusMode;
+  const lowPerformance = state.lowPerformance;
+  // Low Performance Mode implies static visuals everywhere reduced-motion does.
+  const effectiveReducedMotion = reducedMotion || lowPerformance;
   const timing = getTimingModeMeta(
     LESSON_TIMING_MODES.find((m) => m.id === state.timingMode)?.id ??
       "standard",
@@ -223,10 +229,12 @@ export function LessonRunner({
   const isLastStep = stepIndex >= totalSteps - 1;
 
   // --- Completion screen ---
+  // Render with focus mode inactive so the global bottom navigation is
+  // restored the moment a lesson completes (there is no guide bar here).
   if (isCompleted) {
     return (
       <ClassroomFocusMode
-        active={focusMode}
+        active={false}
         lessonTitle={lesson.title}
         onEnter={() => setFocusMode(true)}
         onExit={() => setFocusMode(false)}
@@ -260,7 +268,8 @@ export function LessonRunner({
     isPreview: preview,
     presentationMode: state.presentationMode,
     timing,
-    reducedMotion,
+    reducedMotion: effectiveReducedMotion,
+    lowPerformance,
     pet,
     record: record ?? selectRecord(state, lesson.id),
     getEvidence: (stepId) =>
@@ -375,6 +384,19 @@ export function LessonRunner({
                     </button>
                   ))}
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setLowPerformance(!lowPerformance)}
+                  aria-pressed={lowPerformance}
+                  className={`rounded-lg border px-2.5 py-1 font-medium transition-colors ${
+                    lowPerformance
+                      ? "border-emerald-500/50 bg-emerald-500/15 text-emerald-200"
+                      : "border-slate-700 bg-slate-800/40 text-slate-300 hover:bg-slate-800"
+                  }`}
+                  title="Static, low-quality visuals for older devices. Lessons still work fully."
+                >
+                  Low Performance Mode: {lowPerformance ? "On" : "Off"}
+                </button>
               </div>
 
               {/* Teacher control strip */}
@@ -540,11 +562,17 @@ export function LessonRunner({
         totalSteps={totalSteps}
         canGoPrevious={stepIndex > 0}
         canGoNext={stepIndex < totalSteps - 1}
+        isPaused={isPaused}
         onPrevious={goPrevious}
         onNext={goNext}
         onTeacherPrompt={() => setGuideModal("teacher")}
         onStudentTask={() => setGuideModal("student")}
         onWhatDoINow={() => setGuideModal("help")}
+        onPauseResume={() => (isPaused ? resumeLesson() : pauseLesson())}
+        onExit={() => {
+          exitLesson();
+          router.push(TEACHER_HUB_PATH);
+        }}
       />
 
       <LessonModal

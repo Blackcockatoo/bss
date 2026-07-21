@@ -68,10 +68,12 @@ function DnaViewer({
   mode,
   playing,
   reducedMotion,
+  lowPerformance = false,
 }: {
   mode: AdvancedDnaMode;
   playing: boolean;
   reducedMotion: boolean;
+  lowPerformance?: boolean;
 }) {
   const model = useMemo(
     () =>
@@ -87,28 +89,30 @@ function DnaViewer({
     [],
   );
 
+  const performanceMode = lowPerformance ? "performance" : "auto";
+
   const controls: AdvancedDnaControlsState = {
     mode,
     speed: 0.78,
     intensity: 0.82,
     mutationLevel: 0.24,
-    particleDensity: 0.7,
+    particleDensity: lowPerformance ? 0.35 : 0.7,
     symmetry: 12,
     cameraDepth: 1,
     dimension: 4,
     playing: playing && !reducedMotion,
-    performanceMode: "auto",
+    performanceMode,
     animationNonce: 0,
   };
 
   const performance = useMemo(
     () =>
       resolvePerformanceProfile(
-        "auto",
+        performanceMode,
         detectDevicePerformance(),
         reducedMotion,
       ),
-    [reducedMotion],
+    [performanceMode, reducedMotion],
   );
 
   return (
@@ -134,6 +138,7 @@ export function PatternsActivity({
   step,
   isPreview,
   reducedMotion,
+  lowPerformance,
   lesson,
   getEvidence,
   saveEvidence,
@@ -226,7 +231,8 @@ export function PatternsActivity({
         footer={playToggle}
       >
         <div className="flex flex-col items-center gap-2">
-          <DnaViewer mode="sigil" playing={playing} reducedMotion={reducedMotion} />
+          <DnaViewer mode="sigil" playing={playing} reducedMotion={reducedMotion}
+            lowPerformance={lowPerformance} />
           <p className="text-center text-sm text-slate-300">
             {MODE_EXPLAIN.sigil}
           </p>
@@ -248,7 +254,8 @@ export function PatternsActivity({
         footer={playToggle}
       >
         <div className="flex flex-col items-center gap-3">
-          <DnaViewer mode={mode} playing={playing} reducedMotion={reducedMotion} />
+          <DnaViewer mode={mode} playing={playing} reducedMotion={reducedMotion}
+            lowPerformance={lowPerformance} />
           <p className="text-center text-sm text-slate-300">
             {MODE_EXPLAIN[mode]}
           </p>
@@ -273,7 +280,8 @@ export function PatternsActivity({
       >
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col items-center gap-2">
-            <DnaViewer mode={mode} playing={playing} reducedMotion={reducedMotion} />
+            <DnaViewer mode={mode} playing={playing} reducedMotion={reducedMotion}
+            lowPerformance={lowPerformance} />
             <ChoiceGrid
               legend="Left"
               options={MODE_OPTIONS}
@@ -287,6 +295,7 @@ export function PatternsActivity({
               mode={compareMode}
               playing={playing}
               reducedMotion={reducedMotion}
+              lowPerformance={lowPerformance}
             />
             <ChoiceGrid
               legend="Right"

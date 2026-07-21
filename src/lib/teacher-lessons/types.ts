@@ -233,6 +233,8 @@ export interface LessonProgressState {
   presentationMode: LessonPresentationMode;
   /** Selected timing mode id (demo / standard / extended). */
   timingMode: string;
+  /** Low Performance Mode: static/low-quality visuals for older devices. */
+  lowPerformance: boolean;
 }
 
 /** Overall progress summary across all seven lessons. */

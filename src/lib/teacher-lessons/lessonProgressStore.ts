@@ -65,6 +65,7 @@ function createDefaultState(): LessonProgressState {
     focusMode: false,
     presentationMode: "standard",
     timingMode: DEFAULT_TIMING_MODE,
+    lowPerformance: false,
   };
 }
 
@@ -208,6 +209,7 @@ export function sanitizeState(raw: unknown): LessonProgressState {
     timingMode: isTimingMode(state.timingMode)
       ? state.timingMode
       : DEFAULT_TIMING_MODE,
+    lowPerformance: state.lowPerformance === true,
   };
 }
 
@@ -251,6 +253,7 @@ interface LessonProgressActions {
   saveEvidenceEntry: (stepId: string, evidence: LessonEvidence) => void;
   setPresentationMode: (mode: LessonPresentationMode) => void;
   setTimingMode: (mode: string) => void;
+  setLowPerformance: (active: boolean) => void;
   /** Update the last-active timestamp for the current lesson. */
   touch: () => void;
 }
@@ -477,6 +480,9 @@ export const useLessonProgressStore = create<LessonProgressStore>()(
         set(() => ({
           timingMode: isTimingMode(mode) ? mode : DEFAULT_TIMING_MODE,
         })),
+
+      setLowPerformance: (active) =>
+        set(() => ({ lowPerformance: active === true })),
 
       touch: () =>
         set((state) => {

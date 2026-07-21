@@ -24,6 +24,8 @@ export interface LessonActivityProps {
   presentationMode: LessonPresentationMode;
   timing: LessonTimingModeMeta;
   reducedMotion: boolean;
+  /** Low Performance Mode: prefer static/low-quality visuals on older devices. */
+  lowPerformance: boolean;
   pet: LessonPetContext;
   /** The live progress record for the current lesson (read-only view). */
   record: LessonProgressRecord;
