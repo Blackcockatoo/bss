@@ -35,3 +35,34 @@ export {
   selectProgressSummary,
   type LessonProgressStore,
 } from "./lessonProgressStore";
+export {
+  LESSON_EVIDENCE_VERSION,
+  evidenceTimestamp,
+  isEvidenceKind,
+  validateEvidence,
+  type LessonEvidence,
+  type LessonEvidenceBase,
+  type PetObservationCardEvidence,
+  type BodyDesignComparisonEvidence,
+  type DnaComparisonEvidence,
+  type CauseEffectChainEvidence,
+  type EmotionReflectionEvidence,
+  type VisualisationSelectionEvidence,
+  type ResponsibleCreatorPromiseEvidence,
+} from "./evidence";
+export * from "./lessonPet";
+export * from "./lessonVitals";
+export {
+  isFeatureAvailable,
+  resolveLessonAvailability,
+  setFeatureAvailabilityOverrides,
+  type FeatureAvailability,
+} from "./featureFlags";
+export {
+  LESSON_TIMING_MODES,
+  DEFAULT_TIMING_MODE,
+  getTimingModeMeta,
+  isTimingMode,
+  type LessonTimingMode,
+  type LessonTimingModeMeta,
+} from "./timing";

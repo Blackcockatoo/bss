@@ -22,8 +22,11 @@ import {
   getLessonById,
   isLessonId,
 } from "./lessonDefinitions";
+import { validateEvidence, type LessonEvidence } from "./evidence";
+import { DEFAULT_TIMING_MODE, isTimingMode } from "./timing";
 import type {
   LessonId,
+  LessonPresentationMode,
   LessonProgressRecord,
   LessonProgressState,
   LessonProgressSummary,
@@ -31,7 +34,8 @@ import type {
 } from "./types";
 
 export const LESSON_PROGRESS_STORAGE_KEY = "metapet-teacher-lesson-progress";
-const LESSON_PROGRESS_VERSION = 1;
+// v2 adds typed evidence entries and presentation/timing preferences.
+const LESSON_PROGRESS_VERSION = 2;
 
 function now(): number {
   return Date.now();
@@ -48,6 +52,7 @@ function createEmptyRecord(lessonId: LessonId): LessonProgressRecord {
     lastActiveAt: null,
     completedAt: null,
     evidence: {},
+    evidenceEntries: {},
   };
 }
 
@@ -58,7 +63,13 @@ function createDefaultState(): LessonProgressState {
     records: {},
     viewMode: "teacher",
     focusMode: false,
+    presentationMode: "standard",
+    timingMode: DEFAULT_TIMING_MODE,
   };
+}
+
+function isPresentationMode(value: unknown): value is LessonPresentationMode {
+  return value === "support" || value === "standard" || value === "extension";
 }
 
 /** Number of steps a lesson has, or a safe default if the lesson is unknown. */
@@ -113,6 +124,18 @@ function sanitizeRecord(
         )
       : {};
 
+  // Validate typed evidence entries; drop anything that fails validation so
+  // corrupted local storage can never surface to a classroom.
+  const evidenceEntries: Record<string, LessonEvidence> = {};
+  if (record.evidenceEntries && typeof record.evidenceEntries === "object") {
+    for (const [stepId, value] of Object.entries(record.evidenceEntries)) {
+      const validated = validateEvidence(value);
+      if (validated && validated.lessonId === lessonId) {
+        evidenceEntries[stepId] = validated;
+      }
+    }
+  }
+
   const completed = record.completed === true;
 
   return {
@@ -135,6 +158,7 @@ function sanitizeRecord(
           ? now()
           : null,
     evidence,
+    evidenceEntries,
   };
 }
 
@@ -178,6 +202,12 @@ export function sanitizeState(raw: unknown): LessonProgressState {
     records,
     viewMode,
     focusMode: state.focusMode === true,
+    presentationMode: isPresentationMode(state.presentationMode)
+      ? state.presentationMode
+      : "standard",
+    timingMode: isTimingMode(state.timingMode)
+      ? state.timingMode
+      : DEFAULT_TIMING_MODE,
   };
 }
 
@@ -215,8 +245,12 @@ interface LessonProgressActions {
   setViewMode: (mode: LessonViewMode) => void;
   toggleViewMode: () => void;
   setFocusMode: (active: boolean) => void;
-  /** Persist a placeholder piece of student evidence for a step. */
+  /** Persist a placeholder piece of free-text student evidence for a step. */
   saveEvidence: (stepId: string, value: string) => void;
+  /** Persist a typed evidence entry for a step in the current lesson. */
+  saveEvidenceEntry: (stepId: string, evidence: LessonEvidence) => void;
+  setPresentationMode: (mode: LessonPresentationMode) => void;
+  setTimingMode: (mode: string) => void;
   /** Update the last-active timestamp for the current lesson. */
   touch: () => void;
 }
@@ -315,8 +349,10 @@ export const useLessonProgressStore = create<LessonProgressStore>()(
             );
             const stepId = lesson?.steps[target]?.id;
             const evidence = { ...record.evidence };
+            const evidenceEntries = { ...record.evidenceEntries };
             if (stepId) {
               delete evidence[stepId];
+              delete evidenceEntries[stepId];
             }
             return {
               ...record,
@@ -324,6 +360,7 @@ export const useLessonProgressStore = create<LessonProgressStore>()(
                 (s) => s !== target,
               ),
               evidence,
+              evidenceEntries,
               lastActiveAt: now(),
             };
           });
@@ -414,6 +451,33 @@ export const useLessonProgressStore = create<LessonProgressStore>()(
           return { records };
         }),
 
+      saveEvidenceEntry: (stepId, evidence) =>
+        set((state) => {
+          const lessonId = state.currentLessonId;
+          if (!lessonId || typeof stepId !== "string") return state;
+          const validated = validateEvidence(evidence);
+          if (!validated || validated.lessonId !== lessonId) return state;
+          const records = withRecord(state.records, lessonId, (record) => ({
+            ...record,
+            evidenceEntries: {
+              ...record.evidenceEntries,
+              [stepId]: validated,
+            },
+            lastActiveAt: now(),
+          }));
+          return { records };
+        }),
+
+      setPresentationMode: (mode) =>
+        set(() => ({
+          presentationMode: isPresentationMode(mode) ? mode : "standard",
+        })),
+
+      setTimingMode: (mode) =>
+        set(() => ({
+          timingMode: isTimingMode(mode) ? mode : DEFAULT_TIMING_MODE,
+        })),
+
       touch: () =>
         set((state) => {
           const lessonId = state.currentLessonId;
@@ -428,6 +492,10 @@ export const useLessonProgressStore = create<LessonProgressStore>()(
     {
       name: LESSON_PROGRESS_STORAGE_KEY,
       version: LESSON_PROGRESS_VERSION,
+      // v1 → v2 migration and any future upgrades run through sanitizeState,
+      // which fills in the new fields (typed evidence, presentation/timing)
+      // from safe defaults without discarding earlier progress.
+      migrate: (persisted) => sanitizeState(persisted),
       // Sanitise persisted data on merge so corrupted local storage can never
       // crash the app or trap a teacher on a broken screen.
       merge: (persisted, current) => ({

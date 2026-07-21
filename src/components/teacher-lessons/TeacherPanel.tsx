@@ -1,45 +1,40 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, EyeOff, MessagesSquare, Speech } from "lucide-react";
+import { Eye, EyeOff, MessagesSquare, Speech, Target } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import type { LessonDefinition, LessonStepDefinition } from "@/lib/teacher-lessons";
-import { LessonStep } from "./LessonStep";
 
 interface TeacherPanelProps {
   lesson: LessonDefinition;
   step: LessonStepDefinition;
-  stepIndex: number;
-  completedSteps: number[];
+  /** Whether the "expected outcome" is being shown (teacher toggle). */
+  showExpectedOutcome: boolean;
 }
 
 /**
- * Teacher View: projector-friendly framing around the activity area. Shows the
- * teacher script and discussion prompts, and can reveal the student
- * instructions or hide teacher-only notes for projection.
+ * Teacher View guidance panel shown above the activity. Projector-friendly: the
+ * teacher script, discussion prompts, an optional expected-outcome reveal, and
+ * toggles to show the student instructions or hide teacher-only notes.
  */
 export function TeacherPanel({
   lesson,
   step,
-  stepIndex,
-  completedSteps,
+  showExpectedOutcome,
 }: TeacherPanelProps) {
   const [showStudentInstructions, setShowStudentInstructions] = useState(false);
   const [hideTeacherNotes, setHideTeacherNotes] = useState(false);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
-      <div>
-        <LessonStep
-          lesson={lesson}
-          step={step}
-          stepIndex={stepIndex}
-          completedSteps={completedSteps}
-        />
-      </div>
-
-      <aside className="space-y-4" aria-label="Teacher guidance">
+    <aside
+      className="mb-6 space-y-3 rounded-3xl border border-amber-300/15 bg-slate-900/40 p-4"
+      aria-label="Teacher guidance"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-300/90">
+          Teacher guidance
+        </p>
         <div className="flex flex-wrap gap-2">
           <Button
             type="button"
@@ -69,47 +64,58 @@ export function TeacherPanel({
             ) : (
               <EyeOff className="mr-1.5 h-4 w-4" aria-hidden="true" />
             )}
-            {hideTeacherNotes ? "Show teacher notes" : "Hide teacher notes"}
+            {hideTeacherNotes ? "Show notes" : "Hide notes (projector)"}
           </Button>
         </div>
+      </div>
 
-        {!hideTeacherNotes ? (
-          <div className="space-y-4">
-            <section className="rounded-2xl border border-amber-300/20 bg-amber-300/5 p-4">
-              <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-300/90">
-                <Speech className="h-4 w-4" aria-hidden="true" />
-                Teacher script
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-amber-50/90">
-                “{step.teacherPrompt}”
-              </p>
-            </section>
-
-            <section className="rounded-2xl border border-slate-700/60 bg-slate-800/30 p-4">
-              <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">
-                <MessagesSquare className="h-4 w-4" aria-hidden="true" />
-                Discussion prompts
-              </h3>
-              <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-300">
-                {lesson.discussionPrompts.map((prompt) => (
-                  <li key={prompt}>{prompt}</li>
-                ))}
-              </ul>
-            </section>
-          </div>
-        ) : null}
-
-        {showStudentInstructions ? (
-          <section className="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-4">
-            <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200">
-              What students see
+      {!hideTeacherNotes ? (
+        <div className="grid gap-3 md:grid-cols-2">
+          <section className="rounded-2xl border border-amber-300/20 bg-amber-300/5 p-3">
+            <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-300/90">
+              <Speech className="h-4 w-4" aria-hidden="true" />
+              Teacher script
             </h3>
-            <p className="mt-2 text-sm leading-6 text-cyan-50/90">
-              {step.studentTask}
+            <p className="mt-1.5 text-sm leading-6 text-amber-50/90">
+              “{step.teacherPrompt}”
             </p>
           </section>
-        ) : null}
-      </aside>
-    </div>
+          <section className="rounded-2xl border border-slate-700/60 bg-slate-800/30 p-3">
+            <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">
+              <MessagesSquare className="h-4 w-4" aria-hidden="true" />
+              Discussion prompts
+            </h3>
+            <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-300">
+              {lesson.discussionPrompts.map((prompt) => (
+                <li key={prompt}>{prompt}</li>
+              ))}
+            </ul>
+          </section>
+        </div>
+      ) : null}
+
+      {showStudentInstructions ? (
+        <section className="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-3">
+          <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200">
+            What students see
+          </h3>
+          <p className="mt-1.5 text-sm leading-6 text-cyan-50/90">
+            {step.studentTask}
+          </p>
+        </section>
+      ) : null}
+
+      {showExpectedOutcome ? (
+        <section className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-3">
+          <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200">
+            <Target className="h-4 w-4" aria-hidden="true" />
+            Expected outcome
+          </h3>
+          <p className="mt-1.5 text-sm leading-6 text-emerald-50/90">
+            {step.expectedOutcome}
+          </p>
+        </section>
+      ) : null}
+    </aside>
   );
 }

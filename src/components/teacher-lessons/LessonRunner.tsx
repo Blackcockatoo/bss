@@ -9,27 +9,36 @@ import {
   Home,
   Pause,
   Play,
+  Repeat,
   RotateCcw,
+  SkipForward,
+  Target,
   Users,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import {
   LESSON_DEFINITIONS,
+  LESSON_TIMING_MODES,
   TEACHER_HUB_PATH,
   getLessonBySlug,
+  getTimingModeMeta,
   resolveStepIndex,
   selectRecord,
   useLessonProgressHydrated,
   useLessonProgressStore,
+  type LessonEvidence,
+  type LessonPresentationMode,
   type LessonViewMode,
 } from "@/lib/teacher-lessons";
 import { ClassroomFocusMode } from "./ClassroomFocusMode";
 import { LessonCompletion } from "./LessonCompletion";
 import { LessonGuideBar } from "./LessonGuideBar";
 import { LessonModal } from "./LessonModal";
-import { StudentPanel } from "./StudentPanel";
 import { TeacherPanel } from "./TeacherPanel";
+import { ActivityHost, useLessonPet } from "./activities";
+import type { LessonActivityProps } from "./activities";
 
 interface LessonRunnerProps {
   slug: string;
@@ -39,6 +48,12 @@ interface LessonRunnerProps {
 }
 
 type GuideModalKind = "teacher" | "student" | "help" | null;
+
+const PRESENTATION_MODES: { id: LessonPresentationMode; label: string }[] = [
+  { id: "support", label: "Support" },
+  { id: "standard", label: "Standard" },
+  { id: "extension", label: "Extension" },
+];
 
 /** Safe fallback shown when a lesson slug is unknown or data is missing. */
 function LessonNotFound() {
@@ -78,6 +93,7 @@ export function LessonRunner({
 }: LessonRunnerProps) {
   const lesson = getLessonBySlug(slug);
   const hydrated = useLessonProgressHydrated();
+  const reducedMotion = useReducedMotion();
 
   // Store bindings (hooks must run unconditionally, before any early return).
   const state = useLessonProgressStore();
@@ -93,7 +109,21 @@ export function LessonRunner({
   const exitLesson = useLessonProgressStore((s) => s.exitLesson);
   const setViewMode = useLessonProgressStore((s) => s.setViewMode);
   const setFocusMode = useLessonProgressStore((s) => s.setFocusMode);
-  const saveEvidence = useLessonProgressStore((s) => s.saveEvidence);
+  const saveEvidenceEntry = useLessonProgressStore((s) => s.saveEvidenceEntry);
+  const setPresentationMode = useLessonProgressStore(
+    (s) => s.setPresentationMode,
+  );
+  const setTimingMode = useLessonProgressStore((s) => s.setTimingMode);
+
+  // Lesson pet context (safe demo/real resolution). Called unconditionally with
+  // a fallback so the hook order is stable even on an unknown slug.
+  const pet = useLessonPet(
+    lesson ?? {
+      usesStudentRealPet: false,
+      usesDemonstrationPet: true,
+      persistChanges: false,
+    },
+  );
 
   // Preview mode keeps its own ephemeral step so it never touches real
   // progress. Seeded lazily from the deep link; the route remounts on change.
@@ -102,6 +132,8 @@ export function LessonRunner({
   );
   const [guideModal, setGuideModal] = useState<GuideModalKind>(null);
   const [confirmResetLesson, setConfirmResetLesson] = useState(false);
+  const [showExpected, setShowExpected] = useState(false);
+  const [activityNonce, setActivityNonce] = useState(0);
   const startedRef = useRef(false);
 
   // On first mount, start the lesson (unless previewing) at the requested step.
@@ -109,8 +141,7 @@ export function LessonRunner({
     if (!lesson || preview || !hydrated || startedRef.current) return;
     startedRef.current = true;
     startLesson(lesson.id, {
-      fromStep:
-        typeof initialStep === "number" ? initialStep : undefined,
+      fromStep: typeof initialStep === "number" ? initialStep : undefined,
     });
     if (initialMode) {
       setViewMode(initialMode);
@@ -137,12 +168,15 @@ export function LessonRunner({
   const totalSteps = lesson.steps.length;
   const viewMode: LessonViewMode = state.viewMode;
   const focusMode = !preview && state.focusMode;
+  const timing = getTimingModeMeta(
+    LESSON_TIMING_MODES.find((m) => m.id === state.timingMode)?.id ??
+      "standard",
+  );
 
   const stepIndex = preview
     ? Math.min(previewStep, totalSteps - 1)
     : (record?.currentStep ?? 0);
   const step = lesson.steps[stepIndex] ?? lesson.steps[0];
-  const completedSteps = preview ? [] : (record?.completedSteps ?? []);
   const isPaused = !preview && (record?.paused ?? false);
   const isCompleted = !preview && (record?.completed ?? false);
 
@@ -167,6 +201,14 @@ export function LessonRunner({
     }
   };
 
+  const skipStep = () => {
+    if (preview) {
+      setPreviewStep((s) => Math.min(totalSteps - 1, s + 1));
+    } else {
+      nextStep();
+    }
+  };
+
   const handleComplete = () => {
     if (preview) return;
     completeLesson(lesson.id);
@@ -175,6 +217,7 @@ export function LessonRunner({
   const handleReplay = () => {
     resetLesson(lesson.id);
     startLesson(lesson.id, { fromStep: 0 });
+    setActivityNonce((n) => n + 1);
   };
 
   const isLastStep = stepIndex >= totalSteps - 1;
@@ -209,6 +252,26 @@ export function LessonRunner({
     help: { title: "What do I do now?", body: step.whatDoINow },
   };
 
+  const activityProps: LessonActivityProps = {
+    lesson,
+    step,
+    stepIndex,
+    viewMode,
+    isPreview: preview,
+    presentationMode: state.presentationMode,
+    timing,
+    reducedMotion,
+    pet,
+    record: record ?? selectRecord(state, lesson.id),
+    getEvidence: (stepId) =>
+      (record ?? selectRecord(state, lesson.id)).evidenceEntries[stepId],
+    saveEvidence: (evidence: LessonEvidence) => {
+      if (preview) return;
+      saveEvidenceEntry(evidence.stepId, evidence);
+    },
+    onAskForHelp: () => setGuideModal("help"),
+  };
+
   return (
     <ClassroomFocusMode
       active={focusMode}
@@ -218,7 +281,7 @@ export function LessonRunner({
     >
       {/* pb-28 keeps content clear of the fixed guide bar on all screens. */}
       <div className="mx-auto w-full max-w-5xl px-4 pb-28 pt-4 sm:px-6">
-        {/* Header / control strip */}
+        {/* Header */}
         <header className="mb-6 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -273,88 +336,163 @@ export function LessonRunner({
               Preview mode — navigate freely. Nothing here changes student or pet
               progress.
             </p>
-          ) : (
-            <div className="flex flex-wrap items-center gap-2">
-              {isPaused ? (
-                <Button
-                  type="button"
-                  size="sm"
-                  className="bg-emerald-400 text-slate-950 hover:bg-emerald-300"
-                  onClick={() => resumeLesson()}
-                >
-                  <Play className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                  Resume Lesson
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
-                  onClick={() => pauseLesson()}
-                >
-                  <Pause className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                  Pause Lesson
-                </Button>
-              )}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
-                onClick={() => resetStep(stepIndex)}
-              >
-                <RotateCcw className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                Reset Step
-              </Button>
-              {confirmResetLesson ? (
-                <span className="inline-flex items-center gap-2">
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => {
-                      resetLesson(lesson.id);
-                      startLesson(lesson.id, { fromStep: 0 });
-                      setConfirmResetLesson(false);
-                    }}
+          ) : viewMode === "teacher" ? (
+            <div className="space-y-2">
+              {/* Timing + presentation selectors */}
+              <div className="flex flex-wrap items-center gap-3 text-xs">
+                <label className="flex items-center gap-1.5 text-slate-300">
+                  <span className="font-medium">Timing</span>
+                  <select
+                    value={timing.id}
+                    onChange={(e) => setTimingMode(e.target.value)}
+                    className="rounded-lg border border-slate-700 bg-slate-800/60 px-2 py-1 text-slate-200"
                   >
-                    Confirm reset lesson
-                  </Button>
+                    {LESSON_TIMING_MODES.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <div
+                  className="inline-flex overflow-hidden rounded-lg border border-slate-700"
+                  role="group"
+                  aria-label="Presentation mode"
+                >
+                  {PRESENTATION_MODES.map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setPresentationMode(m.id)}
+                      aria-pressed={state.presentationMode === m.id}
+                      className={`px-2.5 py-1 font-medium transition-colors ${
+                        state.presentationMode === m.id
+                          ? "bg-cyan-400 text-slate-950"
+                          : "bg-slate-800/40 text-slate-300 hover:bg-slate-800"
+                      }`}
+                    >
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Teacher control strip */}
+              <div className="flex flex-wrap items-center gap-2">
+                {isPaused ? (
                   <Button
                     type="button"
                     size="sm"
+                    className="bg-emerald-400 text-slate-950 hover:bg-emerald-300"
+                    onClick={() => resumeLesson()}
+                  >
+                    <Play className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                    Resume
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
                     variant="outline"
+                    size="sm"
                     className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
-                    onClick={() => setConfirmResetLesson(false)}
+                    onClick={() => pauseLesson()}
                   >
-                    Cancel
+                    <Pause className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                    Pause
                   </Button>
-                </span>
-              ) : (
+                )}
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
-                  onClick={() => setConfirmResetLesson(true)}
+                  onClick={() => setShowExpected((v) => !v)}
+                  aria-pressed={showExpected}
+                >
+                  <Target className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  Expected outcome
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
+                  onClick={handleReplay}
+                >
+                  <Repeat className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  Replay
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
+                  onClick={() => resetStep(stepIndex)}
                 >
                   <RotateCcw className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                  Reset Lesson
+                  Reset Step
                 </Button>
-              )}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="border-emerald-500/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20"
-                onClick={handleComplete}
-              >
-                <FastForward className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                Finish Early
-              </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
+                  onClick={skipStep}
+                  disabled={isLastStep}
+                >
+                  <SkipForward className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  Skip Step
+                </Button>
+                {confirmResetLesson ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => {
+                        resetLesson(lesson.id);
+                        startLesson(lesson.id, { fromStep: 0 });
+                        setActivityNonce((n) => n + 1);
+                        setConfirmResetLesson(false);
+                      }}
+                    >
+                      Confirm reset lesson
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
+                      onClick={() => setConfirmResetLesson(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </span>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
+                    onClick={() => setConfirmResetLesson(true)}
+                  >
+                    <RotateCcw className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                    Reset Lesson
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="border-emerald-500/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20"
+                  onClick={handleComplete}
+                >
+                  <FastForward className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  Finish Early
+                </Button>
+              </div>
             </div>
-          )}
+          ) : null}
         </header>
 
         {/* Paused overlay message */}
@@ -363,31 +501,23 @@ export function LessonRunner({
             className="mb-6 rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-100"
             role="status"
           >
-            Lesson paused. Press <strong>Resume Lesson</strong> when you&apos;re
-            ready to continue.
+            Lesson paused. Press <strong>Resume</strong> when you&apos;re ready to
+            continue.
           </div>
         ) : null}
 
-        {/* Activity body */}
-        {viewMode === "student" && !preview ? (
-          <StudentPanel
-            key={step.id}
-            lesson={lesson}
-            step={step}
-            stepIndex={stepIndex}
-            totalSteps={totalSteps}
-            savedEvidence={record?.evidence[step.id]}
-            onSaveResponse={(value) => saveEvidence(step.id, value)}
-            onAskForHelp={() => setGuideModal("help")}
-          />
-        ) : (
+        {/* Teacher guidance (teacher view only, not in preview) */}
+        {viewMode === "teacher" && !preview ? (
           <TeacherPanel
             lesson={lesson}
             step={step}
-            stepIndex={stepIndex}
-            completedSteps={completedSteps}
+            showExpectedOutcome={showExpected}
           />
-        )}
+        ) : null}
+
+        {/* Activity — mounted once per lesson (keyed by lesson + replay nonce)
+            so a student's in-progress work persists as steps change. */}
+        <ActivityHost key={`${lesson.id}-${activityNonce}`} {...activityProps} />
 
         {/* Last-step complete action (guide bar Next is disabled at the end) */}
         {isLastStep && !preview ? (

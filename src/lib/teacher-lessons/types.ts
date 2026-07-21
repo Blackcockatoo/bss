@@ -15,6 +15,10 @@
  *   Meta-Pet / MetaPet Schools privacy contract.
  */
 
+// Type-only import (no runtime cycle) so a progress record can hold typed
+// Pass 2 evidence while evidence.ts continues to import shared types from here.
+import type { LessonEvidence } from "./evidence";
+
 /** Stable identifier for each of the seven lessons. */
 export type LessonId =
   | "meet-your-metapet"
@@ -72,11 +76,13 @@ export type LessonStepKind =
 
 /** The type of evidence a lesson will eventually capture (placeholder only). */
 export type LessonEvidenceType =
-  | "observation-note"
-  | "prediction"
-  | "reflection"
-  | "artifact"
-  | "discussion-summary";
+  | "pet-observation-card"
+  | "body-design-comparison"
+  | "dna-comparison"
+  | "cause-effect-chain"
+  | "emotion-reflection"
+  | "visualisation-selection"
+  | "responsible-creator-promise";
 
 /**
  * Optional feature flags a lesson may require before its real activity can run.
@@ -179,8 +185,14 @@ export interface LessonDefinition {
 
 // ==================== PROGRESS STATE ====================
 
-/** Persisted evidence placeholder keyed by step id. */
+/** Persisted free-text evidence placeholder keyed by step id (Pass 1). */
 export type LessonEvidenceMap = Record<string, string>;
+
+/**
+ * Presentation depth a lesson is running at. Support/extension reuse the same
+ * lesson definition — they never fork the lesson into a separate implementation.
+ */
+export type LessonPresentationMode = "support" | "standard" | "extension";
 
 /** Progress record for a single lesson. */
 export interface LessonProgressRecord {
@@ -199,8 +211,10 @@ export interface LessonProgressRecord {
   lastActiveAt: number | null;
   /** Epoch ms when the lesson was completed, or null. */
   completedAt: number | null;
-  /** Student evidence placeholders keyed by step id. */
+  /** Legacy free-text evidence placeholders keyed by step id (Pass 1). */
   evidence: LessonEvidenceMap;
+  /** Typed lesson evidence keyed by step id (Pass 2). */
+  evidenceEntries: Record<string, LessonEvidence>;
 }
 
 /** Top-level persisted lesson-progress state. */
@@ -215,6 +229,10 @@ export interface LessonProgressState {
   viewMode: LessonViewMode;
   /** Whether Classroom Focus Mode is currently active. */
   focusMode: boolean;
+  /** Presentation depth (support / standard / extension). */
+  presentationMode: LessonPresentationMode;
+  /** Selected timing mode id (demo / standard / extended). */
+  timingMode: string;
 }
 
 /** Overall progress summary across all seven lessons. */

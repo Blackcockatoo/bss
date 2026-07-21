@@ -78,7 +78,7 @@ export const LESSON_DEFINITIONS: LessonDefinition[] = [
     ],
     appDestination: "meet",
     activityType: "observe",
-    evidenceType: "observation-note",
+    evidenceType: "pet-observation-card",
     completionMessage:
       "You met your Meta-Pet and described what makes it special. Well done!",
     extensionActivity:
@@ -177,7 +177,7 @@ export const LESSON_DEFINITIONS: LessonDefinition[] = [
     ],
     appDestination: "body-forge",
     activityType: "build",
-    evidenceType: "artifact",
+    evidenceType: "body-design-comparison",
     completionMessage:
       "You built a Meta-Pet body and explained your choices. Great designing!",
     extensionActivity:
@@ -269,7 +269,7 @@ export const LESSON_DEFINITIONS: LessonDefinition[] = [
     ],
     appDestination: "dna-lab",
     activityType: "compare",
-    evidenceType: "observation-note",
+    evidenceType: "dna-comparison",
     completionMessage:
       "You compared Meta-Pets and connected their differences to DNA. Nice science!",
     extensionActivity:
@@ -359,7 +359,7 @@ export const LESSON_DEFINITIONS: LessonDefinition[] = [
     ],
     appDestination: "vitals",
     activityType: "care",
-    evidenceType: "prediction",
+    evidenceType: "cause-effect-chain",
     completionMessage:
       "You cared for a Meta-Pet and learned that actions have consequences. Well done!",
     extensionActivity:
@@ -449,7 +449,7 @@ export const LESSON_DEFINITIONS: LessonDefinition[] = [
     ],
     appDestination: "emotions",
     activityType: "interpret",
-    evidenceType: "reflection",
+    evidenceType: "emotion-reflection",
     completionMessage:
       "You read feelings without words and thought about kind responses. Beautiful work!",
     extensionActivity:
@@ -539,7 +539,7 @@ export const LESSON_DEFINITIONS: LessonDefinition[] = [
     ],
     appDestination: "visualisation",
     activityType: "predict",
-    evidenceType: "observation-note",
+    evidenceType: "visualisation-selection",
     completionMessage:
       "You found the patterns behind the pet and described what they mean. Excellent thinking!",
     extensionActivity:
@@ -629,7 +629,7 @@ export const LESSON_DEFINITIONS: LessonDefinition[] = [
     ],
     appDestination: "challenge",
     activityType: "create",
-    evidenceType: "reflection",
+    evidenceType: "responsible-creator-promise",
     completionMessage:
       "You completed the Responsible Creator Challenge. You have finished all seven lessons — congratulations!",
     extensionActivity:
