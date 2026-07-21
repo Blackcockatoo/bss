@@ -84,6 +84,12 @@ export default function HomePage() {
               Open Classroom Runtime
             </Link>
             <Link
+              href="/teachers"
+              className="inline-flex items-center rounded-xl border border-amber-400/40 bg-amber-400/10 px-5 py-2.5 text-sm font-semibold text-amber-200 transition-colors hover:bg-amber-400/15"
+            >
+              Teacher Hub — 7 Lessons
+            </Link>
+            <Link
               href="/schools/parents"
               className="inline-flex items-center rounded-xl border border-slate-700 bg-slate-800/60 px-5 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:bg-slate-800"
             >

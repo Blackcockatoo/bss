@@ -6,6 +6,7 @@ const CORE_ALLOWED_EXACT = new Set([
   "/compass",
   "/pet",
   "/school-game",
+  "/teachers",
   "/legal",
   "/docs",
   "/icon.svg",
@@ -23,6 +24,7 @@ const SCHOOLS_ALLOWED_EXACT = new Set([
   "/schools/safeguarding",
   "/schools/parents",
   "/school-game",
+  "/teachers",
   "/legal",
   "/legal/privacy",
   "/legal/safety",
@@ -36,8 +38,12 @@ const SCHOOLS_ALLOWED_EXACT = new Set([
   "/sitemap.xml",
 ]);
 
-const CORE_ALLOWED_PREFIXES = ["/app/", "/docs/"];
-const SCHOOLS_ALLOWED_PREFIXES = ["/docs/schools-au/", "/schools/docs/"];
+const CORE_ALLOWED_PREFIXES = ["/app/", "/docs/", "/teachers/"];
+const SCHOOLS_ALLOWED_PREFIXES = [
+  "/docs/schools-au/",
+  "/schools/docs/",
+  "/teachers/",
+];
 
 export const CHILD_SAFE_NAV_ROUTES = IS_SCHOOLS_PROFILE
   ? new Set(["/schools", "/school-game", "/legal/privacy"])

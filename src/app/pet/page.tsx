@@ -29,6 +29,7 @@ import {
   ChevronUp,
   Compass,
   Dna,
+  GraduationCap,
   Move,
   Shield,
   Shirt,
@@ -341,6 +342,16 @@ export default function PetPage() {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
+                    <Link href="/teachers">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-2 border-amber-500/60 bg-amber-500/10 text-amber-200 hover:bg-amber-500/20"
+                      >
+                        <GraduationCap className="h-4 w-4" />
+                        Teacher Hub
+                      </Button>
+                    </Link>
                     {!ENABLE_CHILD_SAFE_BASELINE && (
                       <>
                         <Link href="/app/activities">
