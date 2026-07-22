@@ -6,10 +6,16 @@ export const FIELD_MODE_LESSONS_PATH = "/schools/field/lessons";
 export const FIELD_MODE_CLASSROOM_PATH = "/schools/field/classroom";
 export const FIELD_MODE_PASSPORT_PATH = "/schools/field/passport";
 export const FIELD_MODE_REVIEW_PATH = "/schools/field/review";
+export const FIELD_MODE_OFFLINE_PATH = "/schools/field/offline";
+export const FIELD_MODE_GUIDE_PATH = "/schools/field/guide";
+export const FIELD_MODE_SAFETY_PATH = "/schools/field/safety";
+export const FIELD_MODE_PACK_MANIFEST_PATH = "/schools/field/pack.json";
+export const FIELD_MODE_PRINT_PATH_PREFIX = "/schools/field/print";
 export const FIELD_MODE_EXIT_PATH = "/schools/field/exit";
 export const FIELD_MODE_MANIFEST_PATH =
   "/schools/field/manifest.webmanifest";
 export const FIELD_MODE_COOKIE = "metapet-field-mode";
+export const FIELD_MODE_UI_COOKIE = "metapet-field-ui";
 export const FIELD_MODE_COOKIE_VALUE = "active";
 
 export type ChildSafePolicyId = "core" | "schools" | "field";
@@ -24,7 +30,14 @@ export interface ChildSafeRoutePolicy {
 export interface FieldModeNavItem {
   href: string;
   label: string;
-  kind: "home" | "lessons" | "classroom" | "guide" | "safety" | "exit";
+  kind:
+    | "home"
+    | "lessons"
+    | "classroom"
+    | "offline"
+    | "guide"
+    | "safety"
+    | "exit";
 }
 
 const REQUIRED_STATIC_ROUTES = [
@@ -37,7 +50,11 @@ const REQUIRED_STATIC_ROUTES = [
   "/sitemap.xml",
 ] as const;
 
-const FIELD_REQUIRED_STATIC_ROUTES = ["/icon.svg", "/favicon.ico"] as const;
+const FIELD_REQUIRED_STATIC_ROUTES = [
+  "/icon.svg",
+  "/favicon.ico",
+  "/sw.js",
+] as const;
 
 /**
  * The route/profile contract for every child-safe surface.
@@ -102,6 +119,10 @@ export const CHILD_SAFE_ROUTE_POLICIES: Record<
       FIELD_MODE_CLASSROOM_PATH,
       FIELD_MODE_PASSPORT_PATH,
       FIELD_MODE_REVIEW_PATH,
+      FIELD_MODE_OFFLINE_PATH,
+      FIELD_MODE_GUIDE_PATH,
+      FIELD_MODE_SAFETY_PATH,
+      FIELD_MODE_PACK_MANIFEST_PATH,
       FIELD_MODE_EXIT_PATH,
       FIELD_MODE_MANIFEST_PATH,
       "/schools/safeguarding",
@@ -117,6 +138,7 @@ export const CHILD_SAFE_ROUTE_POLICIES: Record<
       "/docs/schools-au/",
       "/schools/docs/",
       `${FIELD_MODE_LESSONS_PATH}/`,
+      `${FIELD_MODE_PRINT_PATH_PREFIX}/`,
     ],
   },
 };
@@ -131,12 +153,17 @@ export const FIELD_MODE_NAV_ITEMS: readonly FieldModeNavItem[] = [
     kind: "classroom",
   },
   {
-    href: "/schools/docs/teacher-guide",
+    href: FIELD_MODE_OFFLINE_PATH,
+    label: "Offline Pack",
+    kind: "offline",
+  },
+  {
+    href: FIELD_MODE_GUIDE_PATH,
     label: "Teacher Guide",
     kind: "guide",
   },
   {
-    href: "/schools/safeguarding",
+    href: FIELD_MODE_SAFETY_PATH,
     label: "Safety & Privacy",
     kind: "safety",
   },
@@ -201,5 +228,17 @@ export function fieldModeCookieOptions(secure = true) {
     secure,
     path: "/",
     maxAge: 60 * 60 * 8,
+  };
+}
+
+/**
+ * Presentation-only marker used to suppress consumer navigation on approved
+ * supporting documents outside the nested Field layout. Request enforcement
+ * always uses the separate HTTP-only FIELD_MODE_COOKIE.
+ */
+export function fieldModeUiCookieOptions(secure = true) {
+  return {
+    ...fieldModeCookieOptions(secure),
+    httpOnly: false,
   };
 }

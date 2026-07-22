@@ -82,6 +82,35 @@
   }
 }
 
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 14mm;
+  }
+
+  .field-print-hide,
+  .app-shell-header,
+  .app-shell-footer,
+  .field-mode-nav {
+    display: none !important;
+  }
+
+  .field-print-document {
+    color: #0f172a !important;
+    font-size: 11pt;
+  }
+
+  .field-print-document * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  .field-print-document a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+}
+
 @layer base {
   * {
     @apply border-border;

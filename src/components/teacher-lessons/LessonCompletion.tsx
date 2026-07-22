@@ -18,6 +18,7 @@ interface LessonCompletionProps {
   hubPath?: string;
   nextLessonPath?: string;
   hubLabel?: string;
+  documentNavigation?: boolean;
 }
 
 /**
@@ -33,7 +34,20 @@ export function LessonCompletion({
   hubPath = TEACHER_HUB_PATH,
   nextLessonPath,
   hubLabel = "Teacher Hub",
+  documentNavigation = false,
 }: LessonCompletionProps) {
+  const hubLink = documentNavigation ? (
+    <a href={hubPath} onClick={onReturnToHub}>
+      Return to {hubLabel}
+    </a>
+  ) : (
+    <Link href={hubPath} onClick={onReturnToHub}>
+      Return to {hubLabel}
+    </Link>
+  );
+  const nextPath = nextLesson
+    ? (nextLessonPath ?? buildLessonPath(nextLesson.slug))
+    : null;
   return (
     <div className="mx-auto flex max-w-xl flex-col items-center gap-6 py-6 text-center">
       <span
@@ -61,9 +75,7 @@ export function LessonCompletion({
           asChild
           className="bg-amber-300 text-slate-950 hover:bg-amber-200"
         >
-          <Link href={hubPath} onClick={onReturnToHub}>
-            Return to {hubLabel}
-          </Link>
+          {hubLink}
         </Button>
         {nextLesson ? (
           <Button
@@ -71,13 +83,17 @@ export function LessonCompletion({
             variant="outline"
             className="border-cyan-500/30 bg-cyan-500/10 text-cyan-100 hover:bg-cyan-500/20"
           >
-            <Link
-              href={nextLessonPath ?? buildLessonPath(nextLesson.slug)}
-              onClick={onReturnToHub}
-            >
-              Next: {nextLesson.title}
-              <ArrowRight className="ml-1.5 h-4 w-4" aria-hidden="true" />
-            </Link>
+            {documentNavigation ? (
+              <a href={nextPath ?? undefined} onClick={onReturnToHub}>
+                Next: {nextLesson.title}
+                <ArrowRight className="ml-1.5 h-4 w-4" aria-hidden="true" />
+              </a>
+            ) : (
+              <Link href={nextPath ?? "#"} onClick={onReturnToHub}>
+                Next: {nextLesson.title}
+                <ArrowRight className="ml-1.5 h-4 w-4" aria-hidden="true" />
+              </Link>
+            )}
           </Button>
         ) : null}
         <Button

@@ -5,10 +5,10 @@ import {
   BookOpenCheck,
   DoorOpen,
   GraduationCap,
+  HardDriveDownload,
   Home,
   ShieldCheck,
 } from "lucide-react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import {
@@ -21,6 +21,7 @@ const ICONS: Record<FieldModeNavItem["kind"], typeof Home> = {
   home: Home,
   lessons: BookOpenCheck,
   classroom: GraduationCap,
+  offline: HardDriveDownload,
   guide: BookOpen,
   safety: ShieldCheck,
   exit: DoorOpen,
@@ -32,15 +33,15 @@ export function FieldModeNav() {
   return (
     <nav
       aria-label="Field Mode"
-      className="border-b border-emerald-950/15 bg-white/95 px-4 py-3 text-slate-900 shadow-sm backdrop-blur"
+      className="field-mode-nav field-print-hide border-b border-emerald-950/15 bg-white/95 px-4 py-3 text-slate-900 shadow-sm backdrop-blur"
     >
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-2">
-        <Link
+        <a
           href={FIELD_MODE_HOME_PATH}
           className="mr-auto text-sm font-semibold text-emerald-950"
         >
           MetaPet Field Mode
-        </Link>
+        </a>
         {FIELD_MODE_NAV_ITEMS.map((item) => {
           const Icon = ICONS[item.kind];
           const active =
@@ -48,7 +49,7 @@ export function FieldModeNav() {
               ? pathname === item.href
               : pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (
-            <Link
+            <a
               key={item.href}
               href={item.href}
               aria-current={active ? "page" : undefined}
@@ -62,7 +63,7 @@ export function FieldModeNav() {
             >
               <Icon className="h-4 w-4" aria-hidden="true" />
               {item.label}
-            </Link>
+            </a>
           );
         })}
       </div>

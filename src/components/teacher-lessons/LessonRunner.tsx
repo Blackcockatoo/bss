@@ -20,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { FieldSessionStatus } from "@/components/field-mode/FieldSessionStatus";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useFieldConnectivity } from "@/lib/fieldMode/connectivity";
 import {
   buildFieldLessonPath,
   fieldPresentationMode,
@@ -87,10 +88,17 @@ function LessonNotFound({ hubPath }: { hubPath: string }) {
           asChild
           className="w-full bg-amber-300 text-slate-950 hover:bg-amber-200"
         >
-          <Link href={hubPath}>
-            <Home className="mr-1.5 h-4 w-4" aria-hidden="true" />
-            Back to {hubPath === TEACHER_HUB_PATH ? "Teacher Hub" : "Field Lessons"}
-          </Link>
+          {hubPath === TEACHER_HUB_PATH ? (
+            <Link href={hubPath}>
+              <Home className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              Back to Teacher Hub
+            </Link>
+          ) : (
+            <a href={hubPath}>
+              <Home className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              Back to Field Lessons
+            </a>
+          )}
         </Button>
       </div>
     </main>
@@ -109,6 +117,7 @@ export function LessonRunner({
   const lesson = getLessonBySlug(slug);
   const hydrated = useLessonProgressHydrated();
   const reducedMotion = useReducedMotion();
+  const online = useFieldConnectivity();
   const router = useRouter();
 
   // Store bindings (hooks must run unconditionally, before any early return).
@@ -207,7 +216,8 @@ export function LessonRunner({
   const focusMode = !preview && state.focusMode;
   const lowPerformance = state.lowPerformance;
   // Low Performance Mode implies static visuals everywhere reduced-motion does.
-  const effectiveReducedMotion = reducedMotion || lowPerformance;
+  const effectiveReducedMotion =
+    reducedMotion || lowPerformance || (fieldMode && !online);
   const timing = getTimingModeMeta(
     LESSON_TIMING_MODES.find((m) => m.id === state.timingMode)?.id ??
       "standard",
@@ -286,6 +296,7 @@ export function LessonRunner({
                 ? buildFieldLessonPath(nextLesson.slug, fieldSession)
                 : undefined
             }
+            documentNavigation={fieldMode}
           />
         </div>
       </ClassroomFocusMode>
@@ -375,10 +386,17 @@ export function LessonRunner({
                 size="sm"
                 className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
               >
-                <Link href={hubPath} onClick={() => exitLesson()}>
-                  <Home className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                  Exit to Hub
-                </Link>
+                {fieldMode ? (
+                  <a href={hubPath} onClick={() => exitLesson()}>
+                    <Home className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                    Exit to Hub
+                  </a>
+                ) : (
+                  <Link href={hubPath} onClick={() => exitLesson()}>
+                    <Home className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                    Exit to Hub
+                  </Link>
+                )}
               </Button>
             </div>
           </div>

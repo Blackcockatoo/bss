@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { FieldModeNav } from "@/components/field-mode/FieldModeNav";
+import { FieldOfflineBadge } from "@/components/field-mode/FieldOfflineBadge";
 import { FieldStorageGuard } from "@/components/field-mode/FieldStorageGuard";
 import { FIELD_MODE_MANIFEST_PATH } from "@/lib/childSafeBaseline";
 
@@ -19,6 +20,7 @@ export default function FieldModeLayout({ children }: { children: React.ReactNod
     <>
       <FieldStorageGuard />
       <FieldModeNav />
+      <FieldOfflineBadge />
       {children}
     </>
   );

@@ -1,5 +1,4 @@
 import { ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
-import Link from "next/link";
 
 import {
   FIELD_MODE_HOME_PATH,
@@ -40,13 +39,13 @@ export default function FieldModePage() {
               remain on this device. No student sign-in is required.
             </p>
           </div>
-          <Link
+          <a
             href={FIELD_MODE_START_PATH}
             className="inline-flex min-h-14 items-center justify-center rounded-xl bg-emerald-800 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-emerald-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800"
           >
             Start Field Mode
             <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
-          </Link>
+          </a>
         </section>
 
         <aside className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">

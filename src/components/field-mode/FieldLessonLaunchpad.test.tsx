@@ -41,4 +41,17 @@ describe("Field lesson launchpad", () => {
       screen.getByRole("link", { name: /Teacher Evidence Review/i }),
     ).toHaveAttribute("href", "/schools/field/review");
   });
+
+  it("offers one printable PDF fallback for every lesson", () => {
+    render(<FieldLessonLaunchpad />);
+    const printLinks = screen.getAllByRole("link", {
+      name: /Print \/ save PDF fallback/i,
+    });
+    expect(printLinks).toHaveLength(7);
+    for (const link of printLinks) {
+      expect(link.getAttribute("href")).toMatch(
+        /^\/schools\/field\/print\//,
+      );
+    }
+  });
 });

@@ -1,11 +1,11 @@
 "use client";
 
-import { BookOpenCheck, ClipboardCheck, FileText, ShieldCheck } from "lucide-react";
-import Link from "next/link";
+import { BookOpenCheck, ClipboardCheck, FileText, Printer, ShieldCheck } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import {
   FIELD_MODE_PASSPORT_PATH,
+  FIELD_MODE_PRINT_PATH_PREFIX,
   FIELD_MODE_REVIEW_PATH,
 } from "@/lib/childSafeBaseline";
 import {
@@ -213,12 +213,19 @@ export function FieldLessonLaunchpad() {
                   <p className="mt-4 text-xs font-medium text-slate-500">
                     {FIELD_SESSION_LABELS.yearBand[session.yearBand]} · {session.durationMinutes} min · {FIELD_SESSION_LABELS.deliveryMode[session.deliveryMode]}
                   </p>
-                  <Link
+                  <a
                     href={buildFieldLessonPath(lesson.slug, session)}
                     className="mt-4 inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-800 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
                   >
                     {status === "not-started" ? "Start lesson" : "Open lesson"}
-                  </Link>
+                  </a>
+                  <a
+                    href={`${FIELD_MODE_PRINT_PATH_PREFIX}/${lesson.slug}`}
+                    className="mt-2 inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    <Printer className="h-4 w-4" aria-hidden="true" />
+                    Print / save PDF fallback
+                  </a>
                 </article>
               );
             })}
@@ -226,7 +233,7 @@ export function FieldLessonLaunchpad() {
         </section>
 
         <section className="grid gap-4 md:grid-cols-2" aria-label="Local evidence tools">
-          <Link
+          <a
             href={FIELD_MODE_PASSPORT_PATH}
             className="rounded-3xl border border-emerald-900/15 bg-emerald-50 p-5 text-emerald-950 hover:bg-emerald-100"
           >
@@ -236,8 +243,8 @@ export function FieldLessonLaunchpad() {
               See the alias-only journey summary derived from local lesson
               evidence.
             </p>
-          </Link>
-          <Link
+          </a>
+          <a
             href={FIELD_MODE_REVIEW_PATH}
             className="rounded-3xl border border-cyan-900/15 bg-cyan-50 p-5 text-cyan-950 hover:bg-cyan-100"
           >
@@ -246,7 +253,7 @@ export function FieldLessonLaunchpad() {
             <p className="mt-2 text-sm leading-6">
               Review or delete lesson evidence stored on this classroom device.
             </p>
-          </Link>
+          </a>
         </section>
 
         <aside className="flex gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-700">

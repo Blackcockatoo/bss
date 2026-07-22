@@ -18,7 +18,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   CHILD_SAFE_NAV_ROUTES,
+  FIELD_MODE_COOKIE_VALUE,
+  FIELD_MODE_UI_COOKIE,
   isFieldModePathname,
+  isPathnameAllowedByPolicy,
 } from "@/lib/childSafeBaseline";
 import {
   ENABLE_CHILD_SAFE_BASELINE,
@@ -62,6 +65,15 @@ export function QuickNav() {
   );
   const effectiveSchoolsMode = IS_SCHOOLS_PROFILE || isSchoolPath;
   const isFieldPath = !!pathname && isFieldModePathname(pathname);
+  const fieldUiCookieActive =
+    typeof document !== "undefined" &&
+    isPathnameAllowedByPolicy(pathname ?? "/", "field") &&
+    document.cookie
+      .split(/;\s*/)
+      .some(
+        (cookie) =>
+          cookie === `${FIELD_MODE_UI_COOKIE}=${FIELD_MODE_COOKIE_VALUE}`,
+      );
 
   const handleBack = useCallback(() => {
     triggerHaptic("light");
@@ -144,7 +156,7 @@ export function QuickNav() {
   // can neither receive keyboard focus, intercept pointer/touch events, nor
   // occupy layout space over the lesson's Next button.
   const classroomFocusActive = useClassroomFocusActive();
-  if (classroomFocusActive || isFieldPath) {
+  if (classroomFocusActive || isFieldPath || fieldUiCookieActive) {
     return null;
   }
 

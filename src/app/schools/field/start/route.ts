@@ -5,7 +5,9 @@ import {
   FIELD_MODE_COOKIE,
   FIELD_MODE_COOKIE_VALUE,
   FIELD_MODE_LESSONS_PATH,
+  FIELD_MODE_UI_COOKIE,
   fieldModeCookieOptions,
+  fieldModeUiCookieOptions,
 } from "@/lib/childSafeBaseline";
 
 export function GET(request: NextRequest) {
@@ -17,6 +19,11 @@ export function GET(request: NextRequest) {
     FIELD_MODE_COOKIE,
     FIELD_MODE_COOKIE_VALUE,
     fieldModeCookieOptions(request.nextUrl.protocol === "https:"),
+  );
+  response.cookies.set(
+    FIELD_MODE_UI_COOKIE,
+    FIELD_MODE_COOKIE_VALUE,
+    fieldModeUiCookieOptions(request.nextUrl.protocol === "https:"),
   );
   return response;
 }

@@ -5,7 +5,9 @@ import {
   FIELD_MODE_COOKIE,
   FIELD_MODE_COOKIE_VALUE,
   FIELD_MODE_EXIT_PATH,
+  FIELD_MODE_UI_COOKIE,
   fieldModeCookieOptions,
+  fieldModeUiCookieOptions,
   getPolicyFallbackPathname,
   isFieldModePathname,
   isPathnameAllowedByPolicy,
@@ -72,6 +74,21 @@ function fieldCookieIsActive(request: NextRequest): boolean {
     );
 }
 
+function fieldUiCookieIsActive(request: NextRequest): boolean {
+  if (
+    request.cookies.get(FIELD_MODE_UI_COOKIE)?.value === FIELD_MODE_COOKIE_VALUE
+  ) {
+    return true;
+  }
+
+  return (request.headers.get("cookie") ?? "")
+    .split(/;\s*/)
+    .some(
+      (cookie) =>
+        cookie === `${FIELD_MODE_UI_COOKIE}=${FIELD_MODE_COOKIE_VALUE}`,
+    );
+}
+
 function activePolicyId(request: NextRequest): ChildSafePolicyId | null {
   const { pathname } = request.nextUrl;
   if (fieldCookieIsActive(request) || isFieldModePathname(pathname)) {
@@ -88,15 +105,25 @@ function activateFieldCookie(
   request: NextRequest,
 ): NextResponse {
   const { pathname } = request.nextUrl;
-  if (
-    isFieldModePathname(pathname) &&
-    pathname !== FIELD_MODE_EXIT_PATH &&
-    !fieldCookieIsActive(request)
-  ) {
+  const entersFieldMode =
+    isFieldModePathname(pathname) && pathname !== FIELD_MODE_EXIT_PATH;
+  if (!entersFieldMode && !fieldCookieIsActive(request)) {
+    return response;
+  }
+
+  if (entersFieldMode && !fieldCookieIsActive(request)) {
     response.cookies.set(
       FIELD_MODE_COOKIE,
       FIELD_MODE_COOKIE_VALUE,
       fieldModeCookieOptions(request.nextUrl.protocol === "https:"),
+    );
+  }
+
+  if (!fieldUiCookieIsActive(request)) {
+    response.cookies.set(
+      FIELD_MODE_UI_COOKIE,
+      FIELD_MODE_COOKIE_VALUE,
+      fieldModeUiCookieOptions(request.nextUrl.protocol === "https:"),
     );
   }
   return response;

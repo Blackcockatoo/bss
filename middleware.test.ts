@@ -4,6 +4,7 @@ import { NextRequest } from "next/server";
 import {
   FIELD_MODE_COOKIE,
   FIELD_MODE_COOKIE_VALUE,
+  FIELD_MODE_UI_COOKIE,
 } from "@/lib/childSafeBaseline";
 
 type AppProfile = "schools" | "core";
@@ -174,6 +175,9 @@ describe("proxy Field Mode boundary", () => {
     expect(response.cookies.get(FIELD_MODE_COOKIE)?.value).toBe(
       FIELD_MODE_COOKIE_VALUE,
     );
+    expect(response.cookies.get(FIELD_MODE_UI_COOKIE)?.value).toBe(
+      FIELD_MODE_COOKIE_VALUE,
+    );
   });
 
   it("keeps approved Field routes accessible after activation", async () => {
@@ -185,6 +189,12 @@ describe("proxy Field Mode boundary", () => {
       "/schools/field/classroom",
       "/schools/field/passport",
       "/schools/field/review",
+      "/schools/field/offline",
+      "/schools/field/guide",
+      "/schools/field/safety",
+      "/schools/field/pack.json",
+      "/schools/field/print/build-a-body",
+      "/sw.js",
       "/school-game",
       "/schools/docs/teacher-guide",
       "/schools/safeguarding",
@@ -218,6 +228,16 @@ describe("proxy Field Mode boundary", () => {
         "https://example.com/schools/field",
       );
     }
+  });
+
+  it("adds the presentation marker on approved support routes for an active Field session", async () => {
+    const { proxy } = await loadProxy("core");
+    const response = proxy(await fieldRequest("/legal/privacy"));
+
+    expect(response.headers.get("location")).toBeNull();
+    expect(response.cookies.get(FIELD_MODE_UI_COOKIE)?.value).toBe(
+      FIELD_MODE_COOKIE_VALUE,
+    );
   });
 
   it("denies direct API entry with an opaque 404", async () => {
