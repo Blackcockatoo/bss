@@ -26,8 +26,8 @@ export const metadata: Metadata = {
       : "Blue Snake Studios builds privacy-first digital learning experiences with a strict child-safe baseline for default student deployments.",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/icon.svg",
-    apple: "/icon.svg",
+    icon: IS_SCHOOLS_PROFILE ? "/icon-field.svg" : "/icon.svg",
+    apple: IS_SCHOOLS_PROFILE ? "/icon-field.svg" : "/icon.svg",
   },
   appleWebApp: {
     capable: true,
