@@ -110,6 +110,90 @@ describe("proxy canonical BSS origin", () => {
   });
 });
 
+describe("MetaPet.school hostname boundary", () => {
+  it("sends the school-domain root directly to Field Mode", async () => {
+    const { proxy } = await loadProxy("core", {
+      siteUrl: "https://www.bluesnakestudios.com",
+      vercelEnv: "production",
+    });
+    const response = proxy(new NextRequest("https://www.metapet.school/"));
+
+    expect(response.status).toBe(308);
+    expect(response.headers.get("location")).toBe(
+      "https://www.metapet.school/schools/field",
+    );
+  });
+
+  it("enforces Field Mode on the school domain without requiring a cookie", async () => {
+    const { proxy } = await loadProxy("core");
+
+    for (const pathname of [
+      "/schools/field",
+      "/schools/field/lessons",
+      "/schools/field/classroom",
+      "/schools/field/offline",
+      "/schools/parents",
+      "/school-game",
+      "/legal/privacy",
+    ]) {
+      const response = proxy(
+        new NextRequest(`https://www.metapet.school${pathname}`),
+      );
+      expect(response.headers.get("location"), pathname).toBeNull();
+      expect(response.cookies.get(FIELD_MODE_UI_COOKIE)?.value, pathname).toBe(
+        FIELD_MODE_COOKIE_VALUE,
+      );
+    }
+  });
+
+  it("keeps consumer routes and APIs outside MetaPet.school", async () => {
+    const { proxy } = await loadProxy("core");
+
+    for (const pathname of [
+      "/pet",
+      "/identity",
+      "/digital-dna",
+      "/body-forge",
+      "/wallet",
+      "/marketplace",
+      "/teachers",
+    ]) {
+      expect(
+        proxy(
+          new NextRequest(`https://www.metapet.school${pathname}`),
+        ).headers.get("location"),
+        pathname,
+      ).toBe("https://www.metapet.school/schools/field");
+    }
+
+    const apiResponse = proxy(
+      new NextRequest("https://www.metapet.school/api/wallet"),
+    );
+    expect(apiResponse.status).toBe(404);
+    await expect(apiResponse.json()).resolves.toEqual({ error: "not_found" });
+  });
+
+  it("leaves the full MetaPet product available on Blue Snake Studios", async () => {
+    const { proxy } = await loadProxy("core");
+
+    for (const pathname of [
+      "/pet",
+      "/identity",
+      "/digital-dna",
+      "/body-forge",
+      "/app/activities",
+      "/app/wellness",
+    ]) {
+      expect(
+        proxy(
+          new NextRequest(`https://www.bluesnakestudios.com${pathname}`),
+        ).headers.get("location"),
+        pathname,
+      ).toBeNull();
+    }
+  });
+});
+
 describe("proxy school profile boundary", () => {
   it("redirects the school profile root to /schools", async () => {
     const { proxy } = await loadProxy("schools");
