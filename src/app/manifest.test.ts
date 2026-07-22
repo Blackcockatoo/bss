@@ -24,6 +24,7 @@ describe("app manifest", () => {
     expect(result.start_url).toBe("/schools");
     expect(result.description).toMatch(/teacher-led/i);
     expect(result.description).not.toMatch(/genome|evolution/i);
+    expect(result.icons?.[0]?.src).toBe("/icon-field.svg");
   });
 
   it("keeps the consumer manifest in the core profile", async () => {
@@ -33,5 +34,6 @@ describe("app manifest", () => {
     expect(result.name).toBe("Meta-Pet");
     expect(result.start_url).toBe("/");
     expect(result.description).toMatch(/genome-based evolution/i);
+    expect(result.icons?.[0]?.src).toBe("/icon.svg");
   });
 });

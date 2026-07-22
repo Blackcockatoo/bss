@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="MetaPet Field Mode — Australian Schools">
+  <defs>
+    <linearGradient id="field-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0f766e"/>
+      <stop offset="1" stop-color="#065f46"/>
+    </linearGradient>
+    <linearGradient id="field-pet" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ecfdf5"/>
+      <stop offset="1" stop-color="#a7f3d0"/>
+    </linearGradient>
+  </defs>
+  <!-- Maskable-safe: solid background fills the whole canvas -->
+  <rect width="512" height="512" fill="url(#field-bg)"/>
+  <!-- Rolling field horizon -->
+  <path d="M0 372 Q128 336 256 360 Q384 384 512 348 L512 512 L0 512 Z" fill="#047857" opacity="0.55"/>
+  <!-- Sprout leaves above the pet (field = growth / learning) -->
+  <path d="M256 96 C224 96 200 120 200 150 C232 150 256 128 256 96 Z" fill="#bbf7d0"/>
+  <path d="M256 96 C288 96 312 120 312 150 C280 150 256 128 256 96 Z" fill="#86efac"/>
+  <rect x="250" y="96" width="12" height="52" rx="6" fill="#bbf7d0"/>
+  <!-- Friendly companion face, centred in the safe zone -->
+  <ellipse cx="256" cy="256" rx="128" ry="120" fill="url(#field-pet)"/>
+  <ellipse cx="212" cy="240" rx="16" ry="22" fill="#065f46"/>
+  <ellipse cx="300" cy="240" rx="16" ry="22" fill="#065f46"/>
+  <circle cx="217" cy="233" r="5" fill="#ecfdf5"/>
+  <circle cx="305" cy="233" r="5" fill="#ecfdf5"/>
+  <!-- Soft cheeks -->
+  <circle cx="188" cy="286" r="18" fill="#fca5a5" opacity="0.55"/>
+  <circle cx="324" cy="286" r="18" fill="#fca5a5" opacity="0.55"/>
+  <!-- Gentle smile -->
+  <path d="M214 292 Q256 336 298 292" stroke="#0f766e" stroke-width="12" fill="none" stroke-linecap="round"/>
+</svg>
