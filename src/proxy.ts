@@ -5,6 +5,7 @@ import {
   FIELD_MODE_COOKIE,
   FIELD_MODE_COOKIE_VALUE,
   FIELD_MODE_EXIT_PATH,
+  FIELD_MODE_HOME_PATH,
   FIELD_MODE_UI_COOKIE,
   fieldModeCookieOptions,
   fieldModeUiCookieOptions,
@@ -23,6 +24,18 @@ const CORE_HOST_ALIASES = new Set([
   "bluesnakestudios.com",
   "www.bluesnakestudios.com",
 ]);
+const METAPET_SCHOOL_HOST_ALIASES = new Set([
+  "metapet.school",
+  "www.metapet.school",
+]);
+
+function getRequestHost(request: NextRequest): string {
+  return request.nextUrl.hostname.trim().toLowerCase();
+}
+
+function isMetaPetSchoolHost(request: NextRequest): boolean {
+  return METAPET_SCHOOL_HOST_ALIASES.has(getRequestHost(request));
+}
 
 function getCanonicalOrigin(): URL {
   const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
@@ -38,7 +51,7 @@ function getCanonicalOrigin(): URL {
 function shouldRedirectToCanonicalOrigin(request: NextRequest): boolean {
   if (APP_PROFILE !== "core") return false;
 
-  const requestHost = request.nextUrl.hostname.toLowerCase();
+  const requestHost = getRequestHost(request);
   const canonicalHost = getCanonicalOrigin().hostname.toLowerCase();
   if (!requestHost || requestHost === canonicalHost) return false;
 
@@ -57,7 +70,21 @@ function redirectToCanonicalOrigin(request: NextRequest): NextResponse {
   return NextResponse.redirect(redirectUrl, 308);
 }
 
+function redirectSchoolRootToFieldMode(request: NextRequest): NextResponse {
+  const redirectUrl = request.nextUrl.clone();
+  redirectUrl.pathname = FIELD_MODE_HOME_PATH;
+  redirectUrl.search = "";
+  return NextResponse.redirect(redirectUrl, 308);
+}
+
 function fieldCookieIsActive(request: NextRequest): boolean {
+  // MetaPet.school is a dedicated classroom surface. Its hostname is itself
+  // sufficient authority to enforce the Field boundary; cookies remain useful
+  // for the shared Blue Snake Studios host where Field Mode is opt-in.
+  if (isMetaPetSchoolHost(request)) {
+    return true;
+  }
+
   if (
     request.cookies.get(FIELD_MODE_COOKIE)?.value === FIELD_MODE_COOKIE_VALUE
   ) {
@@ -91,6 +118,11 @@ function fieldUiCookieIsActive(request: NextRequest): boolean {
 
 function activePolicyId(request: NextRequest): ChildSafePolicyId | null {
   const { pathname } = request.nextUrl;
+
+  if (isMetaPetSchoolHost(request)) {
+    return "field";
+  }
+
   if (fieldCookieIsActive(request) || isFieldModePathname(pathname)) {
     return "field";
   }
@@ -111,7 +143,11 @@ function activateFieldCookie(
     return response;
   }
 
-  if (entersFieldMode && !fieldCookieIsActive(request)) {
+  if (
+    entersFieldMode &&
+    !isMetaPetSchoolHost(request) &&
+    !fieldCookieIsActive(request)
+  ) {
     response.cookies.set(
       FIELD_MODE_COOKIE,
       FIELD_MODE_COOKIE_VALUE,
@@ -135,6 +171,11 @@ export function proxy(request: NextRequest) {
   }
 
   const { pathname } = request.nextUrl;
+
+  if (isMetaPetSchoolHost(request) && pathname === "/") {
+    return redirectSchoolRootToFieldMode(request);
+  }
+
   const policyId = activePolicyId(request);
 
   if (!policyId) return NextResponse.next();
