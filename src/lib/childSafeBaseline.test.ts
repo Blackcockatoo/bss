@@ -1,77 +1,76 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
-async function loadChildSafeBaseline(isSchoolsProfile: boolean) {
-  vi.resetModules();
-  vi.doMock("@/lib/env/features", () => ({
-    IS_SCHOOLS_PROFILE: isSchoolsProfile,
-  }));
+import {
+  CHILD_SAFE_ROUTE_POLICIES,
+  FIELD_MODE_HOME_PATH,
+  FIELD_MODE_NAV_ITEMS,
+  getPolicyFallbackPathname,
+  isPathnameAllowedByPolicy,
+} from "@/lib/childSafeBaseline";
 
-  return import("./childSafeBaseline");
-}
-
-afterEach(() => {
-  vi.resetModules();
-  vi.doUnmock("@/lib/env/features");
-});
-
-describe("child-safe route boundary", () => {
-  it("keeps the core allowlist limited to the core child-safe routes", async () => {
-    const childSafe = await loadChildSafeBaseline(false);
-
-    expect(childSafe.isChildSafeAllowedPathname("/app")).toBe(true);
-    expect(childSafe.isChildSafeAllowedPathname("/compass")).toBe(true);
-    expect(childSafe.isChildSafeAllowedPathname("/pet")).toBe(true);
-    expect(childSafe.isChildSafeAllowedPathname("/docs/example")).toBe(true);
-    expect(childSafe.isChildSafeAllowedPathname("/manifest.webmanifest")).toBe(
-      true,
-    );
-    expect(childSafe.isChildSafeAllowedPathname("/schools")).toBe(false);
-    expect(childSafe.isChildSafeAllowedPathname("/identity")).toBe(false);
-    expect(childSafe.getChildSafeFallbackPathname("/docs/example")).toBe(
-      "/legal",
-    );
-    expect(childSafe.getChildSafeFallbackPathname("/identity")).toBe("/app");
-    expect(childSafe.isChildSafeAllowedPathname("/app/wellness")).toBe(true);
-    expect([...childSafe.CHILD_SAFE_NAV_ROUTES]).toEqual([
-      "/",
-      "/pet",
-      "/app/wellness",
-      "/school-game",
-    ]);
+describe("declarative Field Mode route policy", () => {
+  it("uses the Field entry as its safe fallback", () => {
+    expect(CHILD_SAFE_ROUTE_POLICIES.field.id).toBe("field");
+    expect(getPolicyFallbackPathname("field")).toBe(FIELD_MODE_HOME_PATH);
   });
 
-  it("keeps the schools allowlist constrained to the school deployment", async () => {
-    const childSafe = await loadChildSafeBaseline(true);
+  it("allows every visible Field navigation destination", () => {
+    for (const item of FIELD_MODE_NAV_ITEMS) {
+      expect(isPathnameAllowedByPolicy(item.href, "field"), item.href).toBe(true);
+    }
+  });
 
-    expect(childSafe.isChildSafeAllowedPathname("/")).toBe(true);
-    expect(childSafe.isChildSafeAllowedPathname("/schools")).toBe(true);
-    expect(childSafe.isChildSafeAllowedPathname("/school-game")).toBe(true);
-    expect(childSafe.isChildSafeAllowedPathname("/legal/privacy")).toBe(true);
-    expect(
-      childSafe.isChildSafeAllowedPathname("/manifest.webmanifest"),
-    ).toBe(true);
-    expect(
-      childSafe.isChildSafeAllowedPathname(
-        "/docs/schools-au/governance/privacy-policy.md",
-      ),
-    ).toBe(
-      true,
-    );
-    expect(childSafe.isChildSafeAllowedPathname("/app")).toBe(false);
-    expect(childSafe.isChildSafeAllowedPathname("/compass")).toBe(false);
-    expect(childSafe.isChildSafeAllowedPathname("/pet")).toBe(false);
-    expect(childSafe.isChildSafeAllowedPathname("/identity")).toBe(false);
-    expect(childSafe.isChildSafeAllowedPathname("/genome-resonance")).toBe(
-      false,
-    );
-    // Body Forge is not part of the schools profile allowlist and must stay
-    // unreachable there unless explicitly added.
-    expect(childSafe.isChildSafeAllowedPathname("/body-forge")).toBe(false);
-    expect(childSafe.getChildSafeFallbackPathname("/pet")).toBe("/schools");
-    expect([...childSafe.CHILD_SAFE_NAV_ROUTES]).toEqual([
+  it("allows approved classroom, evidence and safety routes", () => {
+    for (const pathname of [
       "/schools",
+      "/schools/field",
+      "/schools/field/lessons/meet-your-metapet",
+      "/schools/field/classroom",
+      "/schools/field/passport",
+      "/schools/field/review",
+      "/schools/field/offline",
+      "/schools/field/guide",
+      "/schools/field/safety",
+      "/schools/field/pack.json",
+      "/schools/field/print/build-a-body",
+      "/sw.js",
       "/school-game",
+      "/schools/docs/teacher-guide",
+      "/docs/schools-au/02-lesson-cards.md",
+      "/schools/parents",
+      "/schools/safeguarding",
       "/legal/privacy",
-    ]);
+    ]) {
+      expect(isPathnameAllowedByPolicy(pathname, "field"), pathname).toBe(true);
+    }
+  });
+
+  it("blocks consumer and unrestricted teacher route categories", () => {
+    for (const pathname of [
+      "/shop",
+      "/wallet",
+      "/marketplace",
+      "/breeding",
+      "/identity",
+      "/qr-messaging",
+      "/rituals",
+      "/alchemist",
+      "/digital-dna",
+      "/app/laboratory",
+      "/social",
+      "/share",
+      "/teachers",
+      "/teachers/passport",
+      "/manifest.webmanifest",
+      "/robots.txt",
+      "/sitemap.xml",
+    ]) {
+      expect(isPathnameAllowedByPolicy(pathname, "field"), pathname).toBe(false);
+    }
+  });
+
+  it("does not turn the Field namespace into an unrestricted prefix", () => {
+    expect(isPathnameAllowedByPolicy("/schools/field/shop", "field")).toBe(false);
+    expect(isPathnameAllowedByPolicy("/schools/field/social", "field")).toBe(false);
   });
 });

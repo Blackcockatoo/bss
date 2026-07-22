@@ -6,8 +6,13 @@ import { QuickNav } from "@/components/QuickNav";
 import { WardrobeUnlockCeremony } from "@/components/wardrobe/WardrobeUnlockCeremony";
 import { WardrobeProgressBridge } from "@/lib/wardrobe/WardrobeProgressBridge";
 import {
+  FIELD_MODE_COOKIE_VALUE,
+  FIELD_MODE_HOME_PATH,
+  FIELD_MODE_UI_COOKIE,
   getChildSafeFallbackPathname,
   isChildSafeAllowedPathname,
+  isFieldModePathname,
+  isPathnameAllowedByPolicy,
 } from "@/lib/childSafeBaseline";
 import {
   ENABLE_CHILD_SAFE_BASELINE,
@@ -39,7 +44,17 @@ export default function ClientBody({
         pathname.startsWith("/schools/")),
     [pathname],
   );
-  const effectiveSchoolsMode = IS_SCHOOLS_PROFILE || isSchoolPath;
+  const isFieldPath = !!pathname && isFieldModePathname(pathname);
+  const [fieldUiActive, setFieldUiActive] = useState<boolean | null>(
+    isFieldPath ? true : null,
+  );
+  const fieldSurfaceActive =
+    isFieldPath ||
+    (fieldUiActive === true &&
+      isPathnameAllowedByPolicy(pathname ?? "/", "field"));
+  const fieldUiResolved = isFieldPath || fieldUiActive !== null;
+  const effectiveSchoolsMode =
+    IS_SCHOOLS_PROFILE || isSchoolPath || fieldSurfaceActive;
   const childSafeBlocked = useMemo(
     () =>
       (ENABLE_CHILD_SAFE_BASELINE || IS_SCHOOLS_PROFILE) &&
@@ -51,10 +66,31 @@ export default function ClientBody({
     document.body.classList.add("antialiased");
   }, []);
 
+  useEffect(() => {
+    if (isFieldPath) {
+      return;
+    }
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      const active = document.cookie
+        .split(/;\s*/)
+        .some(
+          (cookie) =>
+            cookie === `${FIELD_MODE_UI_COOKIE}=${FIELD_MODE_COOKIE_VALUE}`,
+        );
+      setFieldUiActive(active);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isFieldPath, pathname]);
+
   // Remember the chosen visual form across reloads so returning from the
   // Body Forge (or any session) never silently reverts the renderer.
   // Restored after hydration to keep server markup deterministic.
   useEffect(() => {
+    if (!fieldUiResolved || effectiveSchoolsMode) return;
     try {
       const stored = window.localStorage.getItem(PET_FORM_STORAGE_KEY);
       if (stored) {
@@ -71,11 +107,12 @@ export default function ClientBody({
         // Non-fatal: the session keeps working without the preference.
       }
     });
-  }, []);
+  }, [effectiveSchoolsMode, fieldUiResolved]);
 
   useEffect(() => {
+    if (!fieldUiResolved || effectiveSchoolsMode) return;
     refreshIdentityProfile();
-  }, [refreshIdentityProfile]);
+  }, [effectiveSchoolsMode, fieldUiResolved, refreshIdentityProfile]);
 
   useEffect(() => {
     if (!childSafeBlocked || !pathname) {
@@ -86,7 +123,10 @@ export default function ClientBody({
   }, [childSafeBlocked, pathname, router]);
 
   useEffect(() => {
-    if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
+    if (
+      typeof window === "undefined" ||
+      !("serviceWorker" in navigator)
+    ) {
       return;
     }
 
@@ -95,14 +135,16 @@ export default function ClientBody({
         const registration = await navigator.serviceWorker.register("/sw.js", {
           updateViaCache: "none",
         });
-        await registration.update();
+        if (navigator.onLine) {
+          await registration.update();
+        }
       } catch (error) {
         console.error("Service worker registration failed", error);
       }
     };
 
     registerServiceWorker();
-  }, []);
+  }, [isFieldPath]);
 
   if (childSafeBlocked) {
     return (
@@ -121,11 +163,21 @@ export default function ClientBody({
   }
 
   return (
-    <div className="antialiased flex min-h-screen flex-col pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]">
-      <div className={`sticky top-0 z-40 border-b px-3 py-2 backdrop-blur sm:px-4 sm:py-3 ${effectiveSchoolsMode ? "border-border bg-background/95" : "border-slate-800 bg-slate-950/90"}`}>
+    <div
+      className={`antialiased flex min-h-screen flex-col ${
+        fieldSurfaceActive
+          ? "pb-0"
+          : "pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]"
+      }`}
+    >
+      <div className={`app-shell-header sticky top-0 z-40 border-b px-3 py-2 backdrop-blur sm:px-4 sm:py-3 ${effectiveSchoolsMode ? "border-border bg-background/95" : "border-slate-800 bg-slate-950/90"}`}>
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 sm:gap-3">
           <div className={`text-sm ${effectiveSchoolsMode ? "text-foreground font-medium" : "text-zinc-200"}`}>
-            {effectiveSchoolsMode ? "MetaPet Schools" : "Meta-Pet"}
+            {fieldSurfaceActive
+              ? "MetaPet Field Mode"
+              : effectiveSchoolsMode
+                ? "MetaPet Schools"
+                : "Meta-Pet"}
           </div>
           <button
             type="button"
@@ -147,23 +199,40 @@ export default function ClientBody({
           </div>
         )}
         {!effectiveSchoolsMode && <JourneyProgressStrip />}
+        {fieldSurfaceActive && !isFieldPath ? (
+          <div className="mx-auto mt-3 flex w-full max-w-6xl items-center justify-between gap-3 rounded-xl border border-emerald-700/20 bg-emerald-50 px-3 py-2 text-xs text-emerald-950">
+            <span>Approved Field Mode information</span>
+            <a
+              href={FIELD_MODE_HOME_PATH}
+              className="font-semibold underline underline-offset-2"
+            >
+              Return to Field Mode
+            </a>
+          </div>
+        ) : null}
       </div>
 
       <div className="flex-1 pb-2">{children}</div>
       {/* Wardrobe progression: the bridge feeds live gameplay into the
           persistent progress record; the ceremony surfaces new unlocks. */}
-      <WardrobeProgressBridge />
-      <WardrobeUnlockCeremony />
-      <footer className="px-4 pb-24 pt-4 text-center sm:pb-6">
-        <a
-          href="mailto:bluesssnakestudio@gmail.com?subject=Meta-Pet%20School%20Pilot%20Enquiry"
-          className="mb-4 inline-block text-xs text-slate-400 underline hover:text-slate-300"
-        >
-          Pilot Enquiry
-        </a>
-        <LegalNotice />
+      {!effectiveSchoolsMode ? (
+        <>
+          <WardrobeProgressBridge />
+          <WardrobeUnlockCeremony />
+        </>
+      ) : null}
+      <footer className="app-shell-footer px-4 pb-24 pt-4 text-center sm:pb-6">
+        {!fieldSurfaceActive ? (
+          <a
+            href="mailto:bluesssnakestudio@gmail.com?subject=Meta-Pet%20School%20Pilot%20Enquiry"
+            className="mb-4 inline-block text-xs text-slate-400 underline hover:text-slate-300"
+          >
+            Pilot Enquiry
+          </a>
+        ) : null}
+        <LegalNotice schoolsMode={effectiveSchoolsMode} />
       </footer>
-      <QuickNav />
+      {!fieldSurfaceActive && fieldUiResolved ? <QuickNav /> : null}
     </div>
   );
 }

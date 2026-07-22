@@ -16,12 +16,19 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { CHILD_SAFE_NAV_ROUTES } from "@/lib/childSafeBaseline";
+import {
+  CHILD_SAFE_NAV_ROUTES,
+  FIELD_MODE_COOKIE_VALUE,
+  FIELD_MODE_UI_COOKIE,
+  isFieldModePathname,
+  isPathnameAllowedByPolicy,
+} from "@/lib/childSafeBaseline";
 import {
   ENABLE_CHILD_SAFE_BASELINE,
   IS_SCHOOLS_PROFILE,
 } from "@/lib/env/features";
 import { triggerHaptic } from "@/lib/haptics";
+import { useClassroomFocusActive } from "@/lib/teacher-lessons/classroomFocusSignal";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -57,6 +64,16 @@ export function QuickNav() {
     [pathname],
   );
   const effectiveSchoolsMode = IS_SCHOOLS_PROFILE || isSchoolPath;
+  const isFieldPath = !!pathname && isFieldModePathname(pathname);
+  const fieldUiCookieActive =
+    typeof document !== "undefined" &&
+    isPathnameAllowedByPolicy(pathname ?? "/", "field") &&
+    document.cookie
+      .split(/;\s*/)
+      .some(
+        (cookie) =>
+          cookie === `${FIELD_MODE_UI_COOKIE}=${FIELD_MODE_COOKIE_VALUE}`,
+      );
 
   const handleBack = useCallback(() => {
     triggerHaptic("light");
@@ -134,8 +151,20 @@ export function QuickNav() {
     triggerHaptic("selection");
   }, []);
 
+  // During Classroom Focus Mode the lesson guide bar is the only persistent
+  // bottom control surface. Removing this bar from the DOM entirely means it
+  // can neither receive keyboard focus, intercept pointer/touch events, nor
+  // occupy layout space over the lesson's Next button.
+  const classroomFocusActive = useClassroomFocusActive();
+  if (classroomFocusActive || isFieldPath || fieldUiCookieActive) {
+    return null;
+  }
+
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4">
+    <nav
+      aria-label="Meta-Pet navigation"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-50 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4"
+    >
       <div className="mx-auto max-w-2xl">
         <div className={`pointer-events-auto flex items-center justify-between rounded-2xl border px-1.5 py-1.5 backdrop-blur-lg sm:px-2 sm:py-2 ${effectiveSchoolsMode ? "border-border bg-background/95 shadow-lg shadow-black/5" : "border-slate-700/70 bg-slate-950/90 shadow-lg shadow-slate-950/60"}`}>
           {/* Back button */}
@@ -213,6 +242,6 @@ export function QuickNav() {
           )}
         </div>
       </div>
-    </div>
+    </nav>
   );
 }

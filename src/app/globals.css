@@ -82,6 +82,35 @@
   }
 }
 
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 14mm;
+  }
+
+  .field-print-hide,
+  .app-shell-header,
+  .app-shell-footer,
+  .field-mode-nav {
+    display: none !important;
+  }
+
+  .field-print-document {
+    color: #0f172a !important;
+    font-size: 11pt;
+  }
+
+  .field-print-document * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  .field-print-document a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -156,5 +185,41 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   Learning Passport — print-friendly styles (Pass 3)
+   Ensures a clean, black-and-white readable print layout that does not depend
+   on background colours and hides interactive controls.
+   ========================================================================== */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .passport-root {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .passport-root * {
+    color: #000000 !important;
+    background: transparent !important;
+    border-color: #999999 !important;
+    box-shadow: none !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .passport-section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .passport-page-break {
+    break-before: page;
+    page-break-before: always;
+  }
+  .passport-root img,
+  .passport-root svg {
+    max-width: 100% !important;
+    height: auto !important;
   }
 }

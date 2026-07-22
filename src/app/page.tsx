@@ -1,302 +1,221 @@
-import Link from "next/link";
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Meta-Pet — Privacy-first digital learning companion",
+  title: "Blue Snake Studios — The full MetaPet living system",
   description:
-    "Meta-Pet is a browser-first, local-first digital learning companion for classrooms and families. No ads, no trackers, no student accounts, and no unnecessary data collection.",
+    "Enter the complete MetaPet world: digital companions, DNA, Body Forge, activities, wellness and the separate MetaPet Schools classroom edition.",
   openGraph: {
-    title: "Meta-Pet — Privacy-first classroom companion",
+    title: "Blue Snake Studios — The full MetaPet living system",
     description:
-      "A teacher-led digital companion for Years 3–6: short guided activities, local-first storage, no ads, no trackers, no student accounts.",
+      "The complete MetaPet creative system, with MetaPet Schools kept as a focused classroom product on its own domain.",
   },
   twitter: {
     card: "summary",
-    title: "Meta-Pet — Privacy-first classroom companion",
+    title: "Blue Snake Studios — The full MetaPet living system",
     description:
-      "A teacher-led digital companion for Years 3–6: short guided activities, local-first storage, no ads, no trackers, no student accounts.",
+      "Digital companions, DNA, Body Forge, activities, wellness and a clearly separated school edition.",
   },
 };
 
-const TRUST_BADGES = [
-  "No ads",
-  "No trackers",
-  "No student accounts",
-  "Browser-first",
-  "Local-first",
-  "Teacher-led school runtime",
-  "Parent/carer information available",
-  "Pilot pack ready",
-];
+const PRODUCT_AREAS = [
+  {
+    eyebrow: "Living companion",
+    title: "MetaPet",
+    description:
+      "Raise, care for and explore a persistent digital companion shaped by its own genome, state and history.",
+    href: "/pet",
+    action: "Enter MetaPet",
+  },
+  {
+    eyebrow: "Creature design",
+    title: "Body Forge",
+    description:
+      "Build distinctive bodies, silhouettes, wings, surfaces and expressive systems without flattening every pet into the same template.",
+    href: "/body-forge",
+    action: "Open Body Forge",
+  },
+  {
+    eyebrow: "Generative identity",
+    title: "DNA Lab",
+    description:
+      "Inspect the deeper genetic identity behind a pet through visual, musical and symbolic interpretations of the same seed.",
+    href: "/digital-dna",
+    action: "Explore DNA",
+  },
+  {
+    eyebrow: "Play and regulation",
+    title: "Activities & Wellness",
+    description:
+      "Move between games, experiments, care loops and calm experiences that make the companion feel alive rather than decorative.",
+    href: "/app/activities",
+    action: "Explore activities",
+  },
+] as const;
 
-const PILOT_MAILTO =
-  "mailto:bluesssnakestudio@gmail.com?subject=Meta-Pet%20School%20Pilot%20Enquiry";
+const FULL_PRODUCT_LINKS = [
+  { label: "Pet", href: "/pet" },
+  { label: "Identity", href: "/identity" },
+  { label: "DNA", href: "/digital-dna" },
+  { label: "Body Forge", href: "/body-forge" },
+  { label: "Activities", href: "/app/activities" },
+  { label: "Wellness", href: "/app/wellness" },
+] as const;
 
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
-      {/* Hero */}
-      <section className="mx-auto w-full max-w-5xl px-6 py-16 md:py-24">
-        <div className="max-w-3xl space-y-6">
-          <h1 className="text-4xl font-semibold tracking-tight text-white md:text-5xl lg:text-6xl">
-            Meta-Pet
-          </h1>
-          <p className="text-xl leading-8 text-slate-300 md:text-2xl md:leading-9">
-            Privacy-first digital learning companion for classrooms and families.
-          </p>
-          <p className="max-w-2xl text-base leading-7 text-slate-400">
-            Meta-Pet turns care, pattern learning, digital responsibility, and
-            emotional regulation into short guided activities. It is
-            browser-first and local-first: no ads, no trackers, no student
-            accounts, and no unnecessary data collection.
-          </p>
+      <section className="relative overflow-hidden border-b border-slate-800/80">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.12),transparent_38%),radial-gradient(circle_at_80%_20%,rgba(245,158,11,0.1),transparent_34%)]" />
+        <div className="relative mx-auto grid w-full max-w-6xl gap-12 px-6 py-20 md:py-28 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+          <div className="space-y-7">
+            <p className="text-xs font-semibold uppercase tracking-[0.34em] text-cyan-300/80">
+              Blue $nake Studios
+            </p>
+            <div className="space-y-5">
+              <h1 className="max-w-4xl text-5xl font-semibold tracking-tight text-white md:text-7xl">
+                The whole MetaPet world lives here.
+              </h1>
+              <p className="max-w-3xl text-xl leading-8 text-slate-300 md:text-2xl md:leading-9">
+                A living companion system built from DNA, care, play, body design,
+                identity and strange creative experiments.
+              </p>
+              <p className="max-w-2xl text-base leading-7 text-slate-400">
+                BlueSnakeStudios.com is the unrestricted home of MetaPet. The
+                classroom edition now has its own focused door at MetaPet.school,
+                so the full creative product and the school-safe product no longer
+                pretend to be the same website.
+              </p>
+            </div>
 
-          {/* Trust badges */}
-          <div className="flex flex-wrap gap-2 pt-2">
-            {TRUST_BADGES.map((badge) => (
-              <span
-                key={badge}
-                className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300"
-              >
-                {badge}
-              </span>
-            ))}
-          </div>
-
-          {/* CTAs */}
-          <div className="flex flex-wrap gap-3 pt-4">
-            <Link
-              href="/pet"
-              className="inline-flex items-center rounded-xl bg-amber-300 px-5 py-2.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-amber-200"
-            >
-              Try Demo
-            </Link>
-            <Link
-              href="/schools"
-              className="inline-flex items-center rounded-xl border border-slate-700 bg-slate-800/60 px-5 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:bg-slate-800"
-            >
-              Review School Pilot Pack
-            </Link>
-            <Link
-              href="/school-game"
-              className="inline-flex items-center rounded-xl border border-slate-700 bg-slate-800/60 px-5 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:bg-slate-800"
-            >
-              Open Classroom Runtime
-            </Link>
-            <Link
-              href="/schools/parents"
-              className="inline-flex items-center rounded-xl border border-slate-700 bg-slate-800/60 px-5 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:bg-slate-800"
-            >
-              Parent / Carer Info
-            </Link>
-            <a
-              href={PILOT_MAILTO}
-              className="inline-flex items-center rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-5 py-2.5 text-sm font-semibold text-cyan-300 transition-colors hover:bg-cyan-500/15"
-            >
-              Ask About a Pilot
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Best first click */}
-      <section className="bg-slate-900/50 py-12">
-        <div className="mx-auto w-full max-w-5xl px-6">
-          <p className="mb-6 text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
-            Best first click
-          </p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              {
-                role: "For teachers",
-                label: "Review School Pilot Pack",
-                href: "/schools",
-                color: "amber",
-              },
-              {
-                role: "For parents / carers",
-                label: "Read Parent / Carer Info",
-                href: "/schools/parents",
-                color: "emerald",
-              },
-              {
-                role: "For students / families",
-                label: "Try Demo",
-                href: "/pet",
-                color: "cyan",
-              },
-              {
-                role: "For principals / councils",
-                label: "Ask About a Pilot",
-                href: PILOT_MAILTO,
-                color: "violet",
-                external: true,
-              },
-            ].map(({ role, label, href, color, external }) => (
+            <div className="flex flex-wrap gap-3">
               <Link
-                key={role}
-                href={href}
-                {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                className={`group rounded-2xl border p-5 transition-colors
-                  ${color === "amber" ? "border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10" : ""}
-                  ${color === "emerald" ? "border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10" : ""}
-                  ${color === "cyan" ? "border-cyan-500/20 bg-cyan-500/5 hover:bg-cyan-500/10" : ""}
-                  ${color === "violet" ? "border-violet-500/20 bg-violet-500/5 hover:bg-violet-500/10" : ""}
-                `}
+                href="/pet"
+                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition-colors hover:bg-cyan-200"
               >
-                <p className={`text-xs font-medium mb-2
-                  ${color === "amber" ? "text-amber-400/70" : ""}
-                  ${color === "emerald" ? "text-emerald-400/70" : ""}
-                  ${color === "cyan" ? "text-cyan-400/70" : ""}
-                  ${color === "violet" ? "text-violet-400/70" : ""}
-                `}>
-                  {role}
-                </p>
-                <p className="text-sm font-semibold text-slate-100 group-hover:text-white">
-                  {label} →
-                </p>
+                Enter MetaPet
               </Link>
-            ))}
+              <Link
+                href="/digital-dna"
+                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-700 bg-slate-900/70 px-5 py-3 text-sm font-semibold text-slate-100 transition-colors hover:border-slate-500 hover:bg-slate-800"
+              >
+                Explore the DNA Lab
+              </Link>
+              <a
+                href="https://www.metapet.school"
+                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-amber-400/30 bg-amber-400/10 px-5 py-3 text-sm font-semibold text-amber-200 transition-colors hover:border-amber-300/50 hover:bg-amber-400/15"
+              >
+                Go to MetaPet School
+              </a>
+            </div>
           </div>
+
+          <aside className="rounded-3xl border border-slate-700/70 bg-slate-900/70 p-6 shadow-2xl shadow-slate-950/50 backdrop-blur md:p-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
+              Full product map
+            </p>
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              {FULL_PRODUCT_LINKS.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-4 text-sm font-semibold text-slate-200 transition-colors hover:border-cyan-400/30 hover:text-cyan-200"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+            <div className="mt-6 rounded-2xl border border-emerald-400/20 bg-emerald-400/5 p-4">
+              <p className="text-sm font-semibold text-emerald-200">
+                One codebase. Two clear products.
+              </p>
+              <p className="mt-2 text-sm leading-6 text-slate-400">
+                Shared engineering underneath, separate entry points and safety
+                boundaries above it.
+              </p>
+            </div>
+          </aside>
         </div>
       </section>
 
-      {/* Sections */}
-      <div className="mx-auto w-full max-w-5xl px-6 py-16 space-y-16">
-
-        {/* What is Meta-Pet? */}
-        <section className="space-y-4 rounded-3xl border border-slate-800 bg-slate-900/40 p-8">
-          <h2 className="text-2xl font-semibold tracking-tight text-white">
-            What is Meta-Pet?
-          </h2>
-          <p className="text-base leading-7 text-slate-300">
-            Meta-Pet is a digital companion that helps children notice patterns,
-            practise digital responsibility, and reflect on systems and
-            regulation through short guided activities.
+      <section className="mx-auto w-full max-w-6xl px-6 py-16 md:py-20">
+        <div className="mb-8 max-w-3xl space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cyan-300/70">
+            Explore the system
           </p>
-        </section>
-
-        {/* Why is it safe? */}
-        <section className="space-y-4 rounded-3xl border border-slate-800 bg-slate-900/40 p-8">
-          <h2 className="text-2xl font-semibold tracking-tight text-white">
-            Why is it safe?
+          <h2 className="text-3xl font-semibold tracking-tight text-white md:text-4xl">
+            Different parts of one living product
           </h2>
-          <p className="text-base leading-7 text-slate-300">
-            The school pathway is designed around adult supervision,
-            alias-only classroom use, local browser storage, clear deletion
-            controls, and no default cloud data transmission.
+          <p className="text-base leading-7 text-slate-400">
+            Each area changes how the same MetaPet identity looks, behaves, learns
+            or expresses itself.
           </p>
-        </section>
+        </div>
 
-        {/* How schools can try it */}
-        <section className="space-y-4 rounded-3xl border border-slate-800 bg-slate-900/40 p-8">
-          <h2 className="text-2xl font-semibold tracking-tight text-white">
-            How schools can try it
-          </h2>
-          <p className="text-base leading-7 text-slate-300">
-            Start with the school pilot pack, review the parent/carer
-            information, then use the classroom runtime for seven teacher-led
-            sessions of around 15–20 minutes.
-          </p>
-          <div className="flex flex-wrap gap-3 pt-2">
+        <div className="grid gap-5 md:grid-cols-2">
+          {PRODUCT_AREAS.map((area) => (
             <Link
-              href="/schools"
-              className="inline-flex items-center rounded-xl bg-amber-300 px-4 py-2 text-sm font-semibold text-slate-950 transition-colors hover:bg-amber-200"
+              key={area.href}
+              href={area.href}
+              className="group rounded-3xl border border-slate-800 bg-slate-900/45 p-6 transition-all hover:-translate-y-0.5 hover:border-cyan-400/25 hover:bg-slate-900/75 md:p-7"
             >
-              Review School Pilot Pack
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+                {area.eyebrow}
+              </p>
+              <h3 className="mt-3 text-2xl font-semibold text-white">
+                {area.title}
+              </h3>
+              <p className="mt-3 text-sm leading-6 text-slate-400">
+                {area.description}
+              </p>
+              <p className="mt-6 text-sm font-semibold text-cyan-300 transition-transform group-hover:translate-x-1">
+                {area.action} →
+              </p>
             </Link>
-            <Link
-              href="/school-game"
-              className="inline-flex items-center rounded-xl border border-slate-700 bg-slate-800/60 px-4 py-2 text-sm font-semibold text-slate-200 transition-colors hover:bg-slate-800"
-            >
-              Open Classroom Runtime
-            </Link>
-          </div>
-        </section>
+          ))}
+        </div>
+      </section>
 
-        {/* What parents should know */}
-        <section className="space-y-4 rounded-3xl border border-slate-800 bg-slate-900/40 p-8">
-          <h2 className="text-2xl font-semibold tracking-tight text-white">
-            What parents should know
-          </h2>
-          <p className="text-base leading-7 text-slate-300">
-            No student email, no public profile, no chat, no social sharing,
-            no ads, no tracking, and no personal data collection. Teachers can
-            delete local classroom data.
-          </p>
-          <div className="pt-2">
-            <Link
-              href="/schools/parents"
-              className="inline-flex items-center rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-300 transition-colors hover:bg-emerald-500/15"
-            >
-              Read Parent / Carer Info
-            </Link>
-          </div>
-        </section>
+      <section className="border-y border-slate-800 bg-slate-900/35">
+        <div className="mx-auto grid w-full max-w-6xl gap-5 px-6 py-16 md:grid-cols-2">
+          <article className="rounded-3xl border border-cyan-400/20 bg-cyan-400/5 p-7">
+            <p className="text-xs font-semibold uppercase tracking-[0.26em] text-cyan-300/70">
+              bluesnakestudios.com
+            </p>
+            <h2 className="mt-3 text-2xl font-semibold text-white">
+              Full MetaPet and the wider studio
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-slate-300">
+              Consumer features, DNA, identity, creative labs, Body Forge,
+              activities, wellness and future experiments stay here.
+            </p>
+          </article>
 
-        {/* Pilot enquiry */}
-        <section className="space-y-4 rounded-3xl border border-cyan-500/20 bg-cyan-950/20 p-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cyan-400/70">
-            Pilot enquiry
-          </p>
-          <h2 className="text-2xl font-semibold tracking-tight text-white">
-            Start a no-cost pilot
-          </h2>
-          <p className="text-base leading-7 text-slate-300">
-            Schools, teachers, principals, councils, and education contacts can
-            approach Blue $nake Studio about a no-cost pilot pathway.
-          </p>
-          <div className="pt-2">
+          <article className="rounded-3xl border border-amber-400/20 bg-amber-400/5 p-7">
+            <p className="text-xs font-semibold uppercase tracking-[0.26em] text-amber-200/70">
+              metapet.school
+            </p>
+            <h2 className="mt-3 text-2xl font-semibold text-white">
+              Focused Australian classroom product
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-slate-300">
+              Years 3–6 Field Mode, teacher-led lessons, alias-only records,
+              local-first storage and a hard boundary around consumer areas.
+            </p>
             <a
-              href={PILOT_MAILTO}
-              className="inline-flex items-center rounded-xl bg-cyan-400 px-5 py-2.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-cyan-300"
+              href="https://www.metapet.school"
+              className="mt-6 inline-flex text-sm font-semibold text-amber-200 hover:text-amber-100"
             >
-              Ask About a Pilot
+              Open MetaPet School →
             </a>
-          </div>
-        </section>
+          </article>
+        </div>
+      </section>
 
-        {/* Classroom detail */}
-        <section className="space-y-4 rounded-3xl border border-slate-800 bg-slate-900/40 p-8">
-          <h2 className="text-2xl font-semibold tracking-tight text-white">
-            Classroom details
-          </h2>
-          <ul className="grid gap-2 text-sm leading-6 text-slate-300 sm:grid-cols-2">
-            {[
-              "Years 3–6",
-              "Seven teacher-led sessions",
-              "Around 15–20 minutes per session",
-              "No student accounts",
-              "No data collection",
-              "Alias-only classroom use",
-              "Local browser storage",
-              "Clear deletion controls",
-              "Parent/carer information",
-              "Safeguarding and governance pack",
-              "Pilot readiness material",
-              "Classroom runtime included",
-            ].map((item) => (
-              <li key={item} className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-emerald-400" />
-                {item}
-              </li>
-            ))}
-          </ul>
-        </section>
-      </div>
-
-      {/* Footer pilot CTA */}
-      <div className="border-t border-slate-800 bg-slate-950 py-10 text-center">
-        <p className="mb-4 text-sm text-slate-400">
-          Ready to explore a school pilot?
-        </p>
-        <a
-          href={PILOT_MAILTO}
-          className="inline-flex items-center rounded-xl bg-amber-300 px-6 py-3 text-sm font-semibold text-slate-950 transition-colors hover:bg-amber-200"
-        >
-          Ask About a Pilot
-        </a>
-      </div>
+      <footer className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-6 py-10 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+        <p>© 2026 Blue $nake Studios</p>
+        <p>MetaPet is the living system. MetaPet School is its focused classroom branch.</p>
+      </footer>
     </main>
   );
 }

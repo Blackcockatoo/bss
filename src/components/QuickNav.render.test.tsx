@@ -42,6 +42,7 @@ async function loadQuickNav({
 }
 
 afterEach(() => {
+  document.cookie = "metapet-field-ui=; Max-Age=0; path=/";
   vi.resetModules();
   vi.doUnmock("next/link");
   vi.doUnmock("next/navigation");
@@ -100,5 +101,31 @@ describe("QuickNav render behavior", () => {
     expect(
       screen.getByRole("button", { name: /Install app/i }),
     ).toBeInTheDocument();
+  });
+
+  it("suppresses consumer navigation on approved supporting pages during Field Mode", async () => {
+    document.cookie = "metapet-field-ui=active; path=/";
+    const QuickNav = await loadQuickNav({
+      pathname: "/legal/privacy",
+      isSchoolsProfile: false,
+    });
+
+    render(<QuickNav />);
+
+    expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Pet/i })).not.toBeInTheDocument();
+  });
+
+  it("does not let a stale presentation marker disable normal MetaPet navigation", async () => {
+    document.cookie = "metapet-field-ui=active; path=/";
+    const QuickNav = await loadQuickNav({
+      pathname: "/pet",
+      isSchoolsProfile: false,
+    });
+
+    render(<QuickNav />);
+
+    expect(screen.getByRole("navigation")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Pet/i })).toBeInTheDocument();
   });
 });

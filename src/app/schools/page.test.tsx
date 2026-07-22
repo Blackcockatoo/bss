@@ -31,6 +31,9 @@ describe("SchoolsPage", () => {
       }),
     ).toBeInTheDocument();
     expect(
+      screen.getByRole("link", { name: /Open Field Mode/i }),
+    ).toHaveAttribute("href", "/schools/field");
+    expect(
       screen.getByRole("link", { name: /Read pilot readiness verdict/i }),
     ).toHaveAttribute("href", "/schools/docs/pilot-readiness-verdict-v2");
     expect(

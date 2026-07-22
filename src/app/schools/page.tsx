@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { FIELD_MODE_HOME_PATH } from "@/lib/childSafeBaseline";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
 
 import {
@@ -84,6 +85,12 @@ export default function SchoolsPage() {
             </div>
 
             <div className="flex flex-wrap gap-3 pt-2">
+              <Link
+                className="rounded-full bg-emerald-400 px-5 py-2 text-sm font-semibold text-emerald-950"
+                href={FIELD_MODE_HOME_PATH}
+              >
+                Open Field Mode
+              </Link>
               <Link
                 className="rounded-full bg-amber-300 px-5 py-2 text-sm font-semibold text-slate-950"
                 href="/schools/docs/pilot-readiness-verdict-v2"

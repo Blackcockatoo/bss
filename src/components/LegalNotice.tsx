@@ -6,9 +6,10 @@ import { LEGAL_NOTICE_TEXT, getLegalNoticeYear } from "@/lib/legalNotice";
 
 type LegalNoticeProps = {
   className?: string;
+  schoolsMode?: boolean;
 };
 
-export default function LegalNotice({ className }: LegalNoticeProps) {
+export default function LegalNotice({ className, schoolsMode = false }: LegalNoticeProps) {
   const year = getLegalNoticeYear();
 
   return (
@@ -18,7 +19,7 @@ export default function LegalNotice({ className }: LegalNoticeProps) {
         className,
       )}
     >
-      {IS_SCHOOLS_PROFILE
+      {IS_SCHOOLS_PROFILE || schoolsMode
         ? `MetaPet Schools educational pilot. Operated by Blue Snake Studios. © ${year}. ${LEGAL_NOTICE_TEXT}`
         : `© ${year} Blue Snake Studios — ${LEGAL_NOTICE_TEXT}`}
     </p>
