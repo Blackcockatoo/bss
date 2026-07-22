@@ -30,6 +30,9 @@ async function loadMiddleware(
   const mockFeatures = {
     APP_PROFILE: profile,
     IS_SCHOOLS_PROFILE: profile === "schools",
+    // Baseline flag is cleared above, so the boundary is enforced iff the
+    // schools profile is active (mirrors ENFORCE_CHILD_SAFE_BOUNDARY).
+    ENFORCE_CHILD_SAFE_BOUNDARY: profile === "schools",
   };
 
   vi.doMock("./src/lib/env/features", () => mockFeatures);
@@ -146,6 +149,23 @@ describe("middleware school profile boundary", () => {
       expect(response.headers.get("location")).toBe(
         "https://example.com/schools",
       );
+    }
+  });
+
+  it("blocks non-allowlisted API routes with an opaque 404 instead of a redirect", async () => {
+    const { middleware } = await loadMiddleware("schools");
+
+    for (const pathname of [
+      "/api/genome-resonance/simulate",
+      "/api/genome-resonance/explain",
+      "/api/genome/sonify/pet-123",
+    ]) {
+      const response = middleware(
+        new NextRequest(`https://example.com${pathname}`),
+      );
+
+      expect(response.status).toBe(404);
+      expect(response.headers.get("location")).toBeNull();
     }
   });
 

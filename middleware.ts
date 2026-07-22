@@ -5,22 +5,16 @@ import {
   getChildSafeFallbackPathname,
   isChildSafeAllowedPathname,
 } from "./src/lib/childSafeBaseline";
-import { APP_PROFILE } from "./src/lib/env/features";
+import {
+  APP_PROFILE,
+  ENFORCE_CHILD_SAFE_BOUNDARY,
+} from "./src/lib/env/features";
 
 const DEFAULT_CANONICAL_ORIGIN = "https://www.bluesnakestudios.com";
 const CORE_HOST_ALIASES = new Set([
   "bluesnakestudios.com",
   "www.bluesnakestudios.com",
 ]);
-
-function isEnabled(value: string | undefined): boolean {
-  if (typeof value !== "string") {
-    return false;
-  }
-
-  const normalized = value.trim().toLowerCase();
-  return normalized === "1" || normalized === "true" || normalized === "yes";
-}
 
 function getCanonicalOrigin(): URL {
   const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
@@ -62,19 +56,16 @@ function redirectToCanonicalOrigin(request: NextRequest): NextResponse {
   return NextResponse.redirect(redirectUrl, 308);
 }
 
-const CHILD_SAFE_BASELINE_ENABLED = isEnabled(
-  process.env.NEXT_PUBLIC_CHILD_SAFE_BASELINE,
-);
-
 export function middleware(request: NextRequest) {
   if (shouldRedirectToCanonicalOrigin(request)) {
     return redirectToCanonicalOrigin(request);
   }
 
-  if (!CHILD_SAFE_BASELINE_ENABLED) {
-    if (APP_PROFILE !== "schools") {
-      return NextResponse.next();
-    }
+  // Single source of truth (src/lib/env/features.ts) decides whether the
+  // request-time child-safe boundary is active. When it is off there is nothing
+  // to enforce and every request passes through untouched.
+  if (!ENFORCE_CHILD_SAFE_BOUNDARY) {
+    return NextResponse.next();
   }
 
   const { pathname } = request.nextUrl;
@@ -87,6 +78,15 @@ export function middleware(request: NextRequest) {
 
   if (isChildSafeAllowedPathname(pathname)) {
     return NextResponse.next();
+  }
+
+  // API/data requests must be denied cleanly instead of 3xx-redirected to an
+  // HTML page. A fetch() that transparently follows a redirect into /schools
+  // would otherwise receive a 200 HTML document, masking the block from callers
+  // and error handling. Return an opaque 404 so the route is denied and its
+  // existence is not disclosed on the schools surface.
+  if (pathname.startsWith("/api/")) {
+    return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
   const redirectUrl = request.nextUrl.clone();
