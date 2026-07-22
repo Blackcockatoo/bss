@@ -16,7 +16,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { CHILD_SAFE_NAV_ROUTES } from "@/lib/childSafeBaseline";
+import {
+  CHILD_SAFE_NAV_ROUTES,
+  isFieldModePathname,
+} from "@/lib/childSafeBaseline";
 import {
   ENABLE_CHILD_SAFE_BASELINE,
   IS_SCHOOLS_PROFILE,
@@ -58,6 +61,7 @@ export function QuickNav() {
     [pathname],
   );
   const effectiveSchoolsMode = IS_SCHOOLS_PROFILE || isSchoolPath;
+  const isFieldPath = !!pathname && isFieldModePathname(pathname);
 
   const handleBack = useCallback(() => {
     triggerHaptic("light");
@@ -140,7 +144,7 @@ export function QuickNav() {
   // can neither receive keyboard focus, intercept pointer/touch events, nor
   // occupy layout space over the lesson's Next button.
   const classroomFocusActive = useClassroomFocusActive();
-  if (classroomFocusActive) {
+  if (classroomFocusActive || isFieldPath) {
     return null;
   }
 

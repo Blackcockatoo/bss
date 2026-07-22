@@ -2,6 +2,7 @@
 
 import { EducationQueuePanel } from "@/components/EducationQueuePanel";
 import { resetTeacherOnboarding } from "@/lib/education/teacher-onboarding";
+import { resetSchoolLessonMemory } from "@/lib/fieldMode/resetLocalState";
 import { Button } from "@/components/ui/button";
 import {
   DEFAULT_ENGAGEMENT_CATEGORY,
@@ -153,6 +154,9 @@ export function ClassroomManager() {
 
   useEffect(() => {
     const purged = purgeExpiredSchoolsLocalState(window.localStorage);
+    if (purged) {
+      resetSchoolLessonMemory();
+    }
     setExpiredDataPurged(purged);
     setStudents(
       safeParse<Student[]>(
@@ -365,6 +369,7 @@ export function ClassroomManager() {
       return;
     }
     clearSchoolsLocalState(window.localStorage);
+    resetSchoolLessonMemory();
     resetEducationStore();
     setStudents([]);
     setAssignments([]);

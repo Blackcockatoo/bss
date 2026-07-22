@@ -12,6 +12,8 @@ import {
 } from "@/lib/teacher-lessons";
 import { ActivityHost } from "./registry";
 import type { LessonActivityProps } from "./types";
+import { generateRandomGenome, decodeGenome } from "@/lib/genome";
+import { useStore } from "@/lib/store";
 
 function emptyRecord(lesson: LessonDefinition): LessonProgressRecord {
   return {
@@ -58,6 +60,7 @@ function makeProps(
 afterEach(() => {
   cleanup();
   setFeatureAvailabilityOverrides({});
+  useStore.setState({ genome: null, traits: null });
 });
 
 describe("lesson activity registry", () => {
@@ -83,6 +86,24 @@ describe("lesson activity registry", () => {
     expect(screen.getByText(/Return to Teacher Hub/i)).toBeTruthy();
   });
 
+  it("uses the Field return route in a Field fallback", () => {
+    setFeatureAvailabilityOverrides({ "advanced-visualisation": false });
+    const patterns = LESSON_DEFINITIONS.find(
+      (lesson) => lesson.id === "patterns-behind-the-pet",
+    )!;
+    render(
+      <ActivityHost
+        {...makeProps(patterns)}
+        allowPetUpdates={false}
+        hubPath="/schools/field/lessons"
+      />,
+    );
+    expect(screen.getByRole("link", { name: /Return to Field Lessons/i })).toHaveAttribute(
+      "href",
+      "/schools/field/lessons",
+    );
+  });
+
   it("renders a real activity when the feature is available", () => {
     setFeatureAvailabilityOverrides({});
     const meet = LESSON_DEFINITIONS.find(
@@ -92,5 +113,28 @@ describe("lesson activity registry", () => {
     expect(
       screen.getByText(/Look closely at the Meta-Pet/i),
     ).toBeTruthy();
+  });
+
+  it("suppresses consumer pet-update controls in Field Mode", () => {
+    const genome = generateRandomGenome(() => 0.25);
+    useStore.getState().setGenome(genome, decodeGenome(genome));
+    const meet = LESSON_DEFINITIONS.find(
+      (lesson) => lesson.id === "meet-your-metapet",
+    )!;
+
+    render(
+      <ActivityHost
+        {...makeProps(meet, 2)}
+        allowPetUpdates={false}
+        hubPath="/schools/field/lessons"
+      />,
+    );
+
+    expect(
+      screen.queryByRole("button", { name: /Save Alias to My Meta-Pet/i }),
+    ).toBeNull();
+    expect(
+      screen.queryByRole("link", { name: /Create a Meta-Pet/i }),
+    ).toBeNull();
   });
 });

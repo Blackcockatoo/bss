@@ -172,22 +172,33 @@ function SectionCard({ section }: { section: PassportLessonSection }) {
   );
 }
 
-export function LearningPassport() {
+export function LearningPassport({
+  hubPath = TEACHER_HUB_PATH,
+  fieldMode = false,
+}: {
+  hubPath?: string;
+  fieldMode?: boolean;
+}) {
   const progressHydrated = useLessonProgressHydrated();
   const profileHydrated = usePetProfileHydrated();
   const progress = useLessonProgressStore();
-  const alias = usePetProfileStore((s) => s.alias);
-  const hasPet = useStore((s) => s.genome !== null);
+  const storedAlias = usePetProfileStore((s) => s.alias);
+  const realHasPet = useStore((s) => s.genome !== null);
+  const alias = fieldMode ? "" : storedAlias;
+  const hasPet = fieldMode ? false : realHasPet;
 
   const passport: LearningPassportModel = useMemo(
-    () => deriveLearningPassport({ progress, alias, hasPet }),
-    [progress, alias, hasPet],
+    () => {
+      const derived = deriveLearningPassport({ progress, alias, hasPet });
+      return fieldMode ? { ...derived, appliedChanges: [] } : derived;
+    },
+    [progress, alias, hasPet, fieldMode],
   );
 
   const petSpec: BodySpec = useMemo(() => {
-    const forged = loadForgedBody();
+    const forged = fieldMode ? null : loadForgedBody();
     return forged ?? configToBodySpec(DEMO_PET_CONFIG);
-  }, []);
+  }, [fieldMode]);
 
   const hydrated = progressHydrated && profileHydrated;
   const hasContent = passportHasContent(passport);
@@ -211,9 +222,9 @@ export function LearningPassport() {
             size="sm"
             className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
           >
-            <Link href={TEACHER_HUB_PATH}>
+            <Link href={hubPath}>
               <ArrowLeft className="mr-1.5 h-4 w-4" aria-hidden="true" />
-              Teacher Hub
+              {fieldMode ? "Field Lessons" : "Teacher Hub"}
             </Link>
           </Button>
           <Button
@@ -258,7 +269,9 @@ export function LearningPassport() {
           <p className="text-xs text-slate-400">{dateLabel}</p>
           {!hasPet ? (
             <p className="text-xs text-slate-400">
-              No Meta-Pet yet — this passport shows a classroom example.
+              {fieldMode
+                ? "Classroom demonstration pet — no student account or consumer pet is required."
+                : "No Meta-Pet yet — this passport shows a classroom example."}
             </p>
           ) : null}
         </header>
@@ -268,8 +281,7 @@ export function LearningPassport() {
         ) : !hasContent ? (
           <div className="rounded-2xl border border-slate-700/60 bg-slate-900/40 p-6 text-center">
             <p className="text-sm text-slate-300">
-              No lessons completed yet. Start a lesson from the Teacher Hub to
-              begin building this passport.
+              No lessons completed yet. Start a lesson from the {fieldMode ? "Field lesson launchpad" : "Teacher Hub"} to begin building this passport.
             </p>
           </div>
         ) : null}
@@ -311,9 +323,8 @@ export function LearningPassport() {
           <p className="text-sm text-slate-300">
             <span className="font-medium text-slate-100">For teachers:</span>{" "}
             each section shows the student&apos;s own words and choices as
-            classroom evidence — observations, predictions, reflections and any
-            changes they chose to apply to their Meta-Pet. It is a record of
-            thinking, not a graded test.
+            classroom evidence — observations, predictions and reflections
+            {fieldMode ? "." : ", including any changes they chose to apply to their Meta-Pet."} It is a record of thinking, not a graded test.
           </p>
           <p className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-100">
             <span className="font-medium">Well done, creator!</span> You met,
@@ -328,7 +339,7 @@ export function LearningPassport() {
           <p className="text-xs text-slate-500">
             Privacy: this passport uses a safe alias only and is generated on
             this device from local lesson evidence. No real student name is
-            required. Deleting lesson evidence does not delete the Meta-Pet.
+            required. {fieldMode ? "Deleting lesson evidence clears only this local classroom record." : "Deleting lesson evidence does not delete the Meta-Pet."}
           </p>
         </section>
 
@@ -338,9 +349,9 @@ export function LearningPassport() {
             variant="outline"
             className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
           >
-            <Link href={TEACHER_HUB_PATH}>
+            <Link href={hubPath}>
               <Home className="mr-1.5 h-4 w-4" aria-hidden="true" />
-              Return to Teacher Hub
+              Return to {fieldMode ? "Field Lessons" : "Teacher Hub"}
             </Link>
           </Button>
         </footer>

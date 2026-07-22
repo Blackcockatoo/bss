@@ -50,7 +50,7 @@ function FeatureUnavailable({
   reason: string;
   props: LessonActivityProps;
 }) {
-  const { step, lesson } = props;
+  const { step, lesson, hubPath = TEACHER_HUB_PATH } = props;
   return (
     <StepShell
       kindLabel={STEP_KIND_LABEL[step.kind]}
@@ -81,9 +81,9 @@ function FeatureUnavailable({
           size="sm"
           className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
         >
-          <Link href={TEACHER_HUB_PATH}>
+          <Link href={hubPath}>
             <Home className="mr-1.5 h-4 w-4" aria-hidden="true" />
-            Return to Teacher Hub
+            Return to {hubPath === TEACHER_HUB_PATH ? "Teacher Hub" : "Field Lessons"}
           </Link>
         </Button>
       </div>

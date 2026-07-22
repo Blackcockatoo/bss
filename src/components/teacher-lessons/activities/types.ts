@@ -26,6 +26,10 @@ export interface LessonActivityProps {
   reducedMotion: boolean;
   /** Low Performance Mode: prefer static/low-quality visuals on older devices. */
   lowPerformance: boolean;
+  /** Field Mode is demonstration-only and never exposes consumer pet updates. */
+  allowPetUpdates?: boolean;
+  /** Safe return route for the active lesson surface. */
+  hubPath?: string;
   pet: LessonPetContext;
   /** The live progress record for the current lesson (read-only view). */
   record: LessonProgressRecord;

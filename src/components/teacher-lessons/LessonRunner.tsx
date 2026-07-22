@@ -18,7 +18,15 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { FieldSessionStatus } from "@/components/field-mode/FieldSessionStatus";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import {
+  buildFieldLessonPath,
+  fieldPresentationMode,
+  fieldTimingMode,
+  type FieldSessionConfig,
+} from "@/lib/fieldMode/session";
+import { touchSchoolsLocalState } from "@/lib/schools/storage";
 import {
   LESSON_DEFINITIONS,
   LESSON_TIMING_MODES,
@@ -46,6 +54,9 @@ interface LessonRunnerProps {
   initialStep?: number;
   preview?: boolean;
   initialMode?: LessonViewMode | null;
+  fieldMode?: boolean;
+  fieldSession?: FieldSessionConfig;
+  hubPath?: string;
 }
 
 type GuideModalKind = "teacher" | "student" | "help" | null;
@@ -57,7 +68,7 @@ const PRESENTATION_MODES: { id: LessonPresentationMode; label: string }[] = [
 ];
 
 /** Safe fallback shown when a lesson slug is unknown or data is missing. */
-function LessonNotFound() {
+function LessonNotFound({ hubPath }: { hubPath: string }) {
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-950 px-4 text-slate-100">
       <div className="max-w-md space-y-4 rounded-3xl border border-amber-300/20 bg-slate-900 p-8 text-center">
@@ -76,9 +87,9 @@ function LessonNotFound() {
           asChild
           className="w-full bg-amber-300 text-slate-950 hover:bg-amber-200"
         >
-          <Link href={TEACHER_HUB_PATH}>
+          <Link href={hubPath}>
             <Home className="mr-1.5 h-4 w-4" aria-hidden="true" />
-            Back to Teacher Hub
+            Back to {hubPath === TEACHER_HUB_PATH ? "Teacher Hub" : "Field Lessons"}
           </Link>
         </Button>
       </div>
@@ -91,6 +102,9 @@ export function LessonRunner({
   initialStep,
   preview = false,
   initialMode,
+  fieldMode = false,
+  fieldSession,
+  hubPath = TEACHER_HUB_PATH,
 }: LessonRunnerProps) {
   const lesson = getLessonBySlug(slug);
   const hydrated = useLessonProgressHydrated();
@@ -126,6 +140,7 @@ export function LessonRunner({
       usesDemonstrationPet: true,
       persistChanges: false,
     },
+    { forceDemonstration: fieldMode },
   );
 
   // Preview mode keeps its own ephemeral step so it never touches real
@@ -149,6 +164,11 @@ export function LessonRunner({
     if (initialMode) {
       setViewMode(initialMode);
     }
+    if (fieldMode && fieldSession) {
+      setTimingMode(fieldTimingMode(fieldSession));
+      setPresentationMode(fieldPresentationMode(fieldSession));
+      setLowPerformance(fieldSession.supportMode === "low-sensory");
+    }
   }, [
     lesson,
     preview,
@@ -157,6 +177,11 @@ export function LessonRunner({
     initialMode,
     startLesson,
     setViewMode,
+    fieldMode,
+    fieldSession,
+    setTimingMode,
+    setPresentationMode,
+    setLowPerformance,
   ]);
 
   const record = useMemo(
@@ -164,8 +189,17 @@ export function LessonRunner({
     [state, lesson],
   );
 
+  useEffect(() => {
+    if (!fieldMode || !hydrated || !record?.lastActiveAt) return;
+    try {
+      touchSchoolsLocalState(window.localStorage, record.lastActiveAt);
+    } catch {
+      // Local storage is optional; the active lesson still runs in memory.
+    }
+  }, [fieldMode, hydrated, record?.lastActiveAt]);
+
   if (!lesson) {
-    return <LessonNotFound />;
+    return <LessonNotFound hubPath={hubPath} />;
   }
 
   const totalSteps = lesson.steps.length;
@@ -245,6 +279,13 @@ export function LessonRunner({
             nextLesson={nextLesson}
             onReplay={handleReplay}
             onReturnToHub={() => exitLesson()}
+            hubPath={hubPath}
+            hubLabel={fieldMode ? "Field Lessons" : "Teacher Hub"}
+            nextLessonPath={
+              fieldMode && fieldSession && nextLesson
+                ? buildFieldLessonPath(nextLesson.slug, fieldSession)
+                : undefined
+            }
           />
         </div>
       </ClassroomFocusMode>
@@ -279,6 +320,8 @@ export function LessonRunner({
       saveEvidenceEntry(evidence.stepId, evidence);
     },
     onAskForHelp: () => setGuideModal("help"),
+    allowPetUpdates: !fieldMode,
+    hubPath,
   };
 
   return (
@@ -332,7 +375,7 @@ export function LessonRunner({
                 size="sm"
                 className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
               >
-                <Link href={TEACHER_HUB_PATH} onClick={() => exitLesson()}>
+                <Link href={hubPath} onClick={() => exitLesson()}>
                   <Home className="mr-1.5 h-4 w-4" aria-hidden="true" />
                   Exit to Hub
                 </Link>
@@ -347,7 +390,10 @@ export function LessonRunner({
             </p>
           ) : viewMode === "teacher" ? (
             <div className="space-y-2">
-              {/* Timing + presentation selectors */}
+              {fieldMode && fieldSession ? (
+                <FieldSessionStatus session={fieldSession} paused={isPaused} />
+              ) : (
+              /* Timing + presentation selectors */
               <div className="flex flex-wrap items-center gap-3 text-xs">
                 <label className="flex items-center gap-1.5 text-slate-300">
                   <span className="font-medium">Timing</span>
@@ -398,6 +444,7 @@ export function LessonRunner({
                   Low Performance Mode: {lowPerformance ? "On" : "Off"}
                 </button>
               </div>
+              )}
 
               {/* Teacher control strip */}
               <div className="flex flex-wrap items-center gap-2">
@@ -571,7 +618,7 @@ export function LessonRunner({
         onPauseResume={() => (isPaused ? resumeLesson() : pauseLesson())}
         onExit={() => {
           exitLesson();
-          router.push(TEACHER_HUB_PATH);
+          router.push(hubPath);
         }}
       />
 

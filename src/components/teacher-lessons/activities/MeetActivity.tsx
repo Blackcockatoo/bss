@@ -63,6 +63,7 @@ export function MeetActivity({
   saveEvidence,
   onAskForHelp,
   lesson,
+  allowPetUpdates = true,
 }: LessonActivityProps) {
   const evidenceStepId = lesson.steps[lesson.steps.length - 1].id;
   const existing = getEvidence(evidenceStepId) as
@@ -211,7 +212,7 @@ export function MeetActivity({
             </div>
 
             {/* Optional: save the alias to the real Meta-Pet (explicit + safe). */}
-            {hasRealPet ? (
+            {allowPetUpdates ? (hasRealPet ? (
               <div className="w-full space-y-2">
                 <Button
                   type="button"
@@ -231,7 +232,7 @@ export function MeetActivity({
               </div>
             ) : (
               <MissingPetNotice message="Saving an alias to your own pet is optional. You can still complete this lesson with a classroom example." />
-            )}
+            )) : null}
           </div>
         </StepShell>
       );

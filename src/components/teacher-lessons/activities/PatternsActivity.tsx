@@ -142,6 +142,7 @@ export function PatternsActivity({
   lesson,
   getEvidence,
   saveEvidence,
+  allowPetUpdates = true,
 }: LessonActivityProps) {
   const evidenceStepId = lesson.steps[lesson.steps.length - 1].id;
   const existing = getEvidence(evidenceStepId) as
@@ -363,7 +364,7 @@ export function PatternsActivity({
           onBlur={() => !isPreview && saveEvidence(buildEvidence())}
           disabled={isPreview}
         />
-        {hasRealPet ? (
+        {allowPetUpdates ? (hasRealPet ? (
           <div className="space-y-2">
             <Button
               type="button"
@@ -381,7 +382,7 @@ export function PatternsActivity({
           </div>
         ) : (
           <MissingPetNotice message="You can still record your choice. Create a Meta-Pet to save a preferred DNA view." />
-        )}
+        )) : null}
         <div className="flex justify-center">
           <SaveButton
             onClick={() => {

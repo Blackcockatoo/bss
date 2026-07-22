@@ -74,6 +74,7 @@ export function deriveLearningPassport(inputs: PassportInputs): LearningPassport
   let completed = 0;
   let first: number | null = null;
   let last: number | null = null;
+  let evidenceAlias = "";
 
   for (const lesson of LESSON_DEFINITIONS) {
     const record = progress?.records?.[lesson.id];
@@ -93,6 +94,13 @@ export function deriveLearningPassport(inputs: PassportInputs): LearningPassport
     const missingEvidence = status === "completed" && !hasEvidence;
 
     if (evidence) {
+      if (
+        !evidenceAlias &&
+        evidence.kind === "pet-observation-card" &&
+        typeof evidence.alias === "string"
+      ) {
+        evidenceAlias = evidence.alias.trim();
+      }
       if (typeof evidence.createdAt === "number") {
         first = first === null ? evidence.createdAt : Math.min(first, evidence.createdAt);
         last = last === null ? evidence.createdAt : Math.max(last, evidence.createdAt);
@@ -124,7 +132,10 @@ export function deriveLearningPassport(inputs: PassportInputs): LearningPassport
   const total = LESSON_DEFINITIONS.length;
   return {
     version: LEARNING_PASSPORT_VERSION,
-    alias: typeof alias === "string" ? alias : "",
+    alias:
+      typeof alias === "string" && alias.trim()
+        ? alias.trim()
+        : evidenceAlias,
     hasPet: hasPet === true,
     completedLessons: completed,
     totalLessons: total,

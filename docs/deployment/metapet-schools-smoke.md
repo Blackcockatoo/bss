@@ -1,7 +1,7 @@
 # MetaPet Schools Smoke Runbook
 
 > Referenced by: `.github/workflows/production-smoke-gate.yml`
-> Last updated: 2026-03-26
+> Last updated: 2026-07-22
 
 This runbook must be completed **manually** before triggering the MetaPet Schools smoke gate workflow with `smoke_confirmation: confirmed`.
 
@@ -37,6 +37,19 @@ This runbook must be completed **manually** before triggering the MetaPet School
 - [ ] School-safe routes remain reachable: `/schools`, `/school-game`, `/schools/docs/privacy-policy`, `/legal/privacy`
 - [ ] Bottom navigation on school routes shows only school-safe destinations
 
+### 3A. Field Mode boundary and Pass 3 evidence (`/schools/field`)
+
+- [ ] `/schools/field` identifies `MetaPet Field Mode — Australian Schools` and lists Years 3–6, teacher-led use, seven lessons, no student accounts, aliases, local records, and Australian Curriculum alignment
+- [ ] `Start Field Mode` resolves through `/schools/field/start` to `/schools/field/lessons`
+- [ ] All seven lesson cards open `/schools/field/lessons/[slug]`, never `/teachers/...`
+- [ ] Field navigation contains only Field Home, Lessons, Classroom, Teacher Guide, Safety & Privacy, and Exit Field Mode
+- [ ] `/schools/field/passport` derives an alias-only Learning Passport from local lesson evidence without consumer profile data or applied-pet summaries
+- [ ] `/schools/field/review` opens lessons and Passport only through Field routes and can reset local lesson evidence
+- [ ] With Field Mode active, direct visits to `/shop`, `/wallet`, `/marketplace`, `/breeding`, `/identity`, `/digital-dna`, `/alchemist`, `/social`, `/share`, and `/teachers` redirect to `/schools/field`
+- [ ] With Field Mode active, a blocked `/api/...` request returns opaque `404 {"error":"not_found"}`
+- [ ] Consumer pet-update buttons and `/pet` links do not appear inside Field lessons
+- [ ] `Exit Field Mode` clears the Field boundary and returns to `/schools`; normal core routes remain available outside Field Mode
+
 ### 4. Metadata, manifest, and install posture
 
 - [ ] Browser tab title uses `MetaPet Schools`
@@ -71,6 +84,8 @@ Any of the following mean smoke **fails** — do NOT set `smoke_confirmation: co
 
 - `/` does not resolve into the school overview
 - Any blocked consumer route stays reachable in the schools deployment
+- Any active Field session can reach a consumer page or blocked API directly
+- Any Field lesson, Passport, review, navigation or fallback links to `/teachers`, `/pet`, or another consumer route
 - Any school-visible surface shows install prompts, consumer lore, or consumer identity/DNA terminology
 - Manifest or metadata still identify the deployment as the consumer product
 - Classroom deletion or local-only behavior fails

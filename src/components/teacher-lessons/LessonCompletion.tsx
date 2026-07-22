@@ -15,6 +15,9 @@ interface LessonCompletionProps {
   nextLesson: LessonDefinition | null;
   onReplay: () => void;
   onReturnToHub: () => void;
+  hubPath?: string;
+  nextLessonPath?: string;
+  hubLabel?: string;
 }
 
 /**
@@ -27,6 +30,9 @@ export function LessonCompletion({
   nextLesson,
   onReplay,
   onReturnToHub,
+  hubPath = TEACHER_HUB_PATH,
+  nextLessonPath,
+  hubLabel = "Teacher Hub",
 }: LessonCompletionProps) {
   return (
     <div className="mx-auto flex max-w-xl flex-col items-center gap-6 py-6 text-center">
@@ -55,8 +61,8 @@ export function LessonCompletion({
           asChild
           className="bg-amber-300 text-slate-950 hover:bg-amber-200"
         >
-          <Link href={TEACHER_HUB_PATH} onClick={onReturnToHub}>
-            Return to Teacher Hub
+          <Link href={hubPath} onClick={onReturnToHub}>
+            Return to {hubLabel}
           </Link>
         </Button>
         {nextLesson ? (
@@ -65,7 +71,10 @@ export function LessonCompletion({
             variant="outline"
             className="border-cyan-500/30 bg-cyan-500/10 text-cyan-100 hover:bg-cyan-500/20"
           >
-            <Link href={buildLessonPath(nextLesson.slug)} onClick={onReturnToHub}>
+            <Link
+              href={nextLessonPath ?? buildLessonPath(nextLesson.slug)}
+              onClick={onReturnToHub}
+            >
               Next: {nextLesson.title}
               <ArrowRight className="ml-1.5 h-4 w-4" aria-hidden="true" />
             </Link>

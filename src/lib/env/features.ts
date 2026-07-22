@@ -32,6 +32,13 @@ export const APP_PROFILE =
     ? "schools"
     : "core";
 export const IS_SCHOOLS_PROFILE = APP_PROFILE === "schools";
+/**
+ * Single source of truth for build-wide request boundary enforcement.
+ * Enabling the child-safe baseline deliberately forces the schools profile;
+ * the coupling is fail-safe and one directional.
+ */
+export const ENFORCE_CHILD_SAFE_BOUNDARY =
+  IS_SCHOOLS_PROFILE || ENABLE_CHILD_SAFE_BASELINE;
 export const ENABLE_MAPS = toEnabled(
   process.env.NEXT_PUBLIC_ENABLE_MAPS,
   false,

@@ -39,10 +39,19 @@ export function useLessonPet(
     LessonDefinition,
     "usesStudentRealPet" | "usesDemonstrationPet" | "persistChanges"
   >,
+  options: { forceDemonstration?: boolean } = {},
 ): LessonPetContext {
   const hasRealPet = useStore((state) => state.genome !== null);
 
   return useMemo(() => {
+    if (options.forceDemonstration) {
+      return {
+        startingConfig: cloneLessonPetConfig(DEMO_PET_CONFIG),
+        isDemo: true,
+        isFallback: false,
+        canPersist: false,
+      };
+    }
     if (lesson.usesStudentRealPet) {
       if (hasRealPet) {
         return {
@@ -74,5 +83,6 @@ export function useLessonPet(
     lesson.usesStudentRealPet,
     lesson.persistChanges,
     hasRealPet,
+    options.forceDemonstration,
   ]);
 }

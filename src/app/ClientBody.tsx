@@ -7,6 +7,7 @@ import { WardrobeUnlockCeremony } from "@/components/wardrobe/WardrobeUnlockCere
 import { WardrobeProgressBridge } from "@/lib/wardrobe/WardrobeProgressBridge";
 import {
   getChildSafeFallbackPathname,
+  isFieldModePathname,
   isChildSafeAllowedPathname,
 } from "@/lib/childSafeBaseline";
 import {
@@ -40,6 +41,7 @@ export default function ClientBody({
     [pathname],
   );
   const effectiveSchoolsMode = IS_SCHOOLS_PROFILE || isSchoolPath;
+  const isFieldPath = !!pathname && isFieldModePathname(pathname);
   const childSafeBlocked = useMemo(
     () =>
       (ENABLE_CHILD_SAFE_BASELINE || IS_SCHOOLS_PROFILE) &&
@@ -55,6 +57,7 @@ export default function ClientBody({
   // Body Forge (or any session) never silently reverts the renderer.
   // Restored after hydration to keep server markup deterministic.
   useEffect(() => {
+    if (effectiveSchoolsMode) return;
     try {
       const stored = window.localStorage.getItem(PET_FORM_STORAGE_KEY);
       if (stored) {
@@ -71,11 +74,12 @@ export default function ClientBody({
         // Non-fatal: the session keeps working without the preference.
       }
     });
-  }, []);
+  }, [effectiveSchoolsMode]);
 
   useEffect(() => {
+    if (effectiveSchoolsMode) return;
     refreshIdentityProfile();
-  }, [refreshIdentityProfile]);
+  }, [effectiveSchoolsMode, refreshIdentityProfile]);
 
   useEffect(() => {
     if (!childSafeBlocked || !pathname) {
@@ -86,7 +90,11 @@ export default function ClientBody({
   }, [childSafeBlocked, pathname, router]);
 
   useEffect(() => {
-    if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
+    if (
+      isFieldPath ||
+      typeof window === "undefined" ||
+      !("serviceWorker" in navigator)
+    ) {
       return;
     }
 
@@ -102,7 +110,7 @@ export default function ClientBody({
     };
 
     registerServiceWorker();
-  }, []);
+  }, [isFieldPath]);
 
   if (childSafeBlocked) {
     return (
@@ -121,7 +129,13 @@ export default function ClientBody({
   }
 
   return (
-    <div className="antialiased flex min-h-screen flex-col pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]">
+    <div
+      className={`antialiased flex min-h-screen flex-col ${
+        isFieldPath
+          ? "pb-0"
+          : "pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]"
+      }`}
+    >
       <div className={`sticky top-0 z-40 border-b px-3 py-2 backdrop-blur sm:px-4 sm:py-3 ${effectiveSchoolsMode ? "border-border bg-background/95" : "border-slate-800 bg-slate-950/90"}`}>
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 sm:gap-3">
           <div className={`text-sm ${effectiveSchoolsMode ? "text-foreground font-medium" : "text-zinc-200"}`}>
@@ -152,18 +166,24 @@ export default function ClientBody({
       <div className="flex-1 pb-2">{children}</div>
       {/* Wardrobe progression: the bridge feeds live gameplay into the
           persistent progress record; the ceremony surfaces new unlocks. */}
-      <WardrobeProgressBridge />
-      <WardrobeUnlockCeremony />
+      {!effectiveSchoolsMode ? (
+        <>
+          <WardrobeProgressBridge />
+          <WardrobeUnlockCeremony />
+        </>
+      ) : null}
       <footer className="px-4 pb-24 pt-4 text-center sm:pb-6">
-        <a
-          href="mailto:bluesssnakestudio@gmail.com?subject=Meta-Pet%20School%20Pilot%20Enquiry"
-          className="mb-4 inline-block text-xs text-slate-400 underline hover:text-slate-300"
-        >
-          Pilot Enquiry
-        </a>
+        {!isFieldPath ? (
+          <a
+            href="mailto:bluesssnakestudio@gmail.com?subject=Meta-Pet%20School%20Pilot%20Enquiry"
+            className="mb-4 inline-block text-xs text-slate-400 underline hover:text-slate-300"
+          >
+            Pilot Enquiry
+          </a>
+        ) : null}
         <LegalNotice />
       </footer>
-      <QuickNav />
+      {!isFieldPath ? <QuickNav /> : null}
     </div>
   );
 }

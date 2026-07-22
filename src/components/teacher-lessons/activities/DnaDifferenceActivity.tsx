@@ -85,6 +85,7 @@ export function DnaDifferenceActivity({
   lesson,
   getEvidence,
   saveEvidence,
+  allowPetUpdates = true,
 }: LessonActivityProps) {
   const gene = getLessonGene(LESSON_GENE_ID)!;
   const evidenceStepId = lesson.steps[lesson.steps.length - 1].id;
@@ -299,10 +300,16 @@ export function DnaDifferenceActivity({
           disabled={isPreview}
         />
         <p className="rounded-2xl border border-slate-700/60 bg-slate-800/30 px-3 py-2 text-xs text-slate-400">
-          The change you made earlier was a temporary experiment. Your real
-          Meta-Pet only changes if you press <strong>Keep This Variation</strong>.
+          {allowPetUpdates ? (
+            <>
+              The change you made earlier was a temporary experiment. Your real
+              Meta-Pet only changes if you press <strong>Keep This Variation</strong>.
+            </>
+          ) : (
+            "This variation stays inside the classroom example and does not change a consumer Meta-Pet."
+          )}
         </p>
-        {hasRealPet ? (
+        {allowPetUpdates ? (hasRealPet ? (
           <div className="space-y-2">
             <div className="flex flex-wrap justify-center gap-2">
               <Button
@@ -334,7 +341,7 @@ export function DnaDifferenceActivity({
           </div>
         ) : (
           <MissingPetNotice message="You can still record your discovery. Create a Meta-Pet to keep a real DNA variation." />
-        )}
+        )) : null}
         <div className="flex justify-center">
           <SaveButton
             onClick={() => {

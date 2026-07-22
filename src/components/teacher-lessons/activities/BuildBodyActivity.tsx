@@ -51,6 +51,7 @@ export function BuildBodyActivity({
   lesson,
   getEvidence,
   saveEvidence,
+  allowPetUpdates = true,
 }: LessonActivityProps) {
   const evidenceStepId = lesson.steps[lesson.steps.length - 1].id;
   const existing = getEvidence(evidenceStepId) as
@@ -325,7 +326,7 @@ export function BuildBodyActivity({
             >
               Keep my original design
             </Button>
-            {hasRealPet ? (
+            {allowPetUpdates && hasRealPet ? (
               <Button
                 type="button"
                 onClick={applyToPet}
@@ -336,7 +337,7 @@ export function BuildBodyActivity({
               </Button>
             ) : null}
           </div>
-          {hasRealPet ? (
+          {allowPetUpdates ? (hasRealPet ? (
             <ApplyResultBanner
               result={bodyResult}
               onUndo={undoApplyToPet}
@@ -344,7 +345,7 @@ export function BuildBodyActivity({
             />
           ) : (
             <MissingPetNotice message="You can still finish this lesson with a classroom example. Create a Meta-Pet to apply your design to your own pet." />
-          )}
+          )) : null}
           <div className="flex justify-center">
             <SaveButton
               onClick={() => {

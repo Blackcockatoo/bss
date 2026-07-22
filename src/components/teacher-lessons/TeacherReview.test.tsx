@@ -82,4 +82,26 @@ describe("Teacher review", () => {
     // …but the real pet is untouched.
     expect(useStore.getState().genome).toEqual(genome);
   });
+
+  it("keeps Field review links inside the Field boundary", () => {
+    seedEvidence();
+    render(
+      <TeacherReview
+        fieldMode
+        hubPath="/schools/field/lessons"
+        passportPath="/schools/field/passport"
+      />,
+    );
+
+    fireEvent.click(screen.getByText(/1\. Meet Your Meta-Pet/));
+    expect(screen.getByRole("link", { name: /Open lesson/i })).toHaveAttribute(
+      "href",
+      "/schools/field/lessons/meet-your-metapet",
+    );
+    expect(screen.getByRole("link", { name: /Open Learning Passport/i })).toHaveAttribute(
+      "href",
+      "/schools/field/passport",
+    );
+    expect(screen.queryByText(/Applied to pet/i)).toBeNull();
+  });
 });

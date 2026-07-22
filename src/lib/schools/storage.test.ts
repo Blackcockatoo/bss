@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import {
   SCHOOLS_CLASSROOM_ROSTER_STORAGE_KEY,
+  SCHOOLS_FIELD_SESSION_STORAGE_KEY,
   SCHOOLS_LOCAL_DATA_RETENTION_MS,
   SCHOOLS_LOCAL_STATE_META_STORAGE_KEY,
+  SCHOOLS_TEACHER_LESSON_PROGRESS_STORAGE_KEY,
   SCHOOLS_TEACHER_ONBOARDING_STORAGE_KEY,
   SCHOOLS_STORAGE_KEYS,
   clearSchoolsLocalState,
@@ -51,6 +53,13 @@ describe("schools storage helpers", () => {
     for (const key of SCHOOLS_STORAGE_KEYS) {
       expect(storage.getItem(key)).toBeNull();
     }
+  });
+
+  it("keeps Field lesson records inside the existing school deletion contract", () => {
+    expect(SCHOOLS_STORAGE_KEYS).toContain(SCHOOLS_FIELD_SESSION_STORAGE_KEY);
+    expect(SCHOOLS_STORAGE_KEYS).toContain(
+      SCHOOLS_TEACHER_LESSON_PROGRESS_STORAGE_KEY,
+    );
   });
 
   it("purges expired classroom data when the retention window is exceeded", () => {

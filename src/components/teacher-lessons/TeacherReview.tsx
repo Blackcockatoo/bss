@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { FIELD_MODE_LESSONS_PATH } from "@/lib/childSafeBaseline";
 import { useStore } from "@/lib/store";
 import {
   TEACHER_HUB_PATH,
@@ -31,9 +32,13 @@ const PASSPORT_PATH = "/teachers/passport";
 function SectionRow({
   section,
   onReset,
+  lessonPath,
+  showAppliedChanges,
 }: {
   section: PassportLessonSection;
   onReset: () => void;
+  lessonPath: string;
+  showAppliedChanges: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [confirm, setConfirm] = useState(false);
@@ -67,7 +72,7 @@ function SectionRow({
           ) : (
             <span className="text-slate-500">No evidence yet</span>
           )}
-          {section.evidence?.appliedChange?.appliedToPet ? (
+          {showAppliedChanges && section.evidence?.appliedChange?.appliedToPet ? (
             <span className="rounded-full border border-cyan-500/40 px-2 py-0.5 text-cyan-200">
               Applied to pet
             </span>
@@ -92,7 +97,7 @@ function SectionRow({
               size="sm"
               className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
             >
-              <Link href={buildLessonPath(section.lessonId)}>Open lesson</Link>
+              <Link href={lessonPath}>Open lesson</Link>
             </Button>
             {confirm ? (
               <span className="inline-flex items-center gap-2">
@@ -136,14 +141,26 @@ function SectionRow({
   );
 }
 
-export function TeacherReview() {
+export function TeacherReview({
+  hubPath = TEACHER_HUB_PATH,
+  passportPath = PASSPORT_PATH,
+  fieldMode = false,
+  lessonPathBuilder = buildLessonPath,
+}: {
+  hubPath?: string;
+  passportPath?: string;
+  fieldMode?: boolean;
+  lessonPathBuilder?: (slug: string) => string;
+}) {
   const progressHydrated = useLessonProgressHydrated();
   const profileHydrated = usePetProfileHydrated();
   const progress = useLessonProgressStore();
   const resetLesson = useLessonProgressStore((s) => s.resetLesson);
   const resetAllProgress = useLessonProgressStore((s) => s.resetAllProgress);
-  const alias = usePetProfileStore((s) => s.alias);
-  const hasPet = useStore((s) => s.genome !== null);
+  const storedAlias = usePetProfileStore((s) => s.alias);
+  const realHasPet = useStore((s) => s.genome !== null);
+  const alias = fieldMode ? "" : storedAlias;
+  const hasPet = fieldMode ? false : realHasPet;
 
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
 
@@ -153,6 +170,9 @@ export function TeacherReview() {
   );
 
   const hydrated = progressHydrated && profileHydrated;
+  const resolveLessonPath = fieldMode
+    ? (slug: string) => `${FIELD_MODE_LESSONS_PATH}/${slug}`
+    : lessonPathBuilder;
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
@@ -164,9 +184,9 @@ export function TeacherReview() {
             size="sm"
             className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
           >
-            <Link href={TEACHER_HUB_PATH}>
+            <Link href={hubPath}>
               <ArrowLeft className="mr-1.5 h-4 w-4" aria-hidden="true" />
-              Teacher Hub
+              {fieldMode ? "Field Lessons" : "Teacher Hub"}
             </Link>
           </Button>
           <div className="flex items-center gap-3">
@@ -197,7 +217,7 @@ export function TeacherReview() {
               asChild
               className="bg-amber-300 text-slate-950 hover:bg-amber-200"
             >
-              <Link href={PASSPORT_PATH}>
+              <Link href={passportPath}>
                 <FileText className="mr-1.5 h-4 w-4" aria-hidden="true" />
                 Open Learning Passport
               </Link>
@@ -207,7 +227,7 @@ export function TeacherReview() {
               variant="outline"
               className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
             >
-              <Link href={PASSPORT_PATH}>
+              <Link href={passportPath}>
                 <Printer className="mr-1.5 h-4 w-4" aria-hidden="true" />
                 Print Passport
               </Link>
@@ -242,6 +262,8 @@ export function TeacherReview() {
               key={section.lessonId}
               section={section}
               onReset={() => resetLesson(section.lessonId)}
+              lessonPath={resolveLessonPath(section.lessonId)}
+              showAppliedChanges={!fieldMode}
             />
           ))}
         </div>
@@ -254,8 +276,11 @@ export function TeacherReview() {
           </h2>
           <p className="mt-1 text-xs text-amber-100/80">
             This clears all saved lesson progress and evidence on this device.
-            It does <strong>not</strong> delete the Meta-Pet, its DNA or its
-            body.
+            {fieldMode ? (
+              "It does not affect classroom rosters or any consumer MetaPet data outside Field Mode."
+            ) : (
+              <>It does <strong>not</strong> delete the Meta-Pet, its DNA or its body.</>
+            )}
           </p>
           <div className="mt-3">
             {confirmDeleteAll ? (
