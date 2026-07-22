@@ -1,6 +1,12 @@
 import type { MetadataRoute } from "next";
 
 import { IS_SCHOOLS_PROFILE } from "@/lib/env/features";
+import {
+  FIELD_MODE_ICON_192_PATH,
+  FIELD_MODE_ICON_512_PATH,
+  FIELD_MODE_ICON_SVG_PATH,
+  FIELD_MODE_MASKABLE_ICON_512_PATH,
+} from "@/lib/fieldMode/pwa";
 
 export default function manifest(): MetadataRoute.Manifest {
   if (IS_SCHOOLS_PROFILE) {
@@ -16,10 +22,28 @@ export default function manifest(): MetadataRoute.Manifest {
       orientation: "portrait",
       icons: [
         {
-          src: "/icon-field.svg",
+          src: FIELD_MODE_ICON_192_PATH,
+          sizes: "192x192",
+          type: "image/png",
+          purpose: "any",
+        },
+        {
+          src: FIELD_MODE_ICON_512_PATH,
+          sizes: "512x512",
+          type: "image/png",
+          purpose: "any",
+        },
+        {
+          src: FIELD_MODE_MASKABLE_ICON_512_PATH,
+          sizes: "512x512",
+          type: "image/png",
+          purpose: "maskable",
+        },
+        {
+          src: FIELD_MODE_ICON_SVG_PATH,
           sizes: "any",
           type: "image/svg+xml",
-          purpose: "maskable",
+          purpose: "any",
         },
       ],
     };

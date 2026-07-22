@@ -3,6 +3,10 @@ import type { CSSProperties } from "react";
 import "./globals.css";
 import { findSiteUrl, findSiteUrlObject } from "@/lib/env/siteUrl";
 import { IS_SCHOOLS_PROFILE } from "@/lib/env/features";
+import {
+  FIELD_MODE_APPLE_TOUCH_ICON_PATH,
+  FIELD_MODE_ICON_192_PATH,
+} from "@/lib/fieldMode/pwa";
 import { LEGAL_NOTICE_TEXT, getLegalNoticeYear } from "@/lib/legalNotice";
 import ClientBody from "./ClientBody";
 import { Analytics } from "@vercel/analytics/next";
@@ -26,8 +30,10 @@ export const metadata: Metadata = {
       : "Blue Snake Studios builds privacy-first digital learning experiences with a strict child-safe baseline for default student deployments.",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: IS_SCHOOLS_PROFILE ? "/icon-field.svg" : "/icon.svg",
-    apple: IS_SCHOOLS_PROFILE ? "/icon-field.svg" : "/icon.svg",
+    icon: IS_SCHOOLS_PROFILE ? FIELD_MODE_ICON_192_PATH : "/icon.svg",
+    apple: IS_SCHOOLS_PROFILE
+      ? FIELD_MODE_APPLE_TOUCH_ICON_PATH
+      : "/icon.svg",
   },
   appleWebApp: {
     capable: true,

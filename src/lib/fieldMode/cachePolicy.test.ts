@@ -9,6 +9,7 @@ import {
   buildFieldPackManifest,
   resolveFieldPackVersion,
 } from "@/lib/fieldMode/cachePolicy";
+import { FIELD_MODE_INSTALL_ICON_PATHS } from "@/lib/fieldMode/pwa";
 
 describe("Field Pack cache policy", () => {
   it("contains all seven guided lessons and seven printable fallbacks", () => {
@@ -26,6 +27,13 @@ describe("Field Pack cache policy", () => {
     ]) {
       expect(isPathnameAllowedByPolicy(pathname, "field"), pathname).toBe(true);
     }
+  });
+
+  it("caches the school install icons instead of the consumer app icon", () => {
+    expect(FIELD_PACK_STATIC_ASSET_PATHS).toEqual(
+      expect.arrayContaining([...FIELD_MODE_INSTALL_ICON_PATHS]),
+    );
+    expect(FIELD_PACK_STATIC_ASSET_PATHS).not.toContain("/icon.svg");
   });
 
   it("never includes consumer route categories in the complete pack", () => {

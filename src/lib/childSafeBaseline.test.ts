@@ -7,6 +7,7 @@ import {
   getPolicyFallbackPathname,
   isPathnameAllowedByPolicy,
 } from "@/lib/childSafeBaseline";
+import { FIELD_MODE_INSTALL_ICON_PATHS } from "@/lib/fieldMode/pwa";
 
 describe("declarative Field Mode route policy", () => {
   it("uses the Field entry as its safe fallback", () => {
@@ -42,6 +43,15 @@ describe("declarative Field Mode route policy", () => {
       "/legal/privacy",
     ]) {
       expect(isPathnameAllowedByPolicy(pathname, "field"), pathname).toBe(true);
+    }
+  });
+
+  it("allows every dedicated MetaPet.school install icon", () => {
+    for (const pathname of FIELD_MODE_INSTALL_ICON_PATHS) {
+      expect(isPathnameAllowedByPolicy(pathname, "field"), pathname).toBe(true);
+      expect(isPathnameAllowedByPolicy(pathname, "schools"), pathname).toBe(
+        true,
+      );
     }
   });
 

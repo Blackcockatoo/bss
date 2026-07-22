@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import {
+  FIELD_MODE_ICON_192_PATH,
+  FIELD_MODE_ICON_512_PATH,
+  FIELD_MODE_MASKABLE_ICON_512_PATH,
+} from "@/lib/fieldMode/pwa";
+
 async function loadManifest(isSchoolsProfile: boolean) {
   vi.resetModules();
   vi.doMock("@/lib/env/features", () => ({
@@ -24,7 +30,25 @@ describe("app manifest", () => {
     expect(result.start_url).toBe("/schools");
     expect(result.description).toMatch(/teacher-led/i);
     expect(result.description).not.toMatch(/genome|evolution/i);
-    expect(result.icons?.[0]?.src).toBe("/icon-field.svg");
+    expect(result.icons).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          src: FIELD_MODE_ICON_192_PATH,
+          sizes: "192x192",
+          purpose: "any",
+        }),
+        expect.objectContaining({
+          src: FIELD_MODE_ICON_512_PATH,
+          sizes: "512x512",
+          purpose: "any",
+        }),
+        expect.objectContaining({
+          src: FIELD_MODE_MASKABLE_ICON_512_PATH,
+          sizes: "512x512",
+          purpose: "maskable",
+        }),
+      ]),
+    );
   });
 
   it("keeps the consumer manifest in the core profile", async () => {

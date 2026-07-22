@@ -1,4 +1,5 @@
 import { IS_SCHOOLS_PROFILE } from "@/lib/env/features";
+import { FIELD_MODE_INSTALL_ICON_PATHS } from "@/lib/fieldMode/pwa";
 
 export const FIELD_MODE_HOME_PATH = "/schools/field";
 export const FIELD_MODE_START_PATH = "/schools/field/start";
@@ -42,6 +43,7 @@ export interface FieldModeNavItem {
 
 const REQUIRED_STATIC_ROUTES = [
   "/icon.svg",
+  ...FIELD_MODE_INSTALL_ICON_PATHS,
   "/manifest.json",
   "/manifest.webmanifest",
   "/sw.js",
@@ -52,6 +54,7 @@ const REQUIRED_STATIC_ROUTES = [
 
 const FIELD_REQUIRED_STATIC_ROUTES = [
   "/icon.svg",
+  ...FIELD_MODE_INSTALL_ICON_PATHS,
   "/favicon.ico",
   "/sw.js",
 ] as const;
