@@ -8,6 +8,7 @@ import type { Addon, AddonInventory, AddonTransfer, AddonPositionOverride } from
 import { verifyAddon, verifyTransfer, generateNonce } from './crypto';
 import { signTransfer } from './crypto';
 import { normalizeAddon, normalizeAddons } from './normalize';
+import { useWalletStore } from '@/lib/wallet/store';
 
 interface AddonStore extends AddonInventory {
   // Actions
@@ -107,6 +108,11 @@ export const useAddonStore = create<AddonStore>()(
           return false;
         }
 
+        if (useWalletStore.getState().isAddonLocked(addonId)) {
+          console.error('Addon is locked in a Vault trade:', addonId);
+          return false;
+        }
+
         // Unequip any addon in the same slot (equipSlot defaults to
         // category for items minted before slots existed).
         const slot = addon.equipSlot ?? addon.category;
@@ -180,6 +186,11 @@ export const useAddonStore = create<AddonStore>()(
 
         if (!addon) {
           console.error('Addon not found:', addonId);
+          return null;
+        }
+
+        if (useWalletStore.getState().isAddonLocked(addonId)) {
+          console.error('Addon is locked in a Vault trade:', addonId);
           return null;
         }
 

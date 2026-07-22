@@ -35,6 +35,7 @@ import {
   Shirt,
   Sparkles,
   UserCircle,
+  WalletCards,
   Zap,
 } from "lucide-react";
 import Link from "next/link";
@@ -448,6 +449,19 @@ export default function PetPage() {
                     <CertificateButton
                       onClick={() => setShowCertificate(true)}
                     />
+                    {!ENABLE_CHILD_SAFE_BASELINE && (
+                      <Button
+                        asChild
+                        variant="outline"
+                        size="sm"
+                        className="gap-2 border-cyan-800 bg-cyan-950/70 text-cyan-200 hover:bg-cyan-900/70"
+                      >
+                        <Link href="/wallet">
+                          <WalletCards className="h-4 w-4" />
+                          B$S Vault
+                        </Link>
+                      </Button>
+                    )}
                   </div>
 
                   {petType === "auralia" && addonEditMode && (

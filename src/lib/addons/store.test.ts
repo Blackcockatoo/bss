@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { migrateAddonStore, useAddonStore } from "./store";
 import type { Addon, AddonInventory } from "./types";
+import { INITIAL_WALLET_STATE, useWalletStore } from "@/lib/wallet/store";
 
 function makeAddon(id: string, overrides: Partial<Addon> = {}): Addon {
   return {
@@ -71,6 +72,7 @@ describe("migrateAddonStore (v1 -> v2)", () => {
 describe("useAddonStore equip flow", () => {
   beforeEach(() => {
     useAddonStore.setState({ addons: {}, equipped: {}, ownerPublicKey: "owner-1", positionOverrides: {} });
+    useWalletStore.setState({ ...INITIAL_WALLET_STATE });
   });
 
   it("equips into the category slot for a normal addon (Auralia regression coverage)", () => {
@@ -96,6 +98,26 @@ describe("useAddonStore equip flow", () => {
     useAddonStore.getState().equipAddon("hat-1");
     useAddonStore.getState().equipAddon("hat-2");
     expect(useAddonStore.getState().equipped.headwear).toBe("hat-2");
+  });
+
+  it("refuses to equip an item locked by the B$S Vault", () => {
+    useAddonStore.setState({ addons: { "hat-1": makeAddon("hat-1") } });
+    useWalletStore.setState({ lockedAddonIds: ["hat-1"] });
+
+    expect(useAddonStore.getState().equipAddon("hat-1")).toBe(false);
+    expect(useAddonStore.getState().equipped.headwear).toBeUndefined();
+  });
+
+  it("refuses a legacy direct transfer while an item is locked by the B$S Vault", async () => {
+    useAddonStore.setState({ addons: { "hat-1": makeAddon("hat-1") } });
+    useWalletStore.setState({ lockedAddonIds: ["hat-1"] });
+
+    const transfer = await useAddonStore
+      .getState()
+      .transferAddon("hat-1", "owner-2", "unused-private-key");
+
+    expect(transfer).toBeNull();
+    expect(useAddonStore.getState().addons["hat-1"]).toBeDefined();
   });
 
   it("this equip mechanism is form-agnostic — the Evolved/Body Forge wardrobe uses the exact same equipAddon call as Auralia", () => {
