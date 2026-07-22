@@ -1,6 +1,11 @@
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import {
+  FIELD_MODE_APPLE_TOUCH_ICON_PATH,
+  FIELD_MODE_ICON_192_PATH,
+} from "@/lib/fieldMode/pwa";
+
 async function loadLayout(isSchoolsProfile: boolean) {
   vi.resetModules();
   vi.doMock("@/lib/env/features", () => ({
@@ -43,6 +48,10 @@ describe("layout metadata", () => {
     expect(metadata.title).toBe("MetaPet Schools");
     expect(metadata.description).toMatch(/teacher-led, low-data classroom tool/i);
     expect(metadata.manifest).toBe("/manifest.webmanifest");
+    expect(metadata.icons).toMatchObject({
+      icon: FIELD_MODE_ICON_192_PATH,
+      apple: FIELD_MODE_APPLE_TOUCH_ICON_PATH,
+    });
     expect(appleWebApp?.title).toBe("MetaPet Schools");
     expect(metadata.openGraph?.siteName).toBe("MetaPet Schools");
   });
@@ -55,6 +64,10 @@ describe("layout metadata", () => {
         : null;
 
     expect(metadata.title).toBe("Blue Snake Studios");
+    expect(metadata.icons).toMatchObject({
+      icon: "/icon.svg",
+      apple: "/icon.svg",
+    });
     expect(appleWebApp?.title).toBe("Blue Snake Studios");
     expect(metadata.openGraph?.siteName).toBe("Blue Snake Studios");
   });

@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 
 import { GET as exitField } from "@/app/schools/field/exit/route";
 import { GET as fieldPack } from "@/app/schools/field/pack.json/route";
+import { GET as fieldManifest } from "@/app/schools/field/manifest.webmanifest/route";
 import { GET as startField } from "@/app/schools/field/start/route";
 import { GET as serviceWorker } from "@/app/sw.js/route";
 import {
@@ -10,6 +11,12 @@ import {
   FIELD_MODE_COOKIE_VALUE,
   FIELD_MODE_UI_COOKIE,
 } from "@/lib/childSafeBaseline";
+import {
+  FIELD_MODE_APP_ID,
+  FIELD_MODE_ICON_192_PATH,
+  FIELD_MODE_ICON_512_PATH,
+  FIELD_MODE_MASKABLE_ICON_512_PATH,
+} from "@/lib/fieldMode/pwa";
 
 describe("Field Mode entry and exit handlers", () => {
   it("starts at the approved Field lesson launchpad", () => {
@@ -52,6 +59,27 @@ describe("Field Mode entry and exit handlers", () => {
       "/schools/field/print/meet-your-metapet",
     );
     expect(body.guarantees.update).toBe("atomic-candidate");
+  });
+
+  it("publishes a separate install identity and complete school icon set", async () => {
+    const response = fieldManifest();
+    const body = await response.json();
+
+    expect(response.headers.get("content-type")).toContain(
+      "application/manifest+json",
+    );
+    expect(body.id).toBe(FIELD_MODE_APP_ID);
+    expect(body.start_url).toBe("/schools/field");
+    expect(body.icons).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ src: FIELD_MODE_ICON_192_PATH }),
+        expect.objectContaining({ src: FIELD_MODE_ICON_512_PATH }),
+        expect.objectContaining({
+          src: FIELD_MODE_MASKABLE_ICON_512_PATH,
+          purpose: "maskable",
+        }),
+      ]),
+    );
   });
 
   it("serves the generated worker with root scope and no HTTP caching", async () => {

@@ -12,6 +12,7 @@ import {
   FIELD_MODE_SAFETY_PATH,
   FIELD_MODE_START_PATH,
 } from "@/lib/childSafeBaseline";
+import { FIELD_MODE_INSTALL_ICON_PATHS } from "@/lib/fieldMode/pwa";
 import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
 
 export const FIELD_PACK_SCHEMA_VERSION = 1;
@@ -59,7 +60,7 @@ export const FIELD_PACK_ROUTE_PATHS = Array.from(
 
 export const FIELD_PACK_STATIC_ASSET_PATHS = [
   FIELD_MODE_MANIFEST_PATH,
-  "/icon.svg",
+  ...FIELD_MODE_INSTALL_ICON_PATHS,
 ] as const;
 
 export interface FieldPackLessonEntry {

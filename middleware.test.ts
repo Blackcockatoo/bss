@@ -6,6 +6,7 @@ import {
   FIELD_MODE_COOKIE_VALUE,
   FIELD_MODE_UI_COOKIE,
 } from "@/lib/childSafeBaseline";
+import { FIELD_MODE_INSTALL_ICON_PATHS } from "@/lib/fieldMode/pwa";
 
 type AppProfile = "schools" | "core";
 
@@ -135,6 +136,7 @@ describe("MetaPet.school hostname boundary", () => {
       "/schools/parents",
       "/school-game",
       "/legal/privacy",
+      ...FIELD_MODE_INSTALL_ICON_PATHS,
     ]) {
       const response = proxy(
         new NextRequest(`https://www.metapet.school${pathname}`),
