@@ -1,15 +1,17 @@
 import type { MetadataRoute } from "next";
 
-import { IS_SCHOOLS_PROFILE } from "@/lib/env/features";
+import { resolveServerSurface } from "@/lib/domain/serverSurface";
 
-export default function manifest(): MetadataRoute.Manifest {
-  if (IS_SCHOOLS_PROFILE) {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const surface = await resolveServerSurface();
+
+  if (surface === "school") {
     return {
-      name: "MetaPet Schools",
-      short_name: "MetaPet Schools",
+      name: "MetaPet School",
+      short_name: "MetaPet School",
       description:
-        "Teacher-led, low-data classroom pilot for Years 3-6 with alias-only rosters and local-only classroom records.",
-      start_url: "/schools",
+        "Australian classroom learning through living digital creatures. Teacher-led, child-safe and classroom focused for Years 3-6.",
+      start_url: "/",
       display: "standalone",
       background_color: "#f5f7fa",
       theme_color: "#f5f7fa",

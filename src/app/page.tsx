@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 
+import { SCHOOL_ORIGIN } from "@/lib/domain/surface";
+
 export const metadata: Metadata = {
   title: "Meta-Pet — Privacy-first digital learning companion",
   description:
@@ -71,12 +73,12 @@ export default function HomePage() {
             >
               Try Demo
             </Link>
-            <Link
-              href="/schools"
+            <a
+              href={SCHOOL_ORIGIN}
               className="inline-flex items-center rounded-xl border border-slate-700 bg-slate-800/60 px-5 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:bg-slate-800"
             >
-              Review School Pilot Pack
-            </Link>
+              MetaPet for Schools
+            </a>
             <Link
               href="/school-game"
               className="inline-flex items-center rounded-xl border border-slate-700 bg-slate-800/60 px-5 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:bg-slate-800"
@@ -199,12 +201,12 @@ export default function HomePage() {
             sessions of around 15–20 minutes.
           </p>
           <div className="flex flex-wrap gap-3 pt-2">
-            <Link
-              href="/schools"
+            <a
+              href={SCHOOL_ORIGIN}
               className="inline-flex items-center rounded-xl bg-amber-300 px-4 py-2 text-sm font-semibold text-slate-950 transition-colors hover:bg-amber-200"
             >
-              Review School Pilot Pack
-            </Link>
+              Visit MetaPet School
+            </a>
             <Link
               href="/school-game"
               className="inline-flex items-center rounded-xl border border-slate-700 bg-slate-800/60 px-4 py-2 text-sm font-semibold text-slate-200 transition-colors hover:bg-slate-800"

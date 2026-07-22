@@ -13,6 +13,8 @@ import {
   ENABLE_CHILD_SAFE_BASELINE,
   IS_SCHOOLS_PROFILE,
 } from "@/lib/env/features";
+import { useSurface } from "@/lib/domain/SurfaceProvider";
+import { getSurfaceContact, buildMailto } from "@/lib/domain/contact";
 import { useIdentityProfileStore } from "@/lib/identity/profile";
 import { normalizePetForm, PET_FORM_STORAGE_KEY } from "@/lib/petForms";
 import { SCHOOLS_LOCAL_DATA_RETENTION_DAYS } from "@/lib/schools/storage";
@@ -27,6 +29,7 @@ export default function ClientBody({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const surface = useSurface();
   const refreshIdentityProfile = useIdentityProfileStore(
     (state) => state.refreshProfile,
   );
@@ -39,7 +42,9 @@ export default function ClientBody({
         pathname.startsWith("/schools/")),
     [pathname],
   );
-  const effectiveSchoolsMode = IS_SCHOOLS_PROFILE || isSchoolPath;
+  const effectiveSchoolsMode =
+    surface === "school" || IS_SCHOOLS_PROFILE || isSchoolPath;
+  const contact = getSurfaceContact(surface);
   const childSafeBlocked = useMemo(
     () =>
       (ENABLE_CHILD_SAFE_BASELINE || IS_SCHOOLS_PROFILE) &&
@@ -125,7 +130,7 @@ export default function ClientBody({
       <div className={`sticky top-0 z-40 border-b px-3 py-2 backdrop-blur sm:px-4 sm:py-3 ${effectiveSchoolsMode ? "border-border bg-background/95" : "border-slate-800 bg-slate-950/90"}`}>
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 sm:gap-3">
           <div className={`text-sm ${effectiveSchoolsMode ? "text-foreground font-medium" : "text-zinc-200"}`}>
-            {effectiveSchoolsMode ? "MetaPet Schools" : "Meta-Pet"}
+            {effectiveSchoolsMode ? "MetaPet School" : "Meta-Pet"}
           </div>
           <button
             type="button"
@@ -156,10 +161,10 @@ export default function ClientBody({
       <WardrobeUnlockCeremony />
       <footer className="px-4 pb-24 pt-4 text-center sm:pb-6">
         <a
-          href="mailto:bluesssnakestudio@gmail.com?subject=Meta-Pet%20School%20Pilot%20Enquiry"
+          href={buildMailto(contact)}
           className="mb-4 inline-block text-xs text-slate-400 underline hover:text-slate-300"
         >
-          Pilot Enquiry
+          {effectiveSchoolsMode ? "Pilot Enquiry" : "Contact"}
         </a>
         <LegalNotice />
       </footer>

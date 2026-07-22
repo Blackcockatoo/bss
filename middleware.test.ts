@@ -6,14 +6,14 @@ type AppProfile = "schools" | "core";
 type MiddlewareEnvironment = {
   siteUrl?: string;
   vercelEnv?: string;
+  devSurface?: string;
 };
 
 async function loadMiddleware(
-  profile: AppProfile,
+  profile: AppProfile = "core",
   environment: MiddlewareEnvironment = {},
 ) {
   vi.resetModules();
-  process.env.NEXT_PUBLIC_CHILD_SAFE_BASELINE = "";
 
   if (environment.siteUrl) {
     process.env.NEXT_PUBLIC_SITE_URL = environment.siteUrl;
@@ -27,6 +27,12 @@ async function loadMiddleware(
     delete process.env.VERCEL_ENV;
   }
 
+  if (environment.devSurface) {
+    process.env.NEXT_PUBLIC_DEV_SURFACE = environment.devSurface;
+  } else {
+    delete process.env.NEXT_PUBLIC_DEV_SURFACE;
+  }
+
   const mockFeatures = {
     APP_PROFILE: profile,
     IS_SCHOOLS_PROFILE: profile === "schools",
@@ -38,18 +44,135 @@ async function loadMiddleware(
   return import("./middleware");
 }
 
+function rewriteTarget(response: Response): string | null {
+  const rewrite = response.headers.get("x-middleware-rewrite");
+  if (!rewrite) return null;
+  return new URL(rewrite).pathname;
+}
+
 afterEach(() => {
   vi.resetModules();
   vi.doUnmock("./src/lib/env/features");
   vi.doUnmock("@/lib/env/features");
-  delete process.env.NEXT_PUBLIC_CHILD_SAFE_BASELINE;
   delete process.env.NEXT_PUBLIC_SITE_URL;
   delete process.env.VERCEL_ENV;
+  delete process.env.NEXT_PUBLIC_DEV_SURFACE;
 });
 
-describe("middleware canonical BSS origin", () => {
+describe("surface resolution by hostname", () => {
+  it("tags every response with the resolved surface", async () => {
+    const { middleware, SURFACE_HEADER } = await loadMiddleware();
+
+    const school = middleware(new NextRequest("https://metapet.school/"));
+    expect(school.headers.get(SURFACE_HEADER)).toBe("school");
+
+    const studio = middleware(
+      new NextRequest("https://www.bluesnakestudios.com/pet"),
+    );
+    expect(studio.headers.get(SURFACE_HEADER)).toBe("studio");
+  });
+
+  it("resolves www variants of both domains", async () => {
+    const { middleware } = await loadMiddleware();
+
+    // www.metapet.school "/" rewrites to the internal school landing.
+    const school = middleware(
+      new NextRequest("https://www.metapet.school/"),
+    );
+    expect(rewriteTarget(school)).toBe("/schools");
+
+    // www studio host serves the consumer app directly.
+    const studio = middleware(
+      new NextRequest("https://www.bluesnakestudios.com/pet"),
+    );
+    expect(studio.headers.get("location")).toBeNull();
+    expect(rewriteTarget(studio)).toBeNull();
+  });
+});
+
+describe("school domain routing", () => {
+  it("rewrites clean school URLs to internal implementations", async () => {
+    const { middleware } = await loadMiddleware();
+
+    expect(rewriteTarget(middleware(new NextRequest("https://metapet.school/")))).toBe(
+      "/schools",
+    );
+    expect(
+      rewriteTarget(middleware(new NextRequest("https://metapet.school/field"))),
+    ).toBe("/schools/field");
+    expect(
+      rewriteTarget(middleware(new NextRequest("https://metapet.school/start"))),
+    ).toBe("/school-game");
+  });
+
+  it("redirects blocked consumer routes to the school home", async () => {
+    const { middleware } = await loadMiddleware();
+
+    for (const pathname of [
+      "/wallet",
+      "/body-forge",
+      "/breeding",
+      "/shop",
+      "/identity",
+      "/digital-dna",
+      "/pet",
+    ]) {
+      const response = middleware(
+        new NextRequest(`https://metapet.school${pathname}`),
+      );
+      expect(response.headers.get("location")).toBe("https://metapet.school/");
+    }
+  });
+
+  it("keeps internally-supported school routes reachable", async () => {
+    const { middleware } = await loadMiddleware();
+
+    for (const pathname of [
+      "/schools/docs/privacy-policy",
+      "/school-game",
+      "/legal/privacy",
+      "/manifest.webmanifest",
+    ]) {
+      const response = middleware(
+        new NextRequest(`https://metapet.school${pathname}`),
+      );
+      expect(response.headers.get("location")).toBeNull();
+      expect(rewriteTarget(response)).toBeNull();
+    }
+  });
+});
+
+describe("studio domain routing", () => {
+  it("serves the full ecosystem", async () => {
+    const { middleware } = await loadMiddleware();
+
+    for (const pathname of ["/pet", "/body-forge", "/wallet", "/identity"]) {
+      const response = middleware(
+        new NextRequest(`https://www.bluesnakestudios.com${pathname}`),
+      );
+      expect(response.headers.get("location")).toBeNull();
+      expect(rewriteTarget(response)).toBeNull();
+    }
+  });
+
+  it("redirects old public school URLs to the school domain", async () => {
+    const { middleware } = await loadMiddleware();
+
+    expect(
+      middleware(
+        new NextRequest("https://www.bluesnakestudios.com/schools"),
+      ).headers.get("location"),
+    ).toBe("https://metapet.school/");
+
+    expect(
+      middleware(
+        new NextRequest("https://www.bluesnakestudios.com/schools/field"),
+      ).headers.get("location"),
+    ).toBe("https://metapet.school/field");
+  });
+
   it("redirects the bare production domain to the canonical www origin", async () => {
-    const { middleware } = await loadMiddleware("core");
+    const { middleware } = await loadMiddleware();
 
     const response = middleware(
       new NextRequest("https://bluesnakestudios.com/body-forge?mode=live"),
@@ -61,7 +184,7 @@ describe("middleware canonical BSS origin", () => {
     );
   });
 
-  it("redirects production Vercel aliases to the configured canonical origin", async () => {
+  it("redirects production Vercel aliases to the canonical origin", async () => {
     const { middleware } = await loadMiddleware("core", {
       siteUrl: "https://www.bluesnakestudios.com",
       vercelEnv: "production",
@@ -76,94 +199,44 @@ describe("middleware canonical BSS origin", () => {
       "https://www.bluesnakestudios.com/app/activities?tab=vimana",
     );
   });
+});
 
-  it("keeps the canonical host and preview deployments available", async () => {
-    const canonical = await loadMiddleware("core", {
-      siteUrl: "https://www.bluesnakestudios.com",
-      vercelEnv: "production",
-    });
+describe("build-time school profile override", () => {
+  it("forces the school surface on any host", async () => {
+    const { middleware } = await loadMiddleware("schools");
 
-    expect(
-      canonical.middleware(
-        new NextRequest("https://www.bluesnakestudios.com/body-forge"),
-      ).headers.get("location"),
-    ).toBeNull();
+    const home = middleware(new NextRequest("https://school-pilot.vercel.app/"));
+    expect(rewriteTarget(home)).toBe("/schools");
 
-    const preview = await loadMiddleware("core", {
-      siteUrl: "https://www.bluesnakestudios.com",
-      vercelEnv: "preview",
-    });
-
-    expect(
-      preview.middleware(
-        new NextRequest("https://bss-git-feature.vercel.app/body-forge"),
-      ).headers.get("location"),
-    ).toBeNull();
-  });
-
-  it("does not force school deployments onto the core BSS domain", async () => {
-    const { middleware } = await loadMiddleware("schools", {
-      siteUrl: "https://www.bluesnakestudios.com",
-      vercelEnv: "production",
-    });
-
-    const response = middleware(new NextRequest("https://school-pilot.vercel.app/"));
-
-    expect(response.headers.get("location")).toBe(
-      "https://school-pilot.vercel.app/schools",
+    const blocked = middleware(
+      new NextRequest("https://school-pilot.vercel.app/pet"),
+    );
+    expect(blocked.headers.get("location")).toBe(
+      "https://school-pilot.vercel.app/",
     );
   });
 });
 
-describe("middleware school profile boundary", () => {
-  it("redirects the school profile root to /schools", async () => {
-    const { middleware } = await loadMiddleware("schools");
+describe("developer surface override", () => {
+  it("allows a query override outside production", async () => {
+    const { middleware } = await loadMiddleware();
 
-    const response = middleware(new NextRequest("https://example.com/"));
-
-    expect(response.headers.get("location")).toBe(
-      "https://example.com/schools",
+    // Studio host, dev-only school override → school routing applies.
+    const response = middleware(
+      new NextRequest("https://localhost:3000/wallet?surface=school"),
     );
+    expect(response.headers.get("location")).toBe("https://localhost:3000/");
   });
 
-  it("redirects blocked school profile routes back to /schools", async () => {
-    const { middleware } = await loadMiddleware("schools");
+  it("refuses the query override in production (no safety bypass)", async () => {
+    const { middleware } = await loadMiddleware("schools", {
+      vercelEnv: "production",
+    });
 
-    for (const pathname of [
-      "/pet",
-      "/app",
-      "/app/moss60",
-      "/identity",
-      "/moss60",
-      "/digital-dna",
-      "/pricing",
-      "/shop",
-    ]) {
-      const response = middleware(
-        new NextRequest(`https://example.com${pathname}`),
-      );
-
-      expect(response.headers.get("location")).toBe(
-        "https://example.com/schools",
-      );
-    }
-  });
-
-  it("keeps allowed school profile routes inside the schools deployment", async () => {
-    const { middleware } = await loadMiddleware("schools");
-
-    for (const pathname of [
-      "/schools",
-      "/school-game",
-      "/schools/docs/privacy-policy",
-      "/legal/privacy",
-      "/manifest.webmanifest",
-    ]) {
-      const response = middleware(
-        new NextRequest(`https://example.com${pathname}`),
-      );
-
-      expect(response.headers.get("location")).toBeNull();
-    }
+    // School surface forced; a query cannot switch it to studio to reach /wallet.
+    const response = middleware(
+      new NextRequest("https://metapet.school/wallet?surface=studio"),
+    );
+    expect(response.headers.get("location")).toBe("https://metapet.school/");
   });
 });

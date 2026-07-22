@@ -5,11 +5,15 @@ import {
   ArrowLeft,
   FileText,
   BookOpen,
+  GraduationCap,
   HeartPulse,
   Home,
   Compass,
   PawPrint,
+  Shield,
+  Sprout,
   UserCircle,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -21,6 +25,7 @@ import {
   ENABLE_CHILD_SAFE_BASELINE,
   IS_SCHOOLS_PROFILE,
 } from "@/lib/env/features";
+import { useSurface } from "@/lib/domain/SurfaceProvider";
 import { triggerHaptic } from "@/lib/haptics";
 
 type BeforeInstallPromptEvent = Event & {
@@ -43,11 +48,27 @@ export const SCHOOLS_QUICK_NAV_ITEMS = [
   { href: "/legal/privacy", label: "Privacy", icon: FileText },
 ];
 
+/**
+ * School-domain navigation using clean, school-native URLs. Used when the
+ * active surface is the school product (metapet.school), where these paths are
+ * rewritten to their internal implementations by middleware.
+ */
+export const SCHOOL_CLEAN_NAV_ITEMS = [
+  { href: "/", label: "Home", icon: Home },
+  { href: "/field", label: "Field", icon: Sprout },
+  { href: "/lessons", label: "Lessons", icon: BookOpen },
+  { href: "/classroom", label: "Class", icon: Users },
+  { href: "/teacher-guide", label: "Teacher", icon: GraduationCap },
+  { href: "/safety", label: "Safety", icon: Shield },
+];
+
 export function QuickNav() {
   const pathname = usePathname();
   const router = useRouter();
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
+  const surface = useSurface();
+  const isSchoolSurface = surface === "school";
   const isSchoolPath = useMemo(
     () =>
       !!pathname &&
@@ -56,10 +77,15 @@ export function QuickNav() {
         pathname.startsWith("/schools/")),
     [pathname],
   );
-  const effectiveSchoolsMode = IS_SCHOOLS_PROFILE || isSchoolPath;
+  const effectiveSchoolsMode =
+    isSchoolSurface || IS_SCHOOLS_PROFILE || isSchoolPath;
 
   const handleBack = useCallback(() => {
     triggerHaptic("light");
+    if (isSchoolSurface) {
+      router.push("/");
+      return;
+    }
     if (IS_SCHOOLS_PROFILE) {
       router.push("/schools");
       return;
@@ -69,7 +95,7 @@ export function QuickNav() {
       return;
     }
     router.push("/");
-  }, [router]);
+  }, [router, isSchoolSurface]);
 
   useEffect(() => {
     if (effectiveSchoolsMode) {
@@ -102,6 +128,10 @@ export function QuickNav() {
     [effectiveSchoolsMode, installPrompt],
   );
   const visibleNavItems = useMemo(() => {
+    // School domain: always use clean, school-native URLs.
+    if (isSchoolSurface) {
+      return SCHOOL_CLEAN_NAV_ITEMS;
+    }
     if (effectiveSchoolsMode) {
       if (ENABLE_CHILD_SAFE_BASELINE || IS_SCHOOLS_PROFILE) {
         return SCHOOLS_QUICK_NAV_ITEMS.filter((item) =>
@@ -116,7 +146,7 @@ export function QuickNav() {
       );
     }
     return CORE_QUICK_NAV_ITEMS;
-  }, [effectiveSchoolsMode]);
+  }, [effectiveSchoolsMode, isSchoolSurface]);
 
   const handleInstall = useCallback(async () => {
     if (!installPrompt) {
