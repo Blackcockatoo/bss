@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   SCHOOLS_CLASSROOM_ROSTER_STORAGE_KEY,
+  SCHOOLS_FIELD_CLASS_CONSEQUENCE_STORAGE_KEY,
+  SCHOOLS_FIELD_MISSION_PROGRESS_STORAGE_KEY,
   SCHOOLS_FIELD_SESSION_STORAGE_KEY,
   SCHOOLS_LOCAL_DATA_RETENTION_MS,
   SCHOOLS_LOCAL_STATE_META_STORAGE_KEY,
@@ -59,6 +61,15 @@ describe("schools storage helpers", () => {
     expect(SCHOOLS_STORAGE_KEYS).toContain(SCHOOLS_FIELD_SESSION_STORAGE_KEY);
     expect(SCHOOLS_STORAGE_KEYS).toContain(
       SCHOOLS_TEACHER_LESSON_PROGRESS_STORAGE_KEY,
+    );
+  });
+
+  it("keeps Field Missions and class consequences inside the same deletion and retention contract", () => {
+    expect(SCHOOLS_STORAGE_KEYS).toContain(
+      SCHOOLS_FIELD_CLASS_CONSEQUENCE_STORAGE_KEY,
+    );
+    expect(SCHOOLS_STORAGE_KEYS).toContain(
+      SCHOOLS_FIELD_MISSION_PROGRESS_STORAGE_KEY,
     );
   });
 

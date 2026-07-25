@@ -10,6 +10,8 @@ import {
 } from "@/lib/fieldMode/backup";
 import {
   SCHOOLS_CLASSROOM_ROSTER_STORAGE_KEY,
+  SCHOOLS_FIELD_CLASS_CONSEQUENCE_STORAGE_KEY,
+  SCHOOLS_FIELD_MISSION_PROGRESS_STORAGE_KEY,
   SCHOOLS_LOCAL_STATE_META_STORAGE_KEY,
   SCHOOLS_TEACHER_LESSON_PROGRESS_STORAGE_KEY,
   SCHOOLS_TEACHER_PET_PROFILE_STORAGE_KEY,
@@ -85,6 +87,37 @@ describe("Field Mode local backup", () => {
     expect(roster[0].alias).toHaveLength(32);
     expect(progress.version).toBe(2);
     expect(progress.state.currentLessonId).toBeNull();
+  });
+
+  it("backs up and repairs Field Missions and class consequences", () => {
+    const storage = storageMock({
+      [SCHOOLS_FIELD_CLASS_CONSEQUENCE_STORAGE_KEY]: JSON.stringify({
+        state: { values: { trust: 999 }, trustedSystemUnlocked: "yes" },
+        version: 1,
+      }),
+      [SCHOOLS_FIELD_MISSION_PROGRESS_STORAGE_KEY]: JSON.stringify({
+        state: { records: { "silent-signal": { completed: true } } },
+        version: 1,
+      }),
+    });
+    const backup = createFieldBackup(storage, new Date("2026-07-22T00:00:00.000Z"));
+
+    expect(Object.keys(backup.entries)).toEqual(
+      expect.arrayContaining([
+        SCHOOLS_FIELD_CLASS_CONSEQUENCE_STORAGE_KEY,
+        SCHOOLS_FIELD_MISSION_PROGRESS_STORAGE_KEY,
+      ]),
+    );
+    const consequences = JSON.parse(
+      backup.entries[SCHOOLS_FIELD_CLASS_CONSEQUENCE_STORAGE_KEY] ?? "{}",
+    ) as { state: { values: { trust: number }; trustedSystemUnlocked: boolean } };
+    expect(consequences.state.values.trust).toBe(100);
+    expect(consequences.state.trustedSystemUnlocked).toBe(false);
+
+    const missions = JSON.parse(
+      backup.entries[SCHOOLS_FIELD_MISSION_PROGRESS_STORAGE_KEY] ?? "{}",
+    ) as { state: { records: Record<string, { completed: boolean }> } };
+    expect(missions.state.records["silent-signal"].completed).toBe(true);
   });
 
   it("rejects unknown storage keys", () => {

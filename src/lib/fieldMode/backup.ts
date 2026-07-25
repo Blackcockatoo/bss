@@ -4,6 +4,8 @@ import {
   SCHOOLS_CLASSROOM_PROGRESS_STORAGE_KEY,
   SCHOOLS_CLASSROOM_ROSTER_STORAGE_KEY,
   SCHOOLS_EDUCATION_QUEUE_STORAGE_KEY,
+  SCHOOLS_FIELD_CLASS_CONSEQUENCE_STORAGE_KEY,
+  SCHOOLS_FIELD_MISSION_PROGRESS_STORAGE_KEY,
   SCHOOLS_FIELD_SESSION_STORAGE_KEY,
   SCHOOLS_LOCAL_DATA_RETENTION_MS,
   SCHOOLS_LOCAL_STATE_META_STORAGE_KEY,
@@ -11,6 +13,8 @@ import {
   SCHOOLS_TEACHER_LESSON_PROGRESS_STORAGE_KEY,
   SCHOOLS_TEACHER_ONBOARDING_STORAGE_KEY,
 } from "@/lib/schools/storage";
+import { sanitizeClassConsequenceState } from "@/lib/teacher-lessons/classConsequences";
+import { sanitizeFieldMissionProgressState } from "@/lib/teacher-lessons/fieldMissionProgressStore";
 import { sanitizeState } from "@/lib/teacher-lessons/lessonProgressStore";
 
 export const FIELD_BACKUP_SCHEMA_VERSION = 1;
@@ -26,6 +30,8 @@ export const FIELD_BACKUP_STORAGE_KEYS = [
   SCHOOLS_TEACHER_ONBOARDING_STORAGE_KEY,
   SCHOOLS_FIELD_SESSION_STORAGE_KEY,
   SCHOOLS_TEACHER_LESSON_PROGRESS_STORAGE_KEY,
+  SCHOOLS_FIELD_CLASS_CONSEQUENCE_STORAGE_KEY,
+  SCHOOLS_FIELD_MISSION_PROGRESS_STORAGE_KEY,
 ] as const;
 
 type FieldBackupStorageKey = (typeof FIELD_BACKUP_STORAGE_KEYS)[number];
@@ -156,6 +162,24 @@ function sanitizeLessonProgress(value: unknown): string {
   });
 }
 
+function sanitizeClassConsequences(value: unknown): string {
+  const persisted =
+    value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  return JSON.stringify({
+    state: sanitizeClassConsequenceState(persisted.state),
+    version: 1,
+  });
+}
+
+function sanitizeFieldMissionProgress(value: unknown): string {
+  const persisted =
+    value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  return JSON.stringify({
+    state: sanitizeFieldMissionProgressState(persisted.state),
+    version: 1,
+  });
+}
+
 function sanitizeStoredValue(
   key: FieldBackupStorageKey,
   raw: string,
@@ -177,6 +201,10 @@ function sanitizeStoredValue(
       );
     case SCHOOLS_TEACHER_LESSON_PROGRESS_STORAGE_KEY:
       return sanitizeLessonProgress(parsed);
+    case SCHOOLS_FIELD_CLASS_CONSEQUENCE_STORAGE_KEY:
+      return sanitizeClassConsequences(parsed);
+    case SCHOOLS_FIELD_MISSION_PROGRESS_STORAGE_KEY:
+      return sanitizeFieldMissionProgress(parsed);
     default:
       return sanitizeGenericJson(parsed, key);
   }
