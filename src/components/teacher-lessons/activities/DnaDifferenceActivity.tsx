@@ -73,9 +73,9 @@ function DnaStrip({
 
 /**
  * Lesson 3 — DNA Makes Us Different. A controlled one-gene mutation with a
- * simplified DNA strip, a prediction, a single "Change One Gene" action and a
- * side-by-side comparison. The mutation is a sandbox experiment and never
- * overwrites the real pet.
+ * simplified DNA strip: a hidden input (DNA) is changed once and the visible
+ * output (the trait) is compared. The mutation is a sandbox experiment and
+ * never overwrites the real pet.
  */
 export function DnaDifferenceActivity({
   step,
@@ -163,197 +163,243 @@ export function DnaDifferenceActivity({
     }
   };
 
-  if (step.kind === "introduce") {
-    return (
-      <StepShell
-        kindLabel={STEP_KIND_LABEL.introduce}
-        instruction="Meet the original pet and a small section of its DNA. Each block is one piece of genetic information."
-      >
-        <div className="flex flex-col items-center gap-4">
-          <PetStage config={original} reducedMotion={reducedMotion} />
-          <DnaStrip seed={seed} changed={false} />
-        </div>
-      </StepShell>
-    );
-  }
+  const changed = mutated ?? gene.mutate(original);
 
-  if (step.kind === "observe") {
-    return (
-      <StepShell
-        kindLabel={STEP_KIND_LABEL.observe}
-        instruction={`We will change one gene: the ${gene.label}. What do you think might change?`}
-      >
-        <div className="mx-auto flex max-w-lg flex-col items-center gap-4">
-          <DnaStrip seed={seed} changed={false} />
-          <ChoiceGrid
-            legend="My prediction"
-            options={gene.predictionOptions.map((label, i) => ({
-              id: `p${i}`,
-              label,
-            }))}
-            value={
-              predicted
-                ? `p${gene.predictionOptions.indexOf(predicted)}`
-                : null
-            }
-            onChange={(id) => {
-              const idx = Number(id.slice(1));
-              const value = gene.predictionOptions[idx] ?? "";
-              setPredicted(value);
-              if (!isPreview) saveEvidence(buildEvidence({ predicted: value }));
-            }}
-            columns={2}
-            disabled={isPreview}
-          />
-        </div>
-      </StepShell>
-    );
-  }
-
-  if (step.kind === "interact") {
-    return (
-      <StepShell
-        kindLabel={STEP_KIND_LABEL.interact}
-        instruction="Press the button to change one gene. Watch what happens."
-      >
-        <div className="flex flex-col items-center gap-5">
-          <PetStage
-            config={mutated ?? original}
-            reducedMotion={reducedMotion}
-          />
-          <DnaStrip seed={seed} changed={mutated !== null} />
-          <Button
-            type="button"
-            size="lg"
-            disabled={isPreview}
-            onClick={() => setMutated(gene.mutate(original))}
-            className="min-h-14 bg-amber-300 px-8 text-base text-slate-950 hover:bg-amber-200"
-          >
-            <Dna className="mr-2 h-5 w-5" aria-hidden="true" />
-            {mutated ? "Change Again" : "Change One Gene"}
-          </Button>
-          {mutated ? (
-            <p className="text-sm text-emerald-300" role="status">
-              One gene changed. Compare it with the original next.
-            </p>
-          ) : null}
-        </div>
-      </StepShell>
-    );
-  }
-
-  if (step.kind === "discuss") {
-    const changed = mutated ?? gene.mutate(original);
-    return (
-      <StepShell
-        kindLabel={STEP_KIND_LABEL.discuss}
-        instruction="Compare the two pets. What changed? What stayed the same?"
-      >
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
-              Original
-            </p>
-            <PetStage config={original} reducedMotion={reducedMotion} size="sm" />
+  switch (step.kind) {
+    case "notice":
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.notice}
+          instruction="Meet the original pet and a small section of its DNA. Each block is one piece of hidden input."
+        >
+          <div className="flex flex-col items-center gap-4">
+            <PetStage config={original} reducedMotion={reducedMotion} />
+            <DnaStrip seed={seed} changed={false} />
           </div>
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-xs uppercase tracking-[0.2em] text-amber-300/80">
-              Changed
-            </p>
-            <PetStage config={changed} reducedMotion={reducedMotion} size="sm" />
-          </div>
-        </div>
-        <p className="mt-3 text-center text-sm text-slate-300">
-          The <strong>{gene.label}</strong> changed the surface pattern. The
-          shape, colour and movement stayed the same.
-        </p>
-      </StepShell>
-    );
-  }
+        </StepShell>
+      );
 
-  // complete
-  return (
-    <StepShell
-      kindLabel={STEP_KIND_LABEL.complete}
-      instruction="Record your discovery."
-    >
-      <div className="mx-auto max-w-md space-y-3">
-        <EvidenceText
-          label="I predicted…"
-          value={predicted}
-          onChange={setPredicted}
-          onBlur={() => !isPreview && saveEvidence(buildEvidence())}
-          disabled={isPreview}
-        />
-        <EvidenceText
-          label="I observed…"
-          value={observed}
-          onChange={setObserved}
-          onBlur={() => !isPreview && saveEvidence(buildEvidence())}
-          disabled={isPreview}
-        />
-        <EvidenceText
-          label="One thing that stayed the same was…"
-          value={stayedSame}
-          onChange={setStayedSame}
-          onBlur={() => !isPreview && saveEvidence(buildEvidence())}
-          disabled={isPreview}
-        />
-        <p className="rounded-2xl border border-slate-700/60 bg-slate-800/30 px-3 py-2 text-xs text-slate-400">
-          {allowPetUpdates ? (
-            <>
-              The change you made earlier was a temporary experiment. Your real
-              Meta-Pet only changes if you press <strong>Keep This Variation</strong>.
-            </>
-          ) : (
-            "This variation stays inside the classroom example and does not change a consumer Meta-Pet."
-          )}
-        </p>
-        {allowPetUpdates ? (hasRealPet ? (
-          <div className="space-y-2">
-            <div className="flex flex-wrap justify-center gap-2">
-              <Button
-                type="button"
-                onClick={keepVariation}
-                disabled={isPreview}
-                className="bg-amber-300 text-slate-950 hover:bg-amber-200"
-              >
-                <Sparkles className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                Keep This Variation
-              </Button>
-              {kept ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={restoreDna}
-                  disabled={isPreview}
-                  className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
-                >
-                  Restore Previous DNA
-                </Button>
-              ) : null}
-            </div>
-            <ApplyResultBanner
-              result={dnaResult}
-              onUndo={kept ? restoreDna : undefined}
-              showViewPet
+    case "predict":
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.predict}
+          instruction={`We will change one gene: the ${gene.label}. What output do you think might change?`}
+        >
+          <div className="mx-auto flex max-w-lg flex-col items-center gap-4">
+            <DnaStrip seed={seed} changed={false} />
+            <ChoiceGrid
+              legend="My prediction"
+              options={gene.predictionOptions.map((label, i) => ({
+                id: `p${i}`,
+                label,
+              }))}
+              value={
+                predicted
+                  ? `p${gene.predictionOptions.indexOf(predicted)}`
+                  : null
+              }
+              onChange={(id) => {
+                const idx = Number(id.slice(1));
+                const value = gene.predictionOptions[idx] ?? "";
+                setPredicted(value);
+                if (!isPreview) saveEvidence(buildEvidence({ predicted: value }));
+              }}
+              columns={2}
+              disabled={isPreview}
+            />
+            <EvidenceText
+              label="I predicted…"
+              value={predicted}
+              onChange={setPredicted}
+              onBlur={() => !isPreview && saveEvidence(buildEvidence())}
+              disabled={isPreview}
             />
           </div>
-        ) : (
-          <MissingPetNotice message="You can still record your discovery. Create a Meta-Pet to keep a real DNA variation." />
-        )) : null}
-        <div className="flex justify-center">
-          <SaveButton
-            onClick={() => {
-              if (!isPreview) saveEvidence(buildEvidence());
-              setSaved(true);
-            }}
-            saved={saved}
-            disabled={isPreview}
-            label="Save discovery"
-          />
-        </div>
-      </div>
-    </StepShell>
-  );
+        </StepShell>
+      );
+
+    case "act":
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.act}
+          instruction="Press the button to change one gene (one input). Watch what happens."
+        >
+          <div className="flex flex-col items-center gap-5">
+            <PetStage
+              config={mutated ?? original}
+              reducedMotion={reducedMotion}
+            />
+            <DnaStrip seed={seed} changed={mutated !== null} />
+            <Button
+              type="button"
+              size="lg"
+              disabled={isPreview}
+              onClick={() => setMutated(gene.mutate(original))}
+              className="min-h-14 bg-amber-300 px-8 text-base text-slate-950 hover:bg-amber-200"
+            >
+              <Dna className="mr-2 h-5 w-5" aria-hidden="true" />
+              {mutated ? "Change Again" : "Change One Gene"}
+            </Button>
+            {mutated ? (
+              <p className="text-sm text-emerald-300" role="status">
+                One gene changed. Compare it with the original next.
+              </p>
+            ) : null}
+          </div>
+        </StepShell>
+      );
+
+    case "observe":
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.observe}
+          instruction="Compare the two pets side by side. What output changed?"
+        >
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                Original
+              </p>
+              <PetStage config={original} reducedMotion={reducedMotion} size="sm" />
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-xs uppercase tracking-[0.2em] text-amber-300/80">
+                Changed
+              </p>
+              <PetStage config={changed} reducedMotion={reducedMotion} size="sm" />
+            </div>
+          </div>
+          <div className="mx-auto mt-3 max-w-md">
+            <EvidenceText
+              label="I observed…"
+              value={observed}
+              onChange={setObserved}
+              onBlur={() => !isPreview && saveEvidence(buildEvidence())}
+              placeholder="e.g. the surface pattern changed from spotted to striped."
+              disabled={isPreview}
+            />
+          </div>
+        </StepShell>
+      );
+
+    case "explain":
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.explain}
+          instruction="Explain the input-output link, and record one thing that stayed the same."
+        >
+          <div className="mx-auto max-w-md space-y-3">
+            <p className="rounded-2xl border border-slate-700/60 bg-slate-800/40 px-4 py-2 text-center text-sm text-slate-300">
+              The <strong>{gene.label}</strong> (input) changed the surface
+              pattern (output). The shape, colour and movement stayed the
+              same.
+            </p>
+            <EvidenceText
+              label="One thing that stayed the same was…"
+              value={stayedSame}
+              onChange={setStayedSame}
+              onBlur={() => !isPreview && saveEvidence(buildEvidence())}
+              disabled={isPreview}
+            />
+          </div>
+        </StepShell>
+      );
+
+    case "create":
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.create}
+          instruction="Make your final, considered choice: keep this variation, or restore the original?"
+        >
+          <div className="mx-auto max-w-md space-y-3">
+            <p className="rounded-2xl border border-slate-700/60 bg-slate-800/30 px-3 py-2 text-xs text-slate-400">
+              {allowPetUpdates ? (
+                <>
+                  The change you made earlier was a temporary experiment. Your real
+                  Meta-Pet only changes if you press <strong>Keep This Variation</strong>.
+                </>
+              ) : (
+                "This variation stays inside the classroom example and does not change a consumer Meta-Pet."
+              )}
+            </p>
+            {allowPetUpdates ? (hasRealPet ? (
+              <div className="space-y-2">
+                <div className="flex flex-wrap justify-center gap-2">
+                  <Button
+                    type="button"
+                    onClick={keepVariation}
+                    disabled={isPreview}
+                    className="bg-amber-300 text-slate-950 hover:bg-amber-200"
+                  >
+                    <Sparkles className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                    Keep This Variation
+                  </Button>
+                  {kept ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={restoreDna}
+                      disabled={isPreview}
+                      className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
+                    >
+                      Restore Previous DNA
+                    </Button>
+                  ) : null}
+                </div>
+                <ApplyResultBanner
+                  result={dnaResult}
+                  onUndo={kept ? restoreDna : undefined}
+                  showViewPet
+                />
+              </div>
+            ) : (
+              <MissingPetNotice message="You can still record your discovery. Create a Meta-Pet to keep a real DNA variation." />
+            )) : null}
+            <div className="flex justify-center">
+              <SaveButton
+                onClick={() => {
+                  if (!isPreview) saveEvidence(buildEvidence());
+                  setSaved(true);
+                }}
+                saved={saved}
+                disabled={isPreview}
+                label="Save my choice"
+              />
+            </div>
+          </div>
+        </StepShell>
+      );
+
+    case "reflect":
+    default:
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.reflect}
+          instruction="Why is it useful that small input differences make each Meta-Pet unique?"
+        >
+          <div className="mx-auto max-w-md space-y-3">
+            <EvidenceText
+              label="My reflection"
+              value={stayedSame}
+              onChange={setStayedSame}
+              onBlur={() => !isPreview && saveEvidence(buildEvidence())}
+              placeholder="Small input differences are useful because…"
+              rows={3}
+              disabled={isPreview}
+            />
+            <div className="flex justify-center">
+              <SaveButton
+                onClick={() => {
+                  if (!isPreview) saveEvidence(buildEvidence());
+                  setSaved(true);
+                }}
+                saved={saved}
+                disabled={isPreview}
+                label="Save reflection"
+              />
+            </div>
+          </div>
+        </StepShell>
+      );
+  }
 }

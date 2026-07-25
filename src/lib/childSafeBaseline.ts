@@ -4,8 +4,10 @@ import { FIELD_MODE_INSTALL_ICON_PATHS } from "@/lib/fieldMode/pwa";
 export const FIELD_MODE_HOME_PATH = "/schools/field";
 export const FIELD_MODE_START_PATH = "/schools/field/start";
 export const FIELD_MODE_LESSONS_PATH = "/schools/field/lessons";
+export const FIELD_MODE_MISSIONS_PATH = "/schools/field/missions";
 export const FIELD_MODE_CLASSROOM_PATH = "/schools/field/classroom";
 export const FIELD_MODE_PASSPORT_PATH = "/schools/field/passport";
+export const FIELD_MODE_RECORD_PATH = "/schools/field/record";
 export const FIELD_MODE_REVIEW_PATH = "/schools/field/review";
 export const FIELD_MODE_OFFLINE_PATH = "/schools/field/offline";
 export const FIELD_MODE_GUIDE_PATH = "/schools/field/guide";
@@ -34,6 +36,7 @@ export interface FieldModeNavItem {
   kind:
     | "home"
     | "lessons"
+    | "missions"
     | "classroom"
     | "offline"
     | "guide"
@@ -96,6 +99,7 @@ export const CHILD_SAFE_ROUTE_POLICIES: Record<
       "/school-game",
       "/teachers",
       "/teachers/passport",
+      "/teachers/record",
       "/teachers/pilot",
       "/teachers/review",
       "/legal",
@@ -119,8 +123,10 @@ export const CHILD_SAFE_ROUTE_POLICIES: Record<
       FIELD_MODE_HOME_PATH,
       FIELD_MODE_START_PATH,
       FIELD_MODE_LESSONS_PATH,
+      FIELD_MODE_MISSIONS_PATH,
       FIELD_MODE_CLASSROOM_PATH,
       FIELD_MODE_PASSPORT_PATH,
+      FIELD_MODE_RECORD_PATH,
       FIELD_MODE_REVIEW_PATH,
       FIELD_MODE_OFFLINE_PATH,
       FIELD_MODE_GUIDE_PATH,
@@ -150,6 +156,7 @@ export const CHILD_SAFE_ROUTE_POLICIES: Record<
 export const FIELD_MODE_NAV_ITEMS: readonly FieldModeNavItem[] = [
   { href: FIELD_MODE_HOME_PATH, label: "Field Home", kind: "home" },
   { href: FIELD_MODE_LESSONS_PATH, label: "Lessons", kind: "lessons" },
+  { href: FIELD_MODE_MISSIONS_PATH, label: "Field Missions", kind: "missions" },
   {
     href: FIELD_MODE_CLASSROOM_PATH,
     label: "Classroom",

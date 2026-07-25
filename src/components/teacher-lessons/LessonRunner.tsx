@@ -36,6 +36,7 @@ import {
   getTimingModeMeta,
   resolveStepIndex,
   selectRecord,
+  useClassConsequencesStore,
   useLessonProgressHydrated,
   useLessonProgressStore,
   type LessonEvidence,
@@ -140,6 +141,7 @@ export function LessonRunner({
   );
   const setTimingMode = useLessonProgressStore((s) => s.setTimingMode);
   const setLowPerformance = useLessonProgressStore((s) => s.setLowPerformance);
+  const recordClassAction = useClassConsequencesStore((s) => s.recordAction);
 
   // Lesson pet context (safe demo/real resolution). Called unconditionally with
   // a fallback so the hook order is stable even on an unknown slug.
@@ -262,6 +264,9 @@ export function LessonRunner({
   const handleComplete = () => {
     if (preview) return;
     completeLesson(lesson.id);
+    // A completed lesson is a small, transparent, class-level consequence —
+    // never an individual score. See classConsequences.ts.
+    recordClassAction("lesson-completed");
   };
 
   const handleReplay = () => {

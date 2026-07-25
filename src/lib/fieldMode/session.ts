@@ -8,7 +8,8 @@ export const FIELD_MODE_SESSION_STORAGE_KEY =
   "metapet-schools-field-session";
 
 export const FIELD_YEAR_BANDS = ["years-3-4", "years-5-6"] as const;
-export const FIELD_DURATIONS = [10, 15, 20] as const;
+/** Quick Spark (10 min) / Core Lesson (20 min) / Deep Dive (40 min). */
+export const FIELD_DURATIONS = [10, 20, 40] as const;
 export const FIELD_DELIVERY_MODES = [
   "projector",
   "pairs",
@@ -31,10 +32,17 @@ export interface FieldSessionConfig {
 
 export const DEFAULT_FIELD_SESSION: FieldSessionConfig = {
   yearBand: "years-3-4",
-  durationMinutes: 15,
+  durationMinutes: 20,
   deliveryMode: "projector",
   supportMode: "standard",
   soundEnabled: false,
+};
+
+/** Plain-language labels for the three duration depths teachers can pick. */
+export const FIELD_DURATION_LABELS: Record<FieldDuration, string> = {
+  10: "Quick Spark (10 min)",
+  20: "Core Lesson (20 min)",
+  40: "Deep Dive (40 min)",
 };
 
 export const FIELD_SESSION_LABELS = {
@@ -120,7 +128,9 @@ export function buildFieldLessonPath(
 }
 
 export function fieldTimingMode(config: FieldSessionConfig): LessonTimingMode {
-  return config.durationMinutes === 10 ? "demo" : "standard";
+  if (config.durationMinutes === 10) return "demo";
+  if (config.durationMinutes === 40) return "extended";
+  return "standard";
 }
 
 export function fieldPresentationMode(

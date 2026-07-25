@@ -53,7 +53,8 @@ const MOVEMENT_OBSERVATIONS = [
 /**
  * Lesson 1 — Meet Your Meta-Pet. A guided introduction (not the full pet
  * dashboard): a visible demonstration pet, three highlighted observable
- * features, a safe alias field and an observation card.
+ * signals, a safe alias field and an observation card, walked through the
+ * Notice → Predict → Act → Observe → Explain → Create → Reflect rhythm.
  */
 export function MeetActivity({
   step,
@@ -78,7 +79,9 @@ export function MeetActivity({
   const [movementObs, setMovementObs] = useState(
     existing?.observations.movement ?? "",
   );
+  const [prediction, setPrediction] = useState("");
   const [question, setQuestion] = useState(existing?.question ?? "");
+  const [explanation, setExplanation] = useState(existing?.explanation ?? "");
   const [saved, setSaved] = useState(false);
   const [aliasResult, setAliasResult] = useState<PetUpdateResult | null>(null);
   const hasRealPet = useHasRealPet();
@@ -101,6 +104,8 @@ export function MeetActivity({
         movement: overrides.observations?.movement ?? movementObs,
       },
       question: overrides.question ?? question,
+      prediction: overrides.prediction ?? prediction,
+      explanation: overrides.explanation ?? explanation,
       petConfigRef: { ...DEMO_PET_CONFIG },
       ...(appliedChange ? { appliedChange } : existing?.appliedChange ? { appliedChange: existing.appliedChange } : {}),
     };
@@ -123,10 +128,10 @@ export function MeetActivity({
   };
 
   switch (step.kind) {
-    case "introduce":
+    case "notice":
       return (
         <StepShell
-          kindLabel={STEP_KIND_LABEL.introduce}
+          kindLabel={STEP_KIND_LABEL.notice}
           instruction="Look closely at the Meta-Pet before touching anything. What do you notice first?"
         >
           <div className="flex justify-center">
@@ -135,11 +140,34 @@ export function MeetActivity({
         </StepShell>
       );
 
-    case "observe":
+    case "predict":
       return (
         <StepShell
-          kindLabel={STEP_KIND_LABEL.observe}
-          instruction="Notice three things: its shape, its surface, and how it moves. Pick one word for each."
+          kindLabel={STEP_KIND_LABEL.predict}
+          instruction="Before you decide on words, predict: what do you think its shape, surface and movement are telling you?"
+        >
+          <div className="mx-auto max-w-md space-y-3">
+            <div className="flex justify-center">
+              <PetStage config={DEMO_PET_CONFIG} reducedMotion={reducedMotion} />
+            </div>
+            <EvidenceText
+              label="My prediction"
+              value={prediction}
+              onChange={setPrediction}
+              onBlur={() => persist()}
+              placeholder="e.g. I think its bright colour means it is happy."
+              rows={2}
+              disabled={isPreview}
+            />
+          </div>
+        </StepShell>
+      );
+
+    case "act":
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.act}
+          instruction="Notice three things: its shape, its surface, and how it moves. Choose one word for each."
         >
           <div className="grid gap-6 lg:grid-cols-[16rem_1fr]">
             <div className="flex justify-center">
@@ -184,11 +212,11 @@ export function MeetActivity({
         </StepShell>
       );
 
-    case "interact":
+    case "observe":
       return (
         <StepShell
-          kindLabel={STEP_KIND_LABEL.interact}
-          instruction="Give your Meta-Pet a safe nickname (an alias). Do not use your real name."
+          kindLabel={STEP_KIND_LABEL.observe}
+          instruction="Give your Meta-Pet a safe nickname (an alias) and your attention. Observe how it responds."
         >
           <div className="mx-auto flex max-w-md flex-col items-center gap-4">
             <PetStage config={{ ...DEMO_PET_CONFIG, alias: alias || DEMO_PET_CONFIG.alias }} reducedMotion={reducedMotion} />
@@ -237,13 +265,22 @@ export function MeetActivity({
         </StepShell>
       );
 
-    case "discuss":
+    case "explain":
       return (
         <StepShell
-          kindLabel={STEP_KIND_LABEL.discuss}
-          instruction="Think of one question you have about your Meta-Pet. Type or say it."
+          kindLabel={STEP_KIND_LABEL.explain}
+          instruction="Explain what the changed signal tells you, and ask one question you still have."
         >
           <div className="mx-auto max-w-md space-y-3">
+            <EvidenceText
+              label="One signal changing tells me…"
+              value={explanation}
+              onChange={setExplanation}
+              onBlur={() => persist()}
+              placeholder="e.g. it changed when I gave it attention, so it notices me."
+              rows={2}
+              disabled={isPreview}
+            />
             <EvidenceText
               label="My question about the Meta-Pet"
               value={question}
@@ -266,12 +303,11 @@ export function MeetActivity({
         </StepShell>
       );
 
-    case "complete":
-    default:
+    case "create":
       return (
         <StepShell
-          kindLabel={STEP_KIND_LABEL.complete}
-          instruction="Save your pet card: your alias, three observations and your question."
+          kindLabel={STEP_KIND_LABEL.create}
+          instruction="Create your pet card: your alias, three observations and your explanation."
         >
           <div className="mx-auto max-w-md space-y-4">
             <div className="rounded-3xl border border-amber-300/20 bg-slate-900/60 p-5">
@@ -290,7 +326,7 @@ export function MeetActivity({
                     {[shapeObs, surfaceObs, movementObs].filter(Boolean).join(", ") ||
                       "(add observations)"}
                   </p>
-                  <p className="text-slate-400">{question || "(add a question)"}</p>
+                  <p className="text-slate-400">{explanation || question || "(add your explanation)"}</p>
                 </div>
               </div>
             </div>
@@ -303,6 +339,38 @@ export function MeetActivity({
                 saved={saved}
                 disabled={isPreview}
                 label="Save pet card"
+              />
+            </div>
+          </div>
+        </StepShell>
+      );
+
+    case "reflect":
+    default:
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.reflect}
+          instruction="What is one clue your Meta-Pet gives you, and what might it mean?"
+        >
+          <div className="mx-auto max-w-md space-y-3">
+            <EvidenceText
+              label="My reflection"
+              value={explanation}
+              onChange={setExplanation}
+              onBlur={() => persist()}
+              placeholder="One clue my Meta-Pet gives me is… and it might mean…"
+              rows={3}
+              disabled={isPreview}
+            />
+            <div className="flex justify-center">
+              <SaveButton
+                onClick={() => {
+                  persist();
+                  setSaved(true);
+                }}
+                saved={saved}
+                disabled={isPreview}
+                label="Save reflection"
               />
             </div>
           </div>

@@ -1,17 +1,20 @@
 "use client";
 
-import { BookOpenCheck, ClipboardCheck, FileText, Printer, ShieldCheck } from "lucide-react";
+import { BookOpenCheck, ClipboardCheck, ClipboardList, Compass, FileText, Printer, ShieldCheck } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import {
+  FIELD_MODE_MISSIONS_PATH,
   FIELD_MODE_PASSPORT_PATH,
   FIELD_MODE_PRINT_PATH_PREFIX,
+  FIELD_MODE_RECORD_PATH,
   FIELD_MODE_REVIEW_PATH,
 } from "@/lib/childSafeBaseline";
 import {
   DEFAULT_FIELD_SESSION,
   FIELD_DELIVERY_MODES,
   FIELD_DURATIONS,
+  FIELD_DURATION_LABELS,
   FIELD_MODE_SESSION_STORAGE_KEY,
   FIELD_SESSION_LABELS,
   FIELD_SUPPORT_MODES,
@@ -129,7 +132,7 @@ export function FieldLessonLaunchpad() {
               >
                 {FIELD_DURATIONS.map((value) => (
                   <option key={value} value={value}>
-                    {value} minutes
+                    {FIELD_DURATION_LABELS[value]}
                   </option>
                 ))}
               </select>
@@ -232,7 +235,18 @@ export function FieldLessonLaunchpad() {
           </div>
         </section>
 
-        <section className="grid gap-4 md:grid-cols-2" aria-label="Local evidence tools">
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Local evidence tools">
+          <a
+            href={FIELD_MODE_MISSIONS_PATH}
+            className="rounded-3xl border border-violet-900/15 bg-violet-50 p-5 text-violet-950 hover:bg-violet-100"
+          >
+            <Compass className="h-6 w-6" aria-hidden="true" />
+            <h2 className="mt-3 text-xl font-semibold">Field Missions</h2>
+            <p className="mt-2 text-sm leading-6">
+              Optional 5-10 minute investigations you can run inside or
+              between lessons.
+            </p>
+          </a>
           <a
             href={FIELD_MODE_PASSPORT_PATH}
             className="rounded-3xl border border-emerald-900/15 bg-emerald-50 p-5 text-emerald-950 hover:bg-emerald-100"
@@ -242,6 +256,17 @@ export function FieldLessonLaunchpad() {
             <p className="mt-2 text-sm leading-6">
               See the alias-only journey summary derived from local lesson
               evidence.
+            </p>
+          </a>
+          <a
+            href={FIELD_MODE_RECORD_PATH}
+            className="rounded-3xl border border-amber-900/15 bg-amber-50 p-5 text-amber-950 hover:bg-amber-100"
+          >
+            <ClipboardList className="h-6 w-6" aria-hidden="true" />
+            <h2 className="mt-3 text-xl font-semibold">Class Field Record</h2>
+            <p className="mt-2 text-sm leading-6">
+              A printable, no-grading class summary: predictions,
+              observations and reflections.
             </p>
           </a>
           <a

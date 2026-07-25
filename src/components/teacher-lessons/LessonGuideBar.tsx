@@ -162,13 +162,25 @@ export function LessonGuideBar({
           <span className="sr-only sm:hidden">Previous step</span>
         </Button>
 
-        <p
-          className="shrink-0 text-sm font-semibold text-white"
-          aria-live="polite"
-        >
-          Step {stepNumber}
-          <span className="text-slate-400"> / {totalSteps}</span>
-        </p>
+        <div className="flex shrink-0 flex-col gap-1">
+          <p className="text-sm font-semibold text-white" aria-live="polite">
+            Step {stepNumber}
+            <span className="text-slate-400"> / {totalSteps}</span>
+          </p>
+          <div
+            className="h-1.5 w-20 overflow-hidden rounded-full bg-slate-800 sm:w-28"
+            role="progressbar"
+            aria-valuenow={stepNumber}
+            aria-valuemin={1}
+            aria-valuemax={totalSteps}
+            aria-label={`Lesson stage progress: step ${stepNumber} of ${totalSteps}`}
+          >
+            <div
+              className="h-full rounded-full bg-amber-300"
+              style={{ width: `${(stepNumber / totalSteps) * 100}%` }}
+            />
+          </div>
+        </div>
 
         {/* Inline secondary actions on wider screens. */}
         <div className="ml-auto hidden flex-wrap items-center justify-end gap-2 sm:flex">

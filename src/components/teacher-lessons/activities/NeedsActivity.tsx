@@ -21,6 +21,7 @@ import {
 import type { LessonActivityProps } from "./types";
 import {
   ChoiceGrid,
+  EvidenceText,
   PetStage,
   SaveButton,
   STEP_KIND_LABEL,
@@ -80,10 +81,12 @@ function VitalBar({ id, value, delta }: { id: keyof ClassroomVitals; value: numb
 }
 
 /**
- * Lesson 4 — Needs, Actions and Consequences. A temporary vitals sandbox with a
- * deterministic starting state. The four core vitals use the REAL Meta-Pet
+ * Lesson 4 — Needs, Actions and Consequences. A temporary vitals sandbox with
+ * a deterministic starting state. The four core vitals use the REAL Meta-Pet
  * interaction model; three classroom vitals are layered on. Nothing here
- * touches or harms the real pet.
+ * touches or harms the real pet. Students notice several needs, predict and
+ * test an action, then classify the resulting chain as a helpful or harmful
+ * feedback loop.
  */
 export function NeedsActivity({
   step,
@@ -108,6 +111,12 @@ export function NeedsActivity({
   );
   const [balancingActions, setBalancingActions] = useState<string[]>(
     existing?.balancingActions ?? [],
+  );
+  const [loopType, setLoopType] = useState<"helpful" | "harmful" | null>(
+    existing?.loopType ?? null,
+  );
+  const [changedPartPrediction, setChangedPartPrediction] = useState(
+    existing?.changedPartPrediction ?? "",
   );
   const [showWhy, setShowWhy] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -136,7 +145,11 @@ export function NeedsActivity({
     setBalancingActions([]);
   };
 
-  const buildEvidence = (): CauseEffectChainEvidence => {
+  const buildEvidence = (
+    overrides: Partial<
+      Pick<CauseEffectChainEvidence, "loopType" | "changedPartPrediction">
+    > = {},
+  ): CauseEffectChainEvidence => {
     const meta = lastAction ? getActionMeta(lastAction) : LESSON_ACTION_META[0];
     return {
       kind: "cause-effect-chain",
@@ -149,6 +162,9 @@ export function NeedsActivity({
       secondaryEffect: meta.secondary,
       petResponse: meta.petResponse,
       balancingActions: balancingActions.map((a) => getActionMeta(a as LessonAction).label),
+      loopType: overrides.loopType ?? loopType ?? undefined,
+      changedPartPrediction:
+        overrides.changedPartPrediction ?? changedPartPrediction,
     };
   };
 
@@ -216,156 +232,217 @@ export function NeedsActivity({
       </p>
     ) : null;
 
-  if (step.kind === "introduce") {
-    return (
-      <StepShell
-        kindLabel={STEP_KIND_LABEL.introduce}
-        instruction="Read the pet's needs. Which need looks like it needs the most attention?"
-      >
-        <div className="grid gap-6 lg:grid-cols-[16rem_1fr]">
-          <div className="flex justify-center">
-            <PetStage config={vitalsToConfig(vitals)} reducedMotion={reducedMotion} />
+  switch (step.kind) {
+    case "notice":
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.notice}
+          instruction="Read all seven needs. Which signal looks like it needs attention most? Remember: one signal alone doesn't tell the whole story."
+        >
+          <div className="grid gap-6 lg:grid-cols-[16rem_1fr]">
+            <div className="flex justify-center">
+              <PetStage config={vitalsToConfig(vitals)} reducedMotion={reducedMotion} />
+            </div>
+            {vitalsPanel}
           </div>
-          {vitalsPanel}
-        </div>
-      </StepShell>
-    );
-  }
+        </StepShell>
+      );
 
-  if (step.kind === "observe") {
-    return (
-      <StepShell
-        kindLabel={STEP_KIND_LABEL.observe}
-        instruction="Choose an action and predict what it will do before you try it."
-      >
-        <div className="grid gap-6 lg:grid-cols-[1fr_16rem]">
-          <ChoiceGrid
-            legend="I predict this action will help most:"
-            options={actionOptions}
-            value={prediction}
-            onChange={(id) => setPrediction(id as LessonAction)}
-            disabled={isPreview}
-          />
-          <div className="flex justify-center">
-            <PetStage config={vitalsToConfig(vitals)} reducedMotion={reducedMotion} size="sm" />
+    case "predict":
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.predict}
+          instruction="Choose an action and predict what it will do before you try it."
+        >
+          <div className="grid gap-6 lg:grid-cols-[1fr_16rem]">
+            <ChoiceGrid
+              legend="I predict this action will help most:"
+              options={actionOptions}
+              value={prediction}
+              onChange={(id) => setPrediction(id as LessonAction)}
+              disabled={isPreview}
+            />
+            <div className="flex justify-center">
+              <PetStage config={vitalsToConfig(vitals)} reducedMotion={reducedMotion} size="sm" />
+            </div>
           </div>
-        </div>
-        {prediction ? (
-          <p className="text-center text-sm text-slate-300">
-            You predicted <strong>{getActionMeta(prediction).label}</strong>:{" "}
-            {getActionMeta(prediction).immediate}.
-          </p>
-        ) : null}
-      </StepShell>
-    );
-  }
+          {prediction ? (
+            <p className="text-center text-sm text-slate-300">
+              You predicted <strong>{getActionMeta(prediction).label}</strong>:{" "}
+              {getActionMeta(prediction).immediate}.
+            </p>
+          ) : null}
+        </StepShell>
+      );
 
-  if (step.kind === "interact") {
-    return (
-      <StepShell
-        kindLabel={STEP_KIND_LABEL.interact}
-        instruction="Perform an action and watch how several needs change at once."
-        footer={sandboxControls}
-      >
-        <div className="grid gap-6 lg:grid-cols-[16rem_1fr]">
-          <div className="flex flex-col items-center gap-2">
-            <PetStage config={vitalsToConfig(vitals)} reducedMotion={reducedMotion} />
-            {lastAction ? (
-              <p className="text-center text-xs text-slate-300" role="status">
-                {getActionMeta(lastAction).petResponse}
+    case "act":
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.act}
+          instruction="Perform an action and watch how several needs change at once."
+          footer={sandboxControls}
+        >
+          <div className="grid gap-6 lg:grid-cols-[16rem_1fr]">
+            <div className="flex flex-col items-center gap-2">
+              <PetStage config={vitalsToConfig(vitals)} reducedMotion={reducedMotion} />
+              {lastAction ? (
+                <p className="text-center text-xs text-slate-300" role="status">
+                  {getActionMeta(lastAction).petResponse}
+                </p>
+              ) : null}
+            </div>
+            <div className="space-y-4">
+              <ChoiceGrid
+                legend="Choose an action"
+                options={actionOptions}
+                value={null}
+                onChange={(id) => perform(id as LessonAction)}
+                disabled={isPreview}
+              />
+              {vitalsPanel}
+              {whyPanel}
+            </div>
+          </div>
+        </StepShell>
+      );
+
+    case "observe":
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.observe}
+          instruction="Choose one or two more actions to bring the needs into balance. Decide: is this loop helpful or harmful?"
+          footer={sandboxControls}
+        >
+          <div className="grid gap-6 lg:grid-cols-[16rem_1fr]">
+            <div className="flex justify-center">
+              <PetStage config={vitalsToConfig(vitals)} reducedMotion={reducedMotion} />
+            </div>
+            <div className="space-y-4">
+              <ChoiceGrid
+                legend="Balancing action"
+                options={actionOptions}
+                value={null}
+                onChange={(id) => perform(id as LessonAction, true)}
+                disabled={isPreview}
+              />
+              {vitalsPanel}
+              {whyPanel}
+              <ChoiceGrid
+                legend="This loop looks…"
+                options={[
+                  { id: "helpful", label: "Helpful" },
+                  { id: "harmful", label: "Harmful" },
+                ]}
+                value={loopType}
+                onChange={(id) => setLoopType(id as "helpful" | "harmful")}
+                columns={2}
+                disabled={isPreview}
+              />
+            </div>
+          </div>
+        </StepShell>
+      );
+
+    case "explain": {
+      const meta = lastAction ? getActionMeta(lastAction) : null;
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.explain}
+          instruction="Explain the chain: action → immediate effect → secondary effect → pet response."
+        >
+          <div className="mx-auto max-w-lg space-y-4">
+            {meta ? (
+              <ol className="space-y-2">
+                {[
+                  { label: "Action", value: meta.label },
+                  { label: "Immediate effect", value: meta.immediate },
+                  { label: "Secondary effect", value: meta.secondary },
+                  { label: "Pet response", value: meta.petResponse },
+                ].map((row, i) => (
+                  <li
+                    key={row.label}
+                    className="flex items-center gap-3 rounded-2xl border border-slate-700/60 bg-slate-800/40 px-4 py-2"
+                  >
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-300/20 text-sm font-semibold text-amber-200">
+                      {i + 1}
+                    </span>
+                    <span className="text-sm text-slate-200">
+                      <span className="font-medium">{row.label}:</span> {row.value}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="text-center text-sm text-slate-400">
+                Go back and perform an action first, then return here to explain
+                the chain.
               </p>
-            ) : null}
+            )}
           </div>
-          <div className="space-y-4">
-            <ChoiceGrid
-              legend="Choose an action"
-              options={actionOptions}
-              value={null}
-              onChange={(id) => perform(id as LessonAction)}
+        </StepShell>
+      );
+    }
+
+    case "create":
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.create}
+          instruction="Create a loop diagram. Then predict: if you changed only the first action, what would happen instead?"
+        >
+          <div className="mx-auto max-w-lg space-y-4">
+            <EvidenceText
+              label="If I changed only the first action, I predict…"
+              value={changedPartPrediction}
+              onChange={setChangedPartPrediction}
+              onBlur={() => !isPreview && saveEvidence(buildEvidence())}
+              placeholder="e.g. if I chose Rest instead of Play, stress would fall instead of rising."
               disabled={isPreview}
             />
-            {vitalsPanel}
-            {whyPanel}
+            <div className="flex justify-center">
+              <SaveButton
+                onClick={() => {
+                  if (!isPreview && lastAction) saveEvidence(buildEvidence());
+                  setSaved(true);
+                }}
+                saved={saved}
+                disabled={isPreview || !lastAction}
+                label="Save loop diagram"
+              />
+            </div>
           </div>
-        </div>
-      </StepShell>
-    );
-  }
+        </StepShell>
+      );
 
-  if (step.kind === "discuss") {
-    return (
-      <StepShell
-        kindLabel={STEP_KIND_LABEL.discuss}
-        instruction="Choose one or two more actions to bring the pet's needs into balance."
-        footer={sandboxControls}
-      >
-        <div className="grid gap-6 lg:grid-cols-[16rem_1fr]">
-          <div className="flex justify-center">
-            <PetStage config={vitalsToConfig(vitals)} reducedMotion={reducedMotion} />
-          </div>
-          <div className="space-y-4">
-            <ChoiceGrid
-              legend="Balancing action"
-              options={actionOptions}
-              value={null}
-              onChange={(id) => perform(id as LessonAction, true)}
+    case "reflect":
+    default:
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.reflect}
+          instruction="How can noticing a need before reacting help you choose a more helpful action?"
+        >
+          <div className="mx-auto max-w-md space-y-3">
+            <EvidenceText
+              label="My reflection"
+              value={changedPartPrediction}
+              onChange={setChangedPartPrediction}
+              onBlur={() => !isPreview && saveEvidence(buildEvidence())}
+              placeholder="Noticing first helps because…"
+              rows={3}
               disabled={isPreview}
             />
-            {vitalsPanel}
-            {whyPanel}
+            <div className="flex justify-center">
+              <SaveButton
+                onClick={() => {
+                  if (!isPreview) saveEvidence(buildEvidence());
+                  setSaved(true);
+                }}
+                saved={saved}
+                disabled={isPreview}
+                label="Save reflection"
+              />
+            </div>
           </div>
-        </div>
-      </StepShell>
-    );
+        </StepShell>
+      );
   }
-
-  // complete
-  const meta = lastAction ? getActionMeta(lastAction) : null;
-  return (
-    <StepShell
-      kindLabel={STEP_KIND_LABEL.complete}
-      instruction="Record the chain: action → immediate effect → secondary effect → pet response."
-    >
-      <div className="mx-auto max-w-lg space-y-4">
-        {meta ? (
-          <ol className="space-y-2">
-            {[
-              { label: "Action", value: meta.label },
-              { label: "Immediate effect", value: meta.immediate },
-              { label: "Secondary effect", value: meta.secondary },
-              { label: "Pet response", value: meta.petResponse },
-            ].map((row, i) => (
-              <li
-                key={row.label}
-                className="flex items-center gap-3 rounded-2xl border border-slate-700/60 bg-slate-800/40 px-4 py-2"
-              >
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-300/20 text-sm font-semibold text-amber-200">
-                  {i + 1}
-                </span>
-                <span className="text-sm text-slate-200">
-                  <span className="font-medium">{row.label}:</span> {row.value}
-                </span>
-              </li>
-            ))}
-          </ol>
-        ) : (
-          <p className="text-center text-sm text-slate-400">
-            Go back and perform an action first, then return here to record the
-            chain.
-          </p>
-        )}
-        <div className="flex justify-center">
-          <SaveButton
-            onClick={() => {
-              if (!isPreview && meta) saveEvidence(buildEvidence());
-              setSaved(true);
-            }}
-            saved={saved}
-            disabled={isPreview || !meta}
-            label="Save cause-and-effect chain"
-          />
-        </div>
-      </div>
-    </StepShell>
-  );
 }

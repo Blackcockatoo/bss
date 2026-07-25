@@ -66,6 +66,10 @@ export interface PetObservationCardEvidence extends LessonEvidenceBase {
     movement: string;
   };
   question: string;
+  /** Predict stage: what the student expected before checking. */
+  prediction?: string;
+  /** Explain stage: what a changed signal tells us about the system inside. */
+  explanation?: string;
   /** Optional compact config reference of the observed pet. */
   petConfigRef?: Record<string, unknown>;
 }
@@ -84,6 +88,8 @@ export interface BodyDesignComparisonEvidence extends LessonEvidenceBase {
   reason: string;
   /** Whether the student committed the design to their lesson pet. */
   applied: boolean;
+  /** Predict stage: what the student expected before choosing a shape. */
+  shapePrediction?: string;
 }
 
 /** Lesson 3 — single-gene DNA comparison. */
@@ -106,6 +112,10 @@ export interface CauseEffectChainEvidence extends LessonEvidenceBase {
   secondaryEffect: string;
   petResponse: string;
   balancingActions: string[];
+  /** Create stage: is the loop the class built helpful or harmful? */
+  loopType?: "helpful" | "harmful";
+  /** Create stage: prediction for changing only one part of the loop. */
+  changedPartPrediction?: string;
 }
 
 /** Lesson 5 — emotion reflection. */
@@ -115,6 +125,8 @@ export interface EmotionReflectionEvidence extends LessonEvidenceBase {
   interpretation: string;
   helpedBy: string;
   alternativeExplanation: string;
+  /** Predict stage: first guess made before gathering clue evidence. */
+  firstGuess?: string;
 }
 
 /** Lesson 6 — visualisation selection. */
@@ -124,6 +136,8 @@ export interface VisualisationSelectionEvidence extends LessonEvidenceBase {
   patternNoticed: string;
   sharedFeature: string;
   reason: string;
+  /** Predict stage: which representation the student expected to look like. */
+  predictedMode?: string;
 }
 
 /** Lesson 7 — responsible creator promise. */
@@ -136,6 +150,14 @@ export interface ResponsibleCreatorPromiseEvidence extends LessonEvidenceBase {
     reasoning?: string;
   }[];
   promise: string;
+  /** Predict stage: which competing need the class expected to matter most. */
+  predictedPriorityNeed?: string;
+  /** Explain stage: one trade-off the class made and why. */
+  tradeOffExplanation?: string;
+  /** Create stage: three system rules the class designed for the habitat. */
+  systemRules?: string[];
+  /** Create stage: a simple cause -> effect diagram for the habitat plan. */
+  causeEffectDiagram?: { cause: string; effect: string }[];
 }
 
 /** Discriminated union of every evidence kind. */
@@ -207,6 +229,8 @@ export function validateEvidence(raw: unknown): LessonEvidence | null {
           movement: asString((value.observations as never)?.["movement"]),
         },
         question: asString(value.question),
+        prediction: asOptionalString(value.prediction),
+        explanation: asOptionalString(value.explanation),
         petConfigRef: asRecord(value.petConfigRef),
       };
     case "body-design-comparison":
@@ -223,6 +247,7 @@ export function validateEvidence(raw: unknown): LessonEvidence | null {
         },
         reason: asString(value.reason),
         applied: value.applied === true,
+        shapePrediction: asOptionalString(value.shapePrediction),
       };
     case "dna-comparison":
       return {
@@ -245,6 +270,11 @@ export function validateEvidence(raw: unknown): LessonEvidence | null {
         secondaryEffect: asString(value.secondaryEffect),
         petResponse: asString(value.petResponse),
         balancingActions: asStringArray(value.balancingActions),
+        loopType:
+          value.loopType === "helpful" || value.loopType === "harmful"
+            ? value.loopType
+            : undefined,
+        changedPartPrediction: asOptionalString(value.changedPartPrediction),
       };
     case "emotion-reflection":
       return {
@@ -254,6 +284,7 @@ export function validateEvidence(raw: unknown): LessonEvidence | null {
         interpretation: asString(value.interpretation),
         helpedBy: asString(value.helpedBy),
         alternativeExplanation: asString(value.alternativeExplanation),
+        firstGuess: asOptionalString(value.firstGuess),
       };
     case "visualisation-selection":
       return {
@@ -263,6 +294,7 @@ export function validateEvidence(raw: unknown): LessonEvidence | null {
         patternNoticed: asString(value.patternNoticed),
         sharedFeature: asString(value.sharedFeature),
         reason: asString(value.reason),
+        predictedMode: asOptionalString(value.predictedMode),
       };
     case "responsible-creator-promise":
       return {
@@ -285,6 +317,22 @@ export function validateEvidence(raw: unknown): LessonEvidence | null {
               })
           : [],
         promise: asString(value.promise),
+        predictedPriorityNeed: asOptionalString(value.predictedPriorityNeed),
+        tradeOffExplanation: asOptionalString(value.tradeOffExplanation),
+        systemRules: Array.isArray(value.systemRules)
+          ? asStringArray(value.systemRules)
+          : undefined,
+        causeEffectDiagram: Array.isArray(value.causeEffectDiagram)
+          ? value.causeEffectDiagram
+              .filter((c) => !!c && typeof c === "object")
+              .map((entry) => {
+                const c = entry as Record<string, unknown>;
+                return {
+                  cause: asString(c["cause"]),
+                  effect: asString(c["effect"]),
+                };
+              })
+          : undefined,
       };
     default:
       return null;
@@ -328,6 +376,10 @@ function sanitizeAppliedChange(raw: unknown): AppliedChangeMeta | undefined {
 
 function asString(value: unknown): string {
   return typeof value === "string" ? value : "";
+}
+
+function asOptionalString(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
 }
 
 function asStringArray(value: unknown): string[] {

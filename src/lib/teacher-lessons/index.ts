@@ -108,6 +108,13 @@ export {
   type PassportInputs,
 } from "./passport";
 export {
+  CLASS_FIELD_RECORD_VERSION,
+  classFieldRecordHasContent,
+  deriveClassFieldRecord,
+  type ClassFieldRecord,
+  type ClassFieldRecordEntry,
+} from "./classFieldRecord";
+export {
   type AppliedChangeMeta,
 } from "./evidence";
 export {
@@ -123,3 +130,44 @@ export {
   sanitizePilotState,
   type PilotFeedbackEntry,
 } from "./pilot";
+export {
+  FIELD_MISSIONS,
+  FIELD_MISSION_IDS,
+  getFieldMissionBySlug,
+  isFieldMissionId,
+  type FieldMissionDefinition,
+  type FieldMissionId,
+} from "./fieldMissions";
+export {
+  CLASS_CONSEQUENCE_ACTIONS,
+  CLASS_CONSEQUENCE_DIMENSIONS,
+  CLASS_CONSEQUENCE_STATE_VERSION,
+  TRUSTED_SYSTEM_TRUST_THRESHOLD,
+  createDefaultClassConsequenceState,
+  getClassConsequenceAction,
+  isClassConsequenceActionId,
+  recordClassConsequenceAction,
+  resetClassConsequenceState,
+  sanitizeClassConsequenceState,
+  type ClassConsequenceActionId,
+  type ClassConsequenceActionMeta,
+  type ClassConsequenceChange,
+  type ClassConsequenceDimension,
+  type ClassConsequenceState,
+} from "./classConsequences";
+export {
+  CLASS_CONSEQUENCE_STORAGE_KEY,
+  useClassConsequencesHydrated,
+  useClassConsequencesStore,
+  type ClassConsequenceStore,
+} from "./classConsequencesStore";
+export {
+  FIELD_MISSION_PROGRESS_STORAGE_KEY,
+  sanitizeFieldMissionProgressState,
+  selectFieldMissionRecord,
+  useFieldMissionProgressHydrated,
+  useFieldMissionProgressStore,
+  type FieldMissionProgressState,
+  type FieldMissionProgressStore,
+  type FieldMissionRecord,
+} from "./fieldMissionProgressStore";

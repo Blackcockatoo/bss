@@ -19,7 +19,7 @@ function withEvidence(): LessonProgressState {
     kind: "pet-observation-card",
     version: 1,
     lessonId: "meet-your-metapet",
-    stepId: "meet-your-metapet-step-5",
+    stepId: "meet-your-metapet-step-7",
     createdAt: 1000,
     alias: "Pip",
     observations: { shape: "round", surface: "shiny", movement: "floaty" },
@@ -33,15 +33,15 @@ function withEvidence(): LessonProgressState {
   };
   state.records["meet-your-metapet"] = {
     lessonId: "meet-your-metapet",
-    currentStep: 4,
-    completedSteps: [0, 1, 2, 3, 4],
+    currentStep: 6,
+    completedSteps: [0, 1, 2, 3, 4, 5, 6],
     completed: true,
     paused: false,
     startedAt: 1,
     lastActiveAt: 1000,
     completedAt: 1000,
     evidence: {},
-    evidenceEntries: { "meet-your-metapet-step-5": card },
+    evidenceEntries: { "meet-your-metapet-step-7": card },
   };
   return state;
 }
@@ -108,8 +108,8 @@ describe("Learning Passport derivation", () => {
     // Wrong evidence kind stored under a lesson.
     state.records["dna-differences"] = {
       lessonId: "dna-differences",
-      currentStep: 4,
-      completedSteps: [0, 1, 2, 3, 4],
+      currentStep: 6,
+      completedSteps: [0, 1, 2, 3, 4, 5, 6],
       completed: true,
       paused: false,
       startedAt: 1,
@@ -117,11 +117,11 @@ describe("Learning Passport derivation", () => {
       completedAt: 2,
       evidence: {},
       evidenceEntries: {
-        "dna-differences-step-5": {
+        "dna-differences-step-7": {
           kind: "emotion-reflection",
           version: 1,
           lessonId: "dna-differences",
-          stepId: "dna-differences-step-5",
+          stepId: "dna-differences-step-7",
           createdAt: 2,
           clues: [],
           interpretation: "",

@@ -29,22 +29,36 @@ describe("lesson definitions", () => {
     ]);
   });
 
-  it("gives every lesson a five-step placeholder flow", () => {
+  it("gives every lesson the seven-stage Notice-to-Reflect rhythm", () => {
     for (const lesson of LESSON_DEFINITIONS) {
-      expect(lesson.steps).toHaveLength(5);
+      expect(lesson.steps).toHaveLength(7);
       expect(lesson.steps.map((s) => s.kind)).toEqual([
-        "introduce",
+        "notice",
+        "predict",
+        "act",
         "observe",
-        "interact",
-        "discuss",
-        "complete",
+        "explain",
+        "create",
+        "reflect",
       ]);
       for (const step of lesson.steps) {
         expect(step.id).toContain(lesson.id);
         expect(step.teacherPrompt.length).toBeGreaterThan(0);
         expect(step.studentTask.length).toBeGreaterThan(0);
         expect(step.whatDoINow.length).toBeGreaterThan(0);
+        expect(step.expectedOutcome.length).toBeGreaterThan(0);
       }
+    }
+  });
+
+  it("gives every lesson the new classroom-investigation metadata", () => {
+    for (const lesson of LESSON_DEFINITIONS) {
+      expect(lesson.keyConcept.length).toBeGreaterThan(0);
+      expect(Array.isArray(lesson.materials)).toBe(true);
+      expect(lesson.preparation.length).toBeGreaterThan(0);
+      expect(lesson.physicalActivity.length).toBeGreaterThan(0);
+      expect(lesson.deepDiveActivity.length).toBeGreaterThan(0);
+      expect(typeof lesson.safetyNotes).toBe("string");
     }
   });
 

@@ -1,10 +1,20 @@
 /**
- * Meta-Pet Teacher Lesson System — lesson timing modes (Pass 2).
+ * Meta-Pet Teacher Lesson System — lesson duration depths (Pass 2, relabelled
+ * for the Field Mode Lesson Upgrade).
  *
- * A simple lesson-level option (not a scheduler). Timing modes let a teacher
- * pick a 10-minute demo, a 20-minute standard lesson or a 40-minute extended
- * lesson. Modes only affect optional presentation (whether extension prompts
- * and optional depth show); the five core steps always remain navigable.
+ * A simple lesson-level option (not a scheduler). Every lesson supports three
+ * usable depths without forking into three separate lesson plans — all three
+ * reuse the same seven-stage Notice → Reflect rhythm:
+ *
+ *   Quick Spark (~10 min)  — a short hook, prediction and observation.
+ *   Core Lesson (~20 min)  — the main activity, explanation and reflection.
+ *   Deep Dive (~40 min)    — adds the physical/creative/collaborative
+ *                            extension ({@link LessonDefinition.deepDiveActivity}).
+ *
+ * A teacher can stop after any depth and still have a complete experience:
+ * the Runner never blocks Complete Lesson on optional extension content.
+ * Ids are kept stable ("demo" / "standard" / "extended") so persisted
+ * classroom state from earlier releases keeps working unchanged.
  */
 
 export type LessonTimingMode = "demo" | "standard" | "extended";
@@ -23,25 +33,28 @@ export interface LessonTimingModeMeta {
 export const LESSON_TIMING_MODES: LessonTimingModeMeta[] = [
   {
     id: "demo",
-    label: "10-min demo",
+    label: "Quick Spark (10 min)",
     minutes: 10,
-    description: "A quick teacher-led demonstration. Optional steps are hidden.",
+    description:
+      "A short hook: Notice, Predict and Observe only. Optional steps are hidden.",
     showExtension: false,
     shortDiscussion: true,
   },
   {
     id: "standard",
-    label: "20-min lesson",
+    label: "Core Lesson (20 min)",
     minutes: 20,
-    description: "The standard classroom lesson with full discussion.",
+    description:
+      "The main activity: Act, Explain, Create and Reflect with full discussion.",
     showExtension: false,
     shortDiscussion: false,
   },
   {
     id: "extended",
-    label: "40-min extended",
+    label: "Deep Dive (40 min)",
     minutes: 40,
-    description: "A longer lesson with extension tasks and deeper exploration.",
+    description:
+      "Adds the physical, creative or collaborative extension for deeper exploration.",
     showExtension: true,
     shortDiscussion: false,
   },

@@ -13,7 +13,7 @@ const card: PetObservationCardEvidence = {
   kind: "pet-observation-card",
   version: 1,
   lessonId: "meet-your-metapet",
-  stepId: "meet-your-metapet-step-5",
+  stepId: "meet-your-metapet-step-7",
   createdAt: 1,
   alias: "Pip",
   observations: { shape: "round", surface: "shiny", movement: "floaty" },
@@ -55,7 +55,7 @@ describe("Learning Passport", () => {
     useLessonProgressStore.getState().startLesson("meet-your-metapet");
     useLessonProgressStore
       .getState()
-      .saveEvidenceEntry("meet-your-metapet-step-5", card);
+      .saveEvidenceEntry("meet-your-metapet-step-7", card);
     useLessonProgressStore.getState().completeLesson("meet-your-metapet");
 
     render(<LearningPassport />);
@@ -69,7 +69,7 @@ describe("Learning Passport", () => {
     useLessonProgressStore.getState().startLesson("meet-your-metapet");
     useLessonProgressStore
       .getState()
-      .saveEvidenceEntry("meet-your-metapet-step-5", card);
+      .saveEvidenceEntry("meet-your-metapet-step-7", card);
     useLessonProgressStore.getState().completeLesson("meet-your-metapet");
 
     render(

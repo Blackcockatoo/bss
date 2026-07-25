@@ -20,6 +20,11 @@ describe("Field Pack cache policy", () => {
     );
   });
 
+  it("includes the Field Missions and Class Field Record routes", () => {
+    expect(FIELD_PACK_ROUTE_PATHS).toContain("/schools/field/missions");
+    expect(FIELD_PACK_ROUTE_PATHS).toContain("/schools/field/record");
+  });
+
   it("keeps every cached route and asset inside the declarative Field boundary", () => {
     for (const pathname of [
       ...FIELD_PACK_ROUTE_PATHS,

@@ -3,6 +3,7 @@
 import {
   BookOpen,
   BookOpenCheck,
+  Compass,
   DoorOpen,
   GraduationCap,
   HardDriveDownload,
@@ -20,6 +21,7 @@ import {
 const ICONS: Record<FieldModeNavItem["kind"], typeof Home> = {
   home: Home,
   lessons: BookOpenCheck,
+  missions: Compass,
   classroom: GraduationCap,
   offline: HardDriveDownload,
   guide: BookOpen,

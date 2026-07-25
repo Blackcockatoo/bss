@@ -89,6 +89,25 @@ export default async function PrintableLessonPage({
           <p className="mt-3 text-sm text-slate-600">
             <strong>Learning areas:</strong> {lesson.learningAreas.join(" · ")}
           </p>
+          <p className="mt-2 text-sm text-slate-600">
+            <strong>Key concept:</strong> {lesson.keyConcept}
+          </p>
+        </section>
+
+        <section className="mt-6 break-inside-avoid rounded-xl border border-slate-300 p-4 print:rounded-none">
+          <h2 className="text-xl font-bold">Materials and preparation</h2>
+          <p className="mt-2 text-sm leading-6">
+            <strong>Materials:</strong>{" "}
+            {lesson.materials.length > 0 ? lesson.materials.join(" · ") : "None beyond a shared screen"}
+          </p>
+          <p className="mt-2 text-sm leading-6">
+            <strong>Preparation:</strong> {lesson.preparation}
+          </p>
+          {lesson.safetyNotes ? (
+            <p className="mt-2 text-sm leading-6 text-amber-800">
+              <strong>Safety / wellbeing note:</strong> {lesson.safetyNotes}
+            </p>
+          ) : null}
         </section>
 
         <section className="mt-6 break-inside-avoid rounded-xl border border-slate-300 p-4 print:rounded-none">
@@ -112,7 +131,7 @@ export default async function PrintableLessonPage({
         </section>
 
         <section className="mt-7">
-          <h2 className="text-xl font-bold">Five guided steps</h2>
+          <h2 className="text-xl font-bold">Seven guided stages: Notice, Predict, Act, Observe, Explain, Create, Reflect</h2>
           <ol className="mt-4 space-y-5">
             {lesson.steps.map((step, index) => (
               <li key={step.id} className="break-inside-avoid border-t border-slate-300 pt-4">
@@ -144,6 +163,17 @@ export default async function PrintableLessonPage({
           <div className="break-inside-avoid rounded-xl border border-slate-300 p-4 print:rounded-none">
             <h2 className="font-bold">Extension option</h2>
             <p className="mt-2 text-sm leading-6">{lesson.extensionActivity}</p>
+          </div>
+        </section>
+
+        <section className="mt-7 grid gap-5 sm:grid-cols-2">
+          <div className="break-inside-avoid rounded-xl border border-emerald-300 bg-emerald-50 p-4 print:rounded-none">
+            <h2 className="font-bold">Off-screen activity (Quick Spark / Core)</h2>
+            <p className="mt-2 text-sm leading-6">{lesson.physicalActivity}</p>
+          </div>
+          <div className="break-inside-avoid rounded-xl border border-amber-300 bg-amber-50 p-4 print:rounded-none">
+            <h2 className="font-bold">Deep Dive extension (optional, ~40 min)</h2>
+            <p className="mt-2 text-sm leading-6">{lesson.deepDiveActivity}</p>
           </div>
         </section>
 

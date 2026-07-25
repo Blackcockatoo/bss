@@ -17,8 +17,10 @@ describe("printable Field lesson fallback", () => {
     expect(
       screen.getByRole("heading", { name: "Lesson 2: Build a Body" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Five guided steps")).toBeInTheDocument();
-    expect(screen.getAllByRole("listitem").length).toBeGreaterThanOrEqual(5);
+    expect(
+      screen.getByText(/Seven guided stages: Notice, Predict, Act, Observe, Explain, Create, Reflect/),
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole("listitem").length).toBeGreaterThanOrEqual(7);
     expect(
       screen.getByRole("button", { name: /Print \/ Save as PDF/i }),
     ).toBeInTheDocument();

@@ -52,9 +52,9 @@ describe("lesson progress store", () => {
     store.previousStep();
     store.previousStep();
     expect(selectRecord(useLessonProgressStore.getState(), "build-a-body").currentStep).toBe(0);
-    // Clamp above the last step (5 steps -> max index 4).
+    // Clamp above the last step (7 steps -> max index 6).
     for (let i = 0; i < 10; i += 1) store.nextStep();
-    expect(selectRecord(useLessonProgressStore.getState(), "build-a-body").currentStep).toBe(4);
+    expect(selectRecord(useLessonProgressStore.getState(), "build-a-body").currentStep).toBe(6);
   });
 
   it("completes steps and the whole lesson", () => {
@@ -70,7 +70,7 @@ describe("lesson progress store", () => {
     record = selectRecord(useLessonProgressStore.getState(), "dna-differences");
     expect(record.completed).toBe(true);
     expect(record.completedAt).not.toBeNull();
-    expect(record.completedSteps).toEqual([0, 1, 2, 3, 4]);
+    expect(record.completedSteps).toEqual([0, 1, 2, 3, 4, 5, 6]);
     expect(
       selectLessonStatus(useLessonProgressStore.getState(), "dna-differences"),
     ).toBe("completed");
@@ -190,8 +190,8 @@ describe("sanitizeState (corruption safety)", () => {
     expect(Object.keys(clean.records)).toEqual(["meet-your-metapet"]);
 
     const record = clean.records["meet-your-metapet"]!;
-    // 5 steps -> max index 4.
-    expect(record.currentStep).toBe(4);
+    // 7 steps -> max index 6.
+    expect(record.currentStep).toBe(6);
     expect(record.completedSteps).toEqual([0, 1]);
     expect(record.evidence).toEqual({ a: "keep" });
   });

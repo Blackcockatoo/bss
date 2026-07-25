@@ -9,6 +9,7 @@ export { ClassroomFocusMode } from "./ClassroomFocusMode";
 export { LessonCompletion } from "./LessonCompletion";
 export { LessonModal } from "./LessonModal";
 export { LearningPassport } from "./LearningPassport";
+export { ClassFieldRecordView } from "./ClassFieldRecordView";
 export { TeacherReview } from "./TeacherReview";
 export { PilotReadiness } from "./PilotReadiness";
 export { ActivityHost } from "./activities";

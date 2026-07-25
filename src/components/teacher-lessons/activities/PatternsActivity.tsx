@@ -133,12 +133,15 @@ function DnaViewer({
  * engine inside a simplified lesson viewer that only exposes the four modes,
  * pause/resume, compare, explain and reduced-motion. The same DNA seed drives
  * every mode, so students can see the modes differ while the identity holds.
+ * Support presentation gives Years 3-4 a "continue the pattern" prompt;
+ * Extension presentation gives Years 5-6 a rule-testing prompt.
  */
 export function PatternsActivity({
   step,
   isPreview,
   reducedMotion,
   lowPerformance,
+  presentationMode,
   lesson,
   getEvidence,
   saveEvidence,
@@ -151,6 +154,9 @@ export function PatternsActivity({
 
   const [mode, setMode] = useState<AdvancedDnaMode>(
     (existing?.selectedMode as AdvancedDnaMode) ?? "sigil",
+  );
+  const [predictedMode, setPredictedMode] = useState(
+    existing?.predictedMode ?? "",
   );
   const [compareMode, setCompareMode] = useState<AdvancedDnaMode>("vortex");
   const [playing, setPlaying] = useState(!reducedMotion);
@@ -174,6 +180,7 @@ export function PatternsActivity({
     stepId: evidenceStepId,
     createdAt: evidenceTimestamp(),
     selectedMode: mode,
+    predictedMode,
     patternNoticed,
     sharedFeature,
     reason,
@@ -224,177 +231,237 @@ export function PatternsActivity({
     </Button>
   );
 
-  if (step.kind === "introduce") {
-    return (
-      <StepShell
-        kindLabel={STEP_KIND_LABEL.introduce}
-        instruction="This is the pet's DNA shown as a Sigil — a radial pattern. Watch how it holds together."
-        footer={playToggle}
-      >
-        <div className="flex flex-col items-center gap-2">
-          <DnaViewer mode="sigil" playing={playing} reducedMotion={reducedMotion}
-            lowPerformance={lowPerformance} />
-          <p className="text-center text-sm text-slate-300">
-            {MODE_EXPLAIN.sigil}
-          </p>
-          {reducedMotion ? (
-            <p className="text-xs text-slate-400">
-              Reduced motion is on: the pattern is shown as a still image.
-            </p>
-          ) : null}
-        </div>
-      </StepShell>
-    );
-  }
-
-  if (step.kind === "observe") {
-    return (
-      <StepShell
-        kindLabel={STEP_KIND_LABEL.observe}
-        instruction="Change the representation. The DNA is the same — only how we draw it changes."
-        footer={playToggle}
-      >
-        <div className="flex flex-col items-center gap-3">
-          <DnaViewer mode={mode} playing={playing} reducedMotion={reducedMotion}
-            lowPerformance={lowPerformance} />
-          <p className="text-center text-sm text-slate-300">
-            {MODE_EXPLAIN[mode]}
-          </p>
-          <ChoiceGrid
-            legend="Representation"
-            options={MODE_OPTIONS}
-            value={mode}
-            onChange={(id) => setMode(id as AdvancedDnaMode)}
-            columns={4}
-          />
-        </div>
-      </StepShell>
-    );
-  }
-
-  if (step.kind === "interact") {
-    return (
-      <StepShell
-        kindLabel={STEP_KIND_LABEL.interact}
-        instruction="Compare two representations side by side. What appears in both?"
-        footer={playToggle}
-      >
-        <div className="grid gap-4 sm:grid-cols-2">
+  switch (step.kind) {
+    case "notice":
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.notice}
+          instruction="This is the pet's DNA shown as a Sigil — a radial pattern. Notice how it holds together."
+          footer={playToggle}
+        >
           <div className="flex flex-col items-center gap-2">
+            <DnaViewer mode="sigil" playing={playing} reducedMotion={reducedMotion}
+              lowPerformance={lowPerformance} />
+            <p className="text-center text-sm text-slate-300">
+              {MODE_EXPLAIN.sigil}
+            </p>
+            {reducedMotion ? (
+              <p className="text-xs text-slate-400">
+                Reduced motion is on: the pattern is shown as a still image.
+              </p>
+            ) : null}
+          </div>
+        </StepShell>
+      );
+
+    case "predict":
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.predict}
+          instruction="Predict: if we show the same DNA a different way, what do you think will stay the same, and what might look different?"
+        >
+          <div className="mx-auto max-w-md space-y-3">
+            <EvidenceText
+              label="My prediction"
+              value={predictedMode}
+              onChange={setPredictedMode}
+              onBlur={() => !isPreview && saveEvidence(buildEvidence())}
+              placeholder="e.g. I think the colours will stay the same but the shape will change."
+              rows={2}
+              disabled={isPreview}
+            />
+          </div>
+        </StepShell>
+      );
+
+    case "act":
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.act}
+          instruction="Change the representation. The DNA is the same — only how we draw it changes."
+          footer={playToggle}
+        >
+          <div className="flex flex-col items-center gap-3">
             <DnaViewer mode={mode} playing={playing} reducedMotion={reducedMotion}
-            lowPerformance={lowPerformance} />
+              lowPerformance={lowPerformance} />
+            <p className="text-center text-sm text-slate-300">
+              {MODE_EXPLAIN[mode]}
+            </p>
             <ChoiceGrid
-              legend="Left"
+              legend="Representation"
               options={MODE_OPTIONS}
               value={mode}
               onChange={(id) => setMode(id as AdvancedDnaMode)}
               columns={4}
             />
           </div>
-          <div className="flex flex-col items-center gap-2">
-            <DnaViewer
-              mode={compareMode}
-              playing={playing}
-              reducedMotion={reducedMotion}
-              lowPerformance={lowPerformance}
+        </StepShell>
+      );
+
+    case "observe":
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.observe}
+          instruction="Compare two representations side by side. What appears in both?"
+          footer={playToggle}
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="flex flex-col items-center gap-2">
+              <DnaViewer mode={mode} playing={playing} reducedMotion={reducedMotion}
+              lowPerformance={lowPerformance} />
+              <ChoiceGrid
+                legend="Left"
+                options={MODE_OPTIONS}
+                value={mode}
+                onChange={(id) => setMode(id as AdvancedDnaMode)}
+                columns={4}
+              />
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <DnaViewer
+                mode={compareMode}
+                playing={playing}
+                reducedMotion={reducedMotion}
+                lowPerformance={lowPerformance}
+              />
+              <ChoiceGrid
+                legend="Right"
+                options={MODE_OPTIONS}
+                value={compareMode}
+                onChange={(id) => setCompareMode(id as AdvancedDnaMode)}
+                columns={4}
+              />
+            </div>
+          </div>
+        </StepShell>
+      );
+
+    case "explain":
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.explain}
+          instruction={
+            presentationMode === "extension"
+              ? "Years 5-6: state the rule behind the pattern, then try to find a case that breaks it."
+              : presentationMode === "support"
+                ? "Years 3-4: find something that repeats, and describe what comes next."
+                : "Identify something consistent. What pattern or feature appears in more than one mode?"
+          }
+          footer={playToggle}
+        >
+          <div className="mx-auto max-w-md space-y-3">
+            <EvidenceText
+              label={
+                presentationMode === "extension"
+                  ? "The rule I found (and any exception)"
+                  : "A pattern I noticed"
+              }
+              value={patternNoticed}
+              onChange={setPatternNoticed}
+              onBlur={() => !isPreview && saveEvidence(buildEvidence())}
+              placeholder="e.g. a bright cluster near the centre"
+              disabled={isPreview}
             />
+            <EvidenceText
+              label="A feature that appears in more than one mode"
+              value={sharedFeature}
+              onChange={setSharedFeature}
+              onBlur={() => !isPreview && saveEvidence(buildEvidence())}
+              disabled={isPreview}
+            />
+          </div>
+        </StepShell>
+      );
+
+    case "create":
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.create}
+          instruction="Choose the representation that shows the DNA most clearly, and explain why."
+        >
+          <div className="mx-auto max-w-md space-y-3">
             <ChoiceGrid
-              legend="Right"
+              legend="My chosen representation"
               options={MODE_OPTIONS}
-              value={compareMode}
-              onChange={(id) => setCompareMode(id as AdvancedDnaMode)}
+              value={mode}
+              onChange={(id) => {
+                setMode(id as AdvancedDnaMode);
+                if (!isPreview)
+                  saveEvidence({ ...buildEvidence(), selectedMode: id });
+              }}
               columns={4}
             />
-          </div>
-        </div>
-      </StepShell>
-    );
-  }
-
-  if (step.kind === "discuss") {
-    return (
-      <StepShell
-        kindLabel={STEP_KIND_LABEL.discuss}
-        instruction="Identify something consistent. What pattern or feature appears in more than one mode?"
-        footer={playToggle}
-      >
-        <div className="mx-auto max-w-md space-y-3">
-          <EvidenceText
-            label="A pattern I noticed"
-            value={patternNoticed}
-            onChange={setPatternNoticed}
-            onBlur={() => !isPreview && saveEvidence(buildEvidence())}
-            placeholder="e.g. a bright cluster near the centre"
-            disabled={isPreview}
-          />
-          <EvidenceText
-            label="A feature that appears in more than one mode"
-            value={sharedFeature}
-            onChange={setSharedFeature}
-            onBlur={() => !isPreview && saveEvidence(buildEvidence())}
-            disabled={isPreview}
-          />
-        </div>
-      </StepShell>
-    );
-  }
-
-  // complete
-  return (
-    <StepShell
-      kindLabel={STEP_KIND_LABEL.complete}
-      instruction="Choose the representation that shows the DNA most clearly, and explain why."
-    >
-      <div className="mx-auto max-w-md space-y-3">
-        <ChoiceGrid
-          legend="My chosen representation"
-          options={MODE_OPTIONS}
-          value={mode}
-          onChange={(id) => {
-            setMode(id as AdvancedDnaMode);
-            if (!isPreview)
-              saveEvidence({ ...buildEvidence(), selectedMode: id });
-          }}
-          columns={4}
-        />
-        <EvidenceText
-          label="I chose this because…"
-          value={reason}
-          onChange={setReason}
-          onBlur={() => !isPreview && saveEvidence(buildEvidence())}
-          disabled={isPreview}
-        />
-        {allowPetUpdates ? (hasRealPet ? (
-          <div className="space-y-2">
-            <Button
-              type="button"
-              onClick={savePreferredView}
+            <EvidenceText
+              label="I chose this because…"
+              value={reason}
+              onChange={setReason}
+              onBlur={() => !isPreview && saveEvidence(buildEvidence())}
               disabled={isPreview}
-              className="w-full bg-amber-300 text-slate-950 hover:bg-amber-200"
-            >
-              Use This as My Preferred DNA View
-            </Button>
-            <p className="text-xs text-slate-500">
-              This only changes your preferred view. It does not change your
-              pet&apos;s DNA.
-            </p>
-            <ApplyResultBanner result={viewResult} onUndo={undoPreferredView} />
+            />
+            {allowPetUpdates ? (hasRealPet ? (
+              <div className="space-y-2">
+                <Button
+                  type="button"
+                  onClick={savePreferredView}
+                  disabled={isPreview}
+                  className="w-full bg-amber-300 text-slate-950 hover:bg-amber-200"
+                >
+                  Use This as My Preferred DNA View
+                </Button>
+                <p className="text-xs text-slate-500">
+                  This only changes your preferred view. It does not change your
+                  pet&apos;s DNA.
+                </p>
+                <ApplyResultBanner result={viewResult} onUndo={undoPreferredView} />
+              </div>
+            ) : (
+              <MissingPetNotice message="You can still record your choice. Create a Meta-Pet to save a preferred DNA view." />
+            )) : null}
+            <div className="flex justify-center">
+              <SaveButton
+                onClick={() => {
+                  if (!isPreview) saveEvidence(buildEvidence());
+                  setSaved(true);
+                }}
+                saved={saved}
+                disabled={isPreview}
+                label="Save my choice"
+              />
+            </div>
           </div>
-        ) : (
-          <MissingPetNotice message="You can still record your choice. Create a Meta-Pet to save a preferred DNA view." />
-        )) : null}
-        <div className="flex justify-center">
-          <SaveButton
-            onClick={() => {
-              if (!isPreview) saveEvidence(buildEvidence());
-              setSaved(true);
-            }}
-            saved={saved}
-            disabled={isPreview}
-            label="Save my choice"
-          />
-        </div>
-      </div>
-    </StepShell>
-  );
+        </StepShell>
+      );
+
+    case "reflect":
+    default:
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.reflect}
+          instruction="What does a pattern tell you about the rules behind it?"
+        >
+          <div className="mx-auto max-w-md space-y-3">
+            <EvidenceText
+              label="My reflection"
+              value={reason}
+              onChange={setReason}
+              onBlur={() => !isPreview && saveEvidence(buildEvidence())}
+              placeholder="A pattern tells me…"
+              rows={3}
+              disabled={isPreview}
+            />
+            <div className="flex justify-center">
+              <SaveButton
+                onClick={() => {
+                  if (!isPreview) saveEvidence(buildEvidence());
+                  setSaved(true);
+                }}
+                saved={saved}
+                disabled={isPreview}
+                label="Save reflection"
+              />
+            </div>
+          </div>
+        </StepShell>
+      );
+  }
 }

@@ -71,7 +71,7 @@ describe("lesson activity registry", () => {
     for (const lesson of LESSON_DEFINITIONS) {
       const { unmount } = render(<ActivityHost {...makeProps(lesson)} />);
       // Every activity (and the fallback) frames the step with its kind label.
-      expect(screen.getAllByText("Introduce").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("Notice").length).toBeGreaterThan(0);
       unmount();
     }
   });
@@ -124,7 +124,7 @@ describe("lesson activity registry", () => {
 
     render(
       <ActivityHost
-        {...makeProps(meet, 2)}
+        {...makeProps(meet, 3)}
         allowPetUpdates={false}
         hubPath="/schools/field/lessons"
       />,

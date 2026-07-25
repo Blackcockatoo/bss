@@ -39,12 +39,13 @@ import {
 
 /**
  * Lesson 2 — Build a Body. A simplified mini Body Forge exposing only four
- * guided categories (shape, face, movement, surface). Selections are reversible
- * (undo / reset) and only committed when the student presses Apply.
+ * guided categories (shape, face, movement, surface), framed as an ordered
+ * algorithm: Start → Choose → Check → Act → Repeat → Stop. Selections are
+ * reversible (undo / reset) and only committed when the student presses
+ * Apply.
  */
 export function BuildBodyActivity({
   step,
-  stepIndex,
   isPreview,
   reducedMotion,
   pet,
@@ -65,6 +66,8 @@ export function BuildBodyActivity({
   const [working, setWorking] = useState<LessonPetConfig>(() =>
     cloneLessonPetConfig(pet.startingConfig),
   );
+  const [shapePrediction, setShapePrediction] = useState("");
+  const [debugNote, setDebugNote] = useState("");
   const [reason, setReason] = useState(existing?.reason ?? "");
   const [applied, setApplied] = useState(existing?.applied ?? false);
   const [saved, setSaved] = useState(false);
@@ -110,6 +113,7 @@ export function BuildBodyActivity({
     },
     reason: overrides.reason ?? reason,
     applied: overrides.applied ?? applied,
+    shapePrediction: overrides.shapePrediction ?? shapePrediction,
     ...(appliedChange
       ? { appliedChange }
       : existing?.appliedChange
@@ -176,189 +180,242 @@ export function BuildBodyActivity({
     </div>
   );
 
-  if (stepIndex === 0) {
-    return (
-      <StepShell
-        kindLabel={STEP_KIND_LABEL.introduce}
-        instruction="Here is the starting body. Look at its shape, face, movement and surface before you change anything."
-      >
-        <div className="flex justify-center">
-          <PetStage config={before} reducedMotion={reducedMotion} size="lg" />
-        </div>
-      </StepShell>
-    );
-  }
-
-  if (stepIndex === 1) {
-    return (
-      <StepShell
-        kindLabel={STEP_KIND_LABEL.observe}
-        instruction="Choose a body shape. How might this shape affect the way the pet moves?"
-        footer={undoControls}
-      >
-        <div className="grid gap-6 lg:grid-cols-[16rem_1fr]">
+  switch (step.kind) {
+    case "notice":
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.notice}
+          instruction="Here is the starting body. Look at its shape, face, movement and surface before you change anything."
+        >
           <div className="flex justify-center">
-            <PetStage config={working} reducedMotion={reducedMotion} />
+            <PetStage config={before} reducedMotion={reducedMotion} size="lg" />
           </div>
-          <ChoiceGrid
-            legend="Body shape"
-            options={LESSON_SHAPE_OPTIONS}
-            value={working.shape}
-            onChange={(id) => update({ shape: id })}
-            disabled={isPreview}
-          />
-        </div>
-      </StepShell>
-    );
-  }
+        </StepShell>
+      );
 
-  if (stepIndex === 2) {
-    return (
-      <StepShell
-        kindLabel={STEP_KIND_LABEL.interact}
-        instruction="Choose a face. What does this feature communicate without words?"
-        footer={undoControls}
-      >
-        <div className="grid gap-6 lg:grid-cols-[16rem_1fr]">
-          <div className="flex justify-center">
-            <PetStage config={working} reducedMotion={reducedMotion} />
-          </div>
-          <ChoiceGrid
-            legend="Face / expression"
-            options={LESSON_EXPRESSION_OPTIONS}
-            value={working.expression}
-            onChange={(id) => update({ expression: id })}
-            disabled={isPreview}
-          />
-        </div>
-      </StepShell>
-    );
-  }
-
-  if (stepIndex === 3) {
-    return (
-      <StepShell
-        kindLabel={STEP_KIND_LABEL.discuss}
-        instruction="Choose how it moves and its surface. Then finish: I chose this because…"
-        footer={undoControls}
-      >
-        <div className="grid gap-6 lg:grid-cols-[16rem_1fr]">
-          <div className="flex justify-center">
-            <PetStage config={working} reducedMotion={reducedMotion} />
-          </div>
-          <div className="space-y-4">
-            <ChoiceGrid
-              legend="Movement"
-              options={LESSON_MOVEMENT_OPTIONS}
-              value={working.movement}
-              onChange={(id) =>
-                update({ movement: id as LessonMovementStyle })
-              }
-              columns={4}
-              disabled={isPreview}
-            />
-            <ChoiceGrid
-              legend="Surface"
-              options={LESSON_PATTERN_OPTIONS}
-              value={working.pattern}
-              onChange={(id) => update({ pattern: id })}
-              disabled={isPreview}
-            />
+    case "predict":
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.predict}
+          instruction="Building a body follows an order: Start, Choose, Check, Act, Repeat, Stop. Predict what will change if you choose a new shape."
+        >
+          <div className="mx-auto max-w-md space-y-3">
+            <div className="flex justify-center">
+              <PetStage config={before} reducedMotion={reducedMotion} />
+            </div>
             <EvidenceText
-              label="I chose this because…"
+              label="My prediction"
+              value={shapePrediction}
+              onChange={setShapePrediction}
+              onBlur={() => !isPreview && saveEvidence(buildEvidence())}
+              placeholder="e.g. I think a tall shape will make it look like it can reach high places."
+              rows={2}
+              disabled={isPreview}
+            />
+          </div>
+        </StepShell>
+      );
+
+    case "act":
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.act}
+          instruction="Choose → Check → Act: choose a body shape and check it fits the pet you want."
+          footer={undoControls}
+        >
+          <div className="grid gap-6 lg:grid-cols-[16rem_1fr]">
+            <div className="flex justify-center">
+              <PetStage config={working} reducedMotion={reducedMotion} />
+            </div>
+            <ChoiceGrid
+              legend="Body shape"
+              options={LESSON_SHAPE_OPTIONS}
+              value={working.shape}
+              onChange={(id) => update({ shape: id })}
+              disabled={isPreview}
+            />
+          </div>
+        </StepShell>
+      );
+
+    case "observe":
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.observe}
+          instruction="Observe your chosen shape, then Repeat the same rule (Choose → Check → Act) to pick a face."
+          footer={undoControls}
+        >
+          <div className="grid gap-6 lg:grid-cols-[16rem_1fr]">
+            <div className="flex justify-center">
+              <PetStage config={working} reducedMotion={reducedMotion} />
+            </div>
+            <ChoiceGrid
+              legend="Face / expression"
+              options={LESSON_EXPRESSION_OPTIONS}
+              value={working.expression}
+              onChange={(id) => update({ expression: id })}
+              disabled={isPreview}
+            />
+          </div>
+        </StepShell>
+      );
+
+    case "explain":
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.explain}
+          instruction="Choose movement and surface. Then explain: what would you Check first if two choices didn't work together?"
+          footer={undoControls}
+        >
+          <div className="grid gap-6 lg:grid-cols-[16rem_1fr]">
+            <div className="flex justify-center">
+              <PetStage config={working} reducedMotion={reducedMotion} />
+            </div>
+            <div className="space-y-4">
+              <ChoiceGrid
+                legend="Movement"
+                options={LESSON_MOVEMENT_OPTIONS}
+                value={working.movement}
+                onChange={(id) =>
+                  update({ movement: id as LessonMovementStyle })
+                }
+                columns={4}
+                disabled={isPreview}
+              />
+              <ChoiceGrid
+                legend="Surface"
+                options={LESSON_PATTERN_OPTIONS}
+                value={working.pattern}
+                onChange={(id) => update({ pattern: id })}
+                disabled={isPreview}
+              />
+              <EvidenceText
+                label="If something didn't fit, I would check…"
+                value={debugNote}
+                onChange={setDebugNote}
+                placeholder="e.g. whether the feature matches the body shape."
+                disabled={isPreview}
+              />
+            </div>
+          </div>
+        </StepShell>
+      );
+
+    case "create":
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.create}
+          instruction="Create your finished design. Compare before and after, then keep your original or apply your new design."
+        >
+          <div className="space-y-5">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col items-center gap-2">
+                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                  Before
+                </p>
+                <PetStage config={before} reducedMotion={reducedMotion} size="sm" />
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <p className="text-xs uppercase tracking-[0.2em] text-amber-300/80">
+                  After
+                </p>
+                <PetStage config={working} reducedMotion={reducedMotion} size="sm" />
+              </div>
+            </div>
+            <p className="text-center text-xs text-slate-400">{changeDescription}</p>
+
+            <div className="mx-auto max-w-md space-y-3">
+              <EvidenceText
+                label="I chose this because…"
+                value={reason}
+                onChange={setReason}
+                onBlur={() => !isPreview && saveEvidence(buildEvidence())}
+                placeholder="e.g. I chose wings so it can explore high places."
+                disabled={isPreview}
+              />
+              <p className="rounded-2xl border border-slate-700/60 bg-slate-800/30 px-3 py-2 text-xs text-slate-400">
+                Trying designs here is temporary. Nothing changes your real Meta-Pet
+                until you press <strong>Apply Design to My Meta-Pet</strong>.
+              </p>
+              <div className="flex flex-wrap justify-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    resetToStart();
+                    if (!isPreview) saveEvidence(buildEvidence({ applied }));
+                  }}
+                  disabled={isPreview}
+                  className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
+                >
+                  Keep my original design
+                </Button>
+                {allowPetUpdates && hasRealPet ? (
+                  <Button
+                    type="button"
+                    onClick={applyToPet}
+                    disabled={isPreview}
+                    className="bg-amber-300 text-slate-950 hover:bg-amber-200"
+                  >
+                    Apply Design to My Meta-Pet
+                  </Button>
+                ) : null}
+              </div>
+              {allowPetUpdates ? (hasRealPet ? (
+                <ApplyResultBanner
+                  result={bodyResult}
+                  onUndo={undoApplyToPet}
+                  showViewPet
+                />
+              ) : (
+                <MissingPetNotice message="You can still finish this lesson with a classroom example. Create a Meta-Pet to apply your design to your own pet." />
+              )) : null}
+              <div className="flex justify-center">
+                <SaveButton
+                  onClick={() => {
+                    if (!isPreview) saveEvidence(buildEvidence());
+                    setSaved(true);
+                  }}
+                  saved={saved}
+                  disabled={isPreview}
+                  label="Save design comparison"
+                />
+              </div>
+            </div>
+          </div>
+        </StepShell>
+      );
+
+    case "reflect":
+    default:
+      return (
+        <StepShell
+          kindLabel={STEP_KIND_LABEL.reflect}
+          instruction="Why does the order of Start, Choose, Check, Act, Repeat, Stop matter when building something?"
+        >
+          <div className="mx-auto max-w-md space-y-3">
+            <EvidenceText
+              label="My reflection"
               value={reason}
               onChange={setReason}
               onBlur={() => !isPreview && saveEvidence(buildEvidence())}
-              placeholder="e.g. I chose wings so it can explore high places."
+              placeholder="The order matters because…"
+              rows={3}
               disabled={isPreview}
             />
-          </div>
-        </div>
-      </StepShell>
-    );
-  }
-
-  // complete
-  return (
-    <StepShell
-      kindLabel={STEP_KIND_LABEL.complete}
-      instruction="Compare before and after. Keep your original or apply your new design."
-    >
-      <div className="space-y-5">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
-              Before
-            </p>
-            <PetStage config={before} reducedMotion={reducedMotion} size="sm" />
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-xs uppercase tracking-[0.2em] text-amber-300/80">
-              After
-            </p>
-            <PetStage config={working} reducedMotion={reducedMotion} size="sm" />
-          </div>
-        </div>
-        <p className="text-center text-xs text-slate-400">{changeDescription}</p>
-
-        <div className="mx-auto max-w-md space-y-3">
-          <EvidenceText
-            label="I chose this because…"
-            value={reason}
-            onChange={setReason}
-            onBlur={() => !isPreview && saveEvidence(buildEvidence())}
-            disabled={isPreview}
-          />
-          <p className="rounded-2xl border border-slate-700/60 bg-slate-800/30 px-3 py-2 text-xs text-slate-400">
-            Trying designs here is temporary. Nothing changes your real Meta-Pet
-            until you press <strong>Apply Design to My Meta-Pet</strong>.
-          </p>
-          <div className="flex flex-wrap justify-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                resetToStart();
-                if (!isPreview) saveEvidence(buildEvidence({ applied }));
-              }}
-              disabled={isPreview}
-              className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
-            >
-              Keep my original design
-            </Button>
-            {allowPetUpdates && hasRealPet ? (
-              <Button
-                type="button"
-                onClick={applyToPet}
+            <div className="flex justify-center">
+              <SaveButton
+                onClick={() => {
+                  if (!isPreview) saveEvidence(buildEvidence());
+                  setSaved(true);
+                }}
+                saved={saved}
                 disabled={isPreview}
-                className="bg-amber-300 text-slate-950 hover:bg-amber-200"
-              >
-                Apply Design to My Meta-Pet
-              </Button>
-            ) : null}
+                label="Save reflection"
+              />
+            </div>
           </div>
-          {allowPetUpdates ? (hasRealPet ? (
-            <ApplyResultBanner
-              result={bodyResult}
-              onUndo={undoApplyToPet}
-              showViewPet
-            />
-          ) : (
-            <MissingPetNotice message="You can still finish this lesson with a classroom example. Create a Meta-Pet to apply your design to your own pet." />
-          )) : null}
-          <div className="flex justify-center">
-            <SaveButton
-              onClick={() => {
-                if (!isPreview) saveEvidence(buildEvidence());
-                setSaved(true);
-              }}
-              saved={saved}
-              disabled={isPreview}
-              label="Save design comparison"
-            />
-          </div>
-        </div>
-      </div>
-    </StepShell>
-  );
+        </StepShell>
+      );
+  }
 }

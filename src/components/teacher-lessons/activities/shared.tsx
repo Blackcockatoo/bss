@@ -8,13 +8,15 @@ import { Button } from "@/components/ui/button";
 import type { LessonPetConfig, LessonStepDefinition } from "@/lib/teacher-lessons";
 import { configToBodySpec, describePetConfig } from "./petSpec";
 
-/** Plain-language label for each canonical step phase. */
+/** Plain-language label for each canonical investigation stage. */
 export const STEP_KIND_LABEL: Record<LessonStepDefinition["kind"], string> = {
-  introduce: "Introduce",
-  observe: "Observe / Predict",
-  interact: "Interact",
-  discuss: "Discuss",
-  complete: "Save / Complete",
+  notice: "Notice",
+  predict: "Predict",
+  act: "Act",
+  observe: "Observe",
+  explain: "Explain",
+  create: "Create",
+  reflect: "Reflect",
 };
 
 /**
@@ -181,10 +183,12 @@ export function StepShell({
 }) {
   return (
     <section className="space-y-4">
-      <div className="space-y-1">
-        <p className="text-xs uppercase tracking-[0.2em] text-amber-300/80">
+      {/* Only the stage label + instruction are in the live region, so typing
+          in a field inside `children` never re-triggers an announcement. */}
+      <div className="space-y-1" aria-live="polite">
+        <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-300/80">
           {kindLabel}
-        </p>
+        </h2>
         <p className="text-lg leading-7 text-slate-100">{instruction}</p>
       </div>
       <div className="space-y-4">{children}</div>

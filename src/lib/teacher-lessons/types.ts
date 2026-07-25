@@ -64,15 +64,28 @@ export type LessonActivityType =
   | "create";
 
 /**
- * The five canonical placeholder phases every Pass 1 lesson moves through.
- * Later passes may add richer steps, but the Runner treats steps generically.
+ * The seven-stage classroom investigation rhythm every lesson moves through
+ * (Field Mode Lesson Upgrade). Every lesson — at every duration depth — uses
+ * these same seven stages so the shared Lesson Runner, Guide Bar and Teacher
+ * Panel can drive all of them without per-lesson branching:
+ *
+ *   Notice   → look at the system before anything changes.
+ *   Predict  → choose or describe what you think will happen.
+ *   Act      → make one meaningful choice, change one variable, or do an
+ *              offline activity.
+ *   Observe  → the system (MetaPet or classroom result) visibly responds.
+ *   Explain  → identify the cause-and-effect relationship.
+ *   Create   → draw, write, build, arrange, demonstrate or design something.
+ *   Reflect  → answer one short reflection question.
  */
 export type LessonStepKind =
-  | "introduce"
+  | "notice"
+  | "predict"
+  | "act"
   | "observe"
-  | "interact"
-  | "discuss"
-  | "complete";
+  | "explain"
+  | "create"
+  | "reflect";
 
 /** The type of evidence a lesson will eventually capture (placeholder only). */
 export type LessonEvidenceType =
@@ -158,6 +171,28 @@ export interface LessonDefinition {
   studentInstructions: string;
   /** Whole-class discussion prompts. */
   discussionPrompts: string[];
+  /** The single big idea this lesson teaches, shown as "Key concept". */
+  keyConcept: string;
+  /**
+   * Materials needed before the lesson (kept short and classroom-realistic).
+   * Empty array means "no materials beyond a shared screen".
+   */
+  materials: string[];
+  /** What a teacher should set up before the lesson starts. */
+  preparation: string;
+  /**
+   * A short off-screen / physical classroom activity for the Act or Create
+   * stage. Always usable at Quick Spark depth; expanded at Deep Dive via
+   * {@link LessonDefinition.deepDiveActivity}.
+   */
+  physicalActivity: string;
+  /**
+   * The collaborative, physical or creative extension unlocked at Deep Dive
+   * (40-minute) depth. Clearly optional at Quick Spark / Core Lesson depth.
+   */
+  deepDiveActivity: string;
+  /** Safety or wellbeing notes for this lesson, if any (kept empty otherwise). */
+  safetyNotes: string;
   /** Which Meta-Pet system the lesson opens (placeholder in Pass 1). */
   appDestination: LessonAppDestination;
   activityType: LessonActivityType;

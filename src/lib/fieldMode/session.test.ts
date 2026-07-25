@@ -44,13 +44,25 @@ describe("Field lesson session contract", () => {
   it("builds only a Field lesson route", () => {
     const path = buildFieldLessonPath("build-a-body", DEFAULT_FIELD_SESSION);
     expect(path).toMatch(/^\/schools\/field\/lessons\/build-a-body\?/);
-    expect(path).toContain("minutes=15");
+    expect(path).toContain("minutes=20");
     expect(path).not.toContain("/teachers");
   });
 
-  it("maps the 10-minute choice to demo timing", () => {
+  it("maps the 10-minute choice to Quick Spark (demo) timing", () => {
     expect(
       fieldTimingMode({ ...DEFAULT_FIELD_SESSION, durationMinutes: 10 }),
     ).toBe("demo");
+  });
+
+  it("maps the 20-minute choice to Core Lesson (standard) timing", () => {
+    expect(
+      fieldTimingMode({ ...DEFAULT_FIELD_SESSION, durationMinutes: 20 }),
+    ).toBe("standard");
+  });
+
+  it("maps the 40-minute choice to Deep Dive (extended) timing", () => {
+    expect(
+      fieldTimingMode({ ...DEFAULT_FIELD_SESSION, durationMinutes: 40 }),
+    ).toBe("extended");
   });
 });
