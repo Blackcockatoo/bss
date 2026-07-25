@@ -1,8 +1,8 @@
 /**
- * Meta-Pet Teacher Lesson System — public module surface (Pass 1).
+ * Meta-Pet Teacher Lesson System — public module surface.
  *
- * Components and routes import from here so later passes can reorganise the
- * internals without touching call sites.
+ * Components and routes import from here so the stable lesson architecture can
+ * keep evolving without duplicating curriculum copy or changing call sites.
  */
 
 export * from "./types";
@@ -13,7 +13,7 @@ export {
   getLessonById,
   getLessonBySlug,
   isLessonId,
-} from "./lessonDefinitions";
+} from "./lessonProgramme";
 export {
   TEACHER_HUB_PATH,
   LESSON_BASE_PATH,
