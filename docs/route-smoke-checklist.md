@@ -19,6 +19,16 @@ Use this quick checklist after landing/compass updates.
 - [ ] Click `Launch Monkey Invaders` and confirm the game opens.
 - [ ] Click `Open Classroom Quest` and confirm navigation to `/school-game`.
 
+## Arcade hub checks (`/arcade`)
+- [ ] Open `/arcade` and confirm both cabinets render without console/runtime errors.
+- [ ] Click `Monkey Invaders` and confirm it opens in the same tab.
+- [ ] Click `Bubble Hex` and confirm it opens the Bubble Hex deployment in a new tab.
+
+## Bubble Hex checks (`/bubblehex`)
+- [ ] Confirm the route hands off to the Bubble Hex deployment.
+- [ ] Confirm the title screen loads and `Enter` starts a run.
+- [ ] Confirm touch controls appear on phones.
+
 ## Monkey Invaders checks (`/monkey-invaders`)
 - [ ] Confirm the route redirects cleanly into the standalone game experience.
 - [ ] Confirm the fixed top bar shows `B$S` / `Blue Snake Studios` branding plus `Compass` back action.
@@ -27,6 +37,11 @@ Use this quick checklist after landing/compass updates.
 - [ ] Reach level 5 and confirm a boss level appears with HUD bars and attack telegraphs.
 - [ ] Open the legacy `/space-jewbles` URL and confirm it redirects to Monkey Invaders.
 
+## Schools profile checks (MetaPet.school)
+- [ ] With the schools profile active, confirm `/arcade`, `/monkey-invaders` and
+      `/bubblehex` all redirect to `/schools`. Arcade titles are intentionally
+      not part of the child-safe route surface.
+
 ## Pass criteria
-- [ ] No 404s across `/`, `/compass`, `/monkey-invaders`, `/space-jewbles`.
+- [ ] No 404s across `/`, `/compass`, `/arcade`, `/monkey-invaders`, `/bubblehex`, `/space-jewbles`.
 - [ ] No broken CTA links in tested paths.
