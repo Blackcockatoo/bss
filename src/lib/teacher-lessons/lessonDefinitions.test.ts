@@ -7,7 +7,7 @@ import {
   getLessonById,
   getLessonBySlug,
   isLessonId,
-} from "./lessonDefinitions";
+} from "./lessonProgramme";
 
 const EXPECTED_TITLES = [
   "Meet Your Meta-Pet",
@@ -19,47 +19,90 @@ const EXPECTED_TITLES = [
   "The Responsible Creator Challenge",
 ];
 
-describe("lesson definitions", () => {
-  it("defines exactly seven lessons in order", () => {
+const STALE_DEVELOPMENT_LANGUAGE = /placeholder|pass\s*[12]|later\s+(it|they|this)\s+(opens?|becomes?)/i;
+
+describe("classroom lesson programme", () => {
+  it("defines exactly seven lessons in canonical order", () => {
     expect(LESSON_DEFINITIONS).toHaveLength(7);
     expect(TOTAL_LESSONS).toBe(7);
-    expect(LESSON_DEFINITIONS.map((l) => l.title)).toEqual(EXPECTED_TITLES);
-    expect(LESSON_DEFINITIONS.map((l) => l.number)).toEqual([
+    expect(LESSON_DEFINITIONS.map((lesson) => lesson.title)).toEqual(
+      EXPECTED_TITLES,
+    );
+    expect(LESSON_DEFINITIONS.map((lesson) => lesson.number)).toEqual([
       1, 2, 3, 4, 5, 6, 7,
     ]);
   });
 
-  it("gives every lesson a five-step placeholder flow", () => {
+  it("keeps every canonical lesson within the public 20-minute core", () => {
+    for (const lesson of LESSON_DEFINITIONS) {
+      expect(lesson.durationMinutes).toBe(20);
+    }
+  });
+
+  it("gives every lesson a complete five-phase classroom flow", () => {
     for (const lesson of LESSON_DEFINITIONS) {
       expect(lesson.steps).toHaveLength(5);
-      expect(lesson.steps.map((s) => s.kind)).toEqual([
+      expect(lesson.steps.map((step) => step.kind)).toEqual([
         "introduce",
         "observe",
         "interact",
         "discuss",
         "complete",
       ]);
+
       for (const step of lesson.steps) {
         expect(step.id).toContain(lesson.id);
-        expect(step.teacherPrompt.length).toBeGreaterThan(0);
-        expect(step.studentTask.length).toBeGreaterThan(0);
-        expect(step.whatDoINow.length).toBeGreaterThan(0);
+        expect(step.title.length).toBeGreaterThan(8);
+        expect(step.teacherPrompt.length).toBeGreaterThan(40);
+        expect(step.studentTask.length).toBeGreaterThan(20);
+        expect(step.whatDoINow.length).toBeGreaterThan(30);
+        expect(step.expectedOutcome.length).toBeGreaterThan(30);
       }
+    }
+  });
+
+  it("does not expose stale development or placeholder language", () => {
+    for (const lesson of LESSON_DEFINITIONS) {
+      const publicCopy = [
+        lesson.shortDescription,
+        lesson.learningIntention,
+        lesson.teacherIntroduction,
+        lesson.teacherScript,
+        lesson.studentInstructions,
+        lesson.completionMessage,
+        lesson.extensionActivity,
+        lesson.supportActivity,
+        ...lesson.successCriteria,
+        ...lesson.discussionPrompts,
+        ...lesson.steps.flatMap((step) => [
+          step.title,
+          step.teacherPrompt,
+          step.studentTask,
+          step.whatDoINow,
+          step.expectedOutcome,
+        ]),
+      ].join(" ");
+
+      expect(publicCopy).not.toMatch(STALE_DEVELOPMENT_LANGUAGE);
     }
   });
 
   it("has unique ids and slugs", () => {
     expect(new Set(LESSON_IDS).size).toBe(7);
-    expect(new Set(LESSON_DEFINITIONS.map((l) => l.slug)).size).toBe(7);
+    expect(new Set(LESSON_DEFINITIONS.map((lesson) => lesson.slug)).size).toBe(
+      7,
+    );
   });
 
-  it("provides required rich configuration fields on every lesson", () => {
+  it("provides rich, usable classroom configuration for every lesson", () => {
     for (const lesson of LESSON_DEFINITIONS) {
-      expect(lesson.learningIntention.length).toBeGreaterThan(0);
-      expect(lesson.successCriteria.length).toBeGreaterThan(0);
-      expect(lesson.discussionPrompts.length).toBeGreaterThan(0);
-      expect(lesson.completionMessage.length).toBeGreaterThan(0);
-      expect(lesson.preview.mainIdea.length).toBeGreaterThan(0);
+      expect(lesson.learningIntention.length).toBeGreaterThan(30);
+      expect(lesson.successCriteria).toHaveLength(3);
+      expect(lesson.discussionPrompts).toHaveLength(3);
+      expect(lesson.completionMessage.length).toBeGreaterThan(30);
+      expect(lesson.preview.mainIdea.length).toBeGreaterThan(30);
+      expect(lesson.extensionActivity.length).toBeGreaterThan(30);
+      expect(lesson.supportActivity.length).toBeGreaterThan(20);
       expect(typeof lesson.usesDemonstrationPet).toBe("boolean");
       expect(typeof lesson.usesStudentRealPet).toBe("boolean");
       expect(typeof lesson.persistChanges).toBe("boolean");
