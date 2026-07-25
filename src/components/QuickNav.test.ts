@@ -14,17 +14,39 @@ describe("QuickNav items", () => {
       "/pet",
       "/app/activities",
       "/app/wellness",
-      "/school-game",
+      "/schools",
       "/identity",
     ]);
     expect(hrefs).not.toContain("/moss60");
   });
 
-  it("keeps the schools nav constrained to the school surface", () => {
-    const hrefs = SCHOOLS_QUICK_NAV_ITEMS.map((item) => item.href);
+  it("points the core School item at the school doorway, not the runtime", () => {
+    const school = CORE_QUICK_NAV_ITEMS.find((item) => item.label === "School");
+    expect(school?.href).toBe("/schools");
+  });
 
-    expect(hrefs).toEqual(["/schools", "/school-game", "/legal/privacy"]);
+  it("keeps the schools nav to the approved Field Mode primary destinations", () => {
+    const hrefs = SCHOOLS_QUICK_NAV_ITEMS.map((item) => item.href);
+    const labels = SCHOOLS_QUICK_NAV_ITEMS.map((item) => item.label);
+
+    expect(hrefs).toEqual([
+      "/schools/field",
+      "/schools/field/lessons",
+      "/schools/field/classroom",
+      "/schools/field/guide",
+      "/schools/field/safety",
+    ]);
+    expect(labels).toEqual([
+      "Field Home",
+      "Lessons",
+      "Classroom",
+      "Teacher Guide",
+      "Safety & Privacy",
+    ]);
     expect(hrefs).not.toContain("/");
     expect(hrefs).not.toContain("/pet");
+    expect(hrefs).not.toContain("/app/activities");
+    expect(labels).not.toContain("Explore");
+    expect(labels).not.toContain("School");
   });
 });

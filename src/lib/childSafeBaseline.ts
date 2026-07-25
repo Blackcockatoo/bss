@@ -173,11 +173,48 @@ export const FIELD_MODE_NAV_ITEMS: readonly FieldModeNavItem[] = [
   { href: FIELD_MODE_EXIT_PATH, label: "Exit Field Mode", kind: "exit" },
 ] as const;
 
-export const CHILD_SAFE_NAV_ROUTES = new Set(
-  IS_SCHOOLS_PROFILE
-    ? ["/schools", "/school-game", "/legal/privacy"]
-    : ["/", "/pet", "/app/wellness", "/school-game"],
-);
+const SCHOOL_PRIMARY_NAV_KINDS: ReadonlySet<FieldModeNavItem["kind"]> =
+  new Set(["home", "lessons", "classroom", "guide", "safety"]);
+
+/**
+ * The approved school-profile primary navigation: Field Home, Lessons,
+ * Classroom, Teacher Guide and Safety & Privacy. Derived from
+ * FIELD_MODE_NAV_ITEMS (the same canonical destinations used inside the
+ * Field Mode session) so there is a single list of school routes, not a
+ * second, divergent one. Deliberately excludes "Offline Pack" and "Exit
+ * Field Mode", which are session utilities rather than primary destinations,
+ * and never includes a generic "Explore" or a redundant "School" item.
+ */
+export const SCHOOL_PRIMARY_NAV_ITEMS: readonly FieldModeNavItem[] =
+  FIELD_MODE_NAV_ITEMS.filter((item) => SCHOOL_PRIMARY_NAV_KINDS.has(item.kind));
+
+// "/" and "/legal" are shared entry points that render different content
+// depending on the active deployment profile; being present in the schools
+// route policy (so they resolve instead of 404ing) does not make them
+// school-exclusive content, so they must not flip navigation into the
+// school profile on their own.
+const SCHOOL_NAV_PROFILE_EXCLUDED_PATHNAMES = new Set(["/", "/legal"]);
+
+/**
+ * Whether `pathname` belongs to the school/Field Mode surface, regardless of
+ * which domain served it. This is the single source of truth for "should
+ * this page use the school navigation profile" -- used by desktop, mobile
+ * and any other chrome so the determination never has to be duplicated or
+ * re-derived from a hostname or path regex per component.
+ */
+export function isSchoolNavPathname(pathname: string): boolean {
+  if (SCHOOL_NAV_PROFILE_EXCLUDED_PATHNAMES.has(pathname)) {
+    return false;
+  }
+  return isPathnameAllowedByPolicy(pathname, "schools");
+}
+
+export const CHILD_SAFE_NAV_ROUTES = new Set([
+  "/",
+  "/pet",
+  "/app/wellness",
+  "/schools",
+]);
 
 export function isFieldModePathname(pathname: string): boolean {
   return (

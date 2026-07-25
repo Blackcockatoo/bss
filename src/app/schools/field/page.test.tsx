@@ -27,9 +27,30 @@ describe("Field Mode entry", () => {
     }
   });
 
-  it("has one primary launch action into the approved Field start route", () => {
+  it("presents the recommended school homepage CTA order with destination-specific labels", () => {
     render(<FieldModePage />);
-    const action = screen.getByRole("link", { name: /Start Field Mode/i });
-    expect(action).toHaveAttribute("href", "/schools/field/start");
+
+    const links = [
+      "Browse Lessons",
+      "Open Classroom",
+      "Teacher Guide",
+      "Safety & Privacy",
+    ].map((name) => screen.getByRole("link", { name }));
+
+    expect(links.map((link) => link.textContent?.trim())).toEqual([
+      "Browse Lessons",
+      "Open Classroom",
+      "Teacher Guide",
+      "Safety & Privacy",
+    ]);
+    expect(links[0]).toHaveAttribute("href", "/schools/field/start");
+    expect(links[1]).toHaveAttribute("href", "/schools/field/classroom");
+    expect(links[2]).toHaveAttribute("href", "/schools/field/guide");
+    expect(links[3]).toHaveAttribute("href", "/schools/field/safety");
+
+    // No vague "Explore" CTA and no more than one destination per target.
+    expect(screen.queryByRole("link", { name: /^Explore$/i })).not.toBeInTheDocument();
+    const hrefs = links.map((link) => link.getAttribute("href"));
+    expect(new Set(hrefs).size).toBe(hrefs.length);
   });
 });

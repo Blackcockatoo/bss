@@ -6,13 +6,10 @@ import { QuickNav } from "@/components/QuickNav";
 import { WardrobeUnlockCeremony } from "@/components/wardrobe/WardrobeUnlockCeremony";
 import { WardrobeProgressBridge } from "@/lib/wardrobe/WardrobeProgressBridge";
 import {
-  FIELD_MODE_COOKIE_VALUE,
-  FIELD_MODE_HOME_PATH,
-  FIELD_MODE_UI_COOKIE,
   getChildSafeFallbackPathname,
   isChildSafeAllowedPathname,
   isFieldModePathname,
-  isPathnameAllowedByPolicy,
+  isSchoolNavPathname,
 } from "@/lib/childSafeBaseline";
 import {
   ENABLE_CHILD_SAFE_BASELINE,
@@ -36,25 +33,14 @@ export default function ClientBody({
     (state) => state.refreshProfile,
   );
   const [privacyOpen, setPrivacyOpen] = useState(false);
-  const isSchoolPath = useMemo(
-    () =>
-      !!pathname &&
-      (pathname === "/school-game" ||
-        pathname === "/schools" ||
-        pathname.startsWith("/schools/")),
-    [pathname],
-  );
-  const isFieldPath = !!pathname && isFieldModePathname(pathname);
-  const [fieldUiActive, setFieldUiActive] = useState<boolean | null>(
-    isFieldPath ? true : null,
-  );
-  const fieldSurfaceActive =
-    isFieldPath ||
-    (fieldUiActive === true &&
-      isPathnameAllowedByPolicy(pathname ?? "/", "field"));
-  const fieldUiResolved = isFieldPath || fieldUiActive !== null;
+  // A single, synchronous, pathname-derived profile check -- available on
+  // the very first render (server or client) with no cookie round-trip, so
+  // there is no window where the wrong navigation set can flash in.
   const effectiveSchoolsMode =
-    IS_SCHOOLS_PROFILE || isSchoolPath || fieldSurfaceActive;
+    IS_SCHOOLS_PROFILE || isSchoolNavPathname(pathname ?? "/");
+  // True only inside the nested Field Mode layout (/schools/field/*), which
+  // renders its own FieldModeNav as the primary navigation for that surface.
+  const isFieldPath = !!pathname && isFieldModePathname(pathname);
   const childSafeBlocked = useMemo(
     () =>
       (ENABLE_CHILD_SAFE_BASELINE || IS_SCHOOLS_PROFILE) &&
@@ -66,31 +52,11 @@ export default function ClientBody({
     document.body.classList.add("antialiased");
   }, []);
 
-  useEffect(() => {
-    if (isFieldPath) {
-      return;
-    }
-    let cancelled = false;
-    queueMicrotask(() => {
-      if (cancelled) return;
-      const active = document.cookie
-        .split(/;\s*/)
-        .some(
-          (cookie) =>
-            cookie === `${FIELD_MODE_UI_COOKIE}=${FIELD_MODE_COOKIE_VALUE}`,
-        );
-      setFieldUiActive(active);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [isFieldPath, pathname]);
-
   // Remember the chosen visual form across reloads so returning from the
   // Body Forge (or any session) never silently reverts the renderer.
   // Restored after hydration to keep server markup deterministic.
   useEffect(() => {
-    if (!fieldUiResolved || effectiveSchoolsMode) return;
+    if (effectiveSchoolsMode) return;
     try {
       const stored = window.localStorage.getItem(PET_FORM_STORAGE_KEY);
       if (stored) {
@@ -107,12 +73,12 @@ export default function ClientBody({
         // Non-fatal: the session keeps working without the preference.
       }
     });
-  }, [effectiveSchoolsMode, fieldUiResolved]);
+  }, [effectiveSchoolsMode]);
 
   useEffect(() => {
-    if (!fieldUiResolved || effectiveSchoolsMode) return;
+    if (effectiveSchoolsMode) return;
     refreshIdentityProfile();
-  }, [effectiveSchoolsMode, fieldUiResolved, refreshIdentityProfile]);
+  }, [effectiveSchoolsMode, refreshIdentityProfile]);
 
   useEffect(() => {
     if (!childSafeBlocked || !pathname) {
@@ -165,7 +131,7 @@ export default function ClientBody({
   return (
     <div
       className={`antialiased flex min-h-screen flex-col ${
-        fieldSurfaceActive
+        isFieldPath
           ? "pb-0"
           : "pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]"
       }`}
@@ -173,7 +139,7 @@ export default function ClientBody({
       <div className={`app-shell-header sticky top-0 z-40 border-b px-3 py-2 backdrop-blur sm:px-4 sm:py-3 ${effectiveSchoolsMode ? "border-border bg-background/95" : "border-slate-800 bg-slate-950/90"}`}>
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 sm:gap-3">
           <div className={`text-sm ${effectiveSchoolsMode ? "text-foreground font-medium" : "text-zinc-200"}`}>
-            {fieldSurfaceActive
+            {isFieldPath
               ? "MetaPet Field Mode"
               : effectiveSchoolsMode
                 ? "MetaPet Schools"
@@ -199,17 +165,6 @@ export default function ClientBody({
           </div>
         )}
         {!effectiveSchoolsMode && <JourneyProgressStrip />}
-        {fieldSurfaceActive && !isFieldPath ? (
-          <div className="mx-auto mt-3 flex w-full max-w-6xl items-center justify-between gap-3 rounded-xl border border-emerald-700/20 bg-emerald-50 px-3 py-2 text-xs text-emerald-950">
-            <span>Approved Field Mode information</span>
-            <a
-              href={FIELD_MODE_HOME_PATH}
-              className="font-semibold underline underline-offset-2"
-            >
-              Return to Field Mode
-            </a>
-          </div>
-        ) : null}
       </div>
 
       <div className="flex-1 pb-2">{children}</div>
@@ -222,7 +177,7 @@ export default function ClientBody({
         </>
       ) : null}
       <footer className="app-shell-footer px-4 pb-24 pt-4 text-center sm:pb-6">
-        {!fieldSurfaceActive ? (
+        {!isFieldPath ? (
           <a
             href="mailto:bluesssnakestudio@gmail.com?subject=Meta-Pet%20School%20Pilot%20Enquiry"
             className="mb-4 inline-block text-xs text-slate-400 underline hover:text-slate-300"
@@ -232,7 +187,7 @@ export default function ClientBody({
         ) : null}
         <LegalNotice schoolsMode={effectiveSchoolsMode} />
       </footer>
-      {!fieldSurfaceActive && fieldUiResolved ? <QuickNav /> : null}
+      {!isFieldPath ? <QuickNav /> : null}
     </div>
   );
 }

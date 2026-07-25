@@ -42,7 +42,6 @@ async function loadQuickNav({
 }
 
 afterEach(() => {
-  document.cookie = "metapet-field-ui=; Max-Age=0; path=/";
   vi.resetModules();
   vi.doUnmock("next/link");
   vi.doUnmock("next/navigation");
@@ -73,9 +72,9 @@ describe("QuickNav render behavior", () => {
     expect(
       screen.queryByRole("button", { name: /Install app/i }),
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Overview/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /Field Home/i })).toHaveAttribute(
       "href",
-      "/schools",
+      "/schools/field",
     );
   });
 
@@ -103,8 +102,7 @@ describe("QuickNav render behavior", () => {
     ).toBeInTheDocument();
   });
 
-  it("suppresses consumer navigation on approved supporting pages during Field Mode", async () => {
-    document.cookie = "metapet-field-ui=active; path=/";
+  it("shows the school primary navigation (not the full consumer nav) on approved supporting pages", async () => {
     const QuickNav = await loadQuickNav({
       pathname: "/legal/privacy",
       isSchoolsProfile: false,
@@ -112,12 +110,13 @@ describe("QuickNav render behavior", () => {
 
     render(<QuickNav />);
 
-    expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: /Pet/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("navigation")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Field Home/i })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /^Pet$/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /^Explore$/i })).not.toBeInTheDocument();
   });
 
-  it("does not let a stale presentation marker disable normal MetaPet navigation", async () => {
-    document.cookie = "metapet-field-ui=active; path=/";
+  it("keeps normal MetaPet navigation on core consumer pages", async () => {
     const QuickNav = await loadQuickNav({
       pathname: "/pet",
       isSchoolsProfile: false,
@@ -127,5 +126,6 @@ describe("QuickNav render behavior", () => {
 
     expect(screen.getByRole("navigation")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Pet/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Explore/i })).toBeInTheDocument();
   });
 });

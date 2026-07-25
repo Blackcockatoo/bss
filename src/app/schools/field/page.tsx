@@ -1,7 +1,10 @@
 import { ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
 
 import {
+  FIELD_MODE_CLASSROOM_PATH,
+  FIELD_MODE_GUIDE_PATH,
   FIELD_MODE_HOME_PATH,
+  FIELD_MODE_SAFETY_PATH,
   FIELD_MODE_START_PATH,
 } from "@/lib/childSafeBaseline";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
@@ -14,6 +17,32 @@ const FIELD_PROMISES = [
   "Alias-only classroom use",
   "Local device records",
   "Australian Curriculum alignment",
+] as const;
+
+// Recommended school homepage CTA order: Browse Lessons, Open Classroom,
+// Teacher Guide, Safety & Privacy -- four distinct destinations, not five
+// buttons that all land on the same runtime.
+const FIELD_HOME_ACTIONS = [
+  {
+    href: FIELD_MODE_START_PATH,
+    label: "Browse Lessons",
+    primary: true,
+  },
+  {
+    href: FIELD_MODE_CLASSROOM_PATH,
+    label: "Open Classroom",
+    primary: false,
+  },
+  {
+    href: FIELD_MODE_GUIDE_PATH,
+    label: "Teacher Guide",
+    primary: false,
+  },
+  {
+    href: FIELD_MODE_SAFETY_PATH,
+    label: "Safety & Privacy",
+    primary: false,
+  },
 ] as const;
 
 export default function FieldModePage() {
@@ -39,13 +68,28 @@ export default function FieldModePage() {
               remain on this device. No student sign-in is required.
             </p>
           </div>
-          <a
-            href={FIELD_MODE_START_PATH}
-            className="inline-flex min-h-14 items-center justify-center rounded-xl bg-emerald-800 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-emerald-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800"
-          >
-            Start Field Mode
-            <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
-          </a>
+          <div className="flex flex-wrap gap-3">
+            {FIELD_HOME_ACTIONS.map((action) =>
+              action.primary ? (
+                <a
+                  key={action.href}
+                  href={action.href}
+                  className="inline-flex min-h-14 items-center justify-center rounded-xl bg-emerald-800 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-emerald-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800"
+                >
+                  {action.label}
+                  <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
+                </a>
+              ) : (
+                <a
+                  key={action.href}
+                  href={action.href}
+                  className="inline-flex min-h-14 items-center justify-center rounded-xl border border-emerald-800/30 bg-white px-6 py-3 text-base font-semibold text-emerald-900 shadow-sm hover:bg-emerald-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800"
+                >
+                  {action.label}
+                </a>
+              ),
+            )}
+          </div>
         </section>
 
         <aside className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">

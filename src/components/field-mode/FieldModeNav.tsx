@@ -1,31 +1,9 @@
 "use client";
 
-import {
-  BookOpen,
-  BookOpenCheck,
-  DoorOpen,
-  GraduationCap,
-  HardDriveDownload,
-  Home,
-  ShieldCheck,
-} from "lucide-react";
 import { usePathname } from "next/navigation";
 
-import {
-  FIELD_MODE_HOME_PATH,
-  FIELD_MODE_NAV_ITEMS,
-  type FieldModeNavItem,
-} from "@/lib/childSafeBaseline";
-
-const ICONS: Record<FieldModeNavItem["kind"], typeof Home> = {
-  home: Home,
-  lessons: BookOpenCheck,
-  classroom: GraduationCap,
-  offline: HardDriveDownload,
-  guide: BookOpen,
-  safety: ShieldCheck,
-  exit: DoorOpen,
-};
+import { FIELD_MODE_HOME_PATH, FIELD_MODE_NAV_ITEMS } from "@/lib/childSafeBaseline";
+import { FIELD_MODE_NAV_ICONS } from "./fieldModeNavIcons";
 
 export function FieldModeNav() {
   const pathname = usePathname();
@@ -43,7 +21,7 @@ export function FieldModeNav() {
           MetaPet Field Mode
         </a>
         {FIELD_MODE_NAV_ITEMS.map((item) => {
-          const Icon = ICONS[item.kind];
+          const Icon = FIELD_MODE_NAV_ICONS[item.kind];
           const active =
             item.href === FIELD_MODE_HOME_PATH
               ? pathname === item.href

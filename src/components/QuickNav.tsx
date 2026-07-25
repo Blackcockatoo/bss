@@ -3,11 +3,9 @@
 import {
   ArrowDownToLine,
   ArrowLeft,
-  FileText,
-  BookOpen,
+  Compass,
   HeartPulse,
   Home,
-  Compass,
   PawPrint,
   UserCircle,
 } from "lucide-react";
@@ -16,12 +14,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { FIELD_MODE_NAV_ICONS } from "@/components/field-mode/fieldModeNavIcons";
 import {
   CHILD_SAFE_NAV_ROUTES,
-  FIELD_MODE_COOKIE_VALUE,
-  FIELD_MODE_UI_COOKIE,
+  SCHOOL_PRIMARY_NAV_ITEMS,
   isFieldModePathname,
-  isPathnameAllowedByPolicy,
+  isSchoolNavPathname,
 } from "@/lib/childSafeBaseline";
 import {
   ENABLE_CHILD_SAFE_BASELINE,
@@ -40,40 +38,36 @@ export const CORE_QUICK_NAV_ITEMS = [
   { href: "/pet", label: "Pet", icon: PawPrint },
   { href: "/app/activities", label: "Explore", icon: Compass },
   { href: "/app/wellness", label: "Wellness", icon: HeartPulse },
-  { href: "/school-game", label: "School", icon: BookOpen },
+  { href: "/schools", label: "School", icon: FIELD_MODE_NAV_ICONS.home },
   { href: "/identity", label: "Identity", icon: UserCircle },
 ];
 
-export const SCHOOLS_QUICK_NAV_ITEMS = [
-  { href: "/schools", label: "Overview", icon: Home },
-  { href: "/school-game", label: "Runtime", icon: BookOpen },
-  { href: "/legal/privacy", label: "Privacy", icon: FileText },
-];
+/**
+ * The school-profile bottom/desktop navigation. Sourced directly from
+ * SCHOOL_PRIMARY_NAV_ITEMS (childSafeBaseline.ts) -- the same list the Field
+ * Mode top bar renders from -- so mobile, desktop and the Field Mode session
+ * bar can never drift into showing different item sets.
+ */
+export const SCHOOLS_QUICK_NAV_ITEMS = SCHOOL_PRIMARY_NAV_ITEMS.map((item) => ({
+  href: item.href,
+  label: item.label,
+  icon: FIELD_MODE_NAV_ICONS[item.kind],
+}));
 
 export function QuickNav() {
   const pathname = usePathname();
   const router = useRouter();
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const isSchoolPath = useMemo(
-    () =>
-      !!pathname &&
-      (pathname === "/school-game" ||
-        pathname === "/schools" ||
-        pathname.startsWith("/schools/")),
-    [pathname],
-  );
-  const effectiveSchoolsMode = IS_SCHOOLS_PROFILE || isSchoolPath;
+  // A single, synchronous, pathname-derived profile check -- no cookie or
+  // hydration race involved -- so the correct item set is known on first
+  // render, not just once a client-only presentation marker resolves.
+  const effectiveSchoolsMode =
+    IS_SCHOOLS_PROFILE || isSchoolNavPathname(pathname ?? "/");
+  // The nested Field Mode layout (/schools/field/*) already renders
+  // FieldModeNav as the primary nav for that surface; QuickNav stays out of
+  // the way there instead of stacking a second bar on top of it.
   const isFieldPath = !!pathname && isFieldModePathname(pathname);
-  const fieldUiCookieActive =
-    typeof document !== "undefined" &&
-    isPathnameAllowedByPolicy(pathname ?? "/", "field") &&
-    document.cookie
-      .split(/;\s*/)
-      .some(
-        (cookie) =>
-          cookie === `${FIELD_MODE_UI_COOKIE}=${FIELD_MODE_COOKIE_VALUE}`,
-      );
 
   const handleBack = useCallback(() => {
     triggerHaptic("light");
@@ -120,11 +114,9 @@ export function QuickNav() {
   );
   const visibleNavItems = useMemo(() => {
     if (effectiveSchoolsMode) {
-      if (ENABLE_CHILD_SAFE_BASELINE || IS_SCHOOLS_PROFILE) {
-        return SCHOOLS_QUICK_NAV_ITEMS.filter((item) =>
-          CHILD_SAFE_NAV_ROUTES.has(item.href),
-        );
-      }
+      // SCHOOLS_QUICK_NAV_ITEMS is generated from the approved Field Mode
+      // route policy, so every item is inherently allowed -- no further
+      // filtering is needed (or possible to get wrong) here.
       return SCHOOLS_QUICK_NAV_ITEMS;
     }
     if (ENABLE_CHILD_SAFE_BASELINE) {
@@ -156,7 +148,7 @@ export function QuickNav() {
   // can neither receive keyboard focus, intercept pointer/touch events, nor
   // occupy layout space over the lesson's Next button.
   const classroomFocusActive = useClassroomFocusActive();
-  if (classroomFocusActive || isFieldPath || fieldUiCookieActive) {
+  if (classroomFocusActive || isFieldPath) {
     return null;
   }
 
@@ -192,6 +184,7 @@ export function QuickNav() {
                   key={item.href}
                   href={item.href}
                   onClick={handleNavClick}
+                  aria-current={isActive ? "page" : undefined}
                   className="flex"
                 >
                   <div
