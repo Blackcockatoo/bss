@@ -1,5 +1,5 @@
 /**
- * Meta-Pet Teacher Lesson System — routing helpers (Pass 1).
+ * Meta-Pet Teacher Lesson System — routing helpers.
  *
  * Pure functions for building and parsing lesson deep links. Keeping these
  * side-effect free makes them easy to unit test and reuse from both the
@@ -13,7 +13,7 @@
  *   /teachers/lessons/[slug]?mode=student -> open in a specific view mode
  */
 
-import { getLessonBySlug, getLessonById } from "./lessonDefinitions";
+import { getLessonBySlug, getLessonById } from "./lessonProgramme";
 import type { LessonDefinition, LessonId, LessonViewMode } from "./types";
 
 export const TEACHER_HUB_PATH = "/teachers";
