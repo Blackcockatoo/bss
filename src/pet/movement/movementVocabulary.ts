@@ -197,6 +197,64 @@ export const MOVEMENT_CLIPS: Record<string, MovementClip> = {
     tags: ["evolution", "gold"],
     reducedMotionSafe: true,
   }),
+  /**
+   * Plays straight after the ceremony: the creature tests the anatomy the
+   * stage just granted (see EVOLUTION_STAGE_UPGRADES) — a shudder, a stretch
+   * into the larger frame, then a settle into the new silhouette.
+   */
+  stage_emergence: clip({
+    id: "stage_emergence",
+    label: "Stage Emergence",
+    duration: 2600,
+    priority: MovementPriority.EvolutionCeremony,
+    intensity: 0.95,
+    tags: ["evolution", "gold", "red"],
+    reducedMotionSafe: true,
+  }),
+
+  // ── Stage signature ambient moves ─────────────────────────────────────
+  // One per evolution stage, so an evolved pet idles visibly differently
+  // from a hatchling instead of only looking different when still.
+  genesis_shimmer: clip({
+    id: "genesis_shimmer",
+    label: "Genesis Shimmer",
+    duration: 2800,
+    priority: MovementPriority.MoodExpression,
+    intensity: 0.3,
+    tags: ["mood", "blue"],
+    allowedEvolutionStates: ["GENETICS"],
+    reducedMotionSafe: true,
+  }),
+  neuro_lattice_ripple: clip({
+    id: "neuro_lattice_ripple",
+    label: "Neuro Lattice Ripple",
+    duration: 1800,
+    priority: MovementPriority.MoodExpression,
+    intensity: 0.55,
+    tags: ["mood", "blue"],
+    allowedEvolutionStates: ["NEURO", "QUANTUM", "SPECIATION"],
+    reducedMotionSafe: true,
+  }),
+  phase_drift: clip({
+    id: "phase_drift",
+    label: "Phase Drift",
+    duration: 2200,
+    priority: MovementPriority.MoodExpression,
+    intensity: 0.7,
+    tags: ["mood", "black", "blue"],
+    allowedEvolutionStates: ["QUANTUM", "SPECIATION"],
+    reducedMotionSafe: false,
+  }),
+  crown_ascend: clip({
+    id: "crown_ascend",
+    label: "Crown Ascend",
+    duration: 2400,
+    priority: MovementPriority.BigEmotion,
+    intensity: 0.9,
+    tags: ["emotion", "gold"],
+    allowedEvolutionStates: ["SPECIATION"],
+    reducedMotionSafe: false,
+  }),
 
   // ── Signature secret moves (rare) ─────────────────────────────────────
   omen_twitch: clip({
@@ -272,6 +330,32 @@ export const MOVEMENT_CLIPS: Record<string, MovementClip> = {
 export const SECRET_MOVE_IDS: string[] = Object.values(MOVEMENT_CLIPS)
   .filter((c) => c.tags.includes("secret"))
   .map((c) => c.id);
+
+/**
+ * The ambient moves that read as "this pet has evolved". Later stages keep
+ * access to the earlier stage's signature so behaviour accumulates the same
+ * way anatomy does, with the newest move listed first.
+ */
+export const STAGE_SIGNATURE_CLIPS: Record<EvolutionState, readonly string[]> = {
+  GENETICS: ["genesis_shimmer"],
+  NEURO: ["neuro_lattice_ripple"],
+  QUANTUM: ["phase_drift", "neuro_lattice_ripple"],
+  SPECIATION: ["crown_ascend", "phase_drift", "neuro_lattice_ripple"],
+};
+
+/**
+ * Picks one stage signature move for a 0..1 stream value. Returns null for
+ * an unknown state so callers can fall back to the generic mood clip.
+ */
+export function getStageSignatureClip(
+  state: EvolutionState,
+  unit: number,
+): string | null {
+  const options = STAGE_SIGNATURE_CLIPS[state];
+  if (!options || options.length === 0) return null;
+  const index = Math.floor(Math.max(0, Math.min(0.999999, unit)) * options.length);
+  return options[index] ?? options[0];
+}
 
 export function getMovementClip(id: string): MovementClip | undefined {
   return MOVEMENT_CLIPS[id];

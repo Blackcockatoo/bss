@@ -21,6 +21,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { EVOLUTION_STAGE_INFO, EVOLUTION_VISUALS } from "@/evolution/types";
 import type { EvolutionState } from "@/evolution/types";
+import { describeEvolutionUpgrade } from "@/evolution/stageUpgrades";
 
 export interface EvolutionCeremonyProps {
   /** The stage being entered. */
@@ -210,6 +211,13 @@ export function EvolutionCeremony({
         </p>
         <p className="mt-1 text-2xl font-bold text-white">{displayTitle ?? info.title}</p>
         <p className="mt-1 text-sm text-zinc-300">{info.tagline}</p>
+        {/* Name the change on the body, so the player knows what to look for
+            the moment the overlay clears. */}
+        <ul className="mt-3 space-y-0.5 text-xs text-zinc-400">
+          {describeEvolutionUpgrade(stage).map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
       </div>
 
       {/* Skip affordance — ceremony must never trap the user */}

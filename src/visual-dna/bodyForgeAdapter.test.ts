@@ -282,9 +282,11 @@ describe("Body Forge visual genome bridge", () => {
     });
 
     expect(revealed[0]).toEqual(["wings"]);
-    expect(revealed[1]).toEqual(["wings"]);
-    expect(revealed[2].sort()).toEqual(["thirdEye", "wings"].sort());
-    expect(revealed[3].sort()).toEqual(["crown", "thirdEye", "wings"].sort());
+    expect(revealed[1].sort()).toEqual(["horns", "wings"].sort());
+    expect(revealed[2].sort()).toEqual(["horns", "thirdEye", "wings"].sort());
+    expect(revealed[3].sort()).toEqual(
+      ["crown", "horns", "thirdEye", "wings"].sort(),
+    );
 
     for (let index = 1; index < revealed.length; index += 1) {
       for (const feature of revealed[index - 1]) {
@@ -315,6 +317,79 @@ describe("Body Forge visual genome bridge", () => {
     );
 
     expect(grown.features).toContain("tailFlame");
+  });
+
+  it("grows the frame stage by stage so evolving is visible on the body itself", () => {
+    const genome = changeGene(emptyGenome(), 5);
+    const stages: EvolutionState[] = [
+      "GENETICS",
+      "NEURO",
+      "QUANTUM",
+      "SPECIATION",
+    ];
+    const grown = stages.map((state) => {
+      const frame = resolveVisualDNA({
+        traits,
+        vitals: DEFAULT_VITALS,
+        evolution: { ...evolution, state },
+        now: 10_000,
+      });
+      const base = {
+        ...createGenomeBodySpec(frame, genome),
+        features: ["wings"] as const,
+      };
+      return applyEvolutionGrowth(
+        { ...base, features: [...base.features] },
+        frame,
+      );
+    });
+
+    for (let index = 1; index < grown.length; index += 1) {
+      const previous = grown[index - 1];
+      const current = grown[index];
+      expect(
+        current.bodyScale,
+        `${stages[index]} should be larger than ${stages[index - 1]}`,
+      ).toBeGreaterThan(previous.bodyScale);
+      expect(current.outlineWidth).toBeGreaterThan(previous.outlineWidth);
+      expect(current.glow).toBeGreaterThan(previous.glow);
+      expect(current.wingSpread).toBeGreaterThanOrEqual(previous.wingSpread);
+      expect(current.hornLength).toBeGreaterThanOrEqual(previous.hornLength);
+    }
+
+    // Growth is definition, never identity: the creature you raised is still
+    // the same creature after evolving.
+    for (const spec of grown) {
+      expect(spec.shape).toBe(grown[0].shape);
+      expect(spec.pattern).toBe(grown[0].pattern);
+      expect(spec.primaryColor).toBe(grown[0].primaryColor);
+      expect(spec.secondaryColor).toBe(grown[0].secondaryColor);
+    }
+  });
+
+  it("keeps apex growth inside the spec bounds even on an already-maxed forged body", () => {
+    const frame = resolveVisualDNA({
+      traits,
+      vitals: DEFAULT_VITALS,
+      evolution: { ...evolution, state: "SPECIATION" },
+      now: 10_000,
+    });
+    const maxed = {
+      ...DEFAULT_BODY_SPEC,
+      bodyScale: 1.65,
+      outlineWidth: 10,
+      glow: 1,
+      hornLength: 64,
+      wingSpread: 1.65,
+    };
+
+    const grown = applyEvolutionGrowth(maxed, frame);
+
+    expect(grown.bodyScale).toBeLessThanOrEqual(1.65);
+    expect(grown.outlineWidth).toBeLessThanOrEqual(10);
+    expect(grown.glow).toBeLessThanOrEqual(1);
+    expect(grown.hornLength).toBeLessThanOrEqual(64);
+    expect(grown.wingSpread).toBeLessThanOrEqual(1.65);
   });
 });
 

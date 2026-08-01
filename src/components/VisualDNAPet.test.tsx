@@ -145,6 +145,57 @@ describe('VisualDNAPet renderer', () => {
     await screen.findByText('180-digit DNA');
   });
 
+  it('etches the reached stage onto the body and re-etches it when the pet evolves', async () => {
+    const VisualDNAPet = await loadVisualDNAPet();
+    const { container, rerender } = render(<VisualDNAPet />);
+
+    // NEURO wears the synapse lattice.
+    await waitFor(() => {
+      expect(container.querySelector('[data-evolution-mark="lattice"]')).toBeTruthy();
+    });
+    expect(container.querySelector('[data-evolution-mark="crown"]')).toBeNull();
+
+    act(() => {
+      storeState.evolution = { ...evolution, state: 'SPECIATION' };
+    });
+    rerender(<VisualDNAPet />);
+
+    // The apex swaps the sigil — the same creature, visibly further along.
+    await waitFor(() => {
+      expect(container.querySelector('[data-evolution-mark="crown"]')).toBeTruthy();
+    });
+    expect(container.querySelector('[data-evolution-mark="lattice"]')).toBeNull();
+  });
+
+  it('performs the evolution ceremony on the body when the stage actually changes', async () => {
+    const clips: string[] = [];
+    const listen = (event: Event) => {
+      clips.push(String((event as CustomEvent).detail));
+    };
+    window.addEventListener('bss:moss60:active-clip', listen);
+
+    try {
+      const VisualDNAPet = await loadVisualDNAPet();
+      const { rerender } = render(<VisualDNAPet />);
+
+      // Mounting an already-evolved save must not replay a ceremony the
+      // player already had.
+      await waitFor(() => expect(clips.length).toBeGreaterThan(0));
+      expect(clips).not.toContain('evolution_ceremony');
+
+      await act(async () => {
+        storeState.evolution = { ...evolution, state: 'QUANTUM' };
+      });
+      rerender(<VisualDNAPet />);
+
+      await waitFor(() => {
+        expect(clips).toContain('evolution_ceremony');
+      });
+    } finally {
+      window.removeEventListener('bss:moss60:active-clip', listen);
+    }
+  });
+
   it('renders equipped wardrobe cosmetics on the live pet and removes them on unequip', async () => {
     const VisualDNAPet = await loadVisualDNAPet();
     const { useWardrobeProgressionStore } = await import('@/lib/wardrobe/store');

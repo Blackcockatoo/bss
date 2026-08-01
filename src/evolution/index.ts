@@ -8,6 +8,7 @@ import { getEvolutionBranch, getUnlockedAbilities } from './branching';
 export * from './types';
 export * from './conditions';
 export * from './branching';
+export * from './stageUpgrades';
 
 export interface RequirementSnapshot {
   state: EvolutionState;

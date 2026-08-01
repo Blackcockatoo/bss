@@ -329,6 +329,111 @@ const CLIP_INTERPRETERS: Record<string, ClipInterpreter> = {
     };
   },
 
+  stage_emergence: (t, ctx) => {
+    // The reveal beat after the ceremony: a tight shudder as the new stage's
+    // anatomy sets, one big stretch into the larger frame, then a settle.
+    const shudder = t < 0.3 ? Math.sin(t * TAU * 6) * (1 - t / 0.3) : 0;
+    const stretch = t >= 0.25 && t < 0.72 ? arc((t - 0.25) / 0.47) : 0;
+    const rest = t >= 0.72 ? 1 - easeInOut((t - 0.72) / 0.28) : 0;
+    // Eyes squeeze shut through the change, then open on the reveal.
+    const squeeze =
+      t < 0.32 ? easeInOut(t / 0.32) : t < 0.5 ? 1 - easeInOut((t - 0.32) / 0.18) : 0;
+    return {
+      bodyX: shudder * 2.4,
+      bodyY: -stretch * 9 - rest * 2,
+      scaleX: 1 + stretch * 0.09 - Math.abs(shudder) * 0.03,
+      scaleY: 1 + stretch * 0.11 - Math.abs(shudder) * 0.02,
+      headTilt: shudder * 4 + stretch * seedSign(ctx.seed, 31) * 2,
+      eyelidOpen: 1 - squeeze * 0.8 + stretch * 0.1,
+      pupilScale: 1 + stretch * 0.3,
+      // Whatever the stage just granted gets shown off: wings open, horns,
+      // crown and third eye flare together via featureIntensity.
+      wingSpread: ctx.body.hasWings ? 1 + stretch * 0.55 : 1,
+      wingFold: 0,
+      featureIntensity: Math.max(stretch, rest * 0.5),
+      auraScale: 1 + stretch * 0.34,
+      auraPulse: stretch * 0.95,
+      auraRotation: easeInOut(t) * 90,
+      phaseEchoes: ctx.reducedMotion ? 0 : Math.round(stretch * 2),
+      shadowEnclosure: Math.abs(shudder) * 0.25,
+    };
+  },
+
+  // ── Stage signature ambient moves ─────────────────────────────────────
+  genesis_shimmer: (t) => {
+    // GENETICS: barely-formed. A slow surface shimmer and a soft settle,
+    // deliberately the smallest move in the vocabulary.
+    const wave = Math.sin(t * TAU);
+    return {
+      scaleX: 1 + wave * 0.018,
+      scaleY: 1 - wave * 0.014,
+      bodyY: -Math.abs(wave) * 2,
+      auraScale: 1 + wave * 0.05,
+      auraPulse: Math.max(0, wave) * 0.3,
+      featureIntensity: 0.15 + Math.max(0, wave) * 0.2,
+    };
+  },
+
+  neuro_lattice_ripple: (t, ctx) => {
+    // NEURO: a signal runs the length of the body and lights the horns.
+    const front = arc(t);
+    const travel = Math.sin(t * TAU * 2) * front;
+    return {
+      bodyY: -front * 3,
+      scaleY: 1 + travel * 0.035,
+      scaleX: 1 - travel * 0.028,
+      headTilt: travel * 3.5 * ctx.intensity,
+      gazeX: travel * 0.35,
+      pupilScale: 1 + front * 0.18,
+      // Horns are the NEURO grant; without them the aura carries the signal.
+      featureIntensity: ctx.body.hasHorns ? front * 0.85 : front * 0.45,
+      auraScale: 1 + front * 0.12,
+      auraPulse: front * 0.55,
+      auraRotation: travel * 18,
+    };
+  },
+
+  phase_drift: (t, ctx) => {
+    // QUANTUM: the creature drifts fractionally out of its own outline and
+    // slides back, third eye tracking something that is not there.
+    const drift = arc(t);
+    const dir = seedSign(ctx.seed, 37);
+    return {
+      bodyX: dir * drift * 4,
+      rotation: dir * drift * 3,
+      scaleX: 1 + drift * 0.02,
+      phaseEchoes: ctx.reducedMotion ? 0 : Math.round(drift * 2),
+      gazeX: dir * drift * 0.5,
+      gazeY: -drift * 0.25,
+      pupilScale: 1 - drift * 0.15,
+      featureIntensity: ctx.body.hasThirdEye ? 0.4 + drift * 0.55 : drift * 0.4,
+      auraScale: 1 + drift * 0.16,
+      auraPulse: drift * 0.5,
+      auraRotation: dir * drift * 45,
+      shadowEnclosure: drift * 0.2,
+    };
+  },
+
+  crown_ascend: (t, ctx) => {
+    // SPECIATION: the apex display — rise, open everything, hold, descend.
+    const rise = t < 0.4 ? easeInOut(t / 0.4) : t < 0.75 ? 1 : 1 - easeInOut((t - 0.75) / 0.25);
+    const hold = t >= 0.4 && t < 0.75 ? arc((t - 0.4) / 0.35) : 0;
+    return {
+      bodyY: -rise * 11,
+      scaleX: 1 + rise * 0.04,
+      scaleY: 1 + rise * 0.06,
+      headTilt: -rise * 3,
+      gazeY: -rise * 0.3,
+      eyelidOpen: 1 + rise * 0.08,
+      wingSpread: ctx.body.hasWings ? 1 + rise * 0.45 : 1,
+      wingFold: 0,
+      featureIntensity: Math.max(rise * 0.8, hold),
+      auraScale: 1 + rise * 0.26,
+      auraPulse: rise * 0.7 + hold * 0.3,
+      auraRotation: easeInOut(t) * 70,
+    };
+  },
+
   // ── Secret signature moves ────────────────────────────────────────────
   omen_twitch: (t, ctx) => {
     // Tiny, strange, easily missed: one off-axis flick and a pupil narrow.

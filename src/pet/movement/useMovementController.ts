@@ -124,8 +124,9 @@ const ACTION_SEQUENCES: Record<CareActionId, readonly string[]> = {
   sleep: ["sleepy_droop", "folded_wing_hide"],
   // lean + soft blink + head tilt + aura bloom.
   love: ["head_tilt", "blink", "aura_pulse"],
-  // ceremony first; black-wing bloom only fires when its gate is valid.
-  evolution: ["evolution_ceremony", "black_wing_bloom"],
+  // ceremony → the new form emerging and being tested → black-wing bloom
+  // (apex only; its gate skips it at every earlier stage).
+  evolution: ["evolution_ceremony", "stage_emergence", "black_wing_bloom"],
   // resolved per-call from evolution state.
   anomaly: ["omen_twitch"],
 };

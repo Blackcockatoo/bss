@@ -93,6 +93,31 @@ describe("deterministic movement scheduler", () => {
     }
   });
 
+  it("makes an evolved pet idle differently from a hatchling", () => {
+    const seed = hashSeed("stage-signature");
+    const genetics = new Set(
+      sequence(seed, 400, { ...GATES, evolutionState: "GENETICS" }).filter(
+        (pick): pick is string => pick !== null,
+      ),
+    );
+    const apex = new Set(
+      sequence(seed, 400, { ...GATES, evolutionState: "SPECIATION" }).filter(
+        (pick): pick is string => pick !== null,
+      ),
+    );
+
+    expect(genetics.has("genesis_shimmer")).toBe(true);
+    expect(genetics.has("crown_ascend")).toBe(false);
+    expect(genetics.has("phase_drift")).toBe(false);
+
+    expect(apex.has("genesis_shimmer")).toBe(false);
+    expect(
+      apex.has("crown_ascend") ||
+        apex.has("phase_drift") ||
+        apex.has("neuro_lattice_ripple"),
+    ).toBe(true);
+  });
+
   it("produces uniform-ish seeded units with no shared-state drift", () => {
     const first = seededUnit(42, 7, 3);
     expect(seededUnit(42, 7, 3)).toBe(first);

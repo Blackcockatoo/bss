@@ -366,6 +366,273 @@ function sparklePath(cx: number, cy: number, r: number): string {
   return `M${cx} ${cy - r} L${cx + r * 0.28} ${cy - r * 0.28} L${cx + r} ${cy} L${cx + r * 0.28} ${cy + r * 0.28} L${cx} ${cy + r} L${cx - r * 0.28} ${cy + r * 0.28} L${cx - r} ${cy} L${cx - r * 0.28} ${cy - r * 0.28}Z`;
 }
 
+/**
+ * The stage sigil evolution etches onto the body surface. Purely additive
+ * decoration drawn over the silhouette and under the face — it never alters
+ * the stored spec, so a caller that omits `evolutionMark` renders exactly as
+ * before. Geometry is deterministic (no Math.random, fixed rounding) so it
+ * hydrates identically on server and client.
+ */
+export interface EvolutionMark {
+  shape: "helix" | "lattice" | "phase" | "crown";
+  /** Number of sigil elements to draw. */
+  count: number;
+  /** 0..1 how strongly the sigil reads against the body. */
+  intensity: number;
+  color: string;
+  accentColor: string;
+}
+
+/**
+ * A sigil is built as plain geometry first, then painted twice: a dark
+ * underlay and the stage-coloured stroke on top. That two-pass treatment is
+ * what keeps a stage legible on ANY forged body — a blue GENETICS mark on a
+ * blue creature would otherwise vanish into it.
+ */
+type SigilPrimitive =
+  | { kind: "line"; x1: number; y1: number; x2: number; y2: number; accent: boolean }
+  | {
+      kind: "ellipse";
+      cx: number;
+      cy: number;
+      rx: number;
+      ry: number;
+      dash?: string;
+      accent: boolean;
+    }
+  | { kind: "dot"; cx: number; cy: number; r: number; accent: boolean };
+
+function buildSigil(
+  mark: EvolutionMark,
+  spec: BodySpec,
+  featureGlow: number,
+): SigilPrimitive[] {
+  const count = Math.max(1, Math.min(12, Math.round(mark.count)));
+  // Anchored on the chest, below the eyes and mouth, so the sigil is read as
+  // a marking on the body rather than as clutter across the face.
+  const cx = 140;
+  const cy = 112 + spec.bodyHeight * 0.3;
+  const rx = spec.bodyWidth * 0.3;
+  const ry = spec.bodyHeight * 0.17;
+  const out: SigilPrimitive[] = [];
+
+  if (mark.shape === "helix") {
+    // GENETICS: a double strand twisting down the chest — the two backbones
+    // drawn as polylines, cross-linked by rungs every few samples.
+    const samples = count * 7;
+    const at = (index: number, side: 1 | -1) => {
+      const p = index / (samples - 1);
+      return {
+        x: round(cx + side * Math.sin(p * Math.PI * 2) * rx),
+        y: round(cy - ry + p * ry * 2),
+      };
+    };
+    for (let index = 0; index < samples - 1; index += 1) {
+      for (const side of [1, -1] as const) {
+        const from = at(index, side);
+        const to = at(index + 1, side);
+        out.push({
+          kind: "line",
+          x1: from.x,
+          y1: from.y,
+          x2: to.x,
+          y2: to.y,
+          accent: side === -1,
+        });
+      }
+      if (index % 3 === 1) {
+        const left = at(index, -1);
+        const right = at(index, 1);
+        out.push({
+          kind: "line",
+          x1: left.x,
+          y1: left.y,
+          x2: right.x,
+          y2: right.y,
+          accent: false,
+        });
+      }
+    }
+    return out;
+  }
+
+  if (mark.shape === "lattice") {
+    // NEURO: nodes ringing the chest, cross-linked through the centre.
+    const nodes = Array.from({ length: count }, (_, index) => {
+      const angle = (index / count) * Math.PI * 2 - Math.PI / 2;
+      return {
+        x: round(cx + Math.cos(angle) * rx),
+        y: round(cy + Math.sin(angle) * ry),
+      };
+    });
+    nodes.forEach((node, index) => {
+      const next = nodes[(index + 1) % nodes.length];
+      out.push({
+        kind: "line",
+        x1: node.x,
+        y1: node.y,
+        x2: next.x,
+        y2: next.y,
+        accent: true,
+      });
+      out.push({
+        kind: "line",
+        x1: node.x,
+        y1: node.y,
+        x2: cx,
+        y2: round(cy),
+        accent: false,
+      });
+      out.push({
+        kind: "dot",
+        cx: node.x,
+        cy: node.y,
+        r: round(1.8 + featureGlow * 1.4),
+        accent: false,
+      });
+    });
+    return out;
+  }
+
+  if (mark.shape === "phase") {
+    // QUANTUM: rings knocked out of alignment with one another.
+    for (let index = 0; index < count; index += 1) {
+      const offset = (index - (count - 1) / 2) * 4.5;
+      out.push({
+        kind: "ellipse",
+        cx: round(cx + offset),
+        cy: round(cy - offset * 0.45),
+        rx: round(rx * (0.42 + index * 0.29)),
+        ry: round(ry * (0.42 + index * 0.29)),
+        dash: `${3 + index} ${4 + index * 2}`,
+        accent: index % 2 === 1,
+      });
+    }
+    return out;
+  }
+
+  // SPECIATION: a crown of rays radiating from the chest core.
+  for (let index = 0; index < count; index += 1) {
+    const angle = (index / count) * Math.PI * 2 - Math.PI / 2;
+    const inner = 0.3;
+    const outer = 1 + (index % 2) * 0.22 + featureGlow * 0.12;
+    out.push({
+      kind: "line",
+      x1: round(cx + Math.cos(angle) * rx * inner),
+      y1: round(cy + Math.sin(angle) * ry * inner),
+      x2: round(cx + Math.cos(angle) * rx * outer),
+      y2: round(cy + Math.sin(angle) * ry * outer),
+      accent: index % 2 === 1,
+    });
+  }
+  out.push({
+    kind: "ellipse",
+    cx,
+    cy: round(cy),
+    rx: round(rx * 0.26),
+    ry: round(ry * 0.26),
+    accent: false,
+  });
+  return out;
+}
+
+function SigilPass({
+  primitives,
+  stroke,
+  width,
+  opacity,
+  keyPrefix,
+}: {
+  primitives: SigilPrimitive[];
+  /** Called per primitive; the underlay ignores the accent flag. */
+  stroke: (accent: boolean) => string;
+  width: number;
+  opacity: number;
+  keyPrefix: string;
+}) {
+  return (
+    <g opacity={opacity} fill="none" strokeLinecap="round">
+      {primitives.map((primitive, index) => {
+        const key = `${keyPrefix}-${index}`;
+        const color = stroke(primitive.accent);
+        if (primitive.kind === "line") {
+          return (
+            <line
+              key={key}
+              x1={primitive.x1}
+              y1={primitive.y1}
+              x2={primitive.x2}
+              y2={primitive.y2}
+              stroke={color}
+              strokeWidth={width}
+            />
+          );
+        }
+        if (primitive.kind === "ellipse") {
+          return (
+            <ellipse
+              key={key}
+              cx={primitive.cx}
+              cy={primitive.cy}
+              rx={primitive.rx}
+              ry={primitive.ry}
+              stroke={color}
+              strokeWidth={width}
+              strokeDasharray={primitive.dash}
+            />
+          );
+        }
+        return (
+          <circle
+            key={key}
+            cx={primitive.cx}
+            cy={primitive.cy}
+            r={primitive.r + width * 0.25}
+            fill={color}
+            stroke="none"
+          />
+        );
+      })}
+    </g>
+  );
+}
+
+function EvolutionSigil({
+  mark,
+  spec,
+  featureGlow,
+}: {
+  mark: EvolutionMark;
+  spec: BodySpec;
+  featureGlow: number;
+}) {
+  const primitives = buildSigil(mark, spec, featureGlow);
+  const strength = Math.max(0, Math.min(1, mark.intensity));
+  // A live clip's feature intensity brightens the sigil without ever letting
+  // it wash out the body underneath.
+  const opacity = Math.min(0.95, strength * (0.92 + featureGlow * 0.35));
+  const width = Math.max(1.2, spec.outlineWidth * 0.52);
+
+  return (
+    <g data-evolution-mark={mark.shape}>
+      <SigilPass
+        primitives={primitives}
+        stroke={() => spec.secondaryColor}
+        width={width * 2.1}
+        opacity={opacity * 0.5}
+        keyPrefix="under"
+      />
+      <SigilPass
+        primitives={primitives}
+        stroke={(accent) => (accent ? mark.accentColor : mark.color)}
+        width={width}
+        opacity={opacity}
+        keyPrefix="mark"
+      />
+    </g>
+  );
+}
+
 // Rounded to sidestep last-bit differences between the server's and
 // browser's Math.sin/Math.cos, which otherwise trip a React hydration
 // mismatch on every particle coordinate.
@@ -597,6 +864,12 @@ export interface PetBodyRendererProps {
   /** Active clip id, for signature dressings (Moss60 orbit, venom pulse). */
   activeClipId?: string | null;
   /**
+   * Stage sigil earned from evolution, drawn on the body surface. Omitted
+   * (the default) renders the body exactly as before — the Forge preview and
+   * every legacy caller are unaffected.
+   */
+  evolutionMark?: EvolutionMark | null;
+  /**
    * Wardrobe add-on layer rendered behind the body silhouette, inside the
    * same whole-body movement transform (so equipped items follow the body
    * exactly as forged — no separate scale/offset math needed by callers).
@@ -623,6 +896,7 @@ export const PetBodyRenderer = forwardRef<SVGSVGElement, PetBodyRendererProps>(
       activeClipId = null,
       addonsBehind = null,
       addonsFront = null,
+      evolutionMark = null,
     },
     ref,
   ) {
@@ -1176,6 +1450,13 @@ export const PetBodyRenderer = forwardRef<SVGSVGElement, PetBodyRendererProps>(
               />
             ))}
           </g>
+        )}
+        {evolutionMark && evolutionMark.intensity > 0.01 && (
+          <EvolutionSigil
+            mark={evolutionMark}
+            spec={spec}
+            featureGlow={featureGlow}
+          />
         )}
         <g
           transform={
