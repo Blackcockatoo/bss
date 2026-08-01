@@ -707,9 +707,11 @@ export function CertificateButton({
   variant?: ComponentProps<typeof Button>["variant"];
   size?: ComponentProps<typeof Button>["size"];
 }) {
-  // Callers that pass a variant style the button themselves; the gradient is
-  // only the standalone default.
-  const defaultStyle = variant
+  // Callers that pass a variant style the button themselves — including its
+  // icon spacing, since they sit in rows that set their own gap. The gradient
+  // and the margin are only the standalone default.
+  const styled = Boolean(variant);
+  const defaultStyle = styled
     ? ""
     : "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700";
   return (
@@ -722,7 +724,7 @@ export function CertificateButton({
       }}
       className={`${defaultStyle} touch-manipulation ${className}`}
     >
-      <Award className="w-4 h-4 mr-2" />
+      <Award className={`w-4 h-4 ${styled ? "" : "mr-2"}`} />
       View Certificate
     </Button>
   );

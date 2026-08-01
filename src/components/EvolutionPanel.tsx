@@ -13,8 +13,10 @@ import {
   getStageDisplayTitle,
   getUnlockedAbilities,
   describeEvolutionUpgrade,
+  getCumulativeEvolutionUpgrade,
   EVOLUTION_ORDER,
   EVOLUTION_STAGE_INFO,
+  type EvolutionMarkShape,
   type EvolutionState,
 } from "@/lib/evolution";
 import {
@@ -27,7 +29,6 @@ import {
 } from "lucide-react";
 
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { getCumulativeEvolutionUpgrade } from "@/evolution/stageUpgrades";
 
 import { EvolutionCeremony } from "./EvolutionCeremony";
 import { StageSigil } from "./evolution/StageSigil";
@@ -436,7 +437,7 @@ export function EvolutionPanel() {
   );
 }
 
-const MARK_NAMES: Record<string, string> = {
+const MARK_NAMES: Record<EvolutionMarkShape, string> = {
   helix: "Genome helix",
   lattice: "Synapse lattice",
   phase: "Phase rings",
@@ -463,7 +464,7 @@ function StageMark({
   dimmed = false,
 }: StageMarkProps) {
   const upgrade = getCumulativeEvolutionUpgrade(state);
-  const label = MARK_NAMES[upgrade.mark] ?? upgrade.mark;
+  const label = MARK_NAMES[upgrade.mark];
 
   return (
     <figure className="shrink-0 space-y-1 text-center">

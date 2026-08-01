@@ -200,6 +200,22 @@ describe("PetPage", () => {
     expect(screen.queryByTestId("evolution-panel")).not.toBeInTheDocument();
   });
 
+  it("keeps the edit-mode notice visible after the advanced drawer closes", async () => {
+    render(<PetPage />);
+
+    const advancedToggle = screen.getByRole("button", {
+      name: /Advanced \/ Mechanics Lab/i,
+    });
+    fireEvent.click(advancedToggle);
+    fireEvent.click(screen.getByRole("button", { name: /Edit Auralia/i }));
+    expect(screen.getByText(/Edit Mode Active/i)).toBeInTheDocument();
+
+    // Edit mode changes what dragging does, so the notice must outlive the
+    // drawer it was switched on from.
+    fireEvent.click(advancedToggle);
+    expect(screen.getByText(/Edit Mode Active/i)).toBeInTheDocument();
+  });
+
   it("leaves an open panel alone when the advanced drawer closes", async () => {
     render(<PetPage />);
 

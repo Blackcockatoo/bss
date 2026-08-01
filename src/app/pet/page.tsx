@@ -351,6 +351,17 @@ export default function PetPage() {
                 />
               </div>
 
+              {/* Edit mode changes what dragging the stage does, and it is
+                  switched on from inside the advanced drawer — so the notice
+                  has to live out here, where it stays visible once that
+                  drawer is closed again. */}
+              {petType === "auralia" && addonEditMode && (
+                <p className="rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-3 py-2 text-xs text-cyan-100">
+                  <span className="font-semibold">Edit Mode Active</span> — Drag
+                  addons to reposition, hover for controls.
+                </p>
+              )}
+
               {anyPanelOpen && (
                 <div className="grid gap-4 md:grid-cols-2">
                   {showProfilePanel && (
@@ -432,12 +443,6 @@ export default function PetPage() {
                         </Button>
                       )}
                     </div>
-                    {petType === "auralia" && addonEditMode && (
-                      <p className="rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-3 py-2 text-xs text-cyan-100">
-                        <span className="font-semibold">Edit Mode Active</span>{" "}
-                        — Drag addons to reposition, hover for controls.
-                      </p>
-                    )}
                     <p className="text-xs leading-relaxed text-slate-400">
                       Body Forge returns here in Evolved form, where the Moss60
                       movement and identity layer performs on the inherited
