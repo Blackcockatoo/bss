@@ -65,6 +65,19 @@ describe('getStageVisuals', () => {
     expect(visuals.colors).toEqual(branch.accentColors);
   });
 
+  it('never lets the unaligned apex read duller than the stage before it', () => {
+    const neutral = getEvolutionBranch(null);
+    const apex = getStageVisuals('SPECIATION', neutral);
+
+    // A genome-less pet keeps the stage's own palette rather than inheriting
+    // the neutral branch's slate, which would look like a downgrade.
+    expect(apex.colors).toEqual(EVOLUTION_VISUALS.SPECIATION.colors);
+    expect(apex.colors).not.toEqual(neutral.accentColors);
+    expect(apex.colors[0]).not.toBe(
+      getStageVisuals('QUANTUM', neutral).colors[0],
+    );
+  });
+
   it('does not mutate the shared visuals tables', () => {
     const before = [...EVOLUTION_VISUALS.SPECIATION.colors];
     getStageVisuals('SPECIATION', getEvolutionBranch(makeTraits('Mystic Sage')));

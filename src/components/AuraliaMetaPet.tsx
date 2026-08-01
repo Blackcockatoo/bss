@@ -46,6 +46,10 @@ import {
   getEquippedWardrobeItems,
   useWardrobeProgressionStore,
 } from "@/lib/wardrobe/store";
+import { getCumulativeEvolutionUpgrade } from "@/evolution/stageUpgrades";
+import { EvolutionStageAdornments } from "./evolution/EvolutionStageAdornments";
+import { resolveStagePalette } from "./evolution/stagePalette";
+import { useEvolutionStageTransition } from "./evolution/useEvolutionStageTransition";
 import { EyeEmotionFilters } from "./auralia/EyeFilters";
 import {
   EyeRenderer,
@@ -461,6 +465,12 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
   // Companion game wins also feed the main pet store so XP, achievements,
   // and vitals stay consistent with the Conscious Arcade.
   const recordMiniGameResult = useStore((s) => s.recordMiniGameResult);
+
+  // Evolution is companion state, not renderer state: the guardian shares the
+  // same ladder as the Evolved and Geometry forms, so reaching a stage grows
+  // the orb, grants the same anatomy, and etches the same sigil here too.
+  const evolutionState = useStore((s) => s.evolution?.state ?? "GENETICS");
+  const storeTraits = useStore((s) => s.traits);
 
   const [currentGame, setCurrentGame] = useState<MiniGameType>(null);
   const [patternChallenge, setPatternChallenge] = useState<PatternChallenge>({
@@ -2211,6 +2221,35 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
   };
 
   const currentForm = forms[activeForm];
+
+  // ── Evolution stage presentation ─────────────────────────────────────
+  // The guardian's own form system (radiant / sage / wild…) expresses mood
+  // and stats; evolution is the orthogonal axis of earned growth. They
+  // compose: a Wild Verdant at SPECIATION is wild AND crowned.
+  const stageUpgrade = getCumulativeEvolutionUpgrade(evolutionState);
+  const stagePalette = resolveStagePalette(evolutionState, storeTraits);
+  const stageEmphasis = useEvolutionStageTransition(evolutionState, {
+    reduceMotion,
+  });
+  // Auralia's orb anatomy in its own viewBox: head at (200,145), body at
+  // (200,210). Growth scales the creature about the point between them; the
+  // sigil ring and interaction hit-testing sit outside this transform and
+  // are deliberately left alone.
+  const STAGE_ANCHOR = {
+    headX: 200,
+    headY: 145,
+    headRx: 30,
+    headRy: 35,
+    bodyX: 200,
+    bodyY: 210,
+    bodyRx: 40,
+    bodyRy: 60,
+  } as const;
+  const stageGrowth = `translate(200 185) scale(${(
+    stageUpgrade.bodyScale +
+    stageEmphasis * 0.06
+  ).toFixed(4)}) translate(-200 -185)`;
+
   const lucasNum = field.lucas(7 + (energy % 10));
   const fibNum = field.fib(5 + (curiosity % 10));
   const timeTheme = getTimeTheme(timeOfDay);
@@ -2803,6 +2842,32 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
                     })}
                   </g>
 
+                  {/* Evolution growth wraps the orb and its stage anatomy:
+                      wings behind, orb, then horns/crown/third eye/sigil. */}
+                  <g data-testid="auralia-evolution-stage" transform={stageGrowth}>
+                  {stageUpgrade.glowBonus > 0 && (
+                    <circle
+                      cx="200"
+                      cy="185"
+                      r={92}
+                      fill={stagePalette.glowColor}
+                      opacity={
+                        stageUpgrade.glowBonus * 0.55 + stageEmphasis * 0.25
+                      }
+                      filter="url(#glow)"
+                      pointerEvents="none"
+                    />
+                  )}
+                  <EvolutionStageAdornments
+                    {...STAGE_ANCHOR}
+                    state={evolutionState}
+                    layer="behind"
+                    color={stagePalette.color}
+                    accentColor={stagePalette.accentColor}
+                    underlayColor="#05081A"
+                    emphasis={stageEmphasis}
+                    strokeWidth={2.6}
+                  />
                   <g
                     className={`
                     ${aiState.mode === "idle" ? "ai-idle" : ""}
@@ -2886,6 +2951,18 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
                         transition: "all 0.2s ease-out",
                       }}
                     />
+                  </g>
+
+                  <EvolutionStageAdornments
+                    {...STAGE_ANCHOR}
+                    state={evolutionState}
+                    layer="front"
+                    color={stagePalette.color}
+                    accentColor={stagePalette.accentColor}
+                    underlayColor="#05081A"
+                    emphasis={stageEmphasis}
+                    strokeWidth={2.6}
+                  />
                   </g>
 
                   <rect

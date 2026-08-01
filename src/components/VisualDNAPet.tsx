@@ -17,6 +17,7 @@ import {
   type EvolutionMark,
 } from "@/components/body-forge/PetBodyRenderer";
 import { getCumulativeEvolutionUpgrade } from "@/evolution/stageUpgrades";
+import { resolveStagePalette } from "@/components/evolution/stagePalette";
 import {
   clearForgedBody,
   getGenomeVisualFingerprint,
@@ -367,20 +368,22 @@ export function VisualDNAPet({
     [interaction, living],
   );
 
-  // The stage sigil etched on the body. It uses the stage's own aura colours
-  // rather than the genome's, so every reached stage is legible at a glance
-  // even on a creature whose body colours are close to its aura.
+  // The stage sigil etched on the body. It uses the shared branch-tinted
+  // stage palette rather than the genome's own colours, so every reached
+  // stage is legible even on a creature whose body matches its aura — and
+  // so the mark agrees with the ceremony overlay and the Evolution panel.
   const evolutionMark = useMemo<EvolutionMark | null>(() => {
     if (!phenotype) return null;
     const upgrade = getCumulativeEvolutionUpgrade(phenotype.evolution.state);
+    const palette = resolveStagePalette(phenotype.evolution.state, traits);
     return {
       shape: upgrade.mark,
       count: upgrade.markCount,
       intensity: upgrade.markIntensity,
-      color: phenotype.evolution.stageColors[0],
-      accentColor: phenotype.evolution.stageColors[2],
+      color: palette.color,
+      accentColor: palette.accentColor,
     };
-  }, [phenotype]);
+  }, [phenotype, traits]);
 
   const bodyContext = useMemo<MovementBodyContext | null>(() => {
     if (!resolvedBody) return null;
