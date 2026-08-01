@@ -344,17 +344,31 @@ export const STAGE_SIGNATURE_CLIPS: Record<EvolutionState, readonly string[]> = 
 };
 
 /**
- * Picks one stage signature move for a 0..1 stream value. Returns null for
- * an unknown state so callers can fall back to the generic mood clip.
+ * Picks a stage signature move for a 0..1 stream value.
+ *
+ * `isAllowed` lets the caller reject a pick (reduced motion, crisis-state
+ * celebration suppression). The search then walks the remaining options
+ * rather than giving up — otherwise a reduced-motion pet at QUANTUM or
+ * SPECIATION would lose most of its stage character, since the phase and
+ * crown moves are not reduced-motion-safe. Returns null only when the state
+ * is unknown or every option is rejected, so callers can fall back to the
+ * generic mood clip.
  */
 export function getStageSignatureClip(
   state: EvolutionState,
   unit: number,
+  isAllowed: (clipId: string) => boolean = () => true,
 ): string | null {
   const options = STAGE_SIGNATURE_CLIPS[state];
   if (!options || options.length === 0) return null;
-  const index = Math.floor(Math.max(0, Math.min(0.999999, unit)) * options.length);
-  return options[index] ?? options[0];
+  const start = Math.floor(
+    Math.max(0, Math.min(0.999999, unit)) * options.length,
+  );
+  for (let offset = 0; offset < options.length; offset += 1) {
+    const pick = options[(start + offset) % options.length];
+    if (isAllowed(pick)) return pick;
+  }
+  return null;
 }
 
 export function getMovementClip(id: string): MovementClip | undefined {

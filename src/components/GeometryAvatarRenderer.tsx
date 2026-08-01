@@ -150,13 +150,15 @@ export function GeometryAvatarRenderer({
   // anatomy and sigil are drawn as an overlay in this approved wrapper
   // instead — same grants, same palette, same emergence beat as the other
   // two renderers, without touching the locked asset.
-  // A preview is self-contained: a child's geometry must show the CHILD's
-  // stage, never the active parent's — the same rule this component already
-  // applies to traits and vitals.
+  // A preview is self-contained, and that has to hold by DEFAULT rather than
+  // by every call site remembering: `genomeOverride` already means "this is
+  // not the active pet" for traits, so the live store's stage must not leak
+  // in either. Without this an unborn offspring rendered wearing the active
+  // parent's crown and wings.
   const evolutionState: EvolutionState =
     evolutionStateOverride ??
     selectedRecord?.evolution?.state ??
-    runtimeEvolutionState ??
+    (genomeOverride ? "GENETICS" : runtimeEvolutionState) ??
     "GENETICS";
   const stageUpgrade = getCumulativeEvolutionUpgrade(evolutionState);
   const stagePalette = resolveStagePalette(evolutionState, traits);

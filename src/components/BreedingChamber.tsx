@@ -415,6 +415,10 @@ export function BreedingChamber() {
               heptaProfileOverride={preview.heptaProfile}
               projectionVersionOverride={PROJECTION_VERSION_V2}
               identityKeyOverride={packet.checksum}
+              // An offspring has not been born, let alone evolved: it must
+              // show its own first stage, never borrow the active parent's
+              // earned crown and wings.
+              evolutionStateOverride="GENETICS"
             />
           </div>
 

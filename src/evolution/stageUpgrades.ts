@@ -196,17 +196,3 @@ export function getCumulativeEvolutionUpgrade(
 export function describeEvolutionUpgrade(state: EvolutionState): string[] {
   return [...getEvolutionStageUpgrade(state).summary];
 }
-
-/**
- * Features gained by moving from one stage to another. Empty when the move
- * grants nothing new (or goes backwards, which evolution never does).
- */
-export function getNewlyGrantedFeatures(
-  from: EvolutionState | null | undefined,
-  to: EvolutionState
-): EvolutionGrantedFeature[] {
-  const after = getCumulativeEvolutionUpgrade(to).features;
-  if (!from) return [...after];
-  const before = new Set(getCumulativeEvolutionUpgrade(from).features);
-  return after.filter((feature) => !before.has(feature));
-}

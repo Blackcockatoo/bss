@@ -108,8 +108,9 @@ export function decideAmbientClip(
     const signature = getStageSignatureClip(
       gates.evolutionState,
       seededUnit(seed, counter, 3),
+      allowed,
     );
-    if (signature && allowed(signature)) return signature;
+    if (signature) return signature;
   }
 
   // Mood expression roughly every few ticks.

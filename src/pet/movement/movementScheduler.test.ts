@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { MOVEMENT_CLIPS, SECRET_MOVE_IDS } from "./movementVocabulary";
+import {
+  MOVEMENT_CLIPS,
+  SECRET_MOVE_IDS,
+  STAGE_SIGNATURE_CLIPS,
+} from "./movementVocabulary";
 import {
   blinkIntervalSeconds,
   decideAmbientClip,
@@ -116,6 +120,36 @@ describe("deterministic movement scheduler", () => {
         apex.has("phase_drift") ||
         apex.has("neuro_lattice_ripple"),
     ).toBe(true);
+  });
+
+  it("keeps stage signatures at full rate under reduced motion", () => {
+    // Two of the apex's three signature moves are not reduced-motion-safe.
+    // Picking one blindly and giving up when it is rejected cut the stage's
+    // ambient character to roughly a third for those players; the pick must
+    // walk on to a safe option instead. Asserting the RATE (not mere
+    // presence) is what makes this test able to fail — the safe option still
+    // shows up occasionally either way.
+    const countSignatures = (gates: SchedulerGates) =>
+      sequence(hashSeed("reduced-signature"), 2_000, gates).filter(
+        (pick) =>
+          pick !== null &&
+          STAGE_SIGNATURE_CLIPS[gates.evolutionState].includes(pick),
+      ).length;
+
+    const apex = { ...GATES, evolutionState: "SPECIATION" as const };
+    const fullMotion = countSignatures(apex);
+    const reduced = countSignatures({ ...apex, reduceMotion: true });
+
+    expect(fullMotion).toBeGreaterThan(0);
+    expect(reduced).toBeGreaterThan(fullMotion * 0.7);
+
+    // ...and every one of them is still a safe clip.
+    for (const pick of sequence(hashSeed("reduced-signature"), 2_000, {
+      ...apex,
+      reduceMotion: true,
+    })) {
+      if (pick) expect(MOVEMENT_CLIPS[pick].reducedMotionSafe, pick).toBe(true);
+    }
   });
 
   it("produces uniform-ish seeded units with no shared-state drift", () => {

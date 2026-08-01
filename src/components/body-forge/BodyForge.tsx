@@ -13,6 +13,7 @@ import {
   type BodySpec,
   type AuraMotion,
   type AuraStyle,
+  type EvolutionMark,
   type FaceExpression,
   type GenderFrame,
   type WingPurpose,
@@ -37,6 +38,8 @@ import {
   saveForgedBody,
   sanitizeBodySpec,
 } from "@/visual-dna/bodyForgeAdapter";
+import { getCumulativeEvolutionUpgrade } from "@/evolution/stageUpgrades";
+import { resolveStagePalette } from "@/components/evolution/stagePalette";
 import { BODY_FORGE_RETURN_FORM } from "@/lib/petForms";
 
 const ACTION_WINDOW_MS = 1_600;
@@ -273,6 +276,22 @@ export function BodyForge() {
         : spec,
     [phenotype, spec],
   );
+  // The stage sigil is part of that same preview: the Forge shows the
+  // creature as the runtime will actually draw it, so what you save is what
+  // you saw. Like the rest of evolution's growth it is preview-only — the
+  // saved BodySpec stays exactly what was forged.
+  const previewEvolutionMark = useMemo<EvolutionMark | null>(() => {
+    if (!phenotype) return null;
+    const upgrade = getCumulativeEvolutionUpgrade(phenotype.evolution.state);
+    const palette = resolveStagePalette(phenotype.evolution.state, traits);
+    return {
+      shape: upgrade.mark,
+      count: upgrade.markCount,
+      intensity: upgrade.markIntensity,
+      color: palette.color,
+      accentColor: palette.accentColor,
+    };
+  }, [phenotype, traits]);
   const fingerprint = getGenomeVisualFingerprint(
     genome,
     phenotype?.identity.seed ?? 0,
@@ -769,6 +788,7 @@ export function BodyForge() {
                 spec={previewSpec}
                 animate={animate}
                 showForgeAura
+                evolutionMark={previewEvolutionMark}
                 className="h-auto w-full max-w-[720px]"
               />
             </div>

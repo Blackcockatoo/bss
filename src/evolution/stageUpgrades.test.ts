@@ -6,7 +6,6 @@ import {
   describeEvolutionUpgrade,
   getCumulativeEvolutionUpgrade,
   getEvolutionStageUpgrade,
-  getNewlyGrantedFeatures,
 } from './stageUpgrades';
 
 describe('evolution stage upgrades', () => {
@@ -55,17 +54,6 @@ describe('evolution stage upgrades', () => {
         seen.add(feature);
       }
     }
-  });
-
-  it('reports only what a specific transition newly grants', () => {
-    expect(getNewlyGrantedFeatures('GENETICS', 'NEURO')).toEqual(['horns']);
-    expect(getNewlyGrantedFeatures('NEURO', 'QUANTUM')).toEqual(['thirdEye']);
-    expect(getNewlyGrantedFeatures('QUANTUM', 'SPECIATION').sort()).toEqual(
-      ['crown', 'wings'].sort()
-    );
-    // A save loaded straight at the apex has earned everything below it.
-    expect(getNewlyGrantedFeatures(null, 'SPECIATION')).toHaveLength(4);
-    expect(getNewlyGrantedFeatures('SPECIATION', 'SPECIATION')).toEqual([]);
   });
 
   it('keeps growth scalars monotonic and bounded', () => {

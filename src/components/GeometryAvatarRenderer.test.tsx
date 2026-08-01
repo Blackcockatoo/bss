@@ -86,6 +86,39 @@ describe("GeometryAvatarRenderer", () => {
     );
   });
 
+  it("never lends the active parent's earned stage to an offspring preview", () => {
+    // BreedingChamber previews an unborn offspring via genomeOverride, which
+    // deliberately detaches it from the active registry record. Without an
+    // explicit stage that fell through to the live store, so a newborn
+    // rendered wearing the parent's crown and wings.
+    state.evolution = { state: "SPECIATION" };
+    // No explicit stage: a self-contained preview must be safe by default,
+    // not only when a call site remembers to pass one.
+    const { container } = render(
+      <GeometryAvatarRenderer
+        animated={false}
+        compact
+        genomeOverride={state.genome!}
+      />,
+    );
+    const stage = container.querySelector(
+      '[data-testid="geometry-evolution-stage"]',
+    );
+    expect(stage?.querySelector('[data-evolution-adornment="crown"]')).toBeNull();
+    expect(stage?.querySelector('[data-evolution-adornment="wings"]')).toBeNull();
+    expect(stage?.querySelector('[data-evolution-adornment="thirdEye"]')).toBeNull();
+    expect(stage?.querySelector('[data-evolution-mark="helix"]')).toBeTruthy();
+  });
+
+  it("still shows the active pet's stage when it is not a preview", () => {
+    state.evolution = { state: "SPECIATION" };
+    const { container } = render(<GeometryAvatarRenderer animated={false} />);
+    const stage = container.querySelector(
+      '[data-testid="geometry-evolution-stage"]',
+    );
+    expect(stage?.querySelector('[data-evolution-adornment="crown"]')).toBeTruthy();
+  });
+
   it("keeps a preview self-contained: an explicit stage beats the live store", () => {
     state.evolution = { state: "SPECIATION" };
     const { container } = render(
