@@ -38,7 +38,7 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
-import { type KeyboardEvent, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 const PET_FORM_LABELS: Record<PetType, string> = {
   auralia: "Auralia Companion",
@@ -46,25 +46,10 @@ const PET_FORM_LABELS: Record<PetType, string> = {
   geometry: "Geometry / Sri Yantra",
 };
 
-type AdvancedTab = "form" | "systems" | "stats" | "links";
+const PET_FORM_ORDER: readonly PetType[] = ["auralia", "evolved", "geometry"];
 
-const ADVANCED_TABS: Array<{ id: AdvancedTab; label: string; hint: string }> = [
-  { id: "form", label: "Form", hint: "Pick which body renders your companion" },
-  {
-    id: "systems",
-    label: "Systems",
-    hint: "Profile, addons, evolution, breeding",
-  },
-  { id: "stats", label: "Stats", hint: "Raw vitals and runtime numbers" },
-  {
-    id: "links",
-    label: "Links",
-    hint: "Other routes that read this companion",
-  },
-];
-
-// One neutral control style for the whole lab; a single cyan accent marks the
-// active choice so the panel reads as one system instead of a colour grid.
+// One neutral control style for every control on the page; a single cyan
+// accent marks the active choice, so colour only ever means "selected".
 const CONTROL_IDLE =
   "gap-2 border-slate-700/70 bg-slate-900/70 text-slate-300 hover:border-slate-600 hover:bg-slate-800 hover:text-white";
 const CONTROL_ACTIVE =
@@ -95,10 +80,6 @@ export default function PetPage() {
   const [wardrobeOpen, setWardrobeOpen] = useState(false);
   const [addonsInitialized, setAddonsInitialized] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [advancedTab, setAdvancedTab] = useState<AdvancedTab>("form");
-  const tabRefs = useRef<
-    Partial<Record<AdvancedTab, HTMLButtonElement | null>>
-  >({});
   const [showCertificate, setShowCertificate] = useState(false);
   const [showWellnessSync, setShowWellnessSync] = useState(false);
   useJourneyProgressTracker("pet", { completeOnVisit: true });
@@ -191,39 +172,16 @@ export default function PetPage() {
     });
   };
 
-  const closePanels = () => {
-    setShowAddonPanel(false);
-    setShowProfilePanel(false);
-    setShowEvolutionPanel(false);
-    setShowBreedingPanel(false);
-  };
+  const anyPanelOpen =
+    showProfilePanel ||
+    showAddonPanel ||
+    showEvolutionPanel ||
+    showBreedingPanel;
 
+  // The companion panels live on the page now, so collapsing the advanced
+  // drawer no longer closes them.
   const handleToggleAdvanced = () => {
-    setShowAdvanced((prev) => {
-      const next = !prev;
-      if (!next) {
-        closePanels();
-      }
-      return next;
-    });
-  };
-
-  const handleTabKeyDown = (
-    event: KeyboardEvent<HTMLButtonElement>,
-    index: number,
-  ) => {
-    const last = ADVANCED_TABS.length - 1;
-    let nextIndex: number | null = null;
-    if (event.key === "ArrowRight") nextIndex = index === last ? 0 : index + 1;
-    else if (event.key === "ArrowLeft")
-      nextIndex = index === 0 ? last : index - 1;
-    else if (event.key === "Home") nextIndex = 0;
-    else if (event.key === "End") nextIndex = last;
-    if (nextIndex === null) return;
-    event.preventDefault();
-    const nextTab = ADVANCED_TABS[nextIndex].id;
-    setAdvancedTab(nextTab);
-    tabRefs.current[nextTab]?.focus();
+    setShowAdvanced((prev) => !prev);
   };
 
   const selectPetRuntime = (nextPetType: PetType) => {
@@ -306,7 +264,121 @@ export default function PetPage() {
           </div>
 
           <div className="flex-shrink-0 border-t border-slate-700/50 bg-slate-900/90 p-4 sm:p-6">
-            <HUD mode="simple" />
+            {/* Form sits against the stage: it changes the creature you are
+                looking at, so it does not belong behind a drawer. */}
+            <section aria-labelledby="pet-form-label" className="space-y-2">
+              <p id="pet-form-label" className={SECTION_LABEL}>
+                Companion form
+              </p>
+              <div className="grid gap-2 sm:grid-cols-3">
+                {PET_FORM_ORDER.map((form) => (
+                  <Button
+                    key={form}
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    aria-pressed={petType === form}
+                    onClick={() => selectPetRuntime(form)}
+                    className={controlClass(petType === form)}
+                  >
+                    {PET_FORM_LABELS[form]}
+                  </Button>
+                ))}
+              </div>
+            </section>
+
+            <div className="mt-6 border-t border-slate-800/80 pt-4">
+              <HUD mode="simple" />
+            </div>
+
+            {/* The companion's own systems. These are the reason people open
+                this page, so they stay on it. */}
+            <section
+              aria-labelledby="pet-systems-label"
+              className="mt-6 space-y-3 border-t border-slate-800/80 pt-4"
+            >
+              <p id="pet-systems-label" className={SECTION_LABEL}>
+                Companion systems
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  aria-pressed={showEvolutionPanel}
+                  onClick={handleToggleEvolutionPanel}
+                  className={controlClass(showEvolutionPanel)}
+                >
+                  <Zap className="h-4 w-4" />
+                  Evolution
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  aria-pressed={showProfilePanel}
+                  onClick={handleToggleProfilePanel}
+                  className={controlClass(showProfilePanel)}
+                >
+                  <Shield className="h-4 w-4" />
+                  Profile
+                </Button>
+                {petType === "auralia" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    aria-pressed={showAddonPanel}
+                    onClick={handleToggleAddonPanel}
+                    className={controlClass(showAddonPanel)}
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    Addons
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  aria-pressed={showBreedingPanel}
+                  onClick={handleToggleBreedingPanel}
+                  className={controlClass(showBreedingPanel)}
+                >
+                  <Dna className="h-4 w-4" />
+                  Breed Geometry
+                </Button>
+                <CertificateButton
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowCertificate(true)}
+                  className={CONTROL_IDLE}
+                />
+              </div>
+
+              {anyPanelOpen && (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {showProfilePanel && (
+                    <PetProfilePanel
+                      petId={petId}
+                      petName={petName}
+                      record={activeRecord}
+                      editMode={petType === "auralia" && addonEditMode}
+                      onEditModeChange={setAddonEditMode}
+                    />
+                  )}
+                  {petType === "auralia" && showAddonPanel && (
+                    <AddonInventoryPanel />
+                  )}
+                  {showEvolutionPanel && (
+                    <div className="rounded-lg border border-slate-800/80 bg-slate-950/60 p-4 md:col-span-2">
+                      <EvolutionPanel />
+                    </div>
+                  )}
+                  {showBreedingPanel && (
+                    <div className="md:col-span-2">
+                      <BreedingChamber />
+                    </div>
+                  )}
+                </div>
+              )}
+            </section>
+
             <div className="mt-6 border-t border-slate-800/80 pt-4">
               <Button
                 type="button"
@@ -318,8 +390,8 @@ export default function PetPage() {
                 <span className="font-semibold">Advanced / Mechanics Lab</span>
                 <span className="sr-only">
                   {" "}
-                  — peek under the hood to see identity, addons, and the crypto
-                  systems that keep your companion secure
+                  — raw runtime numbers, body-building tools, and the other
+                  routes that read this companion
                 </span>
                 {showAdvanced ? (
                   <ChevronUp className="h-4 w-4" />
@@ -329,282 +401,95 @@ export default function PetPage() {
               </Button>
 
               {showAdvanced && (
-                <div className="mt-4 overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-950/60">
-                  <div
-                    role="tablist"
-                    aria-label="Mechanics Lab sections"
-                    className="flex gap-1 overflow-x-auto border-b border-slate-800/80 bg-slate-950/80 p-1"
-                  >
-                    {ADVANCED_TABS.map((tab, index) => {
-                      const active = advancedTab === tab.id;
-                      return (
-                        <button
-                          key={tab.id}
-                          type="button"
-                          role="tab"
-                          id={`mechanics-tab-${tab.id}`}
-                          aria-controls={`mechanics-panel-${tab.id}`}
-                          aria-selected={active}
-                          tabIndex={active ? 0 : -1}
-                          ref={(node) => {
-                            tabRefs.current[tab.id] = node;
-                          }}
-                          onClick={() => setAdvancedTab(tab.id)}
-                          onKeyDown={(event) => handleTabKeyDown(event, index)}
-                          className={`flex-1 whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400 ${
-                            active
-                              ? "bg-slate-800 text-white shadow-sm"
-                              : "text-slate-400 hover:bg-slate-900 hover:text-slate-200"
-                          }`}
+                <div className="mt-4 space-y-4 rounded-2xl border border-slate-800/80 bg-slate-950/60 p-4">
+                  <section className="space-y-2">
+                    <p className={SECTION_LABEL}>Runtime stats</p>
+                    <HUDAdvancedStats />
+                  </section>
+
+                  <section className="space-y-2 border-t border-slate-800/80 pt-4">
+                    <p className={SECTION_LABEL}>Body tools</p>
+                    <div className="flex flex-wrap gap-2">
+                      <Link href="/body-forge">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={CONTROL_IDLE}
                         >
-                          {tab.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <div className="p-4">
-                    <p className="mb-4 text-xs text-slate-500">
-                      {
-                        ADVANCED_TABS.find((tab) => tab.id === advancedTab)
-                          ?.hint
-                      }
+                          Open Body Forge
+                        </Button>
+                      </Link>
+                      {petType === "auralia" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          aria-pressed={addonEditMode}
+                          onClick={() => setAddonEditMode(!addonEditMode)}
+                          className={controlClass(addonEditMode)}
+                        >
+                          <Move className="h-4 w-4" />
+                          {addonEditMode ? "Editing" : "Edit Auralia"}
+                        </Button>
+                      )}
+                    </div>
+                    {petType === "auralia" && addonEditMode && (
+                      <p className="rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-3 py-2 text-xs text-cyan-100">
+                        <span className="font-semibold">Edit Mode Active</span>{" "}
+                        — Drag addons to reposition, hover for controls.
+                      </p>
+                    )}
+                    <p className="text-xs leading-relaxed text-slate-400">
+                      Body Forge returns here in Evolved form, where the Moss60
+                      movement and identity layer performs on the inherited
+                      body. All three forms share one identity, progression
+                      record, and vitals system.
                     </p>
+                  </section>
 
-                    {advancedTab === "form" && (
-                      <div
-                        role="tabpanel"
-                        id="mechanics-panel-form"
-                        aria-labelledby="mechanics-tab-form"
-                        className="space-y-4"
-                      >
-                        <div className="space-y-2">
-                          <p className={SECTION_LABEL}>Active body engine</p>
-                          <div className="grid gap-2 sm:grid-cols-3">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => selectPetRuntime("auralia")}
-                              className={controlClass(petType === "auralia")}
-                            >
-                              Auralia Companion
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => selectPetRuntime("evolved")}
-                              className={controlClass(petType === "evolved")}
-                            >
-                              Evolved / Body Forge
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => selectPetRuntime("geometry")}
-                              className={controlClass(petType === "geometry")}
-                            >
-                              Geometry / Sri Yantra
-                            </Button>
-                          </div>
-                          <p className="text-xs leading-relaxed text-slate-400">
-                            These are three forms of the same companion. Body
-                            Forge returns here in Evolved form, where the Moss60
-                            movement and identity layer performs on the
-                            inherited body; Geometry is the separate Sri Yantra
-                            manifestation of the same genome; Auralia is the
-                            default form.
-                          </p>
-                        </div>
-
-                        <div className="space-y-2 border-t border-slate-800/80 pt-4">
-                          <p className={SECTION_LABEL}>Build a new body</p>
-                          <Link href="/body-forge" className="inline-block">
+                  <section className="space-y-2 border-t border-slate-800/80 pt-4">
+                    <p className={SECTION_LABEL}>Other routes</p>
+                    <div className="flex flex-wrap gap-2">
+                      <Link href="/teachers">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={CONTROL_IDLE}
+                        >
+                          <GraduationCap className="h-4 w-4" />
+                          Teacher Hub
+                        </Button>
+                      </Link>
+                      {!ENABLE_CHILD_SAFE_BASELINE && (
+                        <>
+                          <Link href="/app/activities">
                             <Button
                               variant="outline"
                               size="sm"
                               className={CONTROL_IDLE}
                             >
-                              Open Body Forge
+                              <Compass className="h-4 w-4" />
+                              Compass Wheel
                             </Button>
                           </Link>
-                        </div>
-                      </div>
-                    )}
-
-                    {advancedTab === "systems" && (
-                      <div
-                        role="tabpanel"
-                        id="mechanics-panel-systems"
-                        aria-labelledby="mechanics-tab-systems"
-                        className="space-y-4"
-                      >
-                        <div className="flex flex-wrap gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleToggleProfilePanel}
-                            className={controlClass(showProfilePanel)}
-                          >
-                            <Shield className="h-4 w-4" />
-                            Profile
-                          </Button>
-                          {petType === "auralia" && (
+                          <Link href="/identity">
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={handleToggleAddonPanel}
-                              className={controlClass(showAddonPanel)}
+                              className={CONTROL_IDLE}
                             >
-                              <Sparkles className="h-4 w-4" />
-                              Addons
+                              <UserCircle className="h-4 w-4" />
+                              Identity
                             </Button>
-                          )}
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleToggleEvolutionPanel}
-                            className={controlClass(showEvolutionPanel)}
-                          >
-                            <Zap className="h-4 w-4" />
-                            Evolution
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleToggleBreedingPanel}
-                            className={controlClass(showBreedingPanel)}
-                          >
-                            <Dna className="h-4 w-4" />
-                            Breed Geometry
-                          </Button>
-                          {petType === "auralia" && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setAddonEditMode(!addonEditMode)}
-                              className={controlClass(addonEditMode)}
-                            >
-                              <Move className="h-4 w-4" />
-                              {addonEditMode ? "Editing" : "Edit Auralia"}
-                            </Button>
-                          )}
-                          <CertificateButton
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setShowCertificate(true)}
-                            className={CONTROL_IDLE}
-                          />
-                        </div>
-
-                        {petType === "auralia" && addonEditMode && (
-                          <div className="rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-3 py-2 text-xs text-cyan-100">
-                            <span className="font-semibold">
-                              Edit Mode Active
-                            </span>{" "}
-                            — Drag addons to reposition, hover for controls.
-                          </div>
-                        )}
-
-                        <div className="grid gap-4 md:grid-cols-2">
-                          {showProfilePanel && (
-                            <PetProfilePanel
-                              petId={petId}
-                              petName={petName}
-                              record={activeRecord}
-                              editMode={petType === "auralia" && addonEditMode}
-                              onEditModeChange={setAddonEditMode}
-                            />
-                          )}
-                          {petType === "auralia" && showAddonPanel && (
-                            <AddonInventoryPanel />
-                          )}
-                          {showEvolutionPanel && (
-                            <div className="rounded-lg border border-slate-800/80 bg-slate-950/60 p-4 md:col-span-2">
-                              <EvolutionPanel />
-                            </div>
-                          )}
-                          {showBreedingPanel && (
-                            <div className="md:col-span-2">
-                              <BreedingChamber />
-                            </div>
-                          )}
-                          {!showProfilePanel &&
-                            !showAddonPanel &&
-                            !showEvolutionPanel &&
-                            !showBreedingPanel && (
-                              <p className="rounded-lg border border-dashed border-slate-700/60 p-4 text-xs text-slate-500 md:col-span-2">
-                                Auralia, Evolved, and Geometry share one
-                                identity, progression record, vitals system, and
-                                canonical pet route. Pick a system above to
-                                inspect it.
-                              </p>
-                            )}
-                        </div>
-                      </div>
-                    )}
-
-                    {advancedTab === "stats" && (
-                      <div
-                        role="tabpanel"
-                        id="mechanics-panel-stats"
-                        aria-labelledby="mechanics-tab-stats"
-                      >
-                        <HUDAdvancedStats />
-                      </div>
-                    )}
-
-                    {advancedTab === "links" && (
-                      <div
-                        role="tabpanel"
-                        id="mechanics-panel-links"
-                        aria-labelledby="mechanics-tab-links"
-                        className="flex flex-wrap gap-2"
-                      >
-                        <Link href="/teachers">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className={CONTROL_IDLE}
-                          >
-                            <GraduationCap className="h-4 w-4" />
-                            Teacher Hub
-                          </Button>
-                        </Link>
-                        {!ENABLE_CHILD_SAFE_BASELINE && (
-                          <>
-                            <Link href="/app/activities">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className={CONTROL_IDLE}
-                              >
-                                <Compass className="h-4 w-4" />
-                                Compass Wheel
-                              </Button>
-                            </Link>
-                            <Link href="/identity">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className={CONTROL_IDLE}
-                              >
-                                <UserCircle className="h-4 w-4" />
-                                Identity
-                              </Button>
-                            </Link>
-                          </>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                          </Link>
+                        </>
+                      )}
+                    </div>
+                  </section>
                 </div>
               )}
-
-              <RouteProgressionCard route="pet" className="mt-4" />
             </div>
+
+            <RouteProgressionCard route="pet" className="mt-4" />
           </div>
         </div>
       </div>

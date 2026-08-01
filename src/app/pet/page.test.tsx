@@ -135,12 +135,9 @@ describe("PetPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("switches the active body engine from the mechanics lab", async () => {
+  it("switches the active body engine without opening any drawer", async () => {
     render(<PetPage />);
 
-    fireEvent.click(
-      screen.getByRole("button", { name: /Advanced \/ Mechanics Lab/i }),
-    );
     fireEvent.click(
       screen.getByRole("button", { name: /Evolved \/ Body Forge/i }),
     );
@@ -150,9 +147,25 @@ describe("PetPage", () => {
 
     expect(setPetType).toHaveBeenNthCalledWith(1, "evolved");
     expect(setPetType).toHaveBeenNthCalledWith(2, "geometry");
+  });
+
+  it("keeps Body Forge and the outside routes in the advanced drawer", async () => {
+    render(<PetPage />);
+
+    expect(
+      screen.queryByRole("link", { name: /Open Body Forge/i }),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /Advanced \/ Mechanics Lab/i }),
+    );
+
     expect(
       screen.getByRole("link", { name: /Open Body Forge/i }),
     ).toHaveAttribute("href", "/body-forge");
+    expect(
+      screen.getByRole("link", { name: /Teacher Hub/i }),
+    ).toBeInTheDocument();
   });
 
   it("opens the registration certificate from the advanced section", async () => {
@@ -162,10 +175,6 @@ describe("PetPage", () => {
       expect(initializeStarterAddons).toHaveBeenCalled();
     });
 
-    fireEvent.click(
-      screen.getByRole("button", { name: /Advanced \/ Mechanics Lab/i }),
-    );
-    fireEvent.click(screen.getByRole("tab", { name: /Systems/i }));
     expect(
       screen.queryByTestId("registration-certificate"),
     ).not.toBeInTheDocument();
@@ -174,42 +183,13 @@ describe("PetPage", () => {
     expect(screen.getByTestId("registration-certificate")).toBeInTheDocument();
   });
 
-  it("keeps mechanics lab controls behind their own tabs", async () => {
-    render(<PetPage />);
-
-    fireEvent.click(
-      screen.getByRole("button", { name: /Advanced \/ Mechanics Lab/i }),
-    );
-
-    // Form is the default tab, so the other groups stay out of the way.
-    expect(screen.getByRole("tab", { name: /Form/i })).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
-    expect(
-      screen.queryByRole("link", { name: /Teacher Hub/i }),
-    ).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("tab", { name: /Links/i }));
-    expect(
-      screen.getByRole("link", { name: /Teacher Hub/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: /Breed Geometry/i }),
-    ).not.toBeInTheDocument();
-  });
-
-  it("toggles the evolution panel from the advanced section", async () => {
+  it("toggles the evolution panel straight from the page", async () => {
     render(<PetPage />);
 
     await waitFor(() => {
       expect(initializeStarterAddons).toHaveBeenCalled();
     });
 
-    fireEvent.click(
-      screen.getByRole("button", { name: /Advanced \/ Mechanics Lab/i }),
-    );
-    fireEvent.click(screen.getByRole("tab", { name: /Systems/i }));
     expect(screen.queryByTestId("evolution-panel")).not.toBeInTheDocument();
 
     const evolutionToggle = screen.getByRole("button", { name: /Evolution/i });
@@ -218,5 +198,20 @@ describe("PetPage", () => {
 
     fireEvent.click(evolutionToggle);
     expect(screen.queryByTestId("evolution-panel")).not.toBeInTheDocument();
+  });
+
+  it("leaves an open panel alone when the advanced drawer closes", async () => {
+    render(<PetPage />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Evolution/i }));
+    expect(screen.getByTestId("evolution-panel")).toBeInTheDocument();
+
+    const advancedToggle = screen.getByRole("button", {
+      name: /Advanced \/ Mechanics Lab/i,
+    });
+    fireEvent.click(advancedToggle);
+    fireEvent.click(advancedToggle);
+
+    expect(screen.getByTestId("evolution-panel")).toBeInTheDocument();
   });
 });
