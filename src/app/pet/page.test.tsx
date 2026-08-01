@@ -165,14 +165,38 @@ describe("PetPage", () => {
     fireEvent.click(
       screen.getByRole("button", { name: /Advanced \/ Mechanics Lab/i }),
     );
+    fireEvent.click(screen.getByRole("tab", { name: /Systems/i }));
     expect(
       screen.queryByTestId("registration-certificate"),
     ).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /View Certificate/i }));
+    expect(screen.getByTestId("registration-certificate")).toBeInTheDocument();
+  });
+
+  it("keeps mechanics lab controls behind their own tabs", async () => {
+    render(<PetPage />);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /Advanced \/ Mechanics Lab/i }),
+    );
+
+    // Form is the default tab, so the other groups stay out of the way.
+    expect(screen.getByRole("tab", { name: /Form/i })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
     expect(
-      screen.getByTestId("registration-certificate"),
+      screen.queryByRole("link", { name: /Teacher Hub/i }),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("tab", { name: /Links/i }));
+    expect(
+      screen.getByRole("link", { name: /Teacher Hub/i }),
     ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /Breed Geometry/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("toggles the evolution panel from the advanced section", async () => {
@@ -185,6 +209,7 @@ describe("PetPage", () => {
     fireEvent.click(
       screen.getByRole("button", { name: /Advanced \/ Mechanics Lab/i }),
     );
+    fireEvent.click(screen.getByRole("tab", { name: /Systems/i }));
     expect(screen.queryByTestId("evolution-panel")).not.toBeInTheDocument();
 
     const evolutionToggle = screen.getByRole("button", { name: /Evolution/i });

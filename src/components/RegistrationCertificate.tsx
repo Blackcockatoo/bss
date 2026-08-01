@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+  type ComponentProps,
+} from "react";
 import { CoatOfArmsRenderer } from "@/components/lineage/CoatOfArmsRenderer";
 import { HeptaTag } from "@/components/HeptaTag";
 import { SeedOfLifeGlyph } from "@/components/SeedOfLifeGlyph";
@@ -692,17 +699,28 @@ function DetailRow({
 export function CertificateButton({
   onClick,
   className = "",
+  variant,
+  size,
 }: {
   onClick: () => void;
   className?: string;
+  variant?: ComponentProps<typeof Button>["variant"];
+  size?: ComponentProps<typeof Button>["size"];
 }) {
+  // Callers that pass a variant style the button themselves; the gradient is
+  // only the standalone default.
+  const defaultStyle = variant
+    ? ""
+    : "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700";
   return (
     <Button
+      variant={variant}
+      size={size}
       onClick={() => {
         triggerHaptic("medium");
         onClick();
       }}
-      className={`bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 touch-manipulation ${className}`}
+      className={`${defaultStyle} touch-manipulation ${className}`}
     >
       <Award className="w-4 h-4 mr-2" />
       View Certificate
