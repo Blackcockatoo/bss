@@ -7,6 +7,8 @@ import type {
   BodyPerformanceState,
   MovementPerformance,
 } from "@/pet/performance";
+import type { EvolutionMarkShape } from "@/evolution/stageUpgrades";
+import { StageSigil } from "@/components/evolution/StageSigil";
 
 export type BodyShape =
   | "round"
@@ -366,6 +368,58 @@ function sparklePath(cx: number, cy: number, r: number): string {
   return `M${cx} ${cy - r} L${cx + r * 0.28} ${cy - r * 0.28} L${cx + r} ${cy} L${cx + r * 0.28} ${cy + r * 0.28} L${cx} ${cy + r} L${cx - r * 0.28} ${cy + r * 0.28} L${cx - r} ${cy} L${cx - r * 0.28} ${cy - r * 0.28}Z`;
 }
 
+/**
+ * The stage sigil evolution etches onto the body surface. Purely additive
+ * decoration drawn over the silhouette and under the face — it never alters
+ * the stored spec, so a caller that omits `evolutionMark` renders exactly as
+ * before. Shape and painting are shared with Auralia and Geometry (see
+ * `@/evolution/stageSigil` and `StageSigil`) so a stage looks like the same
+ * stage on every renderer.
+ */
+export interface EvolutionMark {
+  shape: EvolutionMarkShape;
+  /** Number of sigil elements to draw. */
+  count: number;
+  /** 0..1 how strongly the sigil reads against the body. */
+  intensity: number;
+  color: string;
+  accentColor: string;
+}
+
+function EvolutionSigil({
+  mark,
+  spec,
+  featureGlow,
+}: {
+  mark: EvolutionMark;
+  spec: BodySpec;
+  featureGlow: number;
+}) {
+  return (
+    <StageSigil
+      shape={mark.shape}
+      count={mark.count}
+      // Anchored on the chest, below the eyes and mouth, so the sigil reads
+      // as a marking on the body rather than as clutter across the face.
+      cx={140}
+      cy={112 + spec.bodyHeight * 0.3}
+      rx={spec.bodyWidth * 0.3}
+      ry={spec.bodyHeight * 0.17}
+      glow={featureGlow}
+      color={mark.color}
+      accentColor={mark.accentColor}
+      underlayColor={spec.secondaryColor}
+      width={Math.max(1.2, spec.outlineWidth * 0.52)}
+      // A live clip's feature intensity brightens the sigil without ever
+      // letting it wash out the body underneath.
+      opacity={Math.min(
+        0.95,
+        Math.max(0, Math.min(1, mark.intensity)) * (0.92 + featureGlow * 0.35),
+      )}
+    />
+  );
+}
+
 // Rounded to sidestep last-bit differences between the server's and
 // browser's Math.sin/Math.cos, which otherwise trip a React hydration
 // mismatch on every particle coordinate.
@@ -597,6 +651,12 @@ export interface PetBodyRendererProps {
   /** Active clip id, for signature dressings (Moss60 orbit, venom pulse). */
   activeClipId?: string | null;
   /**
+   * Stage sigil earned from evolution, drawn on the body surface. Omitted
+   * (the default) renders the body exactly as before — the Forge preview and
+   * every legacy caller are unaffected.
+   */
+  evolutionMark?: EvolutionMark | null;
+  /**
    * Wardrobe add-on layer rendered behind the body silhouette, inside the
    * same whole-body movement transform (so equipped items follow the body
    * exactly as forged — no separate scale/offset math needed by callers).
@@ -623,6 +683,7 @@ export const PetBodyRenderer = forwardRef<SVGSVGElement, PetBodyRendererProps>(
       activeClipId = null,
       addonsBehind = null,
       addonsFront = null,
+      evolutionMark = null,
     },
     ref,
   ) {
@@ -1176,6 +1237,13 @@ export const PetBodyRenderer = forwardRef<SVGSVGElement, PetBodyRendererProps>(
               />
             ))}
           </g>
+        )}
+        {evolutionMark && evolutionMark.intensity > 0.01 && (
+          <EvolutionSigil
+            mark={evolutionMark}
+            spec={spec}
+            featureGlow={featureGlow}
+          />
         )}
         <g
           transform={

@@ -11,7 +11,7 @@ import {
   type WingPurpose,
   type WingStyle,
 } from "@/components/body-forge/PetBodyRenderer";
-import { EVOLUTION_ORDER } from "@/evolution/types";
+import { getCumulativeEvolutionUpgrade } from "@/evolution/stageUpgrades";
 import type { Genome } from "@/genome/types";
 import type { VisualPhenotype } from "@/visual-dna";
 
@@ -457,41 +457,38 @@ export function createGenomeBodySpec(
 }
 
 /**
- * Anatomical structures evolution permanently grants once a stage is
- * reached, mirroring that stage's own aura topology (phase-torus insight at
- * QUANTUM, the speciation crown at SPECIATION — see EVOLUTION_STAGE_INFO).
- * Earned once, kept forever after: a later stage's grants stack on top of
- * every earlier stage's.
- */
-const EVOLUTION_GRANTED_FEATURES: Partial<
-  Record<VisualPhenotype["evolution"]["state"], BodyFeature>
-> = {
-  QUANTUM: "thirdEye",
-  SPECIATION: "crown",
-};
-
-/**
- * Evolution owns earned permanent additions. As the pet matures it gains
- * durable anatomical structures on top of whatever the genome or Body Forge
- * already established. It only ever adds to the feature set — it must
- * never remove a feature the genome or forge chose, and it never touches
- * silhouette, colour, or proportions.
+ * Evolution owns earned permanent growth. As the pet matures it gains
+ * durable anatomy (see `EVOLUTION_STAGE_UPGRADES`) on top of whatever the
+ * genome or Body Forge already established, and grows into a larger, more
+ * defined, brighter frame.
+ *
+ * Boundaries this must keep:
+ *  - features are only ever ADDED — never remove one the genome or forge chose;
+ *  - shape, pattern and colour are untouched: growth is size/definition only,
+ *    so the creature you raised still reads as the same creature;
+ *  - stage scalars are absolute, so a pet that jumped straight to SPECIATION
+ *    looks the same as one that walked every stage.
  */
 export function applyEvolutionGrowth(
   base: BodySpec,
   phenotype: VisualPhenotype,
 ): BodySpec {
-  const reachedIndex = EVOLUTION_ORDER.indexOf(phenotype.evolution.state);
+  const upgrade = getCumulativeEvolutionUpgrade(phenotype.evolution.state);
+  // Assigning the domain union into BodyFeature[] is the compile-time proof
+  // that `EvolutionGrantedFeature` never drifts from the renderer's features.
+  const granted: BodyFeature[] = [...upgrade.features];
   const merged = new Set(base.features);
-  let changed = false;
-  for (let index = 0; index <= reachedIndex; index += 1) {
-    const granted = EVOLUTION_GRANTED_FEATURES[EVOLUTION_ORDER[index]];
-    if (granted && !merged.has(granted)) {
-      merged.add(granted);
-      changed = true;
-    }
-  }
-  return changed ? { ...base, features: [...merged] } : base;
+  for (const feature of granted) merged.add(feature);
+
+  return {
+    ...base,
+    features: [...merged],
+    bodyScale: clamp(base.bodyScale * upgrade.bodyScale, 0.48, 1.65),
+    outlineWidth: clamp(base.outlineWidth + upgrade.outlineBonus, 0.8, 10),
+    glow: clamp(base.glow + upgrade.glowBonus, 0, 1),
+    hornLength: clamp(base.hornLength * upgrade.hornScale, 8, 64),
+    wingSpread: clamp(base.wingSpread * upgrade.wingScale, 0.2, 1.65),
+  };
 }
 
 /** Applies mood, care, dosha, evolution and vitals without replacing inherited anatomy. */

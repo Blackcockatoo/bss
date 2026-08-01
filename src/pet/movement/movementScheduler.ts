@@ -12,6 +12,7 @@
 import {
   MOVEMENT_CLIPS,
   SECRET_MOVE_IDS,
+  getStageSignatureClip,
   isClipAllowed,
   type PetMood,
 } from "./movementVocabulary";
@@ -55,6 +56,7 @@ const CELEBRATORY_CLIPS = new Set([
   "wing_flutter",
   "swipe_spin",
   "black_wing_bloom",
+  "crown_ascend",
 ]);
 
 export function isCelebratoryClip(clipId: string): boolean {
@@ -97,6 +99,18 @@ export function decideAmbientClip(
   // Occasional addon shimmer when anything is equipped.
   if (gates.equippedAddonCount > 0 && roll < 0.18 && allowed("aura_pulse")) {
     return "aura_pulse";
+  }
+
+  // Stage signature move: how an evolved pet idles differently from a
+  // hatchling. Rolled before the generic mood expression so reaching a stage
+  // shows up in ambient behaviour, not only in the body's anatomy.
+  if (roll < 0.3) {
+    const signature = getStageSignatureClip(
+      gates.evolutionState,
+      seededUnit(seed, counter, 3),
+      allowed,
+    );
+    if (signature) return signature;
   }
 
   // Mood expression roughly every few ticks.

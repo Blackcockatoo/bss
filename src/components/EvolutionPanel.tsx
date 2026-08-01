@@ -12,6 +12,7 @@ import {
   getStageVisuals,
   getStageDisplayTitle,
   getUnlockedAbilities,
+  describeEvolutionUpgrade,
   EVOLUTION_ORDER,
   EVOLUTION_STAGE_INFO,
   type EvolutionState,
@@ -279,6 +280,38 @@ export function EvolutionPanel() {
           </div>
         </section>
       )}
+
+      {/* What evolving actually did to the creature on screen, and what the
+          next stage will do — the visible payoff, not just stage lore. */}
+      <section className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4 space-y-3 text-xs text-zinc-300">
+        <p className="font-semibold text-white text-sm">Body Upgrades</p>
+        <ul className="space-y-1">
+          {describeEvolutionUpgrade(evolution.state).map(line => (
+            <li key={line} className="flex items-start gap-2">
+              <CheckCircle2
+                className="w-3 h-3 shrink-0 mt-0.5"
+                style={{ color: visuals.colors[0] }}
+              />
+              <span>{line}</span>
+            </li>
+          ))}
+        </ul>
+        {requirementSnapshot && (
+          <div className="pt-2 border-t border-zinc-800 space-y-1">
+            <p className="text-zinc-500">
+              Reaching {requirementSnapshot.state} adds:
+            </p>
+            <ul className="space-y-1 text-zinc-400">
+              {describeEvolutionUpgrade(requirementSnapshot.state).map(line => (
+                <li key={line} className="flex items-start gap-2">
+                  <Sparkles className="w-3 h-3 shrink-0 mt-0.5 text-zinc-600" />
+                  <span>{line}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </section>
 
       <section className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4 space-y-3 text-xs text-zinc-300">
         <p className="font-semibold text-white text-sm">Stage Focus</p>

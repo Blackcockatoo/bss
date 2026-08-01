@@ -14,7 +14,10 @@ import { useStore } from "@/lib/store";
 import {
   PetBodyRenderer,
   type BodySpec,
+  type EvolutionMark,
 } from "@/components/body-forge/PetBodyRenderer";
+import { getCumulativeEvolutionUpgrade } from "@/evolution/stageUpgrades";
+import { resolveStagePalette } from "@/components/evolution/stagePalette";
 import {
   clearForgedBody,
   getGenomeVisualFingerprint,
@@ -323,6 +326,20 @@ export function VisualDNAPet({
     playAction(lastAction as CareActionId);
   }, [sealed, lastAction, lastActionAt, playAction]);
 
+  // Reaching a stage must be something you SEE on the creature, not just a
+  // panel overlay: the body performs the ceremony and then the emergence
+  // beat that shows off whatever anatomy the stage just granted. Keyed on
+  // the stage itself, and skipped on first mount so loading an already
+  // evolved save does not replay a ceremony the player already had.
+  const { playCeremony } = movement;
+  const knownStageRef = useRef<string | null>(null);
+  useEffect(() => {
+    const previous = knownStageRef.current;
+    knownStageRef.current = evolution.state;
+    if (sealed || previous === null || previous === evolution.state) return;
+    playCeremony();
+  }, [sealed, evolution.state, playCeremony]);
+
   // A newly surfaced Vimana anomaly earns an omen-class reaction.
   const anomalyRef = useRef(anomalyActive);
   useEffect(() => {
@@ -350,6 +367,23 @@ export function VisualDNAPet({
     () => interaction.applyOverlay(living),
     [interaction, living],
   );
+
+  // The stage sigil etched on the body. It uses the shared branch-tinted
+  // stage palette rather than the genome's own colours, so every reached
+  // stage is legible even on a creature whose body matches its aura — and
+  // so the mark agrees with the ceremony overlay and the Evolution panel.
+  const evolutionMark = useMemo<EvolutionMark | null>(() => {
+    if (!phenotype) return null;
+    const upgrade = getCumulativeEvolutionUpgrade(phenotype.evolution.state);
+    const palette = resolveStagePalette(phenotype.evolution.state, traits);
+    return {
+      shape: upgrade.mark,
+      count: upgrade.markCount,
+      intensity: upgrade.markIntensity,
+      color: palette.color,
+      accentColor: palette.accentColor,
+    };
+  }, [phenotype, traits]);
 
   const bodyContext = useMemo<MovementBodyContext | null>(() => {
     if (!resolvedBody) return null;
@@ -748,6 +782,7 @@ export function VisualDNAPet({
               performance={performanceFrame}
               living={sealed ? null : livingWithTouch}
               activeClipId={sealed ? null : movement.active.clip.id}
+              evolutionMark={evolutionMark}
               addonsBehind={addonLayers?.behind}
               addonsFront={addonLayers?.front}
             />
@@ -900,6 +935,7 @@ export function VisualDNAPet({
                   performance={performanceFrame}
                   living={sealed ? null : livingWithTouch}
                   activeClipId={sealed ? null : movement.active.clip.id}
+                  evolutionMark={evolutionMark}
                   addonsBehind={addonLayers?.behind}
                   addonsFront={addonLayers?.front}
                 />

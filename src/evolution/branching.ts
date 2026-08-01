@@ -99,6 +99,11 @@ export function getStageVisuals(
   const isApex = state === EVOLUTION_ORDER[EVOLUTION_ORDER.length - 1];
 
   if (isApex) {
+    // The unaligned branch's palette is slate: handing it the whole apex
+    // would make the final stage read DULLER than the one before it, on the
+    // panel, in the ceremony, and on the creature. A pet with no genome
+    // keeps the stage's own colours until a real branch claims it.
+    if (branch.id === NEUTRAL_BRANCH.id) return base;
     return { ...base, colors: [...branch.accentColors] };
   }
 
