@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from "react";
 
 type YantraMorphBackdropProps = {
   width?: number;
@@ -12,23 +12,26 @@ type YantraMorphBackdropProps = {
 };
 
 const PALETTE = [
-  '#0b3c5d',
-  '#ff7f0e',
-  '#2ca02c',
-  '#d62728',
-  '#9467bd',
-  '#8c564b',
-  '#e377c2',
-  '#7f7f7f',
-  '#bcbd22',
-  '#17becf',
+  "#0b3c5d",
+  "#ff7f0e",
+  "#2ca02c",
+  "#d62728",
+  "#9467bd",
+  "#8c564b",
+  "#e377c2",
+  "#7f7f7f",
+  "#bcbd22",
+  "#17becf",
 ];
 
 const LUKAS = [2, 1, 3, 4, 7, 1, 8, 9, 7, 6, 3, 9];
 const LUKAS_BOUNDS = (() => {
   const bounds = [0];
   let s = 0;
-  for (const d of LUKAS) { s += d; bounds.push(s); }
+  for (const d of LUKAS) {
+    s += d;
+    bounds.push(s);
+  }
   return bounds;
 })();
 
@@ -48,7 +51,7 @@ const buildFib60 = (): number[] => {
 const FIB60 = buildFib60();
 
 const hexToRgb = (hex: string) => {
-  const clean = hex.replace('#', '');
+  const clean = hex.replace("#", "");
   const n = parseInt(clean, 16);
   return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
 };
@@ -66,7 +69,7 @@ export const YantraMorphBackdrop: React.FC<YantraMorphBackdropProps> = ({
   energy,
   curiosity,
   bond,
-  className = '',
+  className = "",
   reduceMotion = false,
   isVisible = true,
 }) => {
@@ -75,18 +78,23 @@ export const YantraMorphBackdrop: React.FC<YantraMorphBackdropProps> = ({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const ratio = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
+    // This sits `absolute inset-0` behind the pet, so it has to take the size
+    // of whatever box it is placed in. Pinning it to `${width}px` left it
+    // cropped by its own container on anything narrower than 420px.
+    const ratio =
+      typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
     canvas.width = width * ratio;
     canvas.height = height * ratio;
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(ratio, ratio);
 
-    const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
+    const clamp = (v: number, lo: number, hi: number) =>
+      Math.max(lo, Math.min(hi, v));
 
     const drawPhyllo = (t: number, mix: number) => {
       const cx = width / 2;
@@ -109,7 +117,7 @@ export const YantraMorphBackdrop: React.FC<YantraMorphBackdropProps> = ({
         const B = clamp(Math.floor(rgb.b * pulse), 0, 255);
         ctx.fillStyle = `rgba(${R},${G},${B},${0.65 * mix})`;
         ctx.beginPath();
-        ctx.arc(x, y, 2 + (pulse * 2), 0, Math.PI * 2);
+        ctx.arc(x, y, 2 + pulse * 2, 0, Math.PI * 2);
         ctx.fill();
       }
     };
@@ -129,7 +137,8 @@ export const YantraMorphBackdrop: React.FC<YantraMorphBackdropProps> = ({
           const idx = row * cols + col;
           const fib = FIB60[idx % 60];
           const rgb = hexToRgb(PALETTE[fib % PALETTE.length]);
-          const pulse = 0.55 + 0.35 * Math.sin(t * 1.2 + idx * 0.08 + curiosity / 22);
+          const pulse =
+            0.55 + 0.35 * Math.sin(t * 1.2 + idx * 0.08 + curiosity / 22);
           const R = clamp(Math.floor(rgb.r * pulse), 0, 255);
           const G = clamp(Math.floor(rgb.g * pulse), 0, 255);
           const B = clamp(Math.floor(rgb.b * pulse), 0, 255);
@@ -140,7 +149,8 @@ export const YantraMorphBackdrop: React.FC<YantraMorphBackdropProps> = ({
             const a = (Math.PI / 3) * i + t * 0.08;
             const px = x + radius * Math.cos(a) * mix;
             const py = y + radius * Math.sin(a) * mix;
-            if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            if (i === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
           }
           ctx.closePath();
           ctx.fill();
@@ -155,7 +165,7 @@ export const YantraMorphBackdrop: React.FC<YantraMorphBackdropProps> = ({
 
       ctx.save();
       ctx.translate(cx, cy);
-      ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+      ctx.strokeStyle = "rgba(255,255,255,0.12)";
       ctx.lineWidth = 0.6;
       for (let i = 1; i <= 5; i++) {
         const r = baseR * (i / 5);
@@ -166,7 +176,7 @@ export const YantraMorphBackdrop: React.FC<YantraMorphBackdropProps> = ({
 
       const levels = 7;
       for (let k = 0; k < levels; k++) {
-        const r = baseR * (0.25 + 0.7 * k / (levels - 1));
+        const r = baseR * (0.25 + (0.7 * k) / (levels - 1));
         const fib = FIB60[(k * 7) % 60];
         ctx.strokeStyle = `${PALETTE[fib % PALETTE.length]}77`;
         const spin = t * 0.15 + k * 0.18;
@@ -177,14 +187,15 @@ export const YantraMorphBackdrop: React.FC<YantraMorphBackdropProps> = ({
           const a = ((Math.PI * 2) / 3) * i - Math.PI / 2;
           const x = r * Math.cos(a);
           const y = r * Math.sin(a);
-          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
         }
         ctx.closePath();
         ctx.stroke();
         ctx.restore();
       }
 
-      ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+      ctx.strokeStyle = "rgba(255,255,255,0.25)";
       const size1 = baseR * 0.92;
       const size2 = baseR * 0.58;
       const a = t * 0.25;
@@ -193,23 +204,38 @@ export const YantraMorphBackdrop: React.FC<YantraMorphBackdropProps> = ({
       const s1 = size1 / 2;
       const s2 = size2 / 2;
       const sq1 = [
-        { x: -s1, y: -s1 }, { x: s1, y: -s1 }, { x: s1, y: s1 }, { x: -s1, y: s1 },
+        { x: -s1, y: -s1 },
+        { x: s1, y: -s1 },
+        { x: s1, y: s1 },
+        { x: -s1, y: s1 },
       ];
       const sq2 = [
-        { x: -s2, y: -s2 }, { x: s2, y: -s2 }, { x: s2, y: s2 }, { x: -s2, y: s2 },
+        { x: -s2, y: -s2 },
+        { x: s2, y: -s2 },
+        { x: s2, y: s2 },
+        { x: -s2, y: s2 },
       ];
       const off = Math.PI / 8;
       const c = Math.cos(off);
       const s = Math.sin(off);
-      const rot2 = sq2.map(p => ({ x: p.x * c - p.y * s, y: p.x * s + p.y * c }));
+      const rot2 = sq2.map((p) => ({
+        x: p.x * c - p.y * s,
+        y: p.x * s + p.y * c,
+      }));
 
       ctx.beginPath();
-      sq1.forEach((p, i) => { if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
+      sq1.forEach((p, i) => {
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
       ctx.closePath();
       ctx.stroke();
 
       ctx.beginPath();
-      rot2.forEach((p, i) => { if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
+      rot2.forEach((p, i) => {
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
       ctx.closePath();
       ctx.stroke();
 
@@ -229,10 +255,11 @@ export const YantraMorphBackdrop: React.FC<YantraMorphBackdropProps> = ({
       const cy = height / 2;
       const rings = 6;
       const maxR = Math.min(width, height) * 0.48 * mix;
-      const ringPoints: { x: number; y: number; fib: number; L: number; }[][] = Array.from({ length: rings }, () => new Array(60));
+      const ringPoints: { x: number; y: number; fib: number; L: number }[][] =
+        Array.from({ length: rings }, () => new Array(60));
 
       for (let ring = 0; ring < rings; ring++) {
-        const baseR = maxR * (ring + 1) / rings;
+        const baseR = (maxR * (ring + 1)) / rings;
 
         for (let j = 0; j < 60; j++) {
           const theta = (2 * Math.PI * j) / 60;
@@ -244,7 +271,8 @@ export const YantraMorphBackdrop: React.FC<YantraMorphBackdropProps> = ({
           const kH = 2 + (fib % 5);
           const amp = 0.16 + 0.03 * L;
           const phase = 0.3 * L;
-          const wave = 1 + amp * Math.sin(kH * theta + 1.2 * t + phase + bond / 50);
+          const wave =
+            1 + amp * Math.sin(kH * theta + 1.2 * t + phase + bond / 50);
 
           const radius = baseR * wave;
           const x = cx + radius * Math.cos(theta);
@@ -253,7 +281,8 @@ export const YantraMorphBackdrop: React.FC<YantraMorphBackdropProps> = ({
 
           const baseColor = PALETTE[fib % PALETTE.length];
           const rgb = hexToRgb(baseColor);
-          const pulse = 0.55 + 0.35 * Math.sin(t * 2.4 + ring * 0.35 + j * 0.09);
+          const pulse =
+            0.55 + 0.35 * Math.sin(t * 2.4 + ring * 0.35 + j * 0.09);
           const R = clamp(Math.floor(rgb.r * pulse), 0, 255);
           const G = clamp(Math.floor(rgb.g * pulse), 0, 255);
           const B = clamp(Math.floor(rgb.b * pulse), 0, 255);
@@ -268,7 +297,8 @@ export const YantraMorphBackdrop: React.FC<YantraMorphBackdropProps> = ({
         ctx.beginPath();
         for (let j = 0; j < 60; j++) {
           const p = ringPoints[ring][j];
-          if (j === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+          if (j === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
         }
         ctx.closePath();
         ctx.strokeStyle = `rgba(255,255,255,${0.05 + 0.04 * ring})`;
@@ -280,7 +310,8 @@ export const YantraMorphBackdrop: React.FC<YantraMorphBackdropProps> = ({
         ctx.beginPath();
         for (let ring = 0; ring < rings; ring++) {
           const p = ringPoints[ring][j];
-          if (ring === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+          if (ring === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
         }
         const fib = FIB60[j];
         const col = PALETTE[fib % PALETTE.length];
@@ -345,7 +376,14 @@ export const YantraMorphBackdrop: React.FC<YantraMorphBackdropProps> = ({
     };
   }, [width, height, energy, curiosity, bond, reduceMotion, isVisible]);
 
-  return <canvas ref={canvasRef} className={`absolute inset-0 pointer-events-none mix-blend-screen opacity-70 ${className}`} style={{ willChange: 'transform' }} aria-hidden="true" />;
+  return (
+    <canvas
+      ref={canvasRef}
+      className={`absolute inset-0 pointer-events-none mix-blend-screen opacity-70 ${className}`}
+      style={{ willChange: "transform" }}
+      aria-hidden="true"
+    />
+  );
 };
 
 export default YantraMorphBackdrop;

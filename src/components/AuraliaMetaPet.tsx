@@ -56,6 +56,7 @@ import {
   type EyeState,
   calculateEyeState,
 } from "./auralia/EyeSystem";
+import { AdvancedGroup, AdvancedSection } from "./auralia/AdvancedSection";
 import { MechanicsShowcase } from "./auralia/MechanicsShowcase";
 import { SubAtomicParticleField } from "./auralia/SubAtomicParticleField";
 import { TemporalEchoTrail } from "./auralia/TemporalEchoTrail";
@@ -115,11 +116,7 @@ type Form = {
   description: string;
 };
 type BondHistoryEntry = { timestamp: number; bond: number; event: string };
-type MiniGameType =
-  | "sigilPattern"
-  | "fibonacciTrivia"
-  | "snake"
-  | null;
+type MiniGameType = "sigilPattern" | "fibonacciTrivia" | "snake" | null;
 type PatternChallenge = {
   sequence: number[];
   userSequence: number[];
@@ -294,7 +291,6 @@ const generateFibonacciTrivia = (field: Field): TriviaQuestion => {
 
   return { question: q.question, answer: q.answer, options };
 };
-
 
 // ===== AURALIA PERSONALITY SYSTEM =====
 // Innate traits: pedantic precision, spectral curiosity, ambient melancholy,
@@ -2246,8 +2242,7 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
     bodyRy: 60,
   } as const;
   const stageGrowth = `translate(200 185) scale(${(
-    stageUpgrade.bodyScale +
-    stageEmphasis * 0.06
+    stageUpgrade.bodyScale + stageEmphasis * 0.06
   ).toFixed(4)}) translate(-200 -185)`;
 
   const lucasNum = field.lucas(7 + (energy % 10));
@@ -2429,6 +2424,46 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
         .ai-observing { animation: ${reduceMotion ? "none" : "observingRotate 12s linear infinite"}; }
         .ai-focusing { animation: ${reduceMotion ? "none" : "focusingIntense 2s ease-in-out infinite"}; }
 
+        /* The advanced sliders drew an 8px-tall track and used it as the hit
+           area too, which is unusable with a thumb. The track keeps its slim
+           look; the control itself is a 44px touch target. */
+        .range-touch {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 100%;
+          height: 2.75rem;
+          background: transparent;
+          cursor: pointer;
+        }
+        .range-touch:focus-visible { outline: 2px solid #eab308; outline-offset: 2px; }
+        .range-touch::-webkit-slider-runnable-track {
+          height: 0.5rem;
+          border-radius: 9999px;
+          background: rgb(55 65 81);
+        }
+        .range-touch::-moz-range-track {
+          height: 0.5rem;
+          border-radius: 9999px;
+          background: rgb(55 65 81);
+        }
+        .range-touch::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 1.25rem;
+          height: 1.25rem;
+          margin-top: -0.375rem;
+          border-radius: 9999px;
+          background: #eab308;
+          border: 2px solid #111827;
+        }
+        .range-touch::-moz-range-thumb {
+          width: 1.25rem;
+          height: 1.25rem;
+          border-radius: 9999px;
+          background: #eab308;
+          border: 2px solid #111827;
+        }
+
         ${
           highContrast
             ? `
@@ -2510,7 +2545,7 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
                 MossPrimeSeed • Genome-driven metamorphosis • Living mathematics
               </p>
             </div>
-            <div className="mb-6 max-w-md mx-auto flex flex-col sm:flex-row gap-4">
+            <div className="mb-6 max-w-md mx-auto flex flex-col sm:flex-row gap-3 sm:gap-4">
               <div className="flex-1 bg-gray-900/80 rounded-xl p-4 border border-yellow-600/20">
                 <label className="text-sm font-light text-gray-400 block mb-2">
                   Guardian Seed Name
@@ -2529,7 +2564,7 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
                 </label>
                 <button
                   onClick={() => setAudioEnabled(!audioEnabled)}
-                  className="px-4 py-2 rounded-lg bg-gray-950 border border-yellow-600/30 hover:border-yellow-600 transition-colors"
+                  className="min-h-[2.75rem] min-w-[2.75rem] rounded-lg border border-yellow-600/30 bg-gray-950 px-4 py-2 transition-colors hover:border-yellow-600"
                   aria-pressed={audioEnabled}
                   aria-label="Toggle audio"
                 >
@@ -2543,7 +2578,7 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
         <div
           className={`grid grid-cols-1 ${showAdvanced ? "lg:grid-cols-2" : ""} gap-8 items-start`}
         >
-          <div className="bg-gray-900/80 rounded-2xl p-8 border border-yellow-600/20 lg:sticky lg:top-4">
+          <div className="bg-gray-900/80 rounded-2xl p-4 sm:p-6 lg:p-8 border border-yellow-600/20 lg:sticky lg:top-4">
             <div
               className="aspect-square bg-gradient-to-br from-blue-950/30 to-gray-900/30 rounded-xl flex items-center justify-center relative overflow-hidden"
               onPointerMove={handlePointerMove}
@@ -2844,125 +2879,128 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
 
                   {/* Evolution growth wraps the orb and its stage anatomy:
                       wings behind, orb, then horns/crown/third eye/sigil. */}
-                  <g data-testid="auralia-evolution-stage" transform={stageGrowth}>
-                  {stageUpgrade.glowBonus > 0 && (
-                    <circle
-                      cx="200"
-                      cy="185"
-                      r={92}
-                      fill={stagePalette.glowColor}
-                      opacity={
-                        stageUpgrade.glowBonus * 0.55 + stageEmphasis * 0.25
-                      }
-                      filter="url(#glow)"
-                      pointerEvents="none"
-                    />
-                  )}
-                  <EvolutionStageAdornments
-                    {...STAGE_ANCHOR}
-                    state={evolutionState}
-                    layer="behind"
-                    color={stagePalette.color}
-                    accentColor={stagePalette.accentColor}
-                    underlayColor="#05081A"
-                    emphasis={stageEmphasis}
-                    strokeWidth={2.6}
-                  />
                   <g
-                    className={`
+                    data-testid="auralia-evolution-stage"
+                    transform={stageGrowth}
+                  >
+                    {stageUpgrade.glowBonus > 0 && (
+                      <circle
+                        cx="200"
+                        cy="185"
+                        r={92}
+                        fill={stagePalette.glowColor}
+                        opacity={
+                          stageUpgrade.glowBonus * 0.55 + stageEmphasis * 0.25
+                        }
+                        filter="url(#glow)"
+                        pointerEvents="none"
+                      />
+                    )}
+                    <EvolutionStageAdornments
+                      {...STAGE_ANCHOR}
+                      state={evolutionState}
+                      layer="behind"
+                      color={stagePalette.color}
+                      accentColor={stagePalette.accentColor}
+                      underlayColor="#05081A"
+                      emphasis={stageEmphasis}
+                      strokeWidth={2.6}
+                    />
+                    <g
+                      className={`
                     ${aiState.mode === "idle" ? "ai-idle" : ""}
                     ${aiState.mode === "playing" ? "ai-playing" : ""}
                     ${aiState.mode === "dreaming" ? "ai-dreaming" : ""}
                     ${aiState.mode === "observing" ? "ai-observing" : ""}
                     ${aiState.mode === "focusing" ? "ai-focusing" : ""}
                   `}
-                    style={{
-                      transform: `translate(${orbDeformation.x}px, ${orbDeformation.y}px)`,
-                      transition: isBeingSquished
-                        ? "none"
-                        : "transform 0.3s ease-out",
-                    }}
-                  >
-                    <ellipse
-                      cx="200"
-                      cy="210"
-                      rx={
-                        transformationMode === "squished"
-                          ? 50
-                          : transformationMode === "stretched"
+                      style={{
+                        transform: `translate(${orbDeformation.x}px, ${orbDeformation.y}px)`,
+                        transition: isBeingSquished
+                          ? "none"
+                          : "transform 0.3s ease-out",
+                      }}
+                    >
+                      <ellipse
+                        cx="200"
+                        cy="210"
+                        rx={
+                          transformationMode === "squished"
+                            ? 50
+                            : transformationMode === "stretched"
+                              ? 30
+                              : transformationMode === "grumpy"
+                                ? 35
+                                : 40
+                        }
+                        ry={
+                          transformationMode === "squished"
+                            ? 50
+                            : transformationMode === "stretched"
+                              ? 70
+                              : transformationMode === "grumpy"
+                                ? 55
+                                : 60
+                        }
+                        fill={
+                          transformationMode === "grumpy"
+                            ? "#8B5A3C"
+                            : currentForm.baseColor
+                        }
+                        opacity={transformationMode === "grumpy" ? 0.95 : 0.9}
+                        className="breathe-anim"
+                        style={{
+                          transformOrigin: "200px 210px",
+                          transform: `scale(${1 - orbDeformation.intensity * 0.1})`,
+                          transition: "all 0.2s ease-out",
+                        }}
+                      />
+                      <ellipse
+                        cx="200"
+                        cy="145"
+                        rx={
+                          transformationMode === "squished"
+                            ? 35
+                            : transformationMode === "stretched"
+                              ? 25
+                              : transformationMode === "grumpy"
+                                ? 28
+                                : 30
+                        }
+                        ry={
+                          transformationMode === "squished"
                             ? 30
-                            : transformationMode === "grumpy"
-                              ? 35
-                              : 40
-                      }
-                      ry={
-                        transformationMode === "squished"
-                          ? 50
-                          : transformationMode === "stretched"
-                            ? 70
-                            : transformationMode === "grumpy"
-                              ? 55
-                              : 60
-                      }
-                      fill={
-                        transformationMode === "grumpy"
-                          ? "#8B5A3C"
-                          : currentForm.baseColor
-                      }
-                      opacity={transformationMode === "grumpy" ? 0.95 : 0.9}
-                      className="breathe-anim"
-                      style={{
-                        transformOrigin: "200px 210px",
-                        transform: `scale(${1 - orbDeformation.intensity * 0.1})`,
-                        transition: "all 0.2s ease-out",
-                      }}
-                    />
-                    <ellipse
-                      cx="200"
-                      cy="145"
-                      rx={
-                        transformationMode === "squished"
-                          ? 35
-                          : transformationMode === "stretched"
-                            ? 25
-                            : transformationMode === "grumpy"
-                              ? 28
-                              : 30
-                      }
-                      ry={
-                        transformationMode === "squished"
-                          ? 30
-                          : transformationMode === "stretched"
-                            ? 40
-                            : transformationMode === "grumpy"
-                              ? 32
-                              : 35
-                      }
-                      fill={
-                        transformationMode === "grumpy"
-                          ? "#8B5A3C"
-                          : currentForm.baseColor
-                      }
-                      opacity={transformationMode === "grumpy" ? 0.95 : 0.9}
-                      className="breathe-anim"
-                      style={{
-                        transformOrigin: "200px 145px",
-                        transform: `scale(${1 - orbDeformation.intensity * 0.15})`,
-                        transition: "all 0.2s ease-out",
-                      }}
-                    />
-                  </g>
+                            : transformationMode === "stretched"
+                              ? 40
+                              : transformationMode === "grumpy"
+                                ? 32
+                                : 35
+                        }
+                        fill={
+                          transformationMode === "grumpy"
+                            ? "#8B5A3C"
+                            : currentForm.baseColor
+                        }
+                        opacity={transformationMode === "grumpy" ? 0.95 : 0.9}
+                        className="breathe-anim"
+                        style={{
+                          transformOrigin: "200px 145px",
+                          transform: `scale(${1 - orbDeformation.intensity * 0.15})`,
+                          transition: "all 0.2s ease-out",
+                        }}
+                      />
+                    </g>
 
-                  <EvolutionStageAdornments
-                    {...STAGE_ANCHOR}
-                    state={evolutionState}
-                    layer="front"
-                    color={stagePalette.color}
-                    accentColor={stagePalette.accentColor}
-                    underlayColor="#05081A"
-                    emphasis={stageEmphasis}
-                    strokeWidth={2.6}
-                  />
+                    <EvolutionStageAdornments
+                      {...STAGE_ANCHOR}
+                      state={evolutionState}
+                      layer="front"
+                      color={stagePalette.color}
+                      accentColor={stagePalette.accentColor}
+                      underlayColor="#05081A"
+                      emphasis={stageEmphasis}
+                      strokeWidth={2.6}
+                    />
                   </g>
 
                   <rect
@@ -3540,831 +3578,836 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
           </div>
 
           {showAdvanced && (
-            <div className="space-y-6">
-              <div className="bg-gray-900/80 rounded-2xl p-6 border border-yellow-600/20">
-                <h3 className="text-xl font-semibold text-yellow-400 mb-4">
-                  Essence Attunement
-                </h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300">
-                      Energy Flow ({energy})
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={energy}
-                      onChange={(e) => setEnergy(Number(e.target.value))}
-                      className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
-                    />
+            <div className="space-y-5">
+              <AdvancedGroup title="Guardian">
+                <AdvancedSection
+                  title="Essence Attunement"
+                  subtitle="Energy, curiosity, bond and vitality"
+                >
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300">
+                        Energy Flow ({energy})
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={energy}
+                        onChange={(e) => setEnergy(Number(e.target.value))}
+                        className="range-touch"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300">
+                        Curiosity Spark ({curiosity})
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={curiosity}
+                        onChange={(e) => setCuriosity(Number(e.target.value))}
+                        className="range-touch"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300">
+                        Bond Resonance ({bond})
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={bond}
+                        onChange={(e) => setBond(Number(e.target.value))}
+                        className="range-touch"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300">
+                        Vitality Core ({health})
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={health}
+                        onChange={(e) => setHealth(Number(e.target.value))}
+                        className="range-touch"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300">
-                      Curiosity Spark ({curiosity})
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={curiosity}
-                      onChange={(e) => setCuriosity(Number(e.target.value))}
-                      className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
-                    />
+                </AdvancedSection>
+                <AdvancedSection
+                  title="Sacred Games"
+                  subtitle="Sigil pattern, number quiz and snake"
+                >
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={startPatternGame}
+                      disabled={currentGame !== null}
+                      className="px-3 py-2 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed rounded-lg font-medium transition-all text-sm"
+                      aria-label="Start sigil pattern matching game"
+                    >
+                      🔮 Sigil Pattern
+                    </button>
+                    <button
+                      onClick={startTriviaGame}
+                      disabled={currentGame !== null}
+                      className="px-3 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed rounded-lg font-medium transition-all text-sm"
+                      aria-label="Start Fibonacci trivia quiz"
+                    >
+                      🧮 Number Quiz
+                    </button>
+                    <button
+                      onClick={startSnakeGame}
+                      disabled={currentGame !== null}
+                      className="px-3 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed rounded-lg font-medium transition-all text-sm"
+                      aria-label="Start Snake game"
+                    >
+                      🐍 Snake
+                    </button>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300">
-                      Bond Resonance ({bond})
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={bond}
-                      onChange={(e) => setBond(Number(e.target.value))}
-                      className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300">
-                      Vitality Core ({health})
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={health}
-                      onChange={(e) => setHealth(Number(e.target.value))}
-                      className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gray-900/80 rounded-2xl p-6 border border-yellow-600/20">
-                <h3 className="text-xl font-semibold text-yellow-400 mb-4">
-                  Sacred Mathematics
-                </h3>
-                <div className="grid grid-cols-2 gap-4 text-center">
-                  <div className="p-3 bg-gray-950/50 rounded-lg">
-                    <p className="text-sm text-gray-400">Lucas Number</p>
-                    <p className="text-2xl font-mono text-yellow-500">
-                      {lucasNum.toString()}
-                    </p>
-                  </div>
-                  <div className="p-3 bg-gray-950/50 rounded-lg">
-                    <p className="text-sm text-gray-400">Fibonacci Number</p>
-                    <p className="text-2xl font-mono text-yellow-500">
-                      {fibNum.toString()}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <MechanicsShowcase
-                seedName={seedName}
-                energy={energy}
-                curiosity={curiosity}
-                bond={bond}
-                field={field}
-              />
-
-              <div className="bg-gray-900/80 rounded-2xl p-6 border border-yellow-600/20">
-                <h3 className="text-xl font-semibold text-yellow-400 mb-4">
-                  Trinity Genome Vaults
-                </h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm text-gray-400">
-                    <span>Red-60 (Spine Energy)</span>
-                    <span className="font-mono text-yellow-500">
-                      {red60.toFixed(2)}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2">
-                    <div
-                      className="bg-red-500 h-2 rounded-full"
-                      style={{ width: `${red60}%` }}
-                    ></div>
-                  </div>
-
-                  <div className="flex justify-between text-sm text-gray-400 pt-2">
-                    <span>Blue-60 (Form Integrity)</span>
-                    <span className="font-mono text-yellow-500">
-                      {blue60.toFixed(2)}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2">
-                    <div
-                      className="bg-blue-500 h-2 rounded-full"
-                      style={{ width: `${blue60}%` }}
-                    ></div>
-                  </div>
-
-                  <div className="flex justify-between text-sm text-gray-400 pt-2">
-                    <span>Black-60 (Mystery Halo)</span>
-                    <span className="font-mono text-yellow-500">
-                      {black60.toFixed(2)}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2">
-                    <div
-                      className="bg-gray-500 h-2 rounded-full"
-                      style={{ width: `${black60}%` }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gray-900/80 rounded-2xl p-6 border border-yellow-600/20">
-                <h3 className="text-xl font-semibold text-yellow-400 mb-4">
-                  Yantra Genome Lattice
-                </h3>
-                <p className="text-sm text-gray-400 mb-4">
-                  {activatedPoints.size}/7 sigils active •{" "}
-                  {activeForm === "celestial"
-                    ? "12 tiles (Celestial)"
-                    : activeForm === "wild"
-                      ? "9 tiles (Wild)"
-                      : "7 tiles"}
-                </p>
-
-                <YantraTileGenomeVisualizer
-                  energy={energy}
-                  curiosity={curiosity}
-                  bond={bond}
-                  red60={red60}
-                  blue60={blue60}
-                  black60={black60}
-                  field={field}
-                  currentForm={currentForm}
-                  activatedPoints={activatedPoints}
-                  onTileClick={(index) =>
-                    handleSigilClick(index % 7, sigilPoints[index % 7])
-                  }
-                  width={600}
-                  height={400}
-                  className="rounded-lg"
-                />
-
-                <div className="mt-3 text-xs text-gray-500 space-y-1">
-                  <p>
-                    Red-60 ({red60.toFixed(1)}%): Morph bias (circle↔triangle)
+                  <p className="text-xs text-gray-500 mt-2">
+                    Looking for Tetris? The Vimana Tetris Field now lives in the
+                    Conscious Arcade with evolution-scaled difficulty.
                   </p>
-                  <p>Blue-60 ({blue60.toFixed(1)}%): Form stability</p>
-                  <p>Black-60 ({black60.toFixed(1)}%): Mystery halo glow</p>
-                </div>
-              </div>
-
-              <div className="bg-gray-900/80 rounded-2xl p-6 border border-yellow-600/20">
-                <h3 className="text-xl font-semibold text-yellow-400 mb-4">
-                  Seed Patterns (First 10 Digits)
-                </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-gray-400 mb-2">
-                      Pulse (Chaotic)
+                  {gamesWon > 0 && (
+                    <p className="text-xs text-center text-green-400 mt-3">
+                      Games Won: {gamesWon}
                     </p>
-                    <div className="flex space-x-1">
-                      {field.pulse.slice(0, 10).map((d, i) => (
-                        <button
-                          key={i}
-                          onClick={() => audioEnabled && playNote(d % 7)}
-                          className="flex-1 h-8 bg-gray-700 rounded-sm hover:bg-yellow-600 transition-colors relative"
-                          aria-label={`Pulse digit ${d}`}
-                        >
-                          <div
-                            className="absolute bottom-0 left-0 right-0 bg-yellow-500/50"
-                            style={{ height: `${d * 10}%` }}
-                          ></div>
-                          <span className="relative text-xs font-mono">
-                            {d}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-400 mb-2">
-                      Ring (Harmonic)
-                    </p>
-                    <div className="flex space-x-1">
-                      {field.ring.slice(0, 10).map((d, i) => (
-                        <button
-                          key={i}
-                          onClick={() => audioEnabled && playNote(d % 7)}
-                          className="flex-1 h-8 bg-gray-700 rounded-sm hover:bg-teal-600 transition-colors relative"
-                          aria-label={`Ring digit ${d}`}
-                        >
-                          <div
-                            className="absolute bottom-0 left-0 right-0 bg-teal-500/50"
-                            style={{ height: `${d * 10}%` }}
-                          ></div>
-                          <span className="relative text-xs font-mono">
-                            {d}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
+                  )}
 
-              <div className="bg-gray-900/80 rounded-2xl p-6 border border-yellow-600/20">
-                <h3 className="text-xl font-semibold text-yellow-400 mb-4">
-                  Sacred Games
-                </h3>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={startPatternGame}
-                    disabled={currentGame !== null}
-                    className="px-3 py-2 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed rounded-lg font-medium transition-all text-sm"
-                    aria-label="Start sigil pattern matching game"
-                  >
-                    🔮 Sigil Pattern
-                  </button>
-                  <button
-                    onClick={startTriviaGame}
-                    disabled={currentGame !== null}
-                    className="px-3 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed rounded-lg font-medium transition-all text-sm"
-                    aria-label="Start Fibonacci trivia quiz"
-                  >
-                    🧮 Number Quiz
-                  </button>
-                  <button
-                    onClick={startSnakeGame}
-                    disabled={currentGame !== null}
-                    className="px-3 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed rounded-lg font-medium transition-all text-sm"
-                    aria-label="Start Snake game"
-                  >
-                    🐍 Snake
-                  </button>
-                </div>
-                <p className="text-xs text-gray-500 mt-2">
-                  Looking for Tetris? The Vimana Tetris Field now lives in the
-                  Conscious Arcade with evolution-scaled difficulty.
-                </p>
-                {gamesWon > 0 && (
-                  <p className="text-xs text-center text-green-400 mt-3">
-                    Games Won: {gamesWon}
-                  </p>
-                )}
-
-                {patternChallenge.active && (
-                  <div className="mt-4 p-3 bg-purple-900/20 border border-purple-500/30 rounded-lg">
-                    <p className="text-sm text-purple-300 mb-2">
-                      Pattern:{" "}
-                      {patternChallenge.sequence.map((i) => i + 1).join(" → ")}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      Your input ({patternChallenge.userSequence.length}/
-                      {patternChallenge.sequence.length}):{" "}
-                      {patternChallenge.userSequence
-                        .map((i) => i + 1)
-                        .join(" → ")}
-                    </p>
-                  </div>
-                )}
-
-                {triviaQuestion && (
-                  <div className="mt-4 p-3 bg-indigo-900/20 border border-indigo-500/30 rounded-lg">
-                    <p className="text-sm text-indigo-200 mb-3 font-medium">
-                      {triviaQuestion.question}
-                    </p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {triviaQuestion.options.map((opt) => (
-                        <button
-                          key={opt}
-                          onClick={() => answerTrivia(opt)}
-                          className="px-3 py-2 bg-indigo-700/40 hover:bg-indigo-600/60 rounded transition-colors text-sm"
-                        >
-                          {opt}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {currentGame === "snake" && (
-                  <div className="mt-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
-                    <div className="flex justify-between mb-2">
-                      <p className="text-sm text-green-300 font-medium">
-                        Snake Game
+                  {patternChallenge.active && (
+                    <div className="mt-4 p-3 bg-purple-900/20 border border-purple-500/30 rounded-lg">
+                      <p className="text-sm text-purple-300 mb-2">
+                        Pattern:{" "}
+                        {patternChallenge.sequence
+                          .map((i) => i + 1)
+                          .join(" → ")}
                       </p>
-                      <p className="text-sm text-green-400">
-                        Score: {snakeState.score}
+                      <p className="text-xs text-gray-400">
+                        Your input ({patternChallenge.userSequence.length}/
+                        {patternChallenge.sequence.length}):{" "}
+                        {patternChallenge.userSequence
+                          .map((i) => i + 1)
+                          .join(" → ")}
                       </p>
                     </div>
-                    {snakeState.gameOver ? (
-                      <div className="text-center py-4">
-                        <p className="text-sm text-red-400 mb-2">Game Over!</p>
-                        <button
-                          onClick={resetSnakeGame}
-                          className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded text-sm active:bg-green-400"
-                        >
-                          Play Again
-                        </button>
-                      </div>
-                    ) : (
-                      <>
-                        <div
-                          className="grid grid-cols-15 gap-0.5 bg-gray-950 p-2 rounded mx-auto"
-                          style={{ maxWidth: "fit-content" }}
-                        >
-                          {Array.from({ length: 15 }).map((_, y) => (
-                            <div key={y} className="flex gap-0.5">
-                              {Array.from({ length: 15 }).map((_, x) => {
-                                const isSnake = snakeState.segments.some(
-                                  (seg) => seg.x === x && seg.y === y,
-                                );
-                                const isHead =
-                                  snakeState.segments[0].x === x &&
-                                  snakeState.segments[0].y === y;
-                                const isFood =
-                                  snakeState.food.x === x &&
-                                  snakeState.food.y === y;
-                                return (
-                                  <div
-                                    key={x}
-                                    className={`w-4 h-4 sm:w-3 sm:h-3 rounded-sm ${isHead ? "bg-green-400" : isSnake ? "bg-green-600" : isFood ? "bg-red-500" : "bg-gray-800"}`}
-                                  />
-                                );
-                              })}
-                            </div>
-                          ))}
-                        </div>
-                        {/* Mobile touch controls for Snake */}
-                        <div className="flex flex-col items-center gap-2 mt-3">
+                  )}
+
+                  {triviaQuestion && (
+                    <div className="mt-4 p-3 bg-indigo-900/20 border border-indigo-500/30 rounded-lg">
+                      <p className="text-sm text-indigo-200 mb-3 font-medium">
+                        {triviaQuestion.question}
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {triviaQuestion.options.map((opt) => (
                           <button
-                            onClick={() =>
-                              snakeState.direction !== "down" &&
-                              setSnakeState((s) => ({ ...s, direction: "up" }))
-                            }
-                            className="w-12 h-12 rounded-lg bg-green-800/80 border border-green-600 flex items-center justify-center text-xl active:bg-green-700 select-none touch-manipulation"
+                            key={opt}
+                            onClick={() => answerTrivia(opt)}
+                            className="px-3 py-2 bg-indigo-700/40 hover:bg-indigo-600/60 rounded transition-colors text-sm"
                           >
-                            ▲
+                            {opt}
                           </button>
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() =>
-                                snakeState.direction !== "right" &&
-                                setSnakeState((s) => ({
-                                  ...s,
-                                  direction: "left",
-                                }))
-                              }
-                              className="w-12 h-12 rounded-lg bg-green-800/80 border border-green-600 flex items-center justify-center text-xl active:bg-green-700 select-none touch-manipulation"
-                            >
-                              ◀
-                            </button>
-                            <button
-                              onClick={() =>
-                                snakeState.direction !== "up" &&
-                                setSnakeState((s) => ({
-                                  ...s,
-                                  direction: "down",
-                                }))
-                              }
-                              className="w-12 h-12 rounded-lg bg-green-800/80 border border-green-600 flex items-center justify-center text-xl active:bg-green-700 select-none touch-manipulation"
-                            >
-                              ▼
-                            </button>
-                            <button
-                              onClick={() =>
-                                snakeState.direction !== "left" &&
-                                setSnakeState((s) => ({
-                                  ...s,
-                                  direction: "right",
-                                }))
-                              }
-                              className="w-12 h-12 rounded-lg bg-green-800/80 border border-green-600 flex items-center justify-center text-xl active:bg-green-700 select-none touch-manipulation"
-                            >
-                              ▶
-                            </button>
-                          </div>
-                        </div>
-                      </>
-                    )}
-                    <p className="text-xs text-gray-400 mt-2 text-center hidden sm:block">
-                      Use arrow keys or tap buttons to control
-                    </p>
-                  </div>
-                )}
-
-              </div>
-
-              <div className="bg-gray-900/80 rounded-2xl p-6 border border-yellow-600/20">
-                <h3 className="text-xl font-semibold text-yellow-400 mb-4">
-                  Breeding & Lineage
-                </h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Partner Guardian Name
-                    </label>
-                    <input
-                      type="text"
-                      value={breedingPartner}
-                      onChange={(e) =>
-                        setBreedingPartner(e.target.value.toUpperCase())
-                      }
-                      className="w-full bg-gray-950 border border-yellow-600/30 rounded-lg px-4 py-2 text-center font-mono text-cyan-400 focus:outline-none focus:border-yellow-600"
-                      placeholder="PARTNER"
-                    />
-                  </div>
-                  <button
-                    onClick={breedGuardian}
-                    disabled={bond < 70 || !breedingPartner}
-                    className="w-full px-4 py-3 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed rounded-lg font-medium transition-all"
-                    aria-label="Breed new Guardian"
-                  >
-                    💞 Breed Guardian (Bond ≥ 70)
-                  </button>
-                  {offspring.length > 0 && (
-                    <div className="mt-4 space-y-2">
-                      <h4 className="text-sm font-semibold text-purple-400">
-                        Offspring ({offspring.length})
-                      </h4>
-                      <div className="max-h-48 overflow-y-auto space-y-2">
-                        {offspring.map((child, i) => (
-                          <div
-                            key={i}
-                            className="p-3 bg-purple-900/20 border border-purple-500/30 rounded-lg"
-                          >
-                            <p className="text-sm text-purple-300 font-mono">
-                              {child.name}
-                            </p>
-                            <p className="text-xs text-gray-400">
-                              Parents: {child.parents.join(" × ")}
-                            </p>
-                            <div className="mt-2 grid grid-cols-3 gap-2 text-xs">
-                              <div>
-                                <span className="text-gray-400">R:</span>{" "}
-                                <span className="text-red-400">
-                                  {child.genome.red60.toFixed(1)}
-                                </span>
-                              </div>
-                              <div>
-                                <span className="text-gray-400">B:</span>{" "}
-                                <span className="text-blue-400">
-                                  {child.genome.blue60.toFixed(1)}
-                                </span>
-                              </div>
-                              <div>
-                                <span className="text-gray-400">K:</span>{" "}
-                                <span className="text-gray-400">
-                                  {child.genome.black60.toFixed(1)}
-                                </span>
-                              </div>
-                            </div>
-                            <p className="text-xs text-gray-500 mt-1">
-                              {new Date(child.birthDate).toLocaleDateString()}
-                            </p>
-                          </div>
                         ))}
                       </div>
                     </div>
                   )}
-                </div>
-              </div>
 
-              <div className="bg-gray-900/80 rounded-2xl p-6 border border-yellow-600/20">
-                <h3 className="text-xl font-semibold text-yellow-400 mb-4">
-                  Audio Settings
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium text-gray-300">
-                      Audio Enabled
-                    </label>
-                    <button
-                      onClick={() => setAudioEnabled(!audioEnabled)}
-                      className={`relative w-12 h-6 rounded-full transition-colors ${audioEnabled ? "bg-teal-500" : "bg-gray-600"}`}
-                      role="switch"
-                      aria-checked={audioEnabled}
-                      aria-label="Toggle audio"
-                    >
-                      <span
-                        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${audioEnabled ? "translate-x-6" : "translate-x-0"}`}
+                  {currentGame === "snake" && (
+                    <div className="mt-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
+                      <div className="flex justify-between mb-2">
+                        <p className="text-sm text-green-300 font-medium">
+                          Snake Game
+                        </p>
+                        <p className="text-sm text-green-400">
+                          Score: {snakeState.score}
+                        </p>
+                      </div>
+                      {snakeState.gameOver ? (
+                        <div className="text-center py-4">
+                          <p className="text-sm text-red-400 mb-2">
+                            Game Over!
+                          </p>
+                          <button
+                            onClick={resetSnakeGame}
+                            className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded text-sm active:bg-green-400"
+                          >
+                            Play Again
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <div
+                            className="grid grid-cols-15 gap-0.5 bg-gray-950 p-2 rounded mx-auto"
+                            style={{ maxWidth: "fit-content" }}
+                          >
+                            {Array.from({ length: 15 }).map((_, y) => (
+                              <div key={y} className="flex gap-0.5">
+                                {Array.from({ length: 15 }).map((_, x) => {
+                                  const isSnake = snakeState.segments.some(
+                                    (seg) => seg.x === x && seg.y === y,
+                                  );
+                                  const isHead =
+                                    snakeState.segments[0].x === x &&
+                                    snakeState.segments[0].y === y;
+                                  const isFood =
+                                    snakeState.food.x === x &&
+                                    snakeState.food.y === y;
+                                  return (
+                                    <div
+                                      key={x}
+                                      className={`w-4 h-4 sm:w-3 sm:h-3 rounded-sm ${isHead ? "bg-green-400" : isSnake ? "bg-green-600" : isFood ? "bg-red-500" : "bg-gray-800"}`}
+                                    />
+                                  );
+                                })}
+                              </div>
+                            ))}
+                          </div>
+                          {/* Mobile touch controls for Snake */}
+                          <div className="flex flex-col items-center gap-2 mt-3">
+                            <button
+                              onClick={() =>
+                                snakeState.direction !== "down" &&
+                                setSnakeState((s) => ({
+                                  ...s,
+                                  direction: "up",
+                                }))
+                              }
+                              className="w-12 h-12 rounded-lg bg-green-800/80 border border-green-600 flex items-center justify-center text-xl active:bg-green-700 select-none touch-manipulation"
+                            >
+                              ▲
+                            </button>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() =>
+                                  snakeState.direction !== "right" &&
+                                  setSnakeState((s) => ({
+                                    ...s,
+                                    direction: "left",
+                                  }))
+                                }
+                                className="w-12 h-12 rounded-lg bg-green-800/80 border border-green-600 flex items-center justify-center text-xl active:bg-green-700 select-none touch-manipulation"
+                              >
+                                ◀
+                              </button>
+                              <button
+                                onClick={() =>
+                                  snakeState.direction !== "up" &&
+                                  setSnakeState((s) => ({
+                                    ...s,
+                                    direction: "down",
+                                  }))
+                                }
+                                className="w-12 h-12 rounded-lg bg-green-800/80 border border-green-600 flex items-center justify-center text-xl active:bg-green-700 select-none touch-manipulation"
+                              >
+                                ▼
+                              </button>
+                              <button
+                                onClick={() =>
+                                  snakeState.direction !== "left" &&
+                                  setSnakeState((s) => ({
+                                    ...s,
+                                    direction: "right",
+                                  }))
+                                }
+                                className="w-12 h-12 rounded-lg bg-green-800/80 border border-green-600 flex items-center justify-center text-xl active:bg-green-700 select-none touch-manipulation"
+                              >
+                                ▶
+                              </button>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                      <p className="text-xs text-gray-400 mt-2 text-center hidden sm:block">
+                        Use arrow keys or tap buttons to control
+                      </p>
+                    </div>
+                  )}
+                </AdvancedSection>
+                <AdvancedSection
+                  title="Breeding & Lineage"
+                  subtitle="Pair the Guardian with a partner seed"
+                >
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Partner Guardian Name
+                      </label>
+                      <input
+                        type="text"
+                        value={breedingPartner}
+                        onChange={(e) =>
+                          setBreedingPartner(e.target.value.toUpperCase())
+                        }
+                        className="w-full bg-gray-950 border border-yellow-600/30 rounded-lg px-4 py-2 text-center font-mono text-cyan-400 focus:outline-none focus:border-yellow-600"
+                        placeholder="PARTNER"
                       />
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium text-gray-300">
-                      Mute
-                    </label>
+                    </div>
                     <button
-                      onClick={() => setAudioMuted(!audioMuted)}
-                      className={`px-4 py-2 rounded-lg transition-colors ${audioMuted ? "bg-red-600" : "bg-gray-700"}`}
-                      aria-pressed={audioMuted}
+                      onClick={breedGuardian}
+                      disabled={bond < 70 || !breedingPartner}
+                      className="w-full px-4 py-3 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed rounded-lg font-medium transition-all"
+                      aria-label="Breed new Guardian"
                     >
-                      {audioMuted ? "🔇 Muted" : "🔊 Unmuted"}
+                      💞 Breed Guardian (Bond ≥ 70)
                     </button>
+                    {offspring.length > 0 && (
+                      <div className="mt-4 space-y-2">
+                        <h4 className="text-sm font-semibold text-purple-400">
+                          Offspring ({offspring.length})
+                        </h4>
+                        <div className="max-h-48 overflow-y-auto space-y-2">
+                          {offspring.map((child, i) => (
+                            <div
+                              key={i}
+                              className="p-3 bg-purple-900/20 border border-purple-500/30 rounded-lg"
+                            >
+                              <p className="text-sm text-purple-300 font-mono">
+                                {child.name}
+                              </p>
+                              <p className="text-xs text-gray-400">
+                                Parents: {child.parents.join(" × ")}
+                              </p>
+                              <div className="mt-2 grid grid-cols-3 gap-2 text-xs">
+                                <div>
+                                  <span className="text-gray-400">R:</span>{" "}
+                                  <span className="text-red-400">
+                                    {child.genome.red60.toFixed(1)}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400">B:</span>{" "}
+                                  <span className="text-blue-400">
+                                    {child.genome.blue60.toFixed(1)}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400">K:</span>{" "}
+                                  <span className="text-gray-400">
+                                    {child.genome.black60.toFixed(1)}
+                                  </span>
+                                </div>
+                              </div>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {new Date(child.birthDate).toLocaleDateString()}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
+                </AdvancedSection>
+                {(dreamJournal.length > 0 || unlockedLore.length > 0) && (
+                  <AdvancedSection
+                    title="Dream Journal & Lore"
+                    subtitle="Unlocked lore and recent dreams"
+                    accent="purple"
+                  >
+                    {unlockedLore.length > 0 && (
+                      <div className="mb-4">
+                        <h4 className="text-sm font-semibold text-yellow-400 mb-2">
+                          Unlocked Lore ({unlockedLore.length})
+                        </h4>
+                        <div className="space-y-2 max-h-32 overflow-y-auto">
+                          {unlockedLore.map((lore, i) => (
+                            <p
+                              key={i}
+                              className="text-xs text-gray-300 italic border-l-2 border-yellow-600/30 pl-2"
+                            >
+                              {lore}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Volume: {Math.round(masterVolume * 100)}%
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={masterVolume * 100}
-                      onChange={(e) => {
-                        const newVol = Number(e.target.value) / 100;
-                        setMasterVolume(newVol);
-                        setVolume(newVol);
-                      }}
-                      className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
-                      aria-label="Master volume"
-                    />
+                    {dreamJournal.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-semibold text-purple-300 mb-2">
+                          Recent Dreams ({dreamJournal.length})
+                        </h4>
+                        <div className="space-y-2 max-h-48 overflow-y-auto">
+                          {dreamJournal
+                            .slice(-5)
+                            .reverse()
+                            .map((entry, i) => (
+                              <div
+                                key={entry.timestamp}
+                                className="text-xs bg-purple-900/20 border border-purple-500/20 rounded p-2"
+                              >
+                                <p className="text-purple-200 italic">
+                                  "{entry.insight}"
+                                </p>
+                                <p className="text-gray-500 mt-1">
+                                  {new Date(entry.timestamp).toLocaleString()} |
+                                  E:{entry.energy} C:{entry.curiosity} B:
+                                  {entry.bond}
+                                </p>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+                  </AdvancedSection>
+                )}
+              </AdvancedGroup>
+              <AdvancedGroup title="Genome">
+                <AdvancedSection
+                  title="Sacred Mathematics"
+                  subtitle="Lucas and Fibonacci readouts"
+                >
+                  <div className="grid grid-cols-2 gap-4 text-center">
+                    <div className="p-3 bg-gray-950/50 rounded-lg">
+                      <p className="text-sm text-gray-400">Lucas Number</p>
+                      <p className="text-2xl font-mono text-yellow-500">
+                        {lucasNum.toString()}
+                      </p>
+                    </div>
+                    <div className="p-3 bg-gray-950/50 rounded-lg">
+                      <p className="text-sm text-gray-400">Fibonacci Number</p>
+                      <p className="text-2xl font-mono text-yellow-500">
+                        {fibNum.toString()}
+                      </p>
+                    </div>
                   </div>
+                </AdvancedSection>
+                <AdvancedSection
+                  title="DNA Lattice & Key Guardian"
+                  subtitle="Cellular web and sigil fingerprint"
+                >
+                  <MechanicsShowcase
+                    seedName={seedName}
+                    energy={energy}
+                    curiosity={curiosity}
+                    bond={bond}
+                    field={field}
+                  />
+                </AdvancedSection>
+                <AdvancedSection
+                  title="Trinity Genome Vaults"
+                  subtitle="Red, blue and black strand balance"
+                >
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm text-gray-400">
+                      <span>Red-60 (Spine Energy)</span>
+                      <span className="font-mono text-yellow-500">
+                        {red60.toFixed(2)}%
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div
+                        className="bg-red-500 h-2 rounded-full"
+                        style={{ width: `${red60}%` }}
+                      ></div>
+                    </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Audio Scale
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <select
-                        value={audioScale}
-                        onChange={(e) => {
-                          setAutoSelectScale(false);
-                          setAudioScale(e.target.value as ScaleName);
-                        }}
-                        disabled={autoSelectScale}
-                        className="flex-1 bg-gray-950 border border-yellow-600/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-yellow-600 disabled:opacity-50"
-                        aria-label="Select audio scale"
-                      >
-                        <option value="harmonic">
-                          Harmonic (Just Intonation)
-                        </option>
-                        <option value="pentatonic">Pentatonic</option>
-                        <option value="dorian">Dorian Mode</option>
-                        <option value="phrygian">Phrygian Mode</option>
-                      </select>
+                    <div className="flex justify-between text-sm text-gray-400 pt-2">
+                      <span>Blue-60 (Form Integrity)</span>
+                      <span className="font-mono text-yellow-500">
+                        {blue60.toFixed(2)}%
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div
+                        className="bg-blue-500 h-2 rounded-full"
+                        style={{ width: `${blue60}%` }}
+                      ></div>
+                    </div>
+
+                    <div className="flex justify-between text-sm text-gray-400 pt-2">
+                      <span>Black-60 (Mystery Halo)</span>
+                      <span className="font-mono text-yellow-500">
+                        {black60.toFixed(2)}%
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div
+                        className="bg-gray-500 h-2 rounded-full"
+                        style={{ width: `${black60}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                </AdvancedSection>
+                <AdvancedSection
+                  title="Yantra Genome Lattice"
+                  subtitle="Tap tiles to activate sigils"
+                >
+                  <p className="text-sm text-gray-400 mb-4">
+                    {activatedPoints.size}/7 sigils active •{" "}
+                    {activeForm === "celestial"
+                      ? "12 tiles (Celestial)"
+                      : activeForm === "wild"
+                        ? "9 tiles (Wild)"
+                        : "7 tiles"}
+                  </p>
+
+                  <YantraTileGenomeVisualizer
+                    energy={energy}
+                    curiosity={curiosity}
+                    bond={bond}
+                    red60={red60}
+                    blue60={blue60}
+                    black60={black60}
+                    field={field}
+                    currentForm={currentForm}
+                    activatedPoints={activatedPoints}
+                    onTileClick={(index) =>
+                      handleSigilClick(index % 7, sigilPoints[index % 7])
+                    }
+                    width={600}
+                    height={400}
+                    className="rounded-lg"
+                  />
+
+                  <div className="mt-3 text-xs text-gray-500 space-y-1">
+                    <p>
+                      Red-60 ({red60.toFixed(1)}%): Morph bias (circle↔triangle)
+                    </p>
+                    <p>Blue-60 ({blue60.toFixed(1)}%): Form stability</p>
+                    <p>Black-60 ({black60.toFixed(1)}%): Mystery halo glow</p>
+                  </div>
+                </AdvancedSection>
+                <AdvancedSection
+                  title="Seed Patterns"
+                  subtitle="First ten pulse and ring digits"
+                >
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-400 mb-2">
+                        Pulse (Chaotic)
+                      </p>
+                      <div className="flex space-x-1">
+                        {field.pulse.slice(0, 10).map((d, i) => (
+                          <button
+                            key={i}
+                            onClick={() => audioEnabled && playNote(d % 7)}
+                            className="flex-1 h-8 bg-gray-700 rounded-sm hover:bg-yellow-600 transition-colors relative"
+                            aria-label={`Pulse digit ${d}`}
+                          >
+                            <div
+                              className="absolute bottom-0 left-0 right-0 bg-yellow-500/50"
+                              style={{ height: `${d * 10}%` }}
+                            ></div>
+                            <span className="relative text-xs font-mono">
+                              {d}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-400 mb-2">
+                        Ring (Harmonic)
+                      </p>
+                      <div className="flex space-x-1">
+                        {field.ring.slice(0, 10).map((d, i) => (
+                          <button
+                            key={i}
+                            onClick={() => audioEnabled && playNote(d % 7)}
+                            className="flex-1 h-8 bg-gray-700 rounded-sm hover:bg-teal-600 transition-colors relative"
+                            aria-label={`Ring digit ${d}`}
+                          >
+                            <div
+                              className="absolute bottom-0 left-0 right-0 bg-teal-500/50"
+                              style={{ height: `${d * 10}%` }}
+                            ></div>
+                            <span className="relative text-xs font-mono">
+                              {d}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </AdvancedSection>
+              </AdvancedGroup>
+              <AdvancedGroup title="Settings">
+                <AdvancedSection
+                  title="Audio Settings"
+                  subtitle="Volume, mute and harmonic scale"
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium text-gray-300">
+                        Audio Enabled
+                      </label>
                       <button
-                        onClick={() => setAutoSelectScale(!autoSelectScale)}
-                        className={`px-3 py-2 rounded-lg text-xs transition-colors ${autoSelectScale ? "bg-teal-600" : "bg-gray-700"}`}
-                        aria-pressed={autoSelectScale}
-                        title="Auto-select scale based on stats"
+                        onClick={() => setAudioEnabled(!audioEnabled)}
+                        className={`relative w-12 h-6 rounded-full transition-colors before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-[''] ${audioEnabled ? "bg-teal-500" : "bg-gray-600"}`}
+                        role="switch"
+                        aria-checked={audioEnabled}
+                        aria-label="Toggle audio"
                       >
-                        Auto
+                        <span
+                          className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${audioEnabled ? "translate-x-6" : "translate-x-0"}`}
+                        />
                       </button>
                     </div>
-                    {autoSelectScale && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        Currently: {effectiveScale}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
 
-              <div className="bg-gray-900/80 rounded-2xl p-6 border border-yellow-600/20">
-                <h3 className="text-xl font-semibold text-yellow-400 mb-4">
-                  Accessibility
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium text-gray-300">
-                      Reduce Motion
-                    </label>
-                    <button
-                      onClick={() => setReduceMotion(!reduceMotion)}
-                      className={`relative w-12 h-6 rounded-full transition-colors ${reduceMotion ? "bg-purple-500" : "bg-gray-600"}`}
-                      role="switch"
-                      aria-checked={reduceMotion}
-                      aria-label="Toggle reduce motion"
-                    >
-                      <span
-                        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${reduceMotion ? "translate-x-6" : "translate-x-0"}`}
-                      />
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium text-gray-300">
-                      High Contrast
-                    </label>
-                    <button
-                      onClick={() => setHighContrast(!highContrast)}
-                      className={`relative w-12 h-6 rounded-full transition-colors ${highContrast ? "bg-yellow-500" : "bg-gray-600"}`}
-                      role="switch"
-                      aria-checked={highContrast}
-                      aria-label="Toggle high contrast mode"
-                    >
-                      <span
-                        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${highContrast ? "translate-x-6" : "translate-x-0"}`}
-                      />
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium text-gray-300">
-                      Debug Overlay
-                    </label>
-                    <button
-                      onClick={() => setShowDebugOverlay(!showDebugOverlay)}
-                      className={`relative w-12 h-6 rounded-full transition-colors ${showDebugOverlay ? "bg-green-500" : "bg-gray-600"}`}
-                      role="switch"
-                      aria-checked={showDebugOverlay}
-                      aria-label="Toggle debug overlay"
-                    >
-                      <span
-                        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${showDebugOverlay ? "translate-x-6" : "translate-x-0"}`}
-                      />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Dream Journal & Lore */}
-              {(dreamJournal.length > 0 || unlockedLore.length > 0) && (
-                <div className="bg-gray-900/80 rounded-2xl p-6 border border-purple-600/20">
-                  <h3 className="text-xl font-semibold text-purple-400 mb-4">
-                    Dream Journal & Lore
-                  </h3>
-
-                  {unlockedLore.length > 0 && (
-                    <div className="mb-4">
-                      <h4 className="text-sm font-semibold text-yellow-400 mb-2">
-                        Unlocked Lore ({unlockedLore.length})
-                      </h4>
-                      <div className="space-y-2 max-h-32 overflow-y-auto">
-                        {unlockedLore.map((lore, i) => (
-                          <p
-                            key={i}
-                            className="text-xs text-gray-300 italic border-l-2 border-yellow-600/30 pl-2"
-                          >
-                            {lore}
-                          </p>
-                        ))}
-                      </div>
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium text-gray-300">
+                        Mute
+                      </label>
+                      <button
+                        onClick={() => setAudioMuted(!audioMuted)}
+                        className={`px-4 py-2 rounded-lg transition-colors ${audioMuted ? "bg-red-600" : "bg-gray-700"}`}
+                        aria-pressed={audioMuted}
+                      >
+                        {audioMuted ? "🔇 Muted" : "🔊 Unmuted"}
+                      </button>
                     </div>
-                  )}
 
-                  {dreamJournal.length > 0 && (
                     <div>
-                      <h4 className="text-sm font-semibold text-purple-300 mb-2">
-                        Recent Dreams ({dreamJournal.length})
-                      </h4>
-                      <div className="space-y-2 max-h-48 overflow-y-auto">
-                        {dreamJournal
-                          .slice(-5)
-                          .reverse()
-                          .map((entry, i) => (
-                            <div
-                              key={entry.timestamp}
-                              className="text-xs bg-purple-900/20 border border-purple-500/20 rounded p-2"
-                            >
-                              <p className="text-purple-200 italic">
-                                "{entry.insight}"
-                              </p>
-                              <p className="text-gray-500 mt-1">
-                                {new Date(entry.timestamp).toLocaleString()} |
-                                E:{entry.energy} C:{entry.curiosity} B:
-                                {entry.bond}
-                              </p>
-                            </div>
-                          ))}
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Volume: {Math.round(masterVolume * 100)}%
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={masterVolume * 100}
+                        onChange={(e) => {
+                          const newVol = Number(e.target.value) / 100;
+                          setMasterVolume(newVol);
+                          setVolume(newVol);
+                        }}
+                        className="range-touch"
+                        aria-label="Master volume"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Audio Scale
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={audioScale}
+                          onChange={(e) => {
+                            setAutoSelectScale(false);
+                            setAudioScale(e.target.value as ScaleName);
+                          }}
+                          disabled={autoSelectScale}
+                          className="flex-1 bg-gray-950 border border-yellow-600/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-yellow-600 disabled:opacity-50"
+                          aria-label="Select audio scale"
+                        >
+                          <option value="harmonic">
+                            Harmonic (Just Intonation)
+                          </option>
+                          <option value="pentatonic">Pentatonic</option>
+                          <option value="dorian">Dorian Mode</option>
+                          <option value="phrygian">Phrygian Mode</option>
+                        </select>
+                        <button
+                          onClick={() => setAutoSelectScale(!autoSelectScale)}
+                          className={`px-3 py-2 rounded-lg text-xs transition-colors ${autoSelectScale ? "bg-teal-600" : "bg-gray-700"}`}
+                          aria-pressed={autoSelectScale}
+                          title="Auto-select scale based on stats"
+                        >
+                          Auto
+                        </button>
+                      </div>
+                      {autoSelectScale && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          Currently: {effectiveScale}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </AdvancedSection>
+                <AdvancedSection
+                  title="Accessibility"
+                  subtitle="Motion, contrast and debug overlay"
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium text-gray-300">
+                        Reduce Motion
+                      </label>
+                      <button
+                        onClick={() => setReduceMotion(!reduceMotion)}
+                        className={`relative w-12 h-6 rounded-full transition-colors before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-[''] ${reduceMotion ? "bg-purple-500" : "bg-gray-600"}`}
+                        role="switch"
+                        aria-checked={reduceMotion}
+                        aria-label="Toggle reduce motion"
+                      >
+                        <span
+                          className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${reduceMotion ? "translate-x-6" : "translate-x-0"}`}
+                        />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium text-gray-300">
+                        High Contrast
+                      </label>
+                      <button
+                        onClick={() => setHighContrast(!highContrast)}
+                        className={`relative w-12 h-6 rounded-full transition-colors before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-[''] ${highContrast ? "bg-yellow-500" : "bg-gray-600"}`}
+                        role="switch"
+                        aria-checked={highContrast}
+                        aria-label="Toggle high contrast mode"
+                      >
+                        <span
+                          className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${highContrast ? "translate-x-6" : "translate-x-0"}`}
+                        />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium text-gray-300">
+                        Debug Overlay
+                      </label>
+                      <button
+                        onClick={() => setShowDebugOverlay(!showDebugOverlay)}
+                        className={`relative w-12 h-6 rounded-full transition-colors before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-[''] ${showDebugOverlay ? "bg-green-500" : "bg-gray-600"}`}
+                        role="switch"
+                        aria-checked={showDebugOverlay}
+                        aria-label="Toggle debug overlay"
+                      >
+                        <span
+                          className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${showDebugOverlay ? "translate-x-6" : "translate-x-0"}`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </AdvancedSection>
+                <AdvancedSection
+                  title="AI Behavior Tuning"
+                  subtitle="Idle, dream and probability tuning"
+                  accent="cyan"
+                >
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1">
+                        Idle Duration (min: {aiConfig.timings.idle.min}s, max:{" "}
+                        {aiConfig.timings.idle.max}s)
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="range"
+                          min="1"
+                          max="15"
+                          value={aiConfig.timings.idle.min}
+                          onChange={(e) =>
+                            setAiConfig((prev) => ({
+                              ...prev,
+                              timings: {
+                                ...prev.timings,
+                                idle: {
+                                  ...prev.timings.idle,
+                                  min: Number(e.target.value),
+                                },
+                              },
+                            }))
+                          }
+                          className="range-touch flex-1"
+                        />
+                        <input
+                          type="range"
+                          min="1"
+                          max="20"
+                          value={aiConfig.timings.idle.max}
+                          onChange={(e) =>
+                            setAiConfig((prev) => ({
+                              ...prev,
+                              timings: {
+                                ...prev.timings,
+                                idle: {
+                                  ...prev.timings.idle,
+                                  max: Number(e.target.value),
+                                },
+                              },
+                            }))
+                          }
+                          className="range-touch flex-1"
+                        />
                       </div>
                     </div>
-                  )}
-                </div>
-              )}
 
-              {/* AI Config Tuning */}
-              <div className="bg-gray-900/80 rounded-2xl p-6 border border-cyan-600/20">
-                <h3 className="text-xl font-semibold text-cyan-400 mb-4">
-                  AI Behavior Tuning
-                </h3>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs text-gray-400 mb-1">
-                      Idle Duration (min: {aiConfig.timings.idle.min}s, max:{" "}
-                      {aiConfig.timings.idle.max}s)
-                    </label>
-                    <div className="flex gap-2">
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1">
+                        Dream Duration (min: {aiConfig.timings.dreaming.min}s,
+                        max: {aiConfig.timings.dreaming.max}s)
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="range"
+                          min="3"
+                          max="20"
+                          value={aiConfig.timings.dreaming.min}
+                          onChange={(e) =>
+                            setAiConfig((prev) => ({
+                              ...prev,
+                              timings: {
+                                ...prev.timings,
+                                dreaming: {
+                                  ...prev.timings.dreaming,
+                                  min: Number(e.target.value),
+                                },
+                              },
+                            }))
+                          }
+                          className="range-touch flex-1"
+                        />
+                        <input
+                          type="range"
+                          min="5"
+                          max="30"
+                          value={aiConfig.timings.dreaming.max}
+                          onChange={(e) =>
+                            setAiConfig((prev) => ({
+                              ...prev,
+                              timings: {
+                                ...prev.timings,
+                                dreaming: {
+                                  ...prev.timings.dreaming,
+                                  max: Number(e.target.value),
+                                },
+                              },
+                            }))
+                          }
+                          className="range-touch flex-1"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1">
+                        Dream Probability:{" "}
+                        {Math.round(aiConfig.probabilities.idleToDream * 100)}%
+                      </label>
                       <input
                         type="range"
-                        min="1"
-                        max="15"
-                        value={aiConfig.timings.idle.min}
+                        min="0"
+                        max="100"
+                        value={aiConfig.probabilities.idleToDream * 100}
                         onChange={(e) =>
                           setAiConfig((prev) => ({
                             ...prev,
-                            timings: {
-                              ...prev.timings,
-                              idle: {
-                                ...prev.timings.idle,
-                                min: Number(e.target.value),
-                              },
+                            probabilities: {
+                              ...prev.probabilities,
+                              idleToDream: Number(e.target.value) / 100,
                             },
                           }))
                         }
-                        className="flex-1 h-2 bg-gray-700 rounded-lg"
-                      />
-                      <input
-                        type="range"
-                        min="1"
-                        max="20"
-                        value={aiConfig.timings.idle.max}
-                        onChange={(e) =>
-                          setAiConfig((prev) => ({
-                            ...prev,
-                            timings: {
-                              ...prev.timings,
-                              idle: {
-                                ...prev.timings.idle,
-                                max: Number(e.target.value),
-                              },
-                            },
-                          }))
-                        }
-                        className="flex-1 h-2 bg-gray-700 rounded-lg"
+                        className="range-touch"
                       />
                     </div>
-                  </div>
 
-                  <div>
-                    <label className="block text-xs text-gray-400 mb-1">
-                      Dream Duration (min: {aiConfig.timings.dreaming.min}s,
-                      max: {aiConfig.timings.dreaming.max}s)
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="range"
-                        min="3"
-                        max="20"
-                        value={aiConfig.timings.dreaming.min}
-                        onChange={(e) =>
-                          setAiConfig((prev) => ({
-                            ...prev,
-                            timings: {
-                              ...prev.timings,
-                              dreaming: {
-                                ...prev.timings.dreaming,
-                                min: Number(e.target.value),
-                              },
-                            },
-                          }))
-                        }
-                        className="flex-1 h-2 bg-gray-700 rounded-lg"
-                      />
-                      <input
-                        type="range"
-                        min="5"
-                        max="30"
-                        value={aiConfig.timings.dreaming.max}
-                        onChange={(e) =>
-                          setAiConfig((prev) => ({
-                            ...prev,
-                            timings: {
-                              ...prev.timings,
-                              dreaming: {
-                                ...prev.timings.dreaming,
-                                max: Number(e.target.value),
-                              },
-                            },
-                          }))
-                        }
-                        className="flex-1 h-2 bg-gray-700 rounded-lg"
-                      />
-                    </div>
+                    <button
+                      onClick={() => setAiConfig(DEFAULT_AI_CONFIG)}
+                      className="w-full px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm transition-colors"
+                    >
+                      Reset to Defaults
+                    </button>
                   </div>
-
-                  <div>
-                    <label className="block text-xs text-gray-400 mb-1">
-                      Dream Probability:{" "}
-                      {Math.round(aiConfig.probabilities.idleToDream * 100)}%
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={aiConfig.probabilities.idleToDream * 100}
-                      onChange={(e) =>
-                        setAiConfig((prev) => ({
-                          ...prev,
-                          probabilities: {
-                            ...prev.probabilities,
-                            idleToDream: Number(e.target.value) / 100,
-                          },
-                        }))
-                      }
-                      className="w-full h-2 bg-gray-700 rounded-lg"
-                    />
-                  </div>
-
-                  <button
-                    onClick={() => setAiConfig(DEFAULT_AI_CONFIG)}
-                    className="w-full px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm transition-colors"
-                  >
-                    Reset to Defaults
-                  </button>
-                </div>
-              </div>
+                </AdvancedSection>
+              </AdvancedGroup>
             </div>
           )}
         </div>

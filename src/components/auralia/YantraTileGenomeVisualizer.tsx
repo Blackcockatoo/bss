@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from "react";
 
 type Field = {
   seed: string;
@@ -25,18 +25,18 @@ type Form = {
 };
 
 type YantraTileGenomeVisualizerProps = {
-  energy: number;        // 0-100
-  curiosity: number;     // 0-100
-  bond: number;          // 0-100
-  red60: number;         // 0-100 (Spine Energy)
-  blue60: number;        // 0-100 (Form Integrity)
-  black60: number;       // 0-100 (Mystery Halo)
-  field: Field;          // MossPrimeSeed field
-  currentForm: Form;     // Guardian form state
-  activatedPoints: Set<number>;  // Which sigils are activated
+  energy: number; // 0-100
+  curiosity: number; // 0-100
+  bond: number; // 0-100
+  red60: number; // 0-100 (Spine Energy)
+  blue60: number; // 0-100 (Form Integrity)
+  black60: number; // 0-100 (Mystery Halo)
+  field: Field; // MossPrimeSeed field
+  currentForm: Form; // Guardian form state
+  activatedPoints: Set<number>; // Which sigils are activated
   onTileClick?: (tileIndex: number) => void;
-  width?: number;        // Default 600
-  height?: number;       // Default 400
+  width?: number; // Default 600
+  height?: number; // Default 400
   className?: string;
 };
 
@@ -87,21 +87,21 @@ const sectorForIndex = (k: number): number => {
 
 // Color palette for digits 0-9 (matching HTML and YantraMorphBackdrop)
 const PALETTE = [
-  '#0b3c5d', // 0: deep blue
-  '#ff7f0e', // 1: orange
-  '#2ca02c', // 2: green
-  '#d62728', // 3: red
-  '#9467bd', // 4: purple
-  '#8c564b', // 5: brown
-  '#e377c2', // 6: pink
-  '#7f7f7f', // 7: grey
-  '#bcbd22', // 8: yellow-green
-  '#17becf'  // 9: cyan
+  "#0b3c5d", // 0: deep blue
+  "#ff7f0e", // 1: orange
+  "#2ca02c", // 2: green
+  "#d62728", // 3: red
+  "#9467bd", // 4: purple
+  "#8c564b", // 5: brown
+  "#e377c2", // 6: pink
+  "#7f7f7f", // 7: grey
+  "#bcbd22", // 8: yellow-green
+  "#17becf", // 9: cyan
 ];
 
 // Utility: hex to RGB
 const hexToRgb = (hex: string): { r: number; g: number; b: number } => {
-  const clean = hex.replace('#', '');
+  const clean = hex.replace("#", "");
   const n = parseInt(clean, 16);
   return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
 };
@@ -117,14 +117,19 @@ const blendColors = (color1: string, color2: string, ratio: number): string => {
 };
 
 // Utility: clamp value
-const clamp = (v: number, lo: number, hi: number): number => Math.max(lo, Math.min(hi, v));
+const clamp = (v: number, lo: number, hi: number): number =>
+  Math.max(lo, Math.min(hi, v));
 
 // Calculate circle position for point i
-const circlePos = (tile: Tile, i: number, timeShift: number): { x: number; y: number } => {
+const circlePos = (
+  tile: Tile,
+  i: number,
+  timeShift: number,
+): { x: number; y: number } => {
   const angle = (2 * Math.PI * (i + timeShift)) / 60;
   return {
     x: tile.cx + tile.radius * Math.cos(angle),
-    y: tile.cy + tile.radius * Math.sin(angle)
+    y: tile.cy + tile.radius * Math.sin(angle),
   };
 };
 
@@ -159,7 +164,9 @@ const trianglePos = (tile: Tile, i: number): { x: number; y: number } => {
   return { x, y };
 };
 
-export const YantraTileGenomeVisualizer: React.FC<YantraTileGenomeVisualizerProps> = ({
+export const YantraTileGenomeVisualizer: React.FC<
+  YantraTileGenomeVisualizerProps
+> = ({
   energy,
   curiosity,
   bond,
@@ -172,15 +179,15 @@ export const YantraTileGenomeVisualizer: React.FC<YantraTileGenomeVisualizerProp
   onTileClick,
   width = 600,
   height = 400,
-  className = '',
+  className = "",
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const tilesRef = useRef<Tile[]>([]);
 
   // Determine tile count based on form
   const getTileCount = (formName: string): number => {
-    if (formName === 'Celestial Voyager') return 12;
-    if (formName === 'Wild Verdant') return 9;
+    if (formName === "Celestial Voyager") return 12;
+    if (formName === "Wild Verdant") return 9;
     return 7; // Base for all other forms
   };
 
@@ -189,15 +196,20 @@ export const YantraTileGenomeVisualizer: React.FC<YantraTileGenomeVisualizerProp
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // High-DPI support
-    const ratio = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
+    // High-DPI support. The backing store stays at the logical size, but the
+    // element is laid out fluidly: a fixed `${width}px` overflowed every
+    // phone-width container it was dropped into. `height: auto` keeps the
+    // aspect ratio from the width/height attributes.
+    const ratio =
+      typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
     canvas.width = width * ratio;
     canvas.height = height * ratio;
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
+    canvas.style.width = "100%";
+    canvas.style.height = "auto";
+    canvas.style.maxWidth = `${width}px`;
     ctx.scale(ratio, ratio);
 
     // Generate tile layout
@@ -217,7 +229,7 @@ export const YantraTileGenomeVisualizer: React.FC<YantraTileGenomeVisualizerProp
         radius: Math.min(width, height) * 0.08, // Tile size
         phase: i * Math.PI * 0.7, // Unique phase per tile
         offset: (i * 7) % 60, // Offset into Fibonacci-60 sequence
-        sigilIndex: i % 7 // Which sigil this tile corresponds to
+        sigilIndex: i % 7, // Which sigil this tile corresponds to
       };
     });
 
@@ -255,16 +267,26 @@ export const YantraTileGenomeVisualizer: React.FC<YantraTileGenomeVisualizerProp
 
         // Draw 3 rings (60, 108, 216 cycles)
         ctx.save();
-        ctx.strokeStyle = `${currentForm.tealAccent}${Math.floor(ringOpacity * 255).toString(16).padStart(2, '0')}`;
+        ctx.strokeStyle = `${currentForm.tealAccent}${Math.floor(
+          ringOpacity * 255,
+        )
+          .toString(16)
+          .padStart(2, "0")}`;
         ctx.lineWidth = 0.6;
 
         const r1 = adjustedRadius * 0.6;
         const r2 = adjustedRadius * 0.85;
         const r3 = adjustedRadius * 1.05;
 
-        ctx.beginPath(); ctx.arc(tile.cx, tile.cy, r1, 0, Math.PI * 2); ctx.stroke();
-        ctx.beginPath(); ctx.arc(tile.cx, tile.cy, r2, 0, Math.PI * 2); ctx.stroke();
-        ctx.beginPath(); ctx.arc(tile.cx, tile.cy, r3, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(tile.cx, tile.cy, r1, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(tile.cx, tile.cy, r2, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(tile.cx, tile.cy, r3, 0, Math.PI * 2);
+        ctx.stroke();
         ctx.restore();
 
         // Draw 60 Fibonacci points per tile
@@ -275,7 +297,11 @@ export const YantraTileGenomeVisualizer: React.FC<YantraTileGenomeVisualizerProp
           const sectorDigit = LUKAS[sector];
 
           // Circle and triangle positions
-          const cPos = circlePos({ ...tile, radius: adjustedRadius }, i, timeShift);
+          const cPos = circlePos(
+            { ...tile, radius: adjustedRadius },
+            i,
+            timeShift,
+          );
           const triPos = trianglePos({ ...tile, radius: adjustedRadius }, i);
 
           // Interpolate based on morph
@@ -291,13 +317,18 @@ export const YantraTileGenomeVisualizer: React.FC<YantraTileGenomeVisualizerProp
 
           // Color: blend Fibonacci palette with form colors
           const baseColor = PALETTE[digit % PALETTE.length];
-          const blendedColor = blendColors(baseColor, currentForm.tealAccent, 0.3);
+          const blendedColor = blendColors(
+            baseColor,
+            currentForm.tealAccent,
+            0.3,
+          );
           const rgb = hexToRgb(blendedColor);
 
           // Brightness pulse
-          const pulse = 0.6 +
-                        0.25 * Math.sin(t * 2 + digit + tile.phase) +
-                        0.1 * ((sectorDigit - 5) / 5);
+          const pulse =
+            0.6 +
+            0.25 * Math.sin(t * 2 + digit + tile.phase) +
+            0.1 * ((sectorDigit - 5) / 5);
 
           const R = clamp(Math.floor(rgb.r * pulse), 0, 255);
           const G = clamp(Math.floor(rgb.g * pulse), 0, 255);
@@ -330,7 +361,19 @@ export const YantraTileGenomeVisualizer: React.FC<YantraTileGenomeVisualizerProp
       running = false;
       cancelAnimationFrame(rafId);
     };
-  }, [width, height, energy, curiosity, bond, red60, blue60, black60, currentForm, activatedPoints, tileCount]);
+  }, [
+    width,
+    height,
+    energy,
+    curiosity,
+    bond,
+    red60,
+    blue60,
+    black60,
+    currentForm,
+    activatedPoints,
+    tileCount,
+  ]);
 
   // Handle canvas clicks
   const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -339,9 +382,12 @@ export const YantraTileGenomeVisualizer: React.FC<YantraTileGenomeVisualizerProp
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    // The canvas is CSS-scaled to its container, so pointer coordinates have
+    // to be mapped back into the logical drawing space the tiles live in.
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    if (rect.width === 0 || rect.height === 0) return;
+    const x = ((e.clientX - rect.left) * width) / rect.width;
+    const y = ((e.clientY - rect.top) * height) / rect.height;
 
     // Find which tile was clicked
     for (let i = 0; i < tilesRef.current.length; i++) {
