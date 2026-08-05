@@ -10,9 +10,10 @@ describe("Field Mode entry", () => {
     render(<FieldModePage />);
     expect(
       screen.getByRole("heading", {
-        name: /MetaPet Field Mode — Australian Schools/i,
+        name: /Australian classroom lessons for Years 3–6/i,
       }),
     ).toBeTruthy();
+    expect(screen.getAllByText(/MetaPet School/i).length).toBeGreaterThan(0);
 
     for (const promise of [
       /Years 3–6/i,
@@ -29,7 +30,20 @@ describe("Field Mode entry", () => {
 
   it("has one primary launch action into the approved Field start route", () => {
     render(<FieldModePage />);
-    const action = screen.getByRole("link", { name: /Start Field Mode/i });
+    const action = screen.getByRole("link", {
+      name: /Start a classroom session/i,
+    });
     expect(action).toHaveAttribute("href", "/schools/field/start");
+  });
+
+  it("presents Blue Snake Studios as the maker, not the headline brand", () => {
+    render(<FieldModePage />);
+    const heading = screen.getByRole("heading", {
+      name: /Australian classroom lessons for Years 3–6/i,
+    });
+    expect(heading.textContent).not.toMatch(/Blue Snake Studios/i);
+
+    const maker = screen.getByRole("link", { name: /Blue Snake Studios/i });
+    expect(maker).toHaveAttribute("href", "https://www.bluesnakestudios.com");
   });
 });

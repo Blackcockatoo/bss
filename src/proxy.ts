@@ -29,12 +29,59 @@ const METAPET_SCHOOL_HOST_ALIASES = new Set([
   "www.metapet.school",
 ]);
 
+function normalizeHost(value: string | null | undefined): string {
+  if (!value) return "";
+  // `x-forwarded-host` may carry a proxy chain; the first entry is the client
+  // facing host. Port numbers are not part of the identity comparison.
+  const first = value.split(",")[0] ?? "";
+  return first.trim().toLowerCase().split(":")[0] ?? "";
+}
+
+/**
+ * The whole domain product split keys off this value, so it must survive
+ * proxying. `nextUrl.hostname` reports the internal origin rather than the
+ * public domain whenever the app is served behind a proxy, which would hand
+ * the full consumer product to metapet.school visitors. Forwarded headers are
+ * consulted first and the parsed URL is kept as the local fallback.
+ */
 function getRequestHost(request: NextRequest): string {
-  return request.nextUrl.hostname.trim().toLowerCase();
+  return (
+    normalizeHost(request.headers.get("x-forwarded-host")) ||
+    normalizeHost(request.headers.get("host")) ||
+    normalizeHost(request.nextUrl.hostname)
+  );
 }
 
 function isMetaPetSchoolHost(request: NextRequest): boolean {
   return METAPET_SCHOOL_HOST_ALIASES.has(getRequestHost(request));
+}
+
+/**
+ * Same-host redirect target. `nextUrl` carries the internal origin behind a
+ * proxy, so cloning it alone can send a visitor to an internal hostname. The
+ * public host and scheme are reapplied from the forwarded headers.
+ */
+function sameHostUrl(request: NextRequest, pathname: string): URL {
+  const redirectUrl = request.nextUrl.clone();
+  redirectUrl.pathname = pathname;
+  redirectUrl.search = "";
+
+  const publicHost = getRequestHost(request);
+  if (publicHost && publicHost !== redirectUrl.hostname) {
+    redirectUrl.hostname = publicHost;
+    redirectUrl.port = "";
+  }
+
+  const forwardedProto = request.headers
+    .get("x-forwarded-proto")
+    ?.split(",")[0]
+    ?.trim()
+    .toLowerCase();
+  if (forwardedProto === "http" || forwardedProto === "https") {
+    redirectUrl.protocol = `${forwardedProto}:`;
+  }
+
+  return redirectUrl;
 }
 
 function getCanonicalOrigin(): URL {
@@ -71,10 +118,7 @@ function redirectToCanonicalOrigin(request: NextRequest): NextResponse {
 }
 
 function redirectSchoolRootToFieldMode(request: NextRequest): NextResponse {
-  const redirectUrl = request.nextUrl.clone();
-  redirectUrl.pathname = FIELD_MODE_HOME_PATH;
-  redirectUrl.search = "";
-  return NextResponse.redirect(redirectUrl, 308);
+  return NextResponse.redirect(sameHostUrl(request, FIELD_MODE_HOME_PATH), 308);
 }
 
 function fieldCookieIsActive(request: NextRequest): boolean {
@@ -181,10 +225,7 @@ export function proxy(request: NextRequest) {
   if (!policyId) return NextResponse.next();
 
   if (policyId === "schools" && pathname === "/") {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/schools";
-    redirectUrl.search = "";
-    return NextResponse.redirect(redirectUrl);
+    return NextResponse.redirect(sameHostUrl(request, "/schools"));
   }
 
   if (isPathnameAllowedByPolicy(pathname, policyId)) {
@@ -197,10 +238,9 @@ export function proxy(request: NextRequest) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
-  const redirectUrl = request.nextUrl.clone();
-  redirectUrl.pathname = getPolicyFallbackPathname(policyId);
-  redirectUrl.search = "";
-  return NextResponse.redirect(redirectUrl);
+  return NextResponse.redirect(
+    sameHostUrl(request, getPolicyFallbackPathname(policyId)),
+  );
 }
 
 export const config = {

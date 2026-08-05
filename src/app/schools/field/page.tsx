@@ -5,6 +5,10 @@ import {
   FIELD_MODE_START_PATH,
 } from "@/lib/childSafeBaseline";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
+import {
+  METAPET_SCHOOL_NAME,
+  METAPET_SCHOOL_TAGLINE,
+} from "@/lib/fieldMode/identity";
 
 const FIELD_PROMISES = [
   "Years 3–6",
@@ -28,10 +32,10 @@ export default function FieldModePage() {
           </div>
           <div className="space-y-4">
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-800">
-              Blue Snake Studios · MetaPet Schools
+              {METAPET_SCHOOL_NAME}
             </p>
             <h1 className="max-w-4xl text-5xl font-semibold tracking-tight text-slate-950 md:text-6xl">
-              MetaPet Field Mode — Australian Schools
+              {METAPET_SCHOOL_TAGLINE}
             </h1>
             <p className="max-w-3xl text-lg leading-8 text-slate-700">
               A calm, teacher-led classroom experience for Australian Years 3–6.
@@ -43,9 +47,18 @@ export default function FieldModePage() {
             href={FIELD_MODE_START_PATH}
             className="inline-flex min-h-14 items-center justify-center rounded-xl bg-emerald-800 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-emerald-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800"
           >
-            Start Field Mode
+            Start a classroom session
             <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
           </a>
+          <p className="text-sm text-slate-500">
+            Made by{" "}
+            <a
+              href="https://www.bluesnakestudios.com"
+              className="font-medium text-slate-600 underline underline-offset-2 hover:text-slate-800"
+            >
+              Blue Snake Studios
+            </a>
+          </p>
         </section>
 
         <aside className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">

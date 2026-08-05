@@ -1,6 +1,20 @@
 import { NextResponse } from "next/server";
 
 import {
+  FIELD_MODE_CLASSROOM_PATH,
+  FIELD_MODE_GUIDE_PATH,
+  FIELD_MODE_HOME_PATH,
+  FIELD_MODE_LESSONS_PATH,
+  FIELD_MODE_OFFLINE_PATH,
+} from "@/lib/childSafeBaseline";
+import {
+  METAPET_SCHOOL_BACKGROUND_COLOR,
+  METAPET_SCHOOL_DESCRIPTION,
+  METAPET_SCHOOL_NAME,
+  METAPET_SCHOOL_SHORT_NAME,
+  METAPET_SCHOOL_THEME_COLOR,
+} from "@/lib/fieldMode/identity";
+import {
   FIELD_MODE_APP_ID,
   FIELD_MODE_ICON_192_PATH,
   FIELD_MODE_ICON_512_PATH,
@@ -11,17 +25,41 @@ import {
 export function GET() {
   return NextResponse.json(
     {
-      name: "MetaPet Field Mode — Australian Schools",
-      short_name: "MetaPet Field",
-      description:
-        "Teacher-led Years 3–6 Australian classroom lessons with alias-only local records.",
+      name: `${METAPET_SCHOOL_NAME} — Australian Years 3–6 Classroom Lessons`,
+      short_name: METAPET_SCHOOL_SHORT_NAME,
+      description: METAPET_SCHOOL_DESCRIPTION,
       id: FIELD_MODE_APP_ID,
-      start_url: "/schools/field",
-      scope: "/schools/field/",
+      // start_url must sit inside scope. A trailing slash on scope alone put
+      // the start URL outside it, which browsers treat as an invalid install
+      // target. Next serves these routes without a trailing slash, so both
+      // values are slash-free.
+      start_url: FIELD_MODE_HOME_PATH,
+      scope: FIELD_MODE_HOME_PATH,
       display: "standalone",
-      background_color: "#f8fafc",
-      theme_color: "#065f46",
+      background_color: METAPET_SCHOOL_BACKGROUND_COLOR,
+      theme_color: METAPET_SCHOOL_THEME_COLOR,
       orientation: "any",
+      lang: "en-AU",
+      dir: "ltr",
+      categories: ["education"],
+      shortcuts: [
+        {
+          name: "Lessons",
+          url: FIELD_MODE_LESSONS_PATH,
+        },
+        {
+          name: "Classroom",
+          url: FIELD_MODE_CLASSROOM_PATH,
+        },
+        {
+          name: "Teacher Guide",
+          url: FIELD_MODE_GUIDE_PATH,
+        },
+        {
+          name: "Offline Pack",
+          url: FIELD_MODE_OFFLINE_PATH,
+        },
+      ],
       icons: [
         {
           src: FIELD_MODE_ICON_192_PATH,

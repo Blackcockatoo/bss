@@ -125,6 +125,54 @@ describe("MetaPet.school hostname boundary", () => {
     );
   });
 
+  it("identifies the school domain from proxy headers, not just the parsed URL", async () => {
+    const { proxy } = await loadProxy("core");
+
+    // Behind a proxy the parsed URL carries the internal origin. If the
+    // forwarded host were ignored, metapet.school visitors would be served the
+    // full consumer product instead of the classroom boundary.
+    const forwarded = proxy(
+      new NextRequest("https://internal.example.com/pet", {
+        headers: { "x-forwarded-host": "www.metapet.school" },
+      }),
+    );
+    expect(forwarded.headers.get("location")).toContain("/schools/field");
+
+    // `Host` is a forbidden header name in the Request constructor, so the
+    // bare host-header fallback cannot be exercised here; it is covered by the
+    // running server instead.
+  });
+
+  it("keeps redirects on the public host instead of an internal origin", async () => {
+    const { proxy } = await loadProxy("core");
+
+    const response = proxy(
+      new NextRequest("http://internal.example.com/pet", {
+        headers: {
+          "x-forwarded-host": "www.metapet.school",
+          "x-forwarded-proto": "https",
+        },
+      }),
+    );
+
+    expect(response.headers.get("location")).toBe(
+      "https://www.metapet.school/schools/field",
+    );
+  });
+
+  it("ignores a port and proxy chain when matching the school domain", async () => {
+    const { proxy } = await loadProxy("core");
+
+    const response = proxy(
+      new NextRequest("https://internal.example.com/pet", {
+        headers: {
+          "x-forwarded-host": "www.metapet.school:443, internal.example.com",
+        },
+      }),
+    );
+    expect(response.headers.get("location")).toContain("/schools/field");
+  });
+
   it("enforces Field Mode on the school domain without requiring a cookie", async () => {
     const { proxy } = await loadProxy("core");
 
