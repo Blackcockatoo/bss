@@ -16,6 +16,10 @@ import {
   FIELD_MODE_NAV_ITEMS,
   type FieldModeNavItem,
 } from "@/lib/childSafeBaseline";
+import {
+  METAPET_SCHOOL_NAME,
+  METAPET_SCHOOL_TAGLINE,
+} from "@/lib/fieldMode/identity";
 
 const ICONS: Record<FieldModeNavItem["kind"], typeof Home> = {
   home: Home,
@@ -38,9 +42,14 @@ export function FieldModeNav() {
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-2">
         <a
           href={FIELD_MODE_HOME_PATH}
-          className="mr-auto text-sm font-semibold text-emerald-950"
+          className="mr-auto flex flex-col leading-tight"
         >
-          MetaPet Field Mode
+          <span className="text-sm font-semibold text-emerald-950">
+            {METAPET_SCHOOL_NAME}
+          </span>
+          <span className="text-[0.6875rem] font-medium text-emerald-900/70">
+            {METAPET_SCHOOL_TAGLINE}
+          </span>
         </a>
         {FIELD_MODE_NAV_ITEMS.map((item) => {
           const Icon = ICONS[item.kind];

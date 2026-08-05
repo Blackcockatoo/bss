@@ -70,6 +70,12 @@ describe("Field Mode entry and exit handlers", () => {
     );
     expect(body.id).toBe(FIELD_MODE_APP_ID);
     expect(body.start_url).toBe("/schools/field");
+    // A trailing slash on scope alone leaves start_url outside it, which
+    // browsers reject as an install target.
+    expect(body.start_url.startsWith(body.scope)).toBe(true);
+    expect(body.name).toContain("MetaPet School");
+    expect(body.name).not.toMatch(/Blue Snake Studios/i);
+    expect(body.lang).toBe("en-AU");
     expect(body.icons).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ src: FIELD_MODE_ICON_192_PATH }),
