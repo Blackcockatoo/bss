@@ -13,6 +13,17 @@ describe("Field Mode entry", () => {
     expect(screen.getAllByText(/Years 3–6/i).length).toBeGreaterThan(0);
   });
 
+  it("makes the permanent free classroom model visible on the real domain entry", () => {
+    render(<FieldModePage />);
+    expect(screen.getByText(/free forever/i)).toBeInTheDocument();
+    expect(screen.getByText(/no per-student fee/i)).toBeInTheDocument();
+    expect(screen.getByText(/no expiring trial/i)).toBeInTheDocument();
+    expect(screen.getByText(/No school is too poor to use it/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/No school is too wealthy to help sustain it/i),
+    ).toBeInTheDocument();
+  });
+
   it("puts Session One one click from a cold visit", () => {
     render(<FieldModePage />);
 

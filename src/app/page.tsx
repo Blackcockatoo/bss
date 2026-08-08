@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import {
+  CONTRIBUTION_OPTIONS,
+  GOVERNING_PRINCIPLE,
+} from "@/lib/schools/contribution";
+
 export const metadata: Metadata = {
   title: "Blue Snake Studios — The full MetaPet living system",
   description:
@@ -26,6 +31,14 @@ const PRODUCT_AREAS = [
       "Raise, care for and explore a persistent digital companion shaped by its own genome, state and history.",
     href: "/pet",
     action: "Enter MetaPet",
+  },
+  {
+    eyebrow: "Living progression",
+    title: "Evolution",
+    description:
+      "Grow one inherited creature through four visible stages, genome-driven branches, permanent abilities and a full transformation ceremony.",
+    href: "/pet?panel=evolution",
+    action: "See evolution",
   },
   {
     eyebrow: "Creature design",
@@ -55,6 +68,7 @@ const PRODUCT_AREAS = [
 
 const FULL_PRODUCT_LINKS = [
   { label: "Pet", href: "/pet" },
+  { label: "Evolution", href: "/pet?panel=evolution" },
   { label: "Identity", href: "/identity" },
   { label: "DNA", href: "/digital-dna" },
   { label: "Body Forge", href: "/body-forge" },
@@ -173,6 +187,38 @@ export default function HomePage() {
               </p>
             </Link>
           ))}
+        </div>
+      </section>
+
+      <section className="border-y border-amber-400/20 bg-amber-400/5">
+        <div className="mx-auto grid w-full max-w-6xl gap-8 px-6 py-14 md:grid-cols-[1fr_auto] md:items-center">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-200/70">
+              MetaPet School funding model
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
+              {GOVERNING_PRINCIPLE.map((line) => (
+                <span key={line} className="block">
+                  {line}
+                </span>
+              ))}
+            </h2>
+            <p className="mt-4 max-w-3xl text-base leading-7 text-slate-300">
+              The complete classroom experience is A$0 for every school,
+              permanently. Suggested annual support:{" "}
+              {CONTRIBUTION_OPTIONS.map((option) => option.label).join(", ")}.
+            </p>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
+              Support changes what the studio can keep building. It never
+              changes what a class receives.
+            </p>
+          </div>
+          <Link
+            href="/schools/contribute"
+            className="inline-flex min-h-12 items-center justify-center rounded-xl bg-amber-300 px-6 py-3 text-sm font-semibold text-slate-950 transition-colors hover:bg-amber-200"
+          >
+            See the voluntary contribution model
+          </Link>
         </div>
       </section>
 

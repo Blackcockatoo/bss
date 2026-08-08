@@ -37,7 +37,7 @@ function PlanCard({
           </span>
           {!isFree && (
             <span className="mb-1 text-xs text-zinc-500">
-              /{interval === "yearly" ? "yr" : "mo"}
+              /{interval === "yearly" ? "year" : "month"}
             </span>
           )}
         </div>
@@ -100,7 +100,8 @@ export default function PricingPage() {
         <h1 className="text-3xl font-bold">Complete MetaPet</h1>
         <p className="mt-2 text-sm text-zinc-400">
           The consumer companion from Blue $nake Studio. Privacy-first. No ads,
-          no data harvesting. Billing integration is not connected yet.
+          no data harvesting. Prices are in Australian dollars. Billing
+          integration is not connected yet.
         </p>
       </div>
 

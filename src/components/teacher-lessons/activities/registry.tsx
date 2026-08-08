@@ -12,12 +12,14 @@ import {
 import type { LessonActivityProps } from "./types";
 import { STEP_KIND_LABEL, StepShell } from "./shared";
 import { MeetActivity } from "./MeetActivity";
-import { BuildBodyActivity } from "./BuildBodyActivity";
-import { DnaDifferenceActivity } from "./DnaDifferenceActivity";
-import { NeedsActivity } from "./NeedsActivity";
 import { FeelingsActivity } from "./FeelingsActivity";
 import { PatternsActivity } from "./PatternsActivity";
-import { ResponsibleCreatorActivity } from "./ResponsibleCreatorActivity";
+import {
+  AlgorithmSequenceActivity,
+  PrivacySortActivity,
+  RepresentationActivity,
+  SingleFeatureDesignActivity,
+} from "./CanonicalSequenceActivities";
 
 /**
  * The generic activity registry: `activityType → component`. The shared Runner
@@ -29,12 +31,12 @@ export const ACTIVITY_REGISTRY: Record<
   (props: LessonActivityProps) => React.ReactElement
 > = {
   observe: MeetActivity,
-  build: BuildBodyActivity,
-  compare: DnaDifferenceActivity,
-  care: NeedsActivity,
   interpret: FeelingsActivity,
   predict: PatternsActivity,
-  create: ResponsibleCreatorActivity,
+  represent: RepresentationActivity,
+  sequence: AlgorithmSequenceActivity,
+  "privacy-sort": PrivacySortActivity,
+  "single-change": SingleFeatureDesignActivity,
 };
 
 /**

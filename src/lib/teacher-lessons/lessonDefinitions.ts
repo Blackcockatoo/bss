@@ -252,9 +252,9 @@ const LESSON_RUNTIME: Record<LessonId, LessonRuntimeSpec> = {
   },
   "one-identity-many-representations": {
     id: "one-identity-many-representations",
-    activityType: "compare",
+    activityType: "represent",
     evidenceType: "dna-comparison",
-    requiredFeatureFlags: ["dna-lab"],
+    requiredFeatureFlags: [],
     learningAreas: ["Digital Technologies", "Mathematics"],
     successCriteria: [
       "I can find the same thing shown two different ways.",
@@ -325,9 +325,9 @@ const LESSON_RUNTIME: Record<LessonId, LessonRuntimeSpec> = {
   },
   "choices-and-algorithms": {
     id: "choices-and-algorithms",
-    activityType: "care",
+    activityType: "sequence",
     evidenceType: "cause-effect-chain",
-    requiredFeatureFlags: ["vitals"],
+    requiredFeatureFlags: [],
     learningAreas: ["Digital Technologies", "Personal and Social capability"],
     successCriteria: [
       "I can say an if–then rule out loud.",
@@ -399,7 +399,7 @@ const LESSON_RUNTIME: Record<LessonId, LessonRuntimeSpec> = {
   },
   "privacy-and-responsible-design": {
     id: "privacy-and-responsible-design",
-    activityType: "create",
+    activityType: "privacy-sort",
     evidenceType: "responsible-creator-promise",
     requiredFeatureFlags: [],
     learningAreas: [
@@ -478,9 +478,9 @@ const LESSON_RUNTIME: Record<LessonId, LessonRuntimeSpec> = {
   },
   "design-a-better-feature": {
     id: "design-a-better-feature",
-    activityType: "build",
+    activityType: "single-change",
     evidenceType: "body-design-comparison",
-    requiredFeatureFlags: ["body-forge"],
+    requiredFeatureFlags: [],
     learningAreas: ["Design and Technologies", "Digital Technologies"],
     successCriteria: [
       "I can change one part of a design.",
@@ -635,10 +635,10 @@ const LESSON_RUNTIME: Record<LessonId, LessonRuntimeSpec> = {
 const ACTIVITY_DESTINATION = {
   observe: "meet",
   interpret: "emotions",
-  compare: "dna-lab",
-  care: "vitals",
-  create: "challenge",
-  build: "body-forge",
+  represent: "dna-lab",
+  sequence: "vitals",
+  "privacy-sort": "challenge",
+  "single-change": "body-forge",
   predict: "visualisation",
 } as const satisfies Record<LessonActivityType, LessonDefinition["appDestination"]>;
 

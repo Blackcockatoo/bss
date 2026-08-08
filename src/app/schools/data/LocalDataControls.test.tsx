@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import {
   SCHOOLS_CLASSROOM_ROSTER_STORAGE_KEY,
+  SCHOOLS_LOCAL_DATA_RETENTION_MS,
   SCHOOLS_TEACHER_ONBOARDING_STORAGE_KEY,
   touchSchoolsLocalState,
 } from "@/lib/schools/storage";
@@ -32,6 +33,24 @@ describe("local data controls", () => {
     render(<LocalDataControls />);
 
     expect(await screen.findByText(/Nothing is stored yet/i)).toBeInTheDocument();
+  });
+
+  it("purges expired records before displaying the inventory", async () => {
+    touchSchoolsLocalState(
+      window.localStorage,
+      Date.now() - SCHOOLS_LOCAL_DATA_RETENTION_MS - 1,
+    );
+    window.localStorage.setItem(
+      SCHOOLS_CLASSROOM_ROSTER_STORAGE_KEY,
+      JSON.stringify(["Expired alias"]),
+    );
+
+    render(<LocalDataControls />);
+
+    expect(await screen.findByText(/Nothing is stored yet/i)).toBeInTheDocument();
+    expect(
+      window.localStorage.getItem(SCHOOLS_CLASSROOM_ROSTER_STORAGE_KEY),
+    ).toBeNull();
   });
 
   it("lists held categories without revealing any stored value", async () => {
