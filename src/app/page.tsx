@@ -28,6 +28,14 @@ const PRODUCT_AREAS = [
     action: "Enter MetaPet",
   },
   {
+    eyebrow: "Living progression",
+    title: "Evolution",
+    description:
+      "Grow one inherited creature through four visible stages, genome-driven branches, permanent abilities and a full transformation ceremony.",
+    href: "/pet?panel=evolution",
+    action: "See evolution",
+  },
+  {
     eyebrow: "Creature design",
     title: "Body Forge",
     description:
@@ -55,11 +63,13 @@ const PRODUCT_AREAS = [
 
 const FULL_PRODUCT_LINKS = [
   { label: "Pet", href: "/pet" },
+  { label: "Evolution", href: "/pet?panel=evolution" },
   { label: "Identity", href: "/identity" },
   { label: "DNA", href: "/digital-dna" },
   { label: "Body Forge", href: "/body-forge" },
   { label: "Activities", href: "/app/activities" },
   { label: "Wellness", href: "/app/wellness" },
+  { label: "Pricing", href: "/pricing" },
 ] as const;
 
 export default function HomePage() {
@@ -100,6 +110,12 @@ export default function HomePage() {
                 className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-700 bg-slate-900/70 px-5 py-3 text-sm font-semibold text-slate-100 transition-colors hover:border-slate-500 hover:bg-slate-800"
               >
                 Explore the DNA Lab
+              </Link>
+              <Link
+                href="/pricing"
+                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-5 py-3 text-sm font-semibold text-cyan-200 transition-colors hover:border-cyan-300/50 hover:bg-cyan-400/15"
+              >
+                Plans from A$0
               </Link>
               <a
                 href="https://www.metapet.school"
@@ -173,6 +189,33 @@ export default function HomePage() {
               </p>
             </Link>
           ))}
+        </div>
+      </section>
+
+      <section className="border-y border-cyan-400/20 bg-cyan-400/5">
+        <div className="mx-auto grid w-full max-w-6xl gap-8 px-6 py-14 md:grid-cols-[1fr_auto] md:items-center">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-300/70">
+              Simple consumer pricing
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
+              Start free. Unlock the complete companion for A$4.99/month.
+            </h2>
+            <p className="mt-3 max-w-3xl text-base leading-7 text-slate-300">
+              The free companion includes starter addons and all four evolution
+              stages. Companion Pass adds the full addon library, dream journal,
+              advanced genome tools and wellness sync. Annual: A$44.
+            </p>
+            <p className="mt-2 text-sm text-amber-200">
+              Checkout is not connected yet. Nothing can be charged today.
+            </p>
+          </div>
+          <Link
+            href="/pricing"
+            className="inline-flex min-h-12 items-center justify-center rounded-xl bg-cyan-300 px-6 py-3 text-sm font-semibold text-slate-950 transition-colors hover:bg-cyan-200"
+          >
+            Compare the plans
+          </Link>
         </div>
       </section>
 

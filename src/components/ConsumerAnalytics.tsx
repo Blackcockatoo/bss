@@ -1,10 +1,17 @@
 "use client";
 
-import { Analytics } from "@vercel/analytics/next";
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 
 import { isAnalyticsAllowedPathname } from "@/lib/analyticsBoundary";
 import { IS_SCHOOLS_PROFILE } from "@/lib/env/features";
+
+// A route guard around a static import is too late: the browser has already
+// loaded the analytics SDK before this component can return `null`.
+const ConsumerAnalyticsBeacon = dynamic(
+  () => import("@vercel/analytics/next").then((module) => module.Analytics),
+  { ssr: false },
+);
 
 /**
  * Product analytics are a Blue Snake Studios consumer concern only.
@@ -32,5 +39,5 @@ export function ConsumerAnalytics() {
     return null;
   }
 
-  return <Analytics />;
+  return <ConsumerAnalyticsBeacon />;
 }

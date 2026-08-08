@@ -76,6 +76,22 @@ describe("lesson activity registry", () => {
     }
   });
 
+  it("dispatches canonical sessions to matching activities", () => {
+    const expectations = [
+      ["one-identity-many-representations", /Picture view/i],
+      ["choices-and-algorithms", /Rest, then feed/i],
+      ["privacy-and-responsible-design", /student's photo/i],
+      ["design-a-better-feature", /Increase colour contrast/i],
+    ] as const;
+
+    for (const [lessonId, visibleCopy] of expectations) {
+      const lesson = LESSON_DEFINITIONS.find((entry) => entry.id === lessonId)!;
+      const { unmount } = render(<ActivityHost {...makeProps(lesson)} />);
+      expect(screen.getByText(visibleCopy)).toBeInTheDocument();
+      unmount();
+    }
+  });
+
   it("shows a teacher-friendly fallback when a required feature is unavailable", () => {
     setFeatureAvailabilityOverrides({ "advanced-visualisation": false });
     const patterns = LESSON_DEFINITIONS.find(

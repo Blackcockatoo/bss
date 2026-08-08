@@ -8,6 +8,7 @@ import {
   clearSchoolsClassSession,
   clearSchoolsLocalState,
   describeSchoolsLocalData,
+  purgeExpiredSchoolsLocalState,
   type SchoolsAggregateSummary,
   type SchoolsLocalDataReport,
 } from "@/lib/schools/storage";
@@ -80,6 +81,7 @@ export function LocalDataControls() {
   const report = useMemo<SchoolsLocalDataReport | null>(() => {
     if (revision < 0) return null;
     try {
+      purgeExpiredSchoolsLocalState(window.localStorage);
       return describeSchoolsLocalData(window.localStorage);
     } catch {
       // Private browsing or a locked-down profile can deny storage entirely.

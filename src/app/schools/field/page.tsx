@@ -40,12 +40,21 @@ export default function FieldModePage() {
             {METAPET_SCHOOL_NAME} · Australian Years 3–6
           </div>
 
+          <p className="text-base font-semibold text-emerald-900">
+            Complete classroom core · free forever
+          </p>
+
           <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-slate-950 md:text-5xl">
             {CANONICAL_SESSION_COUNT} short lessons about how systems work.
           </h1>
           <p className="max-w-2xl text-lg leading-8 text-slate-700">
             Teacher-led, about 15–20 minutes each. No student sign-in. Records
             stay on this device and you can delete them at any time.
+          </p>
+          <p className="max-w-2xl text-base leading-7 text-slate-700">
+            No licence, no per-student fee, no expiring trial and no paid
+            classroom tier. Every school receives the same seven sessions,
+            printable fallback and teacher materials.
           </p>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">

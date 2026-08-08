@@ -103,6 +103,26 @@ export default function PetPage() {
   const [showWellnessSync, setShowWellnessSync] = useState(false);
   useJourneyProgressTracker("pet", { completeOnVisit: true });
 
+  // Deep links from the B$S product map must land on the feature they name,
+  // not merely on the pet route with Evolution still buried in a closed lab.
+  useEffect(() => {
+    const panel = new URLSearchParams(window.location.search).get("panel");
+    if (panel !== "evolution") return;
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      setShowAdvanced(true);
+      setAdvancedTab("systems");
+      setShowEvolutionPanel(true);
+      setShowAddonPanel(false);
+      setShowProfilePanel(false);
+      setShowBreedingPanel(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const imprintAccentClass =
     dnaImprint?.selectedSeed === "red"
       ? "via-rose-950/50"

@@ -55,12 +55,12 @@ export type LessonAppDestination =
 /** High-level shape of the student interaction inside a lesson. */
 export type LessonActivityType =
   | "observe"
-  | "build"
-  | "compare"
-  | "care"
   | "interpret"
   | "predict"
-  | "create";
+  | "represent"
+  | "sequence"
+  | "privacy-sort"
+  | "single-change";
 
 /**
  * The five canonical placeholder phases every Pass 1 lesson moves through.
