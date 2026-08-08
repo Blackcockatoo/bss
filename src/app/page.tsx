@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import {
+  CONTRIBUTION_OPTIONS,
+  GOVERNING_PRINCIPLE,
+} from "@/lib/schools/contribution";
+
 export const metadata: Metadata = {
   title: "Blue Snake Studios — The full MetaPet living system",
   description:
@@ -69,7 +74,6 @@ const FULL_PRODUCT_LINKS = [
   { label: "Body Forge", href: "/body-forge" },
   { label: "Activities", href: "/app/activities" },
   { label: "Wellness", href: "/app/wellness" },
-  { label: "Pricing", href: "/pricing" },
 ] as const;
 
 export default function HomePage() {
@@ -110,12 +114,6 @@ export default function HomePage() {
                 className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-700 bg-slate-900/70 px-5 py-3 text-sm font-semibold text-slate-100 transition-colors hover:border-slate-500 hover:bg-slate-800"
               >
                 Explore the DNA Lab
-              </Link>
-              <Link
-                href="/pricing"
-                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-5 py-3 text-sm font-semibold text-cyan-200 transition-colors hover:border-cyan-300/50 hover:bg-cyan-400/15"
-              >
-                Plans from A$0
               </Link>
               <a
                 href="https://www.metapet.school"
@@ -192,29 +190,34 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="border-y border-cyan-400/20 bg-cyan-400/5">
+      <section className="border-y border-amber-400/20 bg-amber-400/5">
         <div className="mx-auto grid w-full max-w-6xl gap-8 px-6 py-14 md:grid-cols-[1fr_auto] md:items-center">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-300/70">
-              Simple consumer pricing
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-200/70">
+              MetaPet School funding model
             </p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
-              Start free. Unlock the complete companion for A$4.99/month.
+              {GOVERNING_PRINCIPLE.map((line) => (
+                <span key={line} className="block">
+                  {line}
+                </span>
+              ))}
             </h2>
-            <p className="mt-3 max-w-3xl text-base leading-7 text-slate-300">
-              The free companion includes starter addons and all four evolution
-              stages. Companion Pass adds the full addon library, dream journal,
-              advanced genome tools and wellness sync. Annual: A$44.
+            <p className="mt-4 max-w-3xl text-base leading-7 text-slate-300">
+              The complete classroom experience is A$0 for every school,
+              permanently. Suggested annual support:{" "}
+              {CONTRIBUTION_OPTIONS.map((option) => option.label).join(", ")}.
             </p>
-            <p className="mt-2 text-sm text-amber-200">
-              Checkout is not connected yet. Nothing can be charged today.
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
+              Support changes what the studio can keep building. It never
+              changes what a class receives.
             </p>
           </div>
           <Link
-            href="/pricing"
-            className="inline-flex min-h-12 items-center justify-center rounded-xl bg-cyan-300 px-6 py-3 text-sm font-semibold text-slate-950 transition-colors hover:bg-cyan-200"
+            href="/schools/contribute"
+            className="inline-flex min-h-12 items-center justify-center rounded-xl bg-amber-300 px-6 py-3 text-sm font-semibold text-slate-950 transition-colors hover:bg-amber-200"
           >
-            Compare the plans
+            See the voluntary contribution model
           </Link>
         </div>
       </section>
