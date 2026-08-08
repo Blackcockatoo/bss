@@ -38,37 +38,37 @@ afterEach(() => {
 });
 
 describe("layout metadata", () => {
-  it("uses MetaPet Schools metadata in the schools profile", async () => {
+  it("uses MetaPet School metadata in the schools profile", async () => {
     const { metadata } = await loadLayout(true);
     const appleWebApp =
       metadata.appleWebApp && typeof metadata.appleWebApp !== "boolean"
         ? metadata.appleWebApp
         : null;
 
-    expect(metadata.title).toBe("MetaPet Schools");
-    expect(metadata.description).toMatch(/teacher-led, low-data classroom tool/i);
+    expect(metadata.title).toBe("MetaPet School");
+    expect(metadata.description).toMatch(/teacher-led, local-first classroom tool/i);
     expect(metadata.manifest).toBe("/manifest.webmanifest");
     expect(metadata.icons).toMatchObject({
       icon: FIELD_MODE_ICON_192_PATH,
       apple: FIELD_MODE_APPLE_TOUCH_ICON_PATH,
     });
-    expect(appleWebApp?.title).toBe("MetaPet Schools");
-    expect(metadata.openGraph?.siteName).toBe("MetaPet Schools");
+    expect(appleWebApp?.title).toBe("MetaPet School");
+    expect(metadata.openGraph?.siteName).toBe("MetaPet School");
   });
 
-  it("keeps Blue Snake Studios metadata in the core profile", async () => {
+  it("keeps Blue $nake Studio metadata in the core profile", async () => {
     const { metadata } = await loadLayout(false);
     const appleWebApp =
       metadata.appleWebApp && typeof metadata.appleWebApp !== "boolean"
         ? metadata.appleWebApp
         : null;
 
-    expect(metadata.title).toBe("Blue Snake Studios");
+    expect(metadata.title).toBe("Blue $nake Studio");
     expect(metadata.icons).toMatchObject({
       icon: "/icon.svg",
       apple: "/icon.svg",
     });
-    expect(appleWebApp?.title).toBe("Blue Snake Studios");
-    expect(metadata.openGraph?.siteName).toBe("Blue Snake Studios");
+    expect(appleWebApp?.title).toBe("Blue $nake Studio");
+    expect(metadata.openGraph?.siteName).toBe("Blue $nake Studio");
   });
 });

@@ -27,6 +27,9 @@ export interface FieldSessionConfig {
   deliveryMode: FieldDeliveryMode;
   supportMode: FieldSupportMode;
   soundEnabled: boolean;
+  reducedMotion: boolean;
+  highContrast: boolean;
+  largeText: boolean;
 }
 
 export const DEFAULT_FIELD_SESSION: FieldSessionConfig = {
@@ -35,6 +38,9 @@ export const DEFAULT_FIELD_SESSION: FieldSessionConfig = {
   deliveryMode: "projector",
   supportMode: "standard",
   soundEnabled: false,
+  reducedMotion: false,
+  highContrast: false,
+  largeText: false,
 };
 
 export const FIELD_SESSION_LABELS = {
@@ -91,6 +97,9 @@ export function sanitizeFieldSession(
       DEFAULT_FIELD_SESSION.supportMode,
     ),
     soundEnabled: value?.soundEnabled === true,
+    reducedMotion: value?.reducedMotion === true,
+    highContrast: value?.highContrast === true,
+    largeText: value?.largeText === true,
   };
 }
 
@@ -101,6 +110,9 @@ export function parseFieldSession(params: RawParams): FieldSessionConfig {
     deliveryMode: first(params.delivery) as FieldDeliveryMode,
     supportMode: first(params.support) as FieldSupportMode,
     soundEnabled: first(params.sound) === "on",
+    reducedMotion: first(params.motion) === "reduced",
+    highContrast: first(params.contrast) === "high",
+    largeText: first(params.text) === "large",
   });
 }
 
@@ -115,6 +127,9 @@ export function buildFieldLessonPath(
     delivery: safe.deliveryMode,
     support: safe.supportMode,
     sound: safe.soundEnabled ? "on" : "off",
+    motion: safe.reducedMotion ? "reduced" : "standard",
+    contrast: safe.highContrast ? "high" : "standard",
+    text: safe.largeText ? "large" : "standard",
   });
   return `${FIELD_MODE_LESSONS_PATH}/${encodeURIComponent(slug)}?${params.toString()}`;
 }

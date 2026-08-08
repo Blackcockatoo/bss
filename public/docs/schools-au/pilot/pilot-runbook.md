@@ -1,4 +1,4 @@
-# MetaPet Schools Pilot Runbook
+# MetaPet School Pilot Runbook
 
 Use this as the operating sheet for the first constrained school pilot. Recommended default: start with `1 school`, `1 class`, and `1 teacher` before any broader expansion conversation.
 

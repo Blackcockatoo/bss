@@ -29,7 +29,7 @@ export default function SafeguardingPage() {
 
         <section className="rounded-2xl border border-emerald-400/20 bg-slate-900/60 p-6">
           <h2 className="text-xl font-semibold text-white">
-            What MetaPet Schools is / is not
+            What MetaPet School is / is not
           </h2>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <div>
@@ -109,7 +109,7 @@ export default function SafeguardingPage() {
             </div>
           </div>
           <p className="mt-4 rounded-lg border border-rose-400/20 bg-rose-500/5 p-3 text-sm text-rose-200">
-            MetaPet Schools must never be used as the primary response to a
+            MetaPet School must never be used as the primary response to a
             wellbeing issue. It is a classroom learning tool, not a support
             service.
           </p>
@@ -121,7 +121,7 @@ export default function SafeguardingPage() {
           </h2>
           <p className="mt-2 text-sm text-slate-300">
             The teacher is present and leading throughout every session. Students
-            do not use MetaPet Schools unsupervised.
+            do not use MetaPet School unsupervised.
           </p>
           <ul className="mt-3 space-y-2 text-sm text-slate-300">
             <li>

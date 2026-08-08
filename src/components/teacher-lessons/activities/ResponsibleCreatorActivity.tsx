@@ -219,10 +219,9 @@ function ScenarioCard({
 }
 
 /**
- * Lesson 7 — The Responsible Creator Challenge. A guided, primarily emulated
- * scenario challenge covering privacy, care, emotion, accessibility, sharing
- * and difference. Produces the structured promise + choices data that Pass 4's
- * Learning Passport will export (the export itself is out of scope here).
+ * Legacy responsible-design scenario retained for the broader MetaPet teacher
+ * surface. MetaPet School Field Mode uses the canonical static activity driven
+ * directly by the seven lesson definitions.
  */
 export function ResponsibleCreatorActivity({
   step,

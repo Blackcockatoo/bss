@@ -1,4 +1,4 @@
-# MetaPet Schools Parent/Carer Feedback Form
+# MetaPet School Parent/Carer Feedback Form
 
 Use this after the family communication and again after pilot completion if needed.
 

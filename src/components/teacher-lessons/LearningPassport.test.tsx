@@ -47,7 +47,7 @@ describe("Learning Passport", () => {
     expect(screen.getByText(/Meta-Pet Learning Passport/i)).toBeTruthy();
     expect(screen.getByText(/No lessons completed yet/i)).toBeTruthy();
     // All seven sections present even when empty.
-    expect(screen.getByText(/7\. The Responsible Creator Challenge/)).toBeTruthy();
+    expect(screen.getByText(/7\. Test, Reflect and Improve/)).toBeTruthy();
   });
 
   it("renders a completed section with evidence and applied changes", () => {

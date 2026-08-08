@@ -43,7 +43,7 @@ export function FieldOfflineBadge() {
       : "Offline · No complete pack";
 
   return (
-    <div className="field-print-hide border-b border-emerald-950/10 bg-emerald-50 px-4 py-2">
+    <div className="field-offline-badge field-print-hide border-b border-emerald-950/10 bg-emerald-50 px-4 py-2">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 text-xs text-emerald-950">
         <span className="inline-flex items-center gap-2 font-semibold" aria-live="polite">
           <Icon className="h-4 w-4" aria-hidden="true" />

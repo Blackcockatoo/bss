@@ -2,6 +2,10 @@ import { ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
 
 import {
   FIELD_MODE_HOME_PATH,
+  FIELD_MODE_LESSONS_PATH,
+  FIELD_MODE_PRICING_PATH,
+  FIELD_MODE_SAFETY_PATH,
+  FIELD_MODE_WHY_FREE_PATH,
   FIELD_MODE_START_PATH,
 } from "@/lib/childSafeBaseline";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
@@ -9,14 +13,19 @@ import {
   METAPET_SCHOOL_NAME,
   METAPET_SCHOOL_TAGLINE,
 } from "@/lib/fieldMode/identity";
+import {
+  FIELD_GOVERNING_LINE,
+  METAPET_PRODUCT,
+} from "@/lib/fieldMode/product";
 
 const FIELD_PROMISES = [
   "Years 3–6",
   "Teacher-led use",
   "Seven short classroom lessons",
   "No student accounts",
-  "Alias-only classroom use",
-  "Local device records",
+  "No advertising or trackers",
+  "Optional alias-only local records",
+  "Complete Field Mode free for every school",
   "Australian Curriculum alignment",
 ] as const;
 
@@ -38,26 +47,41 @@ export default function FieldModePage() {
               {METAPET_SCHOOL_TAGLINE}
             </h1>
             <p className="max-w-3xl text-lg leading-8 text-slate-700">
-              A calm, teacher-led classroom experience for Australian Years 3–6.
-              Run one of seven short lessons using safe aliases and records that
-              remain on this device. No student sign-in is required.
+              Seven teacher-led lessons for Australian Years 3–6. Explore
+              systems, patterns, privacy and responsible creation without
+              student accounts, advertising, trackers or a social feed.
             </p>
           </div>
-          <a
-            href={FIELD_MODE_START_PATH}
-            className="inline-flex min-h-14 items-center justify-center rounded-xl bg-emerald-800 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-emerald-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800"
-          >
-            Start a classroom session
-            <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
-          </a>
+          <div className="flex flex-wrap gap-3">
+            <a
+              href={FIELD_MODE_START_PATH}
+              className="inline-flex min-h-14 items-center justify-center rounded-xl bg-emerald-800 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-emerald-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800"
+            >
+              Start teaching
+              <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
+            </a>
+            {[
+              [FIELD_MODE_LESSONS_PATH, "Browse seven lessons"],
+              [FIELD_MODE_WHY_FREE_PATH, "Why it is free"],
+              [FIELD_MODE_SAFETY_PATH, "Review safety and privacy"],
+            ].map(([href, label]) => (
+              <a key={href} href={href} className="inline-flex min-h-14 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50">
+                {label}
+              </a>
+            ))}
+          </div>
           <p className="text-sm text-slate-500">
             Made by{" "}
             <a
               href="https://www.bluesnakestudios.com"
               className="font-medium text-slate-600 underline underline-offset-2 hover:text-slate-800"
             >
-              Blue Snake Studios
+              {METAPET_PRODUCT.studio}
             </a>
+          </p>
+          <p className="max-w-2xl rounded-2xl border border-cyan-900/15 bg-cyan-50 p-4 text-sm font-medium leading-6 text-cyan-950">
+            {FIELD_GOVERNING_LINE}{" "}
+            <a href={FIELD_MODE_PRICING_PATH} className="underline underline-offset-2">See the contribution model.</a>
           </p>
         </section>
 

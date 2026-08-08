@@ -25,8 +25,8 @@ describe("app manifest", () => {
     const manifest = await loadManifest(true);
     const result = manifest();
 
-    expect(result.name).toBe("MetaPet Schools");
-    expect(result.short_name).toBe("MetaPet Schools");
+    expect(result.name).toBe("MetaPet School");
+    expect(result.short_name).toBe("MetaPet School");
     expect(result.start_url).toBe("/schools");
     expect(result.description).toMatch(/teacher-led/i);
     expect(result.description).not.toMatch(/genome|evolution/i);

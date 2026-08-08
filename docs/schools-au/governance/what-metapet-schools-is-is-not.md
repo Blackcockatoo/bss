@@ -1,4 +1,4 @@
-# What MetaPet Schools Is / Is Not
+# What MetaPet School Is / Is Not
 
 ## What it is
 

@@ -83,11 +83,29 @@ export default async function PrintableLessonPage({
           </dl>
         </header>
 
+        <section className="mt-6 grid gap-4 sm:grid-cols-2">
+          <div className="break-inside-avoid rounded-xl border border-slate-300 p-4 print:rounded-none">
+            <h2 className="font-bold">Years 3–4 adaptation</h2>
+            <p className="mt-2 text-sm leading-6">{lesson.yearAdaptations.years3To4}</p>
+          </div>
+          <div className="break-inside-avoid rounded-xl border border-slate-300 p-4 print:rounded-none">
+            <h2 className="font-bold">Years 5–6 adaptation</h2>
+            <p className="mt-2 text-sm leading-6">{lesson.yearAdaptations.years5To6}</p>
+          </div>
+        </section>
+
         <section className="mt-6 break-inside-avoid">
           <h2 className="text-xl font-bold">Learning intention</h2>
           <p className="mt-2 leading-7">{lesson.learningIntention}</p>
           <p className="mt-3 text-sm text-slate-600">
             <strong>Learning areas:</strong> {lesson.learningAreas.join(" · ")}
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            <strong>Australian Curriculum V9.0:</strong>{" "}
+            {lesson.curriculumLinks.join(" · ")}
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            <strong>Materials:</strong> {lesson.materials.join(" · ")}
           </p>
         </section>
 
@@ -112,7 +130,7 @@ export default async function PrintableLessonPage({
         </section>
 
         <section className="mt-7">
-          <h2 className="text-xl font-bold">Five guided steps</h2>
+          <h2 className="text-xl font-bold">Opening, three activity stages and finish</h2>
           <ol className="mt-4 space-y-5">
             {lesson.steps.map((step, index) => (
               <li key={step.id} className="break-inside-avoid border-t border-slate-300 pt-4">
@@ -136,6 +154,14 @@ export default async function PrintableLessonPage({
           </ol>
         </section>
 
+        <section className="mt-7 break-inside-avoid rounded-xl border border-slate-300 p-4 print:rounded-none">
+          <h2 className="font-bold">Equivalent participation choices</h2>
+          <p className="mt-2 text-sm leading-6">
+            Participation method is not a behaviour score. Students may{" "}
+            {lesson.participationChoices.join(", ").toLowerCase()}.
+          </p>
+        </section>
+
         <section className="mt-7 grid gap-5 sm:grid-cols-2">
           <div className="break-inside-avoid rounded-xl border border-slate-300 p-4 print:rounded-none">
             <h2 className="font-bold">Support option</h2>
@@ -157,9 +183,32 @@ export default async function PrintableLessonPage({
         </section>
 
         <section className="mt-7 break-inside-avoid rounded-xl border-2 border-dashed border-slate-400 p-4 print:min-h-32 print:rounded-none">
-          <h2 className="font-bold">Teacher notes — aliases only</h2>
+          <h2 className="font-bold">Optional light evidence — aliases only</h2>
+          <p className="mt-2 text-sm leading-6">{lesson.lightEvidenceMethod}</p>
           <p className="mt-2 text-xs text-slate-600">
-            Do not record student names, contact details or identifying information.
+            No-marking option: {lesson.noMarkingOption} Do not record student
+            names, contact details or identifying information.
+          </p>
+        </section>
+
+        <section className="mt-7 grid gap-5 sm:grid-cols-2">
+          <div className="break-inside-avoid rounded-xl border border-slate-300 p-4 print:rounded-none">
+            <h2 className="font-bold">Offline / static fallback</h2>
+            <p className="mt-2 text-sm leading-6">{lesson.offlineFallback}</p>
+          </div>
+          <div className="break-inside-avoid rounded-xl border border-slate-300 p-4 print:rounded-none">
+            <h2 className="font-bold">Safe stop and reset</h2>
+            <p className="mt-2 text-sm leading-6">
+              {lesson.safeStopCondition} {lesson.resetDeleteReminder}
+            </p>
+          </div>
+        </section>
+
+        <section className="mt-7 break-inside-avoid">
+          <h2 className="text-xl font-bold">Accessibility options</h2>
+          <p className="mt-2 text-sm leading-6">{lesson.accessibilityOptions.join(" · ")}</p>
+          <p className="mt-3 text-sm leading-6">
+            <strong>Optional reflection:</strong> {lesson.optionalReflection}
           </p>
         </section>
 

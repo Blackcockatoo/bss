@@ -1,4 +1,4 @@
-# MetaPet Schools Teacher Dry-Run Checklist
+# MetaPet School Teacher Dry-Run Checklist
 
 Use this before any live pilot. One teacher should complete this rehearsal without heavy coaching.
 

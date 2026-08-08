@@ -1,4 +1,4 @@
-# MetaPet Schools Data Flow Diagram
+# MetaPet School Data Flow Diagram
 
 ## Default classroom flow
 

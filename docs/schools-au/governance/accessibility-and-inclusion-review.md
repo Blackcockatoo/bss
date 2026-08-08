@@ -1,4 +1,4 @@
-# MetaPet Schools Accessibility and Inclusion Review
+# MetaPet School Accessibility and Inclusion Review
 
 ## Current inclusion posture
 

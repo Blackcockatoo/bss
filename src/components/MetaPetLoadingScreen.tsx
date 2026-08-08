@@ -228,7 +228,7 @@ export function MetaPetLoadingScreen(props: MetaPetLoadingScreenProps) {
                   src={getCockatooDataUri("flying")}
                   alt={
                     IS_SCHOOLS_PROFILE
-                      ? "MetaPet Schools companion"
+                      ? "MetaPet School companion"
                       : "Meta-Pet companion"
                   }
                   width={56}
@@ -243,7 +243,7 @@ export function MetaPetLoadingScreen(props: MetaPetLoadingScreenProps) {
               <div>
                 <p className="text-xs tracking-[0.25em] uppercase text-cyan-300/70 mb-2">
                   {IS_SCHOOLS_PROFILE
-                    ? "MetaPet Schools"
+                    ? "MetaPet School"
                     : "Meta-Pet // school-safe preview"}
                 </p>
                 <h1 className="text-2xl md:text-3xl font-semibold text-slate-50">

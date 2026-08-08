@@ -1,22 +1,22 @@
 /**
- * Meta-Pet Teacher Lesson System — the seven lesson definitions (Pass 1).
+ * The one canonical MetaPet School lesson sequence.
  *
- * Content here is intentionally lightweight placeholder copy. Every lesson has
- * the same five-phase placeholder structure (introduce → observe → interact →
- * discuss → complete) so the shared Lesson Runner can drive all of them.
- * Pass 2 will replace the placeholder step bodies with real Meta-Pet activities
- * (Body Forge, DNA Lab, vitals, emotions, visualisations) without changing the
- * Runner or this file's shape.
+ * The guided runtime, lesson list, print cards, passport and offline pack all
+ * consume this file. Stable legacy ids/slugs are retained so existing local
+ * progress and previously shared Field Mode links continue to resolve.
  */
 
 import type {
+  LessonActivityType,
+  LessonAppDestination,
   LessonDefinition,
+  LessonEvidenceType,
+  LessonFeatureFlag,
   LessonId,
   LessonStepDefinition,
   LessonStepKind,
 } from "./types";
 
-/** Canonical order of the five placeholder phases. */
 const STEP_KINDS: LessonStepKind[] = [
   "introduce",
   "observe",
@@ -25,706 +25,566 @@ const STEP_KINDS: LessonStepKind[] = [
   "complete",
 ];
 
-/**
- * Build the five placeholder steps for a lesson from concise per-phase copy.
- * Keeping this helper local guarantees all seven lessons share an identical
- * step contract, which the Runner and tests rely on.
- */
-function buildSteps(
-  lessonId: LessonId,
-  phases: {
-    title: string;
-    teacherPrompt: string;
-    studentTask: string;
-    whatDoINow: string;
-    expectedOutcome: string;
-  }[],
-): LessonStepDefinition[] {
+const PARTICIPATION_CHOICES = [
+  "Move",
+  "Point",
+  "Speak",
+  "Draw",
+  "Build",
+  "Work with a partner",
+  "Quietly observe",
+  "Give the teacher a private response",
+  "Use a printed alternative",
+];
+
+const ACCESSIBILITY_OPTIONS = [
+  "Sound off",
+  "Reduced motion or static visuals",
+  "High contrast",
+  "Large text",
+  "Keyboard-only navigation",
+  "Partner or quiet-observation participation",
+  "Printed instructions",
+];
+
+interface StageSeed {
+  title: string;
+  teacherPrompt: string;
+  studentTask: string;
+  expectedOutcome: string;
+}
+
+interface LessonSeed {
+  id: LessonId;
+  number: number;
+  slug: string;
+  title: string;
+  shortDescription: string;
+  learningAreas: string[];
+  curriculumLinks: string[];
+  materials: string[];
+  yearAdaptations: LessonDefinition["yearAdaptations"];
+  learningIntention: string;
+  successStatement: string;
+  teacherIntroduction: string;
+  teacherScript: string;
+  studentInstructions: string;
+  stages: [StageSeed, StageSeed, StageSeed];
+  discussionPrompts: string[];
+  optionalReflection: string;
+  lightEvidenceMethod: string;
+  noMarkingOption: string;
+  offlineFallback: string;
+  safeStopCondition: string;
+  resetDeleteReminder: string;
+  appDestination: LessonAppDestination;
+  activityType: LessonActivityType;
+  evidenceType: LessonEvidenceType;
+  completionMessage: string;
+  extensionActivity: string;
+  supportActivity: string;
+  requiredFeatureFlags?: LessonFeatureFlag[];
+}
+
+function buildSteps(seed: LessonSeed): LessonStepDefinition[] {
+  const phases: StageSeed[] = [
+    {
+      title: "Open together",
+      teacherPrompt: seed.teacherScript,
+      studentTask: seed.studentInstructions,
+      expectedOutcome: "Students understand the purpose and can choose how to participate.",
+    },
+    ...seed.stages,
+    {
+      title: "Reflect, reset and finish",
+      teacherPrompt: `${seed.optionalReflection} ${seed.resetDeleteReminder}`,
+      studentTask: "Choose whether to share, quietly reflect or use the printed alternative.",
+      expectedOutcome: seed.successStatement,
+    },
+  ];
+
   return phases.map((phase, index) => ({
-    id: `${lessonId}-step-${index + 1}`,
+    id: `${seed.id}-step-${index + 1}`,
     order: index + 1,
     kind: STEP_KINDS[index],
     ...phase,
+    whatDoINow:
+      index === phases.length - 1
+        ? "Use the optional reflection, record nothing if evidence is unnecessary, then complete the lesson."
+        : "Read the teacher prompt, offer the equivalent participation choices, then continue when the class is ready.",
   }));
 }
 
+function defineLesson(seed: LessonSeed): LessonDefinition {
+  return {
+    id: seed.id,
+    number: seed.number,
+    slug: seed.slug,
+    title: seed.title,
+    shortDescription: seed.shortDescription,
+    durationMinutes: 20,
+    yearAdaptations: seed.yearAdaptations,
+    learningAreas: seed.learningAreas,
+    curriculumLinks: seed.curriculumLinks,
+    materials: seed.materials,
+    learningIntention: seed.learningIntention,
+    successStatement: seed.successStatement,
+    successCriteria: [seed.successStatement],
+    teacherIntroduction: seed.teacherIntroduction,
+    teacherScript: seed.teacherScript,
+    studentInstructions: seed.studentInstructions,
+    discussionPrompts: seed.discussionPrompts,
+    appDestination: seed.appDestination,
+    activityType: seed.activityType,
+    steps: buildSteps(seed),
+    evidenceType: seed.evidenceType,
+    completionMessage: seed.completionMessage,
+    extensionActivity: seed.extensionActivity,
+    supportActivity: seed.supportActivity,
+    participationChoices: [...PARTICIPATION_CHOICES],
+    optionalReflection: seed.optionalReflection,
+    lightEvidenceMethod: seed.lightEvidenceMethod,
+    noMarkingOption: seed.noMarkingOption,
+    offlineFallback: seed.offlineFallback,
+    accessibilityOptions: [...ACCESSIBILITY_OPTIONS],
+    safeStopCondition: seed.safeStopCondition,
+    resetDeleteReminder: seed.resetDeleteReminder,
+    preview: {
+      mainIdea: seed.learningIntention,
+      majorInteraction: seed.stages[1].studentTask,
+      expectedOutcome: seed.successStatement,
+      resetBehaviour:
+        "The demonstration resets safely. Any optional local classroom record remains teacher-deletable and expires after 35 days without use.",
+      completionPreview: seed.completionMessage,
+    },
+    requiredFeatureFlags: seed.requiredFeatureFlags ?? [],
+    usesDemonstrationPet: true,
+    usesStudentRealPet: false,
+    persistChanges: false,
+    resetAtCompletion: true,
+  };
+}
+
 export const LESSON_DEFINITIONS: LessonDefinition[] = [
-  {
+  defineLesson({
     id: "meet-your-metapet",
     number: 1,
     slug: "meet-your-metapet",
-    title: "Meet Your Meta-Pet",
+    title: "Meet the System",
     shortDescription:
-      "Students meet a Meta-Pet and describe how it looks, moves and responds.",
-    durationMinutes: 20,
-    learningAreas: ["Digital literacy", "Science", "Oral language"],
+      "Observe how a MetaPet responds to an input and explain that a digital system changes state.",
+    learningAreas: ["Digital Technologies", "Science", "English"],
+    curriculumLinks: ["AC9TDI4K01", "AC9TDI6K03"],
+    materials: ["Shared screen or device", "Optional paper and pencil"],
+    yearAdaptations: {
+      years3To4: "Use one input and describe one visible before-and-after change.",
+      years5To6: "Name the input, state and output, then suggest another test.",
+    },
     learningIntention:
-      "Understand that a Meta-Pet is a digital companion we can observe and describe.",
-    successCriteria: [
-      "I can name at least two things I notice about the Meta-Pet.",
-      "I can describe how the Meta-Pet responds to attention.",
-      "I can explain that it lives on this device, not online.",
-    ],
+      "We are learning that a digital system receives input and changes state.",
+    successStatement:
+      "I can point to an input and explain one visible state change it caused.",
     teacherIntroduction:
-      "This first lesson introduces the Meta-Pet as a calm, local, account-free companion. Keep it playful — the goal is curiosity and shared vocabulary.",
+      "Use a shared demonstration MetaPet. A roster, alias or saved record is not required.",
     teacherScript:
-      "Today we meet a Meta-Pet. It is not a video or a toy from the internet — it lives right here on this screen. Let's watch it together and describe what we see.",
+      "This MetaPet is a digital system. We will give it one input, watch what changes and describe the evidence we can actually see.",
     studentInstructions:
-      "Watch the Meta-Pet. Notice how it looks and moves. Get ready to describe one thing you see.",
-    discussionPrompts: [
-      "What is the first thing you noticed about the Meta-Pet?",
-      "How can you tell it is paying attention?",
-      "How is a Meta-Pet different from a video?",
+      "Watch, point, move, draw or tell a partner what changes after the input.",
+    stages: [
+      {
+        title: "Observe the starting state",
+        teacherPrompt: "Ask the class to identify two visible signals before anyone interacts.",
+        studentTask: "Notice or point to two things that show the current state.",
+        expectedOutcome: "Students describe a visible starting state without guessing feelings.",
+      },
+      {
+        title: "Apply one input",
+        teacherPrompt: "Choose one safe action and ask students to predict a visible change.",
+        studentTask: "Predict, then watch the system respond.",
+        expectedOutcome: "Students distinguish the action from the resulting state.",
+      },
+      {
+        title: "Explain the change",
+        teacherPrompt: "Model the sentence: When we __, the system changed from __ to __.",
+        studentTask: "Explain, draw or point to the cause-and-effect sequence.",
+        expectedOutcome: "Students give an evidence-based cause-and-effect explanation.",
+      },
     ],
+    discussionPrompts: ["What was the input?", "What changed?", "What evidence can we see?"],
+    optionalReflection: "What would you test next, and why?",
+    lightEvidenceMethod: "Optional teacher tick: identified input, state and output using an alias only if needed.",
+    noMarkingOption: "Use one whole-class verbal explanation and save nothing.",
+    offlineFallback: "Use the printed before-and-after MetaPet panels and point to the changed signal.",
+    safeStopCondition: "Stop if the display is distracting or a student wants to opt out; continue with the static card.",
+    resetDeleteReminder: "Reset the demonstration. Delete any optional local note when it is no longer useful.",
     appDestination: "meet",
     activityType: "observe",
     evidenceType: "pet-observation-card",
-    completionMessage:
-      "You met your Meta-Pet and described what makes it special. Well done!",
-    extensionActivity:
-      "Draw the Meta-Pet and label three parts you noticed.",
-    supportActivity:
-      "Point to the Meta-Pet on screen and say one word that describes it.",
-    requiredFeatureFlags: [],
-    usesDemonstrationPet: true,
-    usesStudentRealPet: false,
-    persistChanges: false,
-    resetAtCompletion: true,
-    preview: {
-      mainIdea:
-        "A Meta-Pet is a local, private digital companion students can observe and describe.",
-      majorInteraction:
-        "Watch the demonstration Meta-Pet and name what you notice.",
-      expectedOutcome:
-        "Students share observations and shared vocabulary about the pet.",
-      resetBehaviour:
-        "Nothing is saved to the pet; the demonstration returns to its starting state.",
-      completionPreview:
-        "\"You met your Meta-Pet and described what makes it special.\"",
-    },
-    steps: buildSteps("meet-your-metapet", [
-      {
-        title: "Introduce the Meta-Pet",
-        teacherPrompt:
-          "Explain that we are meeting a digital companion that lives on this device.",
-        studentTask: "Sit ready to watch the shared screen.",
-        whatDoINow:
-          "Tell the class we are about to meet a Meta-Pet together. Then press Next.",
-        expectedOutcome: "Students are focused on the shared screen.",
-      },
-      {
-        title: "Observe how it looks and moves",
-        teacherPrompt:
-          "Ask students to silently notice colour, shape and movement.",
-        studentTask: "Watch the Meta-Pet and pick one thing you notice.",
-        whatDoINow:
-          "Give students quiet watching time, then press Next when they are ready to share.",
-        expectedOutcome: "Each student has one observation ready.",
-      },
-      {
-        title: "Interact and see it respond",
-        teacherPrompt:
-          "Demonstrate giving the Meta-Pet attention and ask what changes.",
-        studentTask: "Watch how the Meta-Pet responds to attention.",
-        whatDoINow:
-          "Show the pet reacting once or twice, then move on with Next.",
-        expectedOutcome: "Students notice the pet responds to attention.",
-      },
-      {
-        title: "Discuss what we saw",
-        teacherPrompt: "Use a discussion prompt to gather observations.",
-        studentTask: "Share one observation with the class.",
-        whatDoINow:
-          "Ask one discussion question and take a few answers, then press Next.",
-        expectedOutcome: "The class has a shared list of observations.",
-      },
-      {
-        title: "Save and finish",
-        teacherPrompt: "Summarise what the class learned about Meta-Pets.",
-        studentTask: "Remember your favourite thing about the Meta-Pet.",
-        whatDoINow:
-          "Recap the lesson and press Complete Lesson to record it as done.",
-        expectedOutcome: "The lesson is completed and recorded on the Hub.",
-      },
-    ]),
-  },
-  {
-    id: "build-a-body",
-    number: 2,
-    slug: "build-a-body",
-    title: "Build a Body",
-    shortDescription:
-      "Students use a simplified Body Forge to assemble a Meta-Pet body.",
-    durationMinutes: 25,
-    learningAreas: ["Design & technology", "Science", "Creativity"],
-    learningIntention:
-      "Understand that a body is made of parts that fit together for a purpose.",
-    successCriteria: [
-      "I can choose parts to build a Meta-Pet body.",
-      "I can explain why I chose a part.",
-      "I can describe how the parts work together.",
-    ],
-    teacherIntroduction:
-      "This lesson previews the Body Forge as a classroom build. In Pass 1 it is a guided placeholder; later it opens a simplified Body Forge with real logic underneath.",
-    teacherScript:
-      "Every Meta-Pet has a body made of parts. Today you are the builders. We will choose parts and see how they fit together to make a whole creature.",
-    studentInstructions:
-      "Pick parts to build a Meta-Pet body. Think about why each part matters.",
-    discussionPrompts: [
-      "Why did you choose that part?",
-      "What happens if a part is missing?",
-      "How do the parts work together?",
-    ],
-    appDestination: "body-forge",
-    activityType: "build",
-    evidenceType: "body-design-comparison",
-    completionMessage:
-      "You built a Meta-Pet body and explained your choices. Great designing!",
-    extensionActivity:
-      "Redesign your body for a different job, like swimming or climbing.",
-    supportActivity:
-      "Choose just one part and say why it belongs on the body.",
-    requiredFeatureFlags: ["body-forge"],
-    usesDemonstrationPet: true,
-    usesStudentRealPet: false,
-    persistChanges: false,
-    resetAtCompletion: true,
-    preview: {
-      mainIdea:
-        "A body is a system of parts chosen to fit together for a purpose.",
-      majorInteraction:
-        "Assemble a Meta-Pet body from parts in a simplified Body Forge.",
-      expectedOutcome:
-        "Students produce a body design and justify their choices.",
-      resetBehaviour:
-        "The demonstration body clears back to empty at completion.",
-      completionPreview:
-        "\"You built a Meta-Pet body and explained your choices.\"",
-    },
-    steps: buildSteps("build-a-body", [
-      {
-        title: "Introduce building a body",
-        teacherPrompt: "Explain that bodies are made of parts with jobs.",
-        studentTask: "Listen and think of a part a pet might need.",
-        whatDoINow: "Set up the idea of building, then press Next.",
-        expectedOutcome: "Students understand the building task.",
-      },
-      {
-        title: "Look at the available parts",
-        teacherPrompt: "Show the placeholder set of body parts.",
-        studentTask: "Look at the parts and pick a favourite.",
-        whatDoINow: "Point out a few parts, then press Next.",
-        expectedOutcome: "Students know what parts are available.",
-      },
-      {
-        title: "Build the body",
-        teacherPrompt: "Invite students to assemble a body from parts.",
-        studentTask: "Choose parts to make a Meta-Pet body.",
-        whatDoINow:
-          "Let students build (or build together on screen), then press Next.",
-        expectedOutcome: "A placeholder body has been assembled.",
-      },
-      {
-        title: "Discuss the designs",
-        teacherPrompt: "Ask students to justify one design choice.",
-        studentTask: "Explain why you chose one of your parts.",
-        whatDoINow: "Ask a discussion prompt, then press Next.",
-        expectedOutcome: "Students can justify a design choice.",
-      },
-      {
-        title: "Save and finish",
-        teacherPrompt: "Summarise how parts form a whole body.",
-        studentTask: "Remember the body you designed.",
-        whatDoINow: "Recap and press Complete Lesson.",
-        expectedOutcome: "The lesson is completed and recorded.",
-      },
-    ]),
-  },
-  {
-    id: "dna-differences",
-    number: 3,
-    slug: "dna-differences",
-    title: "DNA Makes Us Different",
-    shortDescription:
-      "Students compare Meta-Pets to see how DNA creates differences.",
-    durationMinutes: 25,
-    learningAreas: ["Science", "Biology", "Data & patterns"],
-    learningIntention:
-      "Understand that small differences in DNA lead to different pets.",
-    successCriteria: [
-      "I can spot differences between two Meta-Pets.",
-      "I can connect a difference to its DNA.",
-      "I can explain that DNA makes each pet unique.",
-    ],
-    teacherIntroduction:
-      "This lesson previews the DNA Lab. In Pass 1 students compare two demonstration pets; later they will change real DNA values and watch results.",
-    teacherScript:
-      "No two Meta-Pets are exactly the same. The secret is their DNA — a tiny code inside them. Let's compare two pets and find where their DNA made them different.",
-    studentInstructions:
-      "Compare two Meta-Pets. Find the differences and think about what caused them.",
-    discussionPrompts: [
-      "What differences did you find?",
-      "Which difference is the biggest?",
-      "Why is it good that pets are different from each other?",
-    ],
-    appDestination: "dna-lab",
-    activityType: "compare",
-    evidenceType: "dna-comparison",
-    completionMessage:
-      "You compared Meta-Pets and connected their differences to DNA. Nice science!",
-    extensionActivity:
-      "Predict what a third pet would look like from a new DNA code.",
-    supportActivity:
-      "Find just one difference between the two pets and name it.",
-    requiredFeatureFlags: ["dna-lab"],
-    usesDemonstrationPet: true,
-    usesStudentRealPet: false,
-    persistChanges: false,
-    resetAtCompletion: true,
-    preview: {
-      mainIdea: "Small differences in DNA produce visibly different pets.",
-      majorInteraction:
-        "Compare two demonstration Meta-Pets side by side.",
-      expectedOutcome:
-        "Students link observed differences to DNA and uniqueness.",
-      resetBehaviour:
-        "The comparison pets reset to their starting DNA at completion.",
-      completionPreview:
-        "\"You compared Meta-Pets and connected their differences to DNA.\"",
-    },
-    steps: buildSteps("dna-differences", [
-      {
-        title: "Introduce DNA",
-        teacherPrompt: "Explain that DNA is a code that makes each pet unique.",
-        studentTask: "Think about what makes two pets different.",
-        whatDoINow: "Introduce the idea of DNA, then press Next.",
-        expectedOutcome: "Students understand DNA causes differences.",
-      },
-      {
-        title: "Observe two pets",
-        teacherPrompt: "Show two demonstration pets side by side.",
-        studentTask: "Look carefully at both pets.",
-        whatDoINow: "Display the two pets, then press Next.",
-        expectedOutcome: "Students are comparing the two pets.",
-      },
-      {
-        title: "Find the differences",
-        teacherPrompt: "Ask students to list the differences they see.",
-        studentTask: "Find and note differences between the pets.",
-        whatDoINow: "Give time to compare, then press Next.",
-        expectedOutcome: "Students have found several differences.",
-      },
-      {
-        title: "Discuss the causes",
-        teacherPrompt: "Connect the differences back to DNA.",
-        studentTask: "Share a difference and what might have caused it.",
-        whatDoINow: "Ask a discussion prompt, then press Next.",
-        expectedOutcome: "Students link differences to DNA.",
-      },
-      {
-        title: "Save and finish",
-        teacherPrompt: "Summarise how DNA makes every pet unique.",
-        studentTask: "Remember one difference you found.",
-        whatDoINow: "Recap and press Complete Lesson.",
-        expectedOutcome: "The lesson is completed and recorded.",
-      },
-    ]),
-  },
-  {
+    completionMessage: "You observed a digital system and explained how an input changed its state.",
+    extensionActivity: "Test a second input and compare the two outputs.",
+    supportActivity: "Offer two printed states and ask the student to point to what changed.",
+  }),
+  defineLesson({
     id: "needs-and-consequences",
-    number: 4,
+    number: 2,
     slug: "needs-and-consequences",
-    title: "Needs, Actions and Consequences",
+    title: "Read the Signals",
     shortDescription:
-      "Students care for a Meta-Pet and see how actions change its vitals.",
-    durationMinutes: 25,
-    learningAreas: ["Health", "Science", "Responsibility"],
-    learningIntention:
-      "Understand that actions have consequences for a pet's needs.",
-    successCriteria: [
-      "I can name a need a Meta-Pet has.",
-      "I can predict what happens after an action.",
-      "I can explain why looking after needs matters.",
-    ],
+      "Read visible signals, identify what the system may need and make a reasoned choice.",
+    learningAreas: ["Digital Technologies", "Science", "English"],
+    curriculumLinks: ["AC9TDI4P02", "AC9TDI6P05"],
+    materials: ["Shared screen or printed signal cards", "Optional mini-whiteboards"],
+    yearAdaptations: {
+      years3To4: "Choose between two responses and point to the signal that supports the choice.",
+      years5To6: "Compare competing signals, justify priority and acknowledge uncertainty.",
+    },
+    learningIntention: "We are learning to use visible signals to make a reasoned system choice.",
+    successStatement: "I can identify a signal, choose a response and give a reason.",
     teacherIntroduction:
-      "This lesson previews vitals and care. In Pass 1 it is a guided placeholder; later it opens a simplified vitals view driven by real Meta-Pet logic.",
+      "Signals are information from the digital system, not labels for a child or behaviour scores.",
     teacherScript:
-      "Meta-Pets have needs, just like living things. When we act, something changes. Today we will care for a pet and watch how our actions have consequences.",
-    studentInstructions:
-      "Care for the Meta-Pet. Predict what each action will do before you try it.",
-    discussionPrompts: [
-      "What need did you take care of?",
-      "What happened after your action?",
-      "What would happen if a need was ignored?",
+      "Digital systems give us signals. A signal is evidence we can inspect; it is not a diagnosis and it does not tell us everything.",
+    studentInstructions: "Point, speak, draw or work with a partner to choose a response supported by a signal.",
+    stages: [
+      {
+        title: "Find the signals",
+        teacherPrompt: "Ask students to name only what is visibly present.",
+        studentTask: "Find two visible signals without deciding what they mean yet.",
+        expectedOutcome: "Students separate observation from interpretation.",
+      },
+      {
+        title: "Choose a response",
+        teacherPrompt: "Offer two calm system actions and ask which one the evidence supports.",
+        studentTask: "Choose an action and identify the signal used.",
+        expectedOutcome: "Students make a reasoned, reversible choice.",
+      },
+      {
+        title: "Check the result",
+        teacherPrompt: "Apply the action and ask whether the new state supports the original reasoning.",
+        studentTask: "Compare the new signals with the starting signals.",
+        expectedOutcome: "Students revise or retain a choice based on new evidence.",
+      },
     ],
+    discussionPrompts: ["Which signal mattered most?", "What else could it mean?", "When should we change our mind?"],
+    optionalReflection: "What made your choice reasonable rather than random?",
+    lightEvidenceMethod: "Optional alias-only note of the signal, response and observed result.",
+    noMarkingOption: "Invite two class explanations and record nothing.",
+    offlineFallback: "Sort printed signal and response cards into evidence-based pairs.",
+    safeStopCondition: "Stop the interaction if the signals become unclear; use the static example and avoid personal comparisons.",
+    resetDeleteReminder: "Reset the demonstration and remove optional notes when the learning purpose is finished.",
     appDestination: "vitals",
     activityType: "care",
     evidenceType: "cause-effect-chain",
-    completionMessage:
-      "You cared for a Meta-Pet and learned that actions have consequences. Well done!",
-    extensionActivity:
-      "Make a simple care plan for a whole day.",
-    supportActivity:
-      "Choose one caring action and say what it helps.",
+    completionMessage: "You read visible signals and made a reasoned, testable choice.",
+    extensionActivity: "Rank three signals and explain why the priority might change.",
+    supportActivity: "Use one signal and two clearly different response cards.",
     requiredFeatureFlags: ["vitals"],
-    usesDemonstrationPet: true,
-    usesStudentRealPet: false,
-    persistChanges: false,
-    resetAtCompletion: true,
-    preview: {
-      mainIdea: "Actions have consequences for a pet's needs and wellbeing.",
-      majorInteraction:
-        "Care for a demonstration pet and predict the effect of each action.",
-      expectedOutcome:
-        "Students connect caring actions to changes in the pet's needs.",
-      resetBehaviour:
-        "The demonstration pet's needs reset to a neutral state at completion.",
-      completionPreview:
-        "\"You cared for a Meta-Pet and learned that actions have consequences.\"",
-    },
-    steps: buildSteps("needs-and-consequences", [
-      {
-        title: "Introduce needs",
-        teacherPrompt: "Explain that Meta-Pets have needs to look after.",
-        studentTask: "Think of a need a pet might have.",
-        whatDoINow: "Introduce needs, then press Next.",
-        expectedOutcome: "Students can name a pet need.",
-      },
-      {
-        title: "Observe the pet's needs",
-        teacherPrompt: "Show the placeholder needs of the pet.",
-        studentTask: "Look at how the pet is doing right now.",
-        whatDoINow: "Show the current state, then press Next.",
-        expectedOutcome: "Students see the pet's current needs.",
-      },
-      {
-        title: "Take a caring action",
-        teacherPrompt: "Invite a caring action and predict the result first.",
-        studentTask: "Predict, then take one caring action.",
-        whatDoINow: "Let students predict and act, then press Next.",
-        expectedOutcome: "Students have seen an action's consequence.",
-      },
-      {
-        title: "Discuss consequences",
-        teacherPrompt: "Discuss what changed and why.",
-        studentTask: "Share what happened after your action.",
-        whatDoINow: "Ask a discussion prompt, then press Next.",
-        expectedOutcome: "Students explain action and consequence.",
-      },
-      {
-        title: "Save and finish",
-        teacherPrompt: "Summarise why caring for needs matters.",
-        studentTask: "Remember one caring action you took.",
-        whatDoINow: "Recap and press Complete Lesson.",
-        expectedOutcome: "The lesson is completed and recorded.",
-      },
-    ]),
-  },
-  {
-    id: "feelings-without-words",
-    number: 5,
-    slug: "feelings-without-words",
-    title: "Feelings Without Words",
+  }),
+  defineLesson({
+    id: "dna-differences",
+    number: 3,
+    slug: "dna-differences",
+    title: "One Identity, Many Representations",
     shortDescription:
-      "Students read a Meta-Pet's emotions from how it looks and moves.",
-    durationMinutes: 20,
-    learningAreas: ["Social & emotional learning", "Wellbeing", "Oral language"],
-    learningIntention:
-      "Understand that feelings can be shown without words.",
-    successCriteria: [
-      "I can name an emotion the Meta-Pet is showing.",
-      "I can point to a clue that shows the feeling.",
-      "I can suggest a kind response.",
-    ],
-    teacherIntroduction:
-      "This lesson previews the emotion system. In Pass 1 it is a guided placeholder; later it opens a simplified emotion view using real Meta-Pet signals.",
-    teacherScript:
-      "Meta-Pets can show feelings without saying a word. We read their clues — how they move, their colour, their shape. Let's practise reading feelings together.",
-    studentInstructions:
-      "Watch the Meta-Pet's clues. Guess how it feels and how you could respond kindly.",
-    discussionPrompts: [
-      "What feeling do you think the pet is showing?",
-      "What clue told you that?",
-      "How could you respond kindly?",
-    ],
-    appDestination: "emotions",
-    activityType: "interpret",
-    evidenceType: "emotion-reflection",
-    completionMessage:
-      "You read feelings without words and thought about kind responses. Beautiful work!",
-    extensionActivity:
-      "Match three feelings to three different clues.",
-    supportActivity:
-      "Choose a happy or sad face card that matches the pet.",
-    requiredFeatureFlags: ["emotions"],
-    usesDemonstrationPet: true,
-    usesStudentRealPet: false,
-    persistChanges: false,
-    resetAtCompletion: true,
-    preview: {
-      mainIdea: "Feelings can be communicated and read without words.",
-      majorInteraction:
-        "Read a demonstration pet's emotional clues and name the feeling.",
-      expectedOutcome:
-        "Students identify feelings from clues and suggest kind responses.",
-      resetBehaviour:
-        "The demonstration pet returns to a neutral mood at completion.",
-      completionPreview:
-        "\"You read feelings without words and thought about kind responses.\"",
+      "Explore how the same MetaPet can be represented through shape, colour, numbers, traits and visible state.",
+    learningAreas: ["Digital Technologies", "Mathematics", "Visual Arts"],
+    curriculumLinks: ["AC9TDI4K03", "AC9TDI6K03"],
+    materials: ["Shared screen", "Printed representation cards", "Optional drawing materials"],
+    yearAdaptations: {
+      years3To4: "Match two representations of the same MetaPet using obvious shared features.",
+      years5To6: "Explain what each representation reveals, hides or simplifies.",
     },
-    steps: buildSteps("feelings-without-words", [
+    learningIntention: "We are learning that one digital identity can be represented in several useful ways.",
+    successStatement: "I can match representations and explain what stays the same.",
+    teacherIntroduction:
+      "Keep this about digital representation. Do not compare student bodies, identities or private traits.",
+    teacherScript:
+      "The same digital system can be shown as a picture, a set of numbers, a list of traits or a changing state. Each view tells us something different.",
+    studentInstructions: "Match, point, draw or explain which views belong to the same MetaPet.",
+    stages: [
       {
-        title: "Introduce reading feelings",
-        teacherPrompt: "Explain that feelings can be shown without words.",
-        studentTask: "Think of a time you knew how someone felt without asking.",
-        whatDoINow: "Introduce feelings-without-words, then press Next.",
-        expectedOutcome: "Students understand the reading task.",
+        title: "Inspect three views",
+        teacherPrompt: "Show the visual, numeric and trait views without revealing the match.",
+        studentTask: "Notice one feature in each representation.",
+        expectedOutcome: "Students identify information carried by different views.",
       },
       {
-        title: "Observe the pet's mood",
-        teacherPrompt: "Show the pet displaying a placeholder feeling.",
-        studentTask: "Watch the pet's movement and colour.",
-        whatDoINow: "Show the mood, then press Next.",
-        expectedOutcome: "Students are watching for clues.",
+        title: "Find the shared identity",
+        teacherPrompt: "Ask students to match representations using evidence.",
+        studentTask: "Match the views and point to what connects them.",
+        expectedOutcome: "Students recognise one identity across representations.",
       },
       {
-        title: "Read the clues",
-        teacherPrompt: "Ask students to name the feeling and its clue.",
-        studentTask: "Guess the feeling and point to a clue.",
-        whatDoINow: "Let students interpret, then press Next.",
-        expectedOutcome: "Students name a feeling with a clue.",
+        title: "Compare what each view does",
+        teacherPrompt: "Ask what one view makes easy to see and what it leaves out.",
+        studentTask: "Explain, draw or sort the strengths of each representation.",
+        expectedOutcome: "Students understand that representations are selective.",
       },
-      {
-        title: "Discuss kind responses",
-        teacherPrompt: "Discuss how to respond kindly to the feeling.",
-        studentTask: "Suggest a kind way to respond.",
-        whatDoINow: "Ask a discussion prompt, then press Next.",
-        expectedOutcome: "Students suggest a kind response.",
-      },
-      {
-        title: "Save and finish",
-        teacherPrompt: "Summarise how we read feelings without words.",
-        studentTask: "Remember one clue you noticed.",
-        whatDoINow: "Recap and press Complete Lesson.",
-        expectedOutcome: "The lesson is completed and recorded.",
-      },
-    ]),
-  },
-  {
+    ],
+    discussionPrompts: ["What stayed the same?", "What changed only in the display?", "Which view helps with which question?"],
+    optionalReflection: "Which representation would you choose to explain the system to someone else?",
+    lightEvidenceMethod: "Optional photo-free teacher note recording the chosen representation and reason.",
+    noMarkingOption: "Complete the matching task as a class and save nothing.",
+    offlineFallback: "Match the complete printed representation card set.",
+    safeStopCondition: "Stop any personal identity comparison and return to the fictional MetaPet examples.",
+    resetDeleteReminder: "Clear the matching board and delete optional local evidence when finished.",
+    appDestination: "dna-lab",
+    activityType: "compare",
+    evidenceType: "dna-comparison",
+    completionMessage: "You recognised one digital identity across several representations.",
+    extensionActivity: "Invent a new representation and state what it makes easier to understand.",
+    supportActivity: "Use two high-contrast cards with one shared shape cue.",
+    requiredFeatureFlags: ["dna-lab"],
+  }),
+  defineLesson({
     id: "patterns-behind-the-pet",
-    number: 6,
+    number: 4,
     slug: "patterns-behind-the-pet",
-    title: "Patterns Behind the Pet",
+    title: "Choices and Algorithms",
     shortDescription:
-      "Students explore the patterns and visualisations that describe a Meta-Pet.",
-    durationMinutes: 25,
-    learningAreas: ["Mathematics", "Data & patterns", "Science"],
-    learningIntention:
-      "Understand that patterns and data can describe a living-like system.",
-    successCriteria: [
-      "I can spot a pattern in the pet's data.",
-      "I can describe how the pattern changes.",
-      "I can explain what the pattern tells us about the pet.",
-    ],
+      "Build and test a simple sequence of choices using cause, effect, branching and repetition.",
+    learningAreas: ["Digital Technologies", "Mathematics", "English"],
+    curriculumLinks: ["AC9TDI4P04", "AC9TDI6P05"],
+    materials: ["Shared screen", "Arrow/action cards", "Optional floor space for movement"],
+    yearAdaptations: {
+      years3To4: "Build a three-step sequence and test it in order.",
+      years5To6: "Add one branch or repeat, test an edge case and repair the sequence.",
+    },
+    learningIntention: "We are learning to build and test a simple algorithm.",
+    successStatement: "I can put choices in order, test the result and repair one problem.",
     teacherIntroduction:
-      "This lesson previews advanced visualisations. In Pass 1 it is a guided placeholder; later it opens simplified visualisations of real Meta-Pet data.",
+      "Students may act out the algorithm, move cards, point, draw or quietly check a partner’s sequence.",
     teacherScript:
-      "Behind every Meta-Pet are patterns — in its DNA, its moods, its choices. Today we become pattern detectives and find the shapes hiding inside the pet.",
-    studentInstructions:
-      "Explore the pet's patterns. Look for something that repeats or changes.",
-    discussionPrompts: [
-      "What pattern did you find?",
-      "How does the pattern change?",
-      "What does the pattern tell us about the pet?",
+      "An algorithm is a sequence of steps. Today we will build one, test what actually happens and change it when the result is not what we intended.",
+    studentInstructions: "Move, arrange, point to or draw the steps in a simple system sequence.",
+    stages: [
+      {
+        title: "Build the sequence",
+        teacherPrompt: "Choose a goal and arrange three action cards in order.",
+        studentTask: "Create or help check a three-step sequence.",
+        expectedOutcome: "Students can state the intended order.",
+      },
+      {
+        title: "Run and observe",
+        teacherPrompt: "Execute the sequence exactly as written without silently fixing it.",
+        studentTask: "Watch for where cause and effect differ from the plan.",
+        expectedOutcome: "Students use test evidence rather than intention alone.",
+      },
+      {
+        title: "Branch, repeat or repair",
+        teacherPrompt: "Change one step, add a simple if-choice or repeat, then retest.",
+        studentTask: "Suggest, point to or make one useful change.",
+        expectedOutcome: "Students improve an algorithm through testing.",
+      },
     ],
+    discussionPrompts: ["What happened in order?", "Where could the sequence branch?", "What did the test make us change?"],
+    optionalReflection: "Why is testing part of writing an algorithm?",
+    lightEvidenceMethod: "Optional alias-only record of one sequence and its repaired step.",
+    noMarkingOption: "Run one whole-class floor algorithm and keep no record.",
+    offlineFallback: "Use printable arrow, action, branch and repeat cards.",
+    safeStopCondition: "Pause movement if the room becomes unsafe or overstimulating; continue by pointing at desk cards.",
+    resetDeleteReminder: "Clear the sequence and delete optional local evidence when it is no longer needed.",
     appDestination: "visualisation",
     activityType: "predict",
     evidenceType: "visualisation-selection",
-    completionMessage:
-      "You found the patterns behind the pet and described what they mean. Excellent thinking!",
-    extensionActivity:
-      "Predict the next step in a pattern you found.",
-    supportActivity:
-      "Find one thing that repeats and point to it.",
+    completionMessage: "You built, tested and improved a simple algorithm.",
+    extensionActivity: "Add one branch and explain both possible paths.",
+    supportActivity: "Use three numbered cards with one action on each.",
     requiredFeatureFlags: ["advanced-visualisation"],
-    usesDemonstrationPet: true,
-    usesStudentRealPet: false,
-    persistChanges: false,
-    resetAtCompletion: true,
-    preview: {
-      mainIdea: "Patterns and data describe how a living-like system behaves.",
-      majorInteraction:
-        "Explore a simplified visualisation of the pet's patterns.",
-      expectedOutcome:
-        "Students identify a pattern and explain what it reveals.",
-      resetBehaviour:
-        "The visualisation resets to its default view at completion.",
-      completionPreview:
-        "\"You found the patterns behind the pet and described what they mean.\"",
+  }),
+  defineLesson({
+    id: "feelings-without-words",
+    number: 5,
+    slug: "feelings-without-words",
+    title: "Privacy and Responsible Design",
+    shortDescription:
+      "Decide what information a digital experience needs, what it does not need and how responsible creators protect users.",
+    learningAreas: ["Digital Technologies", "Health", "Civics and Citizenship"],
+    curriculumLinks: ["AC9TDI4P09", "AC9TDI6P09"],
+    materials: ["Printed information cards", "Two sorting areas: needs / does not need"],
+    yearAdaptations: {
+      years3To4: "Sort familiar information cards and explain one item the app does not need.",
+      years5To6: "Apply data minimisation, purpose and deletion questions to a feature proposal.",
     },
-    steps: buildSteps("patterns-behind-the-pet", [
+    learningIntention: "We are learning to minimise information and protect people through design.",
+    successStatement: "I can explain why a feature needs some information and should refuse other information.",
+    teacherIntroduction:
+      "Use fictional cards only. Never ask children to type or disclose private feelings, names, contacts or personal experiences.",
+    teacherScript:
+      "Responsible creators collect only what a feature truly needs. More information is not automatically better, and people should know what is stored and how to erase it.",
+    studentInstructions: "Sort, point, draw or quietly check which information the fictional feature needs.",
+    stages: [
       {
-        title: "Introduce patterns",
-        teacherPrompt: "Explain that patterns hide inside the pet's data.",
-        studentTask: "Think of a pattern you know from everyday life.",
-        whatDoINow: "Introduce pattern-hunting, then press Next.",
-        expectedOutcome: "Students understand the pattern task.",
+        title: "Name the feature purpose",
+        teacherPrompt: "State one simple fictional feature and the job it must do.",
+        studentTask: "Repeat or point to the feature’s actual purpose.",
+        expectedOutcome: "Students identify a bounded purpose before choosing data.",
       },
       {
-        title: "Observe the visualisation",
-        teacherPrompt: "Show a placeholder visualisation of the pet's data.",
-        studentTask: "Look at the shapes and movement.",
-        whatDoINow: "Show the visualisation, then press Next.",
-        expectedOutcome: "Students are examining the visualisation.",
+        title: "Minimise the information",
+        teacherPrompt: "Sort each fictional information card into needs or does not need.",
+        studentTask: "Place, point to or draw a decision and give a reason.",
+        expectedOutcome: "Students reject unnecessary information.",
       },
       {
-        title: "Explore a pattern",
-        teacherPrompt: "Ask students to find something that repeats or changes.",
-        studentTask: "Find a pattern in the visualisation.",
-        whatDoINow: "Let students explore, then press Next.",
-        expectedOutcome: "Students have found a pattern.",
+        title: "Add protection and deletion",
+        teacherPrompt: "Ask who controls the record, where it stays and when it is erased.",
+        studentTask: "Choose one protection and one deletion rule.",
+        expectedOutcome: "Students connect responsible design with control and retention.",
+      },
+    ],
+    discussionPrompts: ["What does the feature truly need?", "What should it refuse?", "Who can erase the record?"],
+    optionalReflection: "What is one question you should ask before giving an app information?",
+    lightEvidenceMethod: "Optional anonymous class tally of information cards rejected as unnecessary.",
+    noMarkingOption: "Complete the sort together and store no student response.",
+    offlineFallback: "Use the full printable privacy-card sort.",
+    safeStopCondition: "Stop immediately if discussion turns to a child’s real private information; return to fictional examples.",
+    resetDeleteReminder: "Clear the fictional sort. Erase any optional local class tally when finished.",
+    appDestination: "emotions",
+    activityType: "interpret",
+    evidenceType: "emotion-reflection",
+    completionMessage: "You minimised information and added a clear protection and deletion rule.",
+    extensionActivity: "Review a second feature and identify one misleading privacy claim.",
+    supportActivity: "Use two cards: one clearly needed and one clearly unnecessary.",
+    requiredFeatureFlags: ["emotions"],
+  }),
+  defineLesson({
+    id: "build-a-body",
+    number: 6,
+    slug: "build-a-body",
+    title: "Design a Better Feature",
+    shortDescription:
+      "Identify a real user need and design a useful, calm, accessible feature without manipulation or unnecessary data.",
+    learningAreas: ["Design and Technologies", "Digital Technologies", "Visual Arts"],
+    curriculumLinks: ["AC9TDI4P04", "AC9TDI6P06"],
+    materials: ["Feature canvas or plain paper", "Drawing or building materials", "Accessibility checklist"],
+    yearAdaptations: {
+      years3To4: "Choose one user need and draw a feature with one accessibility option.",
+      years5To6: "Write a design rationale covering need, accessibility, data minimisation and non-manipulative use.",
+    },
+    learningIntention: "We are learning to design a calm, accessible feature for a genuine user need.",
+    successStatement: "I can connect a feature to a need and explain how it avoids unnecessary pressure or data.",
+    teacherIntroduction:
+      "A polished drawing is not required. Students can build, speak, point, partner or privately show the teacher.",
+    teacherScript:
+      "Good features solve a real problem. They should be understandable, accessible and honest without tricks that pressure people to stay, click or share more.",
+    studentInstructions: "Draw, build, speak, point or partner to design one useful and calm feature.",
+    stages: [
+      {
+        title: "Identify the user need",
+        teacherPrompt: "Choose a fictional classroom user and state one practical need.",
+        studentTask: "Name or select the need before inventing the feature.",
+        expectedOutcome: "Students separate a user need from a decorative idea.",
       },
       {
-        title: "Discuss the meaning",
-        teacherPrompt: "Discuss what the pattern reveals about the pet.",
-        studentTask: "Share the pattern you found.",
-        whatDoINow: "Ask a discussion prompt, then press Next.",
-        expectedOutcome: "Students explain a pattern's meaning.",
+        title: "Design the feature",
+        teacherPrompt: "Ask for one main action, one clear result and one accessibility choice.",
+        studentTask: "Create the smallest feature that meets the need.",
+        expectedOutcome: "Students produce an understandable feature concept.",
       },
       {
-        title: "Save and finish",
-        teacherPrompt: "Summarise how patterns describe the pet.",
-        studentTask: "Remember one pattern you found.",
-        whatDoINow: "Recap and press Complete Lesson.",
-        expectedOutcome: "The lesson is completed and recorded.",
+        title: "Remove pressure and excess data",
+        teacherPrompt: "Check for countdowns, guilt, streak loss, sharing pressure and unnecessary information.",
+        studentTask: "Remove or redesign one risky element.",
+        expectedOutcome: "Students improve the feature through responsible constraints.",
       },
-    ]),
-  },
-  {
+    ],
+    discussionPrompts: ["Whose need does it meet?", "How can more people use it?", "What did you deliberately leave out?"],
+    optionalReflection: "What made the feature calmer or more honest after revision?",
+    lightEvidenceMethod: "Optional alias-only feature title plus one design reason; do not photograph students.",
+    noMarkingOption: "Run a gallery walk or quiet desk check and save nothing.",
+    offlineFallback: "Use the printable feature canvas and accessibility checklist.",
+    safeStopCondition: "Pause critique if it becomes personal; assess the design choice, never the child or participation method.",
+    resetDeleteReminder: "Clear demonstration changes and delete optional local notes after their teaching purpose ends.",
+    appDestination: "body-forge",
+    activityType: "build",
+    evidenceType: "body-design-comparison",
+    completionMessage: "You designed a useful feature and removed unnecessary pressure or data.",
+    extensionActivity: "Add a keyboard-only path and explain a colour-independent instruction.",
+    supportActivity: "Choose a need card and add one large, clearly labelled control.",
+    requiredFeatureFlags: ["body-forge"],
+  }),
+  defineLesson({
     id: "responsible-creator",
     number: 7,
     slug: "responsible-creator",
-    title: "The Responsible Creator Challenge",
+    title: "Test, Reflect and Improve",
     shortDescription:
-      "Students bring it all together and make responsible choices as creators.",
-    durationMinutes: 30,
-    learningAreas: ["Ethics", "Digital citizenship", "Science"],
-    learningIntention:
-      "Understand that creating and caring come with responsibility.",
-    successCriteria: [
-      "I can make a choice and give a reason for it.",
-      "I can explain a responsibility of a creator.",
-      "I can reflect on what makes a caring creator.",
-    ],
+      "Test a design, observe what happens, accept criticism, repair problems and explain what should change next.",
+    learningAreas: ["Digital Technologies", "Design and Technologies", "English"],
+    curriculumLinks: ["AC9TDI4P02", "AC9TDI6P06"],
+    materials: ["Lesson 6 feature idea or sample design", "Simple test checklist", "Optional paper"],
+    yearAdaptations: {
+      years3To4: "Run one test, name what worked and change one part.",
+      years5To6: "Use test criteria, record a failure honestly and prioritise the next iteration.",
+    },
+    learningIntention: "We are learning to use testing and criticism to improve a design.",
+    successStatement: "I can describe one test result, repair one problem and explain the next change.",
     teacherIntroduction:
-      "This capstone lesson ties the previous six together. In Pass 1 it is a guided reflection placeholder; later it becomes a real challenge using the student's pet.",
+      "Criticism targets the design, not the designer. Participation style, speed and confidence are never behaviour scores.",
     teacherScript:
-      "You have met, built, compared, cared for, understood and studied your Meta-Pet. Now the big question: what does it mean to be a responsible creator? Let's decide together.",
-    studentInstructions:
-      "Make thoughtful choices for your Meta-Pet and be ready to explain your reasons.",
-    discussionPrompts: [
-      "What is one responsibility of a creator?",
-      "What choice are you most proud of?",
-      "How can we be caring creators?",
+      "Responsible creators do not hide what failed. We test, observe, listen, repair and explain what should change next.",
+    studentInstructions: "Test, observe, point, draw, speak or privately show one useful improvement.",
+    stages: [
+      {
+        title: "Choose a fair test",
+        teacherPrompt: "State the feature’s goal and choose one observable test criterion.",
+        studentTask: "Predict what success would look like.",
+        expectedOutcome: "Students define a test before judging the result.",
+      },
+      {
+        title: "Observe and accept feedback",
+        teacherPrompt: "Run the test and collect one kind, specific piece of design feedback.",
+        studentTask: "Notice what happened without defending the design.",
+        expectedOutcome: "Students distinguish evidence from preference.",
+      },
+      {
+        title: "Repair and explain",
+        teacherPrompt: "Change one part and ask what should be tested next.",
+        studentTask: "Make or describe one repair and its reason.",
+        expectedOutcome: "Students complete a simple test-and-improve cycle.",
+      },
     ],
+    discussionPrompts: ["What actually happened?", "What criticism helped?", "What should be tested next?"],
+    optionalReflection: "What did the failure teach that the original idea could not?",
+    lightEvidenceMethod: "Optional alias-only test result: worked, needs repair, next test.",
+    noMarkingOption: "Use a whole-class sample design and store no individual evidence.",
+    offlineFallback: "Use the printable test, feedback and repair sheet.",
+    safeStopCondition: "Stop feedback that labels, ranks or embarrasses a child; return to the shared sample design.",
+    resetDeleteReminder: "Finish by deleting optional local evidence that is not needed and resetting the demonstration.",
     appDestination: "challenge",
     activityType: "create",
     evidenceType: "responsible-creator-promise",
-    completionMessage:
-      "You completed the Responsible Creator Challenge. You have finished all seven lessons — congratulations!",
-    extensionActivity:
-      "Write a short creator's promise for your Meta-Pet.",
-    supportActivity:
-      "Say one kind choice you would make for your Meta-Pet.",
-    requiredFeatureFlags: [],
-    usesDemonstrationPet: false,
-    usesStudentRealPet: true,
-    persistChanges: true,
-    resetAtCompletion: false,
-    preview: {
-      mainIdea: "Creating and caring for a Meta-Pet carry real responsibility.",
-      majorInteraction:
-        "Make and justify responsible choices for a Meta-Pet.",
-      expectedOutcome:
-        "Students reflect on what makes a caring, responsible creator.",
-      resetBehaviour:
-        "This capstone can keep the student's choices; nothing is forced to reset.",
-      completionPreview:
-        "\"You completed the Responsible Creator Challenge and finished all seven lessons.\"",
-    },
-    steps: buildSteps("responsible-creator", [
-      {
-        title: "Introduce the challenge",
-        teacherPrompt: "Explain that this ties all the lessons together.",
-        studentTask: "Recall one thing from an earlier lesson.",
-        whatDoINow: "Introduce the capstone challenge, then press Next.",
-        expectedOutcome: "Students understand the challenge.",
-      },
-      {
-        title: "Review what we know",
-        teacherPrompt: "Recap the six earlier lessons briefly.",
-        studentTask: "Think about what you learned across the lessons.",
-        whatDoINow: "Recap the journey so far, then press Next.",
-        expectedOutcome: "Students recall the earlier learning.",
-      },
-      {
-        title: "Make responsible choices",
-        teacherPrompt: "Invite students to make caring choices for their pet.",
-        studentTask: "Make a thoughtful choice for your Meta-Pet.",
-        whatDoINow: "Let students choose and justify, then press Next.",
-        expectedOutcome: "Students make a justified choice.",
-      },
-      {
-        title: "Discuss responsibility",
-        teacherPrompt: "Discuss what responsible creating means.",
-        studentTask: "Share a responsibility of a creator.",
-        whatDoINow: "Ask a discussion prompt, then press Next.",
-        expectedOutcome: "Students articulate a responsibility.",
-      },
-      {
-        title: "Save and finish",
-        teacherPrompt: "Celebrate finishing all seven lessons.",
-        studentTask: "Remember your creator's promise.",
-        whatDoINow: "Celebrate and press Complete Lesson.",
-        expectedOutcome: "All seven lessons are completed.",
-      },
-    ]),
-  },
+    completionMessage: "You tested honestly, used criticism and improved the design.",
+    extensionActivity: "Prioritise three possible repairs by impact and effort.",
+    supportActivity: "Choose between two clear repairs and point to the one that best addresses the test result.",
+  }),
 ];
 
-/** All lesson ids in canonical order. */
-export const LESSON_IDS: LessonId[] = LESSON_DEFINITIONS.map((l) => l.id);
+export const LESSON_IDS: LessonId[] = LESSON_DEFINITIONS.map((lesson) => lesson.id);
 
-/** Lookup map from lesson id to definition. */
-const LESSON_BY_ID: Map<LessonId, LessonDefinition> = new Map(
+const LESSON_BY_ID = new Map<LessonId, LessonDefinition>(
   LESSON_DEFINITIONS.map((lesson) => [lesson.id, lesson]),
 );
 
-/** Lookup map from slug to definition. */
-const LESSON_BY_SLUG: Map<string, LessonDefinition> = new Map(
+const LESSON_BY_SLUG = new Map<string, LessonDefinition>(
   LESSON_DEFINITIONS.map((lesson) => [lesson.slug, lesson]),
 );
 
-/** Total number of lessons in the system. */
 export const TOTAL_LESSONS = LESSON_DEFINITIONS.length;
 
-/** Return the lesson definition for an id, or undefined if unknown. */
 export function getLessonById(
   id: string | null | undefined,
 ): LessonDefinition | undefined {
-  if (!id) return undefined;
-  return LESSON_BY_ID.get(id as LessonId);
+  return id ? LESSON_BY_ID.get(id as LessonId) : undefined;
 }
 
-/** Return the lesson definition for a slug, or undefined if unknown. */
 export function getLessonBySlug(
   slug: string | null | undefined,
 ): LessonDefinition | undefined {
-  if (!slug) return undefined;
-  return LESSON_BY_SLUG.get(slug);
+  return slug ? LESSON_BY_SLUG.get(slug) : undefined;
 }
 
-/** Type guard: is this string a known lesson id? */
 export function isLessonId(value: unknown): value is LessonId {
   return typeof value === "string" && LESSON_BY_ID.has(value as LessonId);
 }

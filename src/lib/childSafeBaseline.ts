@@ -10,6 +10,10 @@ export const FIELD_MODE_REVIEW_PATH = "/schools/field/review";
 export const FIELD_MODE_OFFLINE_PATH = "/schools/field/offline";
 export const FIELD_MODE_GUIDE_PATH = "/schools/field/guide";
 export const FIELD_MODE_SAFETY_PATH = "/schools/field/safety";
+export const FIELD_MODE_PRIVACY_PATH = "/schools/field/privacy";
+export const FIELD_MODE_PRICING_PATH = "/schools/field/pricing";
+export const FIELD_MODE_WHY_FREE_PATH = "/schools/field/why-free";
+export const FIELD_MODE_TRUST_PATH = "/schools/field/trust";
 export const FIELD_MODE_PACK_MANIFEST_PATH = "/schools/field/pack.json";
 export const FIELD_MODE_PRINT_PATH_PREFIX = "/schools/field/print";
 export const FIELD_MODE_EXIT_PATH = "/schools/field/exit";
@@ -38,6 +42,8 @@ export interface FieldModeNavItem {
     | "offline"
     | "guide"
     | "safety"
+    | "pricing"
+    | "trust"
     | "exit";
 }
 
@@ -125,6 +131,10 @@ export const CHILD_SAFE_ROUTE_POLICIES: Record<
       FIELD_MODE_OFFLINE_PATH,
       FIELD_MODE_GUIDE_PATH,
       FIELD_MODE_SAFETY_PATH,
+      FIELD_MODE_PRIVACY_PATH,
+      FIELD_MODE_PRICING_PATH,
+      FIELD_MODE_WHY_FREE_PATH,
+      FIELD_MODE_TRUST_PATH,
       FIELD_MODE_PACK_MANIFEST_PATH,
       FIELD_MODE_EXIT_PATH,
       FIELD_MODE_MANIFEST_PATH,
@@ -170,6 +180,12 @@ export const FIELD_MODE_NAV_ITEMS: readonly FieldModeNavItem[] = [
     label: "Safety & Privacy",
     kind: "safety",
   },
+  {
+    href: FIELD_MODE_PRICING_PATH,
+    label: "Free Access",
+    kind: "pricing",
+  },
+  { href: FIELD_MODE_TRUST_PATH, label: "Trust", kind: "trust" },
   { href: FIELD_MODE_EXIT_PATH, label: "Exit Field Mode", kind: "exit" },
 ] as const;
 

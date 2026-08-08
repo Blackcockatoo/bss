@@ -1,4 +1,4 @@
-# MetaPet Schools Retention and Deletion Schedule
+# MetaPet School Retention and Deletion Schedule
 
 ## Default expectation
 

@@ -363,7 +363,7 @@ export function ClassroomManager() {
   const resetClassroom = () => {
     if (
       !window.confirm(
-        "Delete all MetaPet Schools data from this device, including the roster, progress, summaries, and queue?",
+        "Delete all MetaPet School data from this device, including the roster, progress, summaries, and queue?",
       )
     ) {
       return;

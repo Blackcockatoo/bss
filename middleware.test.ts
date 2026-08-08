@@ -125,6 +125,21 @@ describe("MetaPet.school hostname boundary", () => {
     );
   });
 
+  it("rewrites clean school routes internally and preserves the query", async () => {
+    const { proxy } = await loadProxy("core");
+    const response = proxy(
+      new NextRequest("https://internal.example.com/lessons/meet-your-metapet?minutes=20", {
+        headers: { "x-forwarded-host": "www.metapet.school" },
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("location")).toBeNull();
+    expect(response.headers.get("x-middleware-rewrite")).toBe(
+      "https://internal.example.com/schools/field/lessons/meet-your-metapet?minutes=20",
+    );
+  });
+
   it("identifies the school domain from proxy headers, not just the parsed URL", async () => {
     const { proxy } = await loadProxy("core");
 
@@ -223,7 +238,7 @@ describe("MetaPet.school hostname boundary", () => {
     await expect(apiResponse.json()).resolves.toEqual({ error: "not_found" });
   });
 
-  it("leaves the full MetaPet product available on Blue Snake Studios", async () => {
+  it("leaves the full MetaPet product available on Blue $nake Studio", async () => {
     const { proxy } = await loadProxy("core");
 
     for (const pathname of [

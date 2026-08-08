@@ -1,8 +1,8 @@
-# MetaPet Schools Privacy Policy
+# MetaPet School Privacy Policy
 
 ## Purpose
 
-This policy explains how the `MetaPet Schools` deployment handles information during a school pilot. It is written for school leaders, ICT teams, and families.
+This policy explains how the `MetaPet School` deployment handles information during a school pilot. It is written for school leaders, ICT teams, and families.
 
 ## Core position
 

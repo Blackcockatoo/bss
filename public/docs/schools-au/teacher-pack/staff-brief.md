@@ -1,10 +1,10 @@
-# MetaPet Schools Staff Brief
+# MetaPet School Staff Brief
 
 ## One-slide briefing script
 
-**What it is:** a teacher-led, low-data classroom tool for Years 3-6  
-**What it teaches:** systems thinking, digital responsibility, and online safety habits  
-**What it avoids:** student accounts, social features, open chat, and retention pressure loops  
+**What it is:** a teacher-led, low-data classroom tool for Years 3-6
+**What it teaches:** systems thinking, digital responsibility, and online safety habits
+**What it avoids:** student accounts, social features, open chat, and retention pressure loops
 **What schools review first:** privacy pack, safeguarding pack, teacher pack, and pilot prospectus
 
 ## Operating rules

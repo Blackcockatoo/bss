@@ -1,4 +1,4 @@
-# MetaPet Schools Incident Log
+# MetaPet School Incident Log
 
 Record any privacy, safeguarding, inclusion, workload, or over-engagement issue on the same day.
 

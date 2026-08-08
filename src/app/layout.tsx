@@ -8,8 +8,8 @@ import {
   FIELD_MODE_ICON_192_PATH,
 } from "@/lib/fieldMode/pwa";
 import { LEGAL_NOTICE_TEXT, getLegalNoticeYear } from "@/lib/legalNotice";
+import { METAPET_PRODUCT } from "@/lib/fieldMode/product";
 import ClientBody from "./ClientBody";
-import { Analytics } from "@vercel/analytics/next";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -23,11 +23,11 @@ const siteUrlObject = findSiteUrlObject();
 
 export const metadata: Metadata = {
   ...(siteUrlObject ? { metadataBase: siteUrlObject } : {}),
-  title: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Blue Snake Studios",
+  title: IS_SCHOOLS_PROFILE ? METAPET_PRODUCT.school : METAPET_PRODUCT.studio,
   description:
     IS_SCHOOLS_PROFILE
-      ? "MetaPet Schools is a teacher-led, low-data classroom tool for Years 3-6 digital responsibility, systems thinking, and online safety habits."
-      : "Blue Snake Studios builds privacy-first digital learning experiences with a strict child-safe baseline for default student deployments.",
+      ? "MetaPet School is a teacher-led, local-first classroom tool for Australian Years 3–6 digital responsibility, systems thinking and responsible creation."
+      : "Blue $nake Studio builds privacy-first digital learning experiences and the Complete MetaPet universe.",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: IS_SCHOOLS_PROFILE ? FIELD_MODE_ICON_192_PATH : "/icon.svg",
@@ -38,25 +38,25 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Blue Snake Studios",
+    title: IS_SCHOOLS_PROFILE ? METAPET_PRODUCT.school : METAPET_PRODUCT.studio,
   },
   openGraph: {
-    title: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Blue Snake Studios",
+    title: IS_SCHOOLS_PROFILE ? METAPET_PRODUCT.school : METAPET_PRODUCT.studio,
     description:
       IS_SCHOOLS_PROFILE
-        ? "MetaPet Schools is a teacher-led, low-data classroom tool for Years 3-6 digital responsibility, systems thinking, and online safety habits."
-        : "Blue Snake Studios builds privacy-first digital learning experiences with a strict child-safe baseline for default student deployments.",
+        ? "MetaPet School is a teacher-led, local-first classroom tool for Australian Years 3–6."
+        : "Blue $nake Studio builds privacy-first digital learning experiences.",
     ...(siteUrl ? { url: siteUrl } : {}),
-    siteName: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Blue Snake Studios",
+    siteName: IS_SCHOOLS_PROFILE ? METAPET_PRODUCT.school : METAPET_PRODUCT.studio,
     type: "website",
   },
   twitter: {
     card: "summary",
-    title: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Blue Snake Studios",
+    title: IS_SCHOOLS_PROFILE ? METAPET_PRODUCT.school : METAPET_PRODUCT.studio,
     description:
       IS_SCHOOLS_PROFILE
-        ? "MetaPet Schools is a teacher-led, low-data classroom tool for Years 3-6 digital responsibility, systems thinking, and online safety habits."
-        : "Blue Snake Studios builds privacy-first digital learning experiences with a strict child-safe baseline for default student deployments.",
+        ? "MetaPet School is a teacher-led, local-first classroom tool for Australian Years 3–6."
+        : "Blue $nake Studio builds privacy-first digital learning experiences.",
   },
 };
 
@@ -67,8 +67,8 @@ export default function RootLayout({
 }>) {
   const currentYear = getLegalNoticeYear();
   const legalMetaContent = IS_SCHOOLS_PROFILE
-    ? `MetaPet Schools educational pilot by Blue Snake Studios. © ${currentYear}. ${LEGAL_NOTICE_TEXT}`
-    : `© ${currentYear} Blue Snake Studios. ${LEGAL_NOTICE_TEXT}`;
+    ? `${METAPET_PRODUCT.school} educational pilot by ${METAPET_PRODUCT.studio}. © ${currentYear}. ${LEGAL_NOTICE_TEXT}`
+    : `© ${currentYear} ${METAPET_PRODUCT.studio}. ${LEGAL_NOTICE_TEXT}`;
 
   return (
     <html
@@ -88,7 +88,6 @@ export default function RootLayout({
       </head>
       <body suppressHydrationWarning className="antialiased">
         <ClientBody>{children}</ClientBody>
-        <Analytics />
       </body>
     </html>
   );

@@ -4,7 +4,7 @@ import { IS_SCHOOLS_PROFILE } from "@/lib/env/features";
 export default function Loading() {
   return (
     <RouteShellLoading
-      eyebrow={IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Meta-Pet"}
+      eyebrow={IS_SCHOOLS_PROFILE ? "MetaPet School" : "Meta-Pet"}
       title={
         IS_SCHOOLS_PROFILE
           ? "Preparing classroom review"

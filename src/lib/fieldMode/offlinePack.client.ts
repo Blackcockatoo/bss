@@ -124,7 +124,9 @@ async function sendCommand(
         );
         return;
       }
-      notifyStatusChanged();
+      if (command.type !== "FIELD_PACK_STATUS") {
+        notifyStatusChanged();
+      }
       resolve(event.data.result);
     };
 

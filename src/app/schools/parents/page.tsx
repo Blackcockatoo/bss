@@ -10,13 +10,13 @@ export default function SchoolsParentPage() {
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-6 py-12">
       <div className="space-y-3">
         <p className="text-xs uppercase tracking-[0.35em] text-emerald-300">
-          MetaPet Schools
+          MetaPet School
         </p>
         <h1 className="text-3xl font-semibold text-slate-100">
           Information for parents and carers
         </h1>
         <p className="text-base leading-7 text-slate-300">
-          MetaPet Schools is a short, teacher-led classroom activity for Years
+          MetaPet School is a short, teacher-led classroom activity for Years
           3&ndash;6. Students use a digital companion to notice patterns,
           practise simple online safety habits, and talk about systems and
           regulation in age-appropriate language.

@@ -20,7 +20,7 @@ const SCHOOL_LEGAL_LINKS = [
     href: "/legal/boundaries",
     title: "Product boundaries",
     description:
-      "What MetaPet Schools is, what it is not, and how the school deployment differs from broader product surfaces.",
+      "What MetaPet School is, what it is not, and how the school deployment differs from broader product surfaces.",
   },
 ];
 
@@ -30,7 +30,7 @@ export default function LegalPage() {
       <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-6 py-12">
         <div className="space-y-3">
           <p className="text-xs uppercase tracking-[0.35em] text-amber-300">
-            MetaPet Schools
+            MetaPet School
           </p>
           <h1 className="text-3xl font-semibold text-slate-100">
             Legal and governance hub
@@ -79,7 +79,7 @@ export default function LegalPage() {
       <section className="rounded-lg border border-slate-800/60 bg-slate-950/20 p-4 text-xs text-slate-600 space-y-2">
         <p className="font-medium text-slate-500">Our principles</p>
         <p>
-          Blue Snake Studios builds software we&apos;d trust with our own
+          Blue $nake Studio builds software we&apos;d trust with our own
           children. That means no hidden data collection, no manipulative
           engagement loops, and no selling user information.
         </p>

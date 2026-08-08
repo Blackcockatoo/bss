@@ -1,4 +1,4 @@
-# MetaPet Schools Family Participation Protocol
+# MetaPet School Family Participation Protocol
 
 This protocol explains how the first pilot should handle family communication and student participation.
 

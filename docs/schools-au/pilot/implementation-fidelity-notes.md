@@ -1,4 +1,4 @@
-# MetaPet Schools Implementation Fidelity Notes
+# MetaPet School Implementation Fidelity Notes
 
 Use this after each lesson or at the end of each teaching week.
 

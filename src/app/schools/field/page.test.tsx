@@ -10,7 +10,7 @@ describe("Field Mode entry", () => {
     render(<FieldModePage />);
     expect(
       screen.getByRole("heading", {
-        name: /Australian classroom lessons for Years 3–6/i,
+        name: /Creative technology that gives attention back/i,
       }),
     ).toBeTruthy();
     expect(screen.getAllByText(/MetaPet School/i).length).toBeGreaterThan(0);
@@ -20,8 +20,9 @@ describe("Field Mode entry", () => {
       /Teacher-led use/i,
       /Seven short classroom lessons/i,
       /No student accounts/i,
-      /Alias-only classroom use/i,
-      /Local device records/i,
+      /No advertising or trackers/i,
+      /Optional alias-only local records/i,
+      /Complete Field Mode free/i,
       /Australian Curriculum alignment/i,
     ]) {
       expect(screen.getAllByText(promise).length).toBeGreaterThan(0);
@@ -31,19 +32,19 @@ describe("Field Mode entry", () => {
   it("has one primary launch action into the approved Field start route", () => {
     render(<FieldModePage />);
     const action = screen.getByRole("link", {
-      name: /Start a classroom session/i,
+      name: /Start teaching/i,
     });
     expect(action).toHaveAttribute("href", "/schools/field/start");
   });
 
-  it("presents Blue Snake Studios as the maker, not the headline brand", () => {
+  it("presents Blue $nake Studio as the maker, not the headline brand", () => {
     render(<FieldModePage />);
     const heading = screen.getByRole("heading", {
-      name: /Australian classroom lessons for Years 3–6/i,
+      name: /Creative technology that gives attention back/i,
     });
-    expect(heading.textContent).not.toMatch(/Blue Snake Studios/i);
+    expect(heading.textContent).not.toMatch(/Blue \$nake Studio/i);
 
-    const maker = screen.getByRole("link", { name: /Blue Snake Studios/i });
+    const maker = screen.getByRole("link", { name: /Blue \$nake Studio/i });
     expect(maker).toHaveAttribute("href", "https://www.bluesnakestudios.com");
   });
 });

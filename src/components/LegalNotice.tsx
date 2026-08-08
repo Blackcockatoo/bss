@@ -20,8 +20,8 @@ export default function LegalNotice({ className, schoolsMode = false }: LegalNot
       )}
     >
       {IS_SCHOOLS_PROFILE || schoolsMode
-        ? `MetaPet Schools educational pilot. Operated by Blue Snake Studios. © ${year}. ${LEGAL_NOTICE_TEXT}`
-        : `© ${year} Blue Snake Studios — ${LEGAL_NOTICE_TEXT}`}
+        ? `MetaPet School educational pilot. Operated by Blue $nake Studio. © ${year}. ${LEGAL_NOTICE_TEXT}`
+        : `© ${year} Blue $nake Studio — ${LEGAL_NOTICE_TEXT}`}
     </p>
   );
 }

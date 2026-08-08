@@ -20,7 +20,7 @@ afterEach(() => {
 });
 
 describe("robots.txt per public domain", () => {
-  it("points metapet.school at its own sitemap, not Blue Snake Studios", async () => {
+  it("points metapet.school at its own sitemap, not Blue $nake Studio", async () => {
     setHost("www.metapet.school");
     const result = await robots();
 
@@ -39,7 +39,7 @@ describe("robots.txt per public domain", () => {
     expect(disallow).toContain("/api/");
   });
 
-  it("leaves the Blue Snake Studios host unrestricted", async () => {
+  it("leaves the Blue $nake Studio host unrestricted", async () => {
     setHost("www.bluesnakestudios.com");
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://www.bluesnakestudios.com");
     const result = await robots();
@@ -87,7 +87,7 @@ describe("sitemap.xml per public domain", () => {
     }
   });
 
-  it("still serves the full product index on Blue Snake Studios", async () => {
+  it("still serves the full product index on Blue $nake Studio", async () => {
     setHost("www.bluesnakestudios.com");
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://www.bluesnakestudios.com");
     const entries = await sitemap();

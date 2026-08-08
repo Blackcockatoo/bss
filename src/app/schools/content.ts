@@ -1,3 +1,5 @@
+import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
+
 export interface SchoolPackageDoc {
   slug: string;
   title: string;
@@ -265,9 +267,9 @@ export const schoolPackageDocs: SchoolPackageDoc[] = ([
   },
   {
     slug: "what-metapet-schools-is-is-not",
-    title: "What MetaPet Schools Is / Is Not",
+    title: "What MetaPet School Is / Is Not",
     description:
-      "Boundary statement covering therapy, surveillance, social, and AI expectations.",
+      "Boundary statement explicitly prohibiting therapy claims, surveillance, social features and unsupported AI positioning.",
     audience: "Leadership, teachers, and families",
     href: "/docs/schools-au/governance/what-metapet-schools-is-is-not.md",
     category: "Governance Pack",
@@ -575,86 +577,15 @@ export const learningOutcomes: LearningOutcome[] = [
   },
 ];
 
-export const lessonCards: LessonCard[] = [
-  {
-    session: "Session 1",
-    title: "Meet the Digital Companion",
-    outcome:
-      "Students explain that a digital system changes when a user gives it input.",
-    activity:
-      "Open the companion, check its companion state, try one action, and describe what changed.",
-    prompt: "What changed after your action, and how do you know?",
-    evidence:
-      'One sentence: "I chose __ and the companion state changed to __."',
-    bestFit: "Digital Technologies mini-lesson",
-  },
-  {
-    session: "Session 2",
-    title: "Read the Companion State",
-    outcome:
-      "Students read visible state information and make a reasoned action choice.",
-    activity:
-      "Check each state indicator, identify the most urgent state, and choose one response.",
-    prompt: "What does the companion state tell you to do next?",
-    evidence: "Quick partner explanation using cause-and-effect language.",
-    bestFit: "Digital Technologies mini-lesson",
-  },
-  {
-    session: "Session 3",
-    title: "Feelings, Signals and Regulation",
-    outcome:
-      "Students connect visible feelings or moods to a simple regulation strategy.",
-    activity:
-      "Identify a mood, discuss what that mood might signal, and match it with a calming action.",
-    prompt: "If the companion looks overwhelmed, what would help it settle?",
-    evidence: "One reflection line about a feeling and a helpful response.",
-    bestFit: "Wellbeing session",
-  },
-  {
-    session: "Session 4",
-    title: "Repair and Reset",
-    outcome:
-      "Students explain that recovery in a system is a skill, not a punishment.",
-    activity:
-      "Start from an unstable companion state, test a repair sequence, and compare which order works best.",
-    prompt: "What helped the system recover, and why did that order matter?",
-    evidence: "Short verbal explanation or checklist note about the recovery sequence.",
-    bestFit: "Relief lesson",
-  },
-  {
-    session: "Session 5",
-    title: "Systems and Feedback Loops",
-    outcome: "Students describe a simple feedback loop using system language.",
-    activity:
-      "Track one input, one state change, and one resulting mood or output.",
-    prompt: "What signal did the system give you after your first action?",
-    evidence: "Input -> state -> output summary.",
-    bestFit: "STEM block",
-  },
-  {
-    session: "Session 6",
-    title: "Patterns Over Time",
-    outcome:
-      "Students identify a pattern in how the companion responds across multiple actions.",
-    activity:
-      "Review notes from earlier sessions, compare with a partner, and identify one reliable pattern.",
-    prompt: "What usually works, and what evidence supports that?",
-    evidence: "One pattern statement supported by an example.",
-    bestFit: "STEM block",
-  },
-  {
-    session: "Session 7",
-    title: "Explain Your Thinking",
-    outcome:
-      "Students explain what they learned about systems, regulation and collaboration.",
-    activity:
-      "Share one pattern, one useful strategy, and one thing they now understand more clearly.",
-    prompt:
-      "What did this digital companion help you notice about systems or behaviour?",
-    evidence: "One short student reflection or teacher observation note.",
-    bestFit: "STEM block",
-  },
-];
+export const lessonCards: LessonCard[] = LESSON_DEFINITIONS.map((lesson) => ({
+  session: `Session ${lesson.number}`,
+  title: lesson.title,
+  outcome: lesson.successStatement,
+  activity: lesson.shortDescription,
+  prompt: lesson.discussionPrompts[0] ?? lesson.optionalReflection,
+  evidence: lesson.lightEvidenceMethod,
+  bestFit: lesson.learningAreas[0] ?? "Digital Technologies",
+}));
 
 export const weeklyFitOptions = [
   {

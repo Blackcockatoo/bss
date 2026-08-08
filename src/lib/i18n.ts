@@ -67,7 +67,7 @@ const UI_STRINGS = {
     onboarding: {
       steps: IS_SCHOOLS_PROFILE ? [
         {
-          title: 'Welcome to MetaPet Schools!',
+          title: 'Welcome to MetaPet School!',
           description:
             'Meet your class companion — a digital character with unique traits. Use it together during short classroom activities to explore systems thinking and digital responsibility.',
           tip: 'Sessions are designed for 15-20 minutes of teacher-led activity.',

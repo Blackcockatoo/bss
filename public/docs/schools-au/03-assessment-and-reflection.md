@@ -22,7 +22,7 @@ Use this once near the end of the sequence, or after any lesson where you want a
 
 ### Student reflection sheet
 
-**Name or alias:** __________  
+**Name or alias:** __________
 **Session:** __________
 
 1. My digital companion was showing this visible state: __________

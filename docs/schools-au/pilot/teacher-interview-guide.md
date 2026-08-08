@@ -1,4 +1,4 @@
-# MetaPet Schools Teacher Interview Guide
+# MetaPet School Teacher Interview Guide
 
 Run this interview after at least one classroom session or at pilot close.
 

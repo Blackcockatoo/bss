@@ -1,4 +1,4 @@
-# MetaPet Schools End-of-Pilot Summary
+# MetaPet School End-of-Pilot Summary
 
 Complete this at pilot close before making any wider rollout decision.
 
@@ -22,11 +22,11 @@ Complete this at pilot close before making any wider rollout decision.
 
 ## What Worked
 
-- 
+-
 
 ## What Did Not Work
 
-- 
+-
 
 ## Safety And Trust Review
 

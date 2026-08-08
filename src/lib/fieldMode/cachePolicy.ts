@@ -10,13 +10,17 @@ import {
   FIELD_MODE_PRINT_PATH_PREFIX,
   FIELD_MODE_REVIEW_PATH,
   FIELD_MODE_SAFETY_PATH,
+  FIELD_MODE_PRIVACY_PATH,
+  FIELD_MODE_PRICING_PATH,
+  FIELD_MODE_WHY_FREE_PATH,
+  FIELD_MODE_TRUST_PATH,
   FIELD_MODE_START_PATH,
 } from "@/lib/childSafeBaseline";
 import { FIELD_MODE_INSTALL_ICON_PATHS } from "@/lib/fieldMode/pwa";
 import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
 
 export const FIELD_PACK_SCHEMA_VERSION = 1;
-export const FIELD_PACK_RELEASE = "pass-4";
+export const FIELD_PACK_RELEASE = "pass-5";
 
 export const FIELD_PACK_CACHE_POLICY = {
   shellCachePrefix: "meta-pet-shell-",
@@ -40,6 +44,10 @@ const FIELD_PACK_BASE_ROUTES = [
   FIELD_MODE_OFFLINE_PATH,
   FIELD_MODE_GUIDE_PATH,
   FIELD_MODE_SAFETY_PATH,
+  FIELD_MODE_PRIVACY_PATH,
+  FIELD_MODE_PRICING_PATH,
+  FIELD_MODE_WHY_FREE_PATH,
+  FIELD_MODE_TRUST_PATH,
 ] as const;
 
 export const FIELD_PACK_LESSON_ROUTES = LESSON_DEFINITIONS.map(

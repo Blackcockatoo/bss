@@ -52,14 +52,14 @@ export default function SchoolsPage() {
         <header className="rounded-3xl border border-amber-300/20 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 p-6 shadow-[0_0_0_1px_rgba(251,191,36,0.05)] md:p-8">
           <div className="space-y-5">
             <p className="text-xs uppercase tracking-[0.35em] text-amber-300">
-              MetaPet Schools
+              MetaPet School
             </p>
             <div className="space-y-4">
               <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-white md:text-5xl">
                 Teacher-led, low-data classroom pilot for Years 3-6
               </h1>
               <p className="max-w-3xl text-base leading-7 text-slate-300 md:text-lg">
-                MetaPet Schools is a teacher-led, time-bounded classroom tool
+                MetaPet School is a teacher-led, time-bounded classroom tool
                 for digital responsibility, systems thinking, and online safety
                 habits. The school profile keeps the product surface narrow:
                 alias-based classroom use, no student accounts, no social

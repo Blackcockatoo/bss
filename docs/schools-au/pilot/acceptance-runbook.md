@@ -1,4 +1,4 @@
-# MetaPet Schools Acceptance Runbook
+# MetaPet School Acceptance Runbook
 
 Use this runbook before any live pilot. Do not move into school outreach or classroom use until each step below is marked `Pass`.
 

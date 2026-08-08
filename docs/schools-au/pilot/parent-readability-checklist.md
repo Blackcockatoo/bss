@@ -1,4 +1,4 @@
-# MetaPet Schools Parent Readability Checklist
+# MetaPet School Parent Readability Checklist
 
 Ask one or two parents or carers to read the family-facing materials and complete this checklist.
 

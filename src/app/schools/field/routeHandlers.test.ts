@@ -74,7 +74,7 @@ describe("Field Mode entry and exit handlers", () => {
     // browsers reject as an install target.
     expect(body.start_url.startsWith(body.scope)).toBe(true);
     expect(body.name).toContain("MetaPet School");
-    expect(body.name).not.toMatch(/Blue Snake Studios/i);
+    expect(body.name).not.toMatch(/Blue $nake Studio/i);
     expect(body.lang).toBe("en-AU");
     expect(body.icons).toEqual(
       expect.arrayContaining([

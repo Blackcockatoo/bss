@@ -1,8 +1,8 @@
-# MetaPet Schools Privacy Impact Assessment
+# MetaPet School Privacy Impact Assessment
 
 ## Scope
 
-- Product surface reviewed: `MetaPet Schools`
+- Product surface reviewed: `MetaPet School`
 - Delivery context: Years 3-6 classroom pilot
 - Default runtime: teacher-led use on a shared classroom device
 - Student identity model: alias only

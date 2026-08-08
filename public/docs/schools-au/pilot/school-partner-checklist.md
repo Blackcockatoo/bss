@@ -1,4 +1,4 @@
-# MetaPet Schools School Partner Checklist
+# MetaPet School School Partner Checklist
 
 Use this checklist with principals, assistant principals, or pilot leads before confirming a pilot.
 
@@ -8,7 +8,7 @@ Use this checklist with principals, assistant principals, or pilot leads before 
 - Review the overview and alignment document
 - Review the staff briefing
 - Review the pilot prospectus
-- Review `What MetaPet Schools Is / Is Not`
+- Review `What MetaPet School Is / Is Not`
 - Review the acceptance runbook
 
 ## Delivery Setup

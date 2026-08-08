@@ -1,3 +1,5 @@
+import { METAPET_PRODUCT } from "./product";
+
 /**
  * Standalone brand identity for the MetaPet School classroom product.
  *
@@ -5,12 +7,12 @@
  * its own right with its own domain, install identity and search presence.
  * The shared app shell resolves its identity from build-time env
  * (`NEXT_PUBLIC_APP_PROFILE`), which on the combined production deployment is
- * `core` — Blue Snake Studios. Without these constants every classroom page
- * inherits the Blue Snake Studios title, social card and canonical origin.
+ * `core` — Blue $nake Studio. Without these constants every classroom page
+ * inherits the studio title, social card and canonical origin.
  *
  * Field routes are the classroom product wherever they are served from, so the
  * identity below is deliberately fixed rather than host-derived. Serving a
- * metapet.school canonical from the Blue Snake Studios host is correct: it
+ * metapet.school canonical from the Blue $nake Studio host is correct: it
  * consolidates classroom search authority onto the classroom domain instead of
  * splitting it across two hostnames.
  */
@@ -25,16 +27,16 @@ export const METAPET_SCHOOL_HOSTS = [
 ] as const;
 
 /** Product wordmark. Used for nav, install prompts and social cards. */
-export const METAPET_SCHOOL_NAME = "MetaPet School";
+export const METAPET_SCHOOL_NAME = METAPET_PRODUCT.school;
 
 /** Short form for home-screen install tiles, which truncate aggressively. */
-export const METAPET_SCHOOL_SHORT_NAME = "MetaPet School";
+export const METAPET_SCHOOL_SHORT_NAME = METAPET_PRODUCT.school;
 
 export const METAPET_SCHOOL_TAGLINE =
-  "Australian classroom lessons for Years 3–6";
+  METAPET_PRODUCT.positioning;
 
 export const METAPET_SCHOOL_DESCRIPTION =
-  "MetaPet School is a calm, teacher-led classroom experience for Australian Years 3–6. Seven short lessons on digital responsibility and online safety, with alias-only participation and records that stay on the classroom device.";
+  "Seven teacher-led lessons for Australian Years 3–6. Explore systems, patterns, privacy and responsible creation without student accounts, advertising, trackers or a social feed.";
 
 /** Emerald used for browser chrome and the install splash. */
 export const METAPET_SCHOOL_THEME_COLOR = "#065f46";

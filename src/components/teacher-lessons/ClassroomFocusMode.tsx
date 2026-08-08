@@ -12,6 +12,8 @@ interface ClassroomFocusModeProps {
   onEnter: () => void;
   onExit: () => void;
   children: React.ReactNode;
+  modeLabel?: string;
+  className?: string;
 }
 
 /**
@@ -28,6 +30,8 @@ export function ClassroomFocusMode({
   onEnter,
   onExit,
   children,
+  modeLabel = "Classroom Focus Mode",
+  className = "",
 }: ClassroomFocusModeProps) {
   // Tell the global app chrome (bottom nav bar) to step aside while focus mode
   // is active, and to reappear the moment it ends or this component unmounts
@@ -39,18 +43,18 @@ export function ClassroomFocusMode({
 
   return (
     <div
-      className={
+      className={`${
         active
           ? "min-h-screen bg-slate-950 ring-4 ring-inset ring-amber-300/30"
           : "min-h-screen bg-slate-950"
-      }
+      } ${className}`}
       data-focus-mode={active ? "on" : "off"}
     >
       {active ? (
         <div className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-amber-300/30 bg-amber-300/10 px-4 py-2 text-amber-100 sm:px-6">
           <p className="flex items-center gap-2 text-sm font-medium">
             <Focus className="h-4 w-4" aria-hidden="true" />
-            <span>Classroom Focus Mode</span>
+            <span>{modeLabel}</span>
             <span className="hidden text-amber-200/70 sm:inline">
               · {lessonTitle}
             </span>
@@ -63,7 +67,7 @@ export function ClassroomFocusMode({
             onClick={onExit}
           >
             <Minimize2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
-            Exit focus
+            {modeLabel === "Student Display Mode" ? "Exit Student Display Mode" : "Exit focus"}
           </Button>
         </div>
       ) : (

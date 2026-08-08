@@ -1,101 +1,80 @@
-# MetaPet for Schools
-## 7 Lesson Cards
+# MetaPet School
+## Canonical 7-Lesson Sequence
 
-Each lesson card is written for a normal classroom slot: **20 minutes**, one clear outcome, simple teacher language, and light evidence only.
+This document is a compact planning view of the same seven lessons used by the guided runtime, lesson list, print cards, passport and offline pack. Each lesson is designed for a **15–20 minute teacher-led classroom slot**. The application and printable cards contain the complete teacher script, five-step lesson flow, participation choices, accessibility options, safe-stop condition and reset/delete reminder.
 
----
-
-## Session 1: Meet the Digital Companion
-
-**Time:** 20 minutes  
-**Clear outcome:** Students explain that a digital system changes when a user gives it input.  
-**Student activity:** Open the companion, check its companion state, try one action, and describe what changed.  
-**Teacher prompt:** "What changed after your action, and how do you know?"  
-**Light evidence:** One sentence: "I chose __ and the companion state changed to __."  
-**Best-fit use case:** Digital Technologies mini-lesson
+Student participation may include moving, pointing, speaking, drawing, building, working with a partner, quietly observing, responding privately to the teacher or using a printed alternative. Evidence is optional and light; every lesson has a no-marking path.
 
 ---
 
-## Session 2: Read the Companion State
+## Lesson 1: Meet the System
 
-**Time:** 20 minutes  
-**Clear outcome:** Students read visible state information and make a reasoned action choice.  
-**Student activity:** Check each state indicator, identify the lowest or most urgent state, and choose one response.  
-**Teacher prompt:** "What does the companion state tell you to do next?"  
-**Light evidence:** Quick partner explanation using cause-and-effect language.  
-**Best-fit use case:** Digital Technologies mini-lesson
+**Learning intention:** We are learning that a digital system receives input and changes state.
+**Success statement:** I can point to an input and explain one visible state change it caused.
+**Core experience:** Observe the starting state, apply one input and explain the visible change.
+**Offline fallback:** Use printed before-and-after MetaPet panels and point to the changed signal.
 
 ---
 
-## Session 3: Feelings, Signals and Regulation
+## Lesson 2: Read the Signals
 
-**Time:** 20 minutes  
-**Clear outcome:** Students connect visible feelings or moods to a simple regulation strategy.  
-**Student activity:** Identify a mood, discuss what that mood might signal, and match it with a calming or recovery action.  
-**Teacher prompt:** "If the companion looks overwhelmed, what would help it settle?"  
-**Light evidence:** One reflection line about a feeling and a helpful response.  
-**Best-fit use case:** Wellbeing session
+**Learning intention:** We are learning to use visible signals to make a reasoned system choice.
+**Success statement:** I can identify a signal, choose a response and give a reason.
+**Core experience:** Find visible signals, choose a calm reversible response and check the result.
+**Offline fallback:** Sort printed signal and response cards into evidence-based pairs.
 
 ---
 
-## Session 4: Repair and Reset
+## Lesson 3: One Identity, Many Representations
 
-**Time:** 20 minutes  
-**Clear outcome:** Students explain that recovery in a system is a skill, not a punishment.  
-**Student activity:** Start from an unstable companion state, test a repair sequence, and compare which order of actions works best.  
-**Teacher prompt:** "What helped the system recover, and why did that order matter?"  
-**Light evidence:** Short verbal explanation or checklist note about the recovery sequence.  
-**Best-fit use case:** Wellbeing session or relief lesson
+**Learning intention:** We are learning that one digital identity can be represented in several useful ways.
+**Success statement:** I can match representations and explain what stays the same.
+**Core experience:** Inspect visual, numeric and trait views; match the shared identity; compare what each view reveals.
+**Offline fallback:** Match the complete printed representation card set.
 
 ---
 
-## Session 5: Systems and Feedback Loops
+## Lesson 4: Choices and Algorithms
 
-**Time:** 20 minutes  
-**Clear outcome:** Students describe a simple feedback loop using system language.  
-**Student activity:** Track one input, one state change, and one resulting mood or output.  
-**Teacher prompt:** "What signal did the system give you after your first action?"  
-**Light evidence:** Input -> state -> output summary.  
-**Best-fit use case:** STEM block
+**Learning intention:** We are learning to build and test a simple algorithm.
+**Success statement:** I can put choices in order, test the result and repair one problem.
+**Core experience:** Build a sequence, test it and revise the steps using cause-and-effect evidence.
+**Offline fallback:** Arrange and act out printed action cards, with movement always optional.
 
 ---
 
-## Session 6: Patterns Over Time
+## Lesson 5: Privacy and Responsible Design
 
-**Time:** 20 minutes  
-**Clear outcome:** Students identify a pattern in how the companion responds across multiple actions.  
-**Student activity:** Review notes from earlier sessions, compare with a partner, and identify one reliable pattern.  
-**Teacher prompt:** "What usually works, and what evidence supports that?"  
-**Light evidence:** One pattern statement supported by an example.  
-**Best-fit use case:** STEM block
+**Learning intention:** We are learning to make data-minimising design choices.
+**Success statement:** I can explain why a system should collect less information and give people meaningful control.
+**Core experience:** Identify unnecessary data, redesign a choice and explain the safer alternative.
+**Offline fallback:** Sort printed data-choice cards into needed, optional and not needed groups.
 
 ---
 
-## Session 7: Explain Your Thinking
+## Lesson 6: Design a Better Feature
 
-**Time:** 20 minutes  
-**Clear outcome:** Students explain what they learned about systems, regulation and collaboration.  
-**Student activity:** Share one pattern, one useful strategy, and one thing they now understand more clearly.  
-**Teacher prompt:** "What did this digital companion help you notice about systems or behaviour?"  
-**Light evidence:** One short student reflection or teacher observation note.  
-**Best-fit use case:** STEM block or end-of-week showcase
+**Learning intention:** We are learning to design a useful, accessible and privacy-preserving feature.
+**Success statement:** I can propose a feature, identify who it helps and explain one safety or accessibility decision.
+**Core experience:** Find a real user need, sketch a small feature and inspect its accessibility, privacy and wellbeing boundaries.
+**Offline fallback:** Use the printable feature-design canvas and static MetaPet examples.
 
 ---
 
-## Suggested Sequence Options
+## Lesson 7: Test, Reflect and Improve
 
-### Full sequence
+**Learning intention:** We are learning to test a design against criteria, listen to feedback and improve it.
+**Success statement:** I can describe what I tested, what I learned and one improvement I made.
+**Core experience:** Choose a criterion, run a small test and revise the design from evidence.
+**Offline fallback:** Use the printed test-and-reflect sheet with a partner or teacher.
 
-Use Sessions 1-7 in order across two weeks.
+---
 
-### Short Digital Technologies option
+## Sequence Options
 
-Use Sessions 1, 2, 5 and 6.
+**Full sequence:** Teach Lessons 1–7 in order.
+**Short systems sequence:** Lessons 1, 2, 4 and 7.
+**Short responsible-design sequence:** Lessons 1, 3, 5, 6 and 7.
+**Standalone entry:** Lesson 1 is the recommended starting point.
 
-### Short wellbeing option
-
-Use Sessions 1, 3, 4 and 7.
-
-### Low-prep relief option
-
-Use Session 1 as the entry lesson or Session 4 as the standalone repair lesson.
+The teacher remains in control throughout. A roster is optional, a student account is never required, demonstration changes reset safely, and optional local classroom records remain teacher-deletable and expire after 35 days without use.

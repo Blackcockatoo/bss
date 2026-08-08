@@ -1,8 +1,8 @@
-# MetaPet Schools Teacher Supervision Model
+# MetaPet School Teacher Supervision Model
 
 ## Default supervision expectation
 
-All classroom use is teacher-led. Students should not use `MetaPet Schools` independently, unsupervised, or as an always-on background tool.
+All classroom use is teacher-led. Students should not use `MetaPet School` independently, unsupervised, or as an always-on background tool.
 
 ## Teacher responsibilities
 
