@@ -11,11 +11,15 @@ import {
 } from "@/lib/schools/contribution";
 
 /**
- * The adult-only contribution chooser.
+ * Optional contribution amounts, deliberately rendered as a plain list.
  *
- * Nothing is preselected, no option is badged, and choosing A$0 is a complete,
- * unremarkable answer. Submitting does not open a checkout: there is no payment
- * processor connected, and the form says so plainly rather than staging a
+ * They were previously bordered cards in a grid, which read as a pricing table
+ * with free access as the cheapest column. A list of suggestions cannot be
+ * mistaken for a set of plans: there is nothing to compare, nothing to unlock
+ * and no column marked as the better choice.
+ *
+ * Nothing is preselected, and submitting does not open a checkout — there is no
+ * payment processor connected, and the form says so rather than staging a
  * transaction that cannot happen.
  */
 export function ContributionChooser() {
@@ -48,53 +52,48 @@ export function ContributionChooser() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <fieldset className="space-y-3">
-        <legend className="text-lg font-semibold text-foreground">
-          Choose an annual contribution
+      <fieldset>
+        <legend className="text-base font-semibold text-foreground">
+          Suggested annual contributions
         </legend>
-        <p className="text-sm leading-6 text-muted-foreground">
-          Every option below gives your school exactly the same thing. Nothing
-          is selected for you.
+        <p className="mt-1 text-sm leading-6 text-muted-foreground">
+          Suggestions, not products. None of them changes what any school or any
+          child receives.
         </p>
 
-        <div className="grid gap-3">
+        <ul className="mt-4 space-y-3">
           {CONTRIBUTION_OPTIONS.map((option) => {
             const inputId = `${groupId}-${option.id}`;
-            const isSelected = selected === option.id;
             return (
-              <label
-                key={option.id}
-                htmlFor={inputId}
-                className={`flex cursor-pointer items-start gap-4 rounded-2xl border p-4 transition-colors focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-emerald-800 ${
-                  isSelected
-                    ? "border-emerald-700 bg-emerald-600/10"
-                    : "border-border bg-card hover:border-muted-foreground"
-                }`}
-              >
-                <input
-                  type="radio"
-                  id={inputId}
-                  name={groupId}
-                  value={option.id}
-                  checked={isSelected}
-                  onChange={() => {
-                    setSelected(option.id);
-                    setResult(null);
-                  }}
-                  className="mt-1 h-5 w-5 shrink-0"
-                />
-                <span>
-                  <span className="block text-base font-semibold text-foreground">
-                    {option.label}
+              <li key={option.id}>
+                <label
+                  htmlFor={inputId}
+                  className="flex cursor-pointer items-baseline gap-3"
+                >
+                  <input
+                    type="radio"
+                    id={inputId}
+                    name={groupId}
+                    value={option.id}
+                    checked={selected === option.id}
+                    onChange={() => {
+                      setSelected(option.id);
+                      setResult(null);
+                    }}
+                    className="h-5 w-5 shrink-0 self-center"
+                  />
+                  <span className="text-base text-foreground">
+                    <span className="font-semibold">{option.label}</span>
+                    {" — "}
+                    <span className="text-muted-foreground">
+                      {option.description}
+                    </span>
                   </span>
-                  <span className="mt-1 block text-sm leading-6 text-muted-foreground">
-                    {option.description}
-                  </span>
-                </span>
-              </label>
+                </label>
+              </li>
             );
           })}
-        </div>
+        </ul>
       </fieldset>
 
       {isCustom ? (
@@ -122,7 +121,7 @@ export function ContributionChooser() {
       <button
         type="submit"
         disabled={!chosen}
-        className="inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-800 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-emerald-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
+        className="inline-flex min-h-12 items-center justify-center rounded-xl border-2 border-border px-6 py-3 text-base font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current disabled:cursor-not-allowed disabled:opacity-50"
       >
         Record this choice
       </button>
@@ -139,8 +138,7 @@ export function ContributionChooser() {
               >
                 {CONTRIBUTION_CONTACT_EMAIL}
               </a>{" "}
-              if you would like to arrange it. If you chose A$0, there is
-              nothing to arrange — just start teaching.
+              if you would like to arrange it.
             </p>
           </div>
         ) : null}

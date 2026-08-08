@@ -5,22 +5,45 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 import {
-  CONTRIBUTION_CLOSING_LINE,
   CONTRIBUTION_INTEGRATION_POINT,
   CONTRIBUTION_OPTIONS,
   CONTRIBUTION_PAYMENTS_ENABLED,
   DEFAULT_CONTRIBUTION_SELECTION,
-  FREE_TIER_INCLUDES,
+  FREE_ACCESS,
+  FREE_ACCESS_INCLUDES,
+  FREE_PROMISE,
+  GOVERNING_PRINCIPLE,
   PAID_SERVICES,
+  START_TEACHING_ACTION,
 } from "./contribution";
 
 const REPO_ROOT = path.resolve(__dirname, "../../..");
 
 describe("contribution model", () => {
-  it("offers A$0 as the first option", () => {
-    const first = CONTRIBUTION_OPTIONS[0];
-    expect(first.amount).toBe(0);
-    expect(first.label).toBe("A$0");
+  it("keeps A$0 out of the contribution amounts entirely", () => {
+    // A$0 is the product, not the cheapest tier. Listing it beside A$250 and
+    // A$1,500 turns free access into a pricing column, which is the exact
+    // misreading this model exists to prevent.
+    for (const option of CONTRIBUTION_OPTIONS) {
+      expect(option.amount === 0).toBe(false);
+      expect(option.label).not.toBe("A$0");
+    }
+  });
+
+  it("states free access as an action, not as an option in a list", () => {
+    expect(FREE_ACCESS.action).toBe("Use MetaPet School — A$0");
+    expect(FREE_ACCESS.assurance).toBe(
+      "No explanation required. Nothing is removed. Nothing expires.",
+    );
+  });
+
+  it("shows the actual zero in the entry action and the promise", () => {
+    // "Free" alone is what an expiring trial says too, so the numeral has to
+    // be visible in both the button and the promise beneath it.
+    expect(START_TEACHING_ACTION).toContain("A$0");
+    expect(FREE_PROMISE).toMatch(/not a trial/i);
+    expect(FREE_PROMISE).toMatch(/no expiry/i);
+    expect(FREE_PROMISE).toMatch(/no reduced version/i);
   });
 
   it("preselects nothing", () => {
@@ -65,8 +88,8 @@ describe("contribution model", () => {
   });
 
   it("gives the A$0 school the complete experience", () => {
-    expect(FREE_TIER_INCLUDES.length).toBeGreaterThanOrEqual(5);
-    const joined = FREE_TIER_INCLUDES.join(" ").toLowerCase();
+    expect(FREE_ACCESS_INCLUDES.length).toBeGreaterThanOrEqual(5);
+    const joined = FREE_ACCESS_INCLUDES.join(" ").toLowerCase();
     expect(joined).toContain("all seven sessions");
     expect(joined).toContain("field mode");
   });
@@ -94,10 +117,41 @@ describe("contribution model", () => {
     expect(result.intent).toEqual({ optionId: "sustain", amount: 250 });
   });
 
-  it("states the closing line the contribution page must end with", () => {
-    expect(CONTRIBUTION_CLOSING_LINE).toBe(
-      "No school is too poor to use it. No school is too wealthy to help sustain it.",
-    );
+  it("carries the governing principle as two display lines", () => {
+    expect([...GOVERNING_PRINCIPLE]).toEqual([
+      "No school is too poor to use it.",
+      "No school is too wealthy to help sustain it.",
+    ]);
+  });
+
+  it("uses no plan, tier or unlock language anywhere in the model", () => {
+    const corpus = [
+      START_TEACHING_ACTION,
+      FREE_PROMISE,
+      FREE_ACCESS.action,
+      FREE_ACCESS.assurance,
+      ...FREE_ACCESS_INCLUDES,
+      ...CONTRIBUTION_OPTIONS.map((o) => `${o.label} ${o.description}`),
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    // Word-boundary matched: "No explanation required" is not plan language.
+    for (const word of [
+      "plan",
+      "plans",
+      "tier",
+      "tiers",
+      "unlock",
+      "premium",
+      "basic",
+      "upgrade",
+      "choose your",
+      "licence",
+      "license",
+    ]) {
+      expect(corpus, word).not.toMatch(new RegExp(`\\b${word}\\b`));
+    }
   });
 });
 
@@ -112,18 +166,28 @@ describe("no child-facing monetisation", () => {
     "src/components/teacher-lessons/activities",
   ];
 
-  const MONEY_WORDS = [
-    "A$",
-    "subscribe",
-    "subscription",
-    "checkout",
-    "upgrade",
-    "purchase",
-    "buy now",
-    "payment",
-    "contribute",
-    "donation",
-    "pricing",
+  /**
+   * Solicitation, not vocabulary. A classroom screen telling a teacher "no
+   * account or payment required" is the opposite of monetisation, so the bans
+   * below target the ask — an amount, a checkout, an upgrade, a request for
+   * payment details — rather than the bare noun.
+   */
+  const MONEY_SOLICITATIONS = [
+    /A\$/i,
+    /\bsubscribe\b/i,
+    /\bsubscription\b/i,
+    /\bcheckout\b/i,
+    /\bupgrade\b/i,
+    /\bpurchase\b/i,
+    /\bbuy\b/i,
+    /\bcontribute\b/i,
+    /\bdonat(e|ion)\b/i,
+    /\bpricing\b/i,
+    /payment (details|method|information)/i,
+    /(make|enter|add) a payment/i,
+    // An affirmative demand only. "No account or payment required" must pass;
+    // "payment is required to continue" must not.
+    /(?<!no account or )(?<!no )payment is required/i,
   ];
 
   async function classroomSources(): Promise<string[]> {
@@ -144,20 +208,30 @@ describe("no child-facing monetisation", () => {
     return groups.flat();
   }
 
-  it("mentions no payment concept on any child-facing classroom screen", async () => {
+  it("asks a child for money nowhere in the classroom experience", async () => {
     const files = await classroomSources();
     expect(files.length).toBeGreaterThan(10);
 
     const offenders: string[] = [];
     for (const file of files) {
-      const source = readFileSync(file, "utf8").toLowerCase();
-      for (const word of MONEY_WORDS) {
-        if (source.includes(word.toLowerCase())) {
-          offenders.push(`${path.relative(REPO_ROOT, file)} → ${word}`);
+      const source = readFileSync(file, "utf8");
+      for (const pattern of MONEY_SOLICITATIONS) {
+        if (pattern.test(source)) {
+          offenders.push(`${path.relative(REPO_ROOT, file)} → ${pattern}`);
         }
       }
     }
 
     expect(offenders).toEqual([]);
+  });
+
+  it("still permits telling a teacher that no payment is required", async () => {
+    // The reassurance must survive the ban, or the ban is checking vocabulary
+    // instead of behaviour.
+    const launchpad = readFileSync(
+      path.join(REPO_ROOT, "src/components/field-mode/FieldLessonLaunchpad.tsx"),
+      "utf8",
+    );
+    expect(launchpad).toContain("No account or payment required");
   });
 });

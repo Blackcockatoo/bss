@@ -4,12 +4,16 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   SCHOOL_HEADLINE,
-  SCHOOL_TRUST_LINE,
   lessonCards,
   reviewerPathways,
   schoolPackageDocs,
 } from "@/app/schools/content";
 import SchoolsPage from "@/app/schools/page";
+import {
+  FREE_PROMISE,
+  GOVERNING_PRINCIPLE,
+  START_TEACHING_ACTION,
+} from "@/lib/schools/contribution";
 
 vi.mock("next/link", () => ({
   default: ({
@@ -27,116 +31,163 @@ vi.mock("@/lib/childSafeRoute.server", () => ({
   enforceChildSafeServerRoute: vi.fn(),
 }));
 
-describe("SchoolsPage", () => {
-  it("leads with the product promise, both calls to action and the trust line", () => {
+/** Everything the entry screen is allowed to contain, in order. */
+describe("SchoolsPage entry", () => {
+  it("shows identity, headline, one short explanation and one primary action", () => {
     render(<SchoolsPage />);
 
+    expect(screen.getByText("MetaPet School")).toBeInTheDocument();
+    expect(
+      screen.getByText("An education initiative of Blue $nake Studio"),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { level: 1, name: SCHOOL_HEADLINE }),
     ).toBeInTheDocument();
     expect(
-      screen.getAllByRole("link", { name: /Run one class free/i })[0],
-    ).toHaveAttribute("href", "/schools/field");
-    expect(
-      screen.getByRole("link", { name: /See exactly what data it uses/i }),
-    ).toHaveAttribute("href", "#data");
-    expect(screen.getByText(SCHOOL_TRUST_LINE)).toBeInTheDocument();
+      screen.getAllByRole("link", { name: START_TEACHING_ACTION })[0],
+    ).toHaveAttribute("href", "/schools/field/start");
   });
 
-  it("gets a teacher to Session One without an account, payment or sales form", () => {
+  it("states the complete-free promise as body text, not microcopy", () => {
     render(<SchoolsPage />);
 
-    expect(
-      screen.getByRole("link", { name: /Preview Session One/i }),
-    ).toHaveAttribute("href", "/schools/field/lessons/meet-the-system");
-    expect(screen.getByText(/No student accounts to create/i)).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: /What you need/i }),
-    ).toBeInTheDocument();
+    const promise = screen.getByText(FREE_PROMISE);
+    expect(promise).toBeInTheDocument();
+    // `text-base` or larger; never a muted `text-xs` legal line.
+    expect(promise.className).toMatch(/\btext-base\b/);
+    expect(promise.className).not.toMatch(/text-(xs|sm)\b/);
   });
 
-  it("separates MetaPet School from school-management software", () => {
+  it("keeps the secondary actions visually subordinate to the primary one", () => {
     render(<SchoolsPage />);
 
-    expect(
-      screen.getByText(
-        /Keep your existing school platform for attendance, payments, timetables and communication/i,
-      ),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/not a school-management system/i),
-    ).toBeInTheDocument();
+    for (const name of [
+      /Browse the seven lessons/i,
+      /Review safety and privacy/i,
+    ]) {
+      const link = screen.getByRole("link", { name });
+      // Underlined text links, not filled buttons competing with the CTA.
+      expect(link.className).toMatch(/underline/);
+      expect(link.className).not.toMatch(/bg-emerald-400/);
+    }
   });
 
-  it("presents A\\$0 as a complete offer rather than a lesser tier", () => {
+  it("never asks the visitor to choose a plan on the entry screen", () => {
+    const { container } = render(<SchoolsPage />);
+    const text = (container.textContent ?? "").toLowerCase();
+
+    for (const phrase of [
+      "choose your",
+      "select a plan",
+      "most popular",
+      "recommended plan",
+      "unlock",
+      "premium",
+      "free trial",
+      "upgrade",
+    ]) {
+      expect(text, phrase).not.toContain(phrase);
+    }
+  });
+});
+
+describe("SchoolsPage governing principle", () => {
+  it("renders both lines at display size, in full-contrast text", () => {
     render(<SchoolsPage />);
 
-    expect(screen.getByText("A$0")).toBeInTheDocument();
-    expect(
-      screen.getByText(/The complete experience\. No conditions\./i),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: /See contribution options/i }),
-    ).toHaveAttribute("href", "/schools/contribute");
+    const band = screen.getByRole("region", { name: /governing principle/i });
+    const statement = within(band).getByText(GOVERNING_PRINCIPLE[0])
+      .parentElement as HTMLElement;
+
+    for (const line of GOVERNING_PRINCIPLE) {
+      expect(within(band).getByText(line)).toBeInTheDocument();
+    }
+
+    // ~24px mobile, ~36px desktop. Never muted grey, never inside a details.
+    expect(statement.className).toMatch(/\btext-2xl\b/);
+    expect(statement.className).toMatch(/md:text-4xl/);
+    expect(statement.className).toMatch(/text-white/);
+    expect(statement.closest("details")).toBeNull();
   });
 
-  it("shows the local-data lifecycle and a route to the deletion controls", () => {
+  it("places the principle directly after the hero, not in the footer", () => {
+    const { container } = render(<SchoolsPage />);
+    const sections = Array.from(container.querySelectorAll("section"));
+    const bandIndex = sections.findIndex((section) =>
+      (section.textContent ?? "").includes(GOVERNING_PRINCIPLE[0]),
+    );
+
+    expect(bandIndex).toBe(1);
+  });
+});
+
+describe("SchoolsPage contribution placement", () => {
+  it("puts contribution after what it is, what teachers do and the privacy answer", () => {
+    const { container } = render(<SchoolsPage />);
+    const text = container.textContent ?? "";
+
+    const contributionAt = text.indexOf("Use it free. Contribute if you can.");
+    expect(contributionAt).toBeGreaterThan(-1);
+
+    for (const earlier of [
+      "This does not replace the software that runs your school",
+      "What children do",
+      "What teachers do",
+      "What happens to the data?",
+    ]) {
+      expect(text.indexOf(earlier), earlier).toBeLessThan(contributionAt);
+    }
+  });
+
+  it("shows no contribution amount on the landing page at all", () => {
+    const { container } = render(<SchoolsPage />);
+    const text = container.textContent ?? "";
+
+    for (const amount of ["A$250", "A$750", "A$1,500"]) {
+      expect(text, amount).not.toContain(amount);
+    }
+  });
+
+  it("offers free access as the action and contribution as a plain link", () => {
     render(<SchoolsPage />);
 
-    const dataSection = document.getElementById("data");
-    expect(dataSection).not.toBeNull();
-    const data = within(dataSection as HTMLElement);
+    const free = screen.getByRole("link", {
+      name: /Use MetaPet School — A\$0/i,
+    });
+    expect(free).toHaveAttribute("href", "/schools/field/start");
+    expect(free.className).toMatch(/bg-emerald-400/);
 
+    const contribute = screen.getByRole("link", {
+      name: /See the optional contribution amounts/i,
+    });
+    expect(contribute).toHaveAttribute("href", "/schools/contribute");
+    expect(contribute.className).toMatch(/underline/);
+    expect(contribute.className).not.toMatch(/bg-emerald-400/);
+  });
+});
+
+describe("SchoolsPage preserved material", () => {
+  it("still shows the one canonical seven-session sequence", () => {
+    render(<SchoolsPage />);
+
+    for (const lesson of lessonCards) {
+      expect(screen.getByText(lesson.title)).toBeInTheDocument();
+    }
+  });
+
+  it("still answers the whole local-data lifecycle", () => {
+    render(<SchoolsPage />);
+
+    const data = within(document.getElementById("data") as HTMLElement);
     expect(data.getByText("What is stored?")).toBeInTheDocument();
     expect(data.getByText("When does it disappear?")).toBeInTheDocument();
-    expect(data.getByText(/How does a teacher delete it\?/i)).toBeInTheDocument();
     expect(
       data.getByRole("link", { name: /Open the local-data controls/i }),
     ).toHaveAttribute("href", "/schools/data");
   });
 
-  it("shows the one canonical seven-session sequence", () => {
+  it("still makes every reviewer pathway and document discoverable", () => {
     render(<SchoolsPage />);
-
-    for (const lesson of lessonCards) {
-      expect(
-        screen.getByRole("heading", { name: lesson.title }),
-      ).toBeInTheDocument();
-    }
-  });
-
-  it("links the broader consumer universe only as an adult-labelled outbound link", () => {
-    render(<SchoolsPage />);
-
-    const consumerLink = screen.getByRole("link", {
-      name: /Complete MetaPet at Blue \$nake Studio/i,
-    });
-    expect(consumerLink).toHaveAttribute(
-      "href",
-      "https://www.bluesnakestudios.com",
-    );
-    expect(consumerLink).toHaveAttribute("target", "_blank");
-  });
-
-  it("keeps every governance, curriculum and reviewer pathway discoverable", () => {
-    render(<SchoolsPage />);
-
-    expect(
-      screen.getByRole("heading", {
-        name: /Curriculum alignment with explicit classroom fit/i,
-      }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: /Choose the pack for your role/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: /Light evidence only/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", {
-        name: /Pilot-ready material for leadership, ICT, and wellbeing review/i,
-      }),
-    ).toBeInTheDocument();
 
     for (const pathway of reviewerPathways) {
       expect(
@@ -150,23 +201,30 @@ describe("SchoolsPage", () => {
           name: new RegExp(`Download ${doc.title}`, "i"),
         }),
       ).toHaveAttribute("href", doc.href);
-      expect(doc.href).toMatch(/\.md$/);
     }
   });
 
-  it("routes no evaluator into the consumer product by accident", () => {
+  it("still separates MetaPet School from school-management software", () => {
     render(<SchoolsPage />);
 
-    const internalHrefs = screen
+    expect(
+      screen.getByText(
+        /Keep your existing school platform for attendance, payments, timetables and communication/i,
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("still routes no evaluator into the consumer product", () => {
+    render(<SchoolsPage />);
+
+    const consumerRoutes = screen
       .getAllByRole("link")
       .map((link) => link.getAttribute("href") ?? "")
-      .filter((href) => href.startsWith("/"));
-
-    const consumerRoutes = internalHrefs.filter((href) =>
-      /^\/(pet|shop|app|pricing|identity|dna-hub|body-forge|alchemest)\b/.test(
-        href,
-      ),
-    );
+      .filter((href) =>
+        /^\/(pet|shop|app|pricing|identity|dna-hub|body-forge|alchemest)\b/.test(
+          href,
+        ),
+      );
     expect(consumerRoutes).toEqual([]);
   });
 });

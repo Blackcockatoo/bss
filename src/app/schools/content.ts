@@ -15,14 +15,6 @@ export interface SchoolPackageDoc {
     | "Evidence Pack";
 }
 
-export interface CurriculumRow {
-  band: "Years 3-4" | "Years 5-6";
-  learningArea: "Digital Technologies" | "Health and Physical Education";
-  code: string;
-  focus: string;
-  metapetUse: string;
-}
-
 export interface LearningOutcome {
   statement: string;
   lessons: string;
@@ -48,17 +40,6 @@ export interface ExternalResourceLink {
 }
 
 export interface ReviewerPathway {
-  title: string;
-  description: string;
-  docSlugs: string[];
-}
-
-export interface PackageSummaryCard {
-  title: string;
-  description: string;
-}
-
-export interface PilotAcceptanceStep {
   title: string;
   description: string;
   docSlugs: string[];
@@ -432,121 +413,6 @@ export const schoolPackageDocs: SchoolPackageDoc[] = ([
   },
 ] as Omit<SchoolPackageDoc, "inAppHref">[]).map(withInAppHref);
 
-export const curriculumRows: CurriculumRow[] = [
-  {
-    band: "Years 3-4",
-    learningArea: "Digital Technologies",
-    code: "AC9TDI4K01",
-    focus: "Digital systems and their purposes",
-    metapetUse:
-      "Students identify the device as a digital system that receives input and displays companion state.",
-  },
-  {
-    band: "Years 3-4",
-    learningArea: "Digital Technologies",
-    code: "AC9TDI4K03",
-    focus: "Data representation",
-    metapetUse:
-      "Students read colour, icon, text and mood as different representations of the same state.",
-  },
-  {
-    band: "Years 3-4",
-    learningArea: "Digital Technologies",
-    code: "AC9TDI4P02",
-    focus: "Branching and iteration",
-    metapetUse:
-      "Students describe simple if-then decisions and repeat care loops to test what works.",
-  },
-  {
-    band: "Years 3-4",
-    learningArea: "Digital Technologies",
-    code: "AC9TDI4P04",
-    focus: "Input and simple visual programs",
-    metapetUse:
-      "Students observe how one action changes the companion state and visible outputs.",
-  },
-  {
-    band: "Years 5-6",
-    learningArea: "Digital Technologies",
-    code: "AC9TDI6K03",
-    focus: "How systems represent data using numbers",
-    metapetUse:
-      "Students connect visible companion state to tracked values and explain why outputs change over time.",
-  },
-  {
-    band: "Years 5-6",
-    learningArea: "Digital Technologies",
-    code: "AC9TDI6P02",
-    focus: "Algorithm design with branching and iteration",
-    metapetUse:
-      "Students predict and explain which action sequence should stabilise a state.",
-  },
-  {
-    band: "Years 5-6",
-    learningArea: "Digital Technologies",
-    code: "AC9TDI6P05",
-    focus: "Control structures, variables and input",
-    metapetUse:
-      "Students test how repeated inputs and changing state values affect outcomes.",
-  },
-  {
-    band: "Years 5-6",
-    learningArea: "Digital Technologies",
-    code: "AC9TDI6P06",
-    focus: "Evaluation and broader impact",
-    metapetUse:
-      "Students evaluate whether the companion is calm, useful and fit for classroom learning.",
-  },
-  {
-    band: "Years 3-4",
-    learningArea: "Health and Physical Education",
-    code: "AC9HP4P03",
-    focus: "Personal and social skills",
-    metapetUse:
-      "Students work in pairs, listen to each other and compare observations respectfully.",
-  },
-  {
-    band: "Years 3-4",
-    learningArea: "Health and Physical Education",
-    code: "AC9HP4P05",
-    focus: "Emotional responses and regulation",
-    metapetUse:
-      "Students name a feeling and match it with a helpful calming or recovery action.",
-  },
-  {
-    band: "Years 3-4",
-    learningArea: "Health and Physical Education",
-    code: "AC9HP4P08",
-    focus: "Health-enhancing behaviours for wellbeing",
-    metapetUse:
-      "Students discuss routines, balance and actions that support calm and recovery.",
-  },
-  {
-    band: "Years 5-6",
-    learningArea: "Health and Physical Education",
-    code: "AC9HP6P03",
-    focus: "Refining personal and social skills",
-    metapetUse:
-      "Students collaborate on explanations, negotiate action choices and present findings.",
-  },
-  {
-    band: "Years 5-6",
-    learningArea: "Health and Physical Education",
-    code: "AC9HP6P05",
-    focus: "Managing emotions and relationships",
-    metapetUse:
-      "Students analyse how responses affect behaviour and suggest strategies to regulate emotions.",
-  },
-  {
-    band: "Years 5-6",
-    learningArea: "Health and Physical Education",
-    code: "AC9HP6P08",
-    focus: "Health-enhancing behaviours and wellbeing",
-    metapetUse:
-      "Students reflect on how routines, balance and reflection support individual and group wellbeing.",
-  },
-];
-
 export const learningOutcomes: LearningOutcome[] = [
   {
     statement:
@@ -606,16 +472,13 @@ export const lessonCards: LessonCard[] = CANONICAL_SESSIONS.map((session) => ({
 export const SCHOOL_HEADLINE = "Creative technology that gives attention back.";
 
 export const SCHOOL_SUPPORTING_STATEMENT =
-  "Seven short, teacher-led lessons that help Years 3-6 students understand systems, signals, choices and responsible technology - without another student account, social feed or permanent digital profile.";
-
-export const SCHOOL_TRUST_LINE =
-  "Free to use. Contribute if you can. No child priced out.";
+  "Seven short, teacher-led lessons for Years 3-6 - without student accounts, advertising or another permanent digital profile.";
 
 export const SCHOOL_PROOF_LINE =
-  "One class. Seven sessions. Prove it before you scale it.";
+  "Open the lesson. Guide the activity. Capture light evidence. Get back to teaching.";
 
 export const SCHOOL_ATTRIBUTION =
-  "MetaPet School - An education initiative of Blue $nake Studio.";
+  "An education initiative of Blue $nake Studio";
 
 /**
  * How MetaPet School relates to the software a school already runs. This is
@@ -624,21 +487,6 @@ export const SCHOOL_ATTRIBUTION =
  */
 export const SCHOOL_POSITIONING_STATEMENT =
   "Keep your existing school platform for attendance, payments, timetables and communication. MetaPet School performs a different job: it gives children a bounded learning experience without requiring another student identity system.";
-
-/**
- * Facts that are true of the shipped implementation. Each one is checkable in
- * the code or the governance pack - nothing aspirational belongs in this list.
- */
-export const proofStripFacts: readonly string[] = [
-  "7 teacher-led sessions",
-  "About 15-20 minutes each",
-  "Years 3-6",
-  "No student accounts",
-  "Local-first classroom records",
-  "Teacher-controlled deletion",
-  "Australian Curriculum mapping",
-  "Printable support",
-];
 
 /** What a teacher needs before Session One. Deliberately short. */
 export const whatYouNeed: readonly string[] = [
@@ -649,29 +497,6 @@ export const whatYouNeed: readonly string[] = [
   "No student accounts to create",
   "A printer if you want the paper fallback",
   "One class is enough to start",
-];
-
-/** The four things a teacher actually does. Nothing else is required. */
-export const teacherEffortSteps: readonly { step: string; detail: string }[] = [
-  {
-    step: "Open the lesson",
-    detail: "Pick a session. No setup screen, no roster import, no login.",
-  },
-  {
-    step: "Guide the activity",
-    detail:
-      "Read the one-sentence opener, run the activity, ask the reflection question.",
-  },
-  {
-    step: "Capture light evidence",
-    detail:
-      "One line or one spoken sentence per pair. There is no marking queue.",
-  },
-  {
-    step: "Get back to teaching",
-    detail:
-      "Each session ends at a visible stopping point. Nothing is left open.",
-  },
 ];
 
 /**
@@ -713,84 +538,6 @@ export const dataLifecycle: readonly { question: string; answer: string }[] = [
     question: "What is never required?",
     answer:
       "A student account, a student email, a real name, a photo, a login, or a payment.",
-  },
-];
-
-/** Things MetaPet School does not do, stated plainly rather than implied. */
-export const boundaryFacts: readonly string[] = [
-  "No student sign-up flow exists in the classroom build",
-  "No advertising and no advertising identifiers",
-  "No behavioural profiling or engagement scoring",
-  "No public student profile and no school social feed",
-  "No streaks, leaderboards or loot-box mechanics",
-  "No child-facing payment or contribution prompt",
-];
-
-/**
- * Where the sequence fits in a school week. Derived from each session's
- * declared best fit so a change to the canonical sequence updates this too.
- */
-export const weeklyFitOptions = [
-  "Digital Technologies mini-lesson",
-  "Wellbeing session",
-  "Digital citizenship lesson",
-  "STEM block",
-].map((label) => {
-  const sessions = CANONICAL_SESSIONS.filter(
-    (session) => session.bestFit === label,
-  );
-  const numbers = sessions.map((session) => session.number).join(", ");
-  return {
-    label,
-    description:
-      sessions.length === 1
-        ? `Session ${numbers}: ${sessions[0].title}.`
-        : `Sessions ${numbers}. ${sessions.map((s) => s.title).join("; ")}.`,
-  };
-});
-
-/**
- * The lowest-prep way in. Session One is complete on its own, so a relief or
- * one-off lesson does not need the rest of the sequence.
- */
-export const standaloneOption = {
-  label: "Relief or one-off lesson",
-  description: `Session 1: ${CANONICAL_SESSIONS[0].title}. It is a complete lesson by itself and ends at a visible stopping point.`,
-};
-
-export const evidenceTools = [
-  {
-    title: "One-page student reflection sheet",
-    description:
-      "A single written snapshot that captures cause/effect reasoning, systems vocabulary, regulation strategy and collaborative reflection.",
-  },
-  {
-    title: "Teacher observation checklist",
-    description:
-      "A quick circulation tool for noting whether students read companion state, explain patterns, suggest strategies and work collaboratively.",
-  },
-];
-
-export const assuranceItems = [
-  {
-    title: "No student accounts",
-    description:
-      "The school deployment is built for alias-only classroom use with no student sign-up flow.",
-  },
-  {
-    title: "Local classroom records",
-    description:
-      "Routine use keeps roster, lesson, and progress records on the current device during the pilot window.",
-  },
-  {
-    title: "Teacher-led and time-bounded",
-    description:
-      "The classroom version is designed for supervised lessons, not always-on companion behaviour.",
-  },
-  {
-    title: "Bounded product contract",
-    description:
-      "The school profile excludes chat, social features, identity shaping, public sharing, and retention pressure loops.",
   },
 ];
 
@@ -851,85 +598,6 @@ export const reviewerPathways: ReviewerPathway[] = [
       "accessibility-and-inclusion-review",
     ],
   },
-];
-
-export const packageSummaryCards: PackageSummaryCard[] = [
-  {
-    title: "Privacy pack",
-    description:
-      "Privacy policy, child and parent notices, data inventory, retention schedule, third-party register, controls summary, and privacy impact assessment.",
-  },
-  {
-    title: "Safeguarding pack",
-    description:
-      "Child-safety risk assessment, misuse and over-engagement controls, escalation pathway, supervision model, and inclusion review.",
-  },
-  {
-    title: "Teacher pack",
-    description:
-      "Teacher guide, parent note, staff briefing, lesson cards, and printable reflection materials for low-friction delivery.",
-  },
-  {
-    title: "Pilot operations pack",
-    description:
-      "Pilot prospectus, acceptance runbook, family participation protocol, review checklists, and outreach material for school launch.",
-  },
-  {
-    title: "Evidence pack",
-    description:
-      "Interview guides, feedback forms, measures, incident logging, fidelity notes, and the end-of-pilot summary template.",
-  },
-];
-
-export const pilotAcceptanceSteps: PilotAcceptanceStep[] = [
-  {
-    title: "Browser and network inspection",
-    description:
-      "Inspect routine classroom use on the school profile and confirm only declared traffic appears during normal lesson flow.",
-    docSlugs: [
-      "acceptance-runbook",
-      "third-party-services-register",
-      "security-controls-summary",
-    ],
-  },
-  {
-    title: "Teacher dry run",
-    description:
-      "Have one teacher rehearse the setup, lesson flow, evidence handling, and deletion controls before any school outreach.",
-    docSlugs: [
-      "teacher-dry-run-checklist",
-      "teacher-guide",
-      "pilot-runbook",
-    ],
-  },
-  {
-    title: "ICT/privacy review",
-    description:
-      "Walk ICT or privacy reviewers through the governance pack and capture a pass/fail decision against the school boundary.",
-    docSlugs: [
-      "ict-privacy-review-checklist",
-      "privacy-policy",
-      "privacy-impact-assessment",
-    ],
-  },
-  {
-    title: "Parent readability review",
-    description:
-      "Test the family note, privacy notice, and participation explanation with a parent or carer before live pilot use.",
-    docSlugs: [
-      "parent-readability-checklist",
-      "parent-note",
-      "parent-carer-privacy-notice",
-      "family-participation-protocol",
-    ],
-  },
-];
-
-export const pilotHardBlockers = [
-  "Any undeclared outbound call during routine classroom use.",
-  "Any reviewer confusion between the school deployment and the broader MetaPet product.",
-  "Any teacher setup burden above the promised low-friction lesson flow.",
-  "Any unclear family participation, alias handling, or deletion process.",
 ];
 
 export const curriculumSourceLinks: ExternalResourceLink[] = [
