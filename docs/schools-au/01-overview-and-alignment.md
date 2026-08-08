@@ -3,7 +3,7 @@
 
 **Audience:** classroom teachers, curriculum leaders, assistant principals, principals  
 **Recommended year levels:** Years 3-6  
-**Delivery shape:** 7 sessions x 20 minutes  
+**Delivery shape:** 7 sessions of about 15-20 minutes  
 **Teacher load:** no student accounts, no setup-heavy admin, no marking required
 
 ---
@@ -32,19 +32,19 @@ It is suitable for:
 By the end of the sequence, students will:
 
 1. explain that a digital system responds to inputs and changes state over time  
-   **Lessons:** 1, 2, 5  
+   **Sessions:** 1, 2, 4  
    **Codes:** `AC9TDI4K01`, `AC9TDI4P02`, `AC9TDI6P02`
-2. read companion state information and use it to make a reasoned action choice  
-   **Lessons:** 1, 2, 4  
+2. read the signals a system shows and use them to make a reasoned choice  
+   **Sessions:** 1, 2, 3  
    **Codes:** `AC9TDI4K03`, `AC9TDI4P04`, `AC9TDI6K03`
-3. describe simple feedback loops, cause and effect, and patterns in a system  
-   **Lessons:** 4, 5, 6  
+3. describe simple if-then rules, cause and effect, and patterns in a system  
+   **Sessions:** 4, 7  
    **Codes:** `AC9TDI4P02`, `AC9TDI6P05`, `AC9TDI6P06`
-4. use classroom wellbeing language to identify feelings, responses, and regulation strategies  
-   **Lessons:** 3, 4, 7  
+4. use classroom wellbeing language to name a signal, a response and a settling strategy  
+   **Sessions:** 2, 5  
    **Codes:** `AC9HP4P05`, `AC9HP6P05`, `AC9HP4P08`
-5. work with others to compare observations, share explanations, and reflect on respectful digital use  
-   **Lessons:** 2, 6, 7  
+5. work with others to compare observations, justify a design choice and reflect on responsible digital use  
+   **Sessions:** 3, 5, 6, 7  
    **Codes:** `AC9HP4P03`, `AC9HP6P03`, `AC9HP6P08`
 
 ---
@@ -100,19 +100,40 @@ This is useful when the sequence is positioned as both Digital Technologies lear
 
 ## How Teachers Can Use It Quickly
 
-- **Digital Technologies mini-lesson:** use Sessions 1, 2 and 5
-- **STEM block:** use Sessions 5, 6 and 7
-- **Wellbeing session:** use Sessions 3 and 4
-- **Relief lesson:** use Session 1 or Session 4 as a standalone
+- **Digital Technologies mini-lesson:** use Sessions 1 and 3
+- **Wellbeing session:** use Session 2
+- **Digital citizenship lesson:** use Session 5
+- **STEM block:** use Sessions 4, 6 and 7
+- **Relief or one-off lesson:** use Session 1 on its own - it is complete by itself
 
 ---
 
 ## What Teachers Need to Know Up Front
 
-- Each session is designed for **20 minutes**
+- Each session is designed for **about 15-20 minutes**
 - Students can work individually or in pairs
 - The sequence uses **light reflection**, not formal grading
 - The classroom version is designed around **on-device storage** and **no student account setup**
+
+---
+
+## What It Costs
+
+The complete core experience is **A$0** for every school, permanently. There is no
+licence, no per-student price, no expiring trial and no paid classroom tier.
+
+A school that contributes nothing receives the same seven sessions, the same
+child-facing Field Mode, the same printable fallback and the same teacher and
+governance packs. No hardship form, no justification, no reminders.
+
+Schools that can contribute may do so voluntarily on an adult-only page.
+Contribution status is never visible to students and never changes the
+child-facing experience.
+
+> Free to use. Contribute if you can. No child priced out.
+
+Contributions are not described as tax-deductible donations; that legal status
+has not been established.
 
 ---
 

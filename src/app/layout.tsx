@@ -9,7 +9,7 @@ import {
 } from "@/lib/fieldMode/pwa";
 import { LEGAL_NOTICE_TEXT, getLegalNoticeYear } from "@/lib/legalNotice";
 import ClientBody from "./ClientBody";
-import { Analytics } from "@vercel/analytics/next";
+import { ConsumerAnalytics } from "@/components/ConsumerAnalytics";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -88,7 +88,7 @@ export default function RootLayout({
       </head>
       <body suppressHydrationWarning className="antialiased">
         <ClientBody>{children}</ClientBody>
-        <Analytics />
+        <ConsumerAnalytics />
       </body>
     </html>
   );

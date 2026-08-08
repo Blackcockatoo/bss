@@ -1,3 +1,4 @@
+import type { CanonicalSessionId } from "@/lib/schools/canonicalSequence";
 import type { EngagementCategory } from "./engagement";
 import type { CurriculumFitTag } from "./curriculum-fit";
 import type { DnaMode, FocusArea } from "./types";
@@ -12,7 +13,15 @@ export interface LessonStep {
 
 export interface ScriptedLessonCard {
   id: string;
-  number: number;
+  /**
+   * Which canonical session this optional activity supports.
+   *
+   * These cards are classroom-runtime activities, not a second lesson
+   * sequence. They used to be numbered 1-7, which read as a rival seven-lesson
+   * list next to the canonical sequence; naming the session they serve keeps
+   * them useful without competing.
+   */
+  supportsSession: CanonicalSessionId;
   title: string;
   subtitle: string;
   durationMinutes: number;
@@ -31,11 +40,17 @@ export interface ScriptedLessonCard {
 const SCHOOLS_SAFETY_NOTE =
   "Teacher-led classroom use. No student sign-up or public sharing. Local classroom records can be cleared on this device.";
 
+/**
+ * Optional classroom activity cards for the school-game runtime.
+ *
+ * They are deliberately unnumbered: the canonical seven-session sequence in
+ * `@/lib/schools/canonicalSequence` is the only numbered list in the product.
+ */
 export const SCRIPTED_LESSONS: ScriptedLessonCard[] = [
   {
     id: "lesson-1-meet-your-pattern",
-    number: 1,
-    title: "Meet the Digital Companion",
+    supportsSession: "meet-the-system",
+    title: "Watch the Pattern Spiral",
     subtitle:
       "Observe how the digital companion responds and describe what you notice.",
     durationMinutes: 15,
@@ -89,7 +104,7 @@ export const SCRIPTED_LESSONS: ScriptedLessonCard[] = [
   },
   {
     id: "lesson-2-team-decode",
-    number: 2,
+    supportsSession: "one-identity-many-representations",
     title: "Team Decode",
     subtitle: "Work in small groups to decode a particle pattern together.",
     durationMinutes: 20,
@@ -143,7 +158,7 @@ export const SCRIPTED_LESSONS: ScriptedLessonCard[] = [
   },
   {
     id: "lesson-3-calm-checkin",
-    number: 3,
+    supportsSession: "read-the-signals",
     title: "Calm Check-In",
     subtitle: "Use a guided journey to reflect on how you feel today.",
     durationMinutes: 15,
@@ -197,7 +212,7 @@ export const SCRIPTED_LESSONS: ScriptedLessonCard[] = [
   },
   {
     id: "lesson-4-shape-investigators",
-    number: 4,
+    supportsSession: "test-reflect-and-improve",
     title: "Shape Investigators",
     subtitle: "Identify and count geometric shapes in a mandala pattern.",
     durationMinutes: 20,
@@ -250,7 +265,7 @@ export const SCRIPTED_LESSONS: ScriptedLessonCard[] = [
   },
   {
     id: "lesson-5-story-relay",
-    number: 5,
+    supportsSession: "design-a-better-feature",
     title: "Story Relay",
     subtitle: "Build a group story inspired by particle movements.",
     durationMinutes: 20,
@@ -304,7 +319,7 @@ export const SCRIPTED_LESSONS: ScriptedLessonCard[] = [
   },
   {
     id: "lesson-6-sound-and-focus",
-    number: 6,
+    supportsSession: "read-the-signals",
     title: "Sound and Focus",
     subtitle: "Listen to generated sounds and connect them to how you feel.",
     durationMinutes: 15,
@@ -358,7 +373,7 @@ export const SCRIPTED_LESSONS: ScriptedLessonCard[] = [
   },
   {
     id: "lesson-7-pattern-showcase",
-    number: 7,
+    supportsSession: "test-reflect-and-improve",
     title: "Pattern Showcase",
     subtitle: "Present your favourite pattern and explain why it's interesting.",
     durationMinutes: 20,

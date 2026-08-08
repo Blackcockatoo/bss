@@ -10,8 +10,8 @@ import {
 const validCard: LessonEvidence = {
   kind: "pet-observation-card",
   version: 1,
-  lessonId: "meet-your-metapet",
-  stepId: "meet-your-metapet-step-5",
+  lessonId: "meet-the-system",
+  stepId: "meet-the-system-step-5",
   createdAt: 1,
   alias: "Pip",
   observations: { shape: "round", surface: "shiny", movement: "floaty" },
@@ -49,8 +49,8 @@ describe("evidence model", () => {
   it("repairs missing structured sub-fields without throwing", () => {
     const repaired = validateEvidence({
       kind: "cause-effect-chain",
-      lessonId: "needs-and-consequences",
-      stepId: "needs-and-consequences-step-5",
+      lessonId: "choices-and-algorithms",
+      stepId: "choices-and-algorithms-step-5",
       // action/immediateEffect etc missing
       balancingActions: ["Feed", 5, "Play"],
     });
@@ -62,11 +62,11 @@ describe("evidence model", () => {
     }
   });
 
-  it("coerces responsible-creator scenario choices safely", () => {
+  it("coerces privacy-and-responsible-design scenario choices safely", () => {
     const repaired = validateEvidence({
       kind: "responsible-creator-promise",
-      lessonId: "responsible-creator",
-      stepId: "responsible-creator-step-5",
+      lessonId: "privacy-and-responsible-design",
+      stepId: "privacy-and-responsible-design-step-5",
       scenarioChoices: [
         { scenarioId: "privacy", choiceId: "use-alias", responsible: true },
         null,

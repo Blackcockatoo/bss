@@ -10,13 +10,13 @@ import {
 } from "./lessonDefinitions";
 
 const EXPECTED_TITLES = [
-  "Meet Your Meta-Pet",
-  "Build a Body",
-  "DNA Makes Us Different",
-  "Needs, Actions and Consequences",
-  "Feelings Without Words",
-  "Patterns Behind the Pet",
-  "The Responsible Creator Challenge",
+  "Meet the System",
+  "Read the Signals",
+  "One Identity, Many Representations",
+  "Choices and Algorithms",
+  "Privacy and Responsible Design",
+  "Design a Better Feature",
+  "Test, Reflect and Improve",
 ];
 
 describe("lesson definitions", () => {
@@ -29,7 +29,7 @@ describe("lesson definitions", () => {
     ]);
   });
 
-  it("gives every lesson a five-step placeholder flow", () => {
+  it("gives every lesson a five-step guided flow", () => {
     for (const lesson of LESSON_DEFINITIONS) {
       expect(lesson.steps).toHaveLength(5);
       expect(lesson.steps.map((s) => s.kind)).toEqual([
@@ -64,18 +64,42 @@ describe("lesson definitions", () => {
       expect(typeof lesson.usesStudentRealPet).toBe("boolean");
       expect(typeof lesson.persistChanges).toBe("boolean");
       expect(typeof lesson.resetAtCompletion).toBe("boolean");
+      expect(lesson.movementMoment.length).toBeGreaterThan(0);
+      expect(lesson.reflectionPrompt.length).toBeGreaterThan(0);
+      expect(lesson.stoppingPoint.length).toBeGreaterThan(0);
+      expect(lesson.lightEvidence.length).toBeGreaterThan(0);
     }
   });
 
   it("looks lessons up by id and slug", () => {
-    expect(getLessonById("dna-differences")?.number).toBe(3);
-    expect(getLessonBySlug("build-a-body")?.title).toBe("Build a Body");
+    expect(getLessonById("one-identity-many-representations")?.number).toBe(3);
+    expect(getLessonBySlug("design-a-better-feature")?.title).toBe(
+      "Design a Better Feature",
+    );
     expect(getLessonById("nope")).toBeUndefined();
     expect(getLessonBySlug(undefined)).toBeUndefined();
   });
 
+  it("runs every classroom lesson on the demonstration pet with nothing persisted", () => {
+    // Field Mode's privacy pages promise that no student's own companion is
+    // touched and nothing survives the lesson. That promise is data, not prose.
+    for (const lesson of LESSON_DEFINITIONS) {
+      expect(lesson.usesDemonstrationPet).toBe(true);
+      expect(lesson.usesStudentRealPet).toBe(false);
+      expect(lesson.persistChanges).toBe(false);
+      expect(lesson.resetAtCompletion).toBe(true);
+    }
+  });
+
+  it("keeps every session inside the promised 15-20 minute window", () => {
+    for (const lesson of LESSON_DEFINITIONS) {
+      expect(lesson.durationMinutes).toBeGreaterThanOrEqual(15);
+      expect(lesson.durationMinutes).toBeLessThanOrEqual(20);
+    }
+  });
+
   it("guards lesson ids", () => {
-    expect(isLessonId("meet-your-metapet")).toBe(true);
+    expect(isLessonId("meet-the-system")).toBe(true);
     expect(isLessonId("not-a-lesson")).toBe(false);
     expect(isLessonId(42)).toBe(false);
   });

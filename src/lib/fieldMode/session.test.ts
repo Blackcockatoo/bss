@@ -42,8 +42,8 @@ describe("Field lesson session contract", () => {
   });
 
   it("builds only a Field lesson route", () => {
-    const path = buildFieldLessonPath("build-a-body", DEFAULT_FIELD_SESSION);
-    expect(path).toMatch(/^\/schools\/field\/lessons\/build-a-body\?/);
+    const path = buildFieldLessonPath("design-a-better-feature", DEFAULT_FIELD_SESSION);
+    expect(path).toMatch(/^\/schools\/field\/lessons\/design-a-better-feature\?/);
     expect(path).toContain("minutes=15");
     expect(path).not.toContain("/teachers");
   });

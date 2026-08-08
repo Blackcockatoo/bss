@@ -228,3 +228,55 @@
     height: auto !important;
   }
 }
+
+/* ==========================================================================
+   MetaPet School classroom surfaces — inclusive interaction defaults.
+
+   These are not an "accessibility mode" a child gets labelled with. They are
+   the ordinary defaults for every classroom screen, applied to the school
+   theme and the Field Mode surface so an energetic eight-year-old on a shared
+   school laptop gets large targets, an obvious focus ring and no motion they
+   did not ask for.
+   ========================================================================== */
+
+.schools-theme :where(a, button, [role="button"], summary):focus-visible,
+.field-surface :where(a, button, [role="button"], summary):focus-visible,
+.schools-theme :where(input, select, textarea):focus-visible,
+.field-surface :where(input, select, textarea):focus-visible {
+  outline: 3px solid hsl(152 44% 24%);
+  outline-offset: 2px;
+  border-radius: 0.5rem;
+}
+
+/* A tapped-wrong recovery has to be easy, which starts with targets a moving
+   hand can actually hit. 44px is the WCAG 2.2 SC 2.5.8 minimum. */
+.field-surface :where(a, button, [role="button"]) {
+  min-height: 44px;
+}
+
+.field-surface :where(a, button, [role="button"]).inline-target {
+  min-height: 0;
+}
+
+/* Checkboxes and radios in the classroom are pressed with a finger. */
+.field-surface :where(input[type="checkbox"], input[type="radio"]) {
+  min-width: 1.25rem;
+  min-height: 1.25rem;
+}
+
+/* Classroom reading measure: long lines are where an easily-distracted reader
+   loses their place. */
+.field-surface :where(p, li) {
+  max-width: 68ch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Belt and braces for the classroom: the global rule collapses durations,
+     this one stops anything that animates by changing transform on a loop. */
+  .field-surface *,
+  .field-surface *::before,
+  .field-surface *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

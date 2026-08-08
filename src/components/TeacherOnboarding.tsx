@@ -54,10 +54,10 @@ const STEPS = [
     icon: BookOpen,
     title: "Choose your first lesson",
     lines: [
-      "Start with Session 1: \"Meet the Digital Companion\".",
-      "Each lesson card includes an outcome, activity, and teacher prompt.",
-      "Add lessons to the queue from the lesson planner.",
-      "Sessions fit into a 30 or 50 minute block.",
+      "Start with Session 1: \"Meet the System\".",
+      "Each session card includes a learning intention, an activity and a reflection question.",
+      "Add sessions to the queue from the lesson planner.",
+      "Each session runs about 15-20 minutes.",
     ],
   },
   {

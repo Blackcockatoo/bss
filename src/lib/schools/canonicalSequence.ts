@@ -1,0 +1,247 @@
+/**
+ * The one canonical MetaPet School session sequence.
+ *
+ * Before this module existed the repository carried three competing seven-item
+ * lists: the runnable lesson definitions, the marketing lesson cards on
+ * `/schools`, and the printed lesson-card document. They disagreed on titles,
+ * on ordering and on what students actually did, which meant a teacher could
+ * be sold one sequence and handed another.
+ *
+ * Everything that names a session — the runner, the launchpad, the landing
+ * page, the printable fallback, the teacher and parent packs, page metadata —
+ * now reads from this array. Adding an eighth session, renaming one, or
+ * inventing a parallel list is a change here first; `canonicalSequence.test.ts`
+ * fails otherwise.
+ *
+ * Content rules each session must satisfy (checked by test):
+ * - one learning intention;
+ * - one teacher introduction;
+ * - one interactive activity;
+ * - one optional movement moment;
+ * - one brief reflection;
+ * - one visible stopping point;
+ * - light teacher evidence with no marking queue;
+ * - 15–20 minutes.
+ */
+
+/** Stable identifier for each canonical session. Also the URL slug. */
+export type CanonicalSessionId =
+  | "meet-the-system"
+  | "read-the-signals"
+  | "one-identity-many-representations"
+  | "choices-and-algorithms"
+  | "privacy-and-responsible-design"
+  | "design-a-better-feature"
+  | "test-reflect-and-improve";
+
+export interface CanonicalSession {
+  /** 1-based session number. Matches array position. */
+  number: number;
+  id: CanonicalSessionId;
+  /** URL slug. Deliberately identical to the id. */
+  slug: string;
+  title: string;
+  /** Planned classroom minutes. Always 15 or 20. */
+  minutes: 15 | 20;
+  /** The single learning intention for the session. */
+  learningIntention: string;
+  /** What the teacher says to open the session. */
+  teacherIntroduction: string;
+  /** One sentence a child could read: what they actually do. */
+  childActivity: string;
+  /** The one whole-class reflection question. */
+  reflectionPrompt: string;
+  /** Optional movement or physical participation moment. */
+  movementMoment: string;
+  /** The visible stopping point that ends the session. */
+  stoppingPoint: string;
+  /** Light evidence a teacher can capture without marking anything. */
+  lightEvidence: string;
+  /** Where this session fits in a normal school week. */
+  bestFit: string;
+}
+
+export const CANONICAL_SESSIONS: readonly CanonicalSession[] = [
+  {
+    number: 1,
+    id: "meet-the-system",
+    slug: "meet-the-system",
+    title: "Meet the System",
+    minutes: 15,
+    learningIntention:
+      "I can explain that a digital system takes an input and changes what it shows.",
+    teacherIntroduction:
+      "Open with one idea only: this is a system, not a video. It waits for something from us, then it changes. Everything else in the sequence builds on that one sentence.",
+    childActivity:
+      "Watch the companion, give it one input, and say what changed.",
+    reflectionPrompt: "What changed after your input, and how do you know?",
+    movementMoment:
+      "Stand up and copy the companion's movement once, then sit back down.",
+    stoppingPoint:
+      "Session One ends after the class has named one change. Nothing carries over.",
+    lightEvidence:
+      "One spoken sentence per pair: \"I did ___ and the system showed ___.\"",
+    bestFit: "Digital Technologies mini-lesson",
+  },
+  {
+    number: 2,
+    id: "read-the-signals",
+    slug: "read-the-signals",
+    title: "Read the Signals",
+    minutes: 15,
+    learningIntention:
+      "I can read the signals a system shows and say what they might mean.",
+    teacherIntroduction:
+      "Signals are guesses, not facts. Ask students to say what a signal might mean and what else it could mean. This is also where classroom feelings-and-settling language belongs: naming a signal, then choosing a calm response.",
+    childActivity:
+      "Look at the companion's signals, name one, and choose a settling action.",
+    reflectionPrompt:
+      "What is one other thing that signal could have meant?",
+    movementMoment:
+      "Three slow breaths together before choosing the settling action.",
+    stoppingPoint:
+      "Session Two ends after each pair has named one signal and one response.",
+    lightEvidence:
+      "One reflection line linking a signal to a helpful response.",
+    bestFit: "Wellbeing session",
+  },
+  {
+    number: 3,
+    id: "one-identity-many-representations",
+    slug: "one-identity-many-representations",
+    title: "One Identity, Many Representations",
+    minutes: 20,
+    learningIntention:
+      "I can explain that one thing can be shown in more than one way and still be the same thing.",
+    teacherIntroduction:
+      "Show the same companion as a picture, as a word and as a number. Students often assume a different display means a different thing. Naming that mistake out loud is the lesson.",
+    childActivity:
+      "Compare two views of the same companion and find what stayed the same.",
+    reflectionPrompt:
+      "What stayed the same in both views, even though they looked different?",
+    movementMoment:
+      "Point to the screen with one hand and to your own drawing with the other when they show the same thing.",
+    stoppingPoint:
+      "Session Three ends once the class has agreed on one thing that stayed the same.",
+    lightEvidence:
+      "One partner explanation naming a shared feature across two representations.",
+    bestFit: "Digital Technologies mini-lesson",
+  },
+  {
+    number: 4,
+    id: "choices-and-algorithms",
+    slug: "choices-and-algorithms",
+    title: "Choices and Algorithms",
+    minutes: 20,
+    learningIntention:
+      "I can describe a simple if–then rule and predict what it will do.",
+    teacherIntroduction:
+      "Predict first, then act. When a sequence goes badly, reset and try a different order — recovering is part of the method, never a punishment. That reset is the feedback loop students are learning to see.",
+    childActivity:
+      "Predict what one action will do, try it, then reset and try a different order.",
+    reflectionPrompt:
+      "Which order worked better, and what makes you say that?",
+    movementMoment:
+      "Act out the if–then rule as a class: hands up for \"if\", step forward for \"then\".",
+    stoppingPoint:
+      "Session Four ends after the class compares two orders. The demonstration resets.",
+    lightEvidence:
+      "One short input → change → result note per pair.",
+    bestFit: "STEM block",
+  },
+  {
+    number: 5,
+    id: "privacy-and-responsible-design",
+    slug: "privacy-and-responsible-design",
+    title: "Privacy and Responsible Design",
+    minutes: 20,
+    learningIntention:
+      "I can decide what a system should and should not keep, and give a reason.",
+    teacherIntroduction:
+      "Keep this concrete. Students sort real examples into keep, ask first and never. The point is that someone chose — systems do not decide on their own what to remember.",
+    childActivity:
+      "Sort what a system should keep, should ask about, and should never keep.",
+    reflectionPrompt:
+      "Who should get to decide what a system remembers about you?",
+    movementMoment:
+      "Move to a corner of the room for keep, ask first or never, then explain your corner.",
+    stoppingPoint:
+      "Session Five ends after each group states one rule they would give a designer.",
+    lightEvidence:
+      "One design rule per group, in the students' own words.",
+    bestFit: "Digital citizenship lesson",
+  },
+  {
+    number: 6,
+    id: "design-a-better-feature",
+    slug: "design-a-better-feature",
+    title: "Design a Better Feature",
+    minutes: 20,
+    learningIntention:
+      "I can design one change to a feature and explain who it helps.",
+    teacherIntroduction:
+      "One change only. The constraint is the teaching: students have to justify a single choice rather than list ten. Ask who it helps and who it might not.",
+    childActivity: "Change one part of the design and say who your change helps.",
+    reflectionPrompt: "Who does your change help, and who might it not help?",
+    movementMoment:
+      "Swap seats with a partner and explain their design back to them.",
+    stoppingPoint:
+      "Session Six ends when every student has named one change and one person it helps.",
+    lightEvidence: "One design choice with one stated reason.",
+    bestFit: "STEM block",
+  },
+  {
+    number: 7,
+    id: "test-reflect-and-improve",
+    slug: "test-reflect-and-improve",
+    title: "Test, Reflect and Improve",
+    minutes: 20,
+    learningIntention:
+      "I can test an idea, notice a pattern across the sequence, and explain my thinking.",
+    teacherIntroduction:
+      "This closes the sequence. Students look back across all seven sessions for something that happened more than once, then say what they would do differently. Finishing is the goal; being right is not.",
+    childActivity:
+      "Test one idea, find a pattern from earlier sessions, and explain it.",
+    reflectionPrompt:
+      "What pattern did you notice, and what would you try next time?",
+    movementMoment:
+      "Stand in a line from \"I am sure\" to \"I am still thinking\" and say why you stood there.",
+    stoppingPoint:
+      "Session Seven ends the sequence. The class has finished; nothing is left open.",
+    lightEvidence:
+      "One pattern statement with one supporting example.",
+    bestFit: "STEM block",
+  },
+] as const;
+
+/** Number of sessions in the canonical sequence. */
+export const CANONICAL_SESSION_COUNT = CANONICAL_SESSIONS.length;
+
+/** Canonical session ids, in order. */
+export const CANONICAL_SESSION_IDS: readonly CanonicalSessionId[] =
+  CANONICAL_SESSIONS.map((session) => session.id);
+
+/** Canonical session titles, in order. */
+export const CANONICAL_SESSION_TITLES: readonly string[] =
+  CANONICAL_SESSIONS.map((session) => session.title);
+
+const SESSION_BY_ID = new Map<CanonicalSessionId, CanonicalSession>(
+  CANONICAL_SESSIONS.map((session) => [session.id, session]),
+);
+
+export function getCanonicalSession(
+  id: string | null | undefined,
+): CanonicalSession | undefined {
+  if (!id) return undefined;
+  return SESSION_BY_ID.get(id as CanonicalSessionId);
+}
+
+/** The first session — the one a cold-visit teacher should be able to reach. */
+export const FIRST_CANONICAL_SESSION = CANONICAL_SESSIONS[0];
+
+/**
+ * Shortest honest description of the whole sequence, used wherever a single
+ * line has to stand in for the seven sessions.
+ */
+export const CANONICAL_SEQUENCE_SUMMARY =
+  "Seven short, teacher-led sessions of about 15–20 minutes each, designed for Years 3–6.";

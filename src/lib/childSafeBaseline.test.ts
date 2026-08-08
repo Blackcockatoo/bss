@@ -25,7 +25,7 @@ describe("declarative Field Mode route policy", () => {
     for (const pathname of [
       "/schools",
       "/schools/field",
-      "/schools/field/lessons/meet-your-metapet",
+      "/schools/field/lessons/meet-the-system",
       "/schools/field/classroom",
       "/schools/field/passport",
       "/schools/field/review",
@@ -33,7 +33,7 @@ describe("declarative Field Mode route policy", () => {
       "/schools/field/guide",
       "/schools/field/safety",
       "/schools/field/pack.json",
-      "/schools/field/print/build-a-body",
+      "/schools/field/print/design-a-better-feature",
       "/sw.js",
       "/school-game",
       "/schools/docs/teacher-guide",
@@ -82,5 +82,21 @@ describe("declarative Field Mode route policy", () => {
   it("does not turn the Field namespace into an unrestricted prefix", () => {
     expect(isPathnameAllowedByPolicy("/schools/field/shop", "field")).toBe(false);
     expect(isPathnameAllowedByPolicy("/schools/field/social", "field")).toBe(false);
+  });
+
+  it("keeps the adult-only contribution and data pages out of Field Mode", () => {
+    // A child on a classroom device must never be able to reach a page that
+    // discusses money or exposes the local-data controls.
+    for (const pathname of ["/schools/contribute", "/schools/data"]) {
+      expect(isPathnameAllowedByPolicy(pathname, "field"), pathname).toBe(false);
+      expect(isPathnameAllowedByPolicy(pathname, "schools"), pathname).toBe(
+        true,
+      );
+    }
+  });
+
+  it("keeps consumer pricing out of both school policies", () => {
+    expect(isPathnameAllowedByPolicy("/pricing", "field")).toBe(false);
+    expect(isPathnameAllowedByPolicy("/pricing", "schools")).toBe(false);
   });
 });

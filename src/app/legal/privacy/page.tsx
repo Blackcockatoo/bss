@@ -68,8 +68,11 @@ export default function LegalPrivacyPage() {
             Manager.
           </li>
           <li>
-            <strong className="text-slate-200">No personal data:</strong> no
-            real names, student IDs, email addresses or accounts are collected.
+            <strong className="text-slate-200">
+              No student identifiers required:
+            </strong>{" "}
+            the classroom build has no field for a real name, student ID or
+            email address, and no student sign-up flow.
           </li>
         </ul>
       </section>

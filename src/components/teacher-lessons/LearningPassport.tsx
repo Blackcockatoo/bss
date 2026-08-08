@@ -123,7 +123,7 @@ function EvidenceView({ evidence }: { evidence: LessonEvidence }) {
             label="Scenario choices"
             value={`${evidence.scenarioChoices.filter((c) => c.responsible).length} of ${evidence.scenarioChoices.length} responsible`}
           />
-          <Field label="Creator promise" value={evidence.promise} />
+          <Field label="Design rule" value={evidence.promise} />
         </div>
       );
     default:

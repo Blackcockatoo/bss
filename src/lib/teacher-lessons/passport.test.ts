@@ -18,8 +18,8 @@ function withEvidence(): LessonProgressState {
   const card: PetObservationCardEvidence = {
     kind: "pet-observation-card",
     version: 1,
-    lessonId: "meet-your-metapet",
-    stepId: "meet-your-metapet-step-5",
+    lessonId: "meet-the-system",
+    stepId: "meet-the-system-step-5",
     createdAt: 1000,
     alias: "Pip",
     observations: { shape: "round", surface: "shiny", movement: "floaty" },
@@ -31,8 +31,8 @@ function withEvidence(): LessonProgressState {
       appliedAt: 1000,
     },
   };
-  state.records["meet-your-metapet"] = {
-    lessonId: "meet-your-metapet",
+  state.records["meet-the-system"] = {
+    lessonId: "meet-the-system",
     currentStep: 4,
     completedSteps: [0, 1, 2, 3, 4],
     completed: true,
@@ -41,7 +41,7 @@ function withEvidence(): LessonProgressState {
     lastActiveAt: 1000,
     completedAt: 1000,
     evidence: {},
-    evidenceEntries: { "meet-your-metapet-step-5": card },
+    evidenceEntries: { "meet-the-system-step-5": card },
   };
   return state;
 }
@@ -68,7 +68,7 @@ describe("Learning Passport derivation", () => {
     expect(passport.completedLessons).toBe(1);
     expect(passport.completionPercent).toBe(Math.round((1 / 7) * 100));
     const meet = passport.sections.find(
-      (s) => s.lessonId === "meet-your-metapet",
+      (s) => s.lessonId === "meet-the-system",
     )!;
     expect(meet.hasEvidence).toBe(true);
     expect(meet.evidence?.kind).toBe("pet-observation-card");
@@ -79,8 +79,8 @@ describe("Learning Passport derivation", () => {
 
   it("flags a completed lesson that is missing evidence", () => {
     const state = emptyProgress();
-    state.records["build-a-body"] = {
-      lessonId: "build-a-body",
+    state.records["design-a-better-feature"] = {
+      lessonId: "design-a-better-feature",
       currentStep: 4,
       completedSteps: [0, 1, 2, 3, 4],
       completed: true,
@@ -97,7 +97,7 @@ describe("Learning Passport derivation", () => {
       hasPet: true,
     });
     const section = passport.sections.find(
-      (s) => s.lessonId === "build-a-body",
+      (s) => s.lessonId === "design-a-better-feature",
     )!;
     expect(section.status).toBe("completed");
     expect(section.missingEvidence).toBe(true);
@@ -106,8 +106,8 @@ describe("Learning Passport derivation", () => {
   it("marks mismatched evidence as corrupted without crashing", () => {
     const state = emptyProgress();
     // Wrong evidence kind stored under a lesson.
-    state.records["dna-differences"] = {
-      lessonId: "dna-differences",
+    state.records["one-identity-many-representations"] = {
+      lessonId: "one-identity-many-representations",
       currentStep: 4,
       completedSteps: [0, 1, 2, 3, 4],
       completed: true,
@@ -117,11 +117,11 @@ describe("Learning Passport derivation", () => {
       completedAt: 2,
       evidence: {},
       evidenceEntries: {
-        "dna-differences-step-5": {
+        "one-identity-many-representations-step-5": {
           kind: "emotion-reflection",
           version: 1,
-          lessonId: "dna-differences",
-          stepId: "dna-differences-step-5",
+          lessonId: "one-identity-many-representations",
+          stepId: "one-identity-many-representations-step-5",
           createdAt: 2,
           clues: [],
           interpretation: "",
@@ -136,7 +136,7 @@ describe("Learning Passport derivation", () => {
       hasPet: true,
     });
     const section = passport.sections.find(
-      (s) => s.lessonId === "dna-differences",
+      (s) => s.lessonId === "one-identity-many-representations",
     )!;
     expect(section.corrupted).toBe(true);
     expect(section.evidence).toBeNull();

@@ -79,7 +79,7 @@ describe("lesson activity registry", () => {
   it("shows a teacher-friendly fallback when a required feature is unavailable", () => {
     setFeatureAvailabilityOverrides({ "advanced-visualisation": false });
     const patterns = LESSON_DEFINITIONS.find(
-      (l) => l.id === "patterns-behind-the-pet",
+      (l) => l.id === "test-reflect-and-improve",
     )!;
     render(<ActivityHost {...makeProps(patterns)} />);
     expect(screen.getByText(/simplified classroom example/i)).toBeTruthy();
@@ -89,7 +89,7 @@ describe("lesson activity registry", () => {
   it("uses the Field return route in a Field fallback", () => {
     setFeatureAvailabilityOverrides({ "advanced-visualisation": false });
     const patterns = LESSON_DEFINITIONS.find(
-      (lesson) => lesson.id === "patterns-behind-the-pet",
+      (lesson) => lesson.id === "test-reflect-and-improve",
     )!;
     render(
       <ActivityHost
@@ -107,7 +107,7 @@ describe("lesson activity registry", () => {
   it("renders a real activity when the feature is available", () => {
     setFeatureAvailabilityOverrides({});
     const meet = LESSON_DEFINITIONS.find(
-      (l) => l.id === "meet-your-metapet",
+      (l) => l.id === "meet-the-system",
     )!;
     render(<ActivityHost {...makeProps(meet)} />);
     expect(
@@ -119,7 +119,7 @@ describe("lesson activity registry", () => {
     const genome = generateRandomGenome(() => 0.25);
     useStore.getState().setGenome(genome, decodeGenome(genome));
     const meet = LESSON_DEFINITIONS.find(
-      (lesson) => lesson.id === "meet-your-metapet",
+      (lesson) => lesson.id === "meet-the-system",
     )!;
 
     render(

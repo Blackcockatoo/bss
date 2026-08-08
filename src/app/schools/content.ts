@@ -1,3 +1,5 @@
+import { CANONICAL_SESSIONS } from "@/lib/schools/canonicalSequence";
+
 export interface SchoolPackageDoc {
   slug: string;
   title: string;
@@ -13,14 +15,6 @@ export interface SchoolPackageDoc {
     | "Evidence Pack";
 }
 
-export interface CurriculumRow {
-  band: "Years 3-4" | "Years 5-6";
-  learningArea: "Digital Technologies" | "Health and Physical Education";
-  code: string;
-  focus: string;
-  metapetUse: string;
-}
-
 export interface LearningOutcome {
   statement: string;
   lessons: string;
@@ -30,10 +24,13 @@ export interface LearningOutcome {
 export interface LessonCard {
   session: string;
   title: string;
+  minutes: number;
   outcome: string;
   activity: string;
   prompt: string;
   evidence: string;
+  movement: string;
+  stoppingPoint: string;
   bestFit: string;
 }
 
@@ -43,17 +40,6 @@ export interface ExternalResourceLink {
 }
 
 export interface ReviewerPathway {
-  title: string;
-  description: string;
-  docSlugs: string[];
-}
-
-export interface PackageSummaryCard {
-  title: string;
-  description: string;
-}
-
-export interface PilotAcceptanceStep {
   title: string;
   description: string;
   docSlugs: string[];
@@ -427,291 +413,131 @@ export const schoolPackageDocs: SchoolPackageDoc[] = ([
   },
 ] as Omit<SchoolPackageDoc, "inAppHref">[]).map(withInAppHref);
 
-export const curriculumRows: CurriculumRow[] = [
-  {
-    band: "Years 3-4",
-    learningArea: "Digital Technologies",
-    code: "AC9TDI4K01",
-    focus: "Digital systems and their purposes",
-    metapetUse:
-      "Students identify the device as a digital system that receives input and displays companion state.",
-  },
-  {
-    band: "Years 3-4",
-    learningArea: "Digital Technologies",
-    code: "AC9TDI4K03",
-    focus: "Data representation",
-    metapetUse:
-      "Students read colour, icon, text and mood as different representations of the same state.",
-  },
-  {
-    band: "Years 3-4",
-    learningArea: "Digital Technologies",
-    code: "AC9TDI4P02",
-    focus: "Branching and iteration",
-    metapetUse:
-      "Students describe simple if-then decisions and repeat care loops to test what works.",
-  },
-  {
-    band: "Years 3-4",
-    learningArea: "Digital Technologies",
-    code: "AC9TDI4P04",
-    focus: "Input and simple visual programs",
-    metapetUse:
-      "Students observe how one action changes the companion state and visible outputs.",
-  },
-  {
-    band: "Years 5-6",
-    learningArea: "Digital Technologies",
-    code: "AC9TDI6K03",
-    focus: "How systems represent data using numbers",
-    metapetUse:
-      "Students connect visible companion state to tracked values and explain why outputs change over time.",
-  },
-  {
-    band: "Years 5-6",
-    learningArea: "Digital Technologies",
-    code: "AC9TDI6P02",
-    focus: "Algorithm design with branching and iteration",
-    metapetUse:
-      "Students predict and explain which action sequence should stabilise a state.",
-  },
-  {
-    band: "Years 5-6",
-    learningArea: "Digital Technologies",
-    code: "AC9TDI6P05",
-    focus: "Control structures, variables and input",
-    metapetUse:
-      "Students test how repeated inputs and changing state values affect outcomes.",
-  },
-  {
-    band: "Years 5-6",
-    learningArea: "Digital Technologies",
-    code: "AC9TDI6P06",
-    focus: "Evaluation and broader impact",
-    metapetUse:
-      "Students evaluate whether the companion is calm, useful and fit for classroom learning.",
-  },
-  {
-    band: "Years 3-4",
-    learningArea: "Health and Physical Education",
-    code: "AC9HP4P03",
-    focus: "Personal and social skills",
-    metapetUse:
-      "Students work in pairs, listen to each other and compare observations respectfully.",
-  },
-  {
-    band: "Years 3-4",
-    learningArea: "Health and Physical Education",
-    code: "AC9HP4P05",
-    focus: "Emotional responses and regulation",
-    metapetUse:
-      "Students name a feeling and match it with a helpful calming or recovery action.",
-  },
-  {
-    band: "Years 3-4",
-    learningArea: "Health and Physical Education",
-    code: "AC9HP4P08",
-    focus: "Health-enhancing behaviours for wellbeing",
-    metapetUse:
-      "Students discuss routines, balance and actions that support calm and recovery.",
-  },
-  {
-    band: "Years 5-6",
-    learningArea: "Health and Physical Education",
-    code: "AC9HP6P03",
-    focus: "Refining personal and social skills",
-    metapetUse:
-      "Students collaborate on explanations, negotiate action choices and present findings.",
-  },
-  {
-    band: "Years 5-6",
-    learningArea: "Health and Physical Education",
-    code: "AC9HP6P05",
-    focus: "Managing emotions and relationships",
-    metapetUse:
-      "Students analyse how responses affect behaviour and suggest strategies to regulate emotions.",
-  },
-  {
-    band: "Years 5-6",
-    learningArea: "Health and Physical Education",
-    code: "AC9HP6P08",
-    focus: "Health-enhancing behaviours and wellbeing",
-    metapetUse:
-      "Students reflect on how routines, balance and reflection support individual and group wellbeing.",
-  },
-];
-
 export const learningOutcomes: LearningOutcome[] = [
   {
     statement:
       "Explain that a digital system responds to inputs and changes state over time.",
-    lessons: "Sessions 1, 2 and 5",
+    lessons: "Sessions 1, 2 and 4",
     codes: ["AC9TDI4K01", "AC9TDI4P02", "AC9TDI6P02"],
   },
   {
     statement:
-      "Read companion state information and use it to make a reasoned action choice.",
-    lessons: "Sessions 1, 2 and 4",
+      "Read the signals a system shows and use them to make a reasoned choice.",
+    lessons: "Sessions 1, 2 and 3",
     codes: ["AC9TDI4K03", "AC9TDI4P04", "AC9TDI6K03"],
   },
   {
     statement:
-      "Describe simple feedback loops, cause and effect, and patterns in a system.",
-    lessons: "Sessions 4, 5 and 6",
+      "Describe simple if-then rules, cause and effect, and patterns in a system.",
+    lessons: "Sessions 4 and 7",
     codes: ["AC9TDI4P02", "AC9TDI6P05", "AC9TDI6P06"],
   },
   {
     statement:
-      "Use classroom wellbeing language to identify feelings, responses and regulation strategies.",
-    lessons: "Sessions 3, 4 and 7",
+      "Use classroom wellbeing language to name a signal, a response and a settling strategy.",
+    lessons: "Sessions 2 and 5",
     codes: ["AC9HP4P05", "AC9HP6P05", "AC9HP4P08"],
   },
   {
     statement:
-      "Work with others to compare observations, share explanations and reflect on respectful digital use.",
-    lessons: "Sessions 2, 6 and 7",
+      "Work with others to compare observations, justify a design choice and reflect on responsible digital use.",
+    lessons: "Sessions 3, 5, 6 and 7",
     codes: ["AC9HP4P03", "AC9HP6P03", "AC9HP6P08"],
   },
 ];
 
-export const lessonCards: LessonCard[] = [
-  {
-    session: "Session 1",
-    title: "Meet the Digital Companion",
-    outcome:
-      "Students explain that a digital system changes when a user gives it input.",
-    activity:
-      "Open the companion, check its companion state, try one action, and describe what changed.",
-    prompt: "What changed after your action, and how do you know?",
-    evidence:
-      'One sentence: "I chose __ and the companion state changed to __."',
-    bestFit: "Digital Technologies mini-lesson",
-  },
-  {
-    session: "Session 2",
-    title: "Read the Companion State",
-    outcome:
-      "Students read visible state information and make a reasoned action choice.",
-    activity:
-      "Check each state indicator, identify the most urgent state, and choose one response.",
-    prompt: "What does the companion state tell you to do next?",
-    evidence: "Quick partner explanation using cause-and-effect language.",
-    bestFit: "Digital Technologies mini-lesson",
-  },
-  {
-    session: "Session 3",
-    title: "Feelings, Signals and Regulation",
-    outcome:
-      "Students connect visible feelings or moods to a simple regulation strategy.",
-    activity:
-      "Identify a mood, discuss what that mood might signal, and match it with a calming action.",
-    prompt: "If the companion looks overwhelmed, what would help it settle?",
-    evidence: "One reflection line about a feeling and a helpful response.",
-    bestFit: "Wellbeing session",
-  },
-  {
-    session: "Session 4",
-    title: "Repair and Reset",
-    outcome:
-      "Students explain that recovery in a system is a skill, not a punishment.",
-    activity:
-      "Start from an unstable companion state, test a repair sequence, and compare which order works best.",
-    prompt: "What helped the system recover, and why did that order matter?",
-    evidence: "Short verbal explanation or checklist note about the recovery sequence.",
-    bestFit: "Relief lesson",
-  },
-  {
-    session: "Session 5",
-    title: "Systems and Feedback Loops",
-    outcome: "Students describe a simple feedback loop using system language.",
-    activity:
-      "Track one input, one state change, and one resulting mood or output.",
-    prompt: "What signal did the system give you after your first action?",
-    evidence: "Input -> state -> output summary.",
-    bestFit: "STEM block",
-  },
-  {
-    session: "Session 6",
-    title: "Patterns Over Time",
-    outcome:
-      "Students identify a pattern in how the companion responds across multiple actions.",
-    activity:
-      "Review notes from earlier sessions, compare with a partner, and identify one reliable pattern.",
-    prompt: "What usually works, and what evidence supports that?",
-    evidence: "One pattern statement supported by an example.",
-    bestFit: "STEM block",
-  },
-  {
-    session: "Session 7",
-    title: "Explain Your Thinking",
-    outcome:
-      "Students explain what they learned about systems, regulation and collaboration.",
-    activity:
-      "Share one pattern, one useful strategy, and one thing they now understand more clearly.",
-    prompt:
-      "What did this digital companion help you notice about systems or behaviour?",
-    evidence: "One short student reflection or teacher observation note.",
-    bestFit: "STEM block",
-  },
+/**
+ * The public lesson snapshot. Derived from {@link CANONICAL_SESSIONS} so the
+ * marketing page, the runner and the printable pack can never advertise three
+ * different seven-session sequences again.
+ */
+export const lessonCards: LessonCard[] = CANONICAL_SESSIONS.map((session) => ({
+  session: `Session ${session.number}`,
+  title: session.title,
+  minutes: session.minutes,
+  outcome: session.learningIntention,
+  activity: session.childActivity,
+  prompt: session.reflectionPrompt,
+  evidence: session.lightEvidence,
+  movement: session.movementMoment,
+  stoppingPoint: session.stoppingPoint,
+  bestFit: session.bestFit,
+}));
+
+
+/**
+ * The hero. One headline, one supporting statement, one trust line — kept here
+ * so the page and its test read from the same words.
+ */
+export const SCHOOL_HEADLINE = "Creative technology that gives attention back.";
+
+export const SCHOOL_SUPPORTING_STATEMENT =
+  "Seven short, teacher-led lessons for Years 3-6 - without student accounts, advertising or another permanent digital profile.";
+
+export const SCHOOL_PROOF_LINE =
+  "Open the lesson. Guide the activity. Capture light evidence. Get back to teaching.";
+
+export const SCHOOL_ATTRIBUTION =
+  "An education initiative of Blue $nake Studio";
+
+/**
+ * How MetaPet School relates to the software a school already runs. This is
+ * the sentence that stops the product being mistaken for a Compass or Sentral
+ * replacement, which it is not and does not try to be.
+ */
+export const SCHOOL_POSITIONING_STATEMENT =
+  "Keep your existing school platform for attendance, payments, timetables and communication. MetaPet School performs a different job: it gives children a bounded learning experience without requiring another student identity system.";
+
+/** What a teacher needs before Session One. Deliberately short. */
+export const whatYouNeed: readonly string[] = [
+  "Years 3-6 class",
+  "About 20 minutes",
+  "A teacher to lead it",
+  "A browser - nothing to install",
+  "No student accounts to create",
+  "A printer if you want the paper fallback",
+  "One class is enough to start",
 ];
 
-export const weeklyFitOptions = [
+/**
+ * The local-data lifecycle in the order an adult asks about it. Wording here is
+ * checked against the implementation - see `@/lib/schools/storage`.
+ */
+export const dataLifecycle: readonly { question: string; answer: string }[] = [
   {
-    label: "Digital Technologies mini-lesson",
-    description:
-      "Use Sessions 1, 2 and 5 when you want explicit system and algorithm language in short bursts.",
+    question: "What is stored?",
+    answer:
+      "Teacher-chosen aliases, lesson progress, classroom setup choices and any light evidence a teacher records.",
   },
   {
-    label: "STEM block",
-    description:
-      "Use Sessions 5, 6 and 7 when you want to emphasise systems thinking, feedback loops and explanation.",
+    question: "Where is it stored?",
+    answer:
+      "In this browser, on this device, using local storage. Routine classroom use does not sync it to a server.",
   },
   {
-    label: "Wellbeing session",
-    description:
-      "Use Sessions 3 and 4 when the goal is feelings language, regulation and repair without blame.",
+    question: "Why is it needed?",
+    answer:
+      "So a class can pause and resume a session, and so a teacher can review evidence without re-running the lesson.",
   },
   {
-    label: "Relief lesson",
-    description:
-      "Use Session 1 or Session 4 as a low-prep standalone option with clear teacher prompts.",
-  },
-];
-
-export const evidenceTools = [
-  {
-    title: "One-page student reflection sheet",
-    description:
-      "A single written snapshot that captures cause/effect reasoning, systems vocabulary, regulation strategy and collaborative reflection.",
+    question: "Who can see it?",
+    answer:
+      "Anyone using this browser profile on this device. That is why it belongs on a teacher-controlled device.",
   },
   {
-    title: "Teacher observation checklist",
-    description:
-      "A quick circulation tool for noting whether students read companion state, explain patterns, suggest strategies and work collaboratively.",
-  },
-];
-
-export const assuranceItems = [
-  {
-    title: "No student accounts",
-    description:
-      "The school deployment is built for alias-only classroom use with no student sign-up flow.",
+    question: "When does it disappear?",
+    answer:
+      "35 days after the last activity, automatically. Clearing site data removes it immediately.",
   },
   {
-    title: "Local classroom records",
-    description:
-      "Routine use keeps roster, lesson, and progress records on the current device during the pilot window.",
+    question: "How does a teacher delete it?",
+    answer:
+      "From the local-data controls, with an explicit confirmation. No request to the studio is needed.",
   },
   {
-    title: "Teacher-led and time-bounded",
-    description:
-      "The classroom version is designed for supervised lessons, not always-on companion behaviour.",
-  },
-  {
-    title: "Bounded product contract",
-    description:
-      "The school profile excludes chat, social features, identity shaping, public sharing, and retention pressure loops.",
+    question: "What is never required?",
+    answer:
+      "A student account, a student email, a real name, a photo, a login, or a payment.",
   },
 ];
 
@@ -772,85 +598,6 @@ export const reviewerPathways: ReviewerPathway[] = [
       "accessibility-and-inclusion-review",
     ],
   },
-];
-
-export const packageSummaryCards: PackageSummaryCard[] = [
-  {
-    title: "Privacy pack",
-    description:
-      "Privacy policy, child and parent notices, data inventory, retention schedule, third-party register, controls summary, and privacy impact assessment.",
-  },
-  {
-    title: "Safeguarding pack",
-    description:
-      "Child-safety risk assessment, misuse and over-engagement controls, escalation pathway, supervision model, and inclusion review.",
-  },
-  {
-    title: "Teacher pack",
-    description:
-      "Teacher guide, parent note, staff briefing, lesson cards, and printable reflection materials for low-friction delivery.",
-  },
-  {
-    title: "Pilot operations pack",
-    description:
-      "Pilot prospectus, acceptance runbook, family participation protocol, review checklists, and outreach material for school launch.",
-  },
-  {
-    title: "Evidence pack",
-    description:
-      "Interview guides, feedback forms, measures, incident logging, fidelity notes, and the end-of-pilot summary template.",
-  },
-];
-
-export const pilotAcceptanceSteps: PilotAcceptanceStep[] = [
-  {
-    title: "Browser and network inspection",
-    description:
-      "Inspect routine classroom use on the school profile and confirm only declared traffic appears during normal lesson flow.",
-    docSlugs: [
-      "acceptance-runbook",
-      "third-party-services-register",
-      "security-controls-summary",
-    ],
-  },
-  {
-    title: "Teacher dry run",
-    description:
-      "Have one teacher rehearse the setup, lesson flow, evidence handling, and deletion controls before any school outreach.",
-    docSlugs: [
-      "teacher-dry-run-checklist",
-      "teacher-guide",
-      "pilot-runbook",
-    ],
-  },
-  {
-    title: "ICT/privacy review",
-    description:
-      "Walk ICT or privacy reviewers through the governance pack and capture a pass/fail decision against the school boundary.",
-    docSlugs: [
-      "ict-privacy-review-checklist",
-      "privacy-policy",
-      "privacy-impact-assessment",
-    ],
-  },
-  {
-    title: "Parent readability review",
-    description:
-      "Test the family note, privacy notice, and participation explanation with a parent or carer before live pilot use.",
-    docSlugs: [
-      "parent-readability-checklist",
-      "parent-note",
-      "parent-carer-privacy-notice",
-      "family-participation-protocol",
-    ],
-  },
-];
-
-export const pilotHardBlockers = [
-  "Any undeclared outbound call during routine classroom use.",
-  "Any reviewer confusion between the school deployment and the broader MetaPet product.",
-  "Any teacher setup burden above the promised low-friction lesson flow.",
-  "Any unclear family participation, alias handling, or deletion process.",
 ];
 
 export const curriculumSourceLinks: ExternalResourceLink[] = [

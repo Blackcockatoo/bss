@@ -17,17 +17,16 @@
 
 // Type-only import (no runtime cycle) so a progress record can hold typed
 // Pass 2 evidence while evidence.ts continues to import shared types from here.
+import type { CanonicalSessionId } from "@/lib/schools/canonicalSequence";
 import type { LessonEvidence } from "./evidence";
 
-/** Stable identifier for each of the seven lessons. */
-export type LessonId =
-  | "meet-your-metapet"
-  | "build-a-body"
-  | "dna-differences"
-  | "needs-and-consequences"
-  | "feelings-without-words"
-  | "patterns-behind-the-pet"
-  | "responsible-creator";
+/**
+ * Stable identifier for each of the seven lessons.
+ *
+ * Aliased to the canonical school sequence so the runner cannot drift from the
+ * sequence the landing page, teacher pack and printable fallback advertise.
+ */
+export type LessonId = CanonicalSessionId;
 
 /** Lifecycle status of a lesson as shown on the Teacher Hub. */
 export type LessonCardStatus =
@@ -170,6 +169,14 @@ export interface LessonDefinition {
   extensionActivity: string;
   /** Optional support activity for students who need scaffolding. */
   supportActivity: string;
+  /** Optional movement or physical participation moment. */
+  movementMoment: string;
+  /** The one brief whole-class reflection question. */
+  reflectionPrompt: string;
+  /** The visible stopping point that ends the session. */
+  stoppingPoint: string;
+  /** Light teacher evidence, captured without creating a marking queue. */
+  lightEvidence: string;
   preview: LessonPreviewContent;
   /** Feature flags the real (later-pass) activity requires. */
   requiredFeatureFlags: LessonFeatureFlag[];

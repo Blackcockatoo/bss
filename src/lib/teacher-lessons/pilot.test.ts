@@ -35,7 +35,7 @@ describe("pilot readiness store", () => {
     expect(labels).not.toContain("student name");
 
     usePilotStore.getState().addFeedback({
-      lessonId: "meet-your-metapet",
+      lessonId: "meet-the-system",
       answers: { "begin-without-help": "Yes" },
     });
     const entry = usePilotStore.getState().feedback[0];

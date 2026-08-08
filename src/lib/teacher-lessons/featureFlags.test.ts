@@ -27,7 +27,7 @@ describe("feature availability", () => {
   });
 
   it("resolves whole-lesson availability from required flags", () => {
-    const patterns = getLessonById("patterns-behind-the-pet")!;
+    const patterns = getLessonById("test-reflect-and-improve")!;
     expect(resolveLessonAvailability(patterns).available).toBe(true);
 
     setFeatureAvailabilityOverrides({ "advanced-visualisation": false });
@@ -37,7 +37,7 @@ describe("feature availability", () => {
   });
 
   it("keeps lessons without required flags available", () => {
-    const meet = getLessonById("meet-your-metapet")!;
+    const meet = getLessonById("meet-the-system")!;
     expect(resolveLessonAvailability(meet).available).toBe(true);
   });
 });

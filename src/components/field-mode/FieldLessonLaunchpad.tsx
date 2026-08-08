@@ -73,31 +73,91 @@ export function FieldLessonLaunchpad() {
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
       <div className="mx-auto w-full max-w-6xl space-y-8 px-5 py-10 md:px-8 md:py-14">
-        <header className="max-w-4xl space-y-3">
+        <header className="max-w-3xl space-y-3">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-800">
             Teacher launchpad · Australian Years 3–6
           </p>
           <h1 className="text-4xl font-semibold tracking-tight text-slate-950 md:text-5xl">
-            Choose a lesson and classroom setup
+            Ready when you are.
           </h1>
-          <p className="max-w-3xl text-base leading-7 text-slate-700 md:text-lg">
-            Every lesson uses the same guided classroom engine. Choose the
-            practical settings once, then start any of the seven short lessons.
-            Records stay on this device under the existing school retention and
-            deletion controls.
+          <p className="text-base leading-7 text-slate-700 md:text-lg">
+            No account or payment required. Open Session One and start teaching,
+            or pick any other session. Records stay on this device.
           </p>
           <p className="text-sm font-medium text-emerald-900" aria-live="polite">
-            {hydrated ? `${completeCount} of 7 lessons completed locally` : "Loading local lesson records…"}
+            {hydrated ? `${completeCount} of 7 sessions completed on this device` : "Loading local session records…"}
           </p>
         </header>
+
+        <section aria-labelledby="field-lessons-heading">
+          <div className="mb-4 flex items-center gap-3">
+            <BookOpenCheck className="h-6 w-6 text-emerald-800" aria-hidden="true" />
+            <h2 id="field-lessons-heading" className="text-2xl font-semibold">
+              The seven sessions
+            </h2>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {LESSON_DEFINITIONS.map((lesson) => {
+              const status = selectLessonStatus(progress, lesson.id);
+              const isRecommendedStart = lesson.number === 1;
+              return (
+                <article
+                  key={lesson.id}
+                  className={`flex flex-col rounded-3xl bg-white p-5 shadow-sm ${
+                    isRecommendedStart
+                      ? "border-2 border-emerald-800"
+                      : "border border-slate-200"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-800">
+                      Session {lesson.number}
+                    </p>
+                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium capitalize text-slate-700">
+                      {status.replace("-", " ")}
+                    </span>
+                  </div>
+                  {isRecommendedStart ? (
+                    <p className="mt-2 text-xs font-semibold text-emerald-800">
+                      Recommended starting point
+                    </p>
+                  ) : null}
+                  <h3 className="mt-3 text-xl font-semibold">{lesson.title}</h3>
+                  <p className="mt-2 flex-1 text-sm leading-6 text-slate-600">
+                    {lesson.shortDescription}
+                  </p>
+                  <p className="mt-4 text-xs font-medium text-slate-500">
+                    {FIELD_SESSION_LABELS.yearBand[session.yearBand]} · {session.durationMinutes} min · {FIELD_SESSION_LABELS.deliveryMode[session.deliveryMode]}
+                  </p>
+                  <a
+                    href={buildFieldLessonPath(lesson.slug, session)}
+                    className="mt-4 inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-800 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
+                  >
+                    {status === "not-started" ? "Start lesson" : "Open lesson"}
+                  </a>
+                  <a
+                    href={`${FIELD_MODE_PRINT_PATH_PREFIX}/${lesson.slug}`}
+                    className="mt-2 inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    <Printer className="h-4 w-4" aria-hidden="true" />
+                    Print / save PDF fallback
+                  </a>
+                </article>
+              );
+            })}
+          </div>
+        </section>
 
         <section
           aria-labelledby="field-setup-heading"
           className="rounded-3xl border border-emerald-950/15 bg-white p-5 shadow-sm md:p-7"
         >
           <h2 id="field-setup-heading" className="text-2xl font-semibold">
-            Classroom setup
+            Adjust classroom settings
           </h2>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            Optional. The defaults work for a Years 3–4 whole-class lesson.
+          </p>
           <div className="mt-5 grid gap-5 md:grid-cols-2 lg:grid-cols-5">
             <label className="space-y-2 text-sm font-semibold text-slate-800">
               Year band
@@ -180,55 +240,6 @@ export function FieldLessonLaunchpad() {
               />
               Sound {session.soundEnabled ? "on" : "off"}
             </label>
-          </div>
-        </section>
-
-        <section aria-labelledby="field-lessons-heading">
-          <div className="mb-4 flex items-center gap-3">
-            <BookOpenCheck className="h-6 w-6 text-emerald-800" aria-hidden="true" />
-            <h2 id="field-lessons-heading" className="text-2xl font-semibold">
-              Seven classroom lessons
-            </h2>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {LESSON_DEFINITIONS.map((lesson) => {
-              const status = selectLessonStatus(progress, lesson.id);
-              return (
-                <article
-                  key={lesson.id}
-                  className="flex flex-col rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-800">
-                      Lesson {lesson.number}
-                    </p>
-                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium capitalize text-slate-700">
-                      {status.replace("-", " ")}
-                    </span>
-                  </div>
-                  <h3 className="mt-3 text-xl font-semibold">{lesson.title}</h3>
-                  <p className="mt-2 flex-1 text-sm leading-6 text-slate-600">
-                    {lesson.shortDescription}
-                  </p>
-                  <p className="mt-4 text-xs font-medium text-slate-500">
-                    {FIELD_SESSION_LABELS.yearBand[session.yearBand]} · {session.durationMinutes} min · {FIELD_SESSION_LABELS.deliveryMode[session.deliveryMode]}
-                  </p>
-                  <a
-                    href={buildFieldLessonPath(lesson.slug, session)}
-                    className="mt-4 inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-800 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
-                  >
-                    {status === "not-started" ? "Start lesson" : "Open lesson"}
-                  </a>
-                  <a
-                    href={`${FIELD_MODE_PRINT_PATH_PREFIX}/${lesson.slug}`}
-                    className="mt-2 inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                  >
-                    <Printer className="h-4 w-4" aria-hidden="true" />
-                    Print / save PDF fallback
-                  </a>
-                </article>
-              );
-            })}
           </div>
         </section>
 

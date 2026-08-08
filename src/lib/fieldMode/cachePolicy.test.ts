@@ -36,11 +36,18 @@ describe("Field Pack cache policy", () => {
     expect(FIELD_PACK_STATIC_ASSET_PATHS).not.toContain("/icon.svg");
   });
 
-  it("never includes consumer route categories in the complete pack", () => {
-    const joined = FIELD_PACK_ROUTE_PATHS.join(" ");
-    expect(joined).not.toMatch(
-      /shop|wallet|marketplace|breeding|identity|qr-messaging|ritual|alchemist|digital-dna|social|share/,
-    );
+  it("never includes a consumer route category in the complete pack", () => {
+    // Checked by route root rather than by substring: a lesson slug is allowed
+    // to contain a word like "identity" (Session 3 is literally about identity
+    // and representation), but a cached route may never live under a consumer
+    // section such as /shop or /identity.
+    const APPROVED_ROOTS = new Set(["schools", "school-game", "legal", "docs"]);
+    const offenders = FIELD_PACK_ROUTE_PATHS.filter((pathname) => {
+      const root = pathname.split("/").filter(Boolean)[0];
+      return root !== undefined && !APPROVED_ROOTS.has(root);
+    });
+
+    expect(offenders).toEqual([]);
   });
 
   it("derives a stable release version from the deployment commit", () => {

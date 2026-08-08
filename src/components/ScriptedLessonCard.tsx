@@ -67,7 +67,6 @@ export function ScriptedLessonCard({
               </span>
             )}
             <h3 className="text-sm font-semibold text-white">
-              <span className="text-slate-500 mr-1.5">#{lesson.number}</span>
               {lesson.title}
             </h3>
             <p className="text-xs text-slate-400">{lesson.subtitle}</p>

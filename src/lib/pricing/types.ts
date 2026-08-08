@@ -1,6 +1,15 @@
-export type PlanId = 'free' | 'consumer' | 'pro' | 'school';
+/**
+ * Pricing types for the Blue Snake Studios consumer product.
+ *
+ * MetaPet School is deliberately absent from this file. The complete school
+ * experience is free, with a voluntary contribution instead of a licence, so
+ * there is no school plan, no per-student tier and no educator upgrade to
+ * model here. See `@/lib/schools/contribution` for the school side.
+ */
 
-export type PlanAudience = 'consumer' | 'educator' | 'institution';
+export type PlanId = "free" | "consumer";
+
+export type PlanAudience = "consumer";
 
 export interface PlanDefinition {
   id: PlanId;
@@ -10,29 +19,17 @@ export interface PlanDefinition {
   audience: PlanAudience;
   priceMonthly: number;
   priceYearly: number;
-  limits: PlanLimits;
   features: PlanFeature[];
-  highlight?: boolean;
-}
-
-export interface PlanLimits {
-  maxClasses: number;
-  maxStudentsPerClass: number;
-  maxAssignments: number;
-  maxLessonsInQueue: number;
-  analyticsRetentionDays: number;
 }
 
 export interface PlanFeature {
   id: string;
   label: string;
   included: boolean;
-  proOnly?: boolean;
   consumerOnly?: boolean;
-  schoolOnly?: boolean;
 }
 
-export type SubscriptionStatus = 'active' | 'trialing' | 'expired' | 'canceled';
+export type SubscriptionStatus = "active" | "trialing" | "expired" | "canceled";
 
 export interface UserSubscription {
   planId: PlanId;
