@@ -29,6 +29,18 @@ const METAPET_SCHOOL_HOST_ALIASES = new Set([
   "www.metapet.school",
 ]);
 
+const METAPET_SCHOOL_CLEAN_ROUTES = new Map<string, string>([
+  ["/lessons", "/schools/field/lessons"],
+  ["/classroom", "/schools/field/classroom"],
+  ["/offline", "/schools/field/offline"],
+  ["/guide", "/schools/field/guide"],
+  ["/safety", "/schools/field/safety"],
+  ["/privacy", "/schools/field/privacy"],
+  ["/pricing", "/schools/field/pricing"],
+  ["/why-free", "/schools/field/why-free"],
+  ["/trust", "/schools/field/trust"],
+]);
+
 function normalizeHost(value: string | null | undefined): string {
   if (!value) return "";
   // `x-forwarded-host` may carry a proxy chain; the first entry is the client
@@ -121,10 +133,25 @@ function redirectSchoolRootToFieldMode(request: NextRequest): NextResponse {
   return NextResponse.redirect(sameHostUrl(request, FIELD_MODE_HOME_PATH), 308);
 }
 
+function cleanSchoolRouteTarget(pathname: string): string | null {
+  const exact = METAPET_SCHOOL_CLEAN_ROUTES.get(pathname);
+  if (exact) return exact;
+  if (pathname.startsWith("/lessons/")) {
+    return `/schools/field${pathname}`;
+  }
+  return null;
+}
+
+function cleanSchoolRewriteUrl(request: NextRequest, pathname: string): URL {
+  const rewriteUrl = request.nextUrl.clone();
+  rewriteUrl.pathname = pathname;
+  return rewriteUrl;
+}
+
 function fieldCookieIsActive(request: NextRequest): boolean {
   // MetaPet.school is a dedicated classroom surface. Its hostname is itself
   // sufficient authority to enforce the Field boundary; cookies remain useful
-  // for the shared Blue Snake Studios host where Field Mode is opt-in.
+  // for the shared Blue $nake Studio host where Field Mode is opt-in.
   if (isMetaPetSchoolHost(request)) {
     return true;
   }
@@ -218,6 +245,16 @@ export function proxy(request: NextRequest) {
 
   if (isMetaPetSchoolHost(request) && pathname === "/") {
     return redirectSchoolRootToFieldMode(request);
+  }
+
+  if (isMetaPetSchoolHost(request)) {
+    const cleanTarget = cleanSchoolRouteTarget(pathname);
+    if (cleanTarget) {
+      return activateFieldCookie(
+        NextResponse.rewrite(cleanSchoolRewriteUrl(request, cleanTarget)),
+        request,
+      );
+    }
   }
 
   const policyId = activePolicyId(request);

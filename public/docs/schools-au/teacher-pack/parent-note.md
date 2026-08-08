@@ -1,8 +1,8 @@
-# MetaPet Schools Parent/Carer Note
+# MetaPet School Parent/Carer Note
 
 ## What is this?
 
-`MetaPet Schools` is a short teacher-led classroom activity for Years 3-6. Students use a digital companion to notice patterns, practise simple online safety habits, and talk about systems and regulation in age-appropriate language.
+`MetaPet School` is a short teacher-led classroom activity for Years 3-6. Students use a digital companion to notice patterns, practise simple online safety habits, and talk about systems and regulation in age-appropriate language.
 
 ## What it does not require
 

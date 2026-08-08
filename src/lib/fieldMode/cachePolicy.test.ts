@@ -46,9 +46,9 @@ describe("Field Pack cache policy", () => {
   it("derives a stable release version from the deployment commit", () => {
     expect(
       resolveFieldPackVersion({ VERCEL_GIT_COMMIT_SHA: "ABCDEF1234567890zz" }),
-    ).toBe("field-pass-4-abcdef1234567890");
+    ).toBe("field-pass-5-abcdef1234567890");
     expect(resolveFieldPackVersion({})).toBe(
-      "field-pass-4-development",
+      "field-pass-5-development",
     );
   });
 

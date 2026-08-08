@@ -1,8 +1,8 @@
-# MetaPet Schools Wellbeing Escalation Pathway
+# MetaPet School Wellbeing Escalation Pathway
 
 ## When to use this pathway
 
-Use this pathway if a student response during a `MetaPet Schools` session suggests distress, disclosure, dysregulation, or another wellbeing concern that goes beyond normal classroom reflection.
+Use this pathway if a student response during a `MetaPet School` session suggests distress, disclosure, dysregulation, or another wellbeing concern that goes beyond normal classroom reflection.
 
 ## Immediate teacher response
 
@@ -20,4 +20,4 @@ Use this pathway if a student response during a `MetaPet Schools` session sugges
 
 ## Product rule
 
-`MetaPet Schools` must never be used as the primary response to a wellbeing issue. It is a classroom learning tool, not a support service.
+`MetaPet School` must never be used as the primary response to a wellbeing issue. It is a classroom learning tool, not a support service.

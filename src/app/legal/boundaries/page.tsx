@@ -15,13 +15,13 @@ export default function LegalBoundariesPage() {
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-6 py-12">
       <div className="space-y-3">
         <p className="text-xs uppercase tracking-[0.35em] text-amber-300">
-          MetaPet Schools
+          MetaPet School
         </p>
         <h1 className="text-3xl font-semibold text-slate-100">
           Product boundaries
         </h1>
         <p className="text-sm leading-6 text-slate-300">
-          MetaPet Schools is a teacher-led classroom tool for digital
+          MetaPet School is a teacher-led classroom tool for digital
           responsibility, systems thinking, and online safety habits in Years
           3-6. It is intentionally narrower than broader Meta-Pet product work.
         </p>

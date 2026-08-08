@@ -1,4 +1,4 @@
-# MetaPet Schools Student Exit Feedback
+# MetaPet School Student Exit Feedback
 
 Use this anonymously. Students should not put full names on the sheet.
 

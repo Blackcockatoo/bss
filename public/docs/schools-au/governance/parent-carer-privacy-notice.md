@@ -1,8 +1,8 @@
-# MetaPet Schools Parent and Carer Privacy Notice
+# MetaPet School Parent and Carer Privacy Notice
 
 ## What this notice covers
 
-This notice explains the school-facing `MetaPet Schools` pilot build. It does not describe adult-only or experimental Meta-Pet routes outside the school deployment.
+This notice explains the school-facing `MetaPet School` pilot build. It does not describe adult-only or experimental Meta-Pet routes outside the school deployment.
 
 ## Classroom privacy position
 

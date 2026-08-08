@@ -8,7 +8,7 @@ import {
 } from "@/lib/fieldMode/identity";
 
 /**
- * MetaPet School ships from the Blue Snake Studios build, where the root
+ * MetaPet School ships from the Blue $nake Studio build, where the root
  * layout resolves its identity from build-time env. These assertions pin the
  * classroom surface to its own identity so a shared-shell change cannot
  * silently re-brand the classroom product.
@@ -23,7 +23,7 @@ describe("MetaPet School standalone identity", () => {
     );
   });
 
-  it("does not inherit the Blue Snake Studios social identity", () => {
+  it("does not inherit the Blue $nake Studio social identity", () => {
     const openGraph = metadata.openGraph;
     expect(openGraph).toBeTruthy();
     expect(openGraph && "siteName" in openGraph ? openGraph.siteName : null).toBe(
@@ -37,7 +37,7 @@ describe("MetaPet School standalone identity", () => {
       twitter: metadata.twitter,
       applicationName: metadata.applicationName,
     });
-    expect(serialized).not.toMatch(/Blue Snake Studios/i);
+    expect(serialized).not.toMatch(/Blue \$nake Studio/i);
   });
 
   it("declares the light classroom chrome rather than the shared dark shell", () => {

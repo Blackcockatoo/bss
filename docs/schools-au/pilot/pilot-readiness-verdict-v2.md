@@ -1,4 +1,4 @@
-# MetaPet Schools Pilot Readiness Verdict v2
+# MetaPet School Pilot Readiness Verdict v2
 
 **Score: 7.2/10.** This v2 memo replaces the earlier school pilot verdict. **Before verification: not ready. After verification: ready for a constrained pilot, nearly ready as a product-category offer.**
 

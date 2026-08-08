@@ -21,12 +21,12 @@ import { useState } from "react";
 const STEPS = [
   {
     icon: GraduationCap,
-    title: "What is MetaPet Schools?",
+    title: "What is MetaPet School?",
     lines: [
       "A digital companion for Years 3-6 classrooms.",
       "Students explore systems thinking, digital responsibility, and emotional regulation.",
       "7 teacher-led sessions, each 20 minutes.",
-      "No accounts, no data collection, everything on this device.",
+      "No student accounts; optional classroom records stay on this device.",
     ],
   },
   {
@@ -44,8 +44,8 @@ const STEPS = [
     icon: Users,
     title: "Set up your classroom",
     lines: [
-      "Create an alias roster with pseudonyms for each student.",
-      "Use the Classroom Manager to add and manage aliases.",
+      "A roster is optional; you can teach every lesson without one.",
+      "If useful, create teacher-assigned aliases in the Classroom Manager.",
       "Aliases keep sessions private — no real names stored.",
       "You can reset the roster at any time.",
     ],
@@ -54,10 +54,10 @@ const STEPS = [
     icon: BookOpen,
     title: "Choose your first lesson",
     lines: [
-      "Start with Session 1: \"Meet the Digital Companion\".",
-      "Each lesson card includes an outcome, activity, and teacher prompt.",
+      "Start with Lesson 1: \"Meet the System\".",
+      "Each lesson includes an outcome, five steps, participation choices, and a fallback.",
       "Add lessons to the queue from the lesson planner.",
-      "Sessions fit into a 30 or 50 minute block.",
+      "Lessons take 15–20 minutes and can sit inside a normal classroom block.",
     ],
   },
   {

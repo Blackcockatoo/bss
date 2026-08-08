@@ -1,8 +1,8 @@
-# MetaPet Schools Child Privacy Notice
+# MetaPet School Child Privacy Notice
 
 ## What this tool does
 
-`MetaPet Schools` is a short classroom tool that helps your class learn about digital systems, routines, and online safety habits.
+`MetaPet School` is a short classroom tool that helps your class learn about digital systems, routines, and online safety habits.
 
 ## What it keeps on this device
 

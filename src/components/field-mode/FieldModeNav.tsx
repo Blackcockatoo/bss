@@ -8,6 +8,8 @@ import {
   HardDriveDownload,
   Home,
   ShieldCheck,
+  BadgeDollarSign,
+  ScanSearch,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 
@@ -28,6 +30,8 @@ const ICONS: Record<FieldModeNavItem["kind"], typeof Home> = {
   offline: HardDriveDownload,
   guide: BookOpen,
   safety: ShieldCheck,
+  pricing: BadgeDollarSign,
+  trust: ScanSearch,
   exit: DoorOpen,
 };
 
@@ -47,7 +51,7 @@ export function FieldModeNav() {
           <span className="text-sm font-semibold text-emerald-950">
             {METAPET_SCHOOL_NAME}
           </span>
-          <span className="text-[0.6875rem] font-medium text-emerald-900/70">
+          <span className="text-[0.6875rem] font-medium text-emerald-900">
             {METAPET_SCHOOL_TAGLINE}
           </span>
         </a>

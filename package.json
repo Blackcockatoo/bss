@@ -15,6 +15,7 @@
     "check:moss60-copy": "node scripts/check-moss60-copy.mjs",
     "check:geometry-sprite-lock": "node scripts/check-geometry-sprite-lock.mjs",
     "check:child-safe-deployment": "node scripts/assert-child-safe-deployment.mjs",
+    "check:school-claims": "node scripts/audit-metapet-school-claims.mjs",
     "smoke:field-pack": "node scripts/field-pack-smoke.mjs",
     "prepare:moss60-production": "node scripts/prepare-moss60-production.mjs",
     "sync:kpps-exports": "node scripts/sync-kpps-package-exports.mjs"

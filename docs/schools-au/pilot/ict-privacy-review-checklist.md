@@ -1,4 +1,4 @@
-# MetaPet Schools ICT/Privacy Review Checklist
+# MetaPet School ICT/Privacy Review Checklist
 
 Use this checklist with the governance pack. Mark each row before approving a pilot.
 

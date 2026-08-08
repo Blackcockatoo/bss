@@ -11,8 +11,8 @@ import {
 export default function manifest(): MetadataRoute.Manifest {
   if (IS_SCHOOLS_PROFILE) {
     return {
-      name: "MetaPet Schools",
-      short_name: "MetaPet Schools",
+      name: "MetaPet School",
+      short_name: "MetaPet School",
       description:
         "Teacher-led, low-data classroom pilot for Years 3-6 with alias-only rosters and local-only classroom records.",
       start_url: "/schools",

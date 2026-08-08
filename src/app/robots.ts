@@ -40,7 +40,7 @@ const CONSUMER_CRAWL_BLOCKLIST = [
 
 /**
  * Two public domains are served from one deployment, so robots.txt must be
- * resolved per host. Emitting the Blue Snake Studios sitemap from
+ * resolved per host. Emitting the Blue $nake Studio sitemap from
  * metapet.school pointed crawlers at a different domain and advertised
  * consumer routes this host redirects away from.
  */

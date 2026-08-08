@@ -17,6 +17,9 @@ describe("Field lesson session contract", () => {
       delivery: "pairs",
       support: "low-sensory",
       sound: "on",
+      motion: "reduced",
+      contrast: "high",
+      text: "large",
     });
     expect(config).toEqual({
       yearBand: "years-5-6",
@@ -24,6 +27,9 @@ describe("Field lesson session contract", () => {
       deliveryMode: "pairs",
       supportMode: "low-sensory",
       soundEnabled: true,
+      reducedMotion: true,
+      highContrast: true,
+      largeText: true,
     });
     expect(fieldTimingMode(config)).toBe("standard");
     expect(fieldPresentationMode(config)).toBe("support");

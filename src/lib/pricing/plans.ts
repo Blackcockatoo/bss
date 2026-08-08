@@ -35,7 +35,7 @@ export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
     maxStudentsPerClass: UNLIMITED,
     maxAssignments: UNLIMITED,
     maxLessonsInQueue: UNLIMITED,
-    analyticsRetentionDays: 730,
+    analyticsRetentionDays: 35,
   },
 };
 
@@ -119,40 +119,39 @@ const CONSUMER_FEATURES: PlanFeature[] = [
 ];
 
 const SCHOOL_FEATURES: PlanFeature[] = [
-  ...EDUCATOR_FEATURES.map((f) => ({ ...f, included: true, proOnly: false })),
   {
-    id: "unlimited-teachers",
-    label: "Unlimited teacher accounts",
+    id: "seven-lessons",
+    label: "All seven canonical classroom lessons",
     included: true,
     schoolOnly: true,
   },
   {
-    id: "student-cap-500",
-    label: "Up to 500 learner aliases",
+    id: "no-student-accounts",
+    label: "No student accounts or student emails",
     included: true,
     schoolOnly: true,
   },
   {
-    id: "custom-branding",
-    label: "Custom school branding (coming soon)",
+    id: "offline-pack",
+    label: "Complete offline Field Pack and rollback",
     included: true,
     schoolOnly: true,
   },
   {
-    id: "admin-dashboard",
-    label: "School admin dashboard",
+    id: "print-fallbacks",
+    label: "Printable fallback for every lesson",
     included: true,
     schoolOnly: true,
   },
   {
-    id: "bulk-dna",
-    label: "Bulk learner alias provisioning",
+    id: "local-records",
+    label: "Optional alias-only local classroom records",
     included: true,
     schoolOnly: true,
   },
   {
-    id: "extended-analytics",
-    label: "Extended local summary history (730-day)",
+    id: "same-access",
+    label: "Same complete Field Mode at every contribution level",
     included: true,
     schoolOnly: true,
   },
@@ -206,13 +205,13 @@ export const PLAN_CATALOG: Record<PlanId, PlanDefinition> = {
   },
   school: {
     id: "school",
-    name: "Campus License",
-    tagline: "School-wide consciousness",
+    name: "MetaPet School",
+    tagline: "Use it free. Contribute what your school can.",
     description:
-      "One license covers your whole school — unlimited teachers, up to 500 learner aliases, admin tools, and extended local summary history.",
+      "The complete teacher-led Field Mode is free for every school. Optional adult contributions sustain maintenance, accessibility and teacher resources without unlocking child-facing features.",
     audience: "institution",
     priceMonthly: 0,
-    priceYearly: 299,
+    priceYearly: 0,
     limits: PLAN_LIMITS.school,
     features: SCHOOL_FEATURES,
   },

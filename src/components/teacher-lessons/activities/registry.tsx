@@ -18,6 +18,7 @@ import { NeedsActivity } from "./NeedsActivity";
 import { FeelingsActivity } from "./FeelingsActivity";
 import { PatternsActivity } from "./PatternsActivity";
 import { ResponsibleCreatorActivity } from "./ResponsibleCreatorActivity";
+import { FieldCanonicalActivity } from "./FieldCanonicalActivity";
 
 /**
  * The generic activity registry: `activityType → component`. The shared Runner
@@ -112,7 +113,14 @@ function ReflectionFallback(props: LessonActivityProps) {
  * The single mounting point the Runner uses. It checks feature availability
  * first (graceful fallback) then renders the registered activity generically.
  */
-export function ActivityHost(props: LessonActivityProps) {
+export function ActivityHost({
+  canonicalField = false,
+  ...props
+}: LessonActivityProps & { canonicalField?: boolean }) {
+  if (canonicalField) {
+    return <FieldCanonicalActivity {...props} />;
+  }
+
   const availability = resolveLessonAvailability(props.lesson);
   if (!availability.available) {
     return (

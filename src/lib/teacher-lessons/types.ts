@@ -12,7 +12,7 @@
  *   cleanly separated so future passes can add real activities without
  *   rewriting the Runner.
  * - Everything is local-first and account-free, matching the existing
- *   Meta-Pet / MetaPet Schools privacy contract.
+ *   Meta-Pet / MetaPet School privacy contract.
  */
 
 // Type-only import (no runtime cycle) so a progress record can hold typed
@@ -144,10 +144,21 @@ export interface LessonDefinition {
   shortDescription: string;
   /** Suggested duration in minutes. */
   durationMinutes: number;
+  /** Explicit adjustments for the two supported Australian year bands. */
+  yearAdaptations: {
+    years3To4: string;
+    years5To6: string;
+  };
   /** Suggested learning areas (curriculum-friendly labels). */
   learningAreas: string[];
+  /** Indicative Australian Curriculum V9.0 content-description links. */
+  curriculumLinks: string[];
+  /** Equipment required before opening the lesson. */
+  materials: string[];
   /** The single learning intention for the lesson. */
   learningIntention: string;
+  /** One observable, student-friendly statement of success. */
+  successStatement: string;
   /** Observable success criteria. */
   successCriteria: string[];
   /** Teacher-facing framing shown before the lesson begins. */
@@ -170,6 +181,15 @@ export interface LessonDefinition {
   extensionActivity: string;
   /** Optional support activity for students who need scaffolding. */
   supportActivity: string;
+  /** Equivalent, non-scored ways students can participate. */
+  participationChoices: string[];
+  optionalReflection: string;
+  lightEvidenceMethod: string;
+  noMarkingOption: string;
+  offlineFallback: string;
+  accessibilityOptions: string[];
+  safeStopCondition: string;
+  resetDeleteReminder: string;
   preview: LessonPreviewContent;
   /** Feature flags the real (later-pass) activity requires. */
   requiredFeatureFlags: LessonFeatureFlag[];

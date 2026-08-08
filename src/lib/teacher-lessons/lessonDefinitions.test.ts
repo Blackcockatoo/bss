@@ -10,13 +10,13 @@ import {
 } from "./lessonDefinitions";
 
 const EXPECTED_TITLES = [
-  "Meet Your Meta-Pet",
-  "Build a Body",
-  "DNA Makes Us Different",
-  "Needs, Actions and Consequences",
-  "Feelings Without Words",
-  "Patterns Behind the Pet",
-  "The Responsible Creator Challenge",
+  "Meet the System",
+  "Read the Signals",
+  "One Identity, Many Representations",
+  "Choices and Algorithms",
+  "Privacy and Responsible Design",
+  "Design a Better Feature",
+  "Test, Reflect and Improve",
 ];
 
 describe("lesson definitions", () => {
@@ -69,7 +69,7 @@ describe("lesson definitions", () => {
 
   it("looks lessons up by id and slug", () => {
     expect(getLessonById("dna-differences")?.number).toBe(3);
-    expect(getLessonBySlug("build-a-body")?.title).toBe("Build a Body");
+    expect(getLessonBySlug("build-a-body")?.title).toBe("Design a Better Feature");
     expect(getLessonById("nope")).toBeUndefined();
     expect(getLessonBySlug(undefined)).toBeUndefined();
   });

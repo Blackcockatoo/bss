@@ -12,18 +12,19 @@ import {
 } from "./menuActions";
 
 const PILOT_EVIDENCE_ITEMS = [
-  "Teacher interview notes",
-  "Anonymous student exit feedback",
-  "Parent/carer feedback",
-  "Pre/post measure",
-  "Incident log",
-  "Dropout and engagement counts",
-  "Implementation fidelity notes",
+  "Teacher setup time",
+  "Lesson completion",
+  "Device and browser performance",
+  "Offline reliability",
+  "Anonymous student clarity feedback",
+  "Parent/carer clarity feedback",
+  "Accessibility, privacy and safeguarding issues",
+  "What failed and what changed because of criticism",
 ];
 
 const WORKFLOW_STEPS = [
   "Review the teacher guide, parent note, and staff briefing before any classroom use.",
-  "Set up an alias-only roster and a short lesson queue on the current device.",
+  "Choose a lesson. An alias-only roster is optional and is used only when the teacher intentionally records local pilot evidence.",
   "Run the sequence as a teacher-led classroom activity, not an always-on companion.",
   "Delete or export local evidence at the end of the pilot window according to the governance pack.",
 ];
@@ -38,16 +39,16 @@ export default function SchoolGamePage() {
         <header className="rounded-3xl border border-amber-300/20 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 p-6 shadow-[0_0_0_1px_rgba(251,191,36,0.05)] md:p-8">
           <div className="space-y-4">
             <p className="text-xs uppercase tracking-[0.35em] text-amber-300">
-              MetaPet Schools
+              MetaPet School
             </p>
             <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-white md:text-5xl">
               Teacher-led classroom runtime
             </h1>
             <p className="max-w-3xl text-base leading-7 text-slate-300 md:text-lg">
-              A 15-20 minute guided classroom activity. No admin. No marking.
-              Follow the script. Alias-based setup, local records, and clear
-              deletion controls. The broader MetaPet product stays outside this
-              school runtime.
+              A 15–20 minute guided classroom activity. Low-prep, with a
+              no-marking option. Follow the script. Optional alias-only local
+              records have clear deletion controls. The broader MetaPet product
+              stays outside this school runtime.
             </p>
             <SafetyBadge />
             <div className="flex flex-wrap gap-3 text-sm">
@@ -161,8 +162,8 @@ export default function SchoolGamePage() {
               Pick a lesson. Follow the script. Done.
             </h2>
             <p className="mt-2 text-sm leading-6 text-slate-400">
-              Each lesson takes 15-20 minutes. No prep needed. Every step has
-              exact words to say aloud.
+              Each lesson takes about 15–20 minutes. The low-prep guide includes
+              exact words to say aloud and a printable fallback.
             </p>
             <div className="mt-6">
               <LessonCardGallery />
@@ -186,7 +187,8 @@ export default function SchoolGamePage() {
                 key={item}
                 className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4 text-sm leading-6 text-slate-300"
               >
-                {item}
+                <span className="block">{item}</span>
+                <span className="mt-1 block text-xs font-semibold uppercase tracking-wide text-amber-300">Not yet established</span>
               </div>
             ))}
           </div>
@@ -197,8 +199,12 @@ export default function SchoolGamePage() {
             Classroom Setup
           </p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white md:text-3xl">
-            Prepare the roster, lesson queue, and local evidence on-device
+            Optional alias-only pilot records on this device
           </h2>
+          <p className="mt-2 text-sm leading-6 text-slate-300">
+            A roster is never required to teach. Use these controls only when a
+            school intentionally chooses local progress or pilot evidence.
+          </p>
           <div className="mt-6">
             <ClassroomManager />
           </div>

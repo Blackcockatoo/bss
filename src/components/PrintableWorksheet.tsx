@@ -67,7 +67,7 @@ function buildWorksheetHtml(lesson: ScriptedLessonCard): string {
     <div class="question-box" style="min-height:100px;"></div>
   </div>
 
-  <p class="safety">${lesson.safetyNote} &bull; MetaPet Schools classroom activity</p>
+  <p class="safety">${lesson.safetyNote} &bull; MetaPet School classroom activity</p>
 </body>
 </html>`;
 }

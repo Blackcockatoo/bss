@@ -39,5 +39,5 @@ export const PORTAL_TAGLINE = IS_SCHOOLS_PROFILE
   : "Privacy-first digital learning companion for classrooms and families.";
 
 export const PORTAL_DESCRIPTION = IS_SCHOOLS_PROFILE
-  ? "Teacher-led, time-bounded sessions for Years 3-6. No accounts, no data collection, everything stays on the school device."
+  ? "Teacher-led, time-bounded lessons for Years 3–6. No student accounts; optional classroom records stay on the school device and remain teacher-deletable."
   : `Meta-Pet turns care, pattern learning, and digital responsibility into short guided activities. It runs browser-first and local-first: no ads, no trackers, no student accounts, and no unnecessary data collection. ${portalPathSummary}`;

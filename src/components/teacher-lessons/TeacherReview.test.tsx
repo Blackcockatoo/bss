@@ -51,14 +51,14 @@ describe("Teacher review", () => {
     expect(screen.getByText(/Evidence Review/i)).toBeTruthy();
     expect(screen.getByText(/1 of 7 lessons complete/i)).toBeTruthy();
     // Every lesson row renders.
-    expect(screen.getByText(/1\. Meet Your Meta-Pet/)).toBeTruthy();
+    expect(screen.getByText(/1\. Meet the System/)).toBeTruthy();
   });
 
   it("resets a single lesson's evidence", () => {
     seedEvidence();
     render(<TeacherReview />);
     // Open the Meet lesson row.
-    fireEvent.click(screen.getByText(/1\. Meet Your Meta-Pet/));
+    fireEvent.click(screen.getByText(/1\. Meet the System/));
     fireEvent.click(screen.getByText(/Reset this lesson's evidence/i));
     fireEvent.click(screen.getByText(/Confirm reset evidence/i));
     const record =
@@ -93,7 +93,7 @@ describe("Teacher review", () => {
       />,
     );
 
-    fireEvent.click(screen.getByText(/1\. Meet Your Meta-Pet/));
+    fireEvent.click(screen.getByText(/1\. Meet the System/));
     expect(screen.getByRole("link", { name: /Open lesson/i })).toHaveAttribute(
       "href",
       "/schools/field/lessons/meet-your-metapet",

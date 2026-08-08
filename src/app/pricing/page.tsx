@@ -18,7 +18,7 @@ const AUDIENCE_DESCRIPTIONS: Record<PlanAudience, string> = {
   educator:
     "Adult-facing class management, learner pattern snapshots, and curriculum tools.",
   institution:
-    "One license for your whole school — teachers, learner aliases, and admin tools.",
+    "The complete MetaPet Field Mode is free for every school. Adult contributions are optional.",
 };
 
 function PlanCard({
@@ -61,8 +61,8 @@ function PlanCard({
       </div>
 
       <div className="mb-5">
-        {isSchool && interval === "monthly" ? (
-          <p className="text-sm text-zinc-400">Annual billing only — $299/yr</p>
+        {isSchool ? (
+          <p className="text-3xl font-bold text-zinc-100">Free</p>
         ) : (
           <div className="flex items-end gap-1">
             <span className="text-3xl font-bold text-zinc-100">
@@ -231,7 +231,7 @@ export default function PricingPage() {
       )}
       {contactShown && (
         <p className="mt-5 text-center text-sm text-cyan-300">
-          For Campus License enquiries:{" "}
+          For voluntary contribution or custom implementation enquiries:{" "}
           <a
             href="mailto:themossman@bluesnakestudios.com.au"
             className="underline hover:text-cyan-200"
@@ -269,12 +269,12 @@ export default function PricingPage() {
               Education
             </p>
             <p className="mt-2 text-sm font-medium text-zinc-200">
-              Teacher Pro + Campus License
+              Teacher Pro + free MetaPet School
             </p>
             <p className="mt-1 text-xs leading-relaxed text-zinc-400">
-              $19/mo per teacher or $299/yr per school. AI lesson tools,
-              unlimited classes, school-wide provisioning, and longer local
-              summary history.
+              Optional paid adult productivity tools remain separate. Every
+              school receives the same complete seven-lesson Field Mode free;
+              voluntary contributions support the public-interest product.
             </p>
           </div>
           <div className="rounded-xl border border-amber-500/20 bg-amber-950/20 p-4">

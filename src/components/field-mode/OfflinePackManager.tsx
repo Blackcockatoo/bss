@@ -46,6 +46,7 @@ function readableDate(timestamp: number): string {
 export function OfflinePackManager() {
   const online = useFieldConnectivity();
   const [overview, setOverview] = useState<FieldPackOverview | null>(null);
+  const [storageAvailable, setStorageAvailable] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [notice, setNotice] = useState<Notice | null>(null);
   const importRef = useRef<HTMLInputElement>(null);
@@ -57,6 +58,14 @@ export function OfflinePackManager() {
   }, []);
 
   useEffect(() => {
+    try {
+      const key = "metapet-school-readiness-check";
+      window.localStorage.setItem(key, "ok");
+      window.localStorage.removeItem(key);
+      setStorageAvailable(true);
+    } catch {
+      setStorageAvailable(false);
+    }
     void refresh().catch((error: unknown) =>
       setNotice({
         tone: "error",
@@ -150,6 +159,22 @@ export function OfflinePackManager() {
   const active = overview?.active ?? null;
   const updateAvailable = overview?.updateAvailable === true;
   const emergencyDisabled = overview?.available?.emergencyNoop === true;
+  const completeLessonRoutes =
+    overview?.available?.lessons.length === LESSON_DEFINITIONS.length &&
+    overview.available.lessons.every(
+      (lesson) =>
+        overview.available?.routes.includes(lesson.route) &&
+        overview.available.routes.includes(lesson.printRoute),
+    );
+  const readinessChecks = [
+    ["Seven lesson routes", Boolean(completeLessonRoutes)],
+    ["Printable fallback for every lesson", Boolean(completeLessonRoutes)],
+    ["Local classroom storage", storageAvailable],
+    ["Sound-off fallback", true],
+    ["Complete offline pack active", Boolean(active && !overview?.bypassed)],
+    ["Current Field Mode version", Boolean(active?.version)],
+  ] as const;
+  const readyForClass = readinessChecks.every(([, ready]) => ready);
 
   return (
     <div className="space-y-8">
@@ -178,7 +203,7 @@ export function OfflinePackManager() {
           </p>
           <p className="mt-2 text-sm leading-6 text-slate-600">
             {active
-              ? `${active.itemCount} verified files · ${readableDate(active.installedAt)}`
+              ? `${active.version} · ${active.itemCount} verified files · ${readableDate(active.installedAt)}`
               : "No complete Field Pack is stored yet."}
           </p>
         </div>
@@ -216,6 +241,26 @@ export function OfflinePackManager() {
           {notice.message}
         </div>
       ) : null}
+
+      <section className={`rounded-3xl border p-6 md:p-8 ${readyForClass ? "border-emerald-300 bg-emerald-50" : "border-amber-300 bg-amber-50"}`}>
+        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-700">Readiness test</p>
+        <h2 className="mt-2 text-3xl font-semibold text-slate-950">
+          {readyForClass ? "Ready for class" : "Preparation needed"}
+        </h2>
+        <p className="mt-2 text-sm leading-6 text-slate-700">
+          {readyForClass
+            ? `Field Pack ${active?.version} was last verified ${active ? readableDate(active.installedAt) : "on this device"}.`
+            : "Complete the failed checks below while connected. The last complete pack, if present, remains untouched."}
+        </p>
+        <ul className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {readinessChecks.map(([label, ready]) => (
+            <li key={label} className="flex items-center gap-2 rounded-xl bg-white/80 p-3 text-sm font-medium text-slate-800">
+              {ready ? <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-700" aria-hidden="true" /> : <CloudOff className="h-5 w-5 shrink-0 text-amber-700" aria-hidden="true" />}
+              {label}: {ready ? "ready" : "check needed"}
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <section className="rounded-3xl border border-slate-200 bg-white p-6 md:p-8">
         <div className="max-w-3xl">

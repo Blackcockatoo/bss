@@ -24,6 +24,8 @@ import { SCHOOLS_LOCAL_DATA_RETENTION_DAYS } from "@/lib/schools/storage";
 import { useStore } from "@/lib/store";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { Analytics } from "@vercel/analytics/next";
+import { METAPET_PRODUCT } from "@/lib/fieldMode/product";
 
 export default function ClientBody({
   children,
@@ -151,7 +153,7 @@ export default function ClientBody({
       <div className="flex min-h-screen items-center justify-center px-4 text-center text-foreground">
         <div className="max-w-md space-y-3">
           <p className="text-sm font-semibold text-primary">
-            MetaPet Schools is active.
+            {METAPET_PRODUCT.school} is active.
           </p>
           <p className="text-sm text-muted-foreground">
             This route is outside the school-safe deployment and is redirecting
@@ -176,7 +178,7 @@ export default function ClientBody({
             {fieldSurfaceActive
               ? "MetaPet Field Mode"
               : effectiveSchoolsMode
-                ? "MetaPet Schools"
+                ? METAPET_PRODUCT.school
                 : "Meta-Pet"}
           </div>
           <button
@@ -233,6 +235,7 @@ export default function ClientBody({
         <LegalNotice schoolsMode={effectiveSchoolsMode} />
       </footer>
       {!fieldSurfaceActive && fieldUiResolved ? <QuickNav /> : null}
+      {!effectiveSchoolsMode ? <Analytics /> : null}
     </div>
   );
 }

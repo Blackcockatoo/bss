@@ -1,4 +1,4 @@
-# MetaPet Schools Security Controls Summary
+# MetaPet School Security Controls Summary
 
 ## Current controls
 

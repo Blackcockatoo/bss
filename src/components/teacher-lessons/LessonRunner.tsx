@@ -214,10 +214,20 @@ export function LessonRunner({
   const totalSteps = lesson.steps.length;
   const viewMode: LessonViewMode = state.viewMode;
   const focusMode = !preview && state.focusMode;
+  const studentDisplayMode = fieldMode && viewMode === "student";
   const lowPerformance = state.lowPerformance;
   // Low Performance Mode implies static visuals everywhere reduced-motion does.
   const effectiveReducedMotion =
-    reducedMotion || lowPerformance || (fieldMode && !online);
+    reducedMotion ||
+    lowPerformance ||
+    fieldSession?.reducedMotion === true ||
+    (fieldMode && !online);
+  const fieldAccessibilityClass = [
+    fieldSession?.highContrast ? "field-high-contrast" : "",
+    fieldSession?.largeText ? "field-large-text" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
   const timing = getTimingModeMeta(
     LESSON_TIMING_MODES.find((m) => m.id === state.timingMode)?.id ??
       "standard",
@@ -282,6 +292,7 @@ export function LessonRunner({
         lessonTitle={lesson.title}
         onEnter={() => setFocusMode(true)}
         onExit={() => setFocusMode(false)}
+        className={fieldAccessibilityClass}
       >
         <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6">
           <LessonCompletion
@@ -337,10 +348,14 @@ export function LessonRunner({
 
   return (
     <ClassroomFocusMode
-      active={focusMode}
+      active={focusMode || studentDisplayMode}
       lessonTitle={lesson.title}
       onEnter={() => setFocusMode(true)}
-      onExit={() => setFocusMode(false)}
+      onExit={() =>
+        studentDisplayMode ? setViewMode("teacher") : setFocusMode(false)
+      }
+      modeLabel={studentDisplayMode ? "Student Display Mode" : "Classroom Focus Mode"}
+      className={fieldAccessibilityClass}
     >
       {/* pb-28 keeps content clear of the fixed guide bar on all screens. */}
       <div className="mx-auto w-full max-w-5xl px-4 pb-28 pt-4 sm:px-6">
@@ -604,7 +619,11 @@ export function LessonRunner({
 
         {/* Activity — mounted once per lesson (keyed by lesson + replay nonce)
             so a student's in-progress work persists as steps change. */}
-        <ActivityHost key={`${lesson.id}-${activityNonce}`} {...activityProps} />
+        <ActivityHost
+          key={`${lesson.id}-${activityNonce}`}
+          canonicalField={fieldMode}
+          {...activityProps}
+        />
 
         {/* Last-step complete action (guide bar Next is disabled at the end) */}
         {isLastStep && !preview ? (

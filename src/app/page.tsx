@@ -2,17 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Blue Snake Studios — The full MetaPet living system",
+  title: "Blue $nake Studio — The full MetaPet living system",
   description:
-    "Enter the complete MetaPet world: digital companions, DNA, Body Forge, activities, wellness and the separate MetaPet Schools classroom edition.",
+    "Enter the complete MetaPet world: digital companions, DNA, Body Forge, activities, wellness and the separate MetaPet School classroom edition.",
   openGraph: {
-    title: "Blue Snake Studios — The full MetaPet living system",
+    title: "Blue $nake Studio — The full MetaPet living system",
     description:
-      "The complete MetaPet creative system, with MetaPet Schools kept as a focused classroom product on its own domain.",
+      "The complete MetaPet creative system, with MetaPet School kept as a focused classroom product on its own domain.",
   },
   twitter: {
     card: "summary",
-    title: "Blue Snake Studios — The full MetaPet living system",
+    title: "Blue $nake Studio — The full MetaPet living system",
     description:
       "Digital companions, DNA, Body Forge, activities, wellness and a clearly separated school edition.",
   },

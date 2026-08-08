@@ -1,8 +1,8 @@
-# MetaPet Schools Misuse and Over-engagement Risk Assessment
+# MetaPet School Misuse and Over-engagement Risk Assessment
 
 ## Product boundary
 
-`MetaPet Schools` is intentionally narrow. It is not designed as an always-on companion, a reward loop, or a habit-forming retention product.
+`MetaPet School` is intentionally narrow. It is not designed as an always-on companion, a reward loop, or a habit-forming retention product.
 
 ## Risks reviewed
 

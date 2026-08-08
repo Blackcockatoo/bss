@@ -1,4 +1,4 @@
-# MetaPet Schools Teacher Guide
+# MetaPet School Teacher Guide
 
 ## Quick setup
 

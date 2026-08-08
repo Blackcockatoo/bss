@@ -1,9 +1,9 @@
 # MetaPet for Schools
 ## Overview and Australian Curriculum Alignment
 
-**Audience:** classroom teachers, curriculum leaders, assistant principals, principals  
-**Recommended year levels:** Years 3-6  
-**Delivery shape:** 7 sessions x 20 minutes  
+**Audience:** classroom teachers, curriculum leaders, assistant principals, principals
+**Recommended year levels:** Years 3-6
+**Delivery shape:** 7 sessions x 20 minutes
 **Teacher load:** no student accounts, no setup-heavy admin, no marking required
 
 ---
@@ -31,20 +31,20 @@ It is suitable for:
 
 By the end of the sequence, students will:
 
-1. explain that a digital system responds to inputs and changes state over time  
-   **Lessons:** 1, 2, 5  
+1. explain that a digital system responds to inputs and changes state over time
+   **Lessons:** 1, 2, 5
    **Codes:** `AC9TDI4K01`, `AC9TDI4P02`, `AC9TDI6P02`
-2. read companion state information and use it to make a reasoned action choice  
-   **Lessons:** 1, 2, 4  
+2. read companion state information and use it to make a reasoned action choice
+   **Lessons:** 1, 2, 4
    **Codes:** `AC9TDI4K03`, `AC9TDI4P04`, `AC9TDI6K03`
-3. describe simple feedback loops, cause and effect, and patterns in a system  
-   **Lessons:** 4, 5, 6  
+3. describe simple feedback loops, cause and effect, and patterns in a system
+   **Lessons:** 4, 5, 6
    **Codes:** `AC9TDI4P02`, `AC9TDI6P05`, `AC9TDI6P06`
-4. use classroom wellbeing language to identify feelings, responses, and regulation strategies  
-   **Lessons:** 3, 4, 7  
+4. use classroom wellbeing language to identify feelings, responses, and regulation strategies
+   **Lessons:** 3, 4, 7
    **Codes:** `AC9HP4P05`, `AC9HP6P05`, `AC9HP4P08`
-5. work with others to compare observations, share explanations, and reflect on respectful digital use  
-   **Lessons:** 2, 6, 7  
+5. work with others to compare observations, share explanations, and reflect on respectful digital use
+   **Lessons:** 2, 6, 7
    **Codes:** `AC9HP4P03`, `AC9HP6P03`, `AC9HP6P08`
 
 ---

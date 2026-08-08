@@ -1,8 +1,8 @@
-# MetaPet Schools Child-Safety Risk Assessment
+# MetaPet School Child-Safety Risk Assessment
 
 ## Purpose
 
-This document records the main child-safety risks for `MetaPet Schools` during a pilot and the controls expected before classroom use.
+This document records the main child-safety risks for `MetaPet School` during a pilot and the controls expected before classroom use.
 
 ## Intended use
 

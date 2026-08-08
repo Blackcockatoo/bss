@@ -1,4 +1,4 @@
-# MetaPet Schools Data Inventory
+# MetaPet School Data Inventory
 
 | Item | Description | Identifiability | Default location | Purpose |
 | --- | --- | --- | --- | --- |

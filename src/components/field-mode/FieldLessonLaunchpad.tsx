@@ -181,6 +181,33 @@ export function FieldLessonLaunchpad() {
               Sound {session.soundEnabled ? "on" : "off"}
             </label>
           </div>
+          <fieldset className="mt-5 rounded-2xl border border-slate-200 p-4">
+            <legend className="px-2 text-sm font-semibold text-slate-800">
+              Accessibility and calm display
+            </legend>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {([
+                ["reducedMotion", "Reduced motion"],
+                ["highContrast", "High contrast"],
+                ["largeText", "Large text"],
+              ] as const).map(([key, label]) => (
+                <label key={key} className="flex min-h-11 items-center gap-3 rounded-xl bg-slate-50 px-3 text-sm font-medium text-slate-800">
+                  <input
+                    type="checkbox"
+                    checked={session[key]}
+                    onChange={(event) => update(key, event.target.checked)}
+                    className="h-5 w-5"
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+            <p className="mt-3 text-xs leading-5 text-slate-600">
+              Students may move, point, speak, draw, build, partner, quietly
+              observe, respond privately or use print. Participation method is
+              never a behaviour score.
+            </p>
+          </fieldset>
         </section>
 
         <section aria-labelledby="field-lessons-heading">

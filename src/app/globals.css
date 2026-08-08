@@ -32,7 +32,7 @@
   }
 
   /* `.field-surface` wraps the MetaPet School classroom routes. On the shared
-     Blue Snake Studios build the root shell sets `dark` on <html>, which would
+     Blue $nake Studio build the root shell sets `dark` on <html>, which would
      otherwise hand dark tokens to classroom components that render light. */
   .schools-theme,
   .field-surface {
@@ -191,6 +191,26 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+html[data-classroom-focus="on"] .app-shell-header,
+html[data-classroom-focus="on"] .app-shell-footer,
+html[data-classroom-focus="on"] .field-mode-nav,
+html[data-classroom-focus="on"] .field-offline-badge {
+  display: none !important;
+}
+
+.field-large-text {
+  font-size: 112.5%;
+}
+
+.field-high-contrast {
+  filter: contrast(1.22);
+}
+
+.field-high-contrast :focus-visible {
+  outline: 4px solid #facc15 !important;
+  outline-offset: 4px !important;
 }
 
 /* ==========================================================================

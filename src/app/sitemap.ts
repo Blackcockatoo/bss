@@ -18,7 +18,7 @@ import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
 
 /**
  * The classroom index. Only routes the field policy actually allows appear
- * here — the shared Blue Snake Studios sitemap advertised consumer pages that
+ * here — the shared Blue $nake Studio sitemap advertised consumer pages that
  * this host redirects away from, and listed none of the classroom pages.
  */
 function metaPetSchoolSitemap(): MetadataRoute.Sitemap {

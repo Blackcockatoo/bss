@@ -1,4 +1,4 @@
-# MetaPet Schools Pre/Post Measure
+# MetaPet School Pre/Post Measure
 
 Use the same items before the sequence begins and after it ends.
 

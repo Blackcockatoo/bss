@@ -23,7 +23,7 @@ import {
 const FIELD_MODE_TITLE = `${METAPET_SCHOOL_NAME} — Australian Years 3–6 Classroom Lessons`;
 
 /**
- * The shared root layout paints Blue Snake Studios' near-black chrome on the
+ * The shared root layout paints Blue $nake Studio' near-black chrome on the
  * combined production build. The classroom surface is light on every page, so
  * it declares its own theme colour instead of inheriting a mismatched one.
  */
@@ -36,7 +36,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  // Overrides the shared Blue Snake Studios metadataBase so canonical and
+  // Overrides the shared Blue $nake Studio metadataBase so canonical and
   // social URLs on classroom pages resolve against the classroom domain.
   metadataBase: new URL(METAPET_SCHOOL_ORIGIN),
   title: {
@@ -91,7 +91,7 @@ export const metadata: Metadata = {
 export default function FieldModeLayout({ children }: { children: React.ReactNode }) {
   return (
     // `field-surface` pins the light design tokens on. The shared shell adds
-    // `dark` to <html> on the Blue Snake Studios build, and the classroom
+    // `dark` to <html> on the Blue $nake Studio build, and the classroom
     // pages are light in every deployment.
     <div className="field-surface">
       <FieldStorageGuard />

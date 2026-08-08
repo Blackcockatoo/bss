@@ -1,4 +1,4 @@
-# MetaPet Schools Third-Party Services Register
+# MetaPet School Third-Party Services Register
 
 ## Current school deployment position
 

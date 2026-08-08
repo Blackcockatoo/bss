@@ -1,4 +1,4 @@
-# MetaPet Schools Pilot Prospectus
+# MetaPet School Pilot Prospectus
 
 Use this prospectus after reviewing `Pilot Readiness Verdict v2`.
 

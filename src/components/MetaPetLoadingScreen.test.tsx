@@ -36,13 +36,13 @@ describe("MetaPetLoadingScreen", () => {
         name: /Preparing the classroom review path/i,
       }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/MetaPet Schools/i)).toBeInTheDocument();
+    expect(screen.getByText(/MetaPet School/i)).toBeInTheDocument();
     expect(
       screen.getByText(
         /Local classroom state stays on this device unless a teacher deliberately exports pilot evidence/i,
       ),
     ).toBeInTheDocument();
-    expect(screen.queryByText(/Blue Snake Studios/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Blue $nake Studio/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/The Celestial Flight/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/astral circuits/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/prime tails/i)).not.toBeInTheDocument();
