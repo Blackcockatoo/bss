@@ -14,6 +14,7 @@ import {
   CANONICAL_SESSION_COUNT,
   FIRST_CANONICAL_SESSION,
 } from "@/lib/schools/canonicalSequence";
+import { GOVERNING_PRINCIPLE } from "@/lib/schools/contribution";
 import { SCHOOLS_LOCAL_DATA_RETENTION_DAYS } from "@/lib/schools/storage";
 
 const WHAT_YOU_NEED = [
@@ -76,6 +77,23 @@ export default function FieldModePage() {
           <p className="text-base text-slate-600">
             Session One is a complete lesson on its own. Running only that one
             is a legitimate way to finish.
+          </p>
+        </section>
+
+        <section
+          aria-label="Our funding principle"
+          className="rounded-3xl bg-emerald-950 px-6 py-8 text-white md:px-8 md:py-10"
+        >
+          <p className="text-2xl font-semibold leading-relaxed tracking-tight md:text-3xl">
+            {GOVERNING_PRINCIPLE.map((line) => (
+              <span key={line} className="block">
+                {line}
+              </span>
+            ))}
+          </p>
+          <p className="mt-4 max-w-2xl text-sm leading-6 text-emerald-100">
+            Every school receives the same complete classroom experience.
+            Capacity to support the work never determines access.
           </p>
         </section>
 
