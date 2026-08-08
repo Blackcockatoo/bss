@@ -1,3 +1,5 @@
+import { CANONICAL_SESSIONS } from "@/lib/schools/canonicalSequence";
+
 export interface SchoolPackageDoc {
   slug: string;
   title: string;
@@ -30,10 +32,13 @@ export interface LearningOutcome {
 export interface LessonCard {
   session: string;
   title: string;
+  minutes: number;
   outcome: string;
   activity: string;
   prompt: string;
   evidence: string;
+  movement: string;
+  stoppingPoint: string;
   bestFit: string;
 }
 
@@ -546,138 +551,212 @@ export const learningOutcomes: LearningOutcome[] = [
   {
     statement:
       "Explain that a digital system responds to inputs and changes state over time.",
-    lessons: "Sessions 1, 2 and 5",
+    lessons: "Sessions 1, 2 and 4",
     codes: ["AC9TDI4K01", "AC9TDI4P02", "AC9TDI6P02"],
   },
   {
     statement:
-      "Read companion state information and use it to make a reasoned action choice.",
-    lessons: "Sessions 1, 2 and 4",
+      "Read the signals a system shows and use them to make a reasoned choice.",
+    lessons: "Sessions 1, 2 and 3",
     codes: ["AC9TDI4K03", "AC9TDI4P04", "AC9TDI6K03"],
   },
   {
     statement:
-      "Describe simple feedback loops, cause and effect, and patterns in a system.",
-    lessons: "Sessions 4, 5 and 6",
+      "Describe simple if-then rules, cause and effect, and patterns in a system.",
+    lessons: "Sessions 4 and 7",
     codes: ["AC9TDI4P02", "AC9TDI6P05", "AC9TDI6P06"],
   },
   {
     statement:
-      "Use classroom wellbeing language to identify feelings, responses and regulation strategies.",
-    lessons: "Sessions 3, 4 and 7",
+      "Use classroom wellbeing language to name a signal, a response and a settling strategy.",
+    lessons: "Sessions 2 and 5",
     codes: ["AC9HP4P05", "AC9HP6P05", "AC9HP4P08"],
   },
   {
     statement:
-      "Work with others to compare observations, share explanations and reflect on respectful digital use.",
-    lessons: "Sessions 2, 6 and 7",
+      "Work with others to compare observations, justify a design choice and reflect on responsible digital use.",
+    lessons: "Sessions 3, 5, 6 and 7",
     codes: ["AC9HP4P03", "AC9HP6P03", "AC9HP6P08"],
   },
 ];
 
-export const lessonCards: LessonCard[] = [
+/**
+ * The public lesson snapshot. Derived from {@link CANONICAL_SESSIONS} so the
+ * marketing page, the runner and the printable pack can never advertise three
+ * different seven-session sequences again.
+ */
+export const lessonCards: LessonCard[] = CANONICAL_SESSIONS.map((session) => ({
+  session: `Session ${session.number}`,
+  title: session.title,
+  minutes: session.minutes,
+  outcome: session.learningIntention,
+  activity: session.childActivity,
+  prompt: session.reflectionPrompt,
+  evidence: session.lightEvidence,
+  movement: session.movementMoment,
+  stoppingPoint: session.stoppingPoint,
+  bestFit: session.bestFit,
+}));
+
+
+/**
+ * The hero. One headline, one supporting statement, one trust line — kept here
+ * so the page and its test read from the same words.
+ */
+export const SCHOOL_HEADLINE = "Creative technology that gives attention back.";
+
+export const SCHOOL_SUPPORTING_STATEMENT =
+  "Seven short, teacher-led lessons that help Years 3-6 students understand systems, signals, choices and responsible technology - without another student account, social feed or permanent digital profile.";
+
+export const SCHOOL_TRUST_LINE =
+  "Free to use. Contribute if you can. No child priced out.";
+
+export const SCHOOL_PROOF_LINE =
+  "One class. Seven sessions. Prove it before you scale it.";
+
+export const SCHOOL_ATTRIBUTION =
+  "MetaPet School - An education initiative of Blue $nake Studio.";
+
+/**
+ * How MetaPet School relates to the software a school already runs. This is
+ * the sentence that stops the product being mistaken for a Compass or Sentral
+ * replacement, which it is not and does not try to be.
+ */
+export const SCHOOL_POSITIONING_STATEMENT =
+  "Keep your existing school platform for attendance, payments, timetables and communication. MetaPet School performs a different job: it gives children a bounded learning experience without requiring another student identity system.";
+
+/**
+ * Facts that are true of the shipped implementation. Each one is checkable in
+ * the code or the governance pack - nothing aspirational belongs in this list.
+ */
+export const proofStripFacts: readonly string[] = [
+  "7 teacher-led sessions",
+  "About 15-20 minutes each",
+  "Years 3-6",
+  "No student accounts",
+  "Local-first classroom records",
+  "Teacher-controlled deletion",
+  "Australian Curriculum mapping",
+  "Printable support",
+];
+
+/** What a teacher needs before Session One. Deliberately short. */
+export const whatYouNeed: readonly string[] = [
+  "Years 3-6 class",
+  "About 20 minutes",
+  "A teacher to lead it",
+  "A browser - nothing to install",
+  "No student accounts to create",
+  "A printer if you want the paper fallback",
+  "One class is enough to start",
+];
+
+/** The four things a teacher actually does. Nothing else is required. */
+export const teacherEffortSteps: readonly { step: string; detail: string }[] = [
   {
-    session: "Session 1",
-    title: "Meet the Digital Companion",
-    outcome:
-      "Students explain that a digital system changes when a user gives it input.",
-    activity:
-      "Open the companion, check its companion state, try one action, and describe what changed.",
-    prompt: "What changed after your action, and how do you know?",
-    evidence:
-      'One sentence: "I chose __ and the companion state changed to __."',
-    bestFit: "Digital Technologies mini-lesson",
+    step: "Open the lesson",
+    detail: "Pick a session. No setup screen, no roster import, no login.",
   },
   {
-    session: "Session 2",
-    title: "Read the Companion State",
-    outcome:
-      "Students read visible state information and make a reasoned action choice.",
-    activity:
-      "Check each state indicator, identify the most urgent state, and choose one response.",
-    prompt: "What does the companion state tell you to do next?",
-    evidence: "Quick partner explanation using cause-and-effect language.",
-    bestFit: "Digital Technologies mini-lesson",
+    step: "Guide the activity",
+    detail:
+      "Read the one-sentence opener, run the activity, ask the reflection question.",
   },
   {
-    session: "Session 3",
-    title: "Feelings, Signals and Regulation",
-    outcome:
-      "Students connect visible feelings or moods to a simple regulation strategy.",
-    activity:
-      "Identify a mood, discuss what that mood might signal, and match it with a calming action.",
-    prompt: "If the companion looks overwhelmed, what would help it settle?",
-    evidence: "One reflection line about a feeling and a helpful response.",
-    bestFit: "Wellbeing session",
+    step: "Capture light evidence",
+    detail:
+      "One line or one spoken sentence per pair. There is no marking queue.",
   },
   {
-    session: "Session 4",
-    title: "Repair and Reset",
-    outcome:
-      "Students explain that recovery in a system is a skill, not a punishment.",
-    activity:
-      "Start from an unstable companion state, test a repair sequence, and compare which order works best.",
-    prompt: "What helped the system recover, and why did that order matter?",
-    evidence: "Short verbal explanation or checklist note about the recovery sequence.",
-    bestFit: "Relief lesson",
-  },
-  {
-    session: "Session 5",
-    title: "Systems and Feedback Loops",
-    outcome: "Students describe a simple feedback loop using system language.",
-    activity:
-      "Track one input, one state change, and one resulting mood or output.",
-    prompt: "What signal did the system give you after your first action?",
-    evidence: "Input -> state -> output summary.",
-    bestFit: "STEM block",
-  },
-  {
-    session: "Session 6",
-    title: "Patterns Over Time",
-    outcome:
-      "Students identify a pattern in how the companion responds across multiple actions.",
-    activity:
-      "Review notes from earlier sessions, compare with a partner, and identify one reliable pattern.",
-    prompt: "What usually works, and what evidence supports that?",
-    evidence: "One pattern statement supported by an example.",
-    bestFit: "STEM block",
-  },
-  {
-    session: "Session 7",
-    title: "Explain Your Thinking",
-    outcome:
-      "Students explain what they learned about systems, regulation and collaboration.",
-    activity:
-      "Share one pattern, one useful strategy, and one thing they now understand more clearly.",
-    prompt:
-      "What did this digital companion help you notice about systems or behaviour?",
-    evidence: "One short student reflection or teacher observation note.",
-    bestFit: "STEM block",
+    step: "Get back to teaching",
+    detail:
+      "Each session ends at a visible stopping point. Nothing is left open.",
   },
 ];
 
-export const weeklyFitOptions = [
+/**
+ * The local-data lifecycle in the order an adult asks about it. Wording here is
+ * checked against the implementation - see `@/lib/schools/storage`.
+ */
+export const dataLifecycle: readonly { question: string; answer: string }[] = [
   {
-    label: "Digital Technologies mini-lesson",
-    description:
-      "Use Sessions 1, 2 and 5 when you want explicit system and algorithm language in short bursts.",
+    question: "What is stored?",
+    answer:
+      "Teacher-chosen aliases, lesson progress, classroom setup choices and any light evidence a teacher records.",
   },
   {
-    label: "STEM block",
-    description:
-      "Use Sessions 5, 6 and 7 when you want to emphasise systems thinking, feedback loops and explanation.",
+    question: "Where is it stored?",
+    answer:
+      "In this browser, on this device, using local storage. Routine classroom use does not sync it to a server.",
   },
   {
-    label: "Wellbeing session",
-    description:
-      "Use Sessions 3 and 4 when the goal is feelings language, regulation and repair without blame.",
+    question: "Why is it needed?",
+    answer:
+      "So a class can pause and resume a session, and so a teacher can review evidence without re-running the lesson.",
   },
   {
-    label: "Relief lesson",
-    description:
-      "Use Session 1 or Session 4 as a low-prep standalone option with clear teacher prompts.",
+    question: "Who can see it?",
+    answer:
+      "Anyone using this browser profile on this device. That is why it belongs on a teacher-controlled device.",
+  },
+  {
+    question: "When does it disappear?",
+    answer:
+      "35 days after the last activity, automatically. Clearing site data removes it immediately.",
+  },
+  {
+    question: "How does a teacher delete it?",
+    answer:
+      "From the local-data controls, with an explicit confirmation. No request to the studio is needed.",
+  },
+  {
+    question: "What is never required?",
+    answer:
+      "A student account, a student email, a real name, a photo, a login, or a payment.",
   },
 ];
+
+/** Things MetaPet School does not do, stated plainly rather than implied. */
+export const boundaryFacts: readonly string[] = [
+  "No student sign-up flow exists in the classroom build",
+  "No advertising and no advertising identifiers",
+  "No behavioural profiling or engagement scoring",
+  "No public student profile and no school social feed",
+  "No streaks, leaderboards or loot-box mechanics",
+  "No child-facing payment or contribution prompt",
+];
+
+/**
+ * Where the sequence fits in a school week. Derived from each session's
+ * declared best fit so a change to the canonical sequence updates this too.
+ */
+export const weeklyFitOptions = [
+  "Digital Technologies mini-lesson",
+  "Wellbeing session",
+  "Digital citizenship lesson",
+  "STEM block",
+].map((label) => {
+  const sessions = CANONICAL_SESSIONS.filter(
+    (session) => session.bestFit === label,
+  );
+  const numbers = sessions.map((session) => session.number).join(", ");
+  return {
+    label,
+    description:
+      sessions.length === 1
+        ? `Session ${numbers}: ${sessions[0].title}.`
+        : `Sessions ${numbers}. ${sessions.map((s) => s.title).join("; ")}.`,
+  };
+});
+
+/**
+ * The lowest-prep way in. Session One is complete on its own, so a relief or
+ * one-off lesson does not need the rest of the sequence.
+ */
+export const standaloneOption = {
+  label: "Relief or one-off lesson",
+  description: `Session 1: ${CANONICAL_SESSIONS[0].title}. It is a complete lesson by itself and ends at a visible stopping point.`,
+};
 
 export const evidenceTools = [
   {

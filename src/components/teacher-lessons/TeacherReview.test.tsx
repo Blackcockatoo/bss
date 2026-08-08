@@ -13,8 +13,8 @@ import { TeacherReview } from "./TeacherReview";
 const card: PetObservationCardEvidence = {
   kind: "pet-observation-card",
   version: 1,
-  lessonId: "meet-your-metapet",
-  stepId: "meet-your-metapet-step-5",
+  lessonId: "meet-the-system",
+  stepId: "meet-the-system-step-5",
   createdAt: 1,
   alias: "Pip",
   observations: { shape: "round", surface: "shiny", movement: "floaty" },
@@ -22,11 +22,11 @@ const card: PetObservationCardEvidence = {
 };
 
 function seedEvidence() {
-  useLessonProgressStore.getState().startLesson("meet-your-metapet");
+  useLessonProgressStore.getState().startLesson("meet-the-system");
   useLessonProgressStore
     .getState()
-    .saveEvidenceEntry("meet-your-metapet-step-5", card);
-  useLessonProgressStore.getState().completeLesson("meet-your-metapet");
+    .saveEvidenceEntry("meet-the-system-step-5", card);
+  useLessonProgressStore.getState().completeLesson("meet-the-system");
 }
 
 beforeEach(() => {
@@ -51,19 +51,19 @@ describe("Teacher review", () => {
     expect(screen.getByText(/Evidence Review/i)).toBeTruthy();
     expect(screen.getByText(/1 of 7 lessons complete/i)).toBeTruthy();
     // Every lesson row renders.
-    expect(screen.getByText(/1\. Meet Your Meta-Pet/)).toBeTruthy();
+    expect(screen.getByText(/1\. Meet the System/)).toBeTruthy();
   });
 
   it("resets a single lesson's evidence", () => {
     seedEvidence();
     render(<TeacherReview />);
     // Open the Meet lesson row.
-    fireEvent.click(screen.getByText(/1\. Meet Your Meta-Pet/));
+    fireEvent.click(screen.getByText(/1\. Meet the System/));
     fireEvent.click(screen.getByText(/Reset this lesson's evidence/i));
     fireEvent.click(screen.getByText(/Confirm reset evidence/i));
     const record =
-      useLessonProgressStore.getState().records["meet-your-metapet"];
-    expect(record?.evidenceEntries["meet-your-metapet-step-5"]).toBeUndefined();
+      useLessonProgressStore.getState().records["meet-the-system"];
+    expect(record?.evidenceEntries["meet-the-system-step-5"]).toBeUndefined();
   });
 
   it("deletes all local lesson data WITHOUT deleting the pet", () => {
@@ -93,10 +93,10 @@ describe("Teacher review", () => {
       />,
     );
 
-    fireEvent.click(screen.getByText(/1\. Meet Your Meta-Pet/));
+    fireEvent.click(screen.getByText(/1\. Meet the System/));
     expect(screen.getByRole("link", { name: /Open lesson/i })).toHaveAttribute(
       "href",
-      "/schools/field/lessons/meet-your-metapet",
+      "/schools/field/lessons/meet-the-system",
     );
     expect(screen.getByRole("link", { name: /Open Learning Passport/i })).toHaveAttribute(
       "href",

@@ -2,48 +2,88 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import FieldModePage from "@/app/schools/field/page";
+import { isPathnameAllowedByPolicy } from "@/lib/childSafeBaseline";
 
 afterEach(cleanup);
 
 describe("Field Mode entry", () => {
   it("identifies the Australian Years 3–6 classroom product", () => {
     render(<FieldModePage />);
-    expect(
-      screen.getByRole("heading", {
-        name: /Australian classroom lessons for Years 3–6/i,
-      }),
-    ).toBeTruthy();
     expect(screen.getAllByText(/MetaPet School/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Years 3–6/i).length).toBeGreaterThan(0);
+  });
 
-    for (const promise of [
-      /Years 3–6/i,
-      /Teacher-led use/i,
-      /Seven short classroom lessons/i,
-      /No student accounts/i,
-      /Alias-only classroom use/i,
-      /Local device records/i,
-      /Australian Curriculum alignment/i,
+  it("puts Session One one click from a cold visit", () => {
+    render(<FieldModePage />);
+
+    expect(
+      screen.getByRole("link", { name: /Start Session One/i }),
+    ).toHaveAttribute("href", "/schools/field/lessons/meet-the-system");
+    expect(
+      screen.getByRole("link", { name: /Run the seven-session sequence/i }),
+    ).toHaveAttribute("href", "/schools/field/start");
+  });
+
+  it("tells a teacher what they need before beginning", () => {
+    render(<FieldModePage />);
+
+    expect(
+      screen.getByRole("heading", { name: /What you need/i }),
+    ).toBeInTheDocument();
+    for (const requirement of [
+      /About 20 minutes/i,
+      /No student accounts to create/i,
+      /nothing to install/i,
     ]) {
-      expect(screen.getAllByText(promise).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(requirement).length).toBeGreaterThan(0);
     }
   });
 
-  it("has one primary launch action into the approved Field start route", () => {
+  it("offers a printable fallback and a route to the data explanation", () => {
     render(<FieldModePage />);
-    const action = screen.getByRole("link", {
-      name: /Start a classroom session/i,
-    });
-    expect(action).toHaveAttribute("href", "/schools/field/start");
+
+    expect(
+      screen.getByRole("link", { name: /Print the Session One paper fallback/i }),
+    ).toHaveAttribute("href", "/schools/field/print/meet-the-system");
+    expect(
+      screen.getByRole("link", { name: /See exactly what data it uses/i }),
+    ).toHaveAttribute("href", "/schools/field/safety");
   });
 
-  it("presents Blue Snake Studios as the maker, not the headline brand", () => {
+  it("links nowhere outside the Field Mode boundary", () => {
+    // A link off this page is a link a supervised child can follow. Every one
+    // has to be a route the Field policy already admits.
     render(<FieldModePage />);
-    const heading = screen.getByRole("heading", {
-      name: /Australian classroom lessons for Years 3–6/i,
-    });
-    expect(heading.textContent).not.toMatch(/Blue Snake Studios/i);
 
-    const maker = screen.getByRole("link", { name: /Blue Snake Studios/i });
-    expect(maker).toHaveAttribute("href", "https://www.bluesnakestudios.com");
+    const hrefs = screen
+      .getAllByRole("link")
+      .map((link) => link.getAttribute("href") ?? "");
+
+    expect(hrefs.length).toBeGreaterThan(0);
+    for (const href of hrefs) {
+      expect(href.startsWith("/"), href).toBe(true);
+      expect(isPathnameAllowedByPolicy(href, "field"), href).toBe(true);
+    }
+  });
+
+  it("offers a child no payment, account or consumer action", () => {
+    const { container } = render(<FieldModePage />);
+    const text = (container.textContent ?? "").toLowerCase();
+
+    // Word-boundary matched: the page is allowed to say it has no shopping,
+    // it is not allowed to offer any.
+    for (const phrase of [
+      "subscribe",
+      "upgrade",
+      "checkout",
+      "sign up",
+      "sign in",
+      "log in",
+      "contribute",
+      "buy",
+      "wallet",
+    ]) {
+      expect(text, phrase).not.toMatch(new RegExp(`\\b${phrase}\\b`));
+    }
   });
 });

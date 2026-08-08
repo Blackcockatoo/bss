@@ -2,21 +2,40 @@ import Link from "next/link";
 
 import { FIELD_MODE_HOME_PATH } from "@/lib/childSafeBaseline";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
+import { SCHOOLS_LOCAL_DATA_RETENTION_DAYS } from "@/lib/schools/storage";
+import {
+  CONTRIBUTION_HEADLINE,
+  FREE_TIER_INCLUDES,
+} from "@/lib/schools/contribution";
+import { FIRST_CANONICAL_SESSION } from "@/lib/schools/canonicalSequence";
 
 import {
-  assuranceItems,
+  SCHOOL_ATTRIBUTION,
+  SCHOOL_HEADLINE,
+  SCHOOL_POSITIONING_STATEMENT,
+  SCHOOL_PROOF_LINE,
+  SCHOOL_SUPPORTING_STATEMENT,
+  SCHOOL_TRUST_LINE,
+  boundaryFacts,
   curriculumRows,
   curriculumSourceLinks,
+  dataLifecycle,
   evidenceTools,
   learningOutcomes,
   lessonCards,
   packageSummaryCards,
   pilotAcceptanceSteps,
+  proofStripFacts,
   reviewerPathways,
   schoolPackageDocCategories,
   schoolPackageDocs,
+  teacherEffortSteps,
+  standaloneOption,
   weeklyFitOptions,
+  whatYouNeed,
 } from "./content";
+
+const SESSION_ONE_PATH = `/schools/field/lessons/${FIRST_CANONICAL_SESSION.slug}`;
 
 function SectionHeading({
   eyebrow,
@@ -49,251 +68,367 @@ export default function SchoolsPage() {
   return (
     <main className="min-h-screen bg-background text-foreground">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 py-12 md:gap-14 md:py-16">
+        {/* 1. Hero */}
         <header className="rounded-3xl border border-amber-300/20 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 p-6 shadow-[0_0_0_1px_rgba(251,191,36,0.05)] md:p-8">
-          <div className="space-y-5">
+          <div className="space-y-6">
             <p className="text-xs uppercase tracking-[0.35em] text-amber-300">
-              MetaPet Schools
+              MetaPet School
             </p>
-            <div className="space-y-4">
-              <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-white md:text-5xl">
-                Teacher-led, low-data classroom pilot for Years 3-6
-              </h1>
-              <p className="max-w-3xl text-base leading-7 text-slate-300 md:text-lg">
-                MetaPet Schools is a teacher-led, time-bounded classroom tool
-                for digital responsibility, systems thinking, and online safety
-                habits. The school profile keeps the product surface narrow:
-                alias-based classroom use, no student accounts, no social
-                features, and a governance pack built for pilot conversations.
-              </p>
-            </div>
+            <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-white md:text-5xl">
+              {SCHOOL_HEADLINE}
+            </h1>
+            <p className="max-w-3xl text-base leading-7 text-slate-300 md:text-lg">
+              {SCHOOL_SUPPORTING_STATEMENT}
+            </p>
 
-            <div className="flex flex-wrap gap-3 text-sm">
-              {[
-                "Years 3-6 fit",
-                "Alias-only classroom use",
-                "7 x 20 minute sessions",
-                "No student accounts",
-                "Governance pack included",
-              ].map((item) => (
-                <span
-                  key={item}
-                  className="rounded-full border border-amber-300/20 bg-amber-300/10 px-4 py-2 font-medium text-amber-100"
-                >
-                  {item}
-                </span>
-              ))}
-            </div>
-
-            <div className="flex flex-wrap gap-3 pt-2">
+            <div className="flex flex-wrap gap-3 pt-1">
               <Link
-                className="rounded-full bg-emerald-400 px-5 py-2 text-sm font-semibold text-emerald-950"
+                className="inline-flex min-h-12 items-center rounded-xl bg-emerald-400 px-6 py-3 text-base font-semibold text-emerald-950 hover:bg-emerald-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
                 href={FIELD_MODE_HOME_PATH}
               >
-                Open Field Mode
-              </Link>
-              <Link
-                className="rounded-full bg-amber-300 px-5 py-2 text-sm font-semibold text-slate-950"
-                href="/schools/docs/pilot-readiness-verdict-v2"
-              >
-                Read pilot readiness verdict
+                Run one class free
               </Link>
               <a
-                className="rounded-full border border-slate-700 px-5 py-2 text-sm font-semibold text-slate-100"
-                href="#downloads"
+                className="inline-flex min-h-12 items-center rounded-xl border border-slate-600 px-6 py-3 text-base font-semibold text-slate-100 hover:border-slate-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300"
+                href="#data"
               >
-                Browse full document pack
-              </a>
-              <Link
-                className="rounded-full border border-slate-700 px-5 py-2 text-sm font-semibold text-slate-100"
-                href="/school-game"
-              >
-                Open classroom runtime
-              </Link>
-              <Link
-                className="rounded-full border border-slate-700 px-5 py-2 text-sm font-semibold text-slate-100"
-                href="/schools/safeguarding"
-              >
-                Safeguarding
-              </Link>
-              <a
-                className="rounded-full border border-slate-700 px-5 py-2 text-sm font-semibold text-slate-100"
-                href="#governance"
-              >
-                Review governance pack
+                See exactly what data it uses
               </a>
             </div>
+
+            <p className="text-base font-semibold text-emerald-200">
+              {SCHOOL_TRUST_LINE}
+            </p>
+            <p className="text-sm text-slate-400">{SCHOOL_ATTRIBUTION}</p>
           </div>
         </header>
 
+        {/* 2. Immediate proof strip */}
+        <section aria-label="At a glance" className="-mt-4">
+          <ul className="flex flex-wrap gap-2 text-sm">
+            {proofStripFacts.map((fact) => (
+              <li
+                key={fact}
+                className="rounded-full border border-slate-700 bg-slate-900/70 px-4 py-2 font-medium text-slate-200"
+              >
+                {fact}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* Not a school-management system */}
+        <section className="rounded-3xl border border-slate-700 bg-slate-900/70 p-6 md:p-8">
+          <SectionHeading
+            eyebrow="Where this fits"
+            title="This does not replace the software that runs your school"
+            description={SCHOOL_POSITIONING_STATEMENT}
+          />
+          <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-400">
+            MetaPet School is not a school-management system, a learning
+            management system, a parent portal or a behaviour-points platform.
+            It is seven short classroom experiences and the material a school
+            needs to approve them.
+          </p>
+        </section>
+
+        {/* 3. Explain the product */}
         <section className="rounded-3xl border border-emerald-400/20 bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/30 p-6 md:p-8">
           <SectionHeading
-            eyebrow="What is Meta-Pet?"
-            title="A digital companion that teaches systems thinking"
-            description="Meta-Pet is a classroom tool where students interact with a digital companion to learn how systems work. Through short, guided activities, students observe cause and effect, practise emotional regulation, and build digital responsibility skills."
+            eyebrow="What children actually do"
+            title="Seven short sessions about how systems work"
+            description="Students watch a digital companion, give it one input, read its signals, compare how it is represented, test an if-then rule, decide what a system should remember, redesign one feature, and explain a pattern they noticed."
           />
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             <div className="rounded-2xl border border-emerald-400/20 bg-slate-950/50 p-4">
-              <h3 className="text-base font-semibold text-emerald-200">What students do</h3>
+              <h3 className="text-base font-semibold text-emerald-200">
+                One instruction at a time
+              </h3>
               <p className="mt-2 text-sm leading-6 text-slate-300">
-                Observe a digital companion, discuss what they notice with classmates, and reflect on patterns, feelings, and system behaviour.
+                Each step gives a class one thing to do. No walls of text, no
+                timers, no speed pressure, no penalty for starting again.
               </p>
             </div>
             <div className="rounded-2xl border border-emerald-400/20 bg-slate-950/50 p-4">
-              <h3 className="text-base font-semibold text-emerald-200">What teachers do</h3>
+              <h3 className="text-base font-semibold text-emerald-200">
+                Talking, pointing, moving or writing
+              </h3>
               <p className="mt-2 text-sm leading-6 text-slate-300">
-                Lead 20-minute sessions using lesson cards with built-in prompts. Set up an alias roster, run the activity, and optionally collect light evidence.
+                Every session has an optional movement moment and more than one
+                way to take part, so a child who does not want to write can
+                still participate fully.
               </p>
             </div>
             <div className="rounded-2xl border border-emerald-400/20 bg-slate-950/50 p-4">
-              <h3 className="text-base font-semibold text-emerald-200">What parents should know</h3>
+              <h3 className="text-base font-semibold text-emerald-200">
+                A visible stopping point
+              </h3>
               <p className="mt-2 text-sm leading-6 text-slate-300">
-                No accounts, no personal data, no social features. Students use aliases. All data stays on the school device and can be deleted at any time.
+                Sessions end on purpose. There is no streak to lose, nothing to
+                come back for tonight, and nothing that keeps running after the
+                bell.
               </p>
-              <Link
-                href="/schools/parents"
-                className="mt-3 inline-block rounded-full border border-emerald-400/30 px-3 py-1.5 text-xs font-medium text-emerald-200 hover:border-emerald-300/50"
+            </div>
+          </div>
+        </section>
+
+        {/* 4. Explain teacher effort */}
+        <section className="rounded-3xl border border-amber-300/20 bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/20 p-6 md:p-8">
+          <SectionHeading
+            eyebrow="Teacher effort"
+            title="Open the lesson. Guide the activity. Capture light evidence. Get back to teaching."
+            description={SCHOOL_PROOF_LINE}
+          />
+
+          <div className="mt-6 grid gap-4 md:grid-cols-4">
+            {teacherEffortSteps.map((item, index) => (
+              <article
+                key={item.step}
+                className="rounded-2xl border border-amber-300/20 bg-slate-950/50 p-4"
               >
-                Read the full parent information page
+                <p className="text-xs uppercase tracking-[0.25em] text-amber-300">
+                  Step {index + 1}
+                </p>
+                <h3 className="mt-2 text-base font-semibold text-white">
+                  {item.step}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  {item.detail}
+                </p>
+              </article>
+            ))}
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-slate-700 bg-slate-950/60 p-5">
+            <h3 className="text-lg font-semibold text-white">What you need</h3>
+            <ul className="mt-3 grid gap-2 text-sm text-slate-300 sm:grid-cols-2">
+              {whatYouNeed.map((item) => (
+                <li key={item} className="flex items-start gap-2">
+                  <span aria-hidden="true" className="text-emerald-300">
+                    ✓
+                  </span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 text-xs leading-5 text-slate-400">
+              Field Mode caches its pages so a session can survive a dropped
+              connection mid-lesson, and every session has a printable fallback.
+              Full offline operation has not been verified across school
+              hardware yet, so plan for the printed sheet if your connection is
+              unreliable.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <Link
+                className="inline-flex min-h-11 items-center rounded-xl bg-emerald-400 px-5 py-2.5 text-sm font-semibold text-emerald-950 hover:bg-emerald-300"
+                href={SESSION_ONE_PATH}
+              >
+                Preview Session One
+              </Link>
+              <Link
+                className="inline-flex min-h-11 items-center rounded-xl border border-slate-600 px-5 py-2.5 text-sm font-semibold text-slate-100 hover:border-slate-400"
+                href="/schools/docs/teacher-guide"
+              >
+                Download the teacher pack
+              </Link>
+              <Link
+                className="inline-flex min-h-11 items-center rounded-xl border border-slate-600 px-5 py-2.5 text-sm font-semibold text-slate-100 hover:border-slate-400"
+                href="/schools/parents"
+              >
+                Review the parent and governance pack
               </Link>
             </div>
           </div>
         </section>
 
-        <section className="rounded-3xl border border-amber-300/20 bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/20 p-6 md:p-8">
+        {/* 5. Explain privacy */}
+        <section
+          id="data"
+          className="rounded-3xl border border-emerald-400/20 bg-slate-900/60 p-6 md:p-8"
+        >
           <SectionHeading
-            eyebrow="Three ways to start"
-            title="From a 10-minute look to a full pilot"
-            description="You do not have to commit to anything to evaluate this. Each step is small, teacher-controlled, and reversible."
+            eyebrow="What happens to the data?"
+            title="The whole local-data lifecycle, in order"
+            description="No student account is required. Classroom lesson state and progress are stored locally in this browser during normal use, and a teacher can delete them at any time."
           />
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <div className="flex flex-col rounded-2xl border border-amber-300/20 bg-slate-950/50 p-5">
-              <p className="text-xs uppercase tracking-[0.25em] text-amber-300">
-                Step 1 · 10 minutes
-              </p>
-              <h3 className="mt-3 text-lg font-semibold text-white">
-                Try it yourself
-              </h3>
-              <p className="mt-2 flex-1 text-sm leading-6 text-slate-300">
-                Open the browser demo on your own device. No account, no
-                install, nothing saved beyond your browser. See exactly what
-                students would see.
-              </p>
+
+          <dl className="mt-6 grid gap-4 md:grid-cols-2">
+            {dataLifecycle.map((item) => (
+              <div
+                key={item.question}
+                className="rounded-2xl border border-emerald-400/20 bg-slate-950/50 p-4"
+              >
+                <dt className="text-base font-semibold text-emerald-200">
+                  {item.question}
+                </dt>
+                <dd className="mt-2 text-sm leading-6 text-slate-300">
+                  {item.answer}
+                </dd>
+              </div>
+            ))}
+          </dl>
+
+          <div className="mt-6 rounded-2xl border border-slate-700 bg-slate-950/60 p-5">
+            <h3 className="text-base font-semibold text-white">
+              What the classroom build does not do
+            </h3>
+            <ul className="mt-3 grid gap-2 text-sm text-slate-300 sm:grid-cols-2">
+              {boundaryFacts.map((fact) => (
+                <li key={fact} className="flex items-start gap-2">
+                  <span aria-hidden="true" className="text-slate-500">
+                    —
+                  </span>
+                  {fact}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 text-xs leading-5 text-slate-400">
+              Inactive local records are cleared after{" "}
+              {SCHOOLS_LOCAL_DATA_RETENTION_DAYS} days without use. We are not
+              claiming there is no data, no risk, or blanket regulatory
+              compliance. The accurate statement is narrower: routine classroom
+              use keeps records on the device, and deletion is in a
+              teacher&apos;s hands.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-3">
               <Link
-                href="/pet"
-                className="mt-4 inline-block rounded-full border border-amber-300/30 px-4 py-2 text-center text-sm font-semibold text-amber-100 hover:border-amber-300/60"
+                className="inline-flex min-h-11 items-center rounded-xl bg-violet-300 px-5 py-2.5 text-sm font-semibold text-slate-950 hover:bg-violet-200"
+                href="/schools/data"
               >
-                Open the 10-minute demo
+                Open the local-data controls
               </Link>
-            </div>
-            <div className="flex flex-col rounded-2xl border border-amber-300/20 bg-slate-950/50 p-5">
-              <p className="text-xs uppercase tracking-[0.25em] text-amber-300">
-                Step 2 · One classroom session
-              </p>
-              <h3 className="mt-3 text-lg font-semibold text-white">
-                Run one 20-minute session
-              </h3>
-              <p className="mt-2 flex-1 text-sm leading-6 text-slate-300">
-                Use Lesson Card 1 with your class as a one-off taster. The dry-run
-                checklist covers devices, aliases and timing so nothing surprises
-                you mid-lesson.
-              </p>
               <Link
-                href="/schools/docs/teacher-dry-run-checklist"
-                className="mt-4 inline-block rounded-full border border-amber-300/30 px-4 py-2 text-center text-sm font-semibold text-amber-100 hover:border-amber-300/60"
+                className="inline-flex min-h-11 items-center rounded-xl border border-violet-400/30 px-5 py-2.5 text-sm font-semibold text-violet-200 hover:border-violet-300/60"
+                href="/schools/docs/privacy-policy"
               >
-                Read the dry-run checklist
+                Read the privacy policy
               </Link>
-            </div>
-            <div className="flex flex-col rounded-2xl border border-amber-300/20 bg-slate-950/50 p-5">
-              <p className="text-xs uppercase tracking-[0.25em] text-amber-300">
-                Step 3 · 7-session pilot
-              </p>
-              <h3 className="mt-3 text-lg font-semibold text-white">
-                Run the constrained pilot
-              </h3>
-              <p className="mt-2 flex-1 text-sm leading-6 text-slate-300">
-                Seven 20-minute lessons with the full governance pack: teacher
-                checklist, parent/carer notice, ICT privacy summary, stop
-                conditions and an evidence plan.
-              </p>
-              <a
-                href="mailto:bluesssnakestudio@gmail.com?subject=Meta-Pet%20School%20Pilot%20Enquiry"
-                className="mt-4 inline-block rounded-full bg-amber-300 px-4 py-2 text-center text-sm font-semibold text-slate-950 hover:bg-amber-200"
-              >
-                Start a pilot conversation
-              </a>
             </div>
           </div>
-          <div className="mt-6 flex flex-wrap gap-2 text-xs">
-            {[
-              {
-                label: "Teacher checklist",
-                href: "/schools/docs/school-partner-checklist",
-              },
-              { label: "Parent/carer notice", href: "/schools/parents" },
-              {
-                label: "ICT privacy summary",
-                href: "/schools/docs/ict-privacy-review-checklist",
-              },
-              {
-                label: "What data is stored",
-                href: "/schools/docs/data-inventory",
-              },
-              {
-                label: "How to delete local data",
-                href: "/schools/docs/retention-and-deletion-schedule",
-              },
-            ].map((item) => (
+        </section>
+
+        {/* 6. Explain the pricing model */}
+        <section className="rounded-3xl border-2 border-emerald-400/40 bg-slate-900/60 p-6 md:p-8">
+          <SectionHeading
+            eyebrow="What it costs"
+            title={CONTRIBUTION_HEADLINE}
+            description="The complete core experience is A$0 for every school, permanently. There is no licence, no per-student price, no expiring trial and no paid classroom tier. Contribution is voluntary, adult-only, and changes nothing a class receives."
+          />
+
+          <div className="mt-6 grid gap-4 lg:grid-cols-2">
+            <article className="rounded-2xl border-2 border-emerald-400/50 bg-emerald-500/5 p-5">
+              <p className="text-3xl font-semibold text-emerald-200">A$0</p>
+              <p className="mt-2 text-sm font-medium text-emerald-100">
+                The complete experience. No conditions.
+              </p>
+              <ul className="mt-4 space-y-2 text-sm text-slate-300">
+                {FREE_TIER_INCLUDES.map((item) => (
+                  <li key={item} className="flex items-start gap-2">
+                    <span aria-hidden="true" className="text-emerald-300">
+                      ✓
+                    </span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-4 text-xs leading-5 text-slate-400">
+                No hardship form, no justification, no reduced lessons, no
+                reminder emails.
+              </p>
+            </article>
+
+            <article className="rounded-2xl border border-slate-700 bg-slate-950/50 p-5">
+              <p className="text-lg font-semibold text-white">
+                If your school can contribute
+              </p>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                Suggested annual amounts are shown on an adult-only page.
+                Nothing is preselected, nothing is badged &ldquo;most
+                popular&rdquo;, and no student ever sees a payment prompt.
+              </p>
+              <p className="mt-4 text-sm leading-6 text-slate-400">
+                Good educational software costs money. Children should not pay
+                with their identity, attention or behavioural data.
+              </p>
               <Link
-                key={item.href}
-                href={item.href}
-                className="rounded-full border border-slate-700 px-3 py-1.5 font-medium text-slate-200 hover:border-slate-500"
+                className="mt-5 inline-flex min-h-11 items-center rounded-xl border border-emerald-400/40 px-5 py-2.5 text-sm font-semibold text-emerald-200 hover:border-emerald-300/70"
+                href="/schools/contribute"
               >
-                {item.label}
+                See contribution options
               </Link>
+            </article>
+          </div>
+        </section>
+
+        {/* 7. The lesson sequence */}
+        <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 md:p-8">
+          <SectionHeading
+            eyebrow="The sequence"
+            title="One sequence. Seven sessions. Nothing hidden."
+            description="Each session carries one learning intention, one activity, one optional movement moment, one reflection question, light evidence and a visible stopping point. This is the same list the app runs and the teacher pack prints."
+          />
+
+          <div className="mt-6 grid gap-4 lg:grid-cols-2">
+            {lessonCards.map((lesson) => (
+              <article
+                key={lesson.session}
+                className="rounded-2xl border border-slate-800 bg-slate-950/50 p-5"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-xs uppercase tracking-[0.25em] text-cyan-300">
+                    {lesson.session}
+                  </p>
+                  <span className="rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-300">
+                    {lesson.minutes} minutes
+                  </span>
+                </div>
+                <h3 className="mt-3 text-lg font-semibold text-white">
+                  {lesson.title}
+                </h3>
+                <dl className="mt-4 space-y-3 text-sm leading-6 text-slate-300">
+                  <div>
+                    <dt className="font-semibold text-slate-100">
+                      Learning intention
+                    </dt>
+                    <dd>{lesson.outcome}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-semibold text-slate-100">
+                      What students do
+                    </dt>
+                    <dd>{lesson.activity}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-semibold text-slate-100">
+                      Reflection question
+                    </dt>
+                    <dd>{lesson.prompt}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-semibold text-slate-100">
+                      Movement moment (optional)
+                    </dt>
+                    <dd>{lesson.movement}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-semibold text-slate-100">
+                      Light evidence
+                    </dt>
+                    <dd>{lesson.evidence}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-semibold text-slate-100">
+                      Stopping point
+                    </dt>
+                    <dd>{lesson.stoppingPoint}</dd>
+                  </div>
+                </dl>
+              </article>
             ))}
           </div>
         </section>
 
-        <section className="rounded-3xl border border-emerald-400/20 bg-slate-900/60 p-6 md:p-8">
-          <SectionHeading
-            eyebrow="Data, in plain words"
-            title="What is stored, what is never collected"
-            description="The governance pack has the full detail. These are the answers up front, in the language a staff meeting actually uses."
-          />
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <div className="rounded-2xl border border-emerald-400/20 bg-slate-950/50 p-4">
-              <h3 className="text-base font-semibold text-emerald-200">
-                What is stored
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-slate-300">
-                Alias-based classroom progress and settings, saved locally on
-                the school device. No names, no student accounts, no profiles.
-              </p>
-            </div>
-            <div className="rounded-2xl border border-emerald-400/20 bg-slate-950/50 p-4">
-              <h3 className="text-base font-semibold text-emerald-200">
-                What is never collected
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-slate-300">
-                Names, emails, photos, voice, location, contacts, behavioural
-                profiles or advertising identifiers. There is no mechanism to
-                collect them.
-              </p>
-            </div>
-            <div className="rounded-2xl border border-emerald-400/20 bg-slate-950/50 p-4">
-              <h3 className="text-base font-semibold text-emerald-200">
-                How it is deleted
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-slate-300">
-                Clearing the browser&apos;s site data on the device removes
-                everything. Any staff member with device access can do it — no
-                request to the studio required.
-              </p>
-            </div>
-          </div>
-        </section>
-
+        {/* 8. Trust material */}
         <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 md:p-8">
           <SectionHeading
             eyebrow="Start Here"
@@ -340,7 +475,7 @@ export default function SchoolsPage() {
           <SectionHeading
             eyebrow="Australian Curriculum V9.0"
             title="Curriculum alignment with explicit classroom fit"
-            description="This sequence is packaged for Digital Technologies, Health and Physical Education wellbeing learning, and Personal and Social capability. The alignment below focuses on the codes most useful for teacher planning and leadership approval."
+            description="This sequence is mapped to Digital Technologies, Health and Physical Education wellbeing learning, and Personal and Social capability. Mapping is our own alignment work, not a government endorsement."
           />
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -367,25 +502,13 @@ export default function SchoolsPage() {
               </article>
             ))}
           </div>
-
-          <div className="mt-6 rounded-2xl border border-emerald-400/20 bg-emerald-500/5 p-4">
-            <p className="text-sm font-semibold text-emerald-200">
-              Personal and Social capability
-            </p>
-            <p className="mt-2 text-sm leading-6 text-slate-300">
-              The sequence also supports self-awareness, self-management, social
-              awareness and social management. This makes it easy to position as
-              both Digital Technologies learning and calm classroom wellbeing
-              practice.
-            </p>
-          </div>
         </section>
 
         <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 md:p-8">
           <SectionHeading
             eyebrow="Learning Outcomes"
             title="What students should be able to say and show"
-            description='Each outcome is written in a teacher-friendly "By the end of this sequence, students will..." form and mapped to both lessons and curriculum codes.'
+            description='Each outcome is written in a teacher-friendly "By the end of this sequence, students will..." form and mapped to both sessions and curriculum codes.'
           />
 
           <div className="mt-6 grid gap-4">
@@ -398,72 +521,13 @@ export default function SchoolsPage() {
                   {outcome.statement}
                 </p>
                 <p className="mt-3 text-sm text-slate-300">
-                  <span className="font-semibold text-slate-100">Lessons:</span>{" "}
+                  <span className="font-semibold text-slate-100">Sessions:</span>{" "}
                   {outcome.lessons}
                 </p>
                 <p className="mt-1 text-sm text-slate-300">
                   <span className="font-semibold text-slate-100">Codes:</span>{" "}
                   {outcome.codes.join(", ")}
                 </p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 md:p-8">
-          <SectionHeading
-            eyebrow="Lesson Snapshot"
-            title="Seven lesson cards built for normal class windows"
-            description="Each session is fixed to 20 minutes, one clear outcome, one student activity, one teacher prompt, light evidence, and a clear best-fit use case."
-          />
-
-          <div className="mt-6 grid gap-4 lg:grid-cols-2">
-            {lessonCards.map((lesson) => (
-              <article
-                key={lesson.session}
-                className="rounded-2xl border border-slate-800 bg-slate-950/50 p-5"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-xs uppercase tracking-[0.25em] text-cyan-300">
-                    {lesson.session}
-                  </p>
-                  <span className="rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-300">
-                    20 minutes
-                  </span>
-                </div>
-                <h3 className="mt-3 text-lg font-semibold text-white">
-                  {lesson.title}
-                </h3>
-                <dl className="mt-4 space-y-3 text-sm leading-6 text-slate-300">
-                  <div>
-                    <dt className="font-semibold text-slate-100">Outcome</dt>
-                    <dd>{lesson.outcome}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-semibold text-slate-100">
-                      Student activity
-                    </dt>
-                    <dd>{lesson.activity}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-semibold text-slate-100">
-                      Teacher prompt
-                    </dt>
-                    <dd>{lesson.prompt}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-semibold text-slate-100">
-                      Light evidence
-                    </dt>
-                    <dd>{lesson.evidence}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-semibold text-slate-100">
-                      Best-fit use case
-                    </dt>
-                    <dd>{lesson.bestFit}</dd>
-                  </div>
-                </dl>
               </article>
             ))}
           </div>
@@ -513,7 +577,7 @@ export default function SchoolsPage() {
             />
 
             <div className="mt-6 grid gap-4">
-              {weeklyFitOptions.map((option) => (
+              {[...weeklyFitOptions, standaloneOption].map((option) => (
                 <article
                   key={option.label}
                   className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4"
@@ -528,77 +592,6 @@ export default function SchoolsPage() {
               ))}
             </div>
           </div>
-        </section>
-
-        <section className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 md:p-8">
-            <SectionHeading
-              eyebrow="Family and Admin Reassurance"
-              title="Low-friction language for parents, principals and wellbeing teams"
-              description="School-facing positioning stays simple: short classroom sequence, clear curriculum fit, supervised use, and no extra account administration."
-            />
-
-            <div className="mt-6 grid gap-4">
-              {assuranceItems.map((item) => (
-                <article
-                  key={item.title}
-                  className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4"
-                >
-                  <h3 className="text-base font-semibold text-white">
-                    {item.title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-300">
-                    {item.description}
-                  </p>
-                </article>
-              ))}
-            </div>
-          </div>
-
-          <section
-            id="privacy"
-            className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 md:p-8"
-          >
-            <SectionHeading
-              eyebrow="ICT and Privacy"
-              title="Keep the technical detail in the governance pack, not the hero copy"
-              description="Teacher and family surfaces stay in plain classroom language. Privacy, retention, and implementation detail live in the governance pack for leadership and ICT review."
-            />
-
-            <div className="mt-6 rounded-2xl border border-violet-400/20 bg-violet-500/5 p-4">
-              <p className="text-sm font-semibold text-violet-200">
-                Privacy position
-              </p>
-              <p className="mt-2 text-sm leading-6 text-slate-300">
-                The school-facing explanation is simple: routine classroom use
-                keeps alias-based data on the device, does not depend on student
-                account setup, and leaves exports under adult control.
-              </p>
-              <p className="mt-3 text-sm text-slate-300">
-                Privacy and security references kept here:
-                <span className="font-medium text-slate-100">
-                  {" "}
-                  AC9TDI4P09, AC9TDI6P09
-                </span>
-              </p>
-            </div>
-
-            <div className="mt-4 flex flex-wrap gap-3">
-              <Link
-                className="inline-flex rounded-full bg-violet-300 px-4 py-2 text-sm font-semibold text-slate-950"
-                href="/schools/docs/privacy-policy"
-              >
-                Read the privacy policy in app
-              </Link>
-              <a
-                className="inline-flex rounded-full border border-violet-400/30 px-4 py-2 text-sm font-semibold text-violet-200"
-                download
-                href="/docs/schools-au/governance/privacy-policy.md"
-              >
-                Download the privacy policy
-              </a>
-            </div>
-          </section>
         </section>
 
         <section
@@ -630,9 +623,9 @@ export default function SchoolsPage() {
 
         <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 md:p-8">
           <SectionHeading
-            eyebrow="Acceptance Gate"
+            eyebrow="Evidence"
             title="Run the acceptance gate before outreach"
-            description="Complete these checks in order. A failed step means fix the issue before moving into school outreach or live pilot use."
+            description="MetaPet School is currently being tested through small, carefully supported classroom pilots. We are collecting evidence before making claims about outcomes, so nothing below is presented as an achieved result."
           />
 
           <div className="mt-6 grid gap-4 lg:grid-cols-2">
@@ -671,7 +664,6 @@ export default function SchoolsPage() {
               </article>
             ))}
           </div>
-
         </section>
 
         <section
@@ -759,23 +751,44 @@ export default function SchoolsPage() {
           </div>
         </section>
 
+        {/* 9. Separate the broader universe */}
+        <section className="rounded-3xl border border-slate-700 bg-slate-950/60 p-6 md:p-8">
+          <SectionHeading
+            eyebrow="For adults only"
+            title="MetaPet School is not the whole MetaPet"
+            description="Blue $nake Studio also makes a broader consumer MetaPet experience. It is a different product with different rules, and it sits entirely outside the classroom pathway — no classroom screen links to it, and no student route can reach it."
+          />
+          <a
+            className="mt-5 inline-flex min-h-11 items-center rounded-xl border border-slate-600 px-5 py-2.5 text-sm font-semibold text-slate-200 hover:border-slate-400"
+            href="https://www.bluesnakestudios.com"
+            rel="noreferrer"
+            target="_blank"
+          >
+            Complete MetaPet at Blue $nake Studio
+          </a>
+        </section>
+
         <section className="rounded-3xl border border-cyan-500/20 bg-cyan-950/20 p-6 md:p-8">
-          <p className="text-xs uppercase tracking-[0.35em] text-cyan-400/70">
-            Pilot enquiry
-          </p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-            Ask about a no-cost pilot
+          <h2 className="text-2xl font-semibold tracking-tight text-white">
+            Questions before you run it?
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-300">
-            Schools, teachers, principals, councils, and education contacts can
-            approach Blue $nake Studio about a no-cost pilot pathway.
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
+            You do not need to contact anyone to start. Session One is available
+            right now, free, with no form. Email is for the things a web page
+            cannot answer.
           </p>
-          <div className="mt-4">
-            <a
-              href="mailto:bluesssnakestudio@gmail.com?subject=Meta-Pet%20School%20Pilot%20Enquiry"
-              className="inline-flex items-center rounded-xl bg-cyan-400 px-5 py-2.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-cyan-300"
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link
+              href={FIELD_MODE_HOME_PATH}
+              className="inline-flex min-h-11 items-center rounded-xl bg-emerald-400 px-5 py-2.5 text-sm font-semibold text-emerald-950 hover:bg-emerald-300"
             >
-              Ask About a Pilot
+              Run one class free
+            </Link>
+            <a
+              href="mailto:bluesssnakestudio@gmail.com?subject=MetaPet%20School%20question"
+              className="inline-flex min-h-11 items-center rounded-xl border border-cyan-400/40 px-5 py-2.5 text-sm font-semibold text-cyan-200 hover:border-cyan-300/70"
+            >
+              Email the studio
             </a>
           </div>
         </section>

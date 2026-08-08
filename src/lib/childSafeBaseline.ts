@@ -93,6 +93,10 @@ export const CHILD_SAFE_ROUTE_POLICIES: Record<
       "/schools",
       "/schools/safeguarding",
       "/schools/parents",
+      // Adult-only. Deliberately absent from the `field` policy below: a
+      // contribution page must never be reachable from a classroom screen.
+      "/schools/contribute",
+      "/schools/data",
       "/school-game",
       "/teachers",
       "/teachers/passport",

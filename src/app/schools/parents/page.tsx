@@ -44,8 +44,8 @@ export default function SchoolsParentPage() {
           <li>No student account or email</li>
           <li>No public profile</li>
           <li>No social sharing or chat</li>
-          <li>No personal data collected</li>
-          <li>No ads or tracking</li>
+          <li>No real name, student ID or email address is asked for</li>
+          <li>No advertising and no behavioural tracking</li>
         </ul>
       </section>
 
@@ -62,8 +62,9 @@ export default function SchoolsParentPage() {
           <li>A local class summary for pilot evidence</li>
         </ul>
         <p className="text-sm leading-6 text-slate-300">
-          All data stays in the browser on the school device. Nothing is sent to
-          any server. Data auto-deletes after{" "}
+          Classroom records stay in the browser on the school device. Routine
+          classroom use does not send them to a server. They are deleted
+          automatically after{" "}
           <strong className="text-emerald-200">
             {SCHOOLS_LOCAL_DATA_RETENTION_DAYS} days
           </strong>{" "}

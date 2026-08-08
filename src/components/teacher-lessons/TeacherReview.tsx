@@ -235,19 +235,22 @@ export function TeacherReview({
           </div>
         </header>
 
-        {/* Responsible creator promise (quick access) */}
+        {/* Design rule from the privacy session (quick access) */}
         {(() => {
-          const l7 = passport.sections.find(
-            (s) => s.lessonId === "responsible-creator",
+          // Located by evidence kind rather than by lesson id: the session that
+          // captures a design rule can move within the canonical sequence
+          // without silently emptying this panel.
+          const designRuleSection = passport.sections.find(
+            (s) => s.evidence?.kind === "responsible-creator-promise",
           );
           const promise =
-            l7?.evidence?.kind === "responsible-creator-promise"
-              ? l7.evidence.promise
+            designRuleSection?.evidence?.kind === "responsible-creator-promise"
+              ? designRuleSection.evidence.promise
               : "";
           return promise.trim() ? (
             <section className="mb-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4">
               <h2 className="text-sm font-semibold text-white">
-                Responsible Creator promise
+                Design rule from the privacy session
               </h2>
               <p className="mt-1 text-sm italic text-emerald-200">
                 “{promise}”

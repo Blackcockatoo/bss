@@ -28,10 +28,11 @@ export function LessonCardGallery() {
       <div className="space-y-1">
         <h2 className="flex items-center gap-2 text-sm font-semibold text-white">
           <BookOpen className="h-4 w-4 text-slate-400" />
-          Scripted Lessons
+          Optional activity cards
         </h2>
         <p className="text-xs text-slate-500">
-          Pick a 15-20 minute lesson. Follow the script. Done.
+          Extra 15-20 minute classroom activities that support the seven-session
+          sequence. Optional — the sequence stands on its own.
         </p>
       </div>
 
@@ -72,7 +73,10 @@ export function LessonCardGallery() {
           <ScriptedLessonCard
             key={lesson.id}
             lesson={lesson}
-            recommended={lesson.number === 1 && activeFilter === null}
+            recommended={
+              lesson.supportsSession === "meet-the-system" &&
+              activeFilter === null
+            }
           />
         ))}
       </div>

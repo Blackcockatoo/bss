@@ -11,7 +11,7 @@ import {
   resolveStepIndex,
 } from "./lessonRouting";
 
-const dnaLesson = getLessonById("dna-differences")!;
+const dnaLesson = getLessonById("one-identity-many-representations")!;
 
 describe("lesson routing", () => {
   it("builds the teacher hub path", () => {
@@ -19,24 +19,24 @@ describe("lesson routing", () => {
   });
 
   it("builds lesson paths from slug and id", () => {
-    expect(buildLessonPath("dna-differences")).toBe(
-      "/teachers/lessons/dna-differences",
+    expect(buildLessonPath("one-identity-many-representations")).toBe(
+      "/teachers/lessons/one-identity-many-representations",
     );
     // Accepts a lesson id too.
-    expect(buildLessonPath("build-a-body")).toBe(
-      "/teachers/lessons/build-a-body",
+    expect(buildLessonPath("design-a-better-feature")).toBe(
+      "/teachers/lessons/design-a-better-feature",
     );
   });
 
   it("appends step, preview and mode query params", () => {
-    expect(buildLessonPath("dna-differences", { step: 2 })).toBe(
-      "/teachers/lessons/dna-differences?step=2",
+    expect(buildLessonPath("one-identity-many-representations", { step: 2 })).toBe(
+      "/teachers/lessons/one-identity-many-representations?step=2",
     );
-    expect(buildLessonPath("dna-differences", { preview: true })).toBe(
-      "/teachers/lessons/dna-differences?preview=1",
+    expect(buildLessonPath("one-identity-many-representations", { preview: true })).toBe(
+      "/teachers/lessons/one-identity-many-representations?preview=1",
     );
     expect(
-      buildLessonPath("dna-differences", { mode: "student", step: 3 }),
+      buildLessonPath("one-identity-many-representations", { mode: "student", step: 3 }),
     ).toContain("mode=student");
   });
 
@@ -72,8 +72,8 @@ describe("lesson routing", () => {
   });
 
   it("resolves and rejects lesson ids from slugs", () => {
-    expect(resolveLessonId("feelings-without-words")).toBe(
-      "feelings-without-words",
+    expect(resolveLessonId("read-the-signals")).toBe(
+      "read-the-signals",
     );
     expect(resolveLessonId("broken")).toBeNull();
     expect(resolveLessonId(null)).toBeNull();

@@ -250,7 +250,7 @@ export default function ShopPage() {
           <div>
             <h2 className="text-xl font-semibold">Premium Addons</h2>
             <p className="text-sm text-zinc-500">
-              Available with Companion Pass or Teacher Pro.
+              Available with Companion Pass.
             </p>
           </div>
           <Link

@@ -10,12 +10,12 @@ afterEach(cleanup);
 describe("printable Field lesson fallback", () => {
   it("renders a complete static teacher sheet", async () => {
     const page = await PrintableLessonPage({
-      params: Promise.resolve({ slug: "build-a-body" }),
+      params: Promise.resolve({ slug: "design-a-better-feature" }),
     });
     render(page);
 
     expect(
-      screen.getByRole("heading", { name: "Lesson 2: Build a Body" }),
+      screen.getByRole("heading", { name: "Lesson 6: Design a Better Feature" }),
     ).toBeInTheDocument();
     expect(screen.getByText("Five guided steps")).toBeInTheDocument();
     expect(screen.getAllByRole("listitem").length).toBeGreaterThanOrEqual(5);
@@ -27,7 +27,7 @@ describe("printable Field lesson fallback", () => {
 
   it("is explicitly excluded from search indexing", async () => {
     const metadata = await generateMetadata({
-      params: Promise.resolve({ slug: "meet-your-metapet" }),
+      params: Promise.resolve({ slug: "meet-the-system" }),
     });
     expect(metadata.robots).toEqual({ index: false, follow: false });
   });

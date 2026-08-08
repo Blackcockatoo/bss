@@ -1,88 +1,13 @@
-import type {
-  PlanDefinition,
-  PlanFeature,
-  PlanId,
-  PlanLimits,
-  UserSubscription,
-} from "./types";
+import type { PlanDefinition, PlanFeature, PlanId, UserSubscription } from "./types";
 
-export const UNLIMITED = -1;
-
-export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
-  free: {
-    maxClasses: 2,
-    maxStudentsPerClass: 25,
-    maxAssignments: 10,
-    maxLessonsInQueue: 5,
-    analyticsRetentionDays: 7,
-  },
-  consumer: {
-    maxClasses: 0,
-    maxStudentsPerClass: 0,
-    maxAssignments: 0,
-    maxLessonsInQueue: 0,
-    analyticsRetentionDays: 90,
-  },
-  pro: {
-    maxClasses: UNLIMITED,
-    maxStudentsPerClass: UNLIMITED,
-    maxAssignments: UNLIMITED,
-    maxLessonsInQueue: UNLIMITED,
-    analyticsRetentionDays: 365,
-  },
-  school: {
-    maxClasses: UNLIMITED,
-    maxStudentsPerClass: UNLIMITED,
-    maxAssignments: UNLIMITED,
-    maxLessonsInQueue: UNLIMITED,
-    analyticsRetentionDays: 730,
-  },
-};
-
-const EDUCATOR_FEATURES: PlanFeature[] = [
-  { id: "basic-analytics", label: "Basic local class summary", included: true },
-  {
-    id: "advanced-analytics",
-    label: "Extended local summary history (365-day)",
-    included: true,
-    proOnly: true,
-  },
-  {
-    id: "student-dna-profiles",
-    label: "Learner pattern snapshots",
-    included: true,
-  },
-  {
-    id: "data-export",
-    label: "Local summary export (CSV)",
-    included: true,
-    proOnly: true,
-  },
-  {
-    id: "ai-lesson-suggestions",
-    label: "AI-powered lesson suggestions",
-    included: true,
-    proOnly: true,
-  },
-  {
-    id: "custom-standards-mapping",
-    label: "Custom standards mapping",
-    included: true,
-    proOnly: true,
-  },
-  {
-    id: "priority-support",
-    label: "Priority support",
-    included: true,
-    proOnly: true,
-  },
-  {
-    id: "premium-addons",
-    label: "Premium addons access",
-    included: true,
-    proOnly: true,
-  },
-];
+/**
+ * The Blue Snake Studios consumer catalogue.
+ *
+ * The previous catalogue carried a "Teacher Pro" subscription and a "Campus
+ * License" priced per school. Both are gone: MetaPet School's complete core is
+ * free for every school, funded by voluntary contribution rather than by a
+ * licence, so a paid school tier would contradict the product it sells.
+ */
 
 const CONSUMER_FEATURES: PlanFeature[] = [
   { id: "pet-companion", label: "Meta-pet companion (Jewble)", included: true },
@@ -118,103 +43,31 @@ const CONSUMER_FEATURES: PlanFeature[] = [
   },
 ];
 
-const SCHOOL_FEATURES: PlanFeature[] = [
-  ...EDUCATOR_FEATURES.map((f) => ({ ...f, included: true, proOnly: false })),
-  {
-    id: "unlimited-teachers",
-    label: "Unlimited teacher accounts",
-    included: true,
-    schoolOnly: true,
-  },
-  {
-    id: "student-cap-500",
-    label: "Up to 500 learner aliases",
-    included: true,
-    schoolOnly: true,
-  },
-  {
-    id: "custom-branding",
-    label: "Custom school branding (coming soon)",
-    included: true,
-    schoolOnly: true,
-  },
-  {
-    id: "admin-dashboard",
-    label: "School admin dashboard",
-    included: true,
-    schoolOnly: true,
-  },
-  {
-    id: "bulk-dna",
-    label: "Bulk learner alias provisioning",
-    included: true,
-    schoolOnly: true,
-  },
-  {
-    id: "extended-analytics",
-    label: "Extended local summary history (730-day)",
-    included: true,
-    schoolOnly: true,
-  },
-];
-
-function projectEducatorFeatures(planId: "free" | "pro"): PlanFeature[] {
-  return EDUCATOR_FEATURES.map((feature) => ({
-    ...feature,
-    included: feature.proOnly ? planId === "pro" : feature.included,
-  }));
-}
-
 export const PLAN_CATALOG: Record<PlanId, PlanDefinition> = {
   free: {
     id: "free",
-    name: "Starter",
-    tagline: "Begin the journey",
+    name: "Free",
+    tagline: "Start here",
     description:
-      "Built for individual educators and pilot classrooms. Genuinely useful — not a stripped-down teaser.",
-    audience: "educator",
+      "The companion, the starter addons and evolution tracking. No account required to look around.",
+    audience: "consumer",
     priceMonthly: 0,
     priceYearly: 0,
-    limits: PLAN_LIMITS.free,
-    features: projectEducatorFeatures("free"),
+    features: CONSUMER_FEATURES.map((feature) => ({
+      ...feature,
+      included: feature.consumerOnly ? false : feature.included,
+    })),
   },
   consumer: {
     id: "consumer",
     name: "Companion Pass",
     tagline: "Your pet, fully alive",
     description:
-      "For individuals who want the full Jewble experience — all addons, dream journal, advanced genome tools, and complete wellness sync.",
+      "For individuals who want the full Jewble experience — all addons, dream journal, advanced genome tools and complete wellness sync.",
     audience: "consumer",
     priceMonthly: 4.99,
     priceYearly: 44,
-    limits: PLAN_LIMITS.consumer,
     features: CONSUMER_FEATURES,
-    highlight: true,
-  },
-  pro: {
-    id: "pro",
-    name: "Teacher Pro",
-    tagline: "Scale your classroom",
-    description:
-      "Unlimited classrooms, longer local summary history, AI lesson suggestions, and premium adult teaching tools.",
-    audience: "educator",
-    priceMonthly: 19,
-    priceYearly: 190,
-    limits: PLAN_LIMITS.pro,
-    features: projectEducatorFeatures("pro"),
-    highlight: true,
-  },
-  school: {
-    id: "school",
-    name: "Campus License",
-    tagline: "School-wide consciousness",
-    description:
-      "One license covers your whole school — unlimited teachers, up to 500 learner aliases, admin tools, and extended local summary history.",
-    audience: "institution",
-    priceMonthly: 0,
-    priceYearly: 299,
-    limits: PLAN_LIMITS.school,
-    features: SCHOOL_FEATURES,
   },
 };
 
@@ -231,10 +84,4 @@ export function createFreeSubscription(): UserSubscription {
     trialEndsAt: null,
     canceledAt: null,
   };
-}
-
-export function formatLimit(value: number, unit: string): string {
-  if (value === UNLIMITED) return "Unlimited";
-  if (value === 0) return "—";
-  return `${value} ${unit}`;
 }

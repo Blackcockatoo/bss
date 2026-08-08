@@ -10,8 +10,8 @@ function resetStore() {
 const cardEvidence: PetObservationCardEvidence = {
   kind: "pet-observation-card",
   version: 1,
-  lessonId: "meet-your-metapet",
-  stepId: "meet-your-metapet-step-5",
+  lessonId: "meet-the-system",
+  stepId: "meet-the-system-step-5",
   createdAt: 1,
   alias: "Pip",
   observations: { shape: "round", surface: "shiny", movement: "floaty" },
@@ -31,14 +31,14 @@ describe("lesson progress store — typed evidence & preferences", () => {
 
   it("saves a typed evidence entry against the current lesson", () => {
     const store = useLessonProgressStore.getState();
-    store.startLesson("meet-your-metapet");
-    store.saveEvidenceEntry("meet-your-metapet-step-5", cardEvidence);
+    store.startLesson("meet-the-system");
+    store.saveEvidenceEntry("meet-the-system-step-5", cardEvidence);
 
     const record = selectRecord(
       useLessonProgressStore.getState(),
-      "meet-your-metapet",
+      "meet-the-system",
     );
-    const saved = record.evidenceEntries["meet-your-metapet-step-5"];
+    const saved = record.evidenceEntries["meet-the-system-step-5"];
     expect(saved?.kind).toBe("pet-observation-card");
     if (saved?.kind === "pet-observation-card") {
       expect(saved.alias).toBe("Pip");
@@ -47,26 +47,26 @@ describe("lesson progress store — typed evidence & preferences", () => {
 
   it("rejects evidence whose lessonId does not match the current lesson", () => {
     const store = useLessonProgressStore.getState();
-    store.startLesson("build-a-body");
-    store.saveEvidenceEntry("build-a-body-step-5", cardEvidence);
+    store.startLesson("design-a-better-feature");
+    store.saveEvidenceEntry("design-a-better-feature-step-5", cardEvidence);
     const record = selectRecord(
       useLessonProgressStore.getState(),
-      "build-a-body",
+      "design-a-better-feature",
     );
-    expect(record.evidenceEntries["build-a-body-step-5"]).toBeUndefined();
+    expect(record.evidenceEntries["design-a-better-feature-step-5"]).toBeUndefined();
   });
 
   it("clears evidence when a step is reset", () => {
     const store = useLessonProgressStore.getState();
-    store.startLesson("meet-your-metapet");
+    store.startLesson("meet-the-system");
     store.goToStep(4);
-    store.saveEvidenceEntry("meet-your-metapet-step-5", cardEvidence);
+    store.saveEvidenceEntry("meet-the-system-step-5", cardEvidence);
     store.resetStep(4);
     const record = selectRecord(
       useLessonProgressStore.getState(),
-      "meet-your-metapet",
+      "meet-the-system",
     );
-    expect(record.evidenceEntries["meet-your-metapet-step-5"]).toBeUndefined();
+    expect(record.evidenceEntries["meet-the-system-step-5"]).toBeUndefined();
   });
 
   it("persists presentation and timing preferences", () => {
@@ -90,12 +90,12 @@ describe("lesson progress store — typed evidence & preferences", () => {
       JSON.stringify({
         state: {
           version: 1,
-          currentLessonId: "dna-differences",
+          currentLessonId: "one-identity-many-representations",
           viewMode: "teacher",
           focusMode: false,
           records: {
-            "dna-differences": {
-              lessonId: "dna-differences",
+            "one-identity-many-representations": {
+              lessonId: "one-identity-many-representations",
               currentStep: 2,
               completedSteps: [0, 1],
               completed: false,
@@ -113,10 +113,10 @@ describe("lesson progress store — typed evidence & preferences", () => {
 
     useLessonProgressStore.persist.rehydrate();
     const state = useLessonProgressStore.getState();
-    expect(state.currentLessonId).toBe("dna-differences");
+    expect(state.currentLessonId).toBe("one-identity-many-representations");
     expect(state.presentationMode).toBe("standard");
     expect(state.timingMode).toBe("standard");
-    const record = selectRecord(state, "dna-differences");
+    const record = selectRecord(state, "one-identity-many-representations");
     expect(record.currentStep).toBe(2);
     // The new evidenceEntries field is filled in as an empty object.
     expect(record.evidenceEntries).toEqual({});

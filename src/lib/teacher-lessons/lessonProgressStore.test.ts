@@ -31,82 +31,82 @@ describe("lesson progress store", () => {
 
   it("starts a lesson and tracks the current step", () => {
     const store = useLessonProgressStore.getState();
-    store.startLesson("meet-your-metapet");
+    store.startLesson("meet-the-system");
     const state = useLessonProgressStore.getState();
-    expect(state.currentLessonId).toBe("meet-your-metapet");
-    const record = selectRecord(state, "meet-your-metapet");
+    expect(state.currentLessonId).toBe("meet-the-system");
+    const record = selectRecord(state, "meet-the-system");
     expect(record.startedAt).not.toBeNull();
     expect(record.currentStep).toBe(0);
-    expect(selectLessonStatus(state, "meet-your-metapet")).toBe("in-progress");
+    expect(selectLessonStatus(state, "meet-the-system")).toBe("in-progress");
   });
 
   it("moves between steps and clamps at the boundaries", () => {
     const store = useLessonProgressStore.getState();
-    store.startLesson("build-a-body");
+    store.startLesson("design-a-better-feature");
     store.nextStep();
     store.nextStep();
-    expect(selectRecord(useLessonProgressStore.getState(), "build-a-body").currentStep).toBe(2);
+    expect(selectRecord(useLessonProgressStore.getState(), "design-a-better-feature").currentStep).toBe(2);
     store.previousStep();
-    expect(selectRecord(useLessonProgressStore.getState(), "build-a-body").currentStep).toBe(1);
+    expect(selectRecord(useLessonProgressStore.getState(), "design-a-better-feature").currentStep).toBe(1);
     // Clamp below zero.
     store.previousStep();
     store.previousStep();
-    expect(selectRecord(useLessonProgressStore.getState(), "build-a-body").currentStep).toBe(0);
+    expect(selectRecord(useLessonProgressStore.getState(), "design-a-better-feature").currentStep).toBe(0);
     // Clamp above the last step (5 steps -> max index 4).
     for (let i = 0; i < 10; i += 1) store.nextStep();
-    expect(selectRecord(useLessonProgressStore.getState(), "build-a-body").currentStep).toBe(4);
+    expect(selectRecord(useLessonProgressStore.getState(), "design-a-better-feature").currentStep).toBe(4);
   });
 
   it("completes steps and the whole lesson", () => {
     const store = useLessonProgressStore.getState();
-    store.startLesson("dna-differences");
+    store.startLesson("one-identity-many-representations");
     store.completeStep(0);
     store.completeStep(1);
-    let record = selectRecord(useLessonProgressStore.getState(), "dna-differences");
+    let record = selectRecord(useLessonProgressStore.getState(), "one-identity-many-representations");
     expect(record.completedSteps).toEqual([0, 1]);
     expect(record.completed).toBe(false);
 
-    store.completeLesson("dna-differences");
-    record = selectRecord(useLessonProgressStore.getState(), "dna-differences");
+    store.completeLesson("one-identity-many-representations");
+    record = selectRecord(useLessonProgressStore.getState(), "one-identity-many-representations");
     expect(record.completed).toBe(true);
     expect(record.completedAt).not.toBeNull();
     expect(record.completedSteps).toEqual([0, 1, 2, 3, 4]);
     expect(
-      selectLessonStatus(useLessonProgressStore.getState(), "dna-differences"),
+      selectLessonStatus(useLessonProgressStore.getState(), "one-identity-many-representations"),
     ).toBe("completed");
   });
 
   it("pauses and resumes", () => {
     const store = useLessonProgressStore.getState();
-    store.startLesson("needs-and-consequences");
+    store.startLesson("choices-and-algorithms");
     store.pauseLesson();
     expect(
-      selectLessonStatus(useLessonProgressStore.getState(), "needs-and-consequences"),
+      selectLessonStatus(useLessonProgressStore.getState(), "choices-and-algorithms"),
     ).toBe("paused");
     store.resumeLesson();
     expect(
-      selectLessonStatus(useLessonProgressStore.getState(), "needs-and-consequences"),
+      selectLessonStatus(useLessonProgressStore.getState(), "choices-and-algorithms"),
     ).toBe("in-progress");
   });
 
   it("resets a single step, a whole lesson, and everything", () => {
     const store = useLessonProgressStore.getState();
-    store.startLesson("feelings-without-words");
+    store.startLesson("read-the-signals");
     store.completeStep(0);
     store.completeStep(1);
-    store.saveEvidence("feelings-without-words-step-1", "a note");
+    store.saveEvidence("read-the-signals-step-1", "a note");
 
     store.resetStep(1);
-    let record = selectRecord(useLessonProgressStore.getState(), "feelings-without-words");
+    let record = selectRecord(useLessonProgressStore.getState(), "read-the-signals");
     expect(record.completedSteps).toEqual([0]);
 
-    store.resetLesson("feelings-without-words");
-    record = selectRecord(useLessonProgressStore.getState(), "feelings-without-words");
+    store.resetLesson("read-the-signals");
+    record = selectRecord(useLessonProgressStore.getState(), "read-the-signals");
     expect(record.completedSteps).toEqual([]);
     expect(record.evidence).toEqual({});
     expect(record.startedAt).toBeNull();
 
-    store.startLesson("patterns-behind-the-pet");
+    store.startLesson("test-reflect-and-improve");
     store.completeStep(0);
     store.resetAllProgress();
     expect(useLessonProgressStore.getState().currentLessonId).toBeNull();
@@ -125,22 +125,22 @@ describe("lesson progress store", () => {
 
   it("saves and clears student evidence placeholders", () => {
     const store = useLessonProgressStore.getState();
-    store.startLesson("responsible-creator");
-    store.saveEvidence("responsible-creator-step-3", "my promise");
+    store.startLesson("privacy-and-responsible-design");
+    store.saveEvidence("privacy-and-responsible-design-step-3", "my promise");
     expect(
-      selectRecord(useLessonProgressStore.getState(), "responsible-creator")
-        .evidence["responsible-creator-step-3"],
+      selectRecord(useLessonProgressStore.getState(), "privacy-and-responsible-design")
+        .evidence["privacy-and-responsible-design-step-3"],
     ).toBe("my promise");
   });
 
   it("computes an overall progress summary", () => {
     const store = useLessonProgressStore.getState();
-    store.completeLesson("meet-your-metapet");
-    store.startLesson("build-a-body");
+    store.completeLesson("meet-the-system");
+    store.startLesson("design-a-better-feature");
     const summary = selectProgressSummary(useLessonProgressStore.getState());
     expect(summary.totalLessons).toBe(7);
     expect(summary.completedLessons).toBe(1);
-    expect(summary.resumeLessonId).toBe("build-a-body");
+    expect(summary.resumeLessonId).toBe("design-a-better-feature");
     expect(summary.completionRatio).toBeCloseTo(1 / 7);
   });
 
@@ -165,12 +165,12 @@ describe("sanitizeState (corruption safety)", () => {
   it("drops unknown lessons and repairs out-of-range steps", () => {
     const dirty = {
       version: 1,
-      currentLessonId: "meet-your-metapet",
+      currentLessonId: "meet-the-system",
       viewMode: "student",
       focusMode: "yes", // wrong type
       records: {
-        "meet-your-metapet": {
-          lessonId: "meet-your-metapet",
+        "meet-the-system": {
+          lessonId: "meet-the-system",
           currentStep: 999,
           completedSteps: [0, 1, 42, -3, "x"],
           completed: false,
@@ -187,9 +187,9 @@ describe("sanitizeState (corruption safety)", () => {
     const clean = sanitizeState(dirty);
     expect(clean.viewMode).toBe("student");
     expect(clean.focusMode).toBe(false);
-    expect(Object.keys(clean.records)).toEqual(["meet-your-metapet"]);
+    expect(Object.keys(clean.records)).toEqual(["meet-the-system"]);
 
-    const record = clean.records["meet-your-metapet"]!;
+    const record = clean.records["meet-the-system"]!;
     // 5 steps -> max index 4.
     expect(record.currentStep).toBe(4);
     expect(record.completedSteps).toEqual([0, 1]);
@@ -203,12 +203,12 @@ describe("sanitizeState (corruption safety)", () => {
       JSON.stringify({
         state: {
           version: 1,
-          currentLessonId: "dna-differences",
+          currentLessonId: "one-identity-many-representations",
           viewMode: "teacher",
           focusMode: false,
           records: {
-            "dna-differences": {
-              lessonId: "dna-differences",
+            "one-identity-many-representations": {
+              lessonId: "one-identity-many-representations",
               currentStep: 2,
               completedSteps: [0, 1],
               completed: false,
@@ -228,9 +228,9 @@ describe("sanitizeState (corruption safety)", () => {
     useLessonProgressStore.persist.rehydrate();
 
     const state = useLessonProgressStore.getState();
-    expect(state.currentLessonId).toBe("dna-differences");
-    expect(selectRecord(state, "dna-differences").currentStep).toBe(2);
-    expect(selectRecord(state, "dna-differences").completedSteps).toEqual([
+    expect(state.currentLessonId).toBe("one-identity-many-representations");
+    expect(selectRecord(state, "one-identity-many-representations").currentStep).toBe(2);
+    expect(selectRecord(state, "one-identity-many-representations").completedSteps).toEqual([
       0, 1,
     ]);
   });

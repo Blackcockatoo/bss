@@ -12,8 +12,8 @@ import { LearningPassport } from "./LearningPassport";
 const card: PetObservationCardEvidence = {
   kind: "pet-observation-card",
   version: 1,
-  lessonId: "meet-your-metapet",
-  stepId: "meet-your-metapet-step-5",
+  lessonId: "meet-the-system",
+  stepId: "meet-the-system-step-5",
   createdAt: 1,
   alias: "Pip",
   observations: { shape: "round", surface: "shiny", movement: "floaty" },
@@ -47,16 +47,16 @@ describe("Learning Passport", () => {
     expect(screen.getByText(/Meta-Pet Learning Passport/i)).toBeTruthy();
     expect(screen.getByText(/No lessons completed yet/i)).toBeTruthy();
     // All seven sections present even when empty.
-    expect(screen.getByText(/7\. The Responsible Creator Challenge/)).toBeTruthy();
+    expect(screen.getByText(/7\. Test, Reflect and Improve/)).toBeTruthy();
   });
 
   it("renders a completed section with evidence and applied changes", () => {
     usePetProfileStore.getState().setAlias("Pip");
-    useLessonProgressStore.getState().startLesson("meet-your-metapet");
+    useLessonProgressStore.getState().startLesson("meet-the-system");
     useLessonProgressStore
       .getState()
-      .saveEvidenceEntry("meet-your-metapet-step-5", card);
-    useLessonProgressStore.getState().completeLesson("meet-your-metapet");
+      .saveEvidenceEntry("meet-the-system-step-5", card);
+    useLessonProgressStore.getState().completeLesson("meet-the-system");
 
     render(<LearningPassport />);
     expect(screen.getByText(/Changes applied to the Meta-Pet/i)).toBeTruthy();
@@ -66,11 +66,11 @@ describe("Learning Passport", () => {
 
   it("uses alias-only evidence and hides consumer pet changes in Field Mode", () => {
     usePetProfileStore.getState().setAlias("Consumer Profile Alias");
-    useLessonProgressStore.getState().startLesson("meet-your-metapet");
+    useLessonProgressStore.getState().startLesson("meet-the-system");
     useLessonProgressStore
       .getState()
-      .saveEvidenceEntry("meet-your-metapet-step-5", card);
-    useLessonProgressStore.getState().completeLesson("meet-your-metapet");
+      .saveEvidenceEntry("meet-the-system-step-5", card);
+    useLessonProgressStore.getState().completeLesson("meet-the-system");
 
     render(
       <LearningPassport

@@ -56,7 +56,7 @@ describe("Field Mode entry and exit handlers", () => {
     expect(body.lessons).toHaveLength(7);
     expect(body.routes).toContain("/schools/field/offline");
     expect(body.routes).toContain(
-      "/schools/field/print/meet-your-metapet",
+      "/schools/field/print/meet-the-system",
     );
     expect(body.guarantees.update).toBe("atomic-candidate");
   });

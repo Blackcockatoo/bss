@@ -48,11 +48,22 @@ assert(
   manifest.routes?.filter((path) => path.startsWith("/schools/field/print/")).length === 7,
   "Field Pack does not contain seven printable fallbacks",
 );
+// Checked by route root, not by substring: a lesson slug may legitimately
+// contain a word like "identity" (Session 3 is about identity and
+// representation), but a cached route may never live under a consumer section.
+const APPROVED_ROUTE_ROOTS = new Set([
+  "schools",
+  "school-game",
+  "legal",
+  "docs",
+]);
+const blockedRoutes = manifest.routes.filter((path) => {
+  const root = path.split("/").filter(Boolean)[0];
+  return root !== undefined && !APPROVED_ROUTE_ROOTS.has(root);
+});
 assert(
-  !manifest.routes.some((path) =>
-    /shop|wallet|marketplace|breeding|identity|qr|ritual|alchemist|social|share/.test(path),
-  ),
-  "Field Pack contains a blocked consumer route",
+  blockedRoutes.length === 0,
+  `Field Pack contains a blocked consumer route: ${blockedRoutes.join(", ")}`,
 );
 
 await mapWithConcurrency([...manifest.routes, ...manifest.assets], 6, async (path) => {

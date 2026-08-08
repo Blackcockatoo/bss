@@ -219,10 +219,10 @@ function ScenarioCard({
 }
 
 /**
- * Lesson 7 — The Responsible Creator Challenge. A guided, primarily emulated
- * scenario challenge covering privacy, care, emotion, accessibility, sharing
- * and difference. Produces the structured promise + choices data that Pass 4's
- * Learning Passport will export (the export itself is out of scope here).
+ * Session 5 — Privacy and Responsible Design. A guided, emulated scenario set
+ * covering privacy, care, emotion, accessibility, sharing and difference.
+ * Students end by stating one design rule they would give a designer, which is
+ * the structured evidence the Learning Passport surfaces.
  */
 export function ResponsibleCreatorActivity({
   step,
@@ -356,15 +356,15 @@ export function ResponsibleCreatorActivity({
     return (
       <StepShell
         kindLabel={STEP_KIND_LABEL.discuss}
-        instruction="Write your responsible creator promise."
+        instruction="Write one design rule you would give a designer."
       >
         <div className="mx-auto max-w-md">
           <EvidenceText
-            label="As a Meta-Pet creator, I will…"
+            label="A system should…"
             value={promise}
             onChange={setPromise}
             onBlur={() => !isPreview && saveEvidence(buildEvidence())}
-            placeholder="…keep people's information private and care for my pet's needs."
+            placeholder="…ask before it keeps anything about a person."
             rows={3}
             disabled={isPreview}
           />
@@ -381,11 +381,11 @@ export function ResponsibleCreatorActivity({
   return (
     <StepShell
       kindLabel={STEP_KIND_LABEL.complete}
-      instruction="You have reached the end of the journey. Save your responsible creator promise."
+      instruction="Save your design rule. Session Five stops here."
     >
       <div className="mx-auto max-w-md space-y-4">
         <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-sm text-slate-200">
-          <p className="font-semibold text-white">Your journey</p>
+          <p className="font-semibold text-white">Your decisions</p>
           <p className="mt-1 text-slate-300">
             Responsible choices: {responsibleCount} of {totalScenarios}.
           </p>

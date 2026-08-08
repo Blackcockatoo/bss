@@ -22,7 +22,7 @@ import { usePetProfileStore } from "./petProfile";
 const REAL_CTX: PetUpdateContext = {
   isPreview: false,
   isDemo: false,
-  lessonId: "build-a-body",
+  lessonId: "design-a-better-feature",
 };
 
 function seedRealPet(): Genome {
@@ -165,7 +165,7 @@ describe("safe pet update — preferred visualisation", () => {
     const genome = seedRealPet();
     const result = applyPreferredVisualisation("vortex", {
       ...REAL_CTX,
-      lessonId: "patterns-behind-the-pet",
+      lessonId: "test-reflect-and-improve",
     });
     expect(result.ok).toBe(true);
     expect(usePetProfileStore.getState().preferredDnaView).toBe("vortex");
@@ -176,7 +176,7 @@ describe("safe pet update — preferred visualisation", () => {
     seedRealPet();
     const result = applyPreferredVisualisation("rainbow", {
       ...REAL_CTX,
-      lessonId: "patterns-behind-the-pet",
+      lessonId: "test-reflect-and-improve",
     });
     expect(result.ok).toBe(false);
   });
