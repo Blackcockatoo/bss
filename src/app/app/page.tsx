@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 
+import { ARCADE_ROUTE } from '@/lib/games/arcade';
+import { IS_SCHOOLS_PROFILE } from '@/lib/env/features';
 import { useStore } from '@/lib/store';
 
 const actionCards = [
@@ -44,6 +46,23 @@ const actionCards = [
     href: '/app/moss60',
   },
 ];
+
+/**
+ * Full-screen arcade builds live outside the child-safe route policies, so the
+ * schools profile must not advertise a link that only redirects away.
+ */
+const consumerArcadeCards = IS_SCHOOLS_PROFILE
+  ? []
+  : [
+      {
+        title: 'Full-Screen Arcade',
+        description:
+          'Leave the app shell for Monkey Invaders, Bubble Hex, and the rest of the standalone Blue Snake Studios games.',
+        href: ARCADE_ROUTE,
+      },
+    ];
+
+const allActionCards = [...actionCards, ...consumerArcadeCards];
 
 export default function StudentAppHomePage() {
   const vitals = useStore((state) => state.vitals);
@@ -92,7 +111,7 @@ export default function StudentAppHomePage() {
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-        {actionCards.map((card) => (
+        {allActionCards.map((card) => (
           <Link
             key={card.href}
             href={card.href}

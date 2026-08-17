@@ -10,6 +10,8 @@ import {
   FIELD_MODE_SAFETY_PATH,
 } from "@/lib/childSafeBaseline";
 import { findSiteUrl } from "@/lib/env/siteUrl";
+import { getArcadeCrawlRoutes } from "@/lib/games/arcade";
+import { STUDIO_ROUTE } from "@/lib/studio/identity";
 import {
   isMetaPetSchoolHostname,
   metaPetSchoolUrl,
@@ -115,11 +117,19 @@ function blueSnakeStudiosSitemap(base: string): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.8,
     },
-    {
-      url: `${base}/monkey-invaders`,
+    // Arcade routes come from the registry so a new game is indexed by adding
+    // it in one place rather than remembering to edit the sitemap too.
+    ...getArcadeCrawlRoutes().map((route) => ({
+      url: `${base}${route}`,
       lastModified,
-      changeFrequency: "weekly",
+      changeFrequency: "weekly" as const,
       priority: 0.8,
+    })),
+    {
+      url: `${base}${STUDIO_ROUTE}`,
+      lastModified,
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
     },
     {
       url: `${base}/schools`,

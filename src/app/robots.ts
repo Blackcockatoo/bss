@@ -2,6 +2,8 @@ import type { MetadataRoute } from "next";
 import { headers } from "next/headers";
 
 import { findSiteUrl } from "@/lib/env/siteUrl";
+import { getArcadeCrawlRoutes } from "@/lib/games/arcade";
+import { STUDIO_ROUTE } from "@/lib/studio/identity";
 import {
   METAPET_SCHOOL_ORIGIN,
   isMetaPetSchoolHostname,
@@ -35,7 +37,12 @@ const CONSUMER_CRAWL_BLOCKLIST = [
   "/scaffold",
   "/moss60",
   "/space-jewbles",
-  "/monkey-invaders",
+  // Studio identity and the sponsored-artist roster link out to independent
+  // sites the studio does not control. Never classroom content.
+  STUDIO_ROUTE,
+  // Every arcade surface is a consumer route. Sourced from the registry so a
+  // newly registered game is blocked on the classroom host by default.
+  ...getArcadeCrawlRoutes(),
 ] as const;
 
 /**
