@@ -11,6 +11,7 @@ import {
 } from "@/lib/childSafeBaseline";
 import { findSiteUrl } from "@/lib/env/siteUrl";
 import { getArcadeCrawlRoutes } from "@/lib/games/arcade";
+import { STUDIO_ROUTE } from "@/lib/studio/identity";
 import {
   isMetaPetSchoolHostname,
   metaPetSchoolUrl,
@@ -124,6 +125,12 @@ function blueSnakeStudiosSitemap(base: string): MetadataRoute.Sitemap {
       changeFrequency: "weekly" as const,
       priority: 0.8,
     })),
+    {
+      url: `${base}${STUDIO_ROUTE}`,
+      lastModified,
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    },
     {
       url: `${base}/schools`,
       lastModified,

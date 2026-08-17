@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { ARCADE_GAMES } from "@/lib/games/arcade";
+import { STUDIO_ROUTE } from "@/lib/studio/identity";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
 
 export const metadata: Metadata = {
@@ -25,7 +26,7 @@ export default function ArcadePage() {
   enforceChildSafeServerRoute("/arcade");
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100">
+    <main className="min-h-screen bg-slate-950 pb-[calc(5.5rem+env(safe-area-inset-bottom))] text-slate-100 sm:pb-[calc(6rem+env(safe-area-inset-bottom))]">
       <section className="relative overflow-hidden border-b border-slate-800/80">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(255,143,31,0.12),transparent_38%),radial-gradient(circle_at_85%_20%,rgba(168,85,247,0.12),transparent_36%)]" />
         <div className="relative mx-auto w-full max-w-5xl space-y-6 px-6 py-16 md:py-20">
@@ -47,7 +48,9 @@ export default function ArcadePage() {
       </section>
 
       <section className="mx-auto w-full max-w-5xl px-6 py-14 md:py-16">
-        <div className="grid gap-5 md:grid-cols-2">
+        {/* `items-start` keeps a short card its own height instead of
+            stretching it to match a neighbour that carries an alt build. */}
+        <div className="grid items-start gap-5 md:grid-cols-2">
           {ARCADE_GAMES.map((game) => {
             const body = (
               <>
@@ -121,20 +124,42 @@ export default function ArcadePage() {
             const shell =
               "group relative overflow-hidden rounded-3xl border bg-slate-900/45 p-6 md:p-7";
 
-            return game.href ? (
-              <Link
-                key={game.id}
-                href={game.href}
-                className={`${shell} ${game.theme.border} transition-all hover:-translate-y-0.5 hover:bg-slate-900/75`}
-              >
-                {body}
-              </Link>
-            ) : (
-              <div
-                key={game.id}
-                className={`${shell} border-slate-800 opacity-70`}
-              >
-                {body}
+            // The alt build is a sibling link, so it must sit outside the card
+            // anchor rather than nested inside it.
+            return (
+              <div key={game.id} className="flex flex-col gap-2">
+                {game.href ? (
+                  <Link
+                    href={game.href}
+                    className={`${shell} ${game.theme.border} flex-1 transition-all hover:-translate-y-0.5 hover:bg-slate-900/75`}
+                  >
+                    {body}
+                  </Link>
+                ) : (
+                  <div className={`${shell} flex-1 border-slate-800 opacity-70`}>
+                    {body}
+                  </div>
+                )}
+
+                {game.altBuild ? (
+                  <a
+                    href={game.altBuild.href}
+                    {...(game.altBuild.external
+                      ? { target: "_blank", rel: "noopener noreferrer" }
+                      : {})}
+                    className="group/alt rounded-2xl border border-slate-800 bg-slate-950/60 px-5 py-4 transition-colors hover:border-slate-600 hover:bg-slate-900/60"
+                  >
+                    <p className="flex items-center gap-2 text-sm font-semibold text-slate-200">
+                      {game.altBuild.label}
+                      <span className="transition-transform group-hover/alt:translate-x-1">
+                        {game.altBuild.external ? "↗" : "→"}
+                      </span>
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-slate-500">
+                      {game.altBuild.note}
+                    </p>
+                  </a>
+                ) : null}
               </div>
             );
           })}
@@ -158,6 +183,12 @@ export default function ArcadePage() {
             part of the MetaPet Schools classroom edition, which runs a curated,
             teacher-led lesson sequence instead.
           </p>
+          <Link
+            href={STUDIO_ROUTE}
+            className="mt-6 inline-flex text-sm font-semibold text-cyan-300 hover:text-cyan-200"
+          >
+            More about the studio →
+          </Link>
         </div>
       </section>
     </main>

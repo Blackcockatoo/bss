@@ -30,6 +30,22 @@ export type ArcadeGameSurface =
   /** Rendered inside the in-app mini-game panel with rank + mastery scaling. */
   | "panel";
 
+/**
+ * A second, separately deployed build of the same game.
+ *
+ * Some games exist twice: the copy committed to `public/` in this repo, and a
+ * newer engine deployed on its own host. Modelling that explicitly beats
+ * silently replacing the committed build, which would drop the touch hardening
+ * and behaviour the smoke tests pin, and beats hiding the newer engine.
+ */
+export interface ArcadeAltBuild {
+  label: string;
+  href: string;
+  /** Off-origin builds need `target`/`rel` handling and are never crawled as ours. */
+  external: boolean;
+  note: string;
+}
+
 export interface ArcadeGame {
   id: string;
   title: string;
@@ -46,6 +62,7 @@ export interface ArcadeGame {
   /** How you play it, in the player's words. */
   controls: string;
   tags: readonly string[];
+  altBuild?: ArcadeAltBuild;
   /** Static Tailwind classes — these must not be built by interpolation. */
   theme: {
     emoji: string;
@@ -67,6 +84,12 @@ export const ARCADE_GAMES: readonly ArcadeGame[] = [
     status: "live",
     controls: "Hold ◀ ▶ to move, hold 🍌 to fire. Arrow keys and space on desktop.",
     tags: ["Arcade shooter", "Boss levels", "Touch ready", "Local high scores"],
+    altBuild: {
+      label: "Enhanced build",
+      href: "https://monkey-invaders-enhanced.vercel.app/",
+      external: true,
+      note: "A rebuilt engine on its own deployment. Opens in a new tab and keeps its own high scores.",
+    },
     theme: {
       emoji: "\u{1F680}",
       border: "border-orange-400/25",

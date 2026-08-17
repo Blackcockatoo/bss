@@ -84,6 +84,25 @@ describe("arcade registry", () => {
     }
   });
 
+  it("keeps off-origin alt builds out of our own crawl routes", () => {
+    const crawlRoutes = getArcadeCrawlRoutes();
+
+    for (const game of ARCADE_GAMES) {
+      const altBuild = game.altBuild;
+      if (!altBuild) continue;
+
+      expect(crawlRoutes).not.toContain(altBuild.href);
+
+      if (altBuild.external) {
+        // An external build is another origin. Marking it internal would drop
+        // the noopener handling and claim a route this app does not serve.
+        expect(altBuild.href.startsWith("https://"), game.id).toBe(true);
+      } else {
+        expect(altBuild.href.startsWith("/"), game.id).toBe(true);
+      }
+    }
+  });
+
   it("looks games up by id", () => {
     expect(getArcadeGame("monkey-invaders")?.title).toBe("Monkey Invaders");
     expect(getArcadeGame("not-a-game")).toBeNull();

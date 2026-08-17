@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { ARCADE_ROUTE } from "@/lib/games/arcade";
+import { ARCADE_GAMES, ARCADE_ROUTE } from "@/lib/games/arcade";
+import {
+  SCHOOL_PITCH,
+  STUDIO_ROSTER,
+  STUDIO_ROUTE,
+} from "@/lib/studio/identity";
 
 export const metadata: Metadata = {
   title: "Blue Snake Studios — The full MetaPet living system",
@@ -71,12 +76,12 @@ const FULL_PRODUCT_LINKS = [
   { label: "Activities", href: "/app/activities" },
   { label: "Wellness", href: "/app/wellness" },
   { label: "Arcade", href: ARCADE_ROUTE },
-  { label: "Monkey Invaders", href: "/monkey-invaders" },
+  { label: "The Studio", href: STUDIO_ROUTE },
 ] as const;
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100">
+    <main className="min-h-screen bg-slate-950 pb-[calc(5.5rem+env(safe-area-inset-bottom))] text-slate-100 sm:pb-[calc(6rem+env(safe-area-inset-bottom))]">
       <section className="relative overflow-hidden border-b border-slate-800/80">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.12),transparent_38%),radial-gradient(circle_at_80%_20%,rgba(245,158,11,0.1),transparent_34%)]" />
         <div className="relative mx-auto grid w-full max-w-6xl gap-12 px-6 py-20 md:py-28 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
@@ -194,39 +199,172 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* The arcade gets a real showcase rather than one line in a link grid. */}
       <section className="border-y border-slate-800 bg-slate-900/35">
-        <div className="mx-auto grid w-full max-w-6xl gap-5 px-6 py-16 md:grid-cols-2">
-          <article className="rounded-3xl border border-cyan-400/20 bg-cyan-400/5 p-7">
-            <p className="text-xs font-semibold uppercase tracking-[0.26em] text-cyan-300/70">
-              bluesnakestudios.com
-            </p>
-            <h2 className="mt-3 text-2xl font-semibold text-white">
-              Full MetaPet and the wider studio
-            </h2>
-            <p className="mt-3 text-sm leading-6 text-slate-300">
-              Consumer features, DNA, identity, creative labs, Body Forge,
-              activities, wellness and future experiments stay here.
-            </p>
-          </article>
-
-          <article className="rounded-3xl border border-amber-400/20 bg-amber-400/5 p-7">
-            <p className="text-xs font-semibold uppercase tracking-[0.26em] text-amber-200/70">
-              metapet.school
-            </p>
-            <h2 className="mt-3 text-2xl font-semibold text-white">
-              Focused Australian classroom product
-            </h2>
-            <p className="mt-3 text-sm leading-6 text-slate-300">
-              Years 3–6 Field Mode, teacher-led lessons, alias-only records,
-              local-first storage and a hard boundary around consumer areas.
-            </p>
-            <a
-              href="https://www.metapet.school"
-              className="mt-6 inline-flex text-sm font-semibold text-amber-200 hover:text-amber-100"
+        <div className="mx-auto w-full max-w-6xl px-6 py-16 md:py-20">
+          <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+            <div className="max-w-2xl space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-orange-300/80">
+                B$S Arcade
+              </p>
+              <h2 className="text-3xl font-semibold tracking-tight text-white md:text-4xl">
+                And then there are the games.
+              </h2>
+              <p className="text-base leading-7 text-slate-400">
+                Loud, self-contained, and built to be played rather than
+                demonstrated.
+              </p>
+            </div>
+            <Link
+              href={ARCADE_ROUTE}
+              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-orange-400/30 bg-orange-400/10 px-5 py-3 text-sm font-semibold text-orange-200 transition-colors hover:border-orange-300/50 hover:bg-orange-400/15"
             >
-              Open MetaPet School →
-            </a>
-          </article>
+              See all games →
+            </Link>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            {ARCADE_GAMES.map((game) => (
+              <article
+                key={game.id}
+                className={`relative overflow-hidden rounded-3xl border ${
+                  game.status === "live" ? game.theme.border : "border-slate-800"
+                } bg-slate-950/50 p-6`}
+              >
+                <div
+                  className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${game.theme.glow}`}
+                />
+                <div className="relative space-y-3">
+                  <span className="text-3xl" aria-hidden="true">
+                    {game.theme.emoji}
+                  </span>
+                  <h3 className="text-xl font-semibold text-white">
+                    {game.title}
+                  </h3>
+                  <p
+                    className={`text-xs font-semibold uppercase tracking-[0.2em] ${game.theme.text}`}
+                  >
+                    {game.tagline}
+                  </p>
+                  {game.href ? (
+                    <Link
+                      href={game.href}
+                      className="inline-flex pt-1 text-sm font-semibold text-slate-200 hover:text-white"
+                    >
+                      Play →
+                    </Link>
+                  ) : (
+                    <p className="pt-1 text-sm font-semibold text-slate-500">
+                      Coming to the arcade
+                    </p>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* The MetaPet School pitch, in full, on the consumer front door. */}
+      <section className="border-b border-slate-800 bg-amber-400/[0.03]">
+        <div className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-16 md:py-20 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="space-y-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-200/80">
+              {SCHOOL_PITCH.eyebrow}
+            </p>
+            <h2 className="text-3xl font-semibold tracking-tight text-white md:text-4xl">
+              {SCHOOL_PITCH.headline}
+            </h2>
+            {SCHOOL_PITCH.body.map((paragraph) => (
+              <p
+                key={paragraph.slice(0, 32)}
+                className="max-w-2xl text-base leading-7 text-slate-300"
+              >
+                {paragraph}
+              </p>
+            ))}
+            <div className="flex flex-wrap gap-3 pt-1">
+              <a
+                href={SCHOOL_PITCH.href}
+                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-amber-300 px-5 py-3 text-sm font-semibold text-slate-950 transition-colors hover:bg-amber-200"
+              >
+                Go to MetaPet School
+              </a>
+              <Link
+                href={SCHOOL_PITCH.reviewHref}
+                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-700 bg-slate-900/70 px-5 py-3 text-sm font-semibold text-slate-100 transition-colors hover:border-slate-500 hover:bg-slate-800"
+              >
+                Review the pilot pack
+              </Link>
+            </div>
+          </div>
+
+          <ul className="grid content-start gap-3">
+            {SCHOOL_PITCH.proofPoints.map((point) => (
+              <li
+                key={point}
+                className="flex gap-3 rounded-2xl border border-amber-400/15 bg-slate-950/50 px-5 py-4 text-sm leading-6 text-slate-300"
+              >
+                <span aria-hidden="true" className="text-amber-300">
+                  ✓
+                </span>
+                {point}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* Sponsored personalities. Independent artists, quoted not rewritten. */}
+      <section className="border-b border-slate-800">
+        <div className="mx-auto w-full max-w-6xl px-6 py-16">
+          <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                Sponsored by the studio
+              </p>
+              <h2 className="text-2xl font-semibold tracking-tight text-white md:text-3xl">
+                B$S backs people, not just products.
+              </h2>
+            </div>
+            <Link
+              href={STUDIO_ROUTE}
+              className="text-sm font-semibold text-cyan-300 hover:text-cyan-200"
+            >
+              More about the studio →
+            </Link>
+          </div>
+
+          {/* A lone sponsored artist gets the full width rather than sitting
+              in a half-empty two-column row. */}
+          <div
+            className={`grid gap-4 ${
+              STUDIO_ROSTER.length > 1 ? "md:grid-cols-2" : ""
+            }`}
+          >
+            {STUDIO_ROSTER.map((member) => (
+              <a
+                key={member.id}
+                href={member.href}
+                rel="noopener noreferrer"
+                target="_blank"
+                className="group overflow-hidden rounded-3xl border border-slate-700/70 bg-gradient-to-br from-slate-900 to-slate-950 p-7 transition-all hover:-translate-y-0.5 hover:border-cyan-400/30"
+              >
+                <h3 className="text-3xl font-black italic tracking-tight text-white">
+                  {member.name}
+                </h3>
+                <p className="mt-2 text-xs font-semibold uppercase tracking-[0.22em] text-cyan-300/80">
+                  {member.tagline} · {member.location}
+                </p>
+                <blockquote className="mt-5 border-l-2 border-cyan-400/40 pl-4 text-base font-medium italic leading-7 text-slate-200">
+                  {member.quote}
+                </blockquote>
+                <p className="mt-5 text-sm font-semibold text-cyan-300 transition-transform group-hover:translate-x-1">
+                  {member.linkLabel} →
+                </p>
+              </a>
+            ))}
+          </div>
         </div>
       </section>
 
