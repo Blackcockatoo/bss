@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { ARCADE_ROUTE } from "@/lib/games/arcade";
+
 export const metadata: Metadata = {
   title: "Blue Snake Studios — The full MetaPet living system",
   description:
@@ -51,6 +53,14 @@ const PRODUCT_AREAS = [
     href: "/app/activities",
     action: "Explore activities",
   },
+  {
+    eyebrow: "Arcade",
+    title: "Games",
+    description:
+      "Monkey Invaders, Bubble Hex and the progression-linked mini-game tracks, collected in one room instead of hidden behind the navigator.",
+    href: ARCADE_ROUTE,
+    action: "Open the arcade",
+  },
 ] as const;
 
 const FULL_PRODUCT_LINKS = [
@@ -60,6 +70,8 @@ const FULL_PRODUCT_LINKS = [
   { label: "Body Forge", href: "/body-forge" },
   { label: "Activities", href: "/app/activities" },
   { label: "Wellness", href: "/app/wellness" },
+  { label: "Arcade", href: ARCADE_ROUTE },
+  { label: "Monkey Invaders", href: "/monkey-invaders" },
 ] as const;
 
 export default function HomePage() {
@@ -100,6 +112,12 @@ export default function HomePage() {
                 className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-700 bg-slate-900/70 px-5 py-3 text-sm font-semibold text-slate-100 transition-colors hover:border-slate-500 hover:bg-slate-800"
               >
                 Explore the DNA Lab
+              </Link>
+              <Link
+                href={ARCADE_ROUTE}
+                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-orange-400/30 bg-orange-400/10 px-5 py-3 text-sm font-semibold text-orange-200 transition-colors hover:border-orange-300/50 hover:bg-orange-400/15"
+              >
+                Enter the Arcade
               </Link>
               <a
                 href="https://www.metapet.school"
