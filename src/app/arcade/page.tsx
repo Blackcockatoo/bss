@@ -69,11 +69,13 @@ export default function ArcadePage() {
                           : "border-slate-600/50 bg-slate-800/50 text-slate-400"
                       }`}
                     >
-                      {game.status === "live"
-                        ? game.surface === "standalone"
-                          ? "Full screen"
-                          : "In app"
-                        : "Not installed yet"}
+                      {game.status !== "live"
+                        ? "Not installed yet"
+                        : game.external
+                          ? "Full screen ↗"
+                          : game.surface === "standalone"
+                            ? "Full screen"
+                            : "In app"}
                     </span>
                   </div>
 
@@ -110,7 +112,7 @@ export default function ArcadePage() {
                     <p
                       className={`pt-1 text-sm font-semibold ${game.theme.text} transition-transform group-hover:translate-x-1`}
                     >
-                      Play {game.title} →
+                      Play {game.title} {game.external ? "↗" : "→"}
                     </p>
                   ) : (
                     <p className="pt-1 text-sm font-semibold text-slate-500">
@@ -129,12 +131,23 @@ export default function ArcadePage() {
             return (
               <div key={game.id} className="flex flex-col gap-2">
                 {game.href ? (
-                  <Link
-                    href={game.href}
-                    className={`${shell} ${game.theme.border} flex-1 transition-all hover:-translate-y-0.5 hover:bg-slate-900/75`}
-                  >
-                    {body}
-                  </Link>
+                  game.external ? (
+                    <a
+                      href={game.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`${shell} ${game.theme.border} flex-1 transition-all hover:-translate-y-0.5 hover:bg-slate-900/75`}
+                    >
+                      {body}
+                    </a>
+                  ) : (
+                    <Link
+                      href={game.href}
+                      className={`${shell} ${game.theme.border} flex-1 transition-all hover:-translate-y-0.5 hover:bg-slate-900/75`}
+                    >
+                      {body}
+                    </Link>
+                  )
                 ) : (
                   <div className={`${shell} flex-1 border-slate-800 opacity-70`}>
                     {body}
@@ -179,9 +192,10 @@ export default function ArcadePage() {
             mastery stars back into the same save.
           </p>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-500">
-            The arcade is part of the full Blue Snake Studios product. It is not
-            part of the MetaPet Schools classroom edition, which runs a curated,
-            teacher-led lesson sequence instead.
+            Cards marked ↗ open a build hosted on its own deployment, in a new
+            tab. The arcade is part of the full Blue Snake Studios product and
+            is not part of the MetaPet Schools classroom edition, which runs a
+            curated, teacher-led lesson sequence instead.
           </p>
           <Link
             href={STUDIO_ROUTE}

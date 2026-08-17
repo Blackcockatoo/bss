@@ -57,6 +57,13 @@ export interface ArcadeGame {
    * arcade renders an honest placeholder instead of a dead link.
    */
   href: string | null;
+  /**
+   * True when `href` is another origin. External games open in a new tab with
+   * noopener handling, are never claimed in our sitemap, and sit outside the
+   * child-safe routing boundary this app enforces — the proxy cannot guard a
+   * host it does not serve.
+   */
+  external: boolean;
   surface: ArcadeGameSurface;
   status: ArcadeGameStatus;
   /** How you play it, in the player's words. */
@@ -80,6 +87,7 @@ export const ARCADE_GAMES: readonly ArcadeGame[] = [
     description:
       "The full-screen B$S arcade shooter. Waves, difficulty modes, boss levels, local high scores, and touch controls built for a phone held sideways.",
     href: "/monkey-invaders",
+    external: false,
     surface: "standalone",
     status: "live",
     controls: "Hold ◀ ▶ to move, hold 🍌 to fire. Arrow keys and space on desktop.",
@@ -100,16 +108,18 @@ export const ARCADE_GAMES: readonly ArcadeGame[] = [
   {
     id: "bubblehex",
     title: "Bubble Hex",
-    tagline: "Hex-grid bubble matching",
+    tagline: "A lost gothic arcade game",
     description:
-      "Colour-matching on a hexagonal grid. Registered in the arcade so the portal, sitemap and crawl rules are already correct — the playable build has not been committed to this repo yet.",
-    href: null,
+      "Trap what is chasing you inside a bubble, then burst it. A single-player platformer of chambers, maps and chronicles, with a Ritual State display mode and multi-touch controls for landscape play.",
+    href: "https://bubblehex.vercel.app/",
+    external: true,
     surface: "standalone",
-    status: "awaiting-build",
-    controls: "Aim and shoot to match three or more.",
-    tags: ["Puzzle", "Hex grid", "Colour matching"],
+    status: "live",
+    controls:
+      "A/D or ◀ ▶ to move, Space/C to jump, X/Z to bubble. Enter starts, P pauses, M opens the chamber map.",
+    tags: ["Platformer", "Bubble trapping", "Multi-touch ready", "Chamber map"],
     theme: {
-      emoji: "\u{1F52E}",
+      emoji: "\u{1FAE7}",
       border: "border-fuchsia-400/25",
       glow: "from-fuchsia-400/20 via-violet-500/10 to-transparent",
       text: "text-fuchsia-200",
@@ -122,6 +132,7 @@ export const ARCADE_GAMES: readonly ArcadeGame[] = [
     description:
       "The four progression-linked games. Difficulty scales with your companion's evolution stage, and results feed rank unlocks and mastery stars back into the pet.",
     href: "/app/activities?tab=games",
+    external: false,
     surface: "panel",
     status: "live",
     controls: "Tap, tempo and sequence play. Ranks unlock as you clear them.",
@@ -150,13 +161,32 @@ export function getPlayableArcadeGames(): readonly ArcadeGame[] {
 
 /**
  * Routes the arcade owns, for `sitemap.ts` and the metapet.school crawl
- * blocklist in `robots.ts`. Query-string surfaces and unbuilt games are
- * excluded: they are not their own indexable documents.
+ * blocklist in `robots.ts`.
+ *
+ * Excluded: query-string surfaces and unbuilt games, which are not their own
+ * indexable documents, and externally hosted games, which are somebody else's
+ * origin — listing those in our sitemap would claim pages this app does not
+ * serve, and blocking them in our robots.txt would do nothing.
  */
 export function getArcadeCrawlRoutes(): readonly string[] {
   const routes = ARCADE_GAMES.flatMap((game) =>
-    game.href && game.surface === "standalone" ? [game.href] : [],
+    game.href && game.surface === "standalone" && !game.external
+      ? [game.href]
+      : [],
   );
 
   return [ARCADE_ROUTE, ...routes];
+}
+
+/**
+ * Games served from another origin.
+ *
+ * Worth being able to enumerate: the child-safe proxy in `src/proxy.ts` only
+ * governs requests this app handles, so an externally hosted game is outside
+ * that boundary no matter what the registry says. Anything that needs to hold
+ * the line for a classroom surface must treat these as unreachable rather than
+ * merely blocked.
+ */
+export function getExternallyHostedGames(): readonly ArcadeGame[] {
+  return ARCADE_GAMES.filter((game) => game.external);
 }

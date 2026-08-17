@@ -247,12 +247,23 @@ export default function HomePage() {
                     {game.tagline}
                   </p>
                   {game.href ? (
-                    <Link
-                      href={game.href}
-                      className="inline-flex pt-1 text-sm font-semibold text-slate-200 hover:text-white"
-                    >
-                      Play →
-                    </Link>
+                    game.external ? (
+                      <a
+                        href={game.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex pt-1 text-sm font-semibold text-slate-200 hover:text-white"
+                      >
+                        Play ↗
+                      </a>
+                    ) : (
+                      <Link
+                        href={game.href}
+                        className="inline-flex pt-1 text-sm font-semibold text-slate-200 hover:text-white"
+                      >
+                        Play →
+                      </Link>
+                    )
                   ) : (
                     <p className="pt-1 text-sm font-semibold text-slate-500">
                       Coming to the arcade

@@ -5,6 +5,7 @@ import {
   ARCADE_ROUTE,
   getArcadeCrawlRoutes,
   getArcadeGame,
+  getExternallyHostedGames,
   getPlayableArcadeGames,
 } from "./arcade";
 import {
@@ -70,7 +71,9 @@ describe("arcade registry", () => {
     const arcadeRoutes = [
       ARCADE_ROUTE,
       ...ARCADE_GAMES.flatMap((game) =>
-        game.href && game.surface === "standalone" ? [game.href] : [],
+        game.href && game.surface === "standalone" && !game.external
+          ? [game.href]
+          : [],
       ),
     ];
 
@@ -81,6 +84,40 @@ describe("arcade registry", () => {
           `${route} must not be allowed by the "${policyId}" policy`,
         ).toBe(false);
       }
+    }
+  });
+
+  it("marks a game external if and only if its href is another origin", () => {
+    for (const game of ARCADE_GAMES) {
+      if (!game.href) continue;
+
+      const looksExternal = /^https?:\/\//.test(game.href);
+      expect(
+        game.external,
+        `${game.id}: external flag must match its href form (${game.href})`,
+      ).toBe(looksExternal);
+    }
+  });
+
+  /**
+   * The proxy in `src/proxy.ts` only governs requests this app serves, so an
+   * externally hosted game cannot be brought inside the child-safe boundary by
+   * registry metadata alone. Keeping them enumerable makes that explicit
+   * rather than implied.
+   */
+  it("never claims an externally hosted game as one of our own routes", () => {
+    const crawlRoutes = getArcadeCrawlRoutes();
+
+    for (const game of getExternallyHostedGames()) {
+      expect(game.href, game.id).toBeTruthy();
+      expect(crawlRoutes).not.toContain(game.href);
+      expect(game.href?.startsWith("https://"), game.id).toBe(true);
+    }
+
+    for (const route of crawlRoutes) {
+      expect(route.startsWith("/"), `${route} must be an app-relative path`).toBe(
+        true,
+      );
     }
   });
 
