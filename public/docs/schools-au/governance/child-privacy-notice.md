@@ -27,7 +27,7 @@
 
 - Local school data is short-term
 - Teachers can delete it
-- Old local school data expires after the pilot retention window
+- Old local school data is removed when the app next opens after the pilot retention window
 
 ## Important boundary
 

@@ -95,7 +95,9 @@ describe("local data controls", () => {
       window.localStorage.getItem(SCHOOLS_TEACHER_ONBOARDING_STORAGE_KEY),
     ).toBeNull();
     expect(
-      screen.getByText(/All MetaPet School data on this device has been deleted/i),
+      screen.getByText(
+        /All covered MetaPet School records in this browser have been deleted/i,
+      ),
     ).toBeInTheDocument();
   });
 

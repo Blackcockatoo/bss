@@ -51,6 +51,7 @@ export default function ContributePage() {
           </h2>
           <Link
             href={FIELD_MODE_START_PATH}
+            prefetch={false}
             className="inline-flex min-h-14 items-center rounded-xl bg-emerald-700 px-7 py-4 text-lg font-semibold text-white hover:bg-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
           >
             {FREE_ACCESS.action}

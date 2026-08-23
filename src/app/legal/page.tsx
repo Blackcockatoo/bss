@@ -80,8 +80,9 @@ export default function LegalPage() {
         <p className="font-medium text-slate-500">Our principles</p>
         <p>
           Blue Snake Studios builds software we&apos;d trust with our own
-          children. That means no hidden data collection, no manipulative
-          engagement loops, and no selling user information.
+          children. School routes exclude product analytics, advertising and
+          behavioural tracking. Consumer routes may use product analytics; we
+          do not sell user information or build advertising profiles.
         </p>
         <p>
           We believe digital companions should teach kids about science,

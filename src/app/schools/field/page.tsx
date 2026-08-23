@@ -116,12 +116,12 @@ export default function FieldModePage() {
               What this stores
             </h3>
             <ul className="mt-4 space-y-2 text-base leading-7 text-slate-700">
-              <li>Teacher-chosen aliases, never student real names</li>
+              <li>Teacher-chosen aliases; real names are not required and should not be entered</li>
               <li>Lesson progress and any light evidence you record</li>
               <li>In this browser only, on this device</li>
               <li>
-                Cleared automatically after {SCHOOLS_LOCAL_DATA_RETENTION_DAYS}{" "}
-                days without use
+                Cleared on the next school-route load after{" "}
+                {SCHOOLS_LOCAL_DATA_RETENTION_DAYS} days without use
               </li>
             </ul>
             <a

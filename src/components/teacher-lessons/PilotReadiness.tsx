@@ -107,8 +107,9 @@ export function PilotReadiness() {
             Post-lesson feedback (optional)
           </h2>
           <p className="text-xs text-slate-400">
-            Stored on this device only. No student names, no tracking. It helps
-            improve the lessons.
+            Stored in this browser by default. No student names are requested,
+            and school routes carry no product analytics. A teacher can clear
+            the feedback locally.
           </p>
 
           <div className="space-y-1.5">

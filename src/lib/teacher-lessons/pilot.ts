@@ -5,8 +5,8 @@
  *
  * A lightweight, local-first pilot layer — NOT an analytics platform. It stores
  * a teacher-facing readiness checklist and optional post-lesson feedback on the
- * device only. No student names, no third-party tracking, nothing leaves the
- * browser.
+ * current browser. No student names are requested and school routes load no
+ * product analytics. Records leave only through a deliberate adult export.
  */
 
 import { create } from "zustand";

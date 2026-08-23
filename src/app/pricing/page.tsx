@@ -99,8 +99,9 @@ export default function PricingPage() {
       <div className="mb-8 text-center">
         <h1 className="text-3xl font-bold">Complete MetaPet</h1>
         <p className="mt-2 text-sm text-zinc-400">
-          The consumer companion from Blue $nake Studio. Privacy-first. No ads,
-          no data harvesting. Billing integration is not connected yet.
+          The consumer companion from Blue $nake Studio. No advertising or
+          behavioural-ad profile. Consumer pages may use product analytics;
+          billing integration is not connected yet.
         </p>
       </div>
 

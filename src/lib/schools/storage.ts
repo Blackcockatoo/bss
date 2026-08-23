@@ -164,7 +164,7 @@ export const SCHOOLS_LOCAL_DATA_CATEGORIES: readonly SchoolsDataCategory[] = [
     id: "aliases",
     label: "Classroom aliases",
     purpose:
-      "Teacher-chosen aliases used in place of student names. No real names, emails or accounts.",
+      "Teacher-chosen aliases used in place of student names. Real names and emails are not required and should not be entered.",
     keys: [SCHOOLS_CLASSROOM_ROSTER_STORAGE_KEY, "metapet-classroom-roster"],
   },
   {
@@ -222,9 +222,9 @@ export interface SchoolsLocalDataReport {
   categories: SchoolsDataCategoryStatus[];
   /** Last time any classroom record was written, or null. */
   lastActivity: Date | null;
-  /** Scheduled automatic deletion date, or null when nothing is held. */
+  /** Date after which the next school-route load will purge records. */
   expiresAt: Date | null;
-  /** Whole days until automatic deletion. 0 once the window has passed. */
+  /** Whole days until the retention threshold. 0 once it has passed. */
   daysRemaining: number | null;
 }
 
@@ -296,7 +296,7 @@ export interface SchoolsAggregateSummary {
   categoriesHeld: number;
   categoriesTotal: number;
   lastActivityOn: string | null;
-  scheduledDeletionOn: string | null;
+  retentionThresholdOn: string | null;
   retentionDays: number;
 }
 
@@ -313,7 +313,7 @@ export function buildSchoolsAggregateSummary(
     categoriesHeld: report.categories.filter((c) => c.present).length,
     categoriesTotal: report.categories.length,
     lastActivityOn: isoDate(report.lastActivity),
-    scheduledDeletionOn: isoDate(report.expiresAt),
+    retentionThresholdOn: isoDate(report.expiresAt),
     retentionDays: SCHOOLS_LOCAL_DATA_RETENTION_DAYS,
   };
 }

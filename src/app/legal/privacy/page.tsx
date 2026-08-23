@@ -46,20 +46,24 @@ export default function LegalPrivacyPage() {
         <ul className="list-disc space-y-2 pl-5 text-sm leading-6 text-slate-300">
           <li>
             <strong className="text-slate-200">What is stored:</strong> student
-            aliases, lesson progress, class summary counts and engagement
-            analytics.
+            aliases, lesson progress, class summary counts and local evidence
+            summaries selected by the teacher.
           </li>
           <li>
             <strong className="text-slate-200">Where:</strong> browser
-            localStorage on this device only. No data is sent to any server.
+            localStorage on the current device by default. Routine classroom
+            use does not submit classroom-record contents to B$S. The hosting
+            provider still receives ordinary page requests and request
+            metadata; a teacher-initiated export deliberately leaves the
+            browser.
           </li>
           <li>
             <strong className="text-slate-200">Retention period:</strong> data
-            auto-deletes after{" "}
+            becomes eligible for expiry cleanup after{" "}
             <span className="font-semibold text-emerald-200">
               {SCHOOLS_LOCAL_DATA_RETENTION_DAYS} days
             </span>{" "}
-            without use.
+            without use and is removed when a school route next opens.
           </li>
           <li>
             <strong className="text-slate-200">Immediate deletion:</strong>{" "}
@@ -82,11 +86,12 @@ export default function LegalPrivacyPage() {
           How deletion works
         </h2>
         <p className="text-sm leading-6 text-slate-300">
-          Auto-deletion is enforced by the application — when the{" "}
-          {SCHOOLS_LOCAL_DATA_RETENTION_DAYS}-day window expires the classroom
-          data is permanently removed from browser storage without any teacher
-          action required. Teachers do not need to manually delete data for the
-          retention policy to apply.
+          Expiry is enforced when a school route runs. If the{" "}
+          {SCHOOLS_LOCAL_DATA_RETENTION_DAYS}-day window has passed, the app
+          removes the covered classroom records the next time a school route
+          opens. A website cannot erase browser storage while it is not
+          running, so schools should still clear site data when a device or
+          pilot is retired.
         </p>
         <p className="text-sm leading-6 text-slate-300">
           Manual deletion (the &ldquo;Delete all school data&rdquo; button in
@@ -107,25 +112,34 @@ export default function LegalPrivacyPage() {
               Australian Privacy Act 1988 (Cth) / Australian Privacy Principles
               (APPs):
             </strong>{" "}
-            Because no data leaves the classroom device during routine use, the
-            pilot does not create student data records that are collected,
-            held, or disclosed by the operator under APP 3. Data minimisation
-            and purpose limitation are built into the design.
+            The school build is designed so routine classroom use does not
+            submit student-record contents to B$S. Whether the Privacy Act and
+            APPs apply, and who is the relevant entity, depends on the operator,
+            deployment and school practice. This is a data-minimisation design,
+            not a legal compliance determination. Review the{" "}
+            <a
+              className="text-emerald-200 underline underline-offset-4"
+              href="https://www.oaic.gov.au/privacy/australian-privacy-principles"
+              target="_blank"
+              rel="noreferrer"
+            >
+              OAIC Australian Privacy Principles
+            </a>{" "}
+            and obtain setting-specific advice where needed.
           </li>
           <li>
             <strong className="text-slate-200">COPPA (US) / GDPR-K (EU):</strong>{" "}
-            These regulations are not in scope for an Australian domestic,
-            on-device pilot. However, the product&apos;s design — no accounts,
-            no cloud transmission, alias-only identifiers, short retention — is
-            consistent with the data minimisation and parental consent
-            principles they embody.
+            Scope depends on where and how the service is deployed and who uses
+            it. Alias-based records, no default classroom sync and short local
+            retention reduce data exposure, but do not establish compliance in
+            another jurisdiction.
           </li>
           <li>
-            <strong className="text-slate-200">No third-party data sharing:</strong>{" "}
-            No student data is shared with analytics services, advertising
-            networks, or third parties. The third-party services register
-            (available in the governance pack) documents all external
-            dependencies used in the school deployment.
+            <strong className="text-slate-200">No application-level student-data sharing by default:</strong>{" "}
+            School routes do not load the consumer analytics SDK, advertising
+            networks or social features. Hosting still involves ordinary
+            requests to the deployment provider. The third-party services
+            register documents that narrower, checkable boundary.
           </li>
         </ul>
       </section>

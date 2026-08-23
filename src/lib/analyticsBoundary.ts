@@ -18,6 +18,9 @@ export const ANALYTICS_EXCLUDED_PREFIXES = [
   "/school-game",
   "/teachers",
   "/docs/schools-au",
+  "/legal/privacy",
+  "/legal/safety",
+  "/legal/boundaries",
 ] as const;
 
 /**

@@ -361,7 +361,7 @@ export const schoolPackageDocs: SchoolPackageDoc[] = ([
     slug: "student-exit-feedback",
     title: "Student Exit Feedback",
     description:
-      "Anonymous student feedback sheet with age-appropriate questions about clarity, safety, and learning.",
+      "Name-free student feedback sheet with age-appropriate questions about clarity, safety, and learning.",
     audience: "Students",
     href: "/docs/schools-au/pilot/student-exit-feedback.md",
     category: "Evidence Pack",
@@ -527,7 +527,7 @@ export const dataLifecycle: readonly { question: string; answer: string }[] = [
   {
     question: "When does it disappear?",
     answer:
-      "35 days after the last activity, automatically. Clearing site data removes it immediately.",
+      "After 35 days without activity, the app deletes it when a school route next opens. Clearing site data removes it immediately.",
   },
   {
     question: "How does a teacher delete it?",

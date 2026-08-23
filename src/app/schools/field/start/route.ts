@@ -15,6 +15,17 @@ export function GET(request: NextRequest) {
     new URL(FIELD_MODE_LESSONS_PATH, request.url),
     307,
   );
+
+  const isPrefetch =
+    request.headers.get("next-router-prefetch") === "1" ||
+    request.headers.get("purpose")?.toLowerCase() === "prefetch" ||
+    request.headers.get("sec-purpose")?.toLowerCase().includes("prefetch") ===
+      true;
+
+  if (isPrefetch) {
+    return response;
+  }
+
   response.cookies.set(
     FIELD_MODE_COOKIE,
     FIELD_MODE_COOKIE_VALUE,

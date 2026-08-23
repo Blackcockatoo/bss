@@ -35,6 +35,18 @@ describe("Field Mode entry and exit handlers", () => {
     );
   });
 
+  it("does not enter Field Mode during speculative prefetch", () => {
+    const response = startField(
+      new NextRequest("https://example.com/schools/field/start", {
+        headers: { "next-router-prefetch": "1" },
+      }),
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.cookies.get(FIELD_MODE_COOKIE)).toBeUndefined();
+    expect(response.cookies.get(FIELD_MODE_UI_COOKIE)).toBeUndefined();
+  });
+
   it("clears Field Mode and returns to the schools surface", () => {
     const response = exitField(
       new NextRequest("https://example.com/schools/field/exit"),

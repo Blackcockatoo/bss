@@ -226,7 +226,7 @@ export function MapView({
         </p>
         <p className="mt-2 text-xs text-zinc-400">
           {loadError ??
-            "External map providers are disabled in this deployment to keep the app offline-first and zero-transmit by default."}
+            "External map providers are disabled in this deployment so the map does not send location or map-state data to a provider by default."}
         </p>
       </div>
     );

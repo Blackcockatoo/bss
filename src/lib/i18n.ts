@@ -79,7 +79,7 @@ const UI_STRINGS = {
         },
         {
           title: 'No accounts needed',
-          description: 'Everything stays on this device. Students use aliases instead of real names, and clearing the browser removes all data. No sign-ups, no cloud storage.',
+          description: 'Classroom state stays in this browser during routine use. Students use aliases instead of real names, and the supervising adult can reset records or clear this site’s data. No sign-ups or default cloud sync.',
           tip: 'Use the alias roster to set up your class before the first session.',
         },
       ] : [
@@ -106,7 +106,7 @@ const UI_STRINGS = {
         },
         {
           title: 'Your Data, Your Device',
-          description: 'Your companion lives entirely on this device. No accounts, no cloud, no tracking. Export anytime to carry them with you. We believe privacy is a right, not a feature.',
+          description: 'Your companion state is saved in this browser by default. No required account or advertising. Consumer pages may use product analytics; classroom routes do not. Exporting is your choice.',
           tip: 'Exporting creates a cryptographically signed backup only you can verify.',
         },
       ],

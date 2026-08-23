@@ -145,9 +145,11 @@ export default function IdentityPage() {
               and pet profiles.
             </p>
             <p className="text-xs text-slate-600 mt-1 leading-relaxed max-w-md">
-              Your identity is stored on this device only — we never collect,
-              transmit, or store personal data on any server. This is a core
-              promise, not a feature toggle.
+              In the current build, these fields are saved in this browser and
+              are not submitted to B$S by default. The site host receives
+              ordinary page requests and consumer routes may use product
+              analytics, but this form does not send its field contents. Any
+              export or sharing action is separate and user-initiated.
             </p>
           </div>
           <RouteTutorialControls
@@ -174,7 +176,7 @@ export default function IdentityPage() {
                 className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
               />
               <p className="text-xs text-slate-500">
-                Stored locally in this browser; not transmitted.
+                Stored locally in this browser; this form does not submit it.
               </p>
               {emailError && (
                 <p className="text-xs text-rose-400">{emailError}</p>

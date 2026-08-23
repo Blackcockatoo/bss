@@ -68,8 +68,8 @@ export default function SchoolsParentPage() {
           <strong className="text-emerald-200">
             {SCHOOLS_LOCAL_DATA_RETENTION_DAYS} days
           </strong>{" "}
-          without use, and teachers can delete everything immediately at any
-          time.
+          without use when a school route next opens, and teachers can delete
+          the covered classroom records immediately at any time.
         </p>
       </section>
 

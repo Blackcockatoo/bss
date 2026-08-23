@@ -26,7 +26,7 @@ const STEPS = [
       "A digital companion for Years 3-6 classrooms.",
       "Students explore systems thinking, digital responsibility, and emotional regulation.",
       "7 teacher-led sessions, each 20 minutes.",
-      "No accounts, no data collection, everything on this device.",
+      "No required student accounts; classroom records stay in this browser during routine use.",
     ],
   },
   {
@@ -35,9 +35,9 @@ const STEPS = [
     lines: [
       "No student accounts or sign-up required.",
       "Students use teacher-assigned aliases only.",
-      "All data stays on this device — no cloud sync.",
+      "Classroom state is local-first with no default cloud sync.",
       "No chat, social features, or open-ended AI.",
-      "Clearing the browser removes all data.",
+      "The supervising adult can reset records or clear this site's browser data.",
     ],
   },
   {
@@ -46,7 +46,7 @@ const STEPS = [
     lines: [
       "Create an alias roster with pseudonyms for each student.",
       "Use the Classroom Manager to add and manage aliases.",
-      "Aliases keep sessions private — no real names stored.",
+      "Aliases reduce direct identifiers — avoid entering real names, and use a teacher-controlled browser profile.",
       "You can reset the roster at any time.",
     ],
   },

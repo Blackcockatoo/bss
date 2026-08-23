@@ -160,24 +160,24 @@ export default function SafeguardingPage() {
             </li>
             <li>
               <span className="font-semibold text-slate-100">
-                Local data only.
+                Local classroom state.
               </span>{" "}
-              Roster, lesson progress, and reflection data stay on the classroom
-              device.
+              Roster, lesson progress, and reflection data stay in the classroom
+              browser during routine use.
             </li>
             <li>
               <span className="font-semibold text-slate-100">
                 No cloud sync.
               </span>{" "}
-              Nothing is transmitted to external servers during routine classroom
-              use.
+              Classroom-record contents are not submitted to B$S during routine
+              classroom use; the host still receives ordinary page requests.
             </li>
             <li>
               <span className="font-semibold text-slate-100">
                 Easy deletion.
               </span>{" "}
-              Clearing the browser or using the built-in reset removes all local
-              data.
+              Clearing this site&apos;s browser data or using the built-in reset
+              removes the covered local classroom records.
             </li>
           </ul>
         </section>

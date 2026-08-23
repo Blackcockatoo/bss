@@ -93,7 +93,7 @@ export function LocalDataControls() {
       if (pending === "everything") {
         clearSchoolsLocalState(window.localStorage);
         setStatus(
-          "All MetaPet School data on this device has been deleted. Nothing was sent anywhere.",
+          "All covered MetaPet School records in this browser have been deleted. No deletion request was sent to B$S.",
         );
       } else {
         clearSchoolsClassSession(window.localStorage);
@@ -103,7 +103,7 @@ export function LocalDataControls() {
       }
     } catch {
       setStatus(
-        "This browser blocked access to local storage, so nothing could be deleted. Clearing site data for this page will remove everything.",
+        "This browser blocked access to local storage, so nothing could be deleted. Clearing this site's browser data will remove its local records.",
       );
     }
     setPending(null);
@@ -171,7 +171,7 @@ export function LocalDataControls() {
           </div>
           <div>
             <dt className="text-sm font-semibold text-foreground">
-              Scheduled automatic deletion
+              Retention threshold
             </dt>
             <dd className="mt-1 text-base text-muted-foreground">
               {formatDate(report.expiresAt)}
@@ -179,7 +179,7 @@ export function LocalDataControls() {
           </div>
           <div>
             <dt className="text-sm font-semibold text-foreground">
-              Days remaining
+              Days to threshold
             </dt>
             <dd className="mt-1 text-base text-muted-foreground">
               {report.daysRemaining ?? "—"}
@@ -187,9 +187,10 @@ export function LocalDataControls() {
           </div>
         </dl>
         <p className="text-sm leading-6 text-muted-foreground">
-          Records are cleared automatically after{" "}
-          {SCHOOLS_LOCAL_DATA_RETENTION_DAYS} days without use. The countdown
-          restarts whenever a session is run on this device.
+          When a school route opens after{" "}
+          {SCHOOLS_LOCAL_DATA_RETENTION_DAYS} days without use, the app clears
+          the covered records. The countdown restarts whenever a session is run
+          on this device; clear site data manually before retiring the device.
         </p>
       </section>
 
@@ -198,8 +199,9 @@ export function LocalDataControls() {
           Delete records now
         </h2>
         <p className="max-w-2xl text-base leading-7 text-muted-foreground">
-          Deletion happens in this browser and cannot be undone. Nothing is sent
-          to the studio, and no request or approval is required.
+          Deletion happens in this browser and cannot be undone. The app does
+          not send the deleted record contents to the studio, and no approval is
+          required.
         </p>
 
         <div className="flex flex-col gap-3 sm:flex-row">

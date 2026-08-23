@@ -208,9 +208,10 @@ export function TeacherReview({
             </div>
           </div>
           <p className="rounded-2xl border border-slate-700/60 bg-slate-800/30 px-4 py-2 text-xs text-slate-400">
-            Review data is stored locally on this device only, is not linked to
-            any real student name, and can be removed at any time. It is
-            classroom evidence, not a sensitive personal record.
+            Review data remains in this browser during routine use, is not
+            linked to a required real-name field, and can be removed at any
+            time. Treat it under the school&apos;s privacy and records rules, and
+            avoid entering sensitive detail.
           </p>
           <div className="flex flex-wrap gap-2">
             <Button

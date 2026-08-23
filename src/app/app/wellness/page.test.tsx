@@ -15,7 +15,7 @@ describe("AppWellnessPage", () => {
       screen.getByRole("heading", { name: /Wellness/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/Everything here stays on this device/i),
+      screen.getByText(/Wellness entries are kept in this browser by default/i),
     ).toBeInTheDocument();
     expect(screen.getByTestId("wellness-dashboard")).toBeInTheDocument();
   });

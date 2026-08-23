@@ -13,7 +13,8 @@ export default function AppWellnessPage() {
           together.
         </p>
         <p className="mt-2 text-xs text-zinc-500">
-          Everything here stays on this device.
+          Wellness entries are kept in this browser by default and can be
+          removed by clearing site data.
         </p>
       </header>
 

@@ -16,7 +16,7 @@ import { IS_SCHOOLS_PROFILE } from "@/lib/env/features";
  *
  * 1. build profile — the schools build never mounts it at all;
  * 2. pathname — the shared Blue Snake Studios build never mounts it on a
- *    school, teacher or Field Mode route.
+ *    school, teacher, Field Mode, or school-governance route.
  *
  * The pathname check is the one that matters: Field Mode is reachable from the
  * combined production build, so a build-time flag alone would not hold.

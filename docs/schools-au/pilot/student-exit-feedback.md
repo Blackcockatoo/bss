@@ -1,6 +1,6 @@
 # MetaPet Schools Student Exit Feedback
 
-Use this anonymously. Students should not put full names on the sheet.
+Do not ask students to put names or other identifying details on this sheet.
 
 ## Circle One Answer
 

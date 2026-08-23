@@ -395,8 +395,8 @@ export function ClassroomManager() {
             <p className="text-sm leading-6 text-zinc-300">
               This classroom setup is alias-based and stays on the current
               device unless a teacher deliberately exports evidence. Local
-              school data expires after {SCHOOLS_LOCAL_DATA_RETENTION_DAYS} days
-              without use.
+              school data is cleared on the next school-route load after{" "}
+              {SCHOOLS_LOCAL_DATA_RETENTION_DAYS} days without use.
             </p>
             {expiredDataPurged && (
               <p className="text-xs text-emerald-300">

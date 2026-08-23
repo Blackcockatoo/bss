@@ -26,7 +26,7 @@ Australian schools need low-friction classroom tools that help students discuss 
 ## Evidence set
 
 - Teacher interview
-- Anonymous student exit feedback
+- Name-free student exit feedback
 - Parent/carer feedback
 - Pre/post measure
 - Incident log

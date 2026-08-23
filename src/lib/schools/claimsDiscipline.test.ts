@@ -33,6 +33,21 @@ const SCANNED_PATHS = [
  */
 const BANNED_CLAIMS: readonly { pattern: RegExp; reason: string }[] = [
   { pattern: /\bwe collect no data\b/i, reason: "absolute; local records exist" },
+  { pattern: /\bno data collection\b/i, reason: "absolute; local records exist" },
+  {
+    pattern: /\bno data is sent to any server\b/i,
+    reason: "absolute; hosting still involves requests",
+  },
+  { pattern: /\ball data stays\b/i, reason: "absolute; exports and hosting exist" },
+  {
+    pattern: /\beverything stays (?:on|in)\b/i,
+    reason: "absolute; describe the specific local state instead",
+  },
+  { pattern: /\bwe never collect\b/i, reason: "absolute across every route" },
+  {
+    pattern: /\bnothing (?:ever )?(?:leaves|is transmitted)\b/i,
+    reason: "absolute; distinguish record contents from page requests",
+  },
   { pattern: /\bzero data\b/i, reason: "absolute" },
   { pattern: /\bzero privacy risk\b/i, reason: "absolute" },
   { pattern: /\bcompletely anonymous\b/i, reason: "aliases are not anonymity" },

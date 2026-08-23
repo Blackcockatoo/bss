@@ -184,9 +184,12 @@ describe('VisualDNAPet renderer', () => {
       expect(clips).not.toContain('evolution_ceremony');
 
       await act(async () => {
+        // Let the remaining mount effects record the already-loaded stage
+        // before simulating a later evolution.
+        await new Promise((resolve) => window.setTimeout(resolve, 0));
         storeState.evolution = { ...evolution, state: 'QUANTUM' };
+        rerender(<VisualDNAPet />);
       });
-      rerender(<VisualDNAPet />);
 
       await waitFor(() => {
         expect(clips).toContain('evolution_ceremony');

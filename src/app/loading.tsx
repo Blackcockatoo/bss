@@ -13,7 +13,7 @@ export default function Loading() {
       detail={
         IS_SCHOOLS_PROFILE
           ? "Teacher-led classroom materials are loading with the privacy summary, lesson path, and local-only runtime kept close together."
-          : "Meta-Pet is a browser-first learning companion: no ads, no trackers, no student accounts, and local-first storage unless an adult deliberately exports something."
+          : "Meta-Pet is a browser-first learning companion: no ads, no required student account, and local-first state unless a user deliberately exports something. Consumer pages may use product analytics; classroom routes do not."
       }
     />
   );

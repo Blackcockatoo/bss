@@ -49,7 +49,7 @@ This policy explains how the `MetaPet Schools` deployment handles information du
 ## Retention
 
 - Local school data is intended to be short-lived.
-- The current pilot configuration uses a 35-day local retention window without use.
+- The current pilot configuration removes expired records when a school route next opens after 35 days without use; the site cannot erase browser storage while it is closed.
 - Teachers can delete local data earlier at any time.
 
 ## Contact and review

@@ -42,6 +42,9 @@ describe("analytics boundary", () => {
       "/teachers/pilot",
       "/school-game",
       "/docs/schools-au/01-overview-and-alignment.md",
+      "/legal/privacy",
+      "/legal/safety",
+      "/legal/boundaries",
     ]) {
       expect(isAnalyticsAllowedPathname(pathname)).toBe(false);
     }
@@ -54,7 +57,7 @@ describe("analytics boundary", () => {
   });
 
   it("still allows analytics on consumer routes", () => {
-    for (const pathname of ["/", "/pet", "/app/wellness", "/pricing"]) {
+    for (const pathname of ["/", "/pet", "/app/wellness", "/pricing", "/legal"]) {
       expect(isAnalyticsAllowedPathname(pathname)).toBe(true);
     }
   });

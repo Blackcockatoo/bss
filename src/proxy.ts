@@ -160,6 +160,15 @@ function fieldUiCookieIsActive(request: NextRequest): boolean {
     );
 }
 
+function isPrefetchRequest(request: NextRequest): boolean {
+  return (
+    request.headers.get("next-router-prefetch") === "1" ||
+    request.headers.get("purpose")?.toLowerCase() === "prefetch" ||
+    request.headers.get("sec-purpose")?.toLowerCase().includes("prefetch") ===
+      true
+  );
+}
+
 function activePolicyId(request: NextRequest): ChildSafePolicyId | null {
   const { pathname } = request.nextUrl;
 
@@ -183,6 +192,19 @@ function activateFieldCookie(
   const { pathname } = request.nextUrl;
   const entersFieldMode =
     isFieldModePathname(pathname) && pathname !== FIELD_MODE_EXIT_PATH;
+
+  // Next.js may prefetch the Field entry route while rendering an adult page.
+  // A speculative fetch is not user intent and must not lock the browser into
+  // Field Mode before the entry link is actually opened.
+  if (
+    entersFieldMode &&
+    !isMetaPetSchoolHost(request) &&
+    !fieldCookieIsActive(request) &&
+    isPrefetchRequest(request)
+  ) {
+    return response;
+  }
+
   if (!entersFieldMode && !fieldCookieIsActive(request)) {
     return response;
   }

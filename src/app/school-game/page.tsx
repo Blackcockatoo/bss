@@ -13,7 +13,7 @@ import {
 
 const PILOT_EVIDENCE_ITEMS = [
   "Teacher interview notes",
-  "Anonymous student exit feedback",
+  "Name-free student exit feedback",
   "Parent/carer feedback",
   "Pre/post measure",
   "Incident log",

@@ -85,7 +85,8 @@ export function TeacherNotes({ lesson, open, onClose }: TeacherNotesProps) {
 
         <p className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-xs text-emerald-200/90">
           Teacher-led classroom use. Local-first, no student accounts. Progress
-          is stored on this device only and can be reset from the Teacher Hub.
+          remains in this browser during routine use and can be reset from the
+          Teacher Hub.
         </p>
       </div>
     </LessonModal>

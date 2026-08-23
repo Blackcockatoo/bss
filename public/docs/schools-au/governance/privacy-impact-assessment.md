@@ -26,7 +26,7 @@
 - No student account requirement
 - Local storage only for routine use
 - Teacher-visible delete controls
-- Automatic expiry after 35 days without use
+- Expiry enforcement on the next school-route load after 35 days without use
 - Separate school routes from adult-only or experimental surfaces
 
 ## Residual actions before pilot approval

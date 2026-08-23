@@ -194,7 +194,7 @@ export default function ClientBody({
             Student accounts, public sharing, and retention-style mechanics stay
             out of the school deployment. Classroom records remain on this
             device unless a teacher deliberately exports evidence. Classroom
-            data on this device auto-deletes after{" "}
+            data in this browser is cleared on the next school-route load after{" "}
             {SCHOOLS_LOCAL_DATA_RETENTION_DAYS} days without use.
           </div>
         )}

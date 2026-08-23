@@ -27,8 +27,9 @@ export default function SchoolsDataPage() {
             What happens to the data?
           </h1>
           <p className="max-w-2xl text-lg leading-8 text-muted-foreground">
-            Everything MetaPet School holds about a class lives in this browser,
-            on this device. This page shows what is here and lets you delete it.
+            Classroom state created during routine use lives in this browser on
+            this device. This page shows what is here and lets the supervising
+            adult delete it.
           </p>
         </header>
 

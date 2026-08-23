@@ -44,9 +44,9 @@ describe("portal truth", () => {
     );
   });
 
-  it("keeps the launch description anchored to the fixed privacy promise", () => {
+  it("keeps the launch description anchored to the precise privacy boundary", () => {
     expect(PORTAL_DESCRIPTION).toBe(
-      "Meta-Pet turns care, pattern learning, and digital responsibility into short guided activities. It runs browser-first and local-first: no ads, no trackers, no student accounts, and no unnecessary data collection. " +
+      "Meta-Pet turns care, pattern learning, and digital responsibility into short guided activities. It runs browser-first and local-first: no ads, no required student account, and local state that can be exported or cleared by the user. Consumer pages may use product analytics; classroom routes do not. " +
         expectedPathSummary(),
     );
   });

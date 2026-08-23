@@ -40,15 +40,18 @@ export default function FieldSafetyPage() {
             <LockKeyhole className="h-6 w-6 text-emerald-800" aria-hidden="true" />
             <h2 className="mt-3 text-xl font-semibold">What is stored</h2>
             <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-700">
-              <li>Teacher-chosen aliases, never student real names</li>
+              <li>Teacher-chosen aliases; real names are not required and should not be entered</li>
               <li>Lesson progress and light classroom evidence</li>
               <li>Classroom setup records on this browser only</li>
-              <li>No routine cloud sync, public profile, chat or tracking</li>
+              <li>
+                No routine cloud sync, public profile, chat or behavioural
+                tracking
+              </li>
             </ul>
             <p className="mt-4 rounded-xl bg-emerald-50 p-3 text-sm leading-6 text-emerald-950">
-              Local school data auto-deletes after {SCHOOLS_LOCAL_DATA_RETENTION_DAYS} days
-              without use. Teachers can delete it sooner with the existing
-              classroom controls.
+              After {SCHOOLS_LOCAL_DATA_RETENTION_DAYS} days without use, local
+              school data is deleted when a school route next opens. Teachers
+              can delete it sooner with the existing classroom controls.
             </p>
           </article>
 

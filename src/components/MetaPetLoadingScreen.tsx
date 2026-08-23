@@ -254,7 +254,7 @@ export function MetaPetLoadingScreen(props: MetaPetLoadingScreenProps) {
                 <p className="mt-2 text-sm text-slate-300/80">
                   {IS_SCHOOLS_PROFILE
                     ? "Teacher-led setup, privacy materials, and classroom runtime are kept together so staff can review it without extra noise."
-                    : "Meta-Pet is a browser-first learning companion for classrooms and families. No ads, no trackers, no student accounts, and no unnecessary data collection."}
+                    : "Meta-Pet is a browser-first learning companion for classrooms and families. No ads or required student account; local state can be exported or cleared by the user. Consumer pages may use product analytics, while classroom routes do not."}
                 </p>
               </div>
 

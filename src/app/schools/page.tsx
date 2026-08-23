@@ -81,6 +81,7 @@ export default function SchoolsPage() {
 
         <Link
           href={FIELD_MODE_START_PATH}
+          prefetch={false}
           className="mt-9 inline-flex min-h-14 items-center rounded-xl bg-emerald-400 px-8 py-4 text-lg font-semibold text-emerald-950 hover:bg-emerald-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
         >
           {START_TEACHING_ACTION}
@@ -95,12 +96,14 @@ export default function SchoolsPage() {
           <Link
             className="text-slate-300 underline underline-offset-4 hover:text-white"
             href={FIELD_MODE_LESSONS_PATH}
+            prefetch={false}
           >
             Browse the seven lessons
           </Link>
           <Link
             className="text-slate-300 underline underline-offset-4 hover:text-white"
             href={FIELD_MODE_SAFETY_PATH}
+            prefetch={false}
           >
             Review safety and privacy
           </Link>
@@ -204,8 +207,9 @@ export default function SchoolsPage() {
             ))}
           </dl>
           <p className="mt-6 max-w-3xl text-sm leading-6 text-slate-400">
-            Inactive records are cleared after {SCHOOLS_LOCAL_DATA_RETENTION_DAYS}{" "}
-            days without use. We are not claiming there is no data, no risk, or
+            After {SCHOOLS_LOCAL_DATA_RETENTION_DAYS} days without use, inactive
+            records are cleared when a school route next opens. We are not
+            claiming there is no data, no risk, or
             blanket regulatory compliance — the accurate statement is narrower:
             routine classroom use keeps records on the device, and deletion is in
             a teacher&apos;s hands.
@@ -246,6 +250,7 @@ export default function SchoolsPage() {
           <div className="mt-8">
             <Link
               href={FIELD_MODE_START_PATH}
+              prefetch={false}
               className="inline-flex min-h-14 items-center rounded-xl bg-emerald-400 px-7 py-4 text-lg font-semibold text-emerald-950 hover:bg-emerald-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
             >
               {FREE_ACCESS.action}

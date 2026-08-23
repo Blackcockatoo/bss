@@ -261,7 +261,7 @@ describe("minimal aggregate summary", () => {
       categoriesHeld: 1,
       categoriesTotal: SCHOOLS_LOCAL_DATA_CATEGORIES.length,
       lastActivityOn: "2026-01-01",
-      scheduledDeletionOn: "2026-02-05",
+      retentionThresholdOn: "2026-02-05",
       retentionDays: 35,
     });
 

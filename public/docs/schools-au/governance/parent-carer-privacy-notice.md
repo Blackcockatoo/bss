@@ -29,7 +29,7 @@ This notice explains the school-facing `MetaPet Schools` pilot build. It does no
 
 - Local pilot data is intended to be short-term
 - Teachers can delete local school data from the runtime
-- The current pilot configuration uses a 35-day local retention window without use
+- The current pilot configuration removes expired records when a school route next opens after 35 days without use
 
 ## Questions
 

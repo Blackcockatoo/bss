@@ -314,6 +314,23 @@ describe("proxy Field Mode boundary", () => {
     );
   });
 
+  it("does not activate Field Mode for a speculative route prefetch", async () => {
+    const { proxy } = await loadProxy("core");
+
+    for (const [label, headers] of [
+      ["Next router", { "next-router-prefetch": "1" }],
+      ["Purpose", { purpose: "prefetch" }],
+    ]) {
+      const response = proxy(
+        new NextRequest("https://example.com/schools/field", { headers }),
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.cookies.get(FIELD_MODE_COOKIE), label).toBeUndefined();
+      expect(response.cookies.get(FIELD_MODE_UI_COOKIE), label).toBeUndefined();
+    }
+  });
+
   it("keeps approved Field routes accessible after activation", async () => {
     const { proxy } = await loadProxy("core");
     for (const pathname of [

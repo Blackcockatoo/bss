@@ -269,8 +269,9 @@ export function FieldLessonLaunchpad() {
 
         <aside className="flex gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-700">
           <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-800" aria-hidden="true" />
-          No student accounts, real names, public sharing or cloud classroom
-          profiles are used by this Field lesson path.
+          This Field lesson path does not require student accounts or real
+          names, and has no public sharing or cloud classroom profiles. Use
+          aliases as instructed.
         </aside>
       </div>
     </main>

@@ -25,7 +25,9 @@ Analytics are now gated twice:
 1. **Build profile.** The schools build never mounts the analytics component.
 2. **Route.** On the combined production build — where Field Mode is reachable
    from the consumer host — the component is not mounted on any pathname under
-   `/schools`, `/school-game`, `/teachers` or `/docs/schools-au`.
+   `/schools`, `/school-game`, `/teachers`, `/docs/schools-au`, or the
+   school-specific `/legal/privacy`, `/legal/safety` and `/legal/boundaries`
+   pages.
 
 Both gates live in `src/lib/analyticsBoundary.ts` and
 `src/components/ConsumerAnalytics.tsx`.
