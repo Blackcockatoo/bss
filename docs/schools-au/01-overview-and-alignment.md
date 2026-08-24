@@ -113,7 +113,7 @@ This is useful when the sequence is positioned as both Digital Technologies lear
 - Each session is designed for **about 15-20 minutes**
 - Students can work individually or in pairs
 - The sequence uses **light reflection**, not formal grading
-- The classroom version is designed around **on-device storage** and **no student account setup**
+- The classroom version requires **no student account setup**; classroom record contents stay in the browser during routine use, under supervising-adult control
 
 ---
 

@@ -166,7 +166,10 @@ Visit `http://localhost:3000`
 - Australia-wide 7 lesson cards: `docs/schools-au/02-lesson-cards.md`
 - Australia-wide assessment and reflection tools: `docs/schools-au/03-assessment-and-reflection.md`
 - Australia-wide privacy and implementation note: `docs/schools-au/04-privacy-and-implementation.md`
-- Public export target for school docs: `public/docs/schools-au/`
+- Canonical school-doc source: `docs/schools-au/`
+- Generated public Markdown mirror: `public/docs/schools-au/`
+- Public DOCX generator: `npm run generate:school-docs`
+- Markdown mirror sync/check: `npm run sync:school-docs` / `npm run check:school-docs`
 - Export sync script: `npm run sync:kpps-exports`
 
 ## MOSS60 Network Docs

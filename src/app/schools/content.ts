@@ -1,4 +1,5 @@
 import { CANONICAL_SESSIONS } from "@/lib/schools/canonicalSequence";
+import { SCHOOL_DATA_LIFECYCLE } from "@/lib/schools/privacyTruth";
 
 export interface SchoolPackageDoc {
   slug: string;
@@ -503,43 +504,7 @@ export const whatYouNeed: readonly string[] = [
  * The local-data lifecycle in the order an adult asks about it. Wording here is
  * checked against the implementation - see `@/lib/schools/storage`.
  */
-export const dataLifecycle: readonly { question: string; answer: string }[] = [
-  {
-    question: "What is stored?",
-    answer:
-      "Teacher-chosen aliases, lesson progress, classroom setup choices and any light evidence a teacher records.",
-  },
-  {
-    question: "Where is it stored?",
-    answer:
-      "In this browser, on this device, using local storage. Routine classroom use does not sync it to a server.",
-  },
-  {
-    question: "Why is it needed?",
-    answer:
-      "So a class can pause and resume a session, and so a teacher can review evidence without re-running the lesson.",
-  },
-  {
-    question: "Who can see it?",
-    answer:
-      "Anyone using this browser profile on this device. That is why it belongs on a teacher-controlled device.",
-  },
-  {
-    question: "When does it disappear?",
-    answer:
-      "After 35 days without activity, the app deletes it when a school route next opens. Clearing site data removes it immediately.",
-  },
-  {
-    question: "How does a teacher delete it?",
-    answer:
-      "From the local-data controls, with an explicit confirmation. No request to the studio is needed.",
-  },
-  {
-    question: "What is never required?",
-    answer:
-      "A student account, a student email, a real name, a photo, a login, or a payment.",
-  },
-];
+export const dataLifecycle = SCHOOL_DATA_LIFECYCLE;
 
 export const reviewerPathways: ReviewerPathway[] = [
   {

@@ -10,8 +10,10 @@ This note keeps the classroom-facing language simple while giving leadership and
 ## Implementation Summary
 
 - **No student accounts required** for the classroom baseline
-- **On-device storage** for normal use
-- **20-minute sessions** with normal teacher supervision
+- **Local browser storage** for classroom record contents during routine use
+- **No advertising or behavioural tracking** on classroom routes
+- **Teacher-controlled deletion and export**
+- **15–20-minute sessions** with normal teacher supervision
 - **No marking workflow** added to existing teacher load
 - **No leaderboard, streak pressure, or reward-pressure loops** in the school-facing sequence
 
@@ -21,9 +23,14 @@ This note keeps the classroom-facing language simple while giving leadership and
 
 For the classroom baseline, the simplest accurate description is:
 
-> Student interaction stays on the device during normal classroom use, with no student account setup required.
+> No student account is required. Classroom record contents stay in the browser during routine use and can be cleared by the supervising adult.
 
 That phrasing is suitable for teachers, school leaders and families.
+
+The technical boundary must also describe network requests: the hosting
+provider receives ordinary page requests, and a deliberate teacher export
+leaves the browser. Routine classroom use does not submit the classroom record
+contents to B$S.
 
 ---
 
@@ -34,8 +41,10 @@ The app already contains more technical internal language and identity systems t
 For this Australia-wide school package, classroom users only need to know:
 
 - the companion runs as a digital system on a device
-- companion state and related information are stored locally for normal use
+- classroom record contents are stored locally for routine use
 - the classroom sequence does not depend on cloud logins
+- classroom routes do not load advertising or behavioural tracking
+- the supervising adult can delete the covered classroom records
 
 ---
 

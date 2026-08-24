@@ -10,6 +10,7 @@
 - No student email
 - No public profile
 - No social sharing
+- No advertising or behavioural tracking on classroom routes
 
 ## What is stored during normal classroom use
 
@@ -25,7 +26,7 @@
 
 ## How long is it kept?
 
-The current pilot setup uses short local retention and teacher-controlled deletion. Teachers can clear local classroom data at any time.
+Classroom record contents stay in the browser during routine use. The hosting provider still receives ordinary page requests, and a deliberate teacher export leaves the browser. After 35 days without use, expired records are removed when a school route next opens; a website cannot erase browser storage while it is closed. Teachers can clear local classroom data at any time.
 
 ## Who should I contact?
 

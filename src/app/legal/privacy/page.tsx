@@ -1,15 +1,11 @@
 import Link from "next/link";
 
-import { SCHOOLS_LOCAL_DATA_RETENTION_DAYS } from "@/lib/schools/storage";
-
-const PRIVACY_ARTIFACTS = [
-  "Privacy policy",
-  "Child-friendly privacy notice",
-  "Parent/carer privacy notice",
-  "Data inventory",
-  "Retention and deletion schedule",
-  "Third-party services register",
-];
+import {
+  SCHOOL_DELETION_EXPLANATION,
+  SCHOOL_PRIVACY_ARTIFACTS,
+  SCHOOL_PRIVACY_COMMITMENTS,
+  SCHOOL_PRIVACY_SUMMARY_ITEMS,
+} from "@/lib/schools/privacyTruth";
 
 export default function LegalPrivacyPage() {
   return (
@@ -29,7 +25,7 @@ export default function LegalPrivacyPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        {PRIVACY_ARTIFACTS.map((item) => (
+        {SCHOOL_PRIVACY_ARTIFACTS.map((item) => (
           <div
             key={item}
             className="rounded-xl border border-slate-800 bg-slate-950/40 p-4 text-sm text-slate-300"
@@ -44,40 +40,12 @@ export default function LegalPrivacyPage() {
           Data retention summary
         </h2>
         <ul className="list-disc space-y-2 pl-5 text-sm leading-6 text-slate-300">
-          <li>
-            <strong className="text-slate-200">What is stored:</strong> student
-            aliases, lesson progress, class summary counts and local evidence
-            summaries selected by the teacher.
-          </li>
-          <li>
-            <strong className="text-slate-200">Where:</strong> browser
-            localStorage on the current device by default. Routine classroom
-            use does not submit classroom-record contents to B$S. The hosting
-            provider still receives ordinary page requests and request
-            metadata; a teacher-initiated export deliberately leaves the
-            browser.
-          </li>
-          <li>
-            <strong className="text-slate-200">Retention period:</strong> data
-            becomes eligible for expiry cleanup after{" "}
-            <span className="font-semibold text-emerald-200">
-              {SCHOOLS_LOCAL_DATA_RETENTION_DAYS} days
-            </span>{" "}
-            without use and is removed when a school route next opens.
-          </li>
-          <li>
-            <strong className="text-slate-200">Immediate deletion:</strong>{" "}
-            teachers can delete all classroom data at any time using the
-            &ldquo;Delete all school data&rdquo; button in the Classroom
-            Manager.
-          </li>
-          <li>
-            <strong className="text-slate-200">
-              No student identifiers required:
-            </strong>{" "}
-            the classroom build has no field for a real name, student ID or
-            email address, and no student sign-up flow.
-          </li>
+          {SCHOOL_PRIVACY_SUMMARY_ITEMS.map((item) => (
+            <li key={item.label}>
+              <strong className="text-slate-200">{item.label}:</strong>{" "}
+              {item.text}
+            </li>
+          ))}
         </ul>
       </section>
 
@@ -85,21 +53,11 @@ export default function LegalPrivacyPage() {
         <h2 className="text-lg font-semibold text-slate-100">
           How deletion works
         </h2>
-        <p className="text-sm leading-6 text-slate-300">
-          Expiry is enforced when a school route runs. If the{" "}
-          {SCHOOLS_LOCAL_DATA_RETENTION_DAYS}-day window has passed, the app
-          removes the covered classroom records the next time a school route
-          opens. A website cannot erase browser storage while it is not
-          running, so schools should still clear site data when a device or
-          pilot is retired.
-        </p>
-        <p className="text-sm leading-6 text-slate-300">
-          Manual deletion (the &ldquo;Delete all school data&rdquo; button in
-          the Classroom Manager) is available for teachers who want to clear
-          data immediately — for example at the end of a session or pilot.
-          Either mechanism is sufficient; they are belt-and-suspenders, not
-          sequential steps.
-        </p>
+        {SCHOOL_DELETION_EXPLANATION.map((paragraph) => (
+          <p key={paragraph} className="text-sm leading-6 text-slate-300">
+            {paragraph}
+          </p>
+        ))}
       </section>
 
       <section className="space-y-4 rounded-xl border border-slate-800 bg-slate-950/40 p-5">
@@ -112,11 +70,11 @@ export default function LegalPrivacyPage() {
               Australian Privacy Act 1988 (Cth) / Australian Privacy Principles
               (APPs):
             </strong>{" "}
-            The school build is designed so routine classroom use does not
-            submit student-record contents to B$S. Whether the Privacy Act and
-            APPs apply, and who is the relevant entity, depends on the operator,
-            deployment and school practice. This is a data-minimisation design,
-            not a legal compliance determination. Review the{" "}
+            {SCHOOL_PRIVACY_COMMITMENTS.transmission} Whether the Privacy Act
+            and APPs apply, and who is the relevant entity, depends on the
+            operator, deployment and school practice. This is a
+            data-minimisation design, not a legal compliance determination.
+            Review the{" "}
             <a
               className="text-emerald-200 underline underline-offset-4"
               href="https://www.oaic.gov.au/privacy/australian-privacy-principles"
@@ -136,10 +94,10 @@ export default function LegalPrivacyPage() {
           </li>
           <li>
             <strong className="text-slate-200">No application-level student-data sharing by default:</strong>{" "}
-            School routes do not load the consumer analytics SDK, advertising
-            networks or social features. Hosting still involves ordinary
-            requests to the deployment provider. The third-party services
-            register documents that narrower, checkable boundary.
+            {SCHOOL_PRIVACY_COMMITMENTS.tracking}{" "}
+            {SCHOOL_PRIVACY_COMMITMENTS.advertising} Hosting still involves
+            ordinary requests to the deployment provider. The third-party
+            services register documents that narrower, checkable boundary.
           </li>
         </ul>
       </section>

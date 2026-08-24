@@ -1,8 +1,11 @@
+import { SCHOOLS_LOCAL_DATA_RETENTION_DAYS } from "@/lib/schools/privacyTruth";
+
+export { SCHOOLS_LOCAL_DATA_RETENTION_DAYS } from "@/lib/schools/privacyTruth";
+
 export const SCHOOLS_PROFILE = "schools" as const;
 export const CORE_PROFILE = "core" as const;
 export type AppProfile = typeof SCHOOLS_PROFILE | typeof CORE_PROFILE;
 
-export const SCHOOLS_LOCAL_DATA_RETENTION_DAYS = 35;
 export const SCHOOLS_LOCAL_DATA_RETENTION_MS =
   SCHOOLS_LOCAL_DATA_RETENTION_DAYS * 24 * 60 * 60 * 1000;
 

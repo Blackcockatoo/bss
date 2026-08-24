@@ -124,8 +124,10 @@ describe("canonical session sequence", () => {
       "src/app/schools/page.tsx",
       "src/lib/teacher-lessons/lessonDefinitions.ts",
       "docs/schools-au/02-lesson-cards.md",
+      "public/docs/schools-au/02-lesson-cards.md",
       "docs/schools-au/01-overview-and-alignment.md",
       "docs/schools-au/teacher-pack/teacher-guide.md",
+      "scripts/generate-school-docs.cjs",
     ];
 
     const offenders: string[] = [];

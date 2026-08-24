@@ -4,6 +4,7 @@ import {
   completeTeacherOnboarding,
   hasCompletedTeacherOnboarding,
 } from "@/lib/education/teacher-onboarding";
+import { SCHOOL_PRIVACY_COMMITMENTS } from "@/lib/schools/privacyTruth";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   BookOpen,
@@ -25,19 +26,21 @@ const STEPS = [
     lines: [
       "A digital companion for Years 3-6 classrooms.",
       "Students explore systems thinking, digital responsibility, and emotional regulation.",
-      "7 teacher-led sessions, each 20 minutes.",
-      "No required student accounts; classroom records stay in this browser during routine use.",
+      "7 teacher-led sessions, each 15–20 minutes.",
+      SCHOOL_PRIVACY_COMMITMENTS.accounts,
+      SCHOOL_PRIVACY_COMMITMENTS.localRecords,
     ],
   },
   {
     icon: ShieldCheck,
     title: "Privacy and safety",
     lines: [
-      "No student accounts or sign-up required.",
+      SCHOOL_PRIVACY_COMMITMENTS.accounts,
       "Students use teacher-assigned aliases only.",
-      "Classroom state is local-first with no default cloud sync.",
+      SCHOOL_PRIVACY_COMMITMENTS.transmission,
+      SCHOOL_PRIVACY_COMMITMENTS.tracking,
       "No chat, social features, or open-ended AI.",
-      "The supervising adult can reset records or clear this site's browser data.",
+      SCHOOL_PRIVACY_COMMITMENTS.deletion,
     ],
   },
   {

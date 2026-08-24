@@ -9,6 +9,8 @@ This policy explains how the `MetaPet Schools` deployment handles information du
 - The school deployment is designed for alias-based classroom use.
 - Student accounts are not required.
 - Routine classroom use keeps records on the current device.
+- Routine classroom use does not submit classroom-record contents to B$S; the hosting provider still receives ordinary page requests.
+- Classroom routes do not load advertising or behavioural tracking.
 - Teachers decide if any pilot evidence is exported.
 - Adult-only or experimental Meta-Pet surfaces sit outside the school deployment.
 
@@ -35,7 +37,8 @@ This policy explains how the `MetaPet Schools` deployment handles information du
 
 ## Disclosure and exports
 
-- Routine classroom use does not require cloud sync.
+- Routine classroom use does not submit classroom-record contents to B$S.
+- The hosting provider still receives ordinary page requests and request metadata.
 - Any pilot evidence export should be teacher-initiated and reviewed before it leaves the device.
 - Exports should remain alias-based or aggregated unless the school has its own lawful basis and process for identifiable handling.
 
@@ -45,6 +48,7 @@ This policy explains how the `MetaPet Schools` deployment handles information du
 - No student account credentials are used in the school deployment.
 - The school deployment blocks adult-only and experimental routes.
 - Teachers can delete local school data from the runtime.
+- The supervising adult can also clear the site's browser data.
 
 ## Retention
 

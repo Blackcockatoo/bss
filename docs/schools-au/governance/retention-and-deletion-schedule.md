@@ -3,7 +3,7 @@
 ## Default expectation
 
 - Local school data is short-term and device-bound.
-- The current pilot configuration uses a 35-day local retention window without use. Expired records are removed when a school route next runs; the site cannot erase browser storage while it is closed.
+- After 35 days without use, expired classroom records are removed when a school route next runs; the site cannot erase browser storage while it is closed.
 
 ## Teacher deletion controls
 

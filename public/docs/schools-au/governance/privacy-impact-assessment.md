@@ -11,6 +11,7 @@
 
 - The school deployment is designed to avoid direct student account data.
 - Routine classroom use stores aliases, lesson setup, progress states, and local class summaries on the current device.
+- Routine classroom use does not submit those record contents to B$S. The hosting provider still receives ordinary page requests.
 - Teacher-controlled exports are optional and should remain alias-based or aggregated by default.
 
 ## Key privacy risks
@@ -24,7 +25,8 @@
 
 - Alias-only roster guidance in the runtime
 - No student account requirement
-- Local storage only for routine use
+- Local browser storage for classroom record contents during routine use
+- No advertising or behavioural tracking loaded on classroom routes
 - Teacher-visible delete controls
 - Expiry enforcement on the next school-route load after 35 days without use
 - Separate school routes from adult-only or experimental surfaces

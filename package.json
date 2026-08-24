@@ -3,13 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "node -e \"require('fs').rmSync('.next',{recursive:true,force:true})\"",
+    "predev": "npm run sync:school-docs && node -e \"require('fs').rmSync('.next',{recursive:true,force:true})\"",
     "dev": "next dev -H 0.0.0.0",
-    "build": "npm run prepare:moss60-production && next build --webpack",
+    "build": "npm run sync:school-docs && npm run prepare:moss60-production && next build --webpack",
     "start": "next start",
-    "lint": "tsc --noEmit && eslint src",
+    "lint": "npm run check:school-docs && tsc --noEmit && eslint src",
     "format": "npx biome format --write",
-    "test": "vitest",
+    "test": "npm run check:school-docs && vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "check:moss60-copy": "node scripts/check-moss60-copy.mjs",
@@ -17,7 +17,10 @@
     "check:child-safe-deployment": "node scripts/assert-child-safe-deployment.mjs",
     "smoke:field-pack": "node scripts/field-pack-smoke.mjs",
     "prepare:moss60-production": "node scripts/prepare-moss60-production.mjs",
-    "sync:kpps-exports": "node scripts/sync-kpps-package-exports.mjs"
+    "sync:kpps-exports": "node scripts/sync-kpps-package-exports.mjs",
+    "sync:school-docs": "node scripts/sync-school-docs.mjs",
+    "check:school-docs": "node scripts/sync-school-docs.mjs --check",
+    "generate:school-docs": "node scripts/generate-school-docs.cjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",

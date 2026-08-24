@@ -1,0 +1,14 @@
+{
+  "retentionDays": 35,
+  "profileDescription": "Teacher-led, time-bounded sessions for Years 3-6. No student account is required. Classroom routes have no advertising or behavioural tracking; classroom record contents stay in the browser during routine use.",
+  "commitments": {
+    "accounts": "No student account, student email, real name, photo or login is required by the classroom build.",
+    "accountsShort": "No student accounts to create",
+    "advertising": "No advertising is loaded on MetaPet School classroom routes.",
+    "tracking": "Classroom routes do not load consumer product analytics or behavioural tracking.",
+    "localRecords": "Classroom record contents stay in this browser on this device during routine use.",
+    "supervision": "Classroom records belong on a teacher-controlled device or browser profile under normal adult supervision.",
+    "transmission": "Routine classroom use does not submit classroom-record contents to B$S. The hosting provider still receives ordinary page requests, and a deliberate teacher export leaves the browser.",
+    "deletion": "The supervising adult can delete the covered classroom records immediately from the local-data controls or by clearing this site's browser data."
+  }
+}

@@ -3,13 +3,17 @@ import type { CSSProperties } from "react";
 import "./globals.css";
 import { findSiteUrl, findSiteUrlObject } from "@/lib/env/siteUrl";
 import { IS_SCHOOLS_PROFILE } from "@/lib/env/features";
+import { METAPET_SCHOOL_ORIGIN } from "@/lib/fieldMode/identity";
 import {
   FIELD_MODE_APPLE_TOUCH_ICON_PATH,
   FIELD_MODE_ICON_192_PATH,
 } from "@/lib/fieldMode/pwa";
 import { LEGAL_NOTICE_TEXT, getLegalNoticeYear } from "@/lib/legalNotice";
+import { SCHOOL_PROFILE_DESCRIPTION } from "@/lib/schools/privacyTruth";
 import ClientBody from "./ClientBody";
 import { ConsumerAnalytics } from "@/components/ConsumerAnalytics";
+
+const CORE_SITE_ORIGIN = "https://www.bluesnakestudios.com";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -19,15 +23,17 @@ export const viewport: Viewport = {
 };
 
 const siteUrl = findSiteUrl();
-const siteUrlObject = findSiteUrlObject();
+const siteUrlObject =
+  findSiteUrlObject() ??
+  new URL(IS_SCHOOLS_PROFILE ? METAPET_SCHOOL_ORIGIN : CORE_SITE_ORIGIN);
+const siteDescription = IS_SCHOOLS_PROFILE
+  ? SCHOOL_PROFILE_DESCRIPTION
+  : "Blue Snake Studios builds privacy-first digital learning experiences with a strict child-safe baseline for default student deployments.";
 
 export const metadata: Metadata = {
-  ...(siteUrlObject ? { metadataBase: siteUrlObject } : {}),
+  metadataBase: siteUrlObject,
   title: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Blue Snake Studios",
-  description:
-    IS_SCHOOLS_PROFILE
-      ? "MetaPet Schools is a teacher-led, low-data classroom tool for Years 3-6 digital responsibility, systems thinking, and online safety habits."
-      : "Blue Snake Studios builds privacy-first digital learning experiences with a strict child-safe baseline for default student deployments.",
+  description: siteDescription,
   manifest: "/manifest.webmanifest",
   icons: {
     icon: IS_SCHOOLS_PROFILE ? FIELD_MODE_ICON_192_PATH : "/icon.svg",
@@ -42,10 +48,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Blue Snake Studios",
-    description:
-      IS_SCHOOLS_PROFILE
-        ? "MetaPet Schools is a teacher-led, low-data classroom tool for Years 3-6 digital responsibility, systems thinking, and online safety habits."
-        : "Blue Snake Studios builds privacy-first digital learning experiences with a strict child-safe baseline for default student deployments.",
+    description: siteDescription,
     ...(siteUrl ? { url: siteUrl } : {}),
     siteName: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Blue Snake Studios",
     type: "website",
@@ -53,10 +56,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary",
     title: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Blue Snake Studios",
-    description:
-      IS_SCHOOLS_PROFILE
-        ? "MetaPet Schools is a teacher-led, low-data classroom tool for Years 3-6 digital responsibility, systems thinking, and online safety habits."
-        : "Blue Snake Studios builds privacy-first digital learning experiences with a strict child-safe baseline for default student deployments.",
+    description: siteDescription,
   },
 };
 

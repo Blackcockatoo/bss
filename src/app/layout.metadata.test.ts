@@ -6,22 +6,29 @@ import {
   FIELD_MODE_ICON_192_PATH,
 } from "@/lib/fieldMode/pwa";
 
-async function loadLayout(isSchoolsProfile: boolean) {
+async function loadLayout(
+  isSchoolsProfile: boolean,
+  hasConfiguredUrl = true,
+) {
   vi.resetModules();
   vi.doMock("@/lib/env/features", () => ({
     IS_SCHOOLS_PROFILE: isSchoolsProfile,
   }));
   vi.doMock("@/lib/env/siteUrl", () => ({
     findSiteUrl: () =>
-      isSchoolsProfile
-        ? "https://schools.example.com"
-        : "https://core.example.com",
-    findSiteUrlObject: () =>
-      new URL(
-        isSchoolsProfile
+      hasConfiguredUrl
+        ? isSchoolsProfile
           ? "https://schools.example.com"
-          : "https://core.example.com",
-      ),
+          : "https://core.example.com"
+        : null,
+    findSiteUrlObject: () =>
+      hasConfiguredUrl
+        ? new URL(
+            isSchoolsProfile
+              ? "https://schools.example.com"
+              : "https://core.example.com",
+          )
+        : null,
   }));
   vi.doMock("./ClientBody", () => ({
     default: ({ children }: { children: ReactNode }) => children,
@@ -46,7 +53,7 @@ describe("layout metadata", () => {
         : null;
 
     expect(metadata.title).toBe("MetaPet Schools");
-    expect(metadata.description).toMatch(/teacher-led, low-data classroom tool/i);
+    expect(metadata.description).toMatch(/teacher-led, time-bounded sessions/i);
     expect(metadata.manifest).toBe("/manifest.webmanifest");
     expect(metadata.icons).toMatchObject({
       icon: FIELD_MODE_ICON_192_PATH,
@@ -71,4 +78,16 @@ describe("layout metadata", () => {
     expect(appleWebApp?.title).toBe("Blue Snake Studios");
     expect(metadata.openGraph?.siteName).toBe("Blue Snake Studios");
   });
+
+  it.each([
+    [true, "https://www.metapet.school/"],
+    [false, "https://www.bluesnakestudios.com/"],
+  ])(
+    "uses the official origin as the metadata base when profile %s has no deployment URL",
+    async (isSchoolsProfile, expectedOrigin) => {
+      const { metadata } = await loadLayout(isSchoolsProfile, false);
+
+      expect(metadata.metadataBase?.toString()).toBe(expectedOrigin);
+    },
+  );
 });

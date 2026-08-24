@@ -1,7 +1,10 @@
 import Link from "next/link";
 
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
-import { SCHOOLS_LOCAL_DATA_RETENTION_DAYS } from "@/lib/schools/storage";
+import {
+  SCHOOL_PRIVACY_COMMITMENTS,
+  SCHOOLS_LOCAL_DATA_RETENTION_DAYS,
+} from "@/lib/schools/privacyTruth";
 
 export default function SchoolsParentPage() {
   enforceChildSafeServerRoute("/schools/parents");
@@ -41,11 +44,11 @@ export default function SchoolsParentPage() {
           What is NOT involved
         </h2>
         <ul className="list-disc space-y-1.5 pl-5 text-sm leading-6 text-slate-300">
-          <li>No student account or email</li>
+          <li>{SCHOOL_PRIVACY_COMMITMENTS.accounts}</li>
           <li>No public profile</li>
           <li>No social sharing or chat</li>
-          <li>No real name, student ID or email address is asked for</li>
-          <li>No advertising and no behavioural tracking</li>
+          <li>{SCHOOL_PRIVACY_COMMITMENTS.advertising}</li>
+          <li>{SCHOOL_PRIVACY_COMMITMENTS.tracking}</li>
         </ul>
       </section>
 
@@ -62,14 +65,14 @@ export default function SchoolsParentPage() {
           <li>A local class summary for pilot evidence</li>
         </ul>
         <p className="text-sm leading-6 text-slate-300">
-          Classroom records stay in the browser on the school device. Routine
-          classroom use does not send them to a server. They are deleted
-          automatically after{" "}
+          {SCHOOL_PRIVACY_COMMITMENTS.localRecords}{" "}
+          {SCHOOL_PRIVACY_COMMITMENTS.transmission} They become eligible for
+          expiry cleanup after{" "}
           <strong className="text-emerald-200">
             {SCHOOLS_LOCAL_DATA_RETENTION_DAYS} days
           </strong>{" "}
-          without use when a school route next opens, and teachers can delete
-          the covered classroom records immediately at any time.
+          without use when a school route next opens. The supervising adult can
+          also delete the covered classroom records immediately.
         </p>
       </section>
 

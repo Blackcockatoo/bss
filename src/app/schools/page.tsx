@@ -6,7 +6,10 @@ import {
   FIELD_MODE_START_PATH,
 } from "@/lib/childSafeBaseline";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
-import { SCHOOLS_LOCAL_DATA_RETENTION_DAYS } from "@/lib/schools/storage";
+import {
+  SCHOOL_PRIVACY_COMMITMENTS,
+  SCHOOLS_LOCAL_DATA_RETENTION_DAYS,
+} from "@/lib/schools/privacyTruth";
 import {
   CONTRIBUTION_EXPLANATION,
   CONTRIBUTION_HEADLINE,
@@ -192,7 +195,7 @@ export default function SchoolsPage() {
         <section id="data">
           <SectionHeading
             title="What happens to the data?"
-            description="No student account is required. Classroom records are stored locally in this browser during normal use, and a teacher can delete them at any time."
+            description={`${SCHOOL_PRIVACY_COMMITMENTS.accounts} ${SCHOOL_PRIVACY_COMMITMENTS.localRecords} ${SCHOOL_PRIVACY_COMMITMENTS.deletion}`}
           />
           <dl className="mt-8 space-y-5">
             {dataLifecycle.map((item) => (
@@ -211,8 +214,9 @@ export default function SchoolsPage() {
             records are cleared when a school route next opens. We are not
             claiming there is no data, no risk, or
             blanket regulatory compliance — the accurate statement is narrower:
-            routine classroom use keeps records on the device, and deletion is in
-            a teacher&apos;s hands.
+            routine classroom use does not submit classroom-record contents to
+            B$S, the host still receives ordinary page requests, and deletion is
+            in a supervising adult&apos;s hands.
           </p>
           <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3 text-base">
             <Link

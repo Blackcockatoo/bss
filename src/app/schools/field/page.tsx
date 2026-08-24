@@ -14,14 +14,17 @@ import {
   CANONICAL_SESSION_COUNT,
   FIRST_CANONICAL_SESSION,
 } from "@/lib/schools/canonicalSequence";
-import { SCHOOLS_LOCAL_DATA_RETENTION_DAYS } from "@/lib/schools/storage";
+import {
+  SCHOOL_PRIVACY_COMMITMENTS,
+  SCHOOLS_LOCAL_DATA_RETENTION_DAYS,
+} from "@/lib/schools/privacyTruth";
 
 const WHAT_YOU_NEED = [
   "Years 3–6 class",
   "About 20 minutes",
   "A teacher to lead it",
   "A browser — nothing to install",
-  "No student accounts to create",
+  SCHOOL_PRIVACY_COMMITMENTS.accountsShort,
   "A printer if you want the paper fallback",
 ] as const;
 
@@ -44,8 +47,9 @@ export default function FieldModePage() {
             {CANONICAL_SESSION_COUNT} short lessons about how systems work.
           </h1>
           <p className="max-w-2xl text-lg leading-8 text-slate-700">
-            Teacher-led, about 15–20 minutes each. No student sign-in. Records
-            stay on this device and you can delete them at any time.
+            Teacher-led, about 15–20 minutes each. No student sign-in. Classroom
+            record contents stay in this browser during routine use, and the
+            supervising adult can delete them at any time.
           </p>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -118,7 +122,7 @@ export default function FieldModePage() {
             <ul className="mt-4 space-y-2 text-base leading-7 text-slate-700">
               <li>Teacher-chosen aliases; real names are not required and should not be entered</li>
               <li>Lesson progress and any light evidence you record</li>
-              <li>In this browser only, on this device</li>
+              <li>{SCHOOL_PRIVACY_COMMITMENTS.localRecords}</li>
               <li>
                 Cleared on the next school-route load after{" "}
                 {SCHOOLS_LOCAL_DATA_RETENTION_DAYS} days without use

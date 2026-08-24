@@ -1,3 +1,5 @@
+import { SCHOOL_PROFILE_DESCRIPTION } from "@/lib/schools/privacyTruth";
+
 /**
  * Standalone brand identity for the MetaPet School classroom product.
  *
@@ -34,7 +36,7 @@ export const METAPET_SCHOOL_TAGLINE =
   "Australian classroom lessons for Years 3–6";
 
 export const METAPET_SCHOOL_DESCRIPTION =
-  "MetaPet School is a calm, teacher-led classroom experience for Australian Years 3–6. Seven short lessons on digital responsibility and online safety, with alias-only participation and records that stay on the classroom device.";
+  `MetaPet School is a calm Australian Years 3–6 classroom experience. ${SCHOOL_PROFILE_DESCRIPTION}`;
 
 /** Emerald used for browser chrome and the install splash. */
 export const METAPET_SCHOOL_THEME_COLOR = "#065f46";
