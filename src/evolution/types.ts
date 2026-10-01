@@ -23,6 +23,8 @@ export interface EvolutionData {
   branchId?: string;
   /** Rare abilities revealed so far; derived from traits when absent. */
   abilitiesUnlocked?: string[];
+  /** Actual transitions only; old saves need no fabricated history. */
+  history?: Array<{ from: EvolutionState; to: EvolutionState; at: number }>;
 }
 
 export interface StageInfo {

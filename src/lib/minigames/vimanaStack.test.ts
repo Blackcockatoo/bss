@@ -15,6 +15,8 @@ import {
   SHAPE_LIST,
   STACK_COLS,
   STACK_ROWS,
+  STACK_SHAPES,
+  getCellPositions,
   activatePower,
   clearLines,
   createStackGame,
@@ -93,11 +95,11 @@ describe('wall kicks', () => {
     const state = createStackGame(1, 1, 0);
     // T pointing right, hugging the left wall (a valid resting spot). The
     // raw next rotation pokes through the wall, so a kick must slide it in.
-    const piece: StackPiece = { shape: 'T', rotation: 1, pos: { x: 0, y: 5 } };
+    const piece: StackPiece = { shape: 'T', rotation: 3, pos: { x: 0, y: 5 } };
     expect(isValidPosition(piece, state.board)).toBe(true);
     const pinned = { ...state, active: piece };
 
-    const rotated = rotateActive(pinned, 1, 0);
+    const rotated = rotateActive(pinned, -1, 0);
     expect(rotated.active!.rotation).toBe(2);
     expect(isValidPosition(rotated.active!, rotated.board)).toBe(true);
     expect(rotated.active!.pos.x).toBeGreaterThan(0);
@@ -105,11 +107,11 @@ describe('wall kicks', () => {
 
   it('kicks a vertical I piece away from the right wall', () => {
     const state = createStackGame(1, 1, 0);
-    const piece: StackPiece = { shape: 'I', rotation: 1, pos: { x: STACK_COLS - 1, y: 5 } };
+    const piece: StackPiece = { shape: 'I', rotation: 3, pos: { x: STACK_COLS - 1, y: 5 } };
     expect(isValidPosition(piece, state.board)).toBe(true);
     const pinned = { ...state, active: piece };
 
-    const rotated = rotateActive(pinned, 1, 0);
+    const rotated = rotateActive(pinned, -1, 0);
     expect(rotated.active!.rotation).toBe(2);
     expect(isValidPosition(rotated.active!, rotated.board)).toBe(true);
     // The kick must have pulled the piece leftwards into the field.
@@ -194,7 +196,7 @@ describe('line clearing and scoring', () => {
     const board = makeEmptyBoard();
     board[STACK_ROWS - 1] = filledRow(0);
     state = withBoard(state, board);
-    state = { ...state, active: { shape: 'I', rotation: 1, pos: { x: 0, y: 0 } } };
+    state = { ...state, active: { shape: 'I', rotation: 3, pos: { x: 0, y: 1 } } };
 
     const { state: next, events } = hardDropActive(state, 100);
     expect(events.cleared).toBe(1);
@@ -330,7 +332,7 @@ function primedForClear(col = 0): StackState {
   return {
     ...state,
     board,
-    active: { shape: 'I', rotation: 1, pos: { x: col, y: 0 } },
+    active: { shape: 'I', rotation: 3, pos: { x: col, y: 1 } },
   };
 }
 
@@ -472,5 +474,78 @@ describe('danger detection', () => {
     expect(isInDanger(board)).toBe(false);
     board[4][3] = { filled: true, color: '#fff' };
     expect(isInDanger(board)).toBe(true);
+  });
+});
+
+
+describe('tetromino geometry regression', () => {
+  const key = (points: Array<{ x: number; y: number }>) =>
+    points.map(({ x, y }) => `${x},${y}`).sort();
+
+  it('spawns L in its original orientation and hold restores that orientation', () => {
+    const game = createStackGame(42, 1, 0);
+    const state = holdActive({ ...game, holdPiece: 'L' }, 0);
+    expect(state.active).toEqual({ shape: 'L', rotation: 0, pos: { x: 5, y: 0 } });
+    expect(key(getCellPositions(state.active!))).toEqual(key([
+      { x: 4, y: 0 }, { x: 5, y: 0 }, { x: 6, y: 0 }, { x: 6, y: 1 },
+    ]));
+  });
+
+  const lStates = [
+    [{ x: -1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }],
+    [{ x: 0, y: -1 }, { x: 0, y: 0 }, { x: 0, y: 1 }, { x: -1, y: 1 }],
+    [{ x: 1, y: 0 }, { x: 0, y: 0 }, { x: -1, y: 0 }, { x: -1, y: -1 }],
+    [{ x: 0, y: 1 }, { x: 0, y: 0 }, { x: 0, y: -1 }, { x: 1, y: -1 }],
+  ];
+
+  it.each([1, -1] as const)('L visits all four exact orientations in direction %s without moving its pivot', direction => {
+    let state = { ...createStackGame(42, 1, 0), active: { shape: 'L', rotation: 0, pos: { x: 5, y: 5 } } } as StackState;
+    for (let step = 0; step <= 4; step += 1) {
+      const index = (step * direction + 8) % 4;
+      expect(state.active!.rotation).toBe(index);
+      expect(key(getCellPositions(state.active!))).toEqual(key(lStates[index].map(({ x, y }) => ({ x: x + 5, y: y + 5 }))));
+      expect(state.active!.pos).toEqual({ x: 5, y: 5 });
+      state = rotateActive(state, direction, step);
+    }
+  });
+
+  it.each(SHAPE_LIST)('%s preserves four cells and its pivot through CW/CCW and round trips', shape => {
+    const pivot = shape === 'I' || shape === 'O' ? { x: 0.5, y: 0.5 } : { x: 0, y: 0 };
+    let state = { ...createStackGame(42, 1, 0), active: { shape, rotation: 0, pos: { x: 5, y: 5 } } } as StackState;
+    const original = state.active;
+    for (let step = 0; step < 4; step += 1) {
+      const before = state;
+      state = rotateActive(state, 1, step);
+      const expected = STACK_SHAPES[shape][step].map(({ x, y }) => ({ x: pivot.x - (y - pivot.y), y: pivot.y + (x - pivot.x) }));
+      expect(key(STACK_SHAPES[shape][(step + 1) % 4])).toEqual(key(expected));
+      expect(new Set(key(getCellPositions(state.active!))).size).toBe(4);
+      expect(state.active!.pos).toEqual(original!.pos);
+      expect(rotateActive(state, -1, step).active).toEqual(before.active);
+    }
+    expect(state.active).toEqual(original);
+  });
+
+  it.each([
+    { rotation: 3, pos: { x: 0, y: 5 }, direction: 1 },
+    { rotation: 1, pos: { x: 9, y: 5 }, direction: 1 },
+    { rotation: 2, pos: { x: 5, y: 19 }, direction: 1 },
+    { rotation: 2, pos: { x: 5, y: 19 }, direction: -1 },
+    { rotation: 0, pos: { x: 5, y: 0 }, direction: 1 },
+  ] as const)('L rotates safely at a wall/floor/spawn ceiling: %j', ({ rotation, pos, direction }) => {
+    const state = { ...createStackGame(42, 1, 0), active: { shape: 'L', rotation, pos } } as StackState;
+    expect(isValidPosition(state.active!, state.board)).toBe(true);
+    const rotated = rotateActive(state, direction, 10);
+    expect(rotated.active!.rotation).toBe((rotation + direction + 4) % 4);
+    expect(isValidPosition(rotated.active!, state.board)).toBe(true);
+  });
+
+  it('rejects a boxed-in L rotation without changing board, pivot or lock timers', () => {
+    const board = Array.from({ length: STACK_ROWS }, () => filledRow());
+    const active: StackPiece = { shape: 'L', rotation: 0, pos: { x: 5, y: 5 } };
+    getCellPositions(active).forEach(({ x, y }) => { board[y][x] = { filled: false, color: null }; });
+    const state = { ...createStackGame(42, 1, 0), board, active, lockDeadline: 500 };
+    expect(isValidPosition(active, board)).toBe(true);
+    expect(rotateActive(state, 1, 20)).toBe(state);
+    expect(rotateActive(state, -1, 20)).toBe(state);
   });
 });

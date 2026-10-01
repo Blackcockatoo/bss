@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { EvolutionData } from "@/evolution";
@@ -87,7 +87,7 @@ describe("EvolutionPanel", () => {
   });
 
   it("offers evolution and fires the ceremony when eligible", () => {
-    mockEvolution = makeEvolution({ canEvolve: true });
+    mockEvolution = makeEvolution({ canEvolve: false, lastEvolutionTime: Date.now() - 3_600_000 });
     tryEvolve.mockReturnValue(true);
 
     render(<EvolutionPanel />);
@@ -100,7 +100,7 @@ describe("EvolutionPanel", () => {
   });
 
   it("does not fire the ceremony when evolution is rejected", () => {
-    mockEvolution = makeEvolution({ canEvolve: true });
+    mockEvolution = makeEvolution({ canEvolve: false, lastEvolutionTime: Date.now() - 3_600_000 });
     tryEvolve.mockReturnValue(false);
 
     render(<EvolutionPanel />);
@@ -118,5 +118,28 @@ describe("EvolutionPanel", () => {
     expect(screen.getByText(/Evolution Stage 4\/4/i)).toBeInTheDocument();
     expect(screen.queryByText(/Next evolution/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Next Stage:/i)).not.toBeInTheDocument();
+  });
+});
+
+
+describe('live evolution eligibility', () => {
+  it('does not offer evolution for a stale true flag when a level is missing', () => {
+    mockEvolution = makeEvolution({ canEvolve: true, level: 1, lastEvolutionTime: Date.now() - 3_600_000 });
+    render(<EvolutionPanel />);
+    expect(screen.getByText('Level')).toBeInTheDocument();
+    expect(screen.getByText('1/5')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Evolve Now!/i })).not.toBeInTheDocument();
+    expect(screen.queryByText('100%')).not.toBeInTheDocument();
+  });
+
+  it('unlocks when age crosses the gate without a store tick', () => {
+    vi.useFakeTimers();
+    try {
+      mockEvolution = makeEvolution({ lastEvolutionTime: Date.now() - 3_600_000 + 500 });
+      render(<EvolutionPanel />);
+      expect(screen.queryByRole('button', { name: /Evolve Now!/i })).not.toBeInTheDocument();
+      act(() => vi.advanceTimersByTime(1000));
+      expect(screen.getByRole('button', { name: /Evolve Now!/i })).toBeInTheDocument();
+    } finally { vi.useRealTimers(); }
   });
 });

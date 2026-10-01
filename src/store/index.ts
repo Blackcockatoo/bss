@@ -5,6 +5,7 @@ import type { Genome, DerivedTraits } from '../genome/types';
 import type { EvolutionData } from '../evolution/types';
 import {
   initializeEvolution,
+  normalizeEvolution,
   gainExperience,
   checkEvolutionEligibility,
   applyEvolution,
@@ -417,7 +418,7 @@ export function createMetaPetWebStore(
         vitals: { ...DEFAULT_VITALS, ...vitals },
         genome,
         traits: normalizeTraits(genome, traits),
-        evolution: { ...evolution },
+        evolution: normalizeEvolution(evolution),
         ritualProgress: ritualProgress ? { ...ritualProgress, history: [...ritualProgress.history] } : state.ritualProgress,
         witness: witness ?? state.witness,
         petOntology: petOntology ?? state.petOntology,

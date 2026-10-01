@@ -8,6 +8,7 @@
  */
 
 import type { EvolutionData } from "@/lib/evolution";
+import type { MetaPetState } from "@/lib/store";
 import type { DerivedTraits, Genome, GenomeHash } from "@/lib/genome";
 import type { HeptaProfileV2 } from "@/lib/heptaProfile";
 import type { HeptaDigits, PrimeTailID } from "@/lib/identity/types";
@@ -98,9 +99,20 @@ export interface PetRecordV2 {
   geometryFingerprint: string;
   evolution: EvolutionData;
   vitals: Vitals;
+  /** Mutable progression, optional for records minted before this bridge. */
+  progress?: PetProgress;
   lineage: PetLineage;
   mutationLog: MutationLogEntry[];
 }
+
+export const PET_PROGRESS_KEYS = [
+  "essence", "achievements", "battle", "miniGames", "vimana",
+  "ritualProgress", "rewardHistory", "lastReward", "lastRewardSource",
+  "lastRewardAmount", "mirrorMode", "witness", "petOntology",
+  "systemState", "sealedAt", "invariantIssues",
+] as const;
+
+export type PetProgress = Pick<MetaPetState, typeof PET_PROGRESS_KEYS[number]>;
 
 function isRegistrationProof(value: unknown): value is RegistrationProofV1 {
   if (typeof value !== "object" || value === null) return false;

@@ -1,5 +1,6 @@
 "use client";
 
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   BrainCircuit,
@@ -438,9 +439,12 @@ export function MiniGamesPanel({ petName }: MiniGamesPanelProps) {
         multiply scores — earn them by proving mastery.
       </p>
 
-      {activeGame && (
+      {activeGame && createPortal(
         <div
-          className="fixed inset-x-0 top-0 z-50 flex h-[100dvh] flex-col bg-black/70 p-2 backdrop-blur-sm sm:items-center sm:justify-center sm:p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label={GAME_META[activeGame].label}
+          className="fixed inset-x-0 top-0 z-[70] flex h-[100dvh] flex-col bg-black/70 p-2 backdrop-blur-sm sm:items-center sm:justify-center sm:p-4"
           style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top, 0px))' }}
         >
           <div className="flex shrink-0 justify-end py-2 sm:w-full sm:max-w-3xl">
@@ -510,7 +514,8 @@ export function MiniGamesPanel({ petName }: MiniGamesPanelProps) {
               />
             )}
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
 
       {/* Unlock toasts */}

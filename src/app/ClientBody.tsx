@@ -3,6 +3,7 @@
 import LegalNotice from "@/components/LegalNotice";
 import { JourneyProgressStrip } from "@/components/JourneyProgressStrip";
 import { QuickNav } from "@/components/QuickNav";
+import { PetRegistryBootstrap } from "@/components/PetRegistryBootstrap";
 import { WardrobeUnlockCeremony } from "@/components/wardrobe/WardrobeUnlockCeremony";
 import { WardrobeProgressBridge } from "@/lib/wardrobe/WardrobeProgressBridge";
 import {
@@ -212,6 +213,7 @@ export default function ClientBody({
         ) : null}
       </div>
 
+      {!effectiveSchoolsMode && fieldUiResolved ? <PetRegistryBootstrap /> : null}
       <div className="flex-1 pb-2">{children}</div>
       {/* Wardrobe progression: the bridge feeds live gameplay into the
           persistent progress record; the ceremony surfaces new unlocks. */}
