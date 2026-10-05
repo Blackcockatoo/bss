@@ -10,7 +10,11 @@ await fs.mkdir(output, { recursive: true });
 async function open(page, route) {
   const response = await page.goto(base + route);
   assert.equal(response.status(), 200, route);
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("domcontentloaded");
+  const privacy = page.getByRole("button", { name: "Privacy & local saves" });
+  await privacy.click();
+  await page.waitForFunction(() => Array.from(document.querySelectorAll("button")).some(button => button.textContent.includes("Privacy & local saves") && button.getAttribute("aria-expanded") === "true"));
+  await privacy.click();
   assert.equal(await page.locator("[data-nextjs-dialog]").count(), 0);
   assert.ok((await page.locator("body").innerText()).length > 100);
   const width = await page.evaluate(() => ({ actual: document.documentElement.scrollWidth, viewport: innerWidth }));
@@ -44,7 +48,7 @@ try {
     const activity = student.locator('a[href^="/schools/field/play/"]').filter({ has: student.locator("h2") }).first();
     await activity.click();
     await student.getByRole("navigation", { name: "Classroom activities" }).waitFor();
-    await student.waitForLoadState("networkidle");
+    await student.waitForLoadState("domcontentloaded");
     for (const name of [/teacher prompt/i, /expected outcome/i, /reset lesson/i, /finish early/i]) {
       assert.equal(await student.getByRole("button", { name }).count(), 0, String(name));
     }
@@ -60,7 +64,7 @@ try {
     }
     await student.screenshot({ path: output + "/student-" + viewport.width + ".png" });
     await student.getByRole("link", { name: "My passport" }).click();
-    await student.waitForLoadState("networkidle");
+    await student.waitForLoadState("domcontentloaded");
     assert.ok(!(await student.locator("body").innerText()).includes("For teachers:"));
     results.push({ route: "school → student activity → passport", viewport: viewport.width, passed: true });
     await school.close();
