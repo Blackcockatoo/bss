@@ -11,6 +11,9 @@ async function open(page, route) {
   const response = await page.goto(base + route);
   assert.equal(response.status(), 200, route);
   await page.waitForLoadState("domcontentloaded");
+  const tutorial = page.getByRole("dialog", { name: "Meta-Pet tutorial" });
+  await tutorial.waitFor({ state: "visible", timeout: 1500 }).catch(() => {});
+  if (await tutorial.isVisible()) await tutorial.getByRole("button", { name: "Skip tutorial", exact: true }).click();
   const privacy = page.getByRole("button", { name: "Privacy & local saves" });
   await privacy.click();
   await page.waitForFunction(() => Array.from(document.querySelectorAll("button")).some(button => button.textContent.includes("Privacy & local saves") && button.getAttribute("aria-expanded") === "true"));

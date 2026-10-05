@@ -197,12 +197,12 @@ export function LearningPassport({
     [progress, alias, hasPet, fieldMode],
   );
 
-  const petSpec: BodySpec = useMemo(() => {
-    const forged = fieldMode ? null : loadForgedBody();
-    return forged ?? configToBodySpec(DEMO_PET_CONFIG);
-  }, [fieldMode]);
-
   const hydrated = progressHydrated && profileHydrated;
+
+  const petSpec: BodySpec = useMemo(() => {
+    const forged = fieldMode || !hydrated ? null : loadForgedBody();
+    return forged ?? configToBodySpec(DEMO_PET_CONFIG);
+  }, [fieldMode, hydrated]);
   const hasContent = passportHasContent(passport);
 
   const dateLabel = useMemo(() => {
@@ -335,7 +335,7 @@ export function LearningPassport({
             kindness.
           </p>
           <p className="text-xs text-slate-400">
-            Generated {new Date(passport.createdAt).toLocaleString()} ·
+            Generated {hydrated ? new Date(passport.createdAt).toLocaleString() : "…"} ·
             Completion {passport.completionPercent}%
           </p>
           <p className="text-xs text-slate-500">
