@@ -5,11 +5,12 @@ import {
   ArrowLeft,
   FileText,
   BookOpen,
-  HeartPulse,
+  Gamepad2,
+  Hammer,
+  Backpack,
   Home,
   Compass,
   PawPrint,
-  UserCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -27,6 +28,7 @@ import {
   ENABLE_CHILD_SAFE_BASELINE,
   IS_SCHOOLS_PROFILE,
 } from "@/lib/env/features";
+import { isTeacherWorkspace } from "@/lib/productSurfaces";
 import { triggerHaptic } from "@/lib/haptics";
 import { useClassroomFocusActive } from "@/lib/teacher-lessons/classroomFocusSignal";
 
@@ -36,12 +38,11 @@ type BeforeInstallPromptEvent = Event & {
 };
 
 export const CORE_QUICK_NAV_ITEMS = [
-  { href: "/", label: "Home", icon: Home },
   { href: "/pet", label: "Pet", icon: PawPrint },
-  { href: "/app/activities", label: "Explore", icon: Compass },
-  { href: "/app/wellness", label: "Wellness", icon: HeartPulse },
-  { href: "/school-game", label: "School", icon: BookOpen },
-  { href: "/identity", label: "Identity", icon: UserCircle },
+  { href: "/app/activities?tab=games", label: "Play", icon: Gamepad2 },
+  { href: "/app/activities", label: "Discover", icon: Compass },
+  { href: "/body-forge", label: "Create", icon: Hammer },
+  { href: "/app/passport", label: "Passport", icon: Backpack },
 ];
 
 export const SCHOOLS_QUICK_NAV_ITEMS = [
@@ -156,7 +157,7 @@ export function QuickNav() {
   // can neither receive keyboard focus, intercept pointer/touch events, nor
   // occupy layout space over the lesson's Next button.
   const classroomFocusActive = useClassroomFocusActive();
-  if (classroomFocusActive || isFieldPath || fieldUiCookieActive) {
+  if (classroomFocusActive || isFieldPath || fieldUiCookieActive || isTeacherWorkspace(pathname ?? "/")) {
     return null;
   }
 
@@ -186,7 +187,7 @@ export function QuickNav() {
           <div className="flex flex-1 items-center justify-around gap-1">
             {visibleNavItems.map((item) => {
               const Icon = item.icon;
-              const isActive = pathname === item.href;
+              const isActive = pathname === item.href.split("?")[0] && !item.href.includes("?");
               return (
                 <Link
                   key={item.href}
@@ -214,7 +215,7 @@ export function QuickNav() {
                   >
                     <Icon className="h-5 w-5" />
                     <span
-                      className={`text-[8px] font-medium sm:text-[9px] ${isActive ? "opacity-100" : "opacity-70"}`}
+                      className={`text-[11px] font-medium sm:text-xs ${isActive ? "opacity-100" : "opacity-70"}`}
                     >
                       {item.label}
                     </span>

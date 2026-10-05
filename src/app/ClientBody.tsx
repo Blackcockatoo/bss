@@ -1,9 +1,10 @@
 "use client";
 
+import { isFieldStudentPath, isTeacherWorkspace } from "@/lib/productSurfaces";
+import { PetRegistryBootstrap } from "@/components/PetRegistryBootstrap";
 import LegalNotice from "@/components/LegalNotice";
 import { JourneyProgressStrip } from "@/components/JourneyProgressStrip";
 import { QuickNav } from "@/components/QuickNav";
-import { PetRegistryBootstrap } from "@/components/PetRegistryBootstrap";
 import { WardrobeUnlockCeremony } from "@/components/wardrobe/WardrobeUnlockCeremony";
 import { WardrobeProgressBridge } from "@/lib/wardrobe/WardrobeProgressBridge";
 import {
@@ -33,6 +34,7 @@ export default function ClientBody({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const teacherWorkspace = isTeacherWorkspace(pathname ?? "/");
   const refreshIdentityProfile = useIdentityProfileStore(
     (state) => state.refreshProfile,
   );
@@ -166,7 +168,7 @@ export default function ClientBody({
   return (
     <div
       className={`antialiased flex min-h-screen flex-col ${
-        fieldSurfaceActive
+        (fieldSurfaceActive || teacherWorkspace)
           ? "pb-0"
           : "pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]"
       }`}
@@ -175,7 +177,7 @@ export default function ClientBody({
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 sm:gap-3">
           <div className={`text-sm ${effectiveSchoolsMode ? "text-foreground font-medium" : "text-zinc-200"}`}>
             {fieldSurfaceActive
-              ? "MetaPet Field Mode"
+              ? isFieldStudentPath(pathname ?? "/") ? "MetaPet" : "MetaPet Field Mode"
               : effectiveSchoolsMode
                 ? "MetaPet Schools"
                 : "Meta-Pet"}
@@ -186,20 +188,20 @@ export default function ClientBody({
             className={`min-h-9 rounded-full border px-3 py-1 text-xs transition-colors ${effectiveSchoolsMode ? "border-emerald-600/30 bg-emerald-50 text-emerald-700 hover:border-emerald-600/50 hover:bg-emerald-100" : "border-emerald-400/25 bg-emerald-500/10 text-emerald-200 hover:border-emerald-300/45 hover:bg-emerald-500/15"}`}
             aria-expanded={privacyOpen}
           >
-            Local-first / child-safe
+            Privacy & local saves
           </button>
         </div>
         {privacyOpen && (
           <div className={`mx-auto mt-3 w-full max-w-6xl rounded-2xl border p-3 text-xs leading-5 sm:leading-6 ${effectiveSchoolsMode ? "border-border bg-card text-muted-foreground" : "border-slate-800 bg-slate-900/60 text-zinc-300"}`}>
-            Default school use is local-first, alias-based, and teacher-led.
+            {effectiveSchoolsMode || teacherWorkspace ? <>Default school use is local-first, alias-based, and teacher-led.
             Student accounts, public sharing, and retention-style mechanics stay
             out of the school deployment. Classroom records remain on this
             device unless a teacher deliberately exports evidence. Classroom
             data in this browser is cleared on the next school-route load after{" "}
-            {SCHOOLS_LOCAL_DATA_RETENTION_DAYS} days without use.
+            {SCHOOLS_LOCAL_DATA_RETENTION_DAYS} days without use.</> : <>Your pet and saved progress stay in this browser. Use the same device and browser to return to your companion. Clearing browser data can remove local saves.</>}
           </div>
         )}
-        {!effectiveSchoolsMode && <JourneyProgressStrip />}
+        {!effectiveSchoolsMode && !teacherWorkspace && <JourneyProgressStrip />}
         {fieldSurfaceActive && !isFieldPath ? (
           <div className="mx-auto mt-3 flex w-full max-w-6xl items-center justify-between gap-3 rounded-xl border border-emerald-700/20 bg-emerald-50 px-3 py-2 text-xs text-emerald-950">
             <span>Approved Field Mode information</span>
@@ -224,7 +226,7 @@ export default function ClientBody({
         </>
       ) : null}
       <footer className="app-shell-footer px-4 pb-24 pt-4 text-center sm:pb-6">
-        {!fieldSurfaceActive ? (
+        {(effectiveSchoolsMode || teacherWorkspace) && !fieldSurfaceActive ? (
           <a
             href="mailto:bluesssnakestudio@gmail.com?subject=Meta-Pet%20School%20Pilot%20Enquiry"
             className="mb-4 inline-block text-xs text-slate-400 underline hover:text-slate-300"
@@ -234,7 +236,7 @@ export default function ClientBody({
         ) : null}
         <LegalNotice schoolsMode={effectiveSchoolsMode} />
       </footer>
-      {!fieldSurfaceActive && fieldUiResolved ? <QuickNav /> : null}
+      {!fieldSurfaceActive && !teacherWorkspace && fieldUiResolved ? <QuickNav /> : null}
     </div>
   );
 }

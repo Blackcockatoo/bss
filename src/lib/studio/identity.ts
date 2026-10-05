@@ -23,7 +23,7 @@ export const STUDIO_TAGLINE =
 
 export const STUDIO_STATEMENT = [
   "Blue $nake Studios makes software that behaves like something rather than something that just displays. A MetaPet is not a picture of a pet — it is a genome, a set of vitals, an evolution stage and a history, and every surface in the product is a different way of reading the same underlying record.",
-  "The studio ships two products from one codebase. The full creative system lives here, unrestricted. The classroom edition lives at MetaPet.school with its own boundary, its own governance pack and none of the consumer surface area. Shared engineering underneath, deliberately separated above.",
+  "MetaPet is one platform with a full player world and a curated classroom entrance. The studio portal lives at blkck2.com; the full MetaPet world lives here. The classroom edition lives at MetaPet.school with its own boundary, its own governance pack and none of the consumer surface area. Shared engineering underneath, deliberately separated above.",
   "Alongside that sits the arcade — smaller, louder, self-contained games that exist because they are fun, not because they demo a feature.",
 ] as const;
 

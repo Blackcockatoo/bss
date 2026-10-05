@@ -9,6 +9,7 @@ import {
   Home,
   ShieldCheck,
 } from "lucide-react";
+import { FIELD_PLAY_HOME, isFieldStudentPath } from "@/lib/productSurfaces";
 import { usePathname } from "next/navigation";
 
 import {
@@ -33,6 +34,16 @@ const ICONS: Record<FieldModeNavItem["kind"], typeof Home> = {
 
 export function FieldModeNav() {
   const pathname = usePathname();
+  if (isFieldStudentPath(pathname)) {
+    return <nav aria-label="Classroom activities" className="field-print-hide border-b border-emerald-950/15 bg-white px-4 py-3 text-emerald-950">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3">
+        <span className="mr-auto font-semibold">MetaPet</span>
+        <a href={FIELD_PLAY_HOME} className="inline-flex min-h-11 items-center rounded-xl border border-emerald-900/20 px-4 py-2 text-sm">Activities</a>
+        <a href={FIELD_PLAY_HOME + "/passport"} className="inline-flex min-h-11 items-center rounded-xl border border-emerald-900/20 px-4 py-2 text-sm">My passport</a>
+      </div>
+    </nav>;
+  }
+
 
   return (
     <nav

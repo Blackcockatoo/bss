@@ -2,24 +2,20 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { ARCADE_GAMES, ARCADE_ROUTE } from "@/lib/games/arcade";
-import {
-  SCHOOL_PITCH,
-  STUDIO_ROSTER,
-  STUDIO_ROUTE,
-} from "@/lib/studio/identity";
+import { STUDIO_PORTAL_URL } from "@/lib/productSurfaces";
 
 export const metadata: Metadata = {
-  title: "Blue Snake Studios — The full MetaPet living system",
+  title: "MetaPet — by Blue $nake Studios",
   description:
     "Enter the complete MetaPet world: digital companions, DNA, Body Forge, activities, wellness and the separate MetaPet Schools classroom edition.",
   openGraph: {
-    title: "Blue Snake Studios — The full MetaPet living system",
+    title: "MetaPet — by Blue $nake Studios",
     description:
       "The complete MetaPet creative system, with MetaPet Schools kept as a focused classroom product on its own domain.",
   },
   twitter: {
     card: "summary",
-    title: "Blue Snake Studios — The full MetaPet living system",
+    title: "MetaPet — by Blue $nake Studios",
     description:
       "Digital companions, DNA, Body Forge, activities, wellness and a clearly separated school edition.",
   },
@@ -76,7 +72,7 @@ const FULL_PRODUCT_LINKS = [
   { label: "Activities", href: "/app/activities" },
   { label: "Wellness", href: "/app/wellness" },
   { label: "Arcade", href: ARCADE_ROUTE },
-  { label: "The Studio", href: STUDIO_ROUTE },
+  { label: "The Studio", href: STUDIO_PORTAL_URL },
 ] as const;
 
 export default function HomePage() {
@@ -87,7 +83,7 @@ export default function HomePage() {
         <div className="relative mx-auto grid w-full max-w-6xl gap-12 px-6 py-20 md:py-28 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
           <div className="space-y-7">
             <p className="text-xs font-semibold uppercase tracking-[0.34em] text-cyan-300/80">
-              Blue $nake Studios
+              MetaPet · by Blue $nake Studios
             </p>
             <div className="space-y-5">
               <h1 className="max-w-4xl text-5xl font-semibold tracking-tight text-white md:text-7xl">
@@ -98,10 +94,9 @@ export default function HomePage() {
                 identity and strange creative experiments.
               </p>
               <p className="max-w-2xl text-base leading-7 text-slate-400">
-                BlueSnakeStudios.com is the unrestricted home of MetaPet. The
-                classroom edition now has its own focused door at MetaPet.school,
-                so the full creative product and the school-safe product no longer
-                pretend to be the same website.
+                One living MetaPet world. Play and explore here, start with the
+                classroom lessons at MetaPet.school, or enter the teacher workspace
+                when you want to teach with the deeper systems.
               </p>
             </div>
 
@@ -125,10 +120,10 @@ export default function HomePage() {
                 Enter the Arcade
               </Link>
               <a
-                href="https://www.metapet.school"
+                href="/teach"
                 className="inline-flex min-h-12 items-center justify-center rounded-xl border border-amber-400/30 bg-amber-400/10 px-5 py-3 text-sm font-semibold text-amber-200 transition-colors hover:border-amber-300/50 hover:bg-amber-400/15"
               >
-                Go to MetaPet School
+                Teach with MetaPet
               </a>
             </div>
           </div>
@@ -276,112 +271,20 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* The MetaPet School pitch, in full, on the consumer front door. */}
-      <section className="border-b border-slate-800 bg-amber-400/[0.03]">
-        <div className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-16 md:py-20 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="space-y-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-200/80">
-              {SCHOOL_PITCH.eyebrow}
-            </p>
-            <h2 className="text-3xl font-semibold tracking-tight text-white md:text-4xl">
-              {SCHOOL_PITCH.headline}
-            </h2>
-            {SCHOOL_PITCH.body.map((paragraph) => (
-              <p
-                key={paragraph.slice(0, 32)}
-                className="max-w-2xl text-base leading-7 text-slate-300"
-              >
-                {paragraph}
-              </p>
-            ))}
-            <div className="flex flex-wrap gap-3 pt-1">
-              <a
-                href={SCHOOL_PITCH.href}
-                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-amber-300 px-5 py-3 text-sm font-semibold text-slate-950 transition-colors hover:bg-amber-200"
-              >
-                Go to MetaPet School
-              </a>
-              <Link
-                href={SCHOOL_PITCH.reviewHref}
-                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-700 bg-slate-900/70 px-5 py-3 text-sm font-semibold text-slate-100 transition-colors hover:border-slate-500 hover:bg-slate-800"
-              >
-                Review the pilot pack
-              </Link>
-            </div>
-          </div>
-
-          <ul className="grid content-start gap-3">
-            {SCHOOL_PITCH.proofPoints.map((point) => (
-              <li
-                key={point}
-                className="flex gap-3 rounded-2xl border border-amber-400/15 bg-slate-950/50 px-5 py-4 text-sm leading-6 text-slate-300"
-              >
-                <span aria-hidden="true" className="text-amber-300">
-                  ✓
-                </span>
-                {point}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      {/* Sponsored personalities. Independent artists, quoted not rewritten. */}
       <section className="border-b border-slate-800">
-        <div className="mx-auto w-full max-w-6xl px-6 py-16">
-          <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
-            <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
-                Sponsored by the studio
-              </p>
-              <h2 className="text-2xl font-semibold tracking-tight text-white md:text-3xl">
-                B$S backs people, not just products.
-              </h2>
-            </div>
-            <Link
-              href={STUDIO_ROUTE}
-              className="text-sm font-semibold text-cyan-300 hover:text-cyan-200"
-            >
-              More about the studio →
-            </Link>
-          </div>
-
-          {/* A lone sponsored artist gets the full width rather than sitting
-              in a half-empty two-column row. */}
-          <div
-            className={`grid gap-4 ${
-              STUDIO_ROSTER.length > 1 ? "md:grid-cols-2" : ""
-            }`}
-          >
-            {STUDIO_ROSTER.map((member) => (
-              <a
-                key={member.id}
-                href={member.href}
-                rel="noopener noreferrer"
-                target="_blank"
-                className="group overflow-hidden rounded-3xl border border-slate-700/70 bg-gradient-to-br from-slate-900 to-slate-950 p-7 transition-all hover:-translate-y-0.5 hover:border-cyan-400/30"
-              >
-                <h3 className="text-3xl font-black italic tracking-tight text-white">
-                  {member.name}
-                </h3>
-                <p className="mt-2 text-xs font-semibold uppercase tracking-[0.22em] text-cyan-300/80">
-                  {member.tagline} · {member.location}
-                </p>
-                <blockquote className="mt-5 border-l-2 border-cyan-400/40 pl-4 text-base font-medium italic leading-7 text-slate-200">
-                  {member.quote}
-                </blockquote>
-                <p className="mt-5 text-sm font-semibold text-cyan-300 transition-transform group-hover:translate-x-1">
-                  {member.linkLabel} →
-                </p>
-              </a>
-            ))}
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-5 px-6 py-10">
+          <div><h2 className="text-2xl font-semibold">For teachers and schools</h2>
+            <p className="mt-2 text-base text-slate-300">Seven guided classroom lessons to start. The full MetaPet toolkit when you are ready.</p></div>
+          <div className="flex flex-wrap gap-3">
+            <a href="https://www.metapet.school" className="inline-flex min-h-12 items-center rounded-xl border border-amber-300/30 px-5 py-3 text-sm font-semibold text-amber-200">Start the classroom pilot</a>
+            <Link href="/teach" className="inline-flex min-h-12 items-center rounded-xl bg-amber-300 px-5 py-3 text-sm font-semibold text-slate-950">Teacher workspace</Link>
           </div>
         </div>
       </section>
 
       <footer className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-6 py-10 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-        <p>© 2026 Blue $nake Studios</p>
-        <p>MetaPet is the living system. MetaPet School is its focused classroom branch.</p>
+        <a href={STUDIO_PORTAL_URL}>Blue $nake Studios · Studio portal</a>
+        <p>MetaPet · Play, explore and teach with one living system.</p>
       </footer>
     </main>
   );

@@ -28,11 +28,11 @@ const siteUrlObject =
   new URL(IS_SCHOOLS_PROFILE ? METAPET_SCHOOL_ORIGIN : CORE_SITE_ORIGIN);
 const siteDescription = IS_SCHOOLS_PROFILE
   ? SCHOOL_PROFILE_DESCRIPTION
-  : "Blue Snake Studios builds privacy-first digital learning experiences with a strict child-safe baseline for default student deployments.";
+  : "MetaPet by Blue $nake Studios: a living digital companion with DNA, evolution, games and creative experiments.";
 
 export const metadata: Metadata = {
   metadataBase: siteUrlObject,
-  title: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Blue Snake Studios",
+  title: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "MetaPet",
   description: siteDescription,
   manifest: "/manifest.webmanifest",
   icons: {
@@ -44,18 +44,18 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Blue Snake Studios",
+    title: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "MetaPet",
   },
   openGraph: {
-    title: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Blue Snake Studios",
+    title: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "MetaPet",
     description: siteDescription,
     ...(siteUrl ? { url: siteUrl } : {}),
-    siteName: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Blue Snake Studios",
+    siteName: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "MetaPet",
     type: "website",
   },
   twitter: {
     card: "summary",
-    title: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "Blue Snake Studios",
+    title: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "MetaPet",
     description: siteDescription,
   },
 };

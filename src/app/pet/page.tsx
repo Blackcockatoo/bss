@@ -28,7 +28,6 @@ import {
   ChevronUp,
   Compass,
   Dna,
-  GraduationCap,
   Move,
   Shield,
   Shirt,
@@ -561,16 +560,7 @@ export default function PetPage() {
                         aria-labelledby="mechanics-tab-links"
                         className="flex flex-wrap gap-2"
                       >
-                        <Link href="/teachers">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className={CONTROL_IDLE}
-                          >
-                            <GraduationCap className="h-4 w-4" />
-                            Teacher Hub
-                          </Button>
-                        </Link>
+
                         {!ENABLE_CHILD_SAFE_BASELINE && (
                           <>
                             <Link href="/app/activities">

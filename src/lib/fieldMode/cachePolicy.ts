@@ -12,6 +12,7 @@ import {
   FIELD_MODE_SAFETY_PATH,
   FIELD_MODE_START_PATH,
 } from "@/lib/childSafeBaseline";
+import { FIELD_PLAY_HOME } from "@/lib/productSurfaces";
 import { FIELD_MODE_INSTALL_ICON_PATHS } from "@/lib/fieldMode/pwa";
 import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
 
@@ -32,6 +33,8 @@ export const FIELD_PACK_CACHE_POLICY = {
 
 const FIELD_PACK_BASE_ROUTES = [
   FIELD_MODE_HOME_PATH,
+  FIELD_PLAY_HOME,
+  `${FIELD_PLAY_HOME}/passport`,
   FIELD_MODE_START_PATH,
   FIELD_MODE_LESSONS_PATH,
   FIELD_MODE_CLASSROOM_PATH,
@@ -54,6 +57,7 @@ export const FIELD_PACK_ROUTE_PATHS = Array.from(
   new Set([
     ...FIELD_PACK_BASE_ROUTES,
     ...FIELD_PACK_LESSON_ROUTES,
+    ...LESSON_DEFINITIONS.map(lesson => `${FIELD_PLAY_HOME}/${lesson.slug}`),
     ...FIELD_PACK_PRINT_ROUTES,
   ]),
 );

@@ -69,3 +69,10 @@ describe("LessonGuideBar", () => {
     expect(next).toBeDisabled();
   });
 });
+
+it("omits teacher prompts from student controls, including the overflow menu", () => {
+  renderBar({ studentView: true });
+  fireEvent.click(screen.getByRole("button", { name: /more/i }));
+  expect(screen.queryByRole("button", { name: /teacher prompt/i })).toBeNull();
+  expect(screen.getAllByRole("button", { name: /my task/i }).length).toBeGreaterThan(0);
+});

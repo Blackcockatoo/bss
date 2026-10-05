@@ -12,6 +12,7 @@ interface ClassroomFocusModeProps {
   onEnter: () => void;
   onExit: () => void;
   children: React.ReactNode;
+  controls?: boolean;
 }
 
 /**
@@ -28,6 +29,7 @@ export function ClassroomFocusMode({
   onEnter,
   onExit,
   children,
+  controls = true,
 }: ClassroomFocusModeProps) {
   // Tell the global app chrome (bottom nav bar) to step aside while focus mode
   // is active, and to reappear the moment it ends or this component unmounts
@@ -46,7 +48,7 @@ export function ClassroomFocusMode({
       }
       data-focus-mode={active ? "on" : "off"}
     >
-      {active ? (
+      {controls ? active ? (
         <div className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-amber-300/30 bg-amber-300/10 px-4 py-2 text-amber-100 sm:px-6">
           <p className="flex items-center gap-2 text-sm font-medium">
             <Focus className="h-4 w-4" aria-hidden="true" />
@@ -79,7 +81,7 @@ export function ClassroomFocusMode({
             Classroom Focus Mode
           </Button>
         </div>
-      )}
+      ) : null}
       {children}
     </div>
   );

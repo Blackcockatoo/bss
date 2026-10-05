@@ -16,8 +16,8 @@
 import { getLessonBySlug, getLessonById } from "./lessonDefinitions";
 import type { LessonDefinition, LessonId, LessonViewMode } from "./types";
 
-export const TEACHER_HUB_PATH = "/teachers";
-export const LESSON_BASE_PATH = "/teachers/lessons";
+export const TEACHER_HUB_PATH = "/teach";
+export const LESSON_BASE_PATH = "/teach/lessons";
 
 /** Build the Teacher Hub URL. */
 export function buildTeacherHubPath(): string {

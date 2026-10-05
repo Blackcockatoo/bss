@@ -27,7 +27,7 @@ import {
   type PassportLessonSection,
 } from "@/lib/teacher-lessons";
 
-const PASSPORT_PATH = "/teachers/passport";
+const PASSPORT_PATH = "/teach/passport";
 
 function SectionRow({
   section,
