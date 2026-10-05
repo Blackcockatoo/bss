@@ -10,12 +10,7 @@ describe("QuickNav items", () => {
     const hrefs = CORE_QUICK_NAV_ITEMS.map((item) => item.href);
 
     expect(hrefs).toEqual([
-      "/",
-      "/pet",
-      "/app/activities",
-      "/app/wellness",
-      "/school-game",
-      "/identity",
+      "/pet", "/app/activities?tab=games", "/app/activities", "/body-forge", "/app/passport",
     ]);
     expect(hrefs).not.toContain("/moss60");
   });

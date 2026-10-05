@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from './ui/button';
 import {
   completeOnboarding,
@@ -76,9 +77,9 @@ export function OnboardingTutorial({
   const step = strings.onboarding.steps[currentStep];
   const isLastStep = currentStep === strings.onboarding.steps.length - 1;
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="w-full max-w-md bg-gradient-to-br from-slate-900 via-purple-950/50 to-slate-900 rounded-2xl border border-slate-700 shadow-2xl overflow-hidden">
+  return createPortal(
+    <div role="dialog" aria-modal="true" aria-label="Meta-Pet tutorial" className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div className="max-h-[calc(100dvh-2rem)] overflow-y-auto w-full max-w-md bg-gradient-to-br from-slate-900 via-purple-950/50 to-slate-900 rounded-2xl border border-slate-700 shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-slate-700/50">
           <div className="flex items-center gap-2">
@@ -155,7 +156,8 @@ export function OnboardingTutorial({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

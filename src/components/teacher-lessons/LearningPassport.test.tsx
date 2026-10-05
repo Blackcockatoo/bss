@@ -88,3 +88,13 @@ describe("Learning Passport", () => {
     );
   });
 });
+
+it("shows the same evidence to a student without teacher links or interpretation copy", () => {
+  useLessonProgressStore.getState().startLesson("meet-the-system");
+  useLessonProgressStore.getState().saveEvidenceEntry("meet-the-system-step-5", card);
+  useLessonProgressStore.getState().completeLesson("meet-the-system");
+  render(<LearningPassport audience="student" hubPath="/pet" />);
+  expect(screen.getAllByText("Pip").length).toBeGreaterThan(0);
+  expect(screen.queryByText(/For teachers:/)).toBeNull();
+  expect(screen.getAllByRole("link").every(link => link.getAttribute("href") === "/pet")).toBe(true);
+});

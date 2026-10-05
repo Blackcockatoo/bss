@@ -9,7 +9,6 @@ describe("route progression", () => {
   it("preserves the intended main ladder order", () => {
     expect(ROUTE_PROGRESSION_SEQUENCE).toEqual([
       "pet",
-      "school",
       "identity",
       "dna",
     ]);

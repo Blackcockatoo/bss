@@ -63,20 +63,20 @@ describe("layout metadata", () => {
     expect(metadata.openGraph?.siteName).toBe("MetaPet Schools");
   });
 
-  it("keeps Blue Snake Studios metadata in the core profile", async () => {
+  it("uses MetaPet product metadata in the core profile", async () => {
     const { metadata } = await loadLayout(false);
     const appleWebApp =
       metadata.appleWebApp && typeof metadata.appleWebApp !== "boolean"
         ? metadata.appleWebApp
         : null;
 
-    expect(metadata.title).toBe("Blue Snake Studios");
+    expect(metadata.title).toBe("MetaPet");
     expect(metadata.icons).toMatchObject({
       icon: "/icon.svg",
       apple: "/icon.svg",
     });
-    expect(appleWebApp?.title).toBe("Blue Snake Studios");
-    expect(metadata.openGraph?.siteName).toBe("Blue Snake Studios");
+    expect(appleWebApp?.title).toBe("MetaPet");
+    expect(metadata.openGraph?.siteName).toBe("MetaPet");
   });
 
   it.each([

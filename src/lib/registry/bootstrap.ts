@@ -14,6 +14,7 @@ import type { PetRecordV2 } from "./record";
 import { usePetRegistryStore } from "./runtime";
 
 let sharedRepository: PetRepository | null = null;
+const pendingBoots = new WeakMap<PetRepository, Promise<PetRecordV2>>();
 
 export function getPetRepository(): PetRepository {
   if (!sharedRepository) {
@@ -34,6 +35,7 @@ export function hydrateStoreFromRecord(
   // re-hydration; never clobber it mid-session.
   if (state.genome) return;
   state.hydrate({
+    ...record.progress,
     vitals: record.vitals,
     genome: record.genome,
     traits: record.traits,
@@ -45,11 +47,16 @@ export function hydrateStoreFromRecord(
  * The production boot path for /pet: one registered pet, hydrated into the
  * runtime store. Safe to call repeatedly; the underlying flow is idempotent.
  */
-export async function bootRegisteredPet(
+export function bootRegisteredPet(
   repository: PetRepository = getPetRepository(),
 ): Promise<PetRecordV2> {
-  const record = await repository.ensureRegisteredPet();
-  hydrateStoreFromRecord(record);
-  usePetRegistryStore.getState().setActiveRecord(record);
-  return record;
+  const pending = pendingBoots.get(repository);
+  if (pending) return pending;
+  const boot = repository.ensureRegisteredPet().then(record => {
+    hydrateStoreFromRecord(record);
+    usePetRegistryStore.getState().setActiveRecord(record);
+    return record;
+  }).finally(() => pendingBoots.delete(repository));
+  pendingBoots.set(repository, boot);
+  return boot;
 }

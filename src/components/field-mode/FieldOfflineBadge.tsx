@@ -1,6 +1,8 @@
 "use client";
 
 import { CloudOff, HardDriveDownload, Wifi } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { isFieldStudentPath } from "@/lib/productSurfaces";
 import { useEffect, useState } from "react";
 
 import { FIELD_MODE_OFFLINE_PATH } from "@/lib/childSafeBaseline";
@@ -13,6 +15,7 @@ import {
 
 export function FieldOfflineBadge() {
   const online = useFieldConnectivity();
+  const pathname = usePathname();
   const [overview, setOverview] = useState<FieldPackOverview | null>(null);
 
   useEffect(() => {
@@ -29,6 +32,8 @@ export function FieldOfflineBadge() {
       window.removeEventListener(FIELD_PACK_STATUS_EVENT, refresh);
     };
   }, [online]);
+
+  if (isFieldStudentPath(pathname)) return null;
 
   const ready = Boolean(overview?.active) && !overview?.bypassed;
   const Icon = online ? (ready ? HardDriveDownload : Wifi) : CloudOff;

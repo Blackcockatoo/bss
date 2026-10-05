@@ -33,9 +33,9 @@ import { LessonCard } from "./LessonCard";
 import { LessonPreview } from "./LessonPreview";
 import { TeacherNotes } from "./TeacherNotes";
 
-const PASSPORT_PATH = "/teachers/passport";
-const REVIEW_PATH = "/teachers/review";
-const PILOT_PATH = "/teachers/pilot";
+const PASSPORT_PATH = "/teach/passport";
+const REVIEW_PATH = "/teach/review";
+const PILOT_PATH = "/teach/pilot";
 
 /** Route back to the main Meta-Pet area. */
 const META_PET_HOME_PATH = "/pet";

@@ -1,3 +1,4 @@
+import { METAPET_ORIGIN } from "@/lib/productSurfaces";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -10,7 +11,9 @@ import {
 } from "@/lib/childSafeBaseline";
 
 export function GET(request: NextRequest) {
-  const response = NextResponse.redirect(new URL("/schools", request.url), 307);
+  const response = NextResponse.redirect(request.nextUrl.searchParams.get("destination") === "teach"
+    ? new URL("/teach", METAPET_ORIGIN)
+    : new URL("/schools", request.url), 307);
   response.cookies.set(FIELD_MODE_COOKIE, FIELD_MODE_COOKIE_VALUE, {
     ...fieldModeCookieOptions(request.nextUrl.protocol === "https:"),
     maxAge: 0,

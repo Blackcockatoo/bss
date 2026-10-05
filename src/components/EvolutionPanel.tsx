@@ -12,6 +12,7 @@ import {
   getStageVisuals,
   getStageDisplayTitle,
   getUnlockedAbilities,
+  checkEvolutionEligibility,
   describeEvolutionUpgrade,
   EVOLUTION_ORDER,
   EVOLUTION_STAGE_INFO,
@@ -33,6 +34,11 @@ export function EvolutionPanel() {
   const miniGames = useStore(state => state.miniGames);
   const essence = useStore(state => state.essence);
   const [ceremonyStage, setCeremonyStage] = useState<EvolutionState | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
   const prefersReducedMotion = useReducedMotion();
 
   const evolutionContext = useMemo(
@@ -67,33 +73,13 @@ export function EvolutionPanel() {
     evolution.state
   );
 
-  const progress = useMemo(
-    () => getEvolutionProgress(evolution, vitalsAverage),
-    [evolution, vitalsAverage]
-  );
-
-  const timeRemaining = useMemo(
-    () => getTimeUntilNextEvolution(evolution),
-    [evolution]
-  );
-
-  const requirementSnapshot = useMemo(
-    () => getNextEvolutionRequirement(evolution),
-    [evolution]
-  );
-
-  const requirementProgress = useMemo(
-    () =>
-      requirementSnapshot
-        ? getRequirementProgress(
-            evolution,
-            vitalsAverage,
-            requirementSnapshot,
-            evolutionContext
-          )
-        : null,
-    [evolution, vitalsAverage, requirementSnapshot, evolutionContext]
-  );
+  const progress = getEvolutionProgress(evolution, vitalsAverage, evolutionContext);
+  const timeRemaining = getTimeUntilNextEvolution(evolution);
+  const requirementSnapshot = getNextEvolutionRequirement(evolution);
+  const requirementProgress = getRequirementProgress(evolution, vitalsAverage, requirementSnapshot, evolutionContext);
+  // Cached canEvolve only updates on the pet tick. Activities, hydration and
+  // elapsed age must also unlock (or withdraw) the button immediately.
+  const canEvolve = checkEvolutionEligibility(evolution, vitalsAverage, evolutionContext);
 
   const nextStageInfo = requirementSnapshot ? EVOLUTION_STAGE_INFO[requirementSnapshot.state] : null;
 
@@ -111,17 +97,8 @@ export function EvolutionPanel() {
     return `${hours}h ${minutes}m`;
   }, []);
 
-  const [ageElapsed, setAgeElapsed] = useState(() => Date.now() - evolution.lastEvolutionTime);
-  const [totalAge, setTotalAge] = useState(() => Date.now() - evolution.birthTime);
-  useEffect(() => {
-    const update = () => {
-      setAgeElapsed(Date.now() - evolution.lastEvolutionTime);
-      setTotalAge(Date.now() - evolution.birthTime);
-    };
-    update();
-    const interval = setInterval(update, 60000);
-    return () => clearInterval(interval);
-  }, [evolution.lastEvolutionTime, evolution.birthTime]);
+  const ageElapsed = now - evolution.lastEvolutionTime;
+  const totalAge = now - evolution.birthTime;
 
   const handleEvolve = useCallback(() => {
     const targetStage = requirementSnapshot?.state ?? evolution.state;
@@ -258,6 +235,12 @@ export function EvolutionPanel() {
               color={accent}
             />
             <RequirementBar
+              label="Level"
+              value={requirementProgress.levelProgress}
+              helper={`${evolution.level}/${requirementSnapshot.requirements.minLevel}`}
+              color={accent}
+            />
+            <RequirementBar
               label="Vitals avg"
               value={requirementProgress.vitalsProgress}
               helper={formatRequirementValue(
@@ -351,7 +334,7 @@ export function EvolutionPanel() {
         </section>
       )}
 
-      {evolution.canEvolve && requirementSnapshot !== null && (
+      {canEvolve && requirementSnapshot !== null && (
         <section className="space-y-3">
           <div className="bg-emerald-500/10 border border-emerald-500/40 text-emerald-100 text-xs rounded-lg px-3 py-2">
             {nextStageInfo ? nextStageInfo.celebration : stageInfo.celebration}

@@ -32,7 +32,7 @@ export type RouteProgressionStep = {
 
 export const ROUTE_PROGRESSION_SEQUENCE: RouteProgressionKey[] = IS_SCHOOLS_PROFILE
   ? ["school"]
-  : ["pet", "school", "identity", "dna"];
+  : ["pet", "identity", "dna"];
 
 export const ROUTE_PROGRESSION: Record<
   RouteProgressionKey,
@@ -43,11 +43,11 @@ export const ROUTE_PROGRESSION: Record<
     step: 1,
     href: "/pet",
     tutorialScope: "pet",
-    shortLabel: "Try Demo",
-    title: "Try the companion first",
-    role: "This is the safe demo layer: meet the companion, care for it, and see the learning loop without needing an account.",
+    shortLabel: "Pet",
+    title: "Meet your companion",
+    role: "Meet your companion, care for it, and discover how it changes.",
     summary:
-      "Start here to try Meta-Pet on this device before reviewing the school pilot pack.",
+      "Care, play and explore with your companion. Your progress stays on this device.",
     entryCta: {
       href: "/pet",
       label: "Try the pet demo",
@@ -55,11 +55,10 @@ export const ROUTE_PROGRESSION: Record<
         "Open the companion demo in the browser. No account, no ad tracking, and local-first storage.",
     },
     next: {
-      href: "/schools",
-      title: "Next layer: School pilot",
-      label: "Review School Pilot Pack",
-      description:
-        "See the classroom fit, privacy summary, parent note, safeguarding material, and pilot pathway.",
+      href: "/app/activities",
+      title: "Choose an adventure",
+      label: "Play and discover",
+      description: "Find games, worlds and creative experiments with your pet.",
     },
   },
   school: {

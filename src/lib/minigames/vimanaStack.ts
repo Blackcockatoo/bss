@@ -118,49 +118,34 @@ const NO_EVENTS: StackEvents = {
   timeUp: false,
 };
 
+/** Screen coordinates grow downwards, so clockwise is (x,y) → (-y,x).
+ * Derive every orientation from one spawn shape around a fixed pivot. Hand
+ * authored quarter-turns previously mirrored L/J and drifted S/Z pivots.
+ */
+function rotationStates(spawn: Point[], pivot: Point = { x: 0, y: 0 }): Point[][] {
+  const states = [spawn];
+  for (let turn = 1; turn < 4; turn += 1) {
+    states.push(states[turn - 1].map(({ x, y }) => ({
+      x: pivot.x - (y - pivot.y),
+      y: pivot.y + (x - pivot.x),
+    })));
+  }
+  return states;
+}
+
+const O_SPAWN = [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }];
+
 export const STACK_SHAPES: Record<ShapeKey, Point[][]> = {
-  I: [
+  I: rotationStates(
     [{ x: -1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }],
-    [{ x: 0, y: -1 }, { x: 0, y: 0 }, { x: 0, y: 1 }, { x: 0, y: 2 }],
-    [{ x: -1, y: 1 }, { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 2, y: 1 }],
-    [{ x: 1, y: -1 }, { x: 1, y: 0 }, { x: 1, y: 1 }, { x: 1, y: 2 }],
-  ],
-  O: [
-    [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }],
-    [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }],
-    [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }],
-    [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }],
-  ],
-  T: [
-    [{ x: -1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }],
-    [{ x: 0, y: -1 }, { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }],
-    [{ x: -1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: -1 }],
-    [{ x: 0, y: -1 }, { x: -1, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 1 }],
-  ],
-  S: [
-    [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: -1, y: 1 }, { x: 0, y: 1 }],
-    [{ x: 0, y: -1 }, { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }],
-    [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: -1, y: 1 }, { x: 0, y: 1 }],
-    [{ x: 0, y: -1 }, { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }],
-  ],
-  Z: [
-    [{ x: -1, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }],
-    [{ x: 1, y: -1 }, { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }],
-    [{ x: -1, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }],
-    [{ x: 1, y: -1 }, { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }],
-  ],
-  J: [
-    [{ x: -1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }, { x: -1, y: 1 }],
-    [{ x: 0, y: -1 }, { x: 0, y: 0 }, { x: 0, y: 1 }, { x: 1, y: -1 }],
-    [{ x: -1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: -1 }],
-    [{ x: 0, y: -1 }, { x: 0, y: 0 }, { x: 0, y: 1 }, { x: -1, y: 1 }],
-  ],
-  L: [
-    [{ x: -1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }],
-    [{ x: 0, y: -1 }, { x: 0, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }],
-    [{ x: -1, y: -1 }, { x: -1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }],
-    [{ x: -1, y: -1 }, { x: 0, y: -1 }, { x: 0, y: 0 }, { x: 0, y: 1 }],
-  ],
+    { x: 0.5, y: 0.5 },
+  ),
+  O: Array.from({ length: 4 }, () => O_SPAWN.map(point => ({ ...point }))),
+  T: rotationStates([{ x: -1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }]),
+  S: rotationStates([{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: -1, y: 1 }, { x: 0, y: 1 }]),
+  Z: rotationStates([{ x: -1, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }]),
+  J: rotationStates([{ x: -1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }, { x: -1, y: 1 }]),
+  L: rotationStates([{ x: -1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }]),
 };
 
 export const STACK_COLORS: Record<ShapeKey, string> = {
@@ -209,7 +194,8 @@ const I_KICK_LIST: Point[] = [
 export function getKickOffsets(shape: ShapeKey, from: number, to: number): Point[] {
   if (shape === 'O') return [{ x: 0, y: 0 }];
   if (shape === 'I') return I_KICK_LIST;
-  return JLSTZ_KICKS[`${from}>${to}`] ?? [{ x: 0, y: 0 }];
+  // These spawn shapes point down (SRS orientation 2), not up (SRS 0).
+  return JLSTZ_KICKS[`${(from + 2) % 4}>${(to + 2) % 4}`] ?? [{ x: 0, y: 0 }];
 }
 
 // ===== Board helpers =====

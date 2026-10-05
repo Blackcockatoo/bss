@@ -2,7 +2,6 @@
 
 import { EvolutionPanel } from "@/components/EvolutionPanel";
 import { HUD, HUDAdvancedStats } from "@/components/HUD";
-import { PetRegistryBootstrap } from "@/components/PetRegistryBootstrap";
 import { PetResponseOverlay } from "@/components/PetResponseOverlay";
 import { PetRuntimeStage } from "@/components/PetRuntimeStage";
 import { BreedingChamber } from "@/components/BreedingChamber";
@@ -29,7 +28,6 @@ import {
   ChevronUp,
   Compass,
   Dna,
-  GraduationCap,
   Move,
   Shield,
   Shirt,
@@ -242,7 +240,6 @@ export default function PetPage() {
     <div
       className={`min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-slate-950 ${imprintAccentClass} to-slate-900 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]`}
     >
-      <PetRegistryBootstrap />
       <PetResponseOverlay enableAudio={true} enableAnticipation={true} />
 
       <div
@@ -563,16 +560,7 @@ export default function PetPage() {
                         aria-labelledby="mechanics-tab-links"
                         className="flex flex-wrap gap-2"
                       >
-                        <Link href="/teachers">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className={CONTROL_IDLE}
-                          >
-                            <GraduationCap className="h-4 w-4" />
-                            Teacher Hub
-                          </Button>
-                        </Link>
+
                         {!ENABLE_CHILD_SAFE_BASELINE && (
                           <>
                             <Link href="/app/activities">

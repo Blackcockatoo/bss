@@ -192,8 +192,8 @@ describe("PetPage", () => {
 
     fireEvent.click(screen.getByRole("tab", { name: /Links/i }));
     expect(
-      screen.getByRole("link", { name: /Teacher Hub/i }),
-    ).toBeInTheDocument();
+      screen.queryByRole("link", { name: /Teacher Hub/i }),
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: /Breed Geometry/i }),
     ).not.toBeInTheDocument();

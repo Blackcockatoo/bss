@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 interface LessonGuideBarProps {
+  studentView?: boolean;
   stepNumber: number;
   totalSteps: number;
   canGoPrevious: boolean;
@@ -44,6 +45,7 @@ const SECONDARY_BUTTON =
  * button is never crowded out or covered. Respects device safe-area insets.
  */
 export function LessonGuideBar({
+  studentView = false,
   stepNumber,
   totalSteps,
   canGoPrevious,
@@ -86,7 +88,7 @@ export function LessonGuideBar({
 
   const secondaryActions = (
     <>
-      <Button
+      {!studentView && (      <Button
         type="button"
         variant="outline"
         size="lg"
@@ -95,7 +97,7 @@ export function LessonGuideBar({
       >
         <UserCog className="mr-1 h-5 w-5" aria-hidden="true" />
         Teacher Prompt
-      </Button>
+      </Button>)}
       <Button
         type="button"
         variant="outline"
@@ -104,7 +106,7 @@ export function LessonGuideBar({
         onClick={runAndClose(onStudentTask)}
       >
         <MessageSquare className="mr-1 h-5 w-5" aria-hidden="true" />
-        Student Task
+        {studentView ? "My task" : "Student Task"}
       </Button>
       <Button
         type="button"

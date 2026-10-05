@@ -74,6 +74,15 @@ export default function FieldModePage() {
           </p>
         </section>
 
+        <section aria-label="Teacher pathways" className="rounded-2xl border border-emerald-900/20 bg-white p-6">
+          <h2 className="text-2xl font-semibold">Ready to use it with your class?</h2>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <a href="/schools/field/play" className="inline-flex min-h-12 items-center rounded-xl bg-emerald-800 px-5 py-3 font-semibold text-white">Open student activities</a>
+            <a href="/schools/field/exit?destination=teach" className="inline-flex min-h-12 items-center rounded-xl border border-emerald-800 px-5 py-3 font-semibold text-emerald-900">Go deeper: teacher workspace</a>
+          </div>
+          <p className="mt-4 text-sm leading-6 text-slate-600">The student view keeps teacher notes and classroom controls out of the way. Go deeper opens full MetaPet for teachers. Local saves stay on this website.</p>
+        </section>
+
         <section
           aria-labelledby="what-you-need-heading"
           className="rounded-3xl border-2 border-emerald-900/20 bg-white p-6 shadow-sm md:p-8"

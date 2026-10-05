@@ -1,0 +1,12 @@
+{
+  "stage": "NEURO",
+  "gamePlays": 1,
+  "genomePreserved": true,
+  "history": [
+    {
+      "from": "GENETICS",
+      "to": "NEURO",
+      "at": 1790830249288
+    }
+  ]
+}

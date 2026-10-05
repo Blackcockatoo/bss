@@ -15,25 +15,25 @@ const dnaLesson = getLessonById("one-identity-many-representations")!;
 
 describe("lesson routing", () => {
   it("builds the teacher hub path", () => {
-    expect(buildTeacherHubPath()).toBe("/teachers");
+    expect(buildTeacherHubPath()).toBe("/teach");
   });
 
   it("builds lesson paths from slug and id", () => {
     expect(buildLessonPath("one-identity-many-representations")).toBe(
-      "/teachers/lessons/one-identity-many-representations",
+      "/teach/lessons/one-identity-many-representations",
     );
     // Accepts a lesson id too.
     expect(buildLessonPath("design-a-better-feature")).toBe(
-      "/teachers/lessons/design-a-better-feature",
+      "/teach/lessons/design-a-better-feature",
     );
   });
 
   it("appends step, preview and mode query params", () => {
     expect(buildLessonPath("one-identity-many-representations", { step: 2 })).toBe(
-      "/teachers/lessons/one-identity-many-representations?step=2",
+      "/teach/lessons/one-identity-many-representations?step=2",
     );
     expect(buildLessonPath("one-identity-many-representations", { preview: true })).toBe(
-      "/teachers/lessons/one-identity-many-representations?preview=1",
+      "/teach/lessons/one-identity-many-representations?preview=1",
     );
     expect(
       buildLessonPath("one-identity-many-representations", { mode: "student", step: 3 }),

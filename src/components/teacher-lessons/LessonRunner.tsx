@@ -58,6 +58,7 @@ interface LessonRunnerProps {
   fieldMode?: boolean;
   fieldSession?: FieldSessionConfig;
   hubPath?: string;
+  studentOnly?: boolean;
 }
 
 type GuideModalKind = "teacher" | "student" | "help" | null;
@@ -113,6 +114,7 @@ export function LessonRunner({
   fieldMode = false,
   fieldSession,
   hubPath = TEACHER_HUB_PATH,
+  studentOnly = false,
 }: LessonRunnerProps) {
   const lesson = getLessonBySlug(slug);
   const hydrated = useLessonProgressHydrated();
@@ -212,7 +214,7 @@ export function LessonRunner({
   }
 
   const totalSteps = lesson.steps.length;
-  const viewMode: LessonViewMode = state.viewMode;
+  const viewMode: LessonViewMode = studentOnly ? "student" : state.viewMode;
   const focusMode = !preview && state.focusMode;
   const lowPerformance = state.lowPerformance;
   // Low Performance Mode implies static visuals everywhere reduced-motion does.
@@ -278,6 +280,7 @@ export function LessonRunner({
   if (isCompleted) {
     return (
       <ClassroomFocusMode
+        controls={!studentOnly}
         active={false}
         lessonTitle={lesson.title}
         onEnter={() => setFocusMode(true)}
@@ -290,8 +293,8 @@ export function LessonRunner({
             onReplay={handleReplay}
             onReturnToHub={() => exitLesson()}
             hubPath={hubPath}
-            hubLabel={fieldMode ? "Field Lessons" : "Teacher Hub"}
-            nextLessonPath={
+            hubLabel={studentOnly ? "Activities" : fieldMode ? "Field Lessons" : "Teacher Hub"}
+            nextLessonPath={studentOnly && nextLesson && fieldSession ? buildFieldLessonPath(nextLesson.slug, fieldSession).replace("/lessons/", "/play/") :
               fieldMode && fieldSession && nextLesson
                 ? buildFieldLessonPath(nextLesson.slug, fieldSession)
                 : undefined
@@ -337,6 +340,7 @@ export function LessonRunner({
 
   return (
     <ClassroomFocusMode
+      controls={!studentOnly}
       active={focusMode}
       lessonTitle={lesson.title}
       onEnter={() => setFocusMode(true)}
@@ -357,7 +361,7 @@ export function LessonRunner({
               </h1>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              {!preview ? (
+              {!preview && !studentOnly ? (
                 <div
                   className="inline-flex overflow-hidden rounded-xl border border-slate-700"
                   role="group"
@@ -389,12 +393,12 @@ export function LessonRunner({
                 {fieldMode ? (
                   <a href={hubPath} onClick={() => exitLesson()}>
                     <Home className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                    Exit to Hub
+                    {studentOnly ? "Activities" : "Exit to Hub"}
                   </a>
                 ) : (
                   <Link href={hubPath} onClick={() => exitLesson()}>
                     <Home className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                    Exit to Hub
+                    {studentOnly ? "Activities" : "Exit to Hub"}
                   </Link>
                 )}
               </Button>
@@ -630,7 +634,8 @@ export function LessonRunner({
         isPaused={isPaused}
         onPrevious={goPrevious}
         onNext={goNext}
-        onTeacherPrompt={() => setGuideModal("teacher")}
+        studentView={studentOnly}
+        onTeacherPrompt={() => { if (!studentOnly) setGuideModal("teacher"); }}
         onStudentTask={() => setGuideModal("student")}
         onWhatDoINow={() => setGuideModal("help")}
         onPauseResume={() => (isPaused ? resumeLesson() : pauseLesson())}

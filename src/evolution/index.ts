@@ -20,6 +20,7 @@ export interface RequirementProgress {
   ageProgress: number;
   interactionsProgress: number;
   vitalsProgress: number;
+  levelProgress: number;
   specialMet: boolean;
   specialDescription?: string;
 }
@@ -61,6 +62,18 @@ export function initializeEvolution(): EvolutionData {
     totalInteractions: 0,
     canEvolve: false,
   };
+}
+
+/** Backfill pre-level saves; invalid numbers must never poison XP arithmetic. */
+export function normalizeEvolution(saved: EvolutionData): EvolutionData {
+  const defaults = initializeEvolution();
+  const result = { ...defaults, ...saved };
+  for (const field of ['birthTime', 'lastEvolutionTime', 'experience', 'level', 'currentLevelXp', 'totalXp', 'totalInteractions'] as const) {
+    if (!Number.isFinite(result[field])) result[field] = defaults[field];
+  }
+  result.level = Math.max(1, Math.floor(result.level));
+  result.canEvolve = false; // derived eligibility is recalculated from live context
+  return result;
 }
 
 function isSpecialConditionMet(
@@ -111,6 +124,7 @@ export function evolvePet(evolution: EvolutionData): EvolutionData {
     lastEvolutionTime: Date.now(),
     experience: 0,
     canEvolve: false,
+    history: [...(evolution.history ?? []), { from: evolution.state, to: nextState, at: Date.now() }],
   };
 }
 
@@ -231,22 +245,14 @@ export function getTimeUntilNextEvolution(evolution: EvolutionData): number {
 
 export function getEvolutionProgress(
   evolution: EvolutionData,
-  vitalsAverage: number
+  vitalsAverage: number,
+  context?: EvolutionContext,
 ): number {
-  const nextState = getNextState(evolution.state);
-
-  if (!nextState) {
-    return 100;
-  }
-
-  const requirements = EVOLUTION_REQUIREMENTS[nextState];
-  const ageElapsed = getElapsedSinceLastEvolution(evolution);
-
-  const ageProgress = normalizeProgress(ageElapsed, requirements.minAge);
-  const interactionProgress = normalizeProgress(evolution.totalInteractions, requirements.minInteractions);
-  const vitalsProgress = normalizeProgress(vitalsAverage, requirements.minVitalsAverage);
-
-  return ((ageProgress + interactionProgress + vitalsProgress) / 3) * 100;
+  const progress = getRequirementProgress(evolution, vitalsAverage, undefined, context);
+  if (!progress) return 100;
+  const parts = [progress.ageProgress, progress.interactionsProgress, progress.vitalsProgress, progress.levelProgress];
+  if (context) parts.push(progress.specialMet ? 1 : 0);
+  return parts.reduce((sum, part) => sum + part, 0) / parts.length * 100;
 }
 
 export function getNextEvolutionRequirement(evolution: EvolutionData): RequirementSnapshot | null {
@@ -289,6 +295,7 @@ export function getRequirementProgress(
     ageProgress,
     interactionsProgress,
     vitalsProgress,
+    levelProgress: normalizeProgress(evolution.level, requirements.minLevel),
     specialMet,
     specialDescription: special?.description ?? requirements.specialDescription,
   };

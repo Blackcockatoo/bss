@@ -20,6 +20,8 @@ import {
   HEPTA_CODE_VERSION_V1,
   isGenomeOfRadix,
   isPetRecordV2,
+  PET_PROGRESS_KEYS,
+  type PetProgress,
   type PetRecordV2,
 } from "./record";
 
@@ -284,6 +286,11 @@ export function createPetRepository(
         }
         record.evolution = legacy.evolution ?? record.evolution;
         record.traits = legacy.traits ?? record.traits;
+        // Legacy activity/essence evidence must migrate with evolution, or
+        // later-stage special conditions silently reset on the next load.
+        record.progress = Object.fromEntries(
+          PET_PROGRESS_KEYS.filter(key => key in legacy).map(key => [key, legacy[key as keyof PetSaveData]]),
+        ) as PetProgress;
         // The freshly created proof covered the pre-migration identity
         // artifacts. Re-attest after preserving the archived crest/code.
         record.registrationProof = await createRegistrationProof(record);

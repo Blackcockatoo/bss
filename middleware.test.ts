@@ -206,7 +206,6 @@ describe("MetaPet.school hostname boundary", () => {
       "/body-forge",
       "/wallet",
       "/marketplace",
-      "/teachers",
     ]) {
       expect(
         proxy(
@@ -403,4 +402,13 @@ describe("proxy Field Mode boundary", () => {
     const response = proxy(new NextRequest("https://example.com/shop"));
     expect(response.headers.get("location")).toBeNull();
   });
+});
+
+it("takes school teachers deliberately to the full teacher workspace", async () => {
+  const { proxy } = await loadProxy("core");
+  for (const path of ["/teach", "/teach/lab", "/teachers/passport"]) {
+    expect(proxy(new NextRequest("https://www.metapet.school" + path)).headers.get("location"))
+      .toBe("https://www.bluesnakestudios.com" + path);
+  }
+  expect(proxy(new NextRequest("https://www.metapet.school/schools/field/play/meet-the-system")).headers.get("location")).toBeNull();
 });

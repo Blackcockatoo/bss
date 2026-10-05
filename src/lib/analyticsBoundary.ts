@@ -17,6 +17,8 @@ export const ANALYTICS_EXCLUDED_PREFIXES = [
   "/schools",
   "/school-game",
   "/teachers",
+  "/teach",
+  "/app/passport",
   "/docs/schools-au",
   "/legal/privacy",
   "/legal/safety",

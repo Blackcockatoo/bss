@@ -175,9 +175,11 @@ function SectionCard({ section }: { section: PassportLessonSection }) {
 export function LearningPassport({
   hubPath = TEACHER_HUB_PATH,
   fieldMode = false,
+  audience = "teacher",
 }: {
   hubPath?: string;
   fieldMode?: boolean;
+  audience?: "student" | "teacher";
 }) {
   const progressHydrated = useLessonProgressHydrated();
   const profileHydrated = usePetProfileHydrated();
@@ -195,12 +197,12 @@ export function LearningPassport({
     [progress, alias, hasPet, fieldMode],
   );
 
-  const petSpec: BodySpec = useMemo(() => {
-    const forged = fieldMode ? null : loadForgedBody();
-    return forged ?? configToBodySpec(DEMO_PET_CONFIG);
-  }, [fieldMode]);
-
   const hydrated = progressHydrated && profileHydrated;
+
+  const petSpec: BodySpec = useMemo(() => {
+    const forged = fieldMode || !hydrated ? null : loadForgedBody();
+    return forged ?? configToBodySpec(DEMO_PET_CONFIG);
+  }, [fieldMode, hydrated]);
   const hasContent = passportHasContent(passport);
 
   const dateLabel = useMemo(() => {
@@ -224,7 +226,7 @@ export function LearningPassport({
           >
             <Link href={hubPath}>
               <ArrowLeft className="mr-1.5 h-4 w-4" aria-hidden="true" />
-              {fieldMode ? "Field Lessons" : "Teacher Hub"}
+              {audience === "student" ? "My world" : fieldMode ? "Field Lessons" : "Teacher Hub"}
             </Link>
           </Button>
           <Button
@@ -281,7 +283,7 @@ export function LearningPassport({
         ) : !hasContent ? (
           <div className="rounded-2xl border border-slate-700/60 bg-slate-900/40 p-6 text-center">
             <p className="text-sm text-slate-300">
-              No lessons completed yet. Start a lesson from the {fieldMode ? "Field lesson launchpad" : "Teacher Hub"} to begin building this passport.
+              {audience === "student" ? "Your discoveries from guided activities will appear here. No saved activities yet." : <>No lessons completed yet. Start a lesson from the {fieldMode ? "Field lesson launchpad" : "Teacher Hub"} to begin building this passport.</>}
             </p>
           </div>
         ) : null}
@@ -320,12 +322,12 @@ export function LearningPassport({
             DNA and difference, caring for needs, reading feelings, finding
             patterns, and becoming a responsible creator.
           </p>
-          <p className="text-sm text-slate-300">
+          {audience === "teacher" && <p className="text-sm text-slate-300">
             <span className="font-medium text-slate-100">For teachers:</span>{" "}
             each section shows the student&apos;s own words and choices as
             classroom evidence — observations, predictions and reflections
             {fieldMode ? "." : ", including any changes they chose to apply to their Meta-Pet."} It is a record of thinking, not a graded test.
-          </p>
+          </p>}
           <p className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-100">
             <span className="font-medium">Well done, creator!</span> You met,
             built, cared for and understood your Meta-Pet — and thought about how
@@ -333,7 +335,7 @@ export function LearningPassport({
             kindness.
           </p>
           <p className="text-xs text-slate-400">
-            Generated {new Date(passport.createdAt).toLocaleString()} ·
+            Generated {hydrated ? new Date(passport.createdAt).toLocaleString() : "…"} ·
             Completion {passport.completionPercent}%
           </p>
           <p className="text-xs text-slate-500">
@@ -351,7 +353,7 @@ export function LearningPassport({
           >
             <Link href={hubPath}>
               <Home className="mr-1.5 h-4 w-4" aria-hidden="true" />
-              Return to {fieldMode ? "Field Lessons" : "Teacher Hub"}
+              Return to {audience === "student" ? "My world" : fieldMode ? "Field Lessons" : "Teacher Hub"}
             </Link>
           </Button>
         </footer>

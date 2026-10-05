@@ -17,6 +17,7 @@
  * fade/scale and drops the particle ring density.
  */
 
+import { createPortal } from "react-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { EVOLUTION_STAGE_INFO, EVOLUTION_VISUALS } from "@/evolution/types";
@@ -133,7 +134,8 @@ export function EvolutionCeremony({
 
   const transformT = phase === "transform" ? local : phase === "shockwave" || phase === "settle" ? 1 : 0;
 
-  return (
+  if (typeof document === "undefined") return null;
+  return createPortal(
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center"
       role="status"
@@ -228,7 +230,8 @@ export function EvolutionCeremony({
       >
         Skip
       </button>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
