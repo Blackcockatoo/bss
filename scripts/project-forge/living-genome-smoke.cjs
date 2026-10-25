@@ -58,9 +58,6 @@ const viewports = [
     await page.locator('.living-world .grid.grid-cols-2 button').first().click();
     const move=page.locator('.living-move').first();
     const pp=Number((await move.innerText()).match(/PP\s+(\d+)/)[1]);
-    await move.click();
-    await page.waitForFunction(()=>document.querySelector('.living-move[aria-pressed="true"]') && document.querySelector('.living-world[aria-busy="false"]'));
-    assert.equal(Number((await move.innerText()).match(/PP\s+(\d+)/)[1]),pp-1);
     for(const viewport of viewports) {
       await page.setViewportSize(viewport);
       const svg=page.locator('[data-geometry-sprite]>svg').first();
@@ -72,6 +69,15 @@ const viewports = [
       await page.screenshot({path:`${output}/battle-${viewport.width}x${viewport.height}.png`,fullPage:true});
       report.viewports.push({screen:'battle',...viewport,overflow:false,geometry:box});
     }
+
+    await move.click();
+    await page.waitForFunction(()=>
+      [...document.querySelectorAll('button')].some(button=>button.textContent.trim()==='Rematch') ||
+      (document.querySelector('.living-move[aria-pressed="true"]') && document.querySelector('.living-world[aria-busy="false"]'))
+    );
+    if(await page.locator('.living-move').count()) assert.equal(Number((await move.innerText()).match(/PP\s+(\d+)/)[1]),pp-1);
+    else assert.ok(await page.getByRole('button',{name:'Rematch',exact:true}).isVisible());
+    await page.screenshot({path:`${output}/battle-resolved-turn.png`,fullPage:true});
 
     await go('/app/activities?tab=vimana');
     await page.getByRole('combobox',{name:'Destination'}).waitFor();
@@ -137,6 +143,10 @@ const viewports = [
     report.arcade=true;
     assert.deepEqual(errors,[]);
     console.log(JSON.stringify(report));
+  } catch(error) {
+    await page.screenshot({path:`${output}/failure.png`,fullPage:true}).catch(()=>{});
+    await fs.writeFile(`${output}/failure.html`,await page.content()).catch(()=>{});
+    throw error;
   } finally {
     await fs.writeFile(`${output}/result.json`,JSON.stringify(report,null,2));
     await context.close();await browser.close();
