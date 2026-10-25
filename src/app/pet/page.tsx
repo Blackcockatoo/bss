@@ -1,6 +1,7 @@
 "use client";
 
 import { EvolutionPanel } from "@/components/EvolutionPanel";
+import { ForgeMemoryBadge } from "@/components/ForgeMemoryBadge";
 import { HUD, HUDAdvancedStats } from "@/components/HUD";
 import { PetResponseOverlay } from "@/components/PetResponseOverlay";
 import { PetRuntimeStage } from "@/components/PetRuntimeStage";
@@ -591,6 +592,10 @@ export default function PetPage() {
                 </div>
               )}
 
+              <div className="mt-4 space-y-3">
+                <Link href="/project-forge" className="inline-flex min-h-11 items-center rounded-lg border border-teal-400/60 bg-teal-950/30 px-4 py-2 font-semibold text-teal-100 hover:bg-teal-900/50">Explore Project Forge · Learn and create</Link>
+                <ForgeMemoryBadge petId={petId} />
+              </div>
               <RouteProgressionCard route="pet" className="mt-4" />
             </div>
           </div>

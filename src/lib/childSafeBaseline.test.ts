@@ -15,6 +15,12 @@ describe("declarative Field Mode route policy", () => {
     expect(getPolicyFallbackPathname("field")).toBe(FIELD_MODE_HOME_PATH);
   });
 
+  it("isolates the Forge prototype from both school policies", () => {
+    expect(isPathnameAllowedByPolicy("/project-forge", "core")).toBe(true);
+    expect(isPathnameAllowedByPolicy("/project-forge", "schools")).toBe(false);
+    expect(isPathnameAllowedByPolicy("/project-forge", "field")).toBe(false);
+  });
+
   it("allows every visible Field navigation destination", () => {
     for (const item of FIELD_MODE_NAV_ITEMS) {
       expect(isPathnameAllowedByPolicy(item.href, "field"), item.href).toBe(true);

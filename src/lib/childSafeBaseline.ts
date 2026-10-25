@@ -78,6 +78,7 @@ export const CHILD_SAFE_ROUTE_POLICIES: Record<
       "/app",
       "/compass",
       "/pet",
+      "/project-forge",
       "/school-game",
       "/legal",
       "/docs",
