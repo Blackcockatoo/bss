@@ -1,12 +1,13 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AlertTriangle, Compass, MapPin, Radar, Sparkles } from 'lucide-react';
 
 import { useStore } from '@/lib/store';
 import type { VimanaDiscoveryStage, VimanaFieldType, VimanaNode } from '@/lib/vimana';
 import { discoveryStageRank, isVimanaNodeDiscovered } from '@/lib/vimana';
 
+import { LivingCompanion, LivingVessel } from './living-genome/LivingScene';
 import { Button } from './ui/button';
 
 const VIEWBOX = { width: 900, height: 560, paddingX: 120, paddingY: 88 };
@@ -147,6 +148,9 @@ function stageProgress(stage: VimanaDiscoveryStage): number {
 }
 
 export function VimanaMap() {
+  const [departing, setDeparting] = useState(false);
+  const departureTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (departureTimer.current) clearTimeout(departureTimer.current); }, []);
   const vimana = useStore((state) => state.vimana);
   const vitals = useStore((state) => state.vitals);
   const exploreCell = useStore((state) => state.exploreCell);
@@ -186,7 +190,13 @@ export function VimanaMap() {
       : null;
 
   const handleScan = () => {
-    if (selectedNode.discoveryStage !== 'mastered') exploreCell(selectedNode.id);
+    if (selectedNode.discoveryStage !== 'mastered') {
+      // Store/save work is synchronous; departure is purely presentational.
+      exploreCell(selectedNode.id);
+      setDeparting(true);
+      if (departureTimer.current) clearTimeout(departureTimer.current);
+      departureTimer.current = setTimeout(() => setDeparting(false), 700);
+    }
   };
 
   const handleResolve = () => {
@@ -194,7 +204,7 @@ export function VimanaMap() {
   };
 
   return (
-    <div className="space-y-4" data-testid="vimana-field-interface">
+    <div className="living-world space-y-4" data-testid="vimana-field-interface">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-cyan-300/80">
@@ -222,6 +232,15 @@ export function VimanaMap() {
         </div>
       </div>
 
+      <section className="living-hangar" aria-label="Vimana companion deck">
+        <div><LivingVessel active={departing} /><p className="px-4 pb-4 text-xs text-cyan-100">Vimana · {departing ? 'Field response received' : 'Companion deck'}</p></div>
+        <LivingCompanion />
+      </section>
+      <label className="block text-sm text-cyan-100">Destination
+        <select className="mt-2 min-h-11 w-full rounded-xl border border-slate-600 bg-slate-950 px-3 text-sm text-white" value={selectedNode.id} onChange={event => setSelectedId(event.target.value)}>
+          {vimana.nodes.map(node => <option key={node.id} value={node.id}>{nodeDisplayName(node)} · {STAGE_LABEL[node.discoveryStage]}</option>)}
+        </select>
+      </label>
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.75fr)_minmax(250px,0.85fr)]">
         <section className="relative min-h-[390px] overflow-hidden rounded-[1.75rem] border border-cyan-500/20 bg-[#030711] shadow-[inset_0_1px_0_rgba(103,232,249,0.12),0_30px_90px_rgba(0,0,0,0.34)]">
           <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-between px-4 py-3 text-[10px] uppercase tracking-[0.2em] text-cyan-200/55">
@@ -306,7 +325,7 @@ export function VimanaMap() {
                       }
                     }}
                     role="button"
-                    style={{ cursor: 'pointer', outline: 'none' }}
+                    style={{ cursor: 'pointer' }}
                     tabIndex={0}
                     transform={`translate(${x} ${y})`}
                   >
@@ -314,7 +333,7 @@ export function VimanaMap() {
                     {selected && (
                       <>
                         <circle className="motion-safe:animate-[spin_12s_linear_infinite]" fill="none" r="37" stroke={visual.glow} strokeDasharray="4 8" strokeOpacity="0.8" strokeWidth="1.8" />
-                        <circle className="motion-safe:animate-ping motion-reduce:hidden" fill="none" r={radius + 7} stroke={visual.glow} strokeOpacity="0.5" strokeWidth="2" />
+                        <circle className="motion-reduce:hidden" fill="none" r={radius + 7} stroke={visual.glow} strokeOpacity="0.5" strokeWidth="2" />
                       </>
                     )}
                     <circle fill={visual.colour} fillOpacity={discovered ? 0.18 : 0.1} filter="url(#vimana-glow)" r={radius + 7} />
@@ -363,7 +382,7 @@ export function VimanaMap() {
               </div>
             </div>
 
-            <dl className="grid grid-cols-2 gap-3 text-xs">
+            <details><summary>Field readings</summary><dl className="grid grid-cols-2 gap-3 text-xs">
               {[
                 ['Intensity', selectedDiscovered ? `${Math.round(selectedNode.intensity)}%` : 'Encrypted'],
                 ['Scan quality', `${Math.round(selectedNode.scanQuality)}%`],
@@ -373,11 +392,11 @@ export function VimanaMap() {
                 ['Coordinates', `${selectedNode.coordinates.x},${selectedNode.coordinates.y},${selectedNode.coordinates.z}`],
               ].map(([label, value]) => (
                 <div key={label}>
-                  <dt className="text-[10px] uppercase tracking-wide text-zinc-600">{label}</dt>
+                  <dt className="text-[10px] uppercase tracking-wide text-zinc-400">{label}</dt>
                   <dd className={`mt-0.5 font-bold ${label === 'Intensity' ? selectedVisual.textClass : 'text-zinc-200'}`}>{value}</dd>
                 </div>
               ))}
-            </dl>
+            </dl></details>
 
             <div className="rounded-xl border border-slate-800 bg-slate-900/65 p-3">
               <div className="flex items-center gap-2 text-xs font-semibold text-zinc-200">
@@ -399,7 +418,7 @@ export function VimanaMap() {
       </div>
 
       <div className="flex flex-wrap items-center gap-2 text-[10px] text-zinc-500">
-        <span className="mr-1 font-semibold uppercase tracking-[0.16em] text-zinc-600">Fields</span>
+        <span className="mr-1 font-semibold uppercase tracking-[0.16em] text-zinc-400">Fields</span>
         {(Object.keys(FIELD_VISUALS) as VimanaFieldType[]).map((field) => {
           const visual = FIELD_VISUALS[field];
           return <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 ${visual.pillClass}`} key={field}><span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: visual.colour, boxShadow: `0 0 8px ${visual.glow}` }} />{visual.label}</span>;

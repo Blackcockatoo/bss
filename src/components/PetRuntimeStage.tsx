@@ -13,6 +13,7 @@ const getClientReadySnapshot = () => true;
 const getServerReadySnapshot = () => false;
 
 interface PetRuntimeStageProps {
+  compact?: boolean;
   addonEditMode?: boolean;
   onAddonEditModeChange?: (enabled: boolean) => void;
   showAdvanced?: boolean;
@@ -28,6 +29,7 @@ interface PetRuntimeStageProps {
  * silently swapping the companion identity or runtime.
  */
 export function PetRuntimeStage({
+  compact = false,
   addonEditMode,
   onAddonEditModeChange,
   showAdvanced = false,
@@ -77,7 +79,7 @@ export function PetRuntimeStage({
         className="relative flex h-full min-h-[520px] items-center justify-center p-3 sm:p-5"
       >
         <PetRuntimeDiagnostics />
-        <LearnedCompanionMotion><GeometryAvatarRenderer animated /></LearnedCompanionMotion>
+        <LearnedCompanionMotion><GeometryAvatarRenderer animated compact={compact} showPersonality={!compact} /></LearnedCompanionMotion>
       </div>
     );
   }
@@ -88,7 +90,7 @@ export function PetRuntimeStage({
       className="relative flex h-full min-h-[520px] items-center justify-center p-3 sm:p-5"
     >
       <PetRuntimeDiagnostics />
-      <LearnedCompanionMotion><VisualDNAPet className="w-full max-w-3xl" /></LearnedCompanionMotion>
+      <LearnedCompanionMotion><VisualDNAPet showReadout={!compact} className="w-full max-w-3xl" /></LearnedCompanionMotion>
     </div>
   );
 }
