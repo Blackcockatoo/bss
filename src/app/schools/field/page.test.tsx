@@ -62,7 +62,7 @@ describe("Field Mode entry", () => {
     expect(hrefs.length).toBeGreaterThan(0);
     for (const href of hrefs) {
       expect(href.startsWith("/"), href).toBe(true);
-      expect(isPathnameAllowedByPolicy(href, "field"), href).toBe(true);
+      expect(isPathnameAllowedByPolicy(new URL(href, "https://example.test").pathname, "field"), href).toBe(true);
     }
   });
 

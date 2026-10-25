@@ -14,6 +14,8 @@
 
 /** Route prefixes that must never load analytics or any tracking script. */
 export const ANALYTICS_EXCLUDED_PREFIXES = [
+  "/project-forge",
+  "/pet",
   "/schools",
   "/school-game",
   "/teachers",

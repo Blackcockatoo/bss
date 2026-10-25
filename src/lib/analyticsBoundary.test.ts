@@ -50,6 +50,11 @@ describe("analytics boundary", () => {
     }
   });
 
+  it("excludes companion and Forge learning surfaces", () => {
+    expect(isAnalyticsAllowedPathname("/pet")).toBe(false);
+    expect(isAnalyticsAllowedPathname("/project-forge")).toBe(false);
+  });
+
   it("treats an unresolved pathname as excluded", () => {
     expect(isAnalyticsAllowedPathname(null)).toBe(false);
     expect(isAnalyticsAllowedPathname(undefined)).toBe(false);
@@ -57,7 +62,7 @@ describe("analytics boundary", () => {
   });
 
   it("still allows analytics on consumer routes", () => {
-    for (const pathname of ["/", "/pet", "/app/wellness", "/pricing", "/legal"]) {
+    for (const pathname of ["/", "/app/wellness", "/pricing", "/legal"]) {
       expect(isAnalyticsAllowedPathname(pathname)).toBe(true);
     }
   });

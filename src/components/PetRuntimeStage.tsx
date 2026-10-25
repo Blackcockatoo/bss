@@ -1,5 +1,6 @@
 'use client';
 
+import { LearnedCompanionMotion } from './LearnedCompanionMotion';
 import AuraliaMetaPet from '@/components/AuraliaMetaPet';
 import { GeometryAvatarRenderer } from '@/components/GeometryAvatarRenderer';
 import { VisualDNAPet } from '@/components/VisualDNAPet';
@@ -12,6 +13,7 @@ const getClientReadySnapshot = () => true;
 const getServerReadySnapshot = () => false;
 
 interface PetRuntimeStageProps {
+  compact?: boolean;
   addonEditMode?: boolean;
   onAddonEditModeChange?: (enabled: boolean) => void;
   showAdvanced?: boolean;
@@ -27,6 +29,7 @@ interface PetRuntimeStageProps {
  * silently swapping the companion identity or runtime.
  */
 export function PetRuntimeStage({
+  compact = false,
   addonEditMode,
   onAddonEditModeChange,
   showAdvanced = false,
@@ -60,11 +63,11 @@ export function PetRuntimeStage({
         className="relative h-full min-h-[520px]"
       >
         <PetRuntimeDiagnostics />
-        <AuraliaMetaPet
+        <LearnedCompanionMotion><AuraliaMetaPet
           addonEditMode={addonEditMode}
           onAddonEditModeChange={onAddonEditModeChange}
           showAdvanced={showAdvanced}
-        />
+        /></LearnedCompanionMotion>
       </div>
     );
   }
@@ -76,7 +79,7 @@ export function PetRuntimeStage({
         className="relative flex h-full min-h-[520px] items-center justify-center p-3 sm:p-5"
       >
         <PetRuntimeDiagnostics />
-        <GeometryAvatarRenderer animated />
+        <LearnedCompanionMotion><GeometryAvatarRenderer animated compact={compact} showPersonality={!compact} /></LearnedCompanionMotion>
       </div>
     );
   }
@@ -87,7 +90,7 @@ export function PetRuntimeStage({
       className="relative flex h-full min-h-[520px] items-center justify-center p-3 sm:p-5"
     >
       <PetRuntimeDiagnostics />
-      <VisualDNAPet className="w-full max-w-3xl" />
+      <LearnedCompanionMotion><VisualDNAPet showReadout={!compact} className="w-full max-w-3xl" /></LearnedCompanionMotion>
     </div>
   );
 }

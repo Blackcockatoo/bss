@@ -45,7 +45,7 @@ import {
 } from "@/lib/witness";
 
 const DB_NAME = "MetaPetDB";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const STORE_NAME = "pets";
 const HISTORY_STORE = "petHistory";
 
@@ -109,10 +109,13 @@ export async function initDB(): Promise<IDBDatabase> {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
 
     request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(request.result);
+    request.onblocked = () => reject(new Error("Close other MetaPet tabs to finish the local storage upgrade."));
+    request.onsuccess = () => { request.result.onversionchange = () => request.result.close(); resolve(request.result); };
 
     request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
+
+      if (!db.objectStoreNames.contains("learningMemory")) db.createObjectStore("learningMemory", { keyPath: "petId" });
 
       // Create object store if it doesn't exist
       if (!db.objectStoreNames.contains(STORE_NAME)) {
@@ -333,10 +336,13 @@ export async function getAllPets(): Promise<PetSaveData[]> {
  * Archive pet data (append-only tombstone)
  */
 export async function deletePet(id: string): Promise<void> {
+  const { purgeLegacyForgeMemory } = await import("../tools/forgePersistence");
+  await purgeLegacyForgeMemory(id);
   const db = await initDB();
 
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction([HISTORY_STORE], "readwrite");
+    const transaction = db.transaction([HISTORY_STORE, "learningMemory"], "readwrite");
+    transaction.objectStore("learningMemory").put({version:1,petId:id,discoveries:[],projects:[]});
     const store = transaction.objectStore(HISTORY_STORE);
     let settled = false;
 

@@ -5,6 +5,8 @@ import type { VimanaNode, VimanaState } from '@/lib/vimana';
 
 import { VimanaMap } from './VimanaMap';
 
+vi.mock('./living-genome/LivingScene', () => ({ LivingCompanion: () => <div>Live companion</div>, LivingVessel: () => <div>Living vessel</div> }));
+
 const exploreCell = vi.fn();
 const resolveAnomaly = vi.fn();
 
@@ -127,4 +129,19 @@ describe('VimanaMap', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Resolve Anomaly' }));
     expect(resolveAnomaly).toHaveBeenCalledWith('neuro-1');
   });
+});
+
+it('offers a native destination selector without relying on tiny map touch targets', () => {
+  render(<VimanaMap />);
+  fireEvent.change(screen.getByRole('combobox', { name: 'Destination' }), { target: { value: 'neuro-1' } });
+  expect(screen.getByTestId('vimana-inspector-title')).toHaveTextContent('Neuro Bloom');
+  fireEvent.click(screen.getByRole('button', { name: 'Enter Field' }));
+  expect(exploreCell).toHaveBeenCalledTimes(1);
+  expect(exploreCell).toHaveBeenCalledWith('neuro-1');
+});
+
+it('allows keyboard selection of a route', () => {
+  render(<VimanaMap />);
+  fireEvent.keyDown(screen.getByTestId('vimana-node-neuro-1'), { key: 'Enter' });
+  expect(screen.getByTestId('vimana-inspector-title')).toHaveTextContent('Neuro Bloom');
 });

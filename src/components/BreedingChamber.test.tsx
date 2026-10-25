@@ -125,4 +125,57 @@ describe("BreedingChamber", () => {
     await waitFor(() => expect(mocks.register).toHaveBeenCalledTimes(1));
     expect(mocks.recordBreeding).toHaveBeenCalledTimes(1);
   });
+  it("locks parents, blend style and registration while a child is being saved", async () => {
+    mocks.register.mockImplementation(() => new Promise(() => {}));
+    render(<BreedingChamber />);
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Blend Geometry" }),
+    );
+    const register = await screen.findByRole("button", {
+      name: "Register This Exact Child",
+    });
+    fireEvent.click(register);
+    fireEvent.click(register);
+    expect(mocks.register).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("combobox", { name: "Parent one" })).toBeDisabled();
+    expect(screen.getByRole("combobox", { name: "Parent two" })).toBeDisabled();
+    expect(
+      screen.getByRole("combobox", { name: "Blend style" }),
+    ).toBeDisabled();
+  });
+
+  it("keeps the child preview available after a failed registration", async () => {
+    mocks.register.mockRejectedValueOnce(new Error("Storage full"));
+    render(<BreedingChamber />);
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Blend Geometry" }),
+    );
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Register This Exact Child" }),
+    );
+    await screen.findByText("Storage full");
+    expect(
+      screen.getByTestId("offspring-geometry-preview"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Register This Exact Child" }),
+    ).toBeEnabled();
+  });
+
+  it("invalidates a preview when the parents change", async () => {
+    render(<BreedingChamber />);
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Blend Geometry" }),
+    );
+    await screen.findByTestId("offspring-geometry-preview");
+    fireEvent.change(screen.getByRole("combobox", { name: "Parent one" }), {
+      target: { value: mocks.records[1].petId },
+    });
+    expect(
+      screen.queryByTestId("offspring-geometry-preview"),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Parent two" })).toHaveValue(
+      mocks.records[0].petId,
+    );
+  });
 });

@@ -412,3 +412,13 @@ it("takes school teachers deliberately to the full teacher workspace", async () 
   }
   expect(proxy(new NextRequest("https://www.metapet.school/schools/field/play/meet-the-system")).headers.get("location")).toBeNull();
 });
+
+it("preserves the public port when a Field redirect replaces the internal hostname", async () => {
+  const { proxy } = await loadProxy("core");
+  const { NextRequest: RuntimeNextRequest } = await import("next/server");
+  const request = new RuntimeNextRequest("http://localhost:3001/project-forge");
+  request.headers.set("host", "127.0.0.1:3001");
+  request.cookies.set(FIELD_MODE_COOKIE, FIELD_MODE_COOKIE_VALUE);
+  const response = proxy(request);
+  expect(response.headers.get("location")).toBe("http://127.0.0.1:3001/schools/field");
+});

@@ -6,13 +6,15 @@ import {
   useMemo,
   useRef,
   useCallback,
+  useId,
   type ComponentProps,
 } from "react";
 import { CoatOfArmsRenderer } from "@/components/lineage/CoatOfArmsRenderer";
 import { HeptaTag } from "@/components/HeptaTag";
 import { SeedOfLifeGlyph } from "@/components/SeedOfLifeGlyph";
-import { generateFounderCoatOfArms, getBlason } from "@/lib/lineage";
-import type { CoatOfArms } from "@/lib/lineage";
+import { getBlason } from "@/lib/lineage";
+import { usePetHeraldry } from "./lineage/usePetHeraldry";
+import "./living-genome/living-genome.css";
 import type { PrimeTailID, HeptaDigits } from "@/lib/identity/types";
 import { getDeviceHmacKey, verifyCrest } from "@/lib/identity/crest";
 import {
@@ -48,17 +50,6 @@ interface RegistrationCertificateProps {
   onClose?: () => void;
 }
 
-// Simple string hash function
-function hashString(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash;
-  }
-  return Math.abs(hash);
-}
-
 function escapeHtml(value: unknown): string {
   return String(value ?? "").replace(/[&<>"']/g, (character) => {
     const entities: Record<string, string> = {
@@ -83,7 +74,9 @@ export function RegistrationCertificate({
   isOpen = false,
   onClose,
 }: RegistrationCertificateProps) {
-  const [coatOfArms, setCoatOfArms] = useState<CoatOfArms | null>(null);
+  const titleId = useId();
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [actionNotice, setActionNotice] = useState<string | null>(null);
   const [proofResult, setProofResult] = useState<{
     key: string;
     state: "verified" | "invalid";
@@ -96,6 +89,11 @@ export function RegistrationCertificate({
   const heptaCode = record?.heptaCode?.digits ?? legacyHeptaCode;
   const createdAt = record?.createdAt ?? legacyCreatedAt;
   const evolutionState = record?.evolution.state ?? legacyEvolutionState;
+  const { coat: coatOfArms, notice: heraldryNotice } = usePetHeraldry(
+    petId,
+    record?.lineage.generation ?? 0,
+    isOpen,
+  );
   const generation = record?.lineage.generation ?? coatOfArms?.generation ?? 0;
   const proofKey = record
     ? `${record.petId}:${record.registrationProof?.signature ?? record.crest?.signature ?? "none"}`
@@ -106,39 +104,24 @@ export function RegistrationCertificate({
       ? proofResult.state
       : "checking";
 
-  // Generate or load coat of arms
   useEffect(() => {
-    if (!petId) return;
-
-    const storedCoa = localStorage.getItem(`auralia_coat_of_arms_${petId}`);
-    let coa: CoatOfArms | null = null;
-
-    if (storedCoa) {
-      try {
-        coa = JSON.parse(storedCoa);
-      } catch {
-        const seed = hashString(petId);
-        coa = generateFounderCoatOfArms(petId, seed);
-        localStorage.setItem(
-          `auralia_coat_of_arms_${petId}`,
-          JSON.stringify(coa),
-        );
-      }
-    } else {
-      const seed = hashString(petId);
-      coa = generateFounderCoatOfArms(petId, seed);
-      localStorage.setItem(
-        `auralia_coat_of_arms_${petId}`,
-        JSON.stringify(coa),
-      );
-    }
-
-    requestAnimationFrame(() => setCoatOfArms(coa));
-  }, [petId]);
+    const dialog = dialogRef.current;
+    if (!isOpen || !dialog) return;
+    const previousFocus = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    dialog.showModal();
+    document.body.style.overflow = "hidden";
+    return () => {
+      dialog.close();
+      document.body.style.overflow = previousOverflow;
+      if (previousFocus instanceof HTMLElement && previousFocus.isConnected)
+        previousFocus.focus();
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     let cancelled = false;
-    if (!record) return;
+    if (!record || !isOpen) return;
     const verification = record.registrationProof
       ? verifyRegistrationProof(record)
       : record.crest
@@ -159,7 +142,7 @@ export function RegistrationCertificate({
     return () => {
       cancelled = true;
     };
-  }, [proofKey, record]);
+  }, [proofKey, record, isOpen]);
 
   // Generate blazon description
   const blazon = useMemo(() => {
@@ -170,7 +153,7 @@ export function RegistrationCertificate({
   // Format date
   const formattedDate = useMemo(() => {
     if (!createdAt) return "Unknown";
-    return new Date(createdAt).toLocaleDateString("en-US", {
+    return new Date(createdAt).toLocaleDateString("en-AU", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -180,7 +163,7 @@ export function RegistrationCertificate({
   // Format time
   const formattedTime = useMemo(() => {
     if (!createdAt) return "";
-    return new Date(createdAt).toLocaleTimeString("en-US", {
+    return new Date(createdAt).toLocaleTimeString("en-AU", {
       hour: "2-digit",
       minute: "2-digit",
     });
@@ -196,12 +179,12 @@ export function RegistrationCertificate({
       if (printWindow) {
         const safe = {
           petName: escapeHtml(petName),
-          petId: escapeHtml(petId.slice(0, 16)),
+          petId: escapeHtml(petId),
           evolutionState: escapeHtml(evolutionState),
           formattedDate: escapeHtml(formattedDate),
           formattedTime: escapeHtml(formattedTime),
           vault: escapeHtml(crest?.vault?.toUpperCase() || "N/A"),
-          rotation: escapeHtml(crest?.rotation || "N/A"),
+          rotation: escapeHtml(crest?.rotation ?? "N/A"),
           tail: escapeHtml(crest?.tail?.join(", ") || "N/A"),
           generation: escapeHtml(generation),
           blazon: escapeHtml(blazon),
@@ -209,19 +192,22 @@ export function RegistrationCertificate({
           mirrorHash: escapeHtml(crest?.mirrorHash?.slice(0, 32) || "N/A"),
           signature: escapeHtml(crest?.signature?.slice(0, 48) || "N/A"),
         };
+        const shieldSvg =
+          certificateRef.current.querySelector("svg.coat-of-arms")?.outerHTML ??
+          "";
         printWindow.document.write(`
           <!DOCTYPE html>
           <html>
             <head>
               <title>MetaPet Registration Certificate - ${safe.petName}</title>
               <style>
-                @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@400;500;600&display=swap');
+
                 body {
                   margin: 0;
                   padding: 20px;
                   background: #0f172a;
                   color: white;
-                  font-family: 'Inter', sans-serif;
+                  font-family: system-ui, sans-serif;
                 }
                 .certificate {
                   max-width: 800px;
@@ -238,7 +224,7 @@ export function RegistrationCertificate({
                   margin-bottom: 24px;
                 }
                 .title {
-                  font-family: 'Cinzel', serif;
+                  font-family: Georgia, serif;
                   font-size: 28px;
                   font-weight: 700;
                   color: #c084fc;
@@ -249,7 +235,7 @@ export function RegistrationCertificate({
                   color: #94a3b8;
                 }
                 .pet-name {
-                  font-family: 'Cinzel', serif;
+                  font-family: Georgia, serif;
                   font-size: 36px;
                   font-weight: 600;
                   color: #22d3ee;
@@ -297,8 +283,15 @@ export function RegistrationCertificate({
                   font-style: italic;
                 }
                 @media print {
-                  body { background: white; color: black; }
-                  .certificate { border-color: #6366f1; }
+                  body { background:white;color:#0f172a;padding:0 }
+                  .certificate{background:white;border-color:#475569;box-shadow:none;padding:24px}
+                  .title,.pet-name,.value{color:#0f172a}.subtitle,.label,.footer{color:#475569}
+                  .signature{background:#f1f5f9;color:#334155}.detail-row{gap:12px}.value{overflow-wrap:anywhere;text-align:right}
+                  svg{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+                }
+                .printed-heraldry{display:flex;justify-content:center;margin:12px 0}.printed-heraldry svg{width:140px;height:auto}
+                .value{overflow-wrap:anywhere;min-width:0}.detail-row{gap:12px}
+                @media(max-width:500px){.grid{grid-template-columns:1fr}.certificate{padding:16px}.title{font-size:22px}
                 }
               </style>
             </head>
@@ -306,14 +299,15 @@ export function RegistrationCertificate({
               <div class="certificate">
                 <div class="header">
                   <h1 class="title">METAPET REGISTRATION CERTIFICATE</h1>
-                  <p class="subtitle">Official Record of Digital Companion Genesis</p>
+                  <p class="subtitle">Local record of companion identity and lineage</p>
                 </div>
                 <h2 class="pet-name">${safe.petName}</h2>
+                <div class="printed-heraldry">${shieldSvg}</div>
                 <div class="grid">
                   <div>
                     <div class="detail-row">
                       <span class="label">Pet ID</span>
-                      <span class="value">${safe.petId}...</span>
+                      <span class="value">${safe.petId}</span>
                     </div>
                     <div class="detail-row">
                       <span class="label">Evolution Stage</span>
@@ -347,7 +341,7 @@ export function RegistrationCertificate({
                     </div>
                   </div>
                 </div>
-                ${blazon ? `<p style="font-style: italic; color: #fbbf24; text-align: center; margin: 16px 0;">"${safe.blazon}"</p>` : ""}
+                ${blazon ? `<p style="font-style: italic; color: #9a6b20; text-align: center; margin: 16px 0;">"${safe.blazon}"</p>` : ""}
                 <div class="signature">
                   <strong>DNA Hash:</strong> ${safe.dnaHash}...<br/>
                   <strong>Mirror Hash:</strong> ${safe.mirrorHash}...<br/>
@@ -363,6 +357,10 @@ export function RegistrationCertificate({
         `);
         printWindow.document.close();
         printWindow.print();
+      } else {
+        setActionNotice(
+          "The print window was blocked. Allow pop-ups for this page, then try again.",
+        );
       }
     }
   }, [
@@ -376,93 +374,148 @@ export function RegistrationCertificate({
     generation,
   ]);
 
-  // Handle share
   const handleShare = useCallback(async () => {
-    triggerHaptic("medium");
-
-    const shareText = `Check out my MetaPet "${petName}"!
-Vault: ${crest?.vault?.toUpperCase() || "N/A"}
-Evolution: ${evolutionState}
-Coronated: ${formattedDate}`;
-
-    if (navigator.share) {
-      try {
+    const shareText = `My MetaPet "${petName}" · Generation ${generation} · ${evolutionState} · Registered ${formattedDate}`;
+    try {
+      if (navigator.share)
         await navigator.share({
           title: `MetaPet Certificate - ${petName}`,
           text: shareText,
         });
-      } catch (err) {
-        // User cancelled or share failed
-        console.log("Share cancelled");
+      else {
+        await navigator.clipboard.writeText(shareText);
+        setActionNotice("Certificate summary copied.");
       }
-    } else {
-      // Fallback: copy to clipboard
-      await navigator.clipboard.writeText(shareText);
-      alert("Certificate details copied to clipboard!");
+    } catch (error) {
+      if (!(error instanceof Error && error.name === "AbortError"))
+        setActionNotice(
+          "Sharing is unavailable. You can still print or save a pet backup.",
+        );
     }
-  }, [petName, crest, evolutionState, formattedDate]);
+  }, [petName, generation, evolutionState, formattedDate]);
 
   const handleCopyPacket = useCallback(async () => {
     if (!record) return;
-    triggerHaptic("medium");
-    const packet = await exportPetPacket(record);
-    await navigator.clipboard.writeText(packet);
-    setPacketCopied(true);
-    window.setTimeout(() => setPacketCopied(false), 2_000);
+    try {
+      const packet = await exportPetPacket(record);
+      await navigator.clipboard.writeText(packet);
+      setPacketCopied(true);
+      setActionNotice(
+        "Pet packet copied. It contains companion data; keep it private.",
+      );
+    } catch {
+      setActionNotice(
+        "The pet packet could not be copied. Try saving a pet backup instead.",
+      );
+    }
+  }, [record]);
+
+  const handleBackup = useCallback(async () => {
+    if (!record) return;
+    try {
+      const packet = await exportPetPacket(record);
+      const url = URL.createObjectURL(
+        new Blob([packet], { type: "text/plain;charset=utf-8" }),
+      );
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `metapet-${record.petId.replace(/[^a-zA-Z0-9_-]/g, "")}.mp2.txt`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
+      setActionNotice(
+        "Pet backup saved. Import the MP2 packet in the breeding chamber to restore it. Heraldry decoration is stored separately on this device.",
+      );
+    } catch {
+      setActionNotice(
+        "The pet backup could not be saved. Your registered companion has not changed.",
+      );
+    }
   }, [record]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <dialog
+      ref={dialogRef}
+      aria-labelledby={titleId}
+      className="living-world registry-dialog"
+      aria-modal="true"
+      onCancel={() => onClose?.()}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose?.();
+      }}
+    >
       <div
         ref={certificateRef}
-        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950 border-2 border-indigo-500/50 rounded-2xl shadow-2xl shadow-indigo-500/20"
+        className="registry-certificate relative w-full bg-slate-950 border border-cyan-900/60 rounded-3xl shadow-2xl"
       >
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full bg-slate-800/80 hover:bg-slate-700 text-white transition-colors z-10 touch-manipulation"
-          aria-label="Close certificate"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
+        {/* Close remains reachable while the certificate scrolls on a phone. */}
+        <div className="registry-close-bar">
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full bg-slate-800/80 hover:bg-slate-700 text-white transition-colors z-10 touch-manipulation"
+            aria-label="Close certificate"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
         {/* Certificate Header */}
-        <div className="text-center pt-8 pb-6 px-6 border-b border-slate-700/50">
+        <div className="text-center pt-3 pb-6 px-4 sm:px-6 border-b border-slate-700/50">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <Award className="w-8 h-8 text-purple-400" />
-            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent font-serif">
-              REGISTRATION CERTIFICATE
+            <h1
+              id={titleId}
+              className="text-xl sm:text-3xl font-semibold text-cyan-100 font-serif"
+            >
+              Registration certificate
             </h1>
-            <Award className="w-8 h-8 text-purple-400" />
           </div>
           <p className="text-sm text-slate-400">
-            Official Record of Digital Companion Genesis
+            Living Genome · Identity & lineage
           </p>
         </div>
 
         {/* Pet Name Banner */}
         <div className="text-center py-6 bg-gradient-to-r from-transparent via-cyan-950/30 to-transparent">
-          <h2 className="text-3xl sm:text-4xl font-bold text-cyan-300 font-serif tracking-wide">
+          <h2 className="px-4 break-words text-3xl sm:text-4xl font-semibold text-cyan-100 font-serif tracking-wide">
             {petName}
           </h2>
-          <p className="text-sm text-slate-500 mt-1">{petId.slice(0, 20)}...</p>
+          <p className="px-4 text-xs text-slate-400 mt-2 break-all font-mono">
+            {petId}
+          </p>
+          <p className="mt-3 text-sm text-slate-300">
+            Generation {generation} ·{" "}
+            {record ? "Registered on this device" : "Legacy companion record"}
+          </p>
+          <p
+            className={`mt-2 text-xs ${proofState === "verified" ? "text-emerald-300" : proofState === "invalid" ? "text-rose-300" : "text-amber-200"}`}
+            role="status"
+          >
+            {proofState === "verified"
+              ? "Identity proof verified"
+              : proofState === "invalid"
+                ? "Identity proof could not be verified"
+                : proofState === "checking"
+                  ? "Checking identity proof…"
+                  : "No registered identity proof"}
+          </p>
         </div>
 
         {/* Main Content Grid */}
-        <div className="p-6 space-y-6">
+        <div className="p-4 sm:p-6 space-y-6">
           {/* Visual Identity Section */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Coat of Arms */}
-            <div className="flex flex-col items-center p-4 bg-slate-900/50 rounded-xl border border-slate-700/50">
+            <div className="heraldry-stage flex flex-col items-center p-3">
               <p className="text-xs uppercase tracking-widest text-slate-500 mb-3">
                 Coat of Arms
               </p>
               {coatOfArms ? (
                 <CoatOfArmsRenderer
                   coatOfArms={coatOfArms}
-                  size={120}
+                  size={150}
+                  label={`${petName} coat of arms`}
                   showMarkers
                 />
               ) : (
@@ -504,8 +557,13 @@ Coronated: ${formattedDate}`;
             </div>
           )}
 
+          {heraldryNotice && (
+            <p role="status" className="text-sm text-amber-200">
+              {heraldryNotice}
+            </p>
+          )}
           {/* Details Grid */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Left Column */}
             <div className="space-y-3">
               <DetailRow
@@ -545,15 +603,14 @@ Coronated: ${formattedDate}`;
             </div>
           </div>
 
-          {/* Cryptographic Signature */}
-          <div className="p-4 bg-slate-950/50 rounded-xl border border-slate-800">
-            <div className="flex items-center gap-2 mb-3">
+          <details className="p-4 bg-slate-950/50 rounded-xl border border-slate-800">
+            <summary className="flex items-center gap-2 mb-3">
               <Fingerprint className="w-4 h-4 text-emerald-400" />
               <p className="text-xs uppercase tracking-widest text-slate-500">
-                Cryptographic Proof
+                Identity proof &amp; verification
               </p>
-            </div>
-            <div className="space-y-2 text-xs font-mono">
+            </summary>
+            <div className="space-y-2 text-xs font-mono break-all">
               <div>
                 <span className="text-slate-500">DNA Hash: </span>
                 <span className="text-emerald-400">
@@ -595,45 +652,49 @@ Coronated: ${formattedDate}`;
                 </span>
               </div>
             </div>
-          </div>
+          </details>
 
           {record && (
-            <div className="grid gap-3 rounded-xl border border-cyan-900/60 bg-cyan-950/15 p-4 text-xs sm:grid-cols-2">
-              <DetailRow
-                icon={<Hash className="h-4 w-4 text-cyan-400" />}
-                label="Ruleset"
-                value={record.rulesetVersion}
-              />
-              <DetailRow
-                icon={<Sparkles className="h-4 w-4 text-fuchsia-400" />}
-                label="Projection"
-                value={record.projectionVersion}
-              />
-              <div className="break-all rounded-lg bg-slate-950/45 p-3 font-mono text-[10px] text-slate-400 sm:col-span-2">
-                Geometry fingerprint: {record.geometryFingerprint}
-                <br />
-                Registration proof:{" "}
-                {record.registrationProof?.algorithm ?? "legacy device HMAC"}
+            <details className="rounded-xl border border-cyan-900/60 bg-cyan-950/15 p-4 text-xs">
+              <summary>Lineage &amp; registration details</summary>
+              <div className="grid gap-3 mt-3 sm:grid-cols-2">
+                <DetailRow
+                  icon={<Hash className="h-4 w-4 text-cyan-400" />}
+                  label="Ruleset"
+                  value={record.rulesetVersion}
+                />
+                <DetailRow
+                  icon={<Sparkles className="h-4 w-4 text-fuchsia-400" />}
+                  label="Projection"
+                  value={record.projectionVersion}
+                />
+                <div className="break-all rounded-lg bg-slate-950/45 p-3 font-mono text-xs text-slate-400 sm:col-span-2">
+                  Geometry fingerprint: {record.geometryFingerprint}
+                  <br />
+                  Registration proof:{" "}
+                  {record.registrationProof?.algorithm ?? "legacy device HMAC"}
+                </div>
+                <div className="rounded-lg bg-slate-950/45 p-3 text-slate-300 sm:col-span-2">
+                  <span className="text-slate-500">Hepta character: </span>
+                  {record.heptaProfile
+                    ? `${record.heptaProfile.temperament} · ${record.heptaProfile.dominantAxis}/${record.heptaProfile.secondaryAxis}`
+                    : "Legacy profile pending"}
+                  <br />
+                  <span className="text-slate-500">Parents: </span>
+                  {record.lineage.parentIds.length > 0
+                    ? record.lineage.parentIds.join(" + ")
+                    : "Genesis founder"}
+                </div>
               </div>
-              <div className="rounded-lg bg-slate-950/45 p-3 text-slate-300 sm:col-span-2">
-                <span className="text-slate-500">Hepta character: </span>
-                {record.heptaProfile
-                  ? `${record.heptaProfile.temperament} · ${record.heptaProfile.dominantAxis}/${record.heptaProfile.secondaryAxis}`
-                  : "Legacy profile pending"}
-                <br />
-                <span className="text-slate-500">Parents: </span>
-                {record.lineage.parentIds.length > 0
-                  ? record.lineage.parentIds.join(" + ")
-                  : "Genesis founder"}
-              </div>
-            </div>
+            </details>
           )}
 
           {/* Action Buttons */}
-          <div className="flex flex-col gap-3 pt-4 sm:flex-row">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4">
             <Button
               onClick={handleDownload}
-              className="flex-1 h-12 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 touch-manipulation"
+              disabled={!coatOfArms}
+              className="flex-1 h-12 bg-cyan-700 hover:bg-cyan-600 touch-manipulation"
             >
               <Download className="w-4 h-4 mr-2" />
               Print / Download
@@ -648,6 +709,16 @@ Coronated: ${formattedDate}`;
             </Button>
             {record && (
               <Button
+                onClick={handleBackup}
+                variant="outline"
+                className="min-h-12 border-cyan-800 text-cyan-100"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Save pet backup
+              </Button>
+            )}
+            {record && (
+              <Button
                 onClick={handleCopyPacket}
                 variant="outline"
                 className="flex-1 h-12 border-cyan-700 text-cyan-200 hover:bg-cyan-950 touch-manipulation"
@@ -658,19 +729,24 @@ Coronated: ${formattedDate}`;
             )}
           </div>
 
+          {actionNotice && (
+            <p role="status" className="text-sm text-cyan-100">
+              {actionNotice}
+            </p>
+          )}
           {/* Footer */}
           <div className="text-center pt-4 border-t border-slate-800">
-            <p className="text-xs text-slate-600 italic">
+            <p className="text-xs text-slate-400 italic">
               This certificate is a record of genesis. It does not grant
               custody; it witnesses it.
             </p>
-            <p className="text-[10px] text-slate-700 mt-2">
+            <p className="text-xs text-slate-400 mt-2">
               MetaPet Registry • {new Date().toLocaleDateString()}
             </p>
           </div>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }
 
@@ -685,12 +761,14 @@ function DetailRow({
   value: string;
 }) {
   return (
-    <div className="flex items-center justify-between p-3 bg-slate-900/30 rounded-lg">
+    <div className="flex flex-wrap items-start justify-between gap-2 p-3 bg-slate-900/30 rounded-lg">
       <div className="flex items-center gap-2">
         {icon}
         <span className="text-xs text-slate-400">{label}</span>
       </div>
-      <span className="text-sm font-medium text-white">{value}</span>
+      <span className="text-sm font-medium text-white break-all text-right">
+        {value}
+      </span>
     </div>
   );
 }

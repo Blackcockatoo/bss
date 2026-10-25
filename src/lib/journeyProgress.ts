@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import {
-  ROUTE_PROGRESSION_SEQUENCE,
+  ROUTE_PROGRESSION,
   type RouteProgressionKey,
 } from "@/lib/routeProgression";
 
@@ -23,7 +23,7 @@ const JOURNEY_PROGRESS_STORAGE_KEY = "metapet-journey-progress-v1";
 const JOURNEY_PROGRESS_EVENT = "metapet:journey-progress-updated";
 
 function createEmptyJourneyProgress(): JourneyProgressRecord {
-  return ROUTE_PROGRESSION_SEQUENCE.reduce((acc, routeKey) => {
+  return (Object.keys(ROUTE_PROGRESSION) as RouteProgressionKey[]).reduce((acc, routeKey) => {
     acc[routeKey] = {
       visitedAt: null,
       completedAt: null,
@@ -67,7 +67,7 @@ export function loadJourneyProgress(storage?: StorageLike) {
     const parsed = JSON.parse(raw) as Partial<JourneyProgressRecord>;
     const emptyState = createEmptyJourneyProgress();
 
-    for (const routeKey of ROUTE_PROGRESSION_SEQUENCE) {
+    for (const routeKey of Object.keys(ROUTE_PROGRESSION) as RouteProgressionKey[]) {
       const nextValue = parsed[routeKey];
       if (!nextValue) {
         continue;

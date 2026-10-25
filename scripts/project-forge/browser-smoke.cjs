@@ -1,0 +1,90 @@
+const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const assert = require('node:assert/strict');
+const fs = require('node:fs/promises');
+(async()=>{
+ const os=require('node:os'), path=require('node:path');
+ const profile=await fs.mkdtemp(path.join(os.tmpdir(),'forge-browser-'));
+ const options={headless:true,args:['--no-sandbox'],viewport:{width:390,height:844},reducedMotion:'reduce',hasTouch:true};
+ const context=await chromium.launchPersistentContext(profile,options);
+ const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+ await page.goto('http://127.0.0.1:3001/project-forge',{waitUntil:'networkidle'});
+ await page.getByRole('heading',{name:'Project Forge',exact:true}).waitFor();
+ const tools=['Pattern Forge','Sound Studio','Discovery Lab','Story Workshop','Maker Bench','Life Compass'];
+ for(const title of tools){
+  await page.getByRole('button',{name:new RegExp('^'+title)}).click();
+  await page.getByRole('button',{name:'Act — run this experiment',exact:true}).click();
+  await page.getByRole('button',{name:'Keep trial for comparison'}).waitFor();
+  if(title==='Pattern Forge'){
+    const editor=page.getByLabel('Sequence (2–16 whole numbers, 0–24)');
+    await editor.fill('1, nope');
+    assert.ok(await page.getByRole('button',{name:'Act — run this experiment',exact:true}).isDisabled());
+    await editor.fill('1, 3, 5, 7');
+    await page.getByRole('button',{name:'Act — run this experiment',exact:true}).click();
+  }
+  if(title==='Sound Studio'){
+    await page.getByRole('button',{name:'Hear sequence (optional)',exact:true}).click();
+    await page.getByRole('button',{name:'Stop sound',exact:true}).click();
+  }
+  if(title==='Maker Bench')await page.getByRole('img',{name:/Robot route:/}).waitFor();
+  if(title==='Story Workshop')await page.getByRole('region',{name:'Word explorer',exact:true}).waitFor();
+
+  const save=page.getByRole('button',{name:/Keep — .*locally/});
+  await save.waitFor({state:'visible'});await page.waitForFunction(()=>Array.from(document.querySelectorAll('button')).some(b=>b.textContent.includes('Keep —')&&!b.disabled));
+  await save.click();await page.getByText('Saved revision 1 on this device.',{exact:true}).waitFor();
+ }
+ assert.equal(await page.locator('section[aria-label="My projects"] article').count(),6);
+ await page.reload({waitUntil:'networkidle'});await page.locator('section[aria-label="My projects"] article').first().waitFor();
+ assert.equal(await page.locator('section[aria-label="My projects"] article').count(),6);
+ await page.getByRole('button',{name:'Reopen My discovery',exact:true}).first().click();
+ await page.getByLabel('Project title',{exact:true}).fill('Revised discovery');
+ await page.getByRole('button',{name:'Act — run this experiment',exact:true}).click();
+ await page.getByRole('button',{name:'Keep — save revision locally',exact:true}).click();
+ await page.getByText('Saved revision 2 on this device.',{exact:true}).waitFor();
+ const downloaded=page.waitForEvent('download');
+ await page.getByRole('button',{name:'Export all Forge work',exact:true}).click();
+ const backup=await downloaded;const backupPath=await backup.path();
+ const packet=JSON.parse(await fs.readFile(backupPath,'utf8'));
+ assert.equal(packet.memory.projects.length,6);
+ page.once('dialog',d=>d.accept());
+ await page.getByRole('button',{name:'Delete Revised discovery',exact:true}).click();
+ await page.waitForFunction(()=>document.querySelectorAll('section[aria-label="My projects"] article').length===5);
+ page.once('dialog',d=>d.accept());
+ await page.getByLabel('Restore Forge backup for this pet (replaces current Forge work)').setInputFiles({name:'backup.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(packet))});
+ await page.getByText('Restored locally.',{exact:true}).waitFor();
+ assert.equal(await page.locator('section[aria-label="My projects"] article').count(),6);
+ // Once loaded, ALL experiment interactions must work with network disabled.
+ await context.setOffline(true);const requests=[];page.on('request',r=>requests.push(r.url()));
+ await page.getByRole('button',{name:/^Discovery Lab/}).click();
+ await page.getByRole('button',{name:'Act — run this experiment',exact:true}).click();
+ await page.getByRole('button',{name:'Keep trial for comparison'}).waitFor();
+ const offlineRequests=requests.filter(u=>!u.startsWith('blob:')).length;
+ assert.equal(offlineRequests,0);
+ await context.setOffline(false);
+ await page.screenshot({path:'/tmp/forge-mobile.png',fullPage:true});
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+ await page.goto('http://127.0.0.1:3001/pet',{waitUntil:'networkidle'});
+ const tutorial=page.getByRole('dialog',{name:'Meta-Pet tutorial'});
+ if(await tutorial.isVisible())await tutorial.getByRole('button',{name:'Skip',exact:true}).click();
+ await page.getByRole('button',{name:'Show learned movement',exact:true}).click();
+ await page.getByText(/Still response from/).waitFor();
+ const school=await context.request.get('http://127.0.0.1:3001/project-forge',{headers:{'x-forwarded-host':'www.metapet.school'},maxRedirects:0});
+ assert.equal(school.status(),307);
+ // Keyboard traversal and direct Field cookie boundary.
+ await page.keyboard.press('Tab');assert.ok(await page.evaluate(()=>document.activeElement!==document.body));
+ await context.addCookies([{name:'metapet-field-mode',value:'active',url:'http://127.0.0.1:3001'}]);
+ await page.goto('http://127.0.0.1:3001/project-forge',{waitUntil:'domcontentloaded'});
+ await page.getByRole('heading',{name:/short lessons about how systems work/}).waitFor();
+ assert.ok(!new URL(page.url()).pathname.startsWith('/project-forge'),'Field cookie must deny Forge');
+ console.log(JSON.stringify({instruments:6,savedAfterRefresh:6,revision:2,premiumAuditChecks:true,offlineRequests,pageErrors:errors,mobileOverflow:false}));
+ assert.deepEqual(errors,[]);
+ await context.close();
+ const restarted=await chromium.launchPersistentContext(profile,options);
+ const returned=await restarted.newPage();
+ await returned.goto('http://127.0.0.1:3001/schools/field/exit',{waitUntil:'domcontentloaded'});
+ await returned.goto('http://127.0.0.1:3001/project-forge',{waitUntil:'networkidle'});
+ await returned.locator('section[aria-label="My projects"] article').first().waitFor();
+ assert.equal(await returned.locator('section[aria-label="My projects"] article').count(),6);
+ console.log('Browser restart: six projects retained under the same registered identity.');
+ await restarted.close();
+ await fs.rm(profile,{recursive:true,force:true});
+})().catch(e=>{console.error(e);process.exit(1);});

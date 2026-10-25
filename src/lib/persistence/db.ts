@@ -8,8 +8,6 @@ import type { Vitals } from '@/lib/store';
 import type { Genome, DerivedTraits } from '@/lib/genome';
 import type { EvolutionData } from '@/lib/evolution';
 
-const DB_NAME = 'MetaPetDB';
-const DB_VERSION = 1;
 const STORE_NAME = 'pets';
 
 export interface PetData {
@@ -24,34 +22,8 @@ export interface PetData {
   tailDNA: string;
 }
 
-let dbInstance: IDBDatabase | null = null;
-
-/**
- * Initialize IndexedDB
- */
-export async function initDB(): Promise<IDBDatabase> {
-  if (dbInstance) return dbInstance;
-
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => {
-      dbInstance = request.result;
-      resolve(dbInstance);
-    };
-
-    request.onupgradeneeded = (event) => {
-      const db = (event.target as IDBOpenDBRequest).result;
-
-      // Create object store for pets
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-        store.createIndex('lastSaved', 'lastSaved', { unique: false });
-      }
-    };
-  });
-}
+export { initDB } from "./indexeddb";
+import { initDB } from "./indexeddb";
 
 /**
  * Save pet data to IndexedDB

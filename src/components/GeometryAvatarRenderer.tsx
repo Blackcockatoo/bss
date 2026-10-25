@@ -180,7 +180,7 @@ export function GeometryAvatarRenderer({
   } as const;
 
   return (
-    <div className="relative flex w-full items-center justify-center">
+    <div data-geometry-sprite data-geometry-identity={selectedRecord?.petId ?? identityKeyOverride ?? "runtime"} className={`relative flex w-full items-center justify-center ${compact ? "aspect-square" : ""}`}>
       <SriYantraPetDisplay
         red={petProfile.strands.red}
         blue={petProfile.strands.blue}
