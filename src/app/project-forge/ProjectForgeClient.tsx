@@ -1,220 +1,740 @@
 "use client";
-
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useDnaImprint } from "@/lib/dnaImprint";
-import { usePetRegistryStore } from "@/lib/registry";
-import { getForgeTool, type ForgeToolId } from "@/lib/tools/registry";
-import { companionMotif, type ForgeDiscovery } from "@/lib/tools/learningMemory";
+import { usePetRegistryStore, getPetRepository } from "@/lib/registry";
+import {
+  exportForgePetBundle,
+  importForgePetBundle,
+} from "@/lib/tools/petBundle";
+import { FORGE_TOOLS, type ForgeToolId } from "@/lib/tools/registry";
+import {
+  DEFAULT_INPUT,
+  runActivity,
+  type ActivityInput,
+  type Project,
+  type Spark,
+} from "@/lib/tools/activities";
 import { useForgeLearningStore } from "@/lib/tools/learningStore";
-
-async function playSequence(sequence: readonly number[], tempo: number): Promise<void> {
-  const context = new AudioContext();
-  try {
-    if (context.state === "suspended") await context.resume();
-    const noteLength = 60 / tempo;
-    const start = context.currentTime + 0.05;
-    sequence.forEach((value, index) => {
-      const tone = context.createOscillator();
-      const gain = context.createGain();
-      tone.type = "sine";
-      tone.frequency.value = 220 * Math.pow(2, (value - 1) / 12);
-      const time = start + noteLength * index;
-      gain.gain.setValueAtTime(0, time);
-      gain.gain.linearRampToValueAtTime(0.12, time + 0.015);
-      gain.gain.exponentialRampToValueAtTime(0.001, time + noteLength * 0.8);
-      tone.connect(gain).connect(context.destination);
-      tone.start(time);
-      tone.stop(time + noteLength * 0.82);
-    });
-    // Closing is only for audio resources, never a tracking/engagement timer.
-    await new Promise<void>((resolve) => setTimeout(resolve, sequence.length * noteLength * 1000 + 200));
-  } finally {
-    await context.close();
-  }
+import { exportForge, parseForge } from "@/lib/tools/forgePersistence";
+import { playForgeSequence } from "@/lib/tools/audio";
+const control =
+  "min-h-11 w-full rounded-lg border border-slate-500 bg-slate-950 p-3 text-white";
+const button =
+  "min-h-11 rounded-lg border border-teal-300 px-4 py-2 disabled:opacity-40";
+function download(name: string, body: string, type = "application/json") {
+  const url = URL.createObjectURL(new Blob([body], { type }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
-
 export function ProjectForgeClient() {
-  const activePet = usePetRegistryStore((state) => state.activeRecord);
-  const dnaImprint = useDnaImprint();
-  const petId = activePet?.petId ?? null;
-  const { memory, status, error, hydrate, saveDiscovery, clearDiscoveries } = useForgeLearningStore();
-  const [toolId, setToolId] = useState<ForgeToolId>("pattern-forge");
-  const [sequence, setSequence] = useState<[number, number, number, number]>([1, 3, 5, 2]);
-  const [tempo, setTempo] = useState(90);
-  const [prediction, setPrediction] = useState("");
-  const [reflection, setReflection] = useState("");
-  const [playing, setPlaying] = useState(false);
+  const petId = usePetRegistryStore((s) => s.activeRecord?.petId ?? null);
+  // Remount editor per identity: no text or draft leaks when switching pets.
+  return <ForgeEditor key={petId ?? "unregistered"} petId={petId} />;
+}
+function ForgeEditor({ petId }: { petId: string | null }) {
+  const store = useForgeLearningStore();
+  const record = usePetRegistryStore((s) => s.activeRecord);
+  const hydrate = store.hydrate;
+  const [toolId, setTool] = useState<ForgeToolId>("pattern-forge");
+  const [input, setInput] = useState<ActivityInput>(
+    structuredClone(DEFAULT_INPUT),
+  );
+  const [spark, setSpark] = useState<Spark>({
+    spot: "",
+    prediction: "",
+    reflection: "",
+  });
+  const [editing, setEditing] = useState<Project | null>(null);
+  const [result, setResult] = useState<ReturnType<typeof runActivity> | null>(
+    null,
+  );
   const [message, setMessage] = useState("");
-  const tool = getForgeTool(toolId)!;
-
+  const [playing, setPlaying] = useState(false);
+  const [comparison, setComparison] = useState<string | null>(null);
+  const tool = FORGE_TOOLS[toolId];
+  const memory = store.memory?.petId === petId ? store.memory : null;
   useEffect(() => {
     if (petId) void hydrate(petId);
   }, [petId, hydrate]);
-
-  const motif = companionMotif(dnaImprint?.liveMutationSeed ?? petId ?? "anonymous",
-    sequence, tempo);
-  const last = memory?.discoveries.at(-1) ?? null;
-  const canSave = Boolean(petId && memory?.petId === petId && status === "ready" && reflection.trim());
-
-  const updateStep = (index: number, value: number) => {
-    const next = [...sequence] as [number, number, number, number];
-    next[index] = value;
-    setSequence(next);
+  const change = (patch: Partial<ActivityInput>) => {
+    setInput({ ...input, ...patch });
+    setResult(null);
+  };
+  const select = (id: ForgeToolId) => {
+    setInput(structuredClone(DEFAULT_INPUT));
+    setSpark({ spot: "", prediction: "", reflection: "" });
+    setTool(id);
+    setEditing(null);
+    setResult(null);
+    setComparison(null);
     setMessage("");
   };
-
+  const reopen = (p: Project) => {
+    setTool(p.toolId);
+    setInput(structuredClone(p.input));
+    setSpark({ ...p.spark });
+    setEditing(p);
+    setResult(null);
+    setComparison(null);
+    setMessage(
+      `Opened revision ${p.revision}. Change, test and save to revise.`,
+    );
+  };
   const save = async () => {
-    if (!canSave) return;
-    const discovery: ForgeDiscovery = {
-      id: typeof crypto !== "undefined" && "randomUUID" in crypto
-        ? crypto.randomUUID() : `discovery-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    if (!result) return;
+    const now = Date.now();
+    const project: Project = {
+      version: 1,
+      id: editing?.id ?? crypto.randomUUID(),
       toolId,
-      createdAt: Date.now(),
-      sequence,
-      tempo,
-      prediction: prediction.trim().slice(0, 160),
-      reflection: reflection.trim().slice(0, 160),
-      motif,
+      title: input.title || tool.title,
+      createdAt: editing?.createdAt ?? now,
+      updatedAt: now,
+      revision: (editing?.revision ?? 0) + 1,
+      input: structuredClone(input),
+      spark: { ...spark },
     };
     try {
-      await saveDiscovery(discovery);
-      setMessage(`Saved on this device. Your companion learned an ${motif} motif.`);
-      setReflection("");
-    } catch {
-      setMessage("The experiment could not be saved. Nothing was sent online.");
+      await store.saveProject(project);
+      setEditing(project);
+      setMessage(`Saved revision ${project.revision} on this device.`);
+    } catch (e) {
+      setMessage(String(e));
     }
   };
-
-  const clear = async () => {
-    if (!window.confirm("Delete this pet's saved Project Forge discoveries on this device?")) return;
-    try {
-      await clearDiscoveries();
-      setMessage("Project Forge discoveries deleted from this device.");
-    } catch {
-      setMessage("Deletion failed. Please try again or use browser storage controls.");
-    }
-  };
-
   return (
-    <main className="min-h-screen bg-slate-950 px-4 py-8 text-white sm:px-6">
+    <main className="min-h-screen bg-slate-950 p-4 text-white sm:p-8">
       <div className="mx-auto max-w-4xl space-y-6">
-        <Link href="/pet" className="inline-block rounded-lg border border-slate-600 px-4 py-2 text-sm underline-offset-4 hover:underline">
-          ← Back to your companion
+        <Link href="/pet" className={button}>
+          ← Companion
         </Link>
-        <header className="space-y-2">
-          <p className="text-xs font-bold uppercase tracking-[0.25em] text-teal-300">Blue $nake Studio · MetaPet</p>
-          <h1 className="text-3xl font-bold sm:text-4xl">Project Forge</h1>
-          <p className="max-w-2xl text-slate-300">
-            Experiment with patterns and sound. Make a prediction, change something, and explain
-            what happened. Your discovery can become a gentle memory for your digital companion.
+        <header>
+          <p className="text-teal-200">
+            BLUE $NAKE STUDIO · EMPOWER. EDUCATE. CREATE.
           </p>
-          <p className="text-sm text-teal-200">The instrument runs without Grok, accounts or advertising. Offline route availability still needs testing.</p>
+          <h1 className="my-3 text-4xl font-bold">Project Forge</h1>
+          <p>
+            Ask, try, discover and make something you can explain. Everything
+            you save stays on this device. Reflections are optional: leave out
+            personal details.
+          </p>
+          <p className="mt-2 text-sm text-slate-300">
+            Activities work without a connection once this page is open.
+            Starting or reloading offline is not yet guaranteed. Back up work
+            before clearing browser data.
+          </p>
         </header>
-        <div className="grid gap-2 sm:grid-cols-2" role="group" aria-label="Choose a learning tool">
-          {(["pattern-forge", "sound-studio"] as const).map((id) => (
-            <button key={id} type="button" onClick={() => setToolId(id)}
-              aria-pressed={toolId === id}
-              className={`rounded-xl border p-4 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-teal-300 ${toolId === id ? "border-teal-300 bg-teal-900/40" : "border-slate-700 bg-slate-900"}`}>
-              <strong>{getForgeTool(id)!.title}</strong>
-              <span className="mt-1 block text-sm text-slate-300">{getForgeTool(id)!.learningOutcome}</span>
+        <nav aria-label="Instruments" className="grid gap-3 sm:grid-cols-2">
+          {Object.values(FORGE_TOOLS).map((t) => (
+            <button
+              key={t.id}
+              className={`${button} text-left ${t.id === toolId ? "bg-teal-900" : ""}`}
+              aria-pressed={t.id === toolId}
+              onClick={() => select(t.id)}
+            >
+              <strong>{t.title}</strong>
+              <span className="block text-sm">{t.learningOutcome}</span>
             </button>
           ))}
-        </div>
-        <section className="rounded-2xl border border-slate-700 bg-slate-900/70 p-5" aria-labelledby="forge-experiment">
-          <h2 id="forge-experiment" className="text-xl font-bold">{tool.title} experiment</h2>
-          <p className="mt-1 text-sm text-slate-300">SPARK: Spot · Predict · Act · Reflect · Keep</p>
-          <div className="mt-5 space-y-5">
-            <label className="block space-y-2">
-              <span className="font-semibold">Spot &amp; Predict — what do you think your changes will do?</span>
-              <input value={prediction} onChange={(event) => setPrediction(event.target.value)} maxLength={160}
-                placeholder="I think the pattern will..." className="w-full rounded-lg border border-slate-500 bg-slate-950 p-3 text-white" />
+        </nav>
+        <section
+          className="space-y-4 rounded-xl border border-slate-600 p-4"
+          aria-label={tool.title}
+        >
+          <h2 className="text-2xl font-bold">{tool.title}</h2>
+          <p>
+            SPARK · Spot → Predict → Act → Reflect → Keep. Explore freely;
+            writing is optional.
+          </p>
+          <label className="block">
+            Project title
+            <input
+              className={control}
+              maxLength={100}
+              value={input.title}
+              onChange={(e) => change({ title: e.target.value })}
+            />
+          </label>
+          {(["spot", "prediction"] as const).map((k) => (
+            <label className="block" key={k}>
+              {k === "spot"
+                ? "Spot — what will you investigate?"
+                : "Predict — what might happen? (optional)"}
+              <textarea
+                className={control}
+                maxLength={500}
+                value={spark[k]}
+                onChange={(e) => setSpark({ ...spark, [k]: e.target.value })}
+              />
             </label>
-            <div>
-              <h3 className="font-semibold">Act — experiment with four numbers</h3>
-              <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {sequence.map((value, index) => (
-                  <label key={index} className="rounded-lg border border-slate-600 bg-slate-950 p-3 text-center">
-                    <span className="mb-2 block text-sm">Step {index + 1}: {value}</span>
-                    <input type="range" min={1} max={7} step={1} value={value}
-                      aria-label={`Pattern step ${index + 1}`}
-                      onChange={(event) => updateStep(index, Number(event.target.value))}
-                      className="w-full accent-teal-300" />
-                  </label>
+          ))}
+          {(toolId === "pattern-forge" || toolId === "sound-studio") && (
+            <>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  className={button}
+                  onClick={() => change({ sequence: [1, 3, 5, 7] })}
+                >
+                  Starter: add two
+                </button>
+                <button
+                  className={button}
+                  onClick={() =>
+                    change({ sequence: [0, 1, 1, 2, 3, 5, 8, 13, 21] })
+                  }
+                >
+                  Stretch: Fibonacci
+                </button>
+                <button
+                  className={button}
+                  onClick={() =>
+                    change({ sequence: [2, 1, 3, 4, 7, 1, 8, 9, 7, 6, 3, 9] })
+                  }
+                >
+                  Explore MOSS60 seed digits
+                </button>
+              </div>
+              <label className="block">
+                Sequence (2–16 whole numbers, 0–24)
+                <input
+                  className={control}
+                  defaultValue={input.sequence.join(", ")}
+                  key={`${toolId}-${editing?.id ?? "new"}-${editing?.revision ?? 0}-${input.sequence.join(",")}`}
+                  onBlur={(e) => {
+                    const values = e.target.value
+                      .split(/[,\s]+/)
+                      .filter(Boolean)
+                      .map(Number);
+                    if (
+                      values.length >= 2 &&
+                      values.length <= 16 &&
+                      values.every(
+                        (n) => Number.isInteger(n) && n >= 0 && n <= 24,
+                      )
+                    )
+                      change({ sequence: values });
+                    else setMessage("Use 2–16 whole numbers between 0 and 24.");
+                  }}
+                />
+              </label>
+              <p>
+                Applied sequence: {input.sequence.join(", ")}. Leave the
+                sequence field to apply edits.
+              </p>
+              <div
+                className="flex h-28 items-end gap-2"
+                role="img"
+                aria-label={`Pattern values ${input.sequence.join(", ")}`}
+              >
+                {input.sequence.map((n, i) => (
+                  <div
+                    key={i}
+                    className="flex-1 bg-teal-700 text-center"
+                    style={{ height: 20 + n * 3 }}
+                  >
+                    {n}
+                  </div>
                 ))}
               </div>
-            </div>
-            <label className="block">
-              <span className="mb-2 block font-semibold">Tempo: {tempo} beats per minute</span>
-              <input type="range" min={50} max={160} step={10} value={tempo}
-                aria-label="Sound tempo" onChange={(event) => setTempo(Number(event.target.value))}
-                className="w-full accent-teal-300" />
-            </label>
-            <figure className="rounded-xl border border-teal-400/30 bg-slate-950 p-4 text-center">
-              <svg className="mx-auto h-36 w-full max-w-lg" viewBox="0 0 400 125" role="img"
-                aria-label={`Four-step pattern: ${sequence.join(", ")}. Companion response: ${motif}.`}>
-                {sequence.map((value, index) => (
-                  <g key={index}>
-                    <circle cx={50 + index * 100} cy={62} r={value * 5 + 6}
-                      stroke="#67e8f9" strokeWidth={2} fill="none" />
-                    <circle cx={50 + index * 100} cy={62} r={5} fill="#5eead4" />
-                    <text x={50 + index * 100} y={120} fill="white" textAnchor="middle" fontSize="15">{value}</text>
-                  </g>
-                ))}
-              </svg>
-              <figcaption className="mt-2 text-sm text-slate-300">Change a number to change the shape; the notes use the same sequence.</figcaption>
-            </figure>
-            <div className="flex flex-wrap gap-3">
-              <button type="button" disabled={playing} onClick={async () => {
-                setPlaying(true);
-                try {
-                  await playSequence(sequence, tempo);
-                } catch {
-                  setMessage("Audio isn't available here. The visual pattern still works.");
-                } finally { setPlaying(false); }
-              }} className="rounded-lg bg-teal-400 px-4 py-3 font-semibold text-slate-950 disabled:opacity-50">
-                {playing ? "Playing…" : "Hear your pattern"}
+              <label className="block">
+                Tempo: {input.tempo} BPM
+                <input
+                  className="min-h-11 w-full"
+                  type="range"
+                  min="50"
+                  max="160"
+                  value={input.tempo}
+                  onChange={(e) => change({ tempo: Number(e.target.value) })}
+                />
+              </label>
+              {toolId === "sound-studio" && (
+                <label className="block">
+                  Rhythm: beat lengths (0.25, 0.5, 1 or 2; repeats across notes)
+                  <input
+                    className={control}
+                    defaultValue={(input.rhythm ?? [1]).join(", ")}
+                    key={`rhythm-${editing?.id ?? "new"}`}
+                    onBlur={(e) => {
+                      const rhythm = e.target.value
+                        .split(/[,\s]+/)
+                        .filter(Boolean)
+                        .map(Number);
+                      if (
+                        rhythm.length >= 1 &&
+                        rhythm.length <= 16 &&
+                        rhythm.every((n) => [0.25, 0.5, 1, 2].includes(n))
+                      )
+                        change({ rhythm });
+                      else
+                        setMessage("Use 1–16 beat lengths: 0.25, 0.5, 1 or 2.");
+                    }}
+                  />
+                </label>
+              )}
+              <label className="block">
+                Repetitions
+                <select
+                  className={control}
+                  value={input.repeats}
+                  onChange={(e) => change({ repeats: Number(e.target.value) })}
+                >
+                  {[1, 2, 3, 4].map((n) => (
+                    <option key={n}>{n}</option>
+                  ))}
+                </select>
+              </label>
+              <button
+                className={button}
+                disabled={playing}
+                onClick={async () => {
+                  setPlaying(true);
+                  try {
+                    await playForgeSequence(
+                      input.sequence,
+                      input.tempo,
+                      input.repeats,
+                      input.rhythm,
+                    );
+                  } catch (e) {
+                    setMessage(String(e));
+                  } finally {
+                    setPlaying(false);
+                  }
+                }}
+              >
+                Hear sequence (optional)
               </button>
-              <p className="self-center text-sm text-slate-300" aria-live="polite">
-                Companion response: <strong>{motif}</strong> (deterministic, from saved local inputs)
+            </>
+          )}
+          {toolId === "discovery-lab" && (
+            <>
+              <p>
+                Falling object model. Change one variable, predict, then compare
+                two trials.
               </p>
+              {(["height", "gravity"] as const).map((k) => (
+                <label className="block" key={k}>
+                  {k === "height"
+                    ? "Height (metres)"
+                    : "Gravity (metres per second squared)"}
+                  <input
+                    className={control}
+                    type="number"
+                    min={k === "height" ? 0.1 : 1}
+                    max={k === "height" ? 10 : 20}
+                    step="0.1"
+                    value={input[k]}
+                    onChange={(e) => change({ [k]: Number(e.target.value) })}
+                  />
+                </label>
+              ))}
+            </>
+          )}
+          {toolId === "story-workshop" && (
+            <>
+              {input.paragraphs.map((p, i) => (
+                <label className="block" key={i}>
+                  {
+                    [
+                      "Opening — introduce someone and a problem",
+                      "Ending A — one choice",
+                      "Ending B — a different choice",
+                    ][i]
+                  }
+                  <textarea
+                    className={control}
+                    rows={4}
+                    maxLength={2000}
+                    value={p}
+                    onChange={(e) =>
+                      change({
+                        paragraphs: input.paragraphs.map((old, j) =>
+                          j === i ? e.target.value : old,
+                        ),
+                      })
+                    }
+                  />
+                </label>
+              ))}
+              <label className="block">
+                Which ending follows your opening?
+                <select
+                  className={control}
+                  value={input.choice}
+                  onChange={(e) => change({ choice: Number(e.target.value) })}
+                >
+                  <option value={1}>A</option>
+                  <option value={2}>B</option>
+                </select>
+              </label>
+              <p className="whitespace-pre-wrap rounded border p-4">
+                {input.paragraphs[0]}
+                {"\n\n"}
+                {input.paragraphs[input.choice]}
+              </p>
+              <button
+                className={button}
+                onClick={() =>
+                  download(
+                    "my-story.txt",
+                    `${input.title}\n\n${input.paragraphs[0]}\n\n${input.paragraphs[input.choice]}`,
+                    "text/plain",
+                  )
+                }
+              >
+                Export my writing
+              </button>
+            </>
+          )}
+          {toolId === "maker-bench" && (
+            <>
+              <p>
+                Help a robot carry a supply from (0, 0) to (2, 2). It starts
+                facing north. Assemble up to 30 instructions.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {(["forward", "left", "right"] as const).map((step) => (
+                  <button
+                    key={step}
+                    className={button}
+                    disabled={input.steps.length >= 30}
+                    onClick={() => change({ steps: [...input.steps, step] })}
+                  >
+                    {step}
+                  </button>
+                ))}
+                <button
+                  className={button}
+                  onClick={() => change({ steps: input.steps.slice(0, -1) })}
+                >
+                  Undo instruction
+                </button>
+                <button
+                  className={button}
+                  onClick={() => change({ steps: [] })}
+                >
+                  Clear instructions
+                </button>
+              </div>
+              <ol className="list-inside list-decimal">
+                {input.steps.map((s, i) => (
+                  <li key={i}>{s}</li>
+                ))}
+              </ol>
+            </>
+          )}
+          {toolId === "life-compass" && (
+            <>
+              <p>
+                Plan a small real-world project. Use task descriptions, never
+                names, addresses or passwords.
+              </p>
+              {input.tasks.map((t, i) => (
+                <div key={i} className="grid gap-2 sm:grid-cols-3">
+                  <label>
+                    Task {i + 1}
+                    <input
+                      className={control}
+                      maxLength={100}
+                      value={t.text}
+                      onChange={(e) =>
+                        change({
+                          tasks: input.tasks.map((old, j) =>
+                            i === j ? { ...old, text: e.target.value } : old,
+                          ),
+                        })
+                      }
+                    />
+                  </label>
+                  <label>
+                    Minutes
+                    <input
+                      className={control}
+                      type="number"
+                      min="1"
+                      max="120"
+                      value={t.minutes}
+                      onChange={(e) =>
+                        change({
+                          tasks: input.tasks.map((old, j) =>
+                            i === j
+                              ? { ...old, minutes: Number(e.target.value) }
+                              : old,
+                          ),
+                        })
+                      }
+                    />
+                  </label>
+                  <button
+                    className={button}
+                    onClick={() =>
+                      change({ tasks: input.tasks.filter((_, j) => i !== j) })
+                    }
+                  >
+                    Remove task {i + 1}
+                  </button>
+                </div>
+              ))}
+              <button
+                className={button}
+                disabled={input.tasks.length >= 20}
+                onClick={() =>
+                  change({ tasks: [...input.tasks, { text: "", minutes: 5 }] })
+                }
+              >
+                Add task
+              </button>
+              <label className="block">
+                How sure are you about the information you need?
+                <select
+                  className={control}
+                  value={input.source}
+                  onChange={(e) =>
+                    change({
+                      source: e.target.value as ActivityInput["source"],
+                    })
+                  }
+                >
+                  <option value="uncertain">Still need to check</option>
+                  <option value="verified">I checked a reliable source</option>
+                </select>
+              </label>
+            </>
+          )}
+          <button
+            className={`${button} bg-teal-800`}
+            onClick={() => {
+              try {
+                setResult(runActivity(toolId, input));
+                setMessage(
+                  "Experiment complete. Compare with your prediction.",
+                );
+              } catch (e) {
+                setMessage(String(e));
+              }
+            }}
+          >
+            Act — run this experiment
+          </button>
+          {result && (
+            <div
+              className="space-y-2 rounded border border-teal-400 p-4"
+              role="status"
+            >
+              <p>{result.summary}</p>
+              <p>{result.explanation}</p>
+              <p>
+                Observed values:{" "}
+                {result.values.map((v) => Number(v.toFixed(3))).join(", ")}
+              </p>
+              <button
+                className={button}
+                onClick={() => setComparison(result.summary)}
+              >
+                Keep trial for comparison
+              </button>
             </div>
-            <label className="block space-y-2">
-              <span className="font-semibold">Reflect — what did you discover?</span>
-              <input value={reflection} onChange={(event) => setReflection(event.target.value)}
-                maxLength={160} placeholder="When I changed step 2..." className="w-full rounded-lg border border-slate-500 bg-slate-950 p-3 text-white" />
-            </label>
-            <button type="button" disabled={!canSave} onClick={() => void save()}
-              className="rounded-lg bg-cyan-300 px-5 py-3 font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-40">
-              Keep this discovery locally
-            </button>
-            {!petId && <p className="text-sm text-amber-200">
-              Open your <Link className="underline" href="/pet">companion</Link> first to register a local pet before saving.
-            </p>}
-            {error && <p role="alert" className="text-sm text-amber-200">Local save issue: {error}</p>}
-            <p aria-live="polite" className="text-sm text-teal-200">{message}</p>
-          </div>
-        </section>
-        <section className="rounded-xl border border-slate-700 p-5" aria-label="Saved local discoveries">
-          <h2 className="text-xl font-bold">Keep — your companion's memory</h2>
-          <p className="mt-2 text-sm text-slate-300">
-            Discoveries are stored separately from pet identity and vitals, on this device only.
-            No attendance or streak penalties. Clearing browser data can erase them.
-          </p>
-          {last ? (
-            <div className="mt-3 rounded-lg bg-teal-950/40 p-4">
-              <p><strong>{last.motif}</strong> motif · {getForgeTool(last.toolId)?.title}</p>
-              <p className="mt-1 text-sm text-slate-200">You discovered: {last.reflection}</p>
-              <p className="mt-1 text-xs text-slate-400">Saved discoveries: {memory?.discoveries.length ?? 0}</p>
-            </div>
-          ) : <p className="mt-3 text-sm text-slate-400">Nothing saved yet. Make something you want to remember.</p>}
-          {petId && memory && memory.discoveries.length > 0 && (
-            <button type="button" onClick={() => void clear()}
-              className="mt-4 rounded-lg border border-rose-400 px-3 py-2 text-sm text-rose-200">
-              Delete Project Forge discoveries
-            </button>
+          )}
+          {comparison && <p>Earlier trial: {comparison}</p>}
+          <label className="block">
+            Reflect — what changed and why? (optional)
+            <textarea
+              className={control}
+              maxLength={500}
+              value={spark.reflection}
+              onChange={(e) =>
+                setSpark({ ...spark, reflection: e.target.value })
+              }
+            />
+          </label>
+          <button
+            className={button}
+            disabled={!petId || !result || store.status !== "ready"}
+            onClick={() => void save()}
+          >
+            Keep — {editing ? "save revision" : "save project"} locally
+          </button>
+          {!petId && (
+            <p>
+              Explore freely. Open your companion first to register its local
+              identity before saving.
+            </p>
+          )}
+          <p role="status">{message}</p>
+          {store.error && (
+            <p role="alert">
+              Local storage: {store.error}{" "}
+              <button
+                className={button}
+                onClick={() => petId && void store.hydrate(petId)}
+              >
+                Retry storage
+              </button>
+            </p>
           )}
         </section>
+        <section className="space-y-3" aria-label="My projects">
+          <h2 className="text-2xl font-bold">My projects</h2>
+          {(memory?.projects ?? []).map((p) => (
+            <article className="rounded border p-3" key={p.id}>
+              <h3>
+                {p.title} · {FORGE_TOOLS[p.toolId].title} · revision{" "}
+                {p.revision}
+              </h3>
+              <div className="flex gap-2">
+                <button className={button} onClick={() => reopen(p)}>
+                  Reopen {p.title}
+                </button>
+                <button
+                  className={button}
+                  disabled={store.status !== "ready"}
+                  onClick={() => {
+                    if (
+                      confirm(`Delete ${p.title} and its companion influence?`)
+                    )
+                      void store
+                        .deleteProject(p.id)
+                        .then(() => {
+                          if (editing?.id === p.id) setEditing(null);
+                        })
+                        .catch((e) => setMessage(String(e)));
+                  }}
+                >
+                  Delete {p.title}
+                </button>
+              </div>
+            </article>
+          ))}
+          {record && (
+            <div className="space-y-2">
+              <button
+                className={button}
+                onClick={() =>
+                  void exportForgePetBundle(record)
+                    .then((body) => download("metapet-with-forge.json", body))
+                    .catch((e) => setMessage(String(e)))
+                }
+              >
+                Export pet identity and Forge work
+              </button>
+              <label className="block">
+                Restore pet + Forge bundle
+                <input
+                  className={control}
+                  type="file"
+                  accept=".json"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      if (file.size > 1000000)
+                        throw new Error("Bundle too large.");
+                      if (
+                        confirm(
+                          "Restore pet and its Forge work? Existing Forge work for that identity will be replaced.",
+                        )
+                      ) {
+                        const restored = await importForgePetBundle(
+                          await file.text(),
+                          getPetRepository(),
+                        );
+                        await getPetRepository().saveRecord(restored, {
+                          activate: true,
+                        });
+                        // A fresh boot hydrates every companion renderer from the restored identity.
+                        window.location.reload();
+                        setMessage("Pet and Forge work restored locally.");
+                      }
+                    } catch (err) {
+                      setMessage(String(err));
+                    }
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            </div>
+          )}
+          {memory && (
+            <>
+              <button
+                className={button}
+                onClick={() =>
+                  download(
+                    "metapet-forge.json",
+                    exportForge({ ...memory, projects: memory.projects ?? [] }),
+                  )
+                }
+              >
+                Export all Forge work
+              </button>
+              <label className="block">
+                Restore Forge backup for this pet (replaces current Forge work)
+                <input
+                  className={control}
+                  type="file"
+                  accept="application/json,.json"
+                  disabled={store.status !== "ready"}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file || !petId) return;
+                    try {
+                      if (file.size > 500000)
+                        throw new Error("Backup too large.");
+                      const restored = parseForge(await file.text(), petId);
+                      if (
+                        confirm(
+                          "Replace this pet’s Forge work with this backup?",
+                        )
+                      ) {
+                        await store.replaceMemory(restored);
+                        setEditing(null);
+                        setMessage("Restored locally.");
+                      }
+                    } catch (err) {
+                      setMessage(String(err));
+                    }
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+              <button
+                className={button}
+                disabled={store.status !== "ready"}
+                onClick={() => {
+                  if (
+                    confirm(
+                      "Delete all Forge projects and discoveries for this pet?",
+                    )
+                  )
+                    void store
+                      .clearDiscoveries()
+                      .then(() => setEditing(null))
+                      .catch((e) => setMessage(String(e)));
+                }}
+              >
+                Delete all Forge work
+              </button>
+            </>
+          )}
+        </section>
+        <details className="rounded border p-4">
+          <summary className="min-h-11 cursor-pointer">
+            Teacher guidance
+          </summary>
+          <p>
+            Optional 15-minute activity: choose one question (2 min), predict (2
+            min), change one input and run two trials (5 min), compare and
+            explain verbally, in writing or with the visual (4 min), save or
+            delete and close (2 min). Objective: explain cause and effect using
+            evidence from a model or creation. Review only work the child
+            chooses to show on this device. No automated assessment or classroom
+            roster is accessed. These consumer instruments are not yet approved
+            for Field Mode; the existing seven lessons remain separate.
+          </p>
+        </details>
       </div>
     </main>
   );

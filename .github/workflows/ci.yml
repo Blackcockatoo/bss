@@ -73,3 +73,27 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Install Chromium for Forge browser verification
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify Forge in the production browser runtime
+        run: |
+          npm run start -- -H 127.0.0.1 -p 3001 > /tmp/forge-server.log 2>&1 &
+          FORGE_SERVER_PID=$!
+          trap 'kill "$FORGE_SERVER_PID" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl --silent --fail http://127.0.0.1:3001/project-forge > /dev/null; then break; fi
+            sleep 1
+          done
+          node scripts/project-forge/browser-smoke.cjs
+
+      - name: Preserve Forge browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: forge-browser-evidence
+          path: |
+            /tmp/forge-mobile.png
+            /tmp/forge-server.log
+          if-no-files-found: ignore

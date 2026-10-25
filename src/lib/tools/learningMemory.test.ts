@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { addForgeDiscovery, companionMotif, emptyForgeMemory, normaliseForgeMemory } from "./learningMemory";
+import {
+  addForgeDiscovery,
+  companionMotif,
+  emptyForgeMemory,
+  normaliseForgeMemory,
+} from "./learningMemory";
 import { FORGE_TOOLS, getForgeTool } from "./registry";
 
 const sample = {
@@ -15,23 +20,43 @@ const sample = {
 
 describe("Project Forge local learning contract", () => {
   it("registers only bounded offline child-local instruments", () => {
-    expect(Object.values(FORGE_TOOLS)).toHaveLength(2);
+    expect(Object.values(FORGE_TOOLS)).toHaveLength(6);
     expect(getForgeTool("untrusted")).toBeNull();
-    expect(Object.values(FORGE_TOOLS).every((tool) =>
-      tool.offline && tool.safetyClass === "child-local")).toBe(true);
+    expect(
+      Object.values(FORGE_TOOLS).every(
+        (tool) => tool.offline && tool.safetyClass === "child-local",
+      ),
+    ).toBe(true);
   });
 
   it("retains a same-pet discovery across JSON roundtrips", () => {
     const memory = addForgeDiscovery(emptyForgeMemory("pet-1"), sample);
-    expect(normaliseForgeMemory(JSON.parse(JSON.stringify(memory)), "pet-1")).toEqual(memory);
+    expect(
+      normaliseForgeMemory(JSON.parse(JSON.stringify(memory)), "pet-1"),
+    ).toEqual(memory);
     expect(normaliseForgeMemory(memory, "pet-2").discoveries).toEqual([]);
   });
 
   it("rejects malformed older or potentially dangerous input", () => {
-    expect(normaliseForgeMemory({ version: 2, petId: "p", discoveries: [sample] }, "p").discoveries).toEqual([]);
-    expect(normaliseForgeMemory({ version: 1, petId: "p", discoveries: [
-      { ...sample, tempo: 9999 }, { ...sample, toolId: "untrusted" },
-    ] }, "p").discoveries).toEqual([]);
+    expect(
+      normaliseForgeMemory(
+        { version: 2, petId: "p", discoveries: [sample] },
+        "p",
+      ).discoveries,
+    ).toEqual([]);
+    expect(
+      normaliseForgeMemory(
+        {
+          version: 1,
+          petId: "p",
+          discoveries: [
+            { ...sample, tempo: 9999 },
+            { ...sample, toolId: "untrusted" },
+          ],
+        },
+        "p",
+      ).discoveries,
+    ).toEqual([]);
   });
 
   it("caps history with no streak or daily-attendance penalty", () => {
