@@ -87,6 +87,7 @@ jobs:
             sleep 1
           done
           node scripts/project-forge/browser-smoke.cjs
+          node scripts/project-forge/living-genome-smoke.cjs
 
       - name: Preserve Forge browser evidence
         if: always()
@@ -96,4 +97,5 @@ jobs:
           path: |
             /tmp/forge-mobile.png
             /tmp/forge-server.log
+            /tmp/living-genome-evidence/
           if-no-files-found: ignore
