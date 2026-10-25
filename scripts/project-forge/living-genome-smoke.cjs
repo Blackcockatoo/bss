@@ -43,6 +43,12 @@ const viewports = [
     await page.getByRole('button',{name:/Advanced \/ Mechanics Lab/}).waitFor();
     await skipTutorial();
     await page.waitForFunction(()=>document.querySelector('[data-testid$="pet-runtime"]'));
+    await page.waitForFunction(async()=>{
+      if(!(await indexedDB.databases()).some(db=>db.name==='MetaPetRegistryDB')) return false;
+      const db=await new Promise((resolve,reject)=>{const r=indexedDB.open('MetaPetRegistryDB',1);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
+      if(!db.objectStoreNames.contains('registryMeta')){db.close();return false;}
+      const active=await new Promise((resolve,reject)=>{const r=db.transaction('registryMeta').objectStore('registryMeta').get('activePetId');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});db.close();return !!active;
+    });
     const initial=await recordState();assert.ok(initial.active);
 
     await go('/app/battle');
@@ -122,7 +128,7 @@ const viewports = [
     await page.getByRole('button',{name:'Pilot: Monkey',exact:true}).click();
     await page.getByRole('button',{name:'Pilot: Geometry',exact:true}).waitFor();
     await page.getByRole('button',{name:'Insert Coin',exact:true}).click();
-    await page.getByRole('button',{name:'Press Start',exact:true}).click();
+    await page.getByRole('button',{name:/^(Press Start|Tap Level To Start)$/}).click();
     await page.locator('#startScreen').waitFor({state:'hidden'});
     for(const viewport of [viewports[2],viewports[4]]) {
       await page.setViewportSize(viewport);await noOverflow();
