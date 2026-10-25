@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function AppBattlePage() {
   return (
-    <main className="mx-auto min-h-screen w-full max-w-4xl px-4 py-8 space-y-6">
+    <main className="phone-experience-shell mx-auto min-h-screen w-full max-w-4xl px-4 py-8 space-y-6">
       <header className="rounded-xl border border-slate-800 bg-slate-900/60 p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -20,7 +20,7 @@ export default function AppBattlePage() {
 
           <Link
             href="/app/activities"
-            className="rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-2 text-sm font-medium text-zinc-200 transition hover:border-cyan-400"
+            className="inline-flex min-h-11 items-center rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-2 text-sm font-medium text-zinc-200 transition hover:border-cyan-400"
           >
             Open Full Activities
           </Link>

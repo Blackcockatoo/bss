@@ -45,7 +45,7 @@ export default function AppActivitiesPage() {
   const showNavigator = !IS_SCHOOLS_PROFILE;
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-8 space-y-6">
+    <main className="phone-experience-shell mx-auto w-full max-w-5xl px-4 py-8 space-y-6">
       <header className="rounded-[2rem] border border-cyan-400/20 bg-gradient-to-br from-cyan-950/70 via-slate-900 to-violet-950/60 p-5 sm:p-7">
         <p className="text-xs font-bold uppercase tracking-[0.22em] text-cyan-300">Pick your next adventure</p>
         <h1 className="mt-2 text-3xl font-black text-white">What sounds fun today?</h1>

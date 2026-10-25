@@ -110,4 +110,13 @@ describe("RegistrationCertificate", () => {
     expect(await (downloaded as unknown as Blob).text()).toMatch(/^MP2\./);
     expect(screen.getByText(/Pet backup saved/)).toBeInTheDocument();
   });
+
+  it('keeps closing accessible with a long companion name and registration details', () => {
+    record = { ...record, name: 'A very long companion name with an unbroken identifier ' + 'A'.repeat(80) };
+    const onClose = vi.fn();
+    render(certificate(true, onClose));
+    expect(screen.getByRole('dialog', { name: 'Registration certificate' })).toHaveAttribute('aria-modal', 'true');
+    fireEvent.click(screen.getByRole('button', { name: 'Close certificate' }));
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
 });
