@@ -58,14 +58,15 @@ const fs = require('node:fs/promises');
  // Keyboard traversal and direct Field cookie boundary.
  await page.keyboard.press('Tab');assert.ok(await page.evaluate(()=>document.activeElement!==document.body));
  await context.addCookies([{name:'metapet-field-mode',value:'active',url:'http://127.0.0.1:3001'}]);
- await page.goto('http://127.0.0.1:3001/project-forge',{waitUntil:'networkidle'});
+ await page.goto('http://127.0.0.1:3001/project-forge',{waitUntil:'domcontentloaded'});
+ await page.getByRole('heading',{name:/short lessons about how systems work/}).waitFor();
  assert.ok(!new URL(page.url()).pathname.startsWith('/project-forge'),'Field cookie must deny Forge');
  console.log(JSON.stringify({instruments:6,savedAfterRefresh:6,revision:2,offlineRequests,pageErrors:errors,mobileOverflow:false}));
  assert.deepEqual(errors,[]);
  await context.close();
  const restarted=await chromium.launchPersistentContext(profile,options);
  const returned=await restarted.newPage();
- await returned.goto('http://127.0.0.1:3001/schools/field/exit',{waitUntil:'networkidle'});
+ await returned.goto('http://127.0.0.1:3001/schools/field/exit',{waitUntil:'domcontentloaded'});
  await returned.goto('http://127.0.0.1:3001/project-forge',{waitUntil:'networkidle'});
  await returned.locator('section[aria-label="My projects"] article').first().waitFor();
  assert.equal(await returned.locator('section[aria-label="My projects"] article').count(),6);
