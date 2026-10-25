@@ -9,7 +9,7 @@ Repository: `Blackcockatoo/bss`. Review branch: `feature/project-forge-first-sli
 | `npm ci` baseline | Successful, 545 packages installed |
 | Original PR CI inspection | Lint: 2 errors. Unit: 2 failed, 1,314 passed. Build skipped. Vercel previews ready, not proof of tests |
 | `npm run lint` after implementation | Passed: TypeScript and ESLint, no final errors or warnings |
-| `npx vitest run` after dependency hardening | **184 files passed; 1,341 tests passed; 0 failed**, Vitest 4.1.12 |
+| `npx vitest run` after dependency hardening | **184 files passed; 1,342 tests passed; 0 failed**, Vitest 4.1.12 |
 | `npm run build` | Passed, Next.js 16.4.3 / webpack; production compilation, TypeScript, route generation |
 | `npm run check:child-safe-deployment` (default) | Command succeeded but assertion **skipped** because STUDENT_DEPLOYMENT was unset |
 | Same deployment command with student=true, child-safe=true, profile=schools, site=https://www.metapet.school | Passed: Schools deployment contract configured |
@@ -28,15 +28,25 @@ Dependency corrections updated the lockfile within declared ranges, including Ne
 - Child workspace DOM integration: all six instruments run/save with optional reflection empty and no audio; reopen/revise/remount/delete succeeds; no `fetch` calls made by those activities. This uses Testing Library + Happy DOM, **not a real browser**.
 - School programme, pet renderer selection, registry identity, genome, progression and Field boundary regression tests are included in the full suite.
 
-## Browser evidence and exact limitation
+## Real-browser CI evidence
 
-A Playwright Chromium launch was attempted. No browser executable was installed in the container. A browser download was then attempted and failed with an invalid/truncated ZIP, ending `Failed to install browsers`. Therefore no local real-browser pass, screenshot, touch, Web Audio playback, screen-reader or browser-restart result is claimed.
+[CI run 40162992814](https://github.com/Blackcockatoo/bss/actions/runs/40162992814) completed successfully for application/test commit `7ff62a5bc6a8de08bdecbe1a153bac6e88361463`. Lint, all 1,342 tests, geometry lock, production build and Playwright Chromium passed. The preceding browser runs found and corrected onboarding handling in the test harness and a real public-port-loss defect in Field redirects; the fix has a dedicated middleware regression test.
 
-`node scripts/project-forge/browser-smoke.cjs` is a reproducible production-runtime check. It covers six saved projects, refresh, revision, backup export/delete/restore, no activity requests while offline, mobile overflow, keyboard focus, reduced-motion companion response and direct school/Field denial. CI now installs Chromium, builds, runs this script on a localhost production server and preserves browser evidence. Its result must be read from the new run; authoring a check is not a passing check.
+Exact browser output:
+
+```json
+{"instruments":6,"savedAfterRefresh":6,"revision":2,"offlineRequests":0,"pageErrors":[],"mobileOverflow":false}
+```
+
+The following logged assertion also passed: `Browser restart: six projects retained under the same registered identity.` Chromium used a persistent profile, a 390×844 viewport, touch capability emulation and reduced motion. It created work in all six instruments, refreshed, reopened/revised, exported a backup, deleted a project, restored the backup, ran an activity with the connection disabled, exercised the companion response and verified direct school-host/Field denials. After closing and relaunching Chromium, all six projects returned.
+
+[Browser screenshot and server log](https://github.com/Blackcockatoo/bss/actions/runs/40162992814/artifacts/12587326798) were preserved as a CI artifact. The mobile screenshot was visually inspected. No horizontal overflow was measured. These are automated Chromium checks, not a manual touch/screen-reader or all-browser certification.
+
+Local Chromium was absent and its download failed with an invalid/truncated ZIP; real-browser execution was completed in GitHub CI instead. `node scripts/project-forge/browser-smoke.cjs` is the reproducible check (serve the production build at 127.0.0.1:3001). The Field test asserts the rendered classroom heading rather than waiting for background traffic to stop.
 
 ## Release blockers
 
-1. Obtain a passing actual-browser CI run; repair any failures. Complete manual screen-reader, keyboard/touch, muted Web Audio and mobile/daylight checks. Desktop/mobile Chromium smoke alone does not certify other browsers or assistive technology.
+1. Complete manual screen-reader, full keyboard/touch, muted Web Audio and mobile/daylight checks. The passing Chromium smoke does not certify other browsers or assistive technology.
 2. Offline cold start/reload is not implemented for Forge. Activities work after loading, but the existing offline pack remains Field-only. A safe consumer pack must preserve route/capability separation even after entering Field Mode.
 3. Complete explicit canonical-pet erasure and orphan-recovery/cleanup controls. Existing archive deletion retains historical snapshots by design. Do not automatically destroy orphan work to make a cleanup counter green.
 4. Educator review, validated curriculum mapping and school admission gates remain outstanding. Family instruments are excluded from Field Mode; the seven-session school programme is preserved.
@@ -45,3 +55,12 @@ A Playwright Chromium launch was attempted. No browser executable was installed 
 ## Production release sequence
 
 Resolve the blockers on the review branch, run the full commands above and real-browser/manual checks, have an adult educator review content, review legacy backups and deletion semantics, and get explicit merge/deploy approval. Only then merge into the verified `main` branch and use the existing Vercel production workflow for `bss-l8cw`; verify live identity, save/restore and school host boundaries after release. No merge, production push, domain reassignment or deployment promotion has been performed here.
+
+## Review commits
+
+- `85bc348`: six instruments, project ownership, acquired response, migrations and dependency hardening.
+- `7f38479` / `664ce65`: onboarding, restart and isolated offline-request browser evidence.
+- `bab377e`: public authority/port preservation in Field redirects, with a regression test.
+- `7ff62a5`: rendered classroom boundary assertion; full CI/browser run above passed.
+
+This final evidence-only documentation update does not change the tested application. Production remains untouched and the PR remains draft.
