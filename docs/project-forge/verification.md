@@ -1,5 +1,7 @@
 # Project Forge verification — 25 October 2026
 
+For the subsequent quality upgrade and its latest checks, see [premium-upgrade-audit.md](premium-upgrade-audit.md). The results below describe the original implementation checkpoint.
+
 Repository: `Blackcockatoo/bss`. Review branch: `feature/project-forge-first-slice-20261025`, PR #179. Production is unchanged. See `architecture.md` for code ownership, flows and limitations.
 
 ## Executed locally

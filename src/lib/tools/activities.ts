@@ -1,6 +1,7 @@
 /** Trusted, deterministic SPARK activities. No dynamic code, network, or inference. */
 import {
   canUseForgeTool,
+  getForgeTool,
   type ForgeContext,
   type ForgeToolId,
 } from "./registry";
@@ -89,18 +90,23 @@ export function validInput(v: unknown): v is ActivityInput {
         number(t.minutes, 1, 120) &&
         Number.isInteger(t.minutes),
     ) &&
-    ["verified", "uncertain"].includes(String(v.source))
+    (v.source === "verified" || v.source === "uncertain")
   );
 }
 export function validProject(v: unknown): v is Project {
   return (
     object(v) &&
     v.version === 1 &&
+    typeof v.toolId === "string" &&
+    !!getForgeTool(v.toolId) &&
     text(v.id, 100) &&
     !!v.id &&
     text(v.title, 100) &&
     number(v.createdAt, 0, Number.MAX_SAFE_INTEGER) &&
     number(v.updatedAt, 0, Number.MAX_SAFE_INTEGER) &&
+    Number.isSafeInteger(v.createdAt) &&
+    Number.isSafeInteger(v.updatedAt) &&
+    v.updatedAt >= v.createdAt &&
     number(v.revision, 1, 1000000) &&
     Number.isInteger(v.revision) &&
     object(v.spark) &&
@@ -115,6 +121,12 @@ export type ActivityResult = {
   explanation: string;
   values: number[];
   signal: number[];
+  robotPath?: { x: number; y: number }[];
+  writingReview?: {
+    distinctWords: number;
+    repeatedWords: string[];
+    prompts: string[];
+  };
 };
 export function runActivity(
   id: ForgeToolId,
@@ -166,28 +178,53 @@ export function runActivity(
       };
     }
     case "story-workshop": {
-      const words = input.paragraphs
-        .join(" ")
-        .trim()
-        .split(/\s+/)
-        .filter(Boolean);
-      const sentences = input.paragraphs
-        .join(" ")
-        .split(/[.!?]+/)
-        .filter((s) => s.trim());
+      const selected = [input.paragraphs[0], input.paragraphs[input.choice]];
+      const story = selected.join(" ");
+      const words = story.trim().split(/\s+/).filter(Boolean);
+      const sentences = story.split(/[.!?]+/).filter((s) => s.trim());
+      const vocabulary =
+        story.toLowerCase().match(/\p{L}[\p{L}\p{N}’'-]*/gu) ?? [];
+      const counts = new Map<string, number>();
+      for (const word of vocabulary)
+        counts.set(word, (counts.get(word) ?? 0) + 1);
+      const repeatedWords = [...counts]
+        .filter(([, count]) => count > 1)
+        .map(([word]) => word)
+        .sort()
+        .slice(0, 12);
+      const prompts: string[] = [];
+      if (selected.some((p) => /^\p{Ll}/u.test(p.trim())))
+        prompts.push(
+          "Check whether each paragraph starts with the capital letter you intended.",
+        );
+      if (
+        selected.some(
+          (p) => p.trim() && !/[.!?][\u201d\u2019"')]*$/.test(p.trim()),
+        )
+      )
+        prompts.push("Try end punctuation to show where a thought finishes.");
+      if (repeatedWords.length)
+        prompts.push(
+          "Choose a repeated word. Try one of your own alternatives, then compare the meaning.",
+        );
+      if (!prompts.length)
+        prompts.push(
+          "Find a subject and its verb. Read your chosen ending and explain how the choice changes the story.",
+        );
       return {
-        summary: `${words.length} words; ${sentences.length} sentence segments. Chosen ending: ${input.choice}.`,
+        summary: `${words.length} words; ${sentences.length} sentence segments in your chosen story. Ending: ${input.choice}.`,
         explanation:
           "Read the opening and your chosen ending aloud or silently. Check who acts (subject), what they do (verb), capitals and punctuation. Counts are mechanical, not a judgement of your writing.",
         values: [words.length, sentences.length],
         signal: [words.length, input.choice],
+        writingReview: { distinctWords: counts.size, repeatedWords, prompts },
       };
     }
     case "maker-bench": {
       let x = 0,
         y = 0,
         d = 0;
-      const path = [0];
+      const robotPath = [{ x, y }];
       for (const step of input.steps) {
         if (step === "left") d = (d + 3) % 4;
         else if (step === "right") d = (d + 1) % 4;
@@ -195,13 +232,14 @@ export function runActivity(
           x += [0, 1, 0, -1][d];
           y += [1, 0, -1, 0][d];
         }
-        path.push(x + y * 5);
+        robotPath.push({ x, y });
       }
       return {
         summary: `Robot at (${x}, ${y}), facing ${["north", "east", "south", "west"][d]}. Goal (2, 2): ${x === 2 && y === 2 ? "reached" : "try revising"}.`,
         explanation:
           "Start at (0, 0), facing north. Forward moves one square; turns change direction only. Plan, run, compare and revise. These are bounded instructions, never executable scripts.",
-        values: path,
+        values: [x, y],
+        robotPath,
         signal: [Math.abs(x), Math.abs(y), input.steps.length],
       };
     }

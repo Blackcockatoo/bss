@@ -3,16 +3,18 @@ import { exportPetPacket, parsePetPacket } from "../registry/protocol";
 import type { PetRecordV2 } from "../registry/record";
 import type { PetRepository } from "../registry/repository";
 import {
+  assertBackupSize,
   exportForge,
   loadForgeMemory,
   parseForge,
   saveForgeMemory,
 } from "./forgePersistence";
+export const MAX_PET_BUNDLE_BYTES = 8_000_000;
 export async function exportForgePetBundle(
   record: PetRecordV2,
 ): Promise<string> {
   const memory = await loadForgeMemory(record.petId);
-  return JSON.stringify(
+  const json = JSON.stringify(
     {
       protocol: "MetaPetForgeBundle",
       version: 1,
@@ -22,12 +24,14 @@ export async function exportForgePetBundle(
     null,
     2,
   );
+  assertBackupSize(json, MAX_PET_BUNDLE_BYTES, "Pet bundle");
+  return json;
 }
 export async function importForgePetBundle(
   json: string,
   repository: PetRepository,
 ): Promise<PetRecordV2> {
-  if (json.length > 1000000) throw new Error("Pet bundle too large.");
+  assertBackupSize(json, MAX_PET_BUNDLE_BYTES, "Pet bundle");
   const bundle = JSON.parse(json);
   if (
     bundle?.protocol !== "MetaPetForgeBundle" ||

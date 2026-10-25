@@ -75,7 +75,7 @@ describe("Six trusted instruments", () => {
       paragraphs: ["One day.", "Go left!", "Go right?"],
       choice: 2,
     };
-    expect(runActivity("story-workshop", input).values).toEqual([6, 3]);
+    expect(runActivity("story-workshop", input).values).toEqual([4, 2]);
     expect(input.paragraphs[2]).toBe("Go right?");
   });
   it("runs only bounded visual instructions to reach a goal", () => {
@@ -140,5 +140,43 @@ describe("Six trusted instruments", () => {
         { ...project, input: { ...project.input, sequence: [2, 4] } },
       ]).sequence,
     ).not.toEqual(response.sequence);
+  });
+});
+
+describe("Learning feedback audit", () => {
+  it("counts the selected story, leaving the unchosen branch out of its response", () => {
+    const input = {
+      ...DEFAULT_INPUT,
+      paragraphs: [
+        "one bird sees one tree",
+        "the bird rests",
+        "An unused ending.",
+      ],
+    };
+    const first = runActivity("story-workshop", input);
+    const revised = runActivity("story-workshop", {
+      ...input,
+      paragraphs: [
+        input.paragraphs[0],
+        input.paragraphs[1],
+        "Another unused ending with far more words.",
+      ],
+    });
+    expect(revised).toEqual(first);
+    expect(first.writingReview?.repeatedWords).toContain("bird");
+    expect(first.writingReview?.prompts.join(" ")).toContain("capital");
+  });
+  it("keeps exact robot coordinates instead of collapsing different positions into the same value", () => {
+    const north = runActivity("maker-bench", {
+      ...DEFAULT_INPUT,
+      steps: Array(5).fill("forward"),
+    });
+    const east = runActivity("maker-bench", {
+      ...DEFAULT_INPUT,
+      steps: ["right", ...Array(5).fill("forward")],
+    });
+    expect(north.robotPath?.at(-1)).toEqual({ x: 0, y: 5 });
+    expect(east.robotPath?.at(-1)).toEqual({ x: 5, y: 0 });
+    expect(north.values).not.toEqual(east.values);
   });
 });

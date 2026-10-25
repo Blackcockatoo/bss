@@ -65,7 +65,16 @@ export const useForgeLearningStore = create<State>((set, get) => {
       await update((m) => {
         const projects = m.projects ?? [];
         const old = projects.find((q) => q.id === p.id);
-        if (old && p.revision !== old.revision + 1)
+        if (!old && p.revision !== 1)
+          throw new Error(
+            "This project was deleted in another tab. Save a new project instead.",
+          );
+        if (
+          old &&
+          (p.revision !== old.revision + 1 ||
+            p.createdAt !== old.createdAt ||
+            p.toolId !== old.toolId)
+        )
           throw new Error(
             "This project changed in another tab. Reopen it before saving.",
           );

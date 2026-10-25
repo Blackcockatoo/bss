@@ -1,10 +1,12 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { ForgeResultDetails } from "@/components/ForgeResultDetails";
+import { useEffect, useRef, useState } from "react";
 import { usePetRegistryStore, getPetRepository } from "@/lib/registry";
 import {
   exportForgePetBundle,
   importForgePetBundle,
+  MAX_PET_BUNDLE_BYTES,
 } from "@/lib/tools/petBundle";
 import { FORGE_TOOLS, type ForgeToolId } from "@/lib/tools/registry";
 import {
@@ -15,8 +17,13 @@ import {
   type Spark,
 } from "@/lib/tools/activities";
 import { useForgeLearningStore } from "@/lib/tools/learningStore";
-import { exportForge, parseForge } from "@/lib/tools/forgePersistence";
-import { playForgeSequence } from "@/lib/tools/audio";
+import {
+  exportForge,
+  parseForge,
+  MAX_FORGE_BACKUP_BYTES,
+} from "@/lib/tools/forgePersistence";
+import { parseNumberList } from "@/lib/tools/numberList";
+import { useForgeAudio } from "@/lib/tools/useForgeAudio";
 const control =
   "min-h-11 w-full rounded-lg border border-slate-500 bg-slate-950 p-3 text-white";
 const button =
@@ -36,11 +43,24 @@ export function ProjectForgeClient() {
 }
 function ForgeEditor({ petId }: { petId: string | null }) {
   const store = useForgeLearningStore();
+  const editorGeneration = useRef(0);
+  useEffect(
+    () => () => {
+      editorGeneration.current++;
+    },
+    [],
+  );
   const record = usePetRegistryStore((s) => s.activeRecord);
   const hydrate = store.hydrate;
   const [toolId, setTool] = useState<ForgeToolId>("pattern-forge");
-  const [input, setInput] = useState<ActivityInput>(
+  const [input, setInput] = useState<ActivityInput>(() =>
     structuredClone(DEFAULT_INPUT),
+  );
+  const [sequenceText, setSequenceText] = useState(
+    DEFAULT_INPUT.sequence.join(", "),
+  );
+  const [rhythmText, setRhythmText] = useState(
+    (DEFAULT_INPUT.rhythm ?? [1]).join(", "),
   );
   const [spark, setSpark] = useState<Spark>({
     spot: "",
@@ -52,19 +72,30 @@ function ForgeEditor({ petId }: { petId: string | null }) {
     null,
   );
   const [message, setMessage] = useState("");
-  const [playing, setPlaying] = useState(false);
+  const { playing, play, stop } = useForgeAudio();
   const [comparison, setComparison] = useState<string | null>(null);
   const tool = FORGE_TOOLS[toolId];
   const memory = store.memory?.petId === petId ? store.memory : null;
+  const sequenceValid = parseNumberList(sequenceText, "sequence") !== null;
+  const rhythmValid = parseNumberList(rhythmText, "rhythm") !== null;
+  const draftValid =
+    (toolId !== "pattern-forge" && toolId !== "sound-studio") ||
+    (sequenceValid && (toolId !== "sound-studio" || rhythmValid));
   useEffect(() => {
     if (petId) void hydrate(petId);
   }, [petId, hydrate]);
   const change = (patch: Partial<ActivityInput>) => {
+    if (patch.sequence) setSequenceText(patch.sequence.join(", "));
+    if (patch.rhythm) setRhythmText(patch.rhythm.join(", "));
     setInput({ ...input, ...patch });
     setResult(null);
   };
   const select = (id: ForgeToolId) => {
+    stop();
+    editorGeneration.current++;
     setInput(structuredClone(DEFAULT_INPUT));
+    setSequenceText(DEFAULT_INPUT.sequence.join(", "));
+    setRhythmText((DEFAULT_INPUT.rhythm ?? [1]).join(", "));
     setSpark({ spot: "", prediction: "", reflection: "" });
     setTool(id);
     setEditing(null);
@@ -73,8 +104,12 @@ function ForgeEditor({ petId }: { petId: string | null }) {
     setMessage("");
   };
   const reopen = (p: Project) => {
+    stop();
+    editorGeneration.current++;
     setTool(p.toolId);
     setInput(structuredClone(p.input));
+    setSequenceText(p.input.sequence.join(", "));
+    setRhythmText((p.input.rhythm ?? [1]).join(", "));
     setSpark({ ...p.spark });
     setEditing(p);
     setResult(null);
@@ -84,7 +119,8 @@ function ForgeEditor({ petId }: { petId: string | null }) {
     );
   };
   const save = async () => {
-    if (!result) return;
+    if (!result || !draftValid) return;
+    const token = editorGeneration.current;
     const now = Date.now();
     const project: Project = {
       version: 1,
@@ -99,10 +135,11 @@ function ForgeEditor({ petId }: { petId: string | null }) {
     };
     try {
       await store.saveProject(project);
+      if (token !== editorGeneration.current) return;
       setEditing(project);
       setMessage(`Saved revision ${project.revision} on this device.`);
     } catch (e) {
-      setMessage(String(e));
+      if (token === editorGeneration.current) setMessage(String(e));
     }
   };
   return (
@@ -201,28 +238,31 @@ function ForgeEditor({ petId }: { petId: string | null }) {
                 Sequence (2–16 whole numbers, 0–24)
                 <input
                   className={control}
-                  defaultValue={input.sequence.join(", ")}
-                  key={`${toolId}-${editing?.id ?? "new"}-${editing?.revision ?? 0}-${input.sequence.join(",")}`}
-                  onBlur={(e) => {
-                    const values = e.target.value
-                      .split(/[,\s]+/)
-                      .filter(Boolean)
-                      .map(Number);
-                    if (
-                      values.length >= 2 &&
-                      values.length <= 16 &&
-                      values.every(
-                        (n) => Number.isInteger(n) && n >= 0 && n <= 24,
-                      )
-                    )
-                      change({ sequence: values });
-                    else setMessage("Use 2–16 whole numbers between 0 and 24.");
+                  value={sequenceText}
+                  aria-invalid={!sequenceValid}
+                  aria-describedby={
+                    !sequenceValid ? "forge-sequence-error" : undefined
+                  }
+                  onChange={(e) => {
+                    setSequenceText(e.target.value);
+                    setResult(null);
+                    const sequence = parseNumberList(
+                      e.target.value,
+                      "sequence",
+                    );
+                    if (sequence) setInput({ ...input, sequence });
                   }}
                 />
               </label>
+              {!sequenceValid && (
+                <p id="forge-sequence-error" role="alert">
+                  Use 2–16 whole numbers between 0 and 24. Correct the sequence
+                  before running or playing it.
+                </p>
+              )}
               <p>
-                Applied sequence: {input.sequence.join(", ")}. Leave the
-                sequence field to apply edits.
+                Applied sequence: {input.sequence.join(", ")}. Valid edits apply
+                immediately.
               </p>
               <div
                 className="flex h-28 items-end gap-2"
@@ -255,24 +295,24 @@ function ForgeEditor({ petId }: { petId: string | null }) {
                   Rhythm: beat lengths (0.25, 0.5, 1 or 2; repeats across notes)
                   <input
                     className={control}
-                    defaultValue={(input.rhythm ?? [1]).join(", ")}
-                    key={`rhythm-${editing?.id ?? "new"}`}
-                    onBlur={(e) => {
-                      const rhythm = e.target.value
-                        .split(/[,\s]+/)
-                        .filter(Boolean)
-                        .map(Number);
-                      if (
-                        rhythm.length >= 1 &&
-                        rhythm.length <= 16 &&
-                        rhythm.every((n) => [0.25, 0.5, 1, 2].includes(n))
-                      )
-                        change({ rhythm });
-                      else
-                        setMessage("Use 1–16 beat lengths: 0.25, 0.5, 1 or 2.");
+                    value={rhythmText}
+                    aria-invalid={!rhythmValid}
+                    aria-describedby={
+                      !rhythmValid ? "forge-rhythm-error" : undefined
+                    }
+                    onChange={(e) => {
+                      setRhythmText(e.target.value);
+                      setResult(null);
+                      const rhythm = parseNumberList(e.target.value, "rhythm");
+                      if (rhythm) setInput({ ...input, rhythm });
                     }}
                   />
                 </label>
+              )}
+              {toolId === "sound-studio" && !rhythmValid && (
+                <p id="forge-rhythm-error" role="alert">
+                  Use 1–16 beat lengths: 0.25, 0.5, 1 or 2.
+                </p>
               )}
               <label className="block">
                 Repetitions
@@ -288,11 +328,10 @@ function ForgeEditor({ petId }: { petId: string | null }) {
               </label>
               <button
                 className={button}
-                disabled={playing}
+                disabled={playing || !draftValid}
                 onClick={async () => {
-                  setPlaying(true);
                   try {
-                    await playForgeSequence(
+                    await play(
                       input.sequence,
                       input.tempo,
                       input.repeats,
@@ -300,13 +339,16 @@ function ForgeEditor({ petId }: { petId: string | null }) {
                     );
                   } catch (e) {
                     setMessage(String(e));
-                  } finally {
-                    setPlaying(false);
                   }
                 }}
               >
                 Hear sequence (optional)
               </button>
+              {playing && (
+                <button className={button} onClick={stop}>
+                  Stop sound
+                </button>
+              )}
             </>
           )}
           {toolId === "discovery-lab" && (
@@ -506,6 +548,7 @@ function ForgeEditor({ petId }: { petId: string | null }) {
           )}
           <button
             className={`${button} bg-teal-800`}
+            disabled={!draftValid}
             onClick={() => {
               try {
                 setResult(runActivity(toolId, input));
@@ -526,6 +569,7 @@ function ForgeEditor({ petId }: { petId: string | null }) {
             >
               <p>{result.summary}</p>
               <p>{result.explanation}</p>
+              <ForgeResultDetails result={result} />
               <p>
                 Observed values:{" "}
                 {result.values.map((v) => Number(v.toFixed(3))).join(", ")}
@@ -592,13 +636,18 @@ function ForgeEditor({ petId }: { petId: string | null }) {
                   className={button}
                   disabled={store.status !== "ready"}
                   onClick={() => {
+                    const token = editorGeneration.current;
                     if (
                       confirm(`Delete ${p.title} and its companion influence?`)
                     )
                       void store
                         .deleteProject(p.id)
                         .then(() => {
-                          if (editing?.id === p.id) setEditing(null);
+                          if (
+                            token === editorGeneration.current &&
+                            editing?.id === p.id
+                          )
+                            setEditing(null);
                         })
                         .catch((e) => setMessage(String(e)));
                   }}
@@ -630,7 +679,7 @@ function ForgeEditor({ petId }: { petId: string | null }) {
                     const file = e.target.files?.[0];
                     if (!file) return;
                     try {
-                      if (file.size > 1000000)
+                      if (file.size > MAX_PET_BUNDLE_BYTES)
                         throw new Error("Bundle too large.");
                       if (
                         confirm(
@@ -681,7 +730,7 @@ function ForgeEditor({ petId }: { petId: string | null }) {
                     const file = e.target.files?.[0];
                     if (!file || !petId) return;
                     try {
-                      if (file.size > 500000)
+                      if (file.size > MAX_FORGE_BACKUP_BYTES)
                         throw new Error("Backup too large.");
                       const restored = parseForge(await file.text(), petId);
                       if (

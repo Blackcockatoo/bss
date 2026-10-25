@@ -3,39 +3,49 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { usePetRegistryStore } from "@/lib/registry/runtime";
 import { loadForgeMemory } from "@/lib/tools/forgePersistence";
 import { adaptation } from "@/lib/tools/activities";
+function cancelMotion(node: HTMLDivElement | null) {
+  node?.getAnimations?.().forEach((animation) => {
+    void animation.finished.catch(() => {}); // A learner/identity change may cancel deliberately.
+    animation.cancel();
+  });
+}
 /** A child-triggered learned response moves the EXISTING renderer, never identity. */
 export function LearnedCompanionMotion({ children }: { children: ReactNode }) {
   const record = usePetRegistryStore((s) => s.activeRecord);
+  const petId = record?.petId ?? null;
+  const seed = record ? JSON.stringify(record.genomeHash) : "";
   const [response, setResponse] = useState<{
     petId: string;
     sequence: number[];
     tempo: number;
     source: string | null;
   } | null>(null);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState<{
+    petId: string | null;
+    text: string;
+  }>({ petId: null, text: "" });
   const stage = useRef<HTMLDivElement>(null);
   useEffect(() => {
     let active = true;
+    let generation = 0;
     const node = stage.current;
     const sync = () => {
-      if (record)
-        void loadForgeMemory(record.petId)
+      const token = ++generation;
+      if (petId)
+        void loadForgeMemory(petId)
           .then((memory) => {
-            if (active)
+            if (active && token === generation)
               setResponse(
                 memory.projects?.length
                   ? {
-                      petId: record.petId,
-                      ...adaptation(
-                        JSON.stringify(record.genomeHash),
-                        memory.projects,
-                      ),
+                      petId,
+                      ...adaptation(seed, memory.projects),
                     }
                   : null,
               );
           })
           .catch(() => {
-            if (active) setResponse(null);
+            if (active && token === generation) setResponse(null);
           });
     };
     sync();
@@ -45,9 +55,9 @@ export function LearnedCompanionMotion({ children }: { children: ReactNode }) {
       active = false;
       window.removeEventListener("metapet:forge-changed", sync);
       window.removeEventListener("focus", sync);
-      node?.getAnimations?.().forEach((a) => a.cancel());
+      cancelMotion(node);
     };
-  }, [record]);
+  }, [petId, seed]);
   const learned = response?.petId === record?.petId ? response : null;
   return (
     <div>
@@ -62,13 +72,14 @@ export function LearnedCompanionMotion({ children }: { children: ReactNode }) {
                 !stage.current?.animate ||
                 window.matchMedia("(prefers-reduced-motion: reduce)").matches
               ) {
-                setMessage(
-                  `Still response from ${learned.source}: ${values.join(", ")}. Motion is reduced.`,
-                );
+                setMessage({
+                  petId: record?.petId ?? null,
+                  text: `Still response from ${learned.source || "your saved project"}: ${values.join(", ")}. Motion is reduced.`,
+                });
                 return;
               }
-              stage.current?.getAnimations?.().forEach((a) => a.cancel());
-              stage.current?.animate(
+              cancelMotion(stage.current);
+              const animation = stage.current?.animate(
                 values.map((v) => ({
                   transform: `translateY(${-v}px) rotate(${(v - 5) / 4}deg)`,
                 })),
@@ -81,14 +92,18 @@ export function LearnedCompanionMotion({ children }: { children: ReactNode }) {
                   easing: "ease-in-out",
                 },
               );
-              setMessage(
-                `Movement echoes ${learned.source}: ${values.join(", ")}. Saved creation plus inherited transposition; no change to DNA.`,
-              );
+              void animation?.finished.catch(() => {});
+              setMessage({
+                petId: record?.petId ?? null,
+                text: `Movement echoes ${learned.source || "your saved project"}: ${values.join(", ")}. Saved creation plus inherited transposition; no change to DNA.`,
+              });
             }}
           >
             Show learned movement
           </button>
-          <p role="status">{message}</p>
+          <p role="status">
+            {message.petId === record?.petId ? message.text : ""}
+          </p>
         </div>
       )}
     </div>

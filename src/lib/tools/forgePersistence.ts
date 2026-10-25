@@ -7,6 +7,18 @@ import {
   type ForgeMemory,
 } from "./learningMemory";
 const STORE = "learningMemory";
+export const MAX_FORGE_BACKUP_BYTES = 4_000_000;
+export function assertBackupSize(
+  json: string,
+  maximum: number,
+  label = "Backup",
+): void {
+  if (
+    json.length > maximum ||
+    new TextEncoder().encode(json).byteLength > maximum
+  )
+    throw new Error(`${label} too large.`);
+}
 function readCanonical(raw: unknown, petId: string): ForgeMemory {
   if (raw === undefined) return emptyForgeMemory(petId);
   const value = raw as Partial<ForgeMemory>;
@@ -29,6 +41,13 @@ function readCanonical(raw: unknown, petId: string): ForgeMemory {
     throw new Error(
       "Damaged Forge records were preserved; restore a valid backup before editing.",
     );
+  if (
+    new Set(safe.projects?.map((p) => p.id)).size !== safe.projects?.length ||
+    new Set(safe.discoveries.map((d) => d.id)).size !== safe.discoveries.length
+  )
+    throw new Error(
+      "Duplicate Forge record IDs; existing records were preserved.",
+    );
   return safe;
 }
 export async function loadForgeMemory(petId: string): Promise<ForgeMemory> {
@@ -48,7 +67,7 @@ export async function loadForgeMemory(petId: string): Promise<ForgeMemory> {
   const legacy = await readLegacy(petId);
   if (legacy) {
     const migrated = await mutateForgeMemory(petId, () => legacy, true);
-    await purgeLegacyForgeMemory(petId);
+    await purgeLegacyForgeMemory(petId, legacy);
     return migrated;
   }
   return emptyForgeMemory(petId);
@@ -70,7 +89,11 @@ async function readLegacy(petId: string): Promise<ForgeMemory | null> {
       const get = tx.objectStore(STORE).get(petId);
       tx.oncomplete = () => {
         db.close();
-        resolve(get.result ? normaliseForgeMemory(get.result, petId) : null);
+        try {
+          resolve(get.result ? readCanonical(get.result, petId) : null);
+        } catch (error) {
+          reject(error);
+        }
       };
       tx.onerror = tx.onabort = () => {
         db.close();
@@ -100,7 +123,7 @@ export async function mutateForgeMemory(
           next =
             onlyIfAbsent && req.result !== undefined
               ? readCanonical(req.result, petId)
-              : normaliseForgeMemory(
+              : readCanonical(
                   update(
                     replace
                       ? emptyForgeMemory(petId)
@@ -136,14 +159,20 @@ export async function deleteForgeMemory(petId: string): Promise<void> {
   await purgeLegacyForgeMemory(petId);
 }
 export function exportForge(memory: ForgeMemory): string {
-  return JSON.stringify(
-    { protocol: "MetaPetForge", version: 1, memory },
+  const json = JSON.stringify(
+    {
+      protocol: "MetaPetForge",
+      version: 1,
+      memory: readCanonical(memory, memory.petId),
+    },
     null,
     2,
   );
+  assertBackupSize(json, MAX_FORGE_BACKUP_BYTES);
+  return json;
 }
 export function parseForge(json: string, petId: string): ForgeMemory {
-  if (json.length > 500000) throw new Error("Backup too large.");
+  assertBackupSize(json, MAX_FORGE_BACKUP_BYTES);
   const packet = JSON.parse(json);
   if (
     packet?.protocol !== "MetaPetForge" ||
@@ -160,13 +189,19 @@ export function parseForge(json: string, petId: string): ForgeMemory {
     safe.projects?.length !== packet.memory.projects.length
   )
     throw new Error("Backup contains invalid or excessive records.");
-  if (new Set(safe.projects?.map((p) => p.id)).size !== safe.projects?.length)
+  if (
+    new Set(safe.projects?.map((p) => p.id)).size !== safe.projects?.length ||
+    new Set(safe.discoveries.map((d) => d.id)).size !== safe.discoveries.length
+  )
     throw new Error("Duplicate project IDs.");
   return safe;
 }
 
 /** Erase the retired copy only after the canonical write commits. */
-export async function purgeLegacyForgeMemory(petId: string): Promise<void> {
+export async function purgeLegacyForgeMemory(
+  petId: string,
+  expected?: ForgeMemory,
+): Promise<void> {
   await new Promise<void>((resolve, reject) => {
     const req = indexedDB.open("MetaPetProjectForge");
     req.onerror = () => reject(req.error);
@@ -178,7 +213,26 @@ export async function purgeLegacyForgeMemory(petId: string): Promise<void> {
         return;
       }
       const tx = db.transaction(STORE, "readwrite");
-      tx.objectStore(STORE).delete(petId);
+      const store = tx.objectStore(STORE);
+      if (!expected) store.delete(petId);
+      else {
+        const read = store.get(petId);
+        read.onsuccess = () => {
+          try {
+            // A retired tab may have saved again since the copy was read.
+            // Never erase a newer value as migration cleanup.
+            if (
+              read.result !== undefined &&
+              JSON.stringify(readCanonical(read.result, petId)) ===
+                JSON.stringify(expected)
+            )
+              store.delete(petId);
+          } catch (error) {
+            tx.abort();
+            reject(error);
+          }
+        };
+      }
       tx.oncomplete = () => {
         db.close();
         resolve();

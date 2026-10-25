@@ -4,23 +4,26 @@ import Link from "next/link";
 import { usePetRegistryStore } from "@/lib/registry";
 import { loadForgeMemory } from "@/lib/tools/forgePersistence";
 import { adaptation } from "@/lib/tools/activities";
-import { playForgeSequence } from "@/lib/tools/audio";
+import { useForgeAudio } from "@/lib/tools/useForgeAudio";
 import type { ForgeMemory } from "@/lib/tools/learningMemory";
 /** Acquired experience supplies a replayable visual/musical companion response. */
 export function ForgeMemoryBadge({ petId }: { petId: string }) {
+  const { playing, play, stop } = useForgeAudio();
   const [loaded, setLoaded] = useState<ForgeMemory | null>(null);
   const [message, setMessage] = useState("");
   const record = usePetRegistryStore((s) => s.activeRecord);
   useEffect(() => {
     let active = true;
+    let generation = 0;
     const sync = () => {
+      const token = ++generation;
       if (petId && petId !== "registration-pending")
         void loadForgeMemory(petId)
           .then((m) => {
-            if (active) setLoaded(m);
+            if (active && token === generation) setLoaded(m);
           })
           .catch(() => {
-            if (active) setLoaded(null);
+            if (active && token === generation) setLoaded(null);
           });
     };
     sync();
@@ -28,10 +31,11 @@ export function ForgeMemoryBadge({ petId }: { petId: string }) {
     window.addEventListener("focus", sync);
     return () => {
       active = false;
+      stop();
       window.removeEventListener("metapet:forge-changed", sync);
       window.removeEventListener("focus", sync);
     };
-  }, [petId]);
+  }, [petId, stop]);
   if (
     loaded?.petId !== petId ||
     (!loaded.projects?.length && !loaded.discoveries.length)
@@ -40,16 +44,17 @@ export function ForgeMemoryBadge({ petId }: { petId: string }) {
   const seed =
     record?.petId === petId ? JSON.stringify(record.genomeHash) : petId;
   const response = adaptation(seed, loaded.projects ?? []);
-  const sequence = response.source
-    ? response.sequence
-    : loaded.discoveries.at(-1)!.sequence;
+  const sequence =
+    response.source !== null
+      ? response.sequence
+      : (loaded.discoveries.at(-1)?.sequence ?? response.sequence);
   return (
     <section
       className="rounded-xl border border-teal-400/30 bg-teal-950/25 p-4 text-teal-100"
       aria-label="Companion learning memory"
     >
       <strong>
-        Your companion can echo {response.source ?? "your saved pattern"}.
+        Your companion can echo {response.source || "your saved pattern"}.
       </strong>
       <p className="text-sm">
         Your creation supplies the shape and notes; inherited identity supplies
@@ -85,8 +90,9 @@ export function ForgeMemoryBadge({ petId }: { petId: string }) {
       </svg>
       <button
         className="min-h-11 rounded border px-3"
+        disabled={playing}
         onClick={() =>
-          void playForgeSequence(sequence, response.tempo).catch(() =>
+          void play(sequence, response.tempo).catch(() =>
             setMessage(
               "Sound unavailable. The visual echo shows the same response.",
             ),
@@ -95,6 +101,11 @@ export function ForgeMemoryBadge({ petId }: { petId: string }) {
       >
         Hear companion echo (optional)
       </button>
+      {playing && (
+        <button className="min-h-11 rounded border px-3" onClick={stop}>
+          Stop sound
+        </button>
+      )}
       <p role="status">{message}</p>
       <Link className="underline" href="/project-forge">
         Revisit your projects

@@ -14,6 +14,20 @@ const fs = require('node:fs/promises');
   await page.getByRole('button',{name:new RegExp('^'+title)}).click();
   await page.getByRole('button',{name:'Act — run this experiment',exact:true}).click();
   await page.getByRole('button',{name:'Keep trial for comparison'}).waitFor();
+  if(title==='Pattern Forge'){
+    const editor=page.getByLabel('Sequence (2–16 whole numbers, 0–24)');
+    await editor.fill('1, nope');
+    assert.ok(await page.getByRole('button',{name:'Act — run this experiment',exact:true}).isDisabled());
+    await editor.fill('1, 3, 5, 7');
+    await page.getByRole('button',{name:'Act — run this experiment',exact:true}).click();
+  }
+  if(title==='Sound Studio'){
+    await page.getByRole('button',{name:'Hear sequence (optional)',exact:true}).click();
+    await page.getByRole('button',{name:'Stop sound',exact:true}).click();
+  }
+  if(title==='Maker Bench')await page.getByRole('img',{name:/Robot route:/}).waitFor();
+  if(title==='Story Workshop')await page.getByRole('region',{name:'Word explorer',exact:true}).waitFor();
+
   const save=page.getByRole('button',{name:/Keep — .*locally/});
   await save.waitFor({state:'visible'});await page.waitForFunction(()=>Array.from(document.querySelectorAll('button')).some(b=>b.textContent.includes('Keep —')&&!b.disabled));
   await save.click();await page.getByText('Saved revision 1 on this device.',{exact:true}).waitFor();
@@ -61,7 +75,7 @@ const fs = require('node:fs/promises');
  await page.goto('http://127.0.0.1:3001/project-forge',{waitUntil:'domcontentloaded'});
  await page.getByRole('heading',{name:/short lessons about how systems work/}).waitFor();
  assert.ok(!new URL(page.url()).pathname.startsWith('/project-forge'),'Field cookie must deny Forge');
- console.log(JSON.stringify({instruments:6,savedAfterRefresh:6,revision:2,offlineRequests,pageErrors:errors,mobileOverflow:false}));
+ console.log(JSON.stringify({instruments:6,savedAfterRefresh:6,revision:2,premiumAuditChecks:true,offlineRequests,pageErrors:errors,mobileOverflow:false}));
  assert.deepEqual(errors,[]);
  await context.close();
  const restarted=await chromium.launchPersistentContext(profile,options);

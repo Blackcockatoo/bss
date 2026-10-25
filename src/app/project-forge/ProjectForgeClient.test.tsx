@@ -120,3 +120,65 @@ describe("Child SPARK workspace", () => {
     );
   });
 });
+
+it("blocks stale execution while a numeric draft is invalid and applies corrected text without blur", async () => {
+  render(<ProjectForgeClient />);
+  await waitFor(() =>
+    expect(useForgeLearningStore.getState().status).toBe("ready"),
+  );
+  const sequence = screen.getByLabelText("Sequence (2–16 whole numbers, 0–24)");
+  fireEvent.change(sequence, { target: { value: "1, nope" } });
+  expect(sequence).toHaveAttribute("aria-invalid", "true");
+  expect(
+    screen.getByRole("button", { name: "Act — run this experiment" }),
+  ).toBeDisabled();
+  expect(
+    screen.getByRole("button", { name: "Hear sequence (optional)" }),
+  ).toBeDisabled();
+  fireEvent.change(sequence, { target: { value: "2, 4" } });
+  fireEvent.click(
+    screen.getByRole("button", { name: "Act — run this experiment" }),
+  );
+  expect(
+    screen.getByText("Constant difference 2; next value 6."),
+  ).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: /^Sound Studio/ }));
+  const rhythm = screen.getByLabelText(/Rhythm: beat lengths/);
+  fireEvent.change(rhythm, { target: { value: "1, 3" } });
+  expect(
+    screen.getByRole("button", { name: "Act — run this experiment" }),
+  ).toBeDisabled();
+  fireEvent.change(rhythm, { target: { value: "0.5, 2" } });
+  expect(
+    screen.getByRole("button", { name: "Act — run this experiment" }),
+  ).toBeEnabled();
+});
+
+it("does not reopen the old project when its save finishes after changing instruments", async () => {
+  render(<ProjectForgeClient />);
+  await waitFor(() =>
+    expect(useForgeLearningStore.getState().status).toBe("ready"),
+  );
+  const original = useForgeLearningStore.getState().saveProject;
+  let finish!: () => void;
+  const pending = new Promise<void>((resolve) => {
+    finish = resolve;
+  });
+  useForgeLearningStore.setState({ saveProject: () => pending });
+  try {
+    fireEvent.click(
+      screen.getByRole("button", { name: "Act — run this experiment" }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Keep — save project locally" }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: /^Sound Studio/ }));
+    await act(async () => finish());
+    expect(
+      screen.getByRole("button", { name: "Keep — save project locally" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Saved revision 1 on this device.")).toBeNull();
+  } finally {
+    useForgeLearningStore.setState({ saveProject: original });
+  }
+});

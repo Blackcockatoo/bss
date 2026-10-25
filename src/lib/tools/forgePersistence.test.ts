@@ -2,6 +2,8 @@ import { IDBFactory, IDBKeyRange } from "fake-indexeddb";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   deleteForgeMemory,
+  MAX_FORGE_BACKUP_BYTES,
+  purgeLegacyForgeMemory,
   exportForge,
   loadForgeMemory,
   mutateForgeMemory,
@@ -135,7 +137,9 @@ describe("Forge ownership and committed persistence", () => {
     expect(() =>
       parseForge(exportForge({ ...memory, projects: [project, project] }), "a"),
     ).toThrow("Duplicate");
-    expect(() => parseForge("x".repeat(500001), "a")).toThrow("large");
+    expect(() =>
+      parseForge("x".repeat(MAX_FORGE_BACKUP_BYTES + 1), "a"),
+    ).toThrow("large");
   });
   it("restores state after a cold store hydration and rejects stale revisions", async () => {
     const store = useForgeLearningStore;
@@ -182,5 +186,76 @@ describe("Damaged and future data are preserved", () => {
     });
     db.close();
     await expect(loadForgeMemory("a")).rejects.toThrow("preserved");
+  });
+});
+
+async function legacyFixture(value: unknown) {
+  const db = await new Promise<IDBDatabase>((resolve) => {
+    const req = indexedDB.open("MetaPetProjectForge", 1);
+    req.onupgradeneeded = () =>
+      req.result.createObjectStore("learningMemory", { keyPath: "petId" });
+    req.onsuccess = () => resolve(req.result);
+  });
+  await transaction(db, "learningMemory", value);
+  return db;
+}
+describe("Upgrade audit regressions", () => {
+  it("does not delete a retired copy changed since migration read it", async () => {
+    const original = {
+      version: 1 as const,
+      petId: "a",
+      discoveries: [],
+      projects: [project],
+    };
+    const newer = {
+      ...original,
+      projects: [project, { ...project, id: "new-work" }],
+    };
+    const db = await legacyFixture(newer);
+    db.close();
+    await purgeLegacyForgeMemory("a", original);
+    expect((await loadForgeMemory("a")).projects).toEqual(newer.projects);
+  });
+  it("preserves corrupt retired data instead of silently migrating an empty record", async () => {
+    const db = await legacyFixture({
+      version: 99,
+      petId: "a",
+      discoveries: [],
+      projects: [project],
+    });
+    db.close();
+    await expect(loadForgeMemory("a")).rejects.toThrow("preserved");
+  });
+  it("does not resurrect a deleted project when an old tab saves a revision", async () => {
+    const store = useForgeLearningStore;
+    await store.getState().hydrate("a");
+    await store.getState().saveProject(project);
+    await store.getState().deleteProject(project.id);
+    await expect(
+      store.getState().saveProject({ ...project, revision: 2 }),
+    ).rejects.toThrow("deleted");
+    expect((await loadForgeMemory("a")).projects).toEqual([]);
+  });
+  it("roundtrips a full workspace with escaped authored text beyond the old file limit", () => {
+    const long = "\u0000".repeat(2000);
+    const projects = Array.from({ length: 50 }, (_, i) => ({
+      ...project,
+      id: String(i),
+      input: { ...project.input, paragraphs: [long, long, long] },
+    }));
+    const memory = {
+      version: 1 as const,
+      petId: "a",
+      discoveries: [],
+      projects,
+    };
+    const json = exportForge(memory);
+    expect(json.length).toBeGreaterThan(500000);
+    expect(parseForge(json, "a")).toEqual(memory);
+  });
+  it("rejects bytes, rather than merely character count, above the backup limit", () => {
+    expect(() =>
+      parseForge("🔥".repeat(MAX_FORGE_BACKUP_BYTES / 4 + 1), "a"),
+    ).toThrow("large");
   });
 });
