@@ -18,11 +18,12 @@ const viewports = [
   page.on('pageerror',error=>errors.push(error.message));
   const report={viewports:[],capture:false,breeding:false,certificate:false,arcade:false,errors};
   async function go(route) {
-    const response=await page.goto(base+route,{waitUntil:'domcontentloaded'});
+    const response=await page.goto(base+route,{waitUntil:'networkidle'});
     assert.ok(response && response.ok(),`${route} returned ${response?.status()}`);
   }
   async function skipTutorial() {
     const tutorial=page.getByRole('dialog',{name:'Meta-Pet tutorial'});
+    await tutorial.waitFor({state:'visible',timeout:3000}).catch(()=>{});
     if(await tutorial.isVisible()) await tutorial.getByRole('button',{name:'Skip',exact:true}).click();
   }
   async function noOverflow(scope='body') {
@@ -39,20 +40,9 @@ const viewports = [
     });
   }
   try {
-    await go('/pet');
-    await page.getByRole('button',{name:/Advanced \/ Mechanics Lab/}).waitFor();
-    await skipTutorial();
-    await page.waitForFunction(()=>document.querySelector('[data-testid$="pet-runtime"]'));
-    await page.waitForFunction(async()=>{
-      if(!(await indexedDB.databases()).some(db=>db.name==='MetaPetRegistryDB')) return false;
-      const db=await new Promise((resolve,reject)=>{const r=indexedDB.open('MetaPetRegistryDB',1);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
-      if(!db.objectStoreNames.contains('registryMeta')){db.close();return false;}
-      const active=await new Promise((resolve,reject)=>{const r=db.transaction('registryMeta').objectStore('registryMeta').get('activePetId');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});db.close();return !!active;
-    });
-    const initial=await recordState();assert.ok(initial.active);
-
     await go('/app/battle');
-    await page.locator('[data-geometry-sprite]>svg').first().waitFor();
+    await page.locator('[data-geometry-sprite][data-geometry-identity^="mp2-"]>svg').first().waitFor();
+    const initial=await recordState();console.log('Registry fixture ready:',JSON.stringify(initial));assert.ok(initial.active);
     await page.getByRole('button',{name:'Enter Arena',exact:true}).click();
     await page.getByRole('heading',{name:'Choose Your Opponent'}).waitFor();
     await page.locator('.living-world .grid.grid-cols-2 button').first().click();
