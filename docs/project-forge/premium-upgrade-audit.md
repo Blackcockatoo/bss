@@ -36,7 +36,24 @@ Normal write mutations also validate the whole resulting memory rather than sile
 - TypeScript/ESLint: passed, with no errors or warnings.
 - Explicit schools deployment configuration and geometry lock: passed. The default deployment assertion skips when student mode is unset.
 - `npm audit`: **0 known vulnerabilities** at this check; no dependency additions were needed.
-- Browser smoke now additionally checks invalid-draft blocking, Sound Studio playback/Stop, the robot diagram and Word Explorer. Its new CI result is recorded after execution; the earlier successful browser run is historical evidence for the prior application version.
+- **[CI run 40166506430](https://github.com/Blackcockatoo/bss/actions/runs/40166506430): passed**, for application commit `547859c28cf59e4b2d57878354516a4e8a5c3e8f`. CI independently passed lint, all 1,360 tests, geometry lock, production build and the augmented Chromium smoke.
+- Browser smoke additionally passed invalid-draft blocking, Sound Studio playback/Stop, robot-diagram rendering and Word Explorer. It preserved six projects after refresh and browser restart, with zero offline activity requests, zero page errors and no mobile horizontal overflow.
+- [CI browser screenshot/server log](https://github.com/Blackcockatoo/bss/actions/runs/40166506430/artifacts/12588627828). Chromium uses a 390×844 viewport, touch-capability emulation and reduced motion; this is not a manual assistive-technology certification.
+
+Exact browser summary:
+
+```json
+{"instruments":6,"savedAfterRefresh":6,"revision":2,"premiumAuditChecks":true,"offlineRequests":0,"pageErrors":[],"mobileOverflow":false}
+```
+
+The persistent-browser assertion also logged: `Browser restart: six projects retained under the same registered identity.` This final documentation-only update records that successful run; it does not change the tested application.
+
+## Code references
+
+- [Canonical storage and migration](../../src/lib/tools/forgePersistence.ts), [revision ownership](../../src/lib/tools/learningStore.ts), [regressions](../../src/lib/tools/forgePersistence.test.ts).
+- [Bounded cancellable audio](../../src/lib/tools/audio.ts), [view lifecycle](../../src/lib/tools/useForgeAudio.ts), [lifecycle tests](../../src/lib/tools/audio.test.ts).
+- [Learning calculations](../../src/lib/tools/activities.ts), [robot/word feedback](../../src/components/ForgeResultDetails.tsx), [workspace and numeric editors](../../src/app/project-forge/ProjectForgeClient.tsx).
+- [Recall](../../src/components/ForgeMemoryBadge.tsx) and [learned movement](../../src/components/LearnedCompanionMotion.tsx), with component regressions for empty titles, stale reads and pet-specific messages.
 
 ## Remaining release gates
 
