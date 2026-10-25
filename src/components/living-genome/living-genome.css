@@ -53,3 +53,49 @@
 .registry-certificate{overflow:hidden;overflow-wrap:anywhere}
 .registry-dialog button:focus-visible{outline-offset:-3px}
 @media(max-width:420px){.registry-dialog{width:calc(100% - 16px);max-height:calc(100dvh - 16px)}.registry-dialog .heraldry-stage{padding:16px}.registry-dialog .heraldry-stage svg{width:140px}}
+/* Phone compatibility: content reflows; essential controls never depend on hover. */
+.living-world{overflow-wrap:anywhere}
+.living-world button{min-width:44px;max-width:100%;white-space:normal;flex-shrink:0;height:auto;min-height:44px}
+.living-world button>svg{flex-shrink:0}
+.living-world :is(input,select,textarea){font-size:16px;box-sizing:border-box;min-width:0;width:100%;min-height:44px}
+.living-world :is(details,section,aside,figure){min-width:0}
+.living-companion figcaption{inset-inline:6px;text-align:center;overflow-wrap:anywhere;line-height:1.35}
+.living-rival figcaption{overflow-wrap:anywhere}
+.registry-dialog .registry-certificate{overflow:visible}
+.registry-dialog{border-radius:24px;max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px);width:min(700px,calc(100% - env(safe-area-inset-left) - env(safe-area-inset-right) - 24px));scroll-padding-block:64px 16px;padding-bottom:env(safe-area-inset-bottom)}
+.registry-close-bar{position:sticky;top:0;z-index:5;display:flex;justify-content:flex-end;padding:8px 12px;background:#020617f5;border-radius:24px 24px 0 0}
+.registry-close-bar button{min-width:44px;min-height:44px;display:grid;place-items:center}
+.registry-certificate svg{max-width:100%;height:auto}
+.vimana-inspector{min-width:0}
+.phone-activities button{min-width:44px;min-height:44px;white-space:normal;overflow-wrap:anywhere}
+.phone-activities :is([role=tabpanel],.living-world){min-width:0}
+@media(max-width:767px){
+  .living-world :is(input,select,textarea){font-size:16px;scroll-margin-block:80px}
+  .vimana-inspector{order:-1}
+  .vimana-atlas,.vimana-atlas>svg{min-height:240px!important}
+  .vimana-atlas text{display:none}
+  .vimana-atlas>div:first-child{flex-wrap:wrap;gap:8px;letter-spacing:.06em}
+  .living-hangar{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .living-world .living-move{padding:12px 10px}
+  .living-world .living-move>div:first-child{align-items:flex-start}
+  .living-world .living-move>div:first-child>span{flex:1;min-width:0}
+  .lineage-parent svg{max-width:35%}
+}
+@media(max-width:359px){
+  .living-arena{min-height:200px}
+  .living-companion{height:195px}
+  .living-companion-form{transform:translate(-50%,-50%) scale(.26)}
+  .living-rival{padding:8px}
+  .lineage-chamber{padding:12px}
+}
+@media(max-height:500px) and (orientation:landscape){
+  .living-arena{min-height:185px}
+  .living-companion{height:180px}
+  .living-companion-form{transform:translate(-50%,-50%) scale(.28)}
+  .living-rival svg{height:100px}
+  .living-vessel{max-height:140px}
+  .registry-dialog{max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 12px)}
+}
+
+.phone-experience-shell{padding-left:max(1rem,env(safe-area-inset-left));padding-right:max(1rem,env(safe-area-inset-right));padding-bottom:max(2rem,env(safe-area-inset-bottom))}
+.phone-pet{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}

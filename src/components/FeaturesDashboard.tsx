@@ -9,6 +9,7 @@ import { CosmeticsPanel } from "./CosmeticsPanel";
 import { MiniGamesPanel } from "./MiniGamesPanel";
 import { SteeringWheel } from "./steering";
 import { VimanaMap } from "./VimanaMap";
+import "./living-genome/living-genome.css";
 
 type FeaturesDashboardTab =
   | "navigator"
@@ -37,11 +38,17 @@ export function FeaturesDashboard({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+    <div className="phone-activities w-full min-w-0 max-w-4xl mx-auto">
+      <Tabs
+        value={activeTab}
+        onValueChange={handleTabChange}
+        className="w-full"
+      >
         <TabsList
           className={`grid w-full grid-cols-2 gap-2 mb-6 h-auto ${
-            includeNavigator ? "sm:grid-cols-3 lg:grid-cols-6" : "sm:grid-cols-5"
+            includeNavigator
+              ? "sm:grid-cols-3 lg:grid-cols-6"
+              : "sm:grid-cols-5"
           }`}
         >
           {includeNavigator && (
@@ -50,7 +57,7 @@ export function FeaturesDashboard({
               className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 touch-manipulation"
             >
               <Compass className="w-5 h-5 sm:w-4 sm:h-4" />
-              <span className="text-[10px] sm:text-sm">Navigator</span>
+              <span className="text-xs sm:text-sm">Navigator</span>
             </TabsTrigger>
           )}
           <TabsTrigger
@@ -58,35 +65,35 @@ export function FeaturesDashboard({
             className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 touch-manipulation"
           >
             <Swords className="w-5 h-5 sm:w-4 sm:h-4" />
-            <span className="text-[10px] sm:text-sm">Battle</span>
+            <span className="text-xs sm:text-sm">Battle</span>
           </TabsTrigger>
           <TabsTrigger
             value="vimana"
             className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 touch-manipulation"
           >
             <Map className="w-5 h-5 sm:w-4 sm:h-4" />
-            <span className="text-[10px] sm:text-sm">Explore</span>
+            <span className="text-xs sm:text-sm">Explore</span>
           </TabsTrigger>
           <TabsTrigger
             value="games"
             className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 touch-manipulation"
           >
             <Gamepad2 className="w-5 h-5 sm:w-4 sm:h-4" />
-            <span className="text-[10px] sm:text-sm">Games</span>
+            <span className="text-xs sm:text-sm">Games</span>
           </TabsTrigger>
           <TabsTrigger
             value="cosmetics"
             className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 touch-manipulation"
           >
             <Sparkles className="w-5 h-5 sm:w-4 sm:h-4" />
-            <span className="text-[10px] sm:text-sm">Wardrobe</span>
+            <span className="text-xs sm:text-sm">Wardrobe</span>
           </TabsTrigger>
           <TabsTrigger
             value="achievements"
             className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 touch-manipulation"
           >
             <Trophy className="w-5 h-5 sm:w-4 sm:h-4" />
-            <span className="text-[10px] sm:text-sm">Achievements</span>
+            <span className="text-xs sm:text-sm">Achievements</span>
           </TabsTrigger>
         </TabsList>
 

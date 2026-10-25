@@ -65,9 +65,9 @@ const ADVANCED_TABS: Array<{ id: AdvancedTab; label: string; hint: string }> = [
 // One neutral control style for the whole lab; a single cyan accent marks the
 // active choice so the panel reads as one system instead of a colour grid.
 const CONTROL_IDLE =
-  "gap-2 border-slate-700/70 bg-slate-900/70 text-slate-300 hover:border-slate-600 hover:bg-slate-800 hover:text-white";
+  "min-h-11 h-auto whitespace-normal gap-2 border-slate-700/70 bg-slate-900/70 text-slate-300 hover:border-slate-600 hover:bg-slate-800 hover:text-white";
 const CONTROL_ACTIVE =
-  "gap-2 border-cyan-400/70 bg-cyan-500/15 text-cyan-100 hover:bg-cyan-500/25 hover:text-white";
+  "min-h-11 h-auto whitespace-normal gap-2 border-cyan-400/70 bg-cyan-500/15 text-cyan-100 hover:bg-cyan-500/25 hover:text-white";
 
 const controlClass = (active: boolean) =>
   active ? CONTROL_ACTIVE : CONTROL_IDLE;
@@ -239,7 +239,7 @@ export default function PetPage() {
 
   return (
     <div
-      className={`min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-slate-950 ${imprintAccentClass} to-slate-900 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]`}
+      className={`phone-pet min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-slate-950 ${imprintAccentClass} to-slate-900 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]`}
     >
       <PetResponseOverlay enableAudio={true} enableAnticipation={true} />
 
@@ -310,7 +310,7 @@ export default function PetPage() {
                 type="button"
                 variant="outline"
                 onClick={handleToggleAdvanced}
-                className="w-full justify-between border-slate-700 bg-slate-900/70 text-slate-200 hover:bg-slate-800"
+                className="min-h-11 w-full justify-between border-slate-700 bg-slate-900/70 text-slate-200 hover:bg-slate-800"
                 aria-expanded={showAdvanced}
               >
                 <span className="font-semibold">Advanced / Mechanics Lab</span>
@@ -331,7 +331,7 @@ export default function PetPage() {
                   <div
                     role="tablist"
                     aria-label="Mechanics Lab sections"
-                    className="flex gap-1 overflow-x-auto border-b border-slate-800/80 bg-slate-950/80 p-1"
+                    className="grid grid-cols-2 sm:grid-cols-4 gap-1 border-b border-slate-800/80 bg-slate-950/80 p-1"
                   >
                     {ADVANCED_TABS.map((tab, index) => {
                       const active = advancedTab === tab.id;
@@ -349,7 +349,7 @@ export default function PetPage() {
                           }}
                           onClick={() => setAdvancedTab(tab.id)}
                           onKeyDown={(event) => handleTabKeyDown(event, index)}
-                          className={`flex-1 whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400 ${
+                          className={`min-h-11 min-w-0 whitespace-normal rounded-xl px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400 ${
                             active
                               ? "bg-slate-800 text-white shadow-sm"
                               : "text-slate-400 hover:bg-slate-900 hover:text-slate-200"

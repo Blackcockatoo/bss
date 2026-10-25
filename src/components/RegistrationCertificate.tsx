@@ -441,6 +441,7 @@ export function RegistrationCertificate({
       ref={dialogRef}
       aria-labelledby={titleId}
       className="living-world registry-dialog"
+      aria-modal="true"
       onCancel={() => onClose?.()}
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose?.();
@@ -450,17 +451,18 @@ export function RegistrationCertificate({
         ref={certificateRef}
         className="registry-certificate relative w-full bg-slate-950 border border-cyan-900/60 rounded-3xl shadow-2xl"
       >
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full bg-slate-800/80 hover:bg-slate-700 text-white transition-colors z-10 touch-manipulation"
-          aria-label="Close certificate"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
+        {/* Close remains reachable while the certificate scrolls on a phone. */}
+        <div className="registry-close-bar">
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full bg-slate-800/80 hover:bg-slate-700 text-white transition-colors z-10 touch-manipulation"
+            aria-label="Close certificate"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
         {/* Certificate Header */}
-        <div className="text-center pt-14 pb-6 px-4 sm:px-6 border-b border-slate-700/50">
+        <div className="text-center pt-3 pb-6 px-4 sm:px-6 border-b border-slate-700/50">
           <div className="flex items-center justify-center gap-2 mb-2">
             <h1
               id={titleId}
@@ -503,7 +505,7 @@ export function RegistrationCertificate({
         {/* Main Content Grid */}
         <div className="p-4 sm:p-6 space-y-6">
           {/* Visual Identity Section */}
-          <div className="grid grid-cols-1 min-[420px]:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Coat of Arms */}
             <div className="heraldry-stage flex flex-col items-center p-3">
               <p className="text-xs uppercase tracking-widest text-slate-500 mb-3">
@@ -688,7 +690,7 @@ export function RegistrationCertificate({
           )}
 
           {/* Action Buttons */}
-          <div className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-3 pt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4">
             <Button
               onClick={handleDownload}
               disabled={!coatOfArms}

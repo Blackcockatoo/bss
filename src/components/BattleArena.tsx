@@ -236,7 +236,7 @@ export function BattleArena({ onWin, onExit }: BattleArenaProps = {}) {
             Return to field
           </button>
         )}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
               <Swords className="w-5 h-5 text-pink-300" />
@@ -314,9 +314,9 @@ export function BattleArena({ onWin, onExit }: BattleArenaProps = {}) {
         <div className="grid gap-3 sm:grid-cols-2">
         {/* Opponent row */}
         <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-3 space-y-1">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-bold text-white">{opponent}</span>
+              <span className="min-w-0 break-words text-sm font-bold text-white">{opponent}</span>
               <TypeBadge type={opponentType} />
             </div>
             {opponentStatus && (
@@ -330,9 +330,9 @@ export function BattleArena({ onWin, onExit }: BattleArenaProps = {}) {
 
         {/* Player row */}
         <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-3 space-y-1">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-bold text-white">{companionName}</span>
+              <span className="min-w-0 break-words text-sm font-bold text-white">{companionName}</span>
               <TypeBadge type={playerType} />
             </div>
             {playerStatus && (
@@ -425,7 +425,7 @@ export function BattleArena({ onWin, onExit }: BattleArenaProps = {}) {
       </div>
       <div className="living-arena"><LivingCompanion /><p className="p-4 text-sm text-cyan-100">{resultMsg.startsWith('Victory') ? 'Challenge complete.' : 'Rest, care and try again.'}</p></div>
       <p className="text-sm text-zinc-400" role="status">{resultMsg}</p>
-      <div className="flex justify-center gap-3 pt-2">
+      <div className="flex flex-wrap justify-center gap-3 pt-2">
         <Button onClick={() => startBattle(opponent)} variant="outline" className="gap-2">
           <Swords className="w-4 h-4" />
           Rematch
