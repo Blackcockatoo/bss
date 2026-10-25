@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useStore } from '@/lib/store';
+import { GeometryArcadeLauncher } from './living-genome/GeometryArcadeLauncher';
 import { LivingCompanion } from './living-genome/LivingScene';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { usePetRegistryStore } from '@/lib/registry';
@@ -105,6 +106,7 @@ export function BattleArena({ onWin, onExit }: BattleArenaProps = {}) {
   useEffect(() => () => { if (turnTimer.current) clearTimeout(turnTimer.current); }, []);
   const chapter = getArenaChapter(battle.wins);
 
+  const sceneRef = useRef<HTMLDivElement>(null);
   const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -226,7 +228,7 @@ export function BattleArena({ onWin, onExit }: BattleArenaProps = {}) {
   if (phase === 'idle') {
     const pType = derivePlayerType(battle.energyShield);
     return (
-      <div className="living-world space-y-4">
+      <div ref={sceneRef} className="living-world space-y-4">
         {onExit && (
           <button
             onClick={onExit}
@@ -251,7 +253,8 @@ export function BattleArena({ onWin, onExit }: BattleArenaProps = {}) {
           </div>
         </div>
 
-        <div className="living-arena"><LivingCompanion /><div className="p-4 text-sm text-cyan-100"><p className="text-xs uppercase tracking-widest text-cyan-300 mb-2">Living Genome</p>Challenge. Adapt. Return stronger.</div></div>
+        <div className="living-arena"><LivingCompanion geometry /><div className="p-4 text-sm text-cyan-100"><p className="text-xs uppercase tracking-widest text-cyan-300 mb-2">Living Genome</p>Challenge. Adapt. Return stronger.</div></div>
+        <GeometryArcadeLauncher scene={sceneRef} />
         <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-4 space-y-3">
           <div className="flex items-center gap-3">
             <ShieldHalf className="w-5 h-5 text-cyan-300 shrink-0" />
@@ -346,7 +349,7 @@ export function BattleArena({ onWin, onExit }: BattleArenaProps = {}) {
 
         </div>
         <div className="living-arena" data-resolving={resolving} data-player-first={playerSpd >= opponentSpd} data-player-damaged={damage.player > 0} data-opponent-damaged={damage.opponent > 0} style={{ backgroundImage: `radial-gradient(ellipse at 75% 55%, ${TYPE_COLORS[opponentType]}22, transparent 65%)` }}>
-          <LivingCompanion />
+          <LivingCompanion geometry />
           {resolving && <div className="living-damage" aria-hidden="true"><span>{damage.player > 0 ? `−${damage.player} HP` : ''}</span><span>{damage.opponent > 0 ? `−${damage.opponent} HP` : ''}</span></div>}
           <figure className="living-rival" aria-label={`${opponent} ${opponentType} signal`}>
             <svg viewBox="0 0 160 160" role="img" aria-label={`${opponentType} opponent sigil`}>
@@ -419,12 +422,13 @@ export function BattleArena({ onWin, onExit }: BattleArenaProps = {}) {
 
   // ── Result ────────────────────────────────────────────────────────────────
   return (
-    <div className="living-world space-y-4 text-center py-4">
+    <div ref={sceneRef} className="living-world space-y-4 text-center py-4">
       <div className={`text-2xl font-bold ${resultMsg.startsWith('Victory') ? 'text-emerald-300' : 'text-rose-300'}`}>
         {resultMsg.startsWith('Victory') ? '🏆 Victory!' : '💀 Defeated'}
       </div>
-      <div className="living-arena"><LivingCompanion /><p className="p-4 text-sm text-cyan-100">{resultMsg.startsWith('Victory') ? 'Challenge complete.' : 'Rest, care and try again.'}</p></div>
+      <div className="living-arena"><LivingCompanion geometry /><p className="p-4 text-sm text-cyan-100">{resultMsg.startsWith('Victory') ? 'Challenge complete.' : 'Rest, care and try again.'}</p></div>
       <p className="text-sm text-zinc-400" role="status">{resultMsg}</p>
+      <GeometryArcadeLauncher scene={sceneRef} />
       <div className="flex flex-wrap justify-center gap-3 pt-2">
         <Button onClick={() => startBattle(opponent)} variant="outline" className="gap-2">
           <Swords className="w-4 h-4" />

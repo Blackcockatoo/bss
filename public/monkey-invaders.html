@@ -2451,6 +2451,9 @@
                 transition-duration: 0.01ms !important;
             }
         }
+        #startScreen { justify-content:flex-start; justify-content:safe center; }
+        .geometry-pilot-controls { flex-shrink:0; display:flex; flex-wrap:wrap; justify-content:center; gap:8px; max-width:100%; margin:12px 0; }
+        .geometry-pilot-controls .nav-btn { min-height:44px; max-width:100%; height:auto; padding:10px 14px; font-size:12px; white-space:normal; text-align:center; }
     </style>
 </head>
 <body>
@@ -2651,6 +2654,10 @@
                     <span class="attract-dot" data-dot="1"></span>
                     <span class="attract-dot" data-dot="2"></span>
                 </div>
+                <div class="geometry-pilot-controls" aria-label="Choose your pilot">
+                    <button id="geometryPilotBtn" class="nav-btn" type="button" aria-pressed="false" disabled>Geometry unavailable</button>
+                    <a class="nav-btn" href="/app/battle">Bring your geometry pet</a>
+                </div>
                 <button id="startButton" class="btn" type="button">Press Start</button>
                 <div class="controls">
                     <span>SPACE</span> or <span>TOUCH FIRE</span> to throw bananas<br>
@@ -2843,7 +2850,9 @@
         <button id="btnFire" class="touch-btn fire" aria-label="Throw Banana">🍌</button>
     </div>
 
+    <script src="/games/geometry-pilot.js"></script>
     <script>
+        const geometryPilot = window.MetaPetGeometryPilot?.create({ button: document.getElementById('geometryPilotBtn') }) || { draw: () => false };
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const gameWrapper = document.getElementById('gameWrapper');
@@ -5540,44 +5549,47 @@
             ctx.save();
             ctx.translate(x + monkey.width / 2, y + monkey.height / 2);
             if (mirrored) ctx.scale(-1, 1);
-            ctx.fillStyle = '#8b4513';
-            ctx.beginPath();
-            ctx.ellipse(0, 5, 25, 28, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#deb887';
-            ctx.beginPath();
-            ctx.ellipse(0, 0, 18, 20, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#fff';
-            ctx.beginPath();
-            ctx.ellipse(-7, -5, 5, 6, 0, 0, Math.PI * 2);
-            ctx.ellipse(7, -5, 5, 6, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#000';
-            ctx.beginPath();
-            ctx.arc(-7, -4, 3, 0, Math.PI * 2);
-            ctx.arc(7, -4, 3, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#fff';
-            ctx.beginPath();
-            ctx.arc(-8, -6, 1.5, 0, Math.PI * 2);
-            ctx.arc(6, -6, 1.5, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#000';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(0, 2, 8, 0.2, Math.PI - 0.2);
-            ctx.stroke();
-            ctx.fillStyle = '#8b4513';
-            ctx.beginPath();
-            ctx.arc(-22, -5, 10, 0, Math.PI * 2);
-            ctx.arc(22, -5, 10, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#deb887';
-            ctx.beginPath();
-            ctx.arc(-22, -5, 6, 0, Math.PI * 2);
-            ctx.arc(22, -5, 6, 0, Math.PI * 2);
-            ctx.fill();
+            // Cosmetic pilot swap: the original 60x60 physics and weapons remain shared.
+            if (!geometryPilot.draw(ctx, -40, -40, 80, 80)) {
+                ctx.fillStyle = '#8b4513';
+                ctx.beginPath();
+                ctx.ellipse(0, 5, 25, 28, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#deb887';
+                ctx.beginPath();
+                ctx.ellipse(0, 0, 18, 20, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.ellipse(-7, -5, 5, 6, 0, 0, Math.PI * 2);
+                ctx.ellipse(7, -5, 5, 6, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(-7, -4, 3, 0, Math.PI * 2);
+                ctx.arc(7, -4, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(-8, -6, 1.5, 0, Math.PI * 2);
+                ctx.arc(6, -6, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(0, 2, 8, 0.2, Math.PI - 0.2);
+                ctx.stroke();
+                ctx.fillStyle = '#8b4513';
+                ctx.beginPath();
+                ctx.arc(-22, -5, 10, 0, Math.PI * 2);
+                ctx.arc(22, -5, 10, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#deb887';
+                ctx.beginPath();
+                ctx.arc(-22, -5, 6, 0, Math.PI * 2);
+                ctx.arc(22, -5, 6, 0, Math.PI * 2);
+                ctx.fill();
+            }
             if (monkey.powerups.bazooka) {
                 ctx.fillStyle = '#444';
                 ctx.fillRect(8, -8, 35, 12);
