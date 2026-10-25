@@ -67,12 +67,6 @@ function sameHostUrl(request: NextRequest, pathname: string): URL {
   redirectUrl.pathname = pathname;
   redirectUrl.search = "";
 
-  const publicHost = getRequestHost(request);
-  if (publicHost && publicHost !== redirectUrl.hostname) {
-    redirectUrl.hostname = publicHost;
-    redirectUrl.port = "";
-  }
-
   const forwardedProto = request.headers
     .get("x-forwarded-proto")
     ?.split(",")[0]
@@ -80,6 +74,17 @@ function sameHostUrl(request: NextRequest, pathname: string): URL {
     .toLowerCase();
   if (forwardedProto === "http" || forwardedProto === "https") {
     redirectUrl.protocol = `${forwardedProto}:`;
+  }
+
+  // Domain matching intentionally strips ports; redirect authority must not.
+  // Next may expose localhost internally for a request made to 127.0.0.1.
+  const publicAuthority = (
+    request.headers.get("x-forwarded-host") || request.headers.get("host") || ""
+  ).split(",")[0].trim();
+  if (publicAuthority) {
+    const publicOrigin = new URL(`${redirectUrl.protocol}//${publicAuthority}`);
+    redirectUrl.hostname = publicOrigin.hostname;
+    redirectUrl.port = publicOrigin.port;
   }
 
   return redirectUrl;
