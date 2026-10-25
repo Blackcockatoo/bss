@@ -4,11 +4,14 @@
 
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import { Shield } from "lucide-react";
+import React, { useState, useMemo } from "react";
 import { CoatOfArmsRenderer } from "@/components/lineage/CoatOfArmsRenderer";
 import { CryptoKeyDisplay } from "./CryptoKeyDisplay";
 import { generateFounderCoatOfArms, getBlason } from "@/lib/lineage";
-import type { CoatOfArms } from "@/lib/lineage";
+import { usePetHeraldry } from "../lineage/usePetHeraldry";
+import { savePetHeraldry } from "@/lib/lineage/storage";
+import "../living-genome/living-genome.css";
 import { useIdentityProfileStore } from "@/lib/identity/profile";
 import type { PetRecordV2 } from "@/lib/registry";
 
@@ -27,37 +30,27 @@ export const PetProfilePanel: React.FC<PetProfilePanelProps> = ({
   editMode = false,
   record = null,
 }) => {
-  const [coatOfArms, setCoatOfArms] = useState<CoatOfArms | null>(null);
+  const [proposal, setProposal] = useState<{
+    petId: string;
+    coat: import("@/lib/lineage").CoatOfArms;
+  } | null>(null);
+  const [heraldryNotice, setHeraldryNotice] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"coat" | "keys" | "addons">(
     "coat",
   );
   const profile = useIdentityProfileStore((state) => state.profile);
   const petId = record?.petId ?? legacyPetId;
   const petName = record?.name ?? legacyPetName;
+  const pendingCoat = proposal?.petId === petId ? proposal.coat : null;
 
   const identityLabel = profile.username.trim() || "Unnamed Owner";
   const identityEmail =
     profile.email.trim() || "Add email on the Identity page";
 
-  // Generate or load coat of arms
-  useEffect(() => {
-    const storedCoa = localStorage.getItem(`auralia_coat_of_arms_${petId}`);
-    let coa: CoatOfArms;
-
-    if (storedCoa) {
-      coa = JSON.parse(storedCoa);
-    } else {
-      // Generate a new coat based on pet ID as seed
-      const seed = hashString(petId);
-      coa = generateFounderCoatOfArms(petId, seed);
-      localStorage.setItem(
-        `auralia_coat_of_arms_${petId}`,
-        JSON.stringify(coa),
-      );
-    }
-
-    requestAnimationFrame(() => setCoatOfArms(coa));
-  }, [petId]);
+  const { coat: coatOfArms, notice: loadNotice } = usePetHeraldry(
+    petId,
+    record?.lineage.generation ?? 0,
+  );
 
   // Generate blazon description
   const blazon = useMemo(() => {
@@ -66,21 +59,38 @@ export const PetProfilePanel: React.FC<PetProfilePanelProps> = ({
   }, [coatOfArms]);
 
   const regenerateCoatOfArms = () => {
-    const seed = Date.now();
-    const newCoa = generateFounderCoatOfArms(petId, seed);
-    localStorage.setItem(
-      `auralia_coat_of_arms_${petId}`,
-      JSON.stringify(newCoa),
-    );
-    setCoatOfArms(newCoa);
+    const candidate = generateFounderCoatOfArms(petId, Date.now());
+    setProposal({
+      petId,
+      coat: {
+        ...candidate,
+        generation: record?.lineage.generation ?? coatOfArms?.generation ?? 0,
+      },
+    });
+    setHeraldryNotice(null);
+  };
+
+  const saveNewCoat = () => {
+    if (!pendingCoat) return;
+    try {
+      savePetHeraldry(petId, pendingCoat);
+      setProposal(null);
+      setHeraldryNotice(
+        "New heraldry saved. Your genome and registered identity are unchanged.",
+      );
+    } catch {
+      setHeraldryNotice(
+        "The new shield could not be saved. Your previous heraldry has been kept.",
+      );
+    }
   };
 
   return (
-    <div className="bg-slate-900/95 border border-slate-700 rounded-lg overflow-hidden">
+    <div className="living-world lineage-profile bg-slate-950/95 border border-cyan-900/50 rounded-2xl overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-900/50 to-blue-900/50 px-4 py-3 border-b border-slate-700">
+      <div className="bg-gradient-to-r from-cyan-950/60 to-slate-900/50 px-4 py-3 border-b border-slate-700">
         <h2 className="text-lg font-bold text-white flex items-center gap-2">
-          <span className="text-2xl">🛡️</span>
+          <Shield className="h-6 w-6 text-cyan-200" />
           {petName} Profile
         </h2>
         <p className="text-xs text-slate-400 mt-1">
@@ -142,6 +152,7 @@ export const PetProfilePanel: React.FC<PetProfilePanelProps> = ({
         </button>
         <button
           onClick={() => setActiveTab("keys")}
+          aria-pressed={activeTab === "keys"}
           className={`flex-1 px-4 py-3 min-h-[44px] text-sm font-medium transition-colors ${
             activeTab === "keys"
               ? "bg-slate-800 text-white border-b-2 border-green-500"
@@ -152,6 +163,7 @@ export const PetProfilePanel: React.FC<PetProfilePanelProps> = ({
         </button>
         <button
           onClick={() => setActiveTab("addons")}
+          aria-pressed={activeTab === "addons"}
           className={`flex-1 px-4 py-3 min-h-[44px] text-sm font-medium transition-colors ${
             activeTab === "addons"
               ? "bg-slate-800 text-white border-b-2 border-blue-500"
@@ -168,12 +180,13 @@ export const PetProfilePanel: React.FC<PetProfilePanelProps> = ({
         {activeTab === "coat" && (
           <div className="space-y-4">
             {/* Coat of Arms Display */}
-            <div className="flex justify-center">
+            <div className="heraldry-stage flex justify-center">
               <div className="relative">
                 {coatOfArms ? (
                   <CoatOfArmsRenderer
                     coatOfArms={coatOfArms}
-                    size={180}
+                    size={220}
+                    label={`${petName} coat of arms`}
                     showMarkers={true}
                   />
                 ) : (
@@ -239,17 +252,55 @@ export const PetProfilePanel: React.FC<PetProfilePanelProps> = ({
               </div>
             )}
 
+            {(heraldryNotice || loadNotice) && (
+              <p className="text-sm text-cyan-100" role="status">
+                {heraldryNotice || loadNotice}
+              </p>
+            )}
+            {pendingCoat && (
+              <section
+                className="rounded-2xl border border-cyan-800/60 bg-cyan-950/20 p-4"
+                aria-label="New heraldry preview"
+              >
+                <p className="text-sm text-cyan-100 mb-3">
+                  Preview a new shield. Your current design stays saved until
+                  you choose Keep.
+                </p>
+                <div className="flex justify-center">
+                  <CoatOfArmsRenderer
+                    coatOfArms={pendingCoat}
+                    size={150}
+                    label="New shield preview"
+                  />
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <button
+                    onClick={saveNewCoat}
+                    className="rounded-xl bg-cyan-700 px-3 text-sm text-white"
+                  >
+                    Keep new shield
+                  </button>
+                  <button
+                    onClick={() => setProposal(null)}
+                    className="rounded-xl border border-slate-600 px-3 text-sm text-slate-200"
+                  >
+                    Keep current shield
+                  </button>
+                </div>
+              </section>
+            )}
             {/* Regenerate Button */}
             <button
               onClick={regenerateCoatOfArms}
               className="w-full bg-purple-600 hover:bg-purple-500 text-white text-sm py-2 px-4 rounded-lg transition-colors"
             >
-              Regenerate Coat of Arms
+              Preview new coat of arms
             </button>
 
             <p className="text-xs text-slate-500 text-center">
-              Your coat of arms is a unique heraldic identifier for your pet
-              lineage
+              Colours and symbols tell your companion’s story. Regenerating
+              changes the decoration, while registered ancestry and DNA stay the
+              same.
             </p>
           </div>
         )}
@@ -276,6 +327,7 @@ export const PetProfilePanel: React.FC<PetProfilePanelProps> = ({
                   className={`relative w-20 h-11 rounded-full transition-colors ${
                     editMode ? "bg-blue-600" : "bg-slate-600"
                   }`}
+                  aria-label="Enable addon edit mode"
                   aria-pressed={editMode}
                 >
                   <div
@@ -332,16 +384,5 @@ export const PetProfilePanel: React.FC<PetProfilePanelProps> = ({
     </div>
   );
 };
-
-// Simple string hash function
-function hashString(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash; // Convert to 32-bit integer
-  }
-  return Math.abs(hash);
-}
 
 export default PetProfilePanel;
