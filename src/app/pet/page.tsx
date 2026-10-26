@@ -267,8 +267,6 @@ export default function PetPage() {
     <div
       className={`phone-pet min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-slate-950 ${imprintAccentClass} to-slate-900 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]`}
     >
-      <PetResponseOverlay enableAudio={true} enableAnticipation={true} />
-
       <div
         className={`flex min-h-[calc(100dvh-11rem)] flex-col items-center justify-start p-3 transition-[padding] sm:p-4 ${wardrobeOpen ? "lg:pr-[480px]" : ""}`}
       >
@@ -331,6 +329,7 @@ export default function PetPage() {
 
           <div className="flex-shrink-0 border-t border-slate-700/50 bg-slate-900/90 p-4 sm:p-6">
             <HUD mode="simple" />
+            <PetResponseOverlay enableAudio={true} enableAnticipation={true} />
             <nav aria-label="Companion adventures" className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
               <Link href="/app/activities?tab=games" className={`${CONTROL_IDLE} flex items-center justify-center rounded-lg border px-3 py-2 font-semibold`}>Play a game</Link>
               <Link href="/app/activities?tab=vimana" className={`${CONTROL_IDLE} flex items-center justify-center rounded-lg border px-3 py-2 font-semibold`}>Explore together</Link>

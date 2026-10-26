@@ -18,6 +18,9 @@ workspaces.
 - Activity query changes remount the requested tab instead of keeping the
   previous tab's initial state. This covers navigating between destinations on
   the same activities route and following browser history.
+- Companion reactions now appear in a readable inline panel instead of floating
+  over the creature. Recent responses remain accessible in a closed-by-default
+  drawer. Corrected the impossible mood comparison that prevented play reactions.
 - Removed the shop's unfinished marketplace promotion and nonfunctional Notify
   me display. Functional shop content and purchase state are untouched.
 - Battle reuses the locked sprite's authored wave (greeting), shuffle (ready/
