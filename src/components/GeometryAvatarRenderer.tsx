@@ -18,10 +18,13 @@ import type { EvolutionState } from "@/evolution/types";
 import { EvolutionStageAdornments } from "./evolution/EvolutionStageAdornments";
 import { resolveStagePalette } from "./evolution/stagePalette";
 import { useEvolutionStageTransition } from "./evolution/useEvolutionStageTransition";
+import type { PetMovementPreset } from "./SriYantraPetEngine";
 import { SriYantraPetDisplay } from "./SriYantraPetDisplay";
 
 interface GeometryAvatarRendererProps {
   animated?: boolean;
+  /** Presentation-only cue; never writes companion behaviour or DNA. */
+  movement?: PetMovementPreset;
   compact?: boolean;
   /** Registered child/parent preview; active registry record is used by default. */
   record?: PetRecordV2 | null;
@@ -46,6 +49,7 @@ interface GeometryAvatarRendererProps {
  */
 export function GeometryAvatarRenderer({
   animated = true,
+  movement,
   compact = false,
   record = null,
   genomeOverride = null,
@@ -142,7 +146,7 @@ export function GeometryAvatarRenderer({
     reduceMotion,
     lastAction,
     lastActionAt,
-    paused: !animated,
+    paused: !animated || movement !== undefined,
   });
 
   // Evolution presentation. The Sri Yantra engine is a checksum-locked sprite
@@ -180,14 +184,14 @@ export function GeometryAvatarRenderer({
   } as const;
 
   return (
-    <div data-geometry-sprite data-geometry-identity={selectedRecord?.petId ?? identityKeyOverride ?? "runtime"} className={`relative flex w-full items-center justify-center ${compact ? "aspect-square" : ""}`}>
+    <div data-geometry-sprite data-geometry-movement={reduceMotion ? "idle" : movement ?? behavior.movement} data-geometry-identity={selectedRecord?.petId ?? identityKeyOverride ?? "runtime"} className={`relative flex w-full items-center justify-center ${compact ? "aspect-square" : ""}`}>
       <SriYantraPetDisplay
         red={petProfile.strands.red}
         blue={petProfile.strands.blue}
         black={petProfile.strands.black}
-        animated={animated}
+        animated={animated && !reduceMotion}
         compact={compact}
-        movement={behavior.movement}
+        movement={reduceMotion ? "idle" : movement ?? behavior.movement}
       />
       <svg
         viewBox="0 0 400 400"

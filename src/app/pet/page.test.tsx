@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import PetPage from "@/app/pet/page";
@@ -28,6 +28,10 @@ vi.mock("next/link", () => ({
 
 vi.mock("@/components/PetRuntimeStage", () => ({
   PetRuntimeStage: () => <div data-testid="pet-runtime-stage" />,
+}));
+
+vi.mock("@/components/BreedingChamber", () => ({
+  BreedingChamber: () => <div data-testid="saved-family">Registered companion family</div>,
 }));
 
 vi.mock("@/components/HUD", () => ({
@@ -105,6 +109,7 @@ vi.mock("@/lib/store", () => ({
 
 describe("PetPage", () => {
   beforeEach(() => {
+    window.history.replaceState(null, "", "/pet");
     setPetType.mockReset();
     window.localStorage.clear();
     saveDnaImprint({
@@ -115,6 +120,28 @@ describe("PetPage", () => {
       completedMode: "sound",
       updatedAt: 1710000000000,
     });
+  });
+
+  it("opens the existing family panel directly without changing the companion form", () => {
+    render(<PetPage />);
+    fireEvent.click(screen.getByRole("link", { name: "Companion family" }));
+    expect(screen.getByTestId("saved-family")).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Systems" })).toHaveAttribute("aria-selected", "true");
+    expect(setPetType).not.toHaveBeenCalled();
+  });
+
+  it("restores the family panel from its bookmarked hash", () => {
+    window.history.replaceState(null, "", "/pet#family");
+    render(<PetPage />);
+    expect(screen.getByTestId("saved-family")).toBeInTheDocument();
+    expect(setPetType).not.toHaveBeenCalled();
+  });
+
+  it("opens the certificate without entering the mechanics lab", () => {
+    render(<PetPage />);
+    fireEvent.click(screen.getByRole("button", { name: /View Certificate/i }));
+    expect(screen.getByTestId("registration-certificate")).toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: "Systems" })).not.toBeInTheDocument();
   });
 
   it("surfaces the latest DNA imprint on the canonical pet route", async () => {
@@ -170,7 +197,7 @@ describe("PetPage", () => {
       screen.queryByTestId("registration-certificate"),
     ).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /View Certificate/i }));
+    fireEvent.click(within(screen.getByRole("tabpanel")).getByRole("button", { name: /View Certificate/i }));
     expect(screen.getByTestId("registration-certificate")).toBeInTheDocument();
   });
 

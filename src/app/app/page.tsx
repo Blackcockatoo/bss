@@ -30,6 +30,11 @@ const actionCards = [
     href: '/app/activities?tab=games',
   },
   {
+    title: 'Make music, stories & experiments',
+    description: 'Choose a creative tool, try an idea, and save what you make with your companion.',
+    href: '/project-forge',
+  },
+  {
     title: 'Body Forge',
     description:
       'Sculpt a custom body in the visual workshop, then send it straight to the canonical Meta-Pet runtime.',
@@ -82,7 +87,7 @@ export default function StudentAppHomePage() {
         <p className="text-xs uppercase tracking-[0.2em] text-cyan-300">Student App</p>
         <h1 className="mt-2 text-2xl font-semibold text-white">Welcome back, explorer</h1>
         <p className="mt-2 text-sm text-zinc-300">
-          These routes mirror the active companion&apos;s live vitals and now return to one canonical pet runtime.
+          Choose something to play, explore or make with your companion.
         </p>
       </header>
 

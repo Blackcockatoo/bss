@@ -271,44 +271,7 @@ export default function ShopPage() {
         </div>
       </section>
 
-      {/* Addon Marketplace Coming Soon */}
-      <section className="mb-10 overflow-hidden rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-950/30 to-slate-900/60 p-5 md:p-8">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-wider text-amber-300">
-              Addon Marketplace — Coming Soon
-            </p>
-            <h3 className="mt-1 text-lg font-bold leading-tight text-zinc-100 sm:text-xl">
-              Individual drops · Creator revenue share · Limited editions
-            </h3>
-            <p className="mt-2 max-w-xl text-sm text-zinc-400 leading-relaxed">
-              Buy individual addon packs from $1.99. Creators earn 70% of each
-              sale. Limited-edition mythic drops with on-chain scarcity.
-              Educators can share curriculum-themed addon bundles. The
-              marketplace opens when the ecosystem is ready.
-            </p>
-          </div>
-          <div className="w-full shrink-0 md:w-auto">
-            <span className="inline-flex w-full justify-center rounded-xl border border-amber-400/30 bg-amber-950/40 px-4 py-2 text-sm font-semibold text-amber-200 md:w-auto">
-              Notify me
-            </span>
-          </div>
-        </div>
-        <div className="mt-4 flex flex-wrap gap-2 text-[11px] text-zinc-500">
-          <span className="rounded-md border border-zinc-700 bg-zinc-900/70 px-2 py-0.5">
-            Drop pricing: $1.99–$9.99
-          </span>
-          <span className="rounded-md border border-zinc-700 bg-zinc-900/70 px-2 py-0.5">
-            Creator cut: 70%
-          </span>
-          <span className="rounded-md border border-zinc-700 bg-zinc-900/70 px-2 py-0.5">
-            Cryptographically signed editions
-          </span>
-          <span className="rounded-md border border-zinc-700 bg-zinc-900/70 px-2 py-0.5">
-            Curriculum addon bundles
-          </span>
-        </div>
-      </section>
+
     </main>
   );
 }

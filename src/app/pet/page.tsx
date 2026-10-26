@@ -37,7 +37,7 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
-import { type KeyboardEvent, useEffect, useRef, useState } from "react";
+import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 
 const PET_FORM_LABELS: Record<PetType, string> = {
   auralia: "Auralia Companion",
@@ -141,6 +141,32 @@ export default function PetPage() {
       });
     }
   }, [addonsInitialized]);
+
+  const openFamily = useCallback(() => {
+    setShowAdvanced(true);
+    setAdvancedTab("systems");
+    setShowProfilePanel(false);
+    setShowAddonPanel(false);
+    setShowEvolutionPanel(false);
+    setShowBreedingPanel(true);
+  }, []);
+
+  // Deep links reveal existing panels; they never switch or replace the pet.
+  useEffect(() => {
+    const reveal = () => {
+      if (window.location.hash === "#family") openFamily();
+      else if (window.location.hash === "#certificate") setShowCertificate(true);
+    };
+    reveal();
+    window.addEventListener("hashchange", reveal);
+    return () => window.removeEventListener("hashchange", reveal);
+  }, [openFamily]);
+
+  useEffect(() => {
+    if (!showBreedingPanel) return;
+    const timer = setTimeout(() => document.getElementById("companion-family")?.scrollIntoView({ block: "start" }), 0);
+    return () => clearTimeout(timer);
+  }, [showBreedingPanel]);
 
   const handleToggleProfilePanel = () => {
     setShowProfilePanel((prev) => {
@@ -305,6 +331,15 @@ export default function PetPage() {
 
           <div className="flex-shrink-0 border-t border-slate-700/50 bg-slate-900/90 p-4 sm:p-6">
             <HUD mode="simple" />
+            <nav aria-label="Companion adventures" className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <Link href="/app/activities?tab=games" className={`${CONTROL_IDLE} flex items-center justify-center rounded-lg border px-3 py-2 font-semibold`}>Play a game</Link>
+              <Link href="/app/activities?tab=vimana" className={`${CONTROL_IDLE} flex items-center justify-center rounded-lg border px-3 py-2 font-semibold`}>Explore together</Link>
+              <Link href="/project-forge" className={`${CONTROL_IDLE} flex items-center justify-center rounded-lg border px-3 py-2 font-semibold`}>Make something</Link>
+            </nav>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Link href="/pet#family" onClick={openFamily} className={`${CONTROL_IDLE} inline-flex items-center rounded-lg border px-3 py-2`}>Companion family</Link>
+              <CertificateButton variant="outline" onClick={() => setShowCertificate(true)} className={CONTROL_IDLE} />
+            </div>
             <div className="mt-6 border-t border-slate-800/80 pt-4">
               <Button
                 type="button"
@@ -525,7 +560,7 @@ export default function PetPage() {
                             </div>
                           )}
                           {showBreedingPanel && (
-                            <div className="md:col-span-2">
+                            <div id="companion-family" className="scroll-mt-20 md:col-span-2">
                               <BreedingChamber />
                             </div>
                           )}
