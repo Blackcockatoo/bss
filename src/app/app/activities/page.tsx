@@ -33,6 +33,7 @@ function ActivitiesDashboard({ showNavigator }: { showNavigator: boolean }) {
 
   return (
     <FeaturesDashboard
+      key={tab ?? (showNavigator ? "navigator" : "battle")}
       includeNavigator={showNavigator}
       initialTab={tab ?? (showNavigator ? 'navigator' : 'battle')}
     />

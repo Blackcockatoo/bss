@@ -1,8 +1,12 @@
 import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GeometryAvatarRenderer } from "./GeometryAvatarRenderer";
 import { deriveSriYantraProjectionV2 } from "@/lib/geometry/projection";
+
+const motion = vi.hoisted(() => ({ reduced: false }));
+vi.mock("@/hooks/useReducedMotion", () => ({ useReducedMotion: () => motion.reduced }));
+afterEach(() => { motion.reduced = false; });
 
 const state = vi.hoisted(() => ({
   genome: null as null | {
@@ -23,16 +27,22 @@ vi.mock("./SriYantraPetDisplay", () => ({
     red,
     blue,
     black,
+    movement,
+    animated,
   }: {
     red: string;
     blue: string;
     black: string;
+    movement?: string;
+    animated?: boolean;
   }) => (
     <div
       data-testid="sri-yantra"
       data-red={red}
       data-blue={blue}
       data-black={black}
+      data-movement={movement}
+      data-animated={String(animated)}
     />
   ),
 }));
@@ -131,4 +141,22 @@ describe("GeometryAvatarRenderer", () => {
     expect(stage?.querySelector('[data-evolution-adornment="crown"]')).toBeNull();
     expect(stage?.querySelector('[data-evolution-mark="helix"]')).toBeTruthy();
   });
+});
+
+
+it('passes authored movement cues through the approved bridge without changing genome packets', () => {
+  const view = render(<GeometryAvatarRenderer movement="dab" />);
+  const sprite = screen.getByTestId('sri-yantra');
+  const packet = sprite.getAttribute('data-red');
+  expect(sprite).toHaveAttribute('data-movement', 'dab');
+  view.rerender(<GeometryAvatarRenderer movement="lotus" />);
+  expect(sprite).toHaveAttribute('data-movement', 'lotus');
+  expect(sprite).toHaveAttribute('data-red', packet);
+});
+
+it('stops the sprite clock and ignores movement cues when reduced motion is requested', () => {
+  motion.reduced = true;
+  render(<GeometryAvatarRenderer movement="dance" />);
+  expect(screen.getByTestId('sri-yantra')).toHaveAttribute('data-movement', 'idle');
+  expect(screen.getByTestId('sri-yantra')).toHaveAttribute('data-animated', 'false');
 });

@@ -21,7 +21,8 @@ const FEATURED_ADVENTURE_ROUTES = [
   '/monkey-invaders',
   '/digital-dna',
   '/body-forge',
-  '/scaffold',
+  '/project-forge',
+  '/app/activities?tab=vimana',
 ] as const;
 
 const ADVENTURE_DETAILS: Record<string, { emoji: string; copy: string; tone: string }> = {
@@ -29,16 +30,17 @@ const ADVENTURE_DETAILS: Record<string, { emoji: string; copy: string; tone: str
   '/pet': { emoji: '\u{1F43E}', copy: 'Visit, care for, and check on your pet.', tone: 'from-emerald-400/25 to-lime-500/10' },
   '/monkey-invaders': { emoji: '\u{1F680}', copy: 'Jump into a quick space game.', tone: 'from-orange-400/25 to-rose-500/10' },
   '/digital-dna': { emoji: '\u{1F9EC}', copy: 'Turn DNA into colour, shapes, and sound.', tone: 'from-violet-400/25 to-fuchsia-500/10' },
+  '/project-forge': { emoji: '\u{1F6E0}', copy: 'Make music, write a story, or try an experiment.', tone: 'from-teal-400/25 to-cyan-500/10' },
   '/body-forge': { emoji: '\u{1F3A8}', copy: 'Create a one-of-a-kind pet body.', tone: 'from-pink-400/25 to-amber-500/10' },
-  '/scaffold': { emoji: '\u{1F5FA}\u{FE0F}', copy: 'See what is waiting in the wider world.', tone: 'from-blue-400/25 to-indigo-500/10' },
+  '/app/activities?tab=vimana': { emoji: '\u{1F5FA}\u{FE0F}', copy: 'Explore the Vimana map with your companion.', tone: 'from-blue-400/25 to-indigo-500/10' },
 };
 
 const MORE_ADVENTURE_EMOJI: Record<string, string> = {
   '/visualizer': '\u{2728}',
-  '/share': '\u{1F3C6}',
+  '/app/activities?tab=achievements': '\u{1F3C6}',
   '/shop': '\u{1F6CD}\u{FE0F}',
   '/identity': '\u{1F50E}',
-  '/lineage-demo': '\u{1F333}',
+  '/pet#family': '\u{1F333}',
   '/genome-resonance': '\u{1F30C}',
   '/qr-messaging': '\u{1F4AC}',
 };

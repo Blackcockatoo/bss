@@ -4,7 +4,6 @@ import { useEffect, useCallback } from 'react';
 import { useStore } from '@/lib/store';
 import { isVimanaNodeDiscovered } from '@/lib/vimana';
 import { useRealtimeResponse } from '@/lib/realtime/useRealtimeResponse';
-import { ResponseBubble } from '@/components/ResponseBubble';
 import { playHepta } from '@/lib/identity/hepta';
 import type { ResponseContext } from '@/lib/realtime/responseSystem';
 
@@ -134,30 +133,29 @@ export function PetResponseOverlay({ enableAudio = true, enableAnticipation = tr
     return () => unsubscribe();
   }, [triggerResponse]);
 
-  return (
-    <>
-      <ResponseBubble response={currentResponse} isVisible={isVisible} />
+  if (!currentResponse && responseHistory.length === 0) return null;
 
-      {/* Optional: Response History Display */}
-      {responseHistory.length > 0 && (
-        <div className="fixed bottom-6 right-6 w-72 max-h-56 overflow-y-auto pointer-events-none z-40 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
-          <div className="space-y-2">
-            {responseHistory.slice(0, 5).map((response, index) => (
-              <div
-                key={response.id}
-                className="text-sm bg-slate-900/90 backdrop-blur-md rounded-xl px-4 py-3 text-white/70 border border-slate-700/60 shadow-lg transition-all duration-300"
-                style={{
-                  opacity: Math.max(0.4, 1 - index * 0.15),
-                  transform: `translateY(${index * 2}px)`
-                }}
-              >
-                <span className="mr-3 text-lg">{response.emoji}</span>
-                <span className="font-light">{response.text}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+  return (
+    <section aria-label="Companion responses" className="mt-4 min-w-0 space-y-2 text-sm">
+      {currentResponse && isVisible && (
+        <p role="status" className="rounded-xl border border-cyan-800/60 bg-slate-950/80 px-4 py-3 leading-relaxed text-cyan-100 break-words">
+          <span aria-hidden="true" className="mr-2">{currentResponse.emoji}</span>
+          {currentResponse.text}
+        </p>
       )}
-    </>
+      {responseHistory.length > 0 && (
+        <details className="rounded-xl border border-slate-700/60 bg-slate-950/60 px-3">
+          <summary className="min-h-11 cursor-pointer content-center py-3 text-slate-300">Recent companion responses</summary>
+          <ol className="space-y-2 pb-3 text-slate-300">
+            {responseHistory.slice(0, 5).map((response, index) => (
+              <li key={`${response.id}-${index}`} className="rounded-lg bg-slate-900 px-3 py-2 leading-relaxed break-words">
+                <span aria-hidden="true" className="mr-2">{response.emoji}</span>
+                {response.text}
+              </li>
+            ))}
+          </ol>
+        </details>
+      )}
+    </section>
   );
 }

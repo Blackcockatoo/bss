@@ -60,6 +60,19 @@ const viewports = [
       report.viewports.push({screen:'battle',...viewport,overflow:false,geometry:box});
     }
 
+    assert.equal(await page.locator('[data-geometry-sprite]').first().getAttribute('data-geometry-movement'),'idle');
+    await page.emulateMedia({reducedMotion:'no-preference'});
+    await page.waitForFunction(()=>document.querySelector('[data-geometry-sprite]')?.dataset.geometryMovement==='shuffle');
+    const animatedSvg=page.locator('[data-geometry-sprite]>svg').first();
+    const beforeFrame=await animatedSvg.innerHTML();
+    await page.waitForTimeout(120);
+    assert.notEqual(await animatedSvg.innerHTML(),beforeFrame,'The real geometry sprite should animate');
+    const movementChanges=[];
+    await page.exposeFunction('recordBattleMovement',movement=>movementChanges.push(movement));
+    await page.locator('[data-geometry-sprite]').first().evaluate(node=>{
+      const observer=new MutationObserver(()=>window.recordBattleMovement(node.dataset.geometryMovement));
+      observer.observe(node,{attributes:true,attributeFilter:['data-geometry-movement']});
+    });
     await move.click();
     await page.waitForFunction(()=>
       [...document.querySelectorAll('button')].some(button=>button.textContent.trim()==='Rematch') ||
@@ -67,9 +80,13 @@ const viewports = [
     );
     if(await page.locator('.living-move').count()) assert.equal(Number((await move.innerText()).match(/PP\s+(\d+)/)[1]),pp-1);
     else assert.ok(await page.getByRole('button',{name:'Rematch',exact:true}).isVisible());
+    assert.ok(movementChanges.some(movement=>['walk','dab'].includes(movement)),JSON.stringify(movementChanges));
+    report.movements=movementChanges;
     await page.screenshot({path:`${output}/battle-resolved-turn.png`,fullPage:true});
+    await page.emulateMedia({reducedMotion:'reduce'});
 
-    await go('/app/activities?tab=vimana');
+    await go('/app/activities');
+    await page.getByRole('button').filter({hasText:'Explore the Vimana map with your companion.'}).click();
     await page.getByRole('combobox',{name:'Destination'}).waitFor();
     await page.getByRole('combobox',{name:'Destination'}).selectOption({index:1});
     for(const viewport of viewports) {
@@ -84,10 +101,13 @@ const viewports = [
     if(await scan.count()) await scan.click();
 
     await go('/pet');await page.getByRole('button',{name:/Advanced \/ Mechanics Lab/}).waitFor();await skipTutorial();
-    await page.getByRole('button',{name:/Advanced \/ Mechanics Lab/}).click();
-    await page.getByRole('tab',{name:'Systems',exact:true}).click();
-    await page.getByRole('button',{name:'Breed Geometry',exact:true}).click();
+    await page.getByRole('link',{name:'Make something',exact:true}).waitFor();
+    assert.equal(await page.getByRole('link',{name:'Make something',exact:true}).getAttribute('href'),'/project-forge');
+    await page.screenshot({path:`${output}/practical-flow-mobile.png`,fullPage:true});
+    await page.getByRole('link',{name:'Companion family',exact:true}).click();
     const chamber=page.getByTestId('breeding-chamber');await chamber.waitFor();
+    await page.reload({waitUntil:'networkidle'});await chamber.waitFor();
+    report.familyDeepLink=true;
     const founder=chamber.getByRole('button',{name:'Awaken Second Founder'});
     if(await founder.count()) { await founder.click(); }
     await chamber.getByRole('button',{name:'Blend Geometry',exact:true}).waitFor();

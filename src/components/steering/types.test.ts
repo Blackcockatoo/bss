@@ -29,3 +29,12 @@ describe('steering compass navigation targets', () => {
     expect(qrMessaging?.renderPosition).toBe(10);
   });
 });
+
+
+it('opens real saved experiences instead of mock or temporary demos', () => {
+  expect(NAVIGATION_TARGETS.find(target => target.label === 'Explore')?.route).toBe('/app/activities?tab=vimana');
+  expect(NAVIGATION_TARGETS.find(target => target.label === 'Family')?.route).toBe('/pet#family');
+  expect(NAVIGATION_TARGETS.find(target => target.label === 'Achievements')?.route).toBe('/app/activities?tab=achievements');
+  expect(NAVIGATION_TARGETS.find(target => target.label === 'Make & learn')?.route).toBe('/project-forge');
+  expect(NAVIGATION_TARGETS.some(target => ['/scaffold', '/lineage-demo', '/share'].includes(target.route))).toBe(false);
+});

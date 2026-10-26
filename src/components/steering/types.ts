@@ -19,7 +19,7 @@ export const GENOME_RESONANCE_ROUTE = "/genome-resonance";
 
 export const NAVIGATION_TARGETS: NavigationTarget[] = [
   { position: 0, angle: 0, label: "Home", route: "/", icon: "Home" },
-  { position: 1, angle: 30, label: "Explore", route: "/scaffold", icon: "Map" },
+  { position: 1, angle: 30, label: "Explore", route: "/app/activities?tab=vimana", icon: "Map" },
   { position: 2, angle: 60, label: "Pet", route: "/pet", icon: "Swords" },
   {
     position: 3,
@@ -31,15 +31,15 @@ export const NAVIGATION_TARGETS: NavigationTarget[] = [
   {
     position: 4,
     angle: 120,
-    label: "Style",
+    label: "DNA visuals",
     route: "/visualizer",
     icon: "Sparkles",
   },
   {
     position: 5,
     angle: 150,
-    label: "Rewards",
-    route: "/share",
+    label: "Achievements",
+    route: "/app/activities?tab=achievements",
     icon: "Trophy",
   },
   {
@@ -66,8 +66,8 @@ export const NAVIGATION_TARGETS: NavigationTarget[] = [
   {
     position: 9,
     angle: 270,
-    label: "Lineage",
-    route: "/lineage-demo",
+    label: "Family",
+    route: "/pet#family",
     icon: "GitBranch",
   },
   {
@@ -90,6 +90,13 @@ export const NAVIGATION_TARGETS: NavigationTarget[] = [
     label: "Body Forge",
     route: "/body-forge",
     icon: "Shapes",
+  },
+  {
+    position: 13,
+    angle: 390,
+    label: "Make & learn",
+    route: "/project-forge",
+    icon: "Hammer",
   },
 ];
 

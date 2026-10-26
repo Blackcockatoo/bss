@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useStore } from '@/lib/store';
 import { usePetRegistryStore } from '@/lib/registry';
 import './living-genome.css';
+import type { PetMovementPreset } from '../SriYantraPetEngine';
 
 const Companion = dynamic(() => import('../PetRuntimeStage').then(m => m.PetRuntimeStage), {
   ssr: false,
@@ -14,7 +15,7 @@ const Companion = dynamic(() => import('../PetRuntimeStage').then(m => m.PetRunt
 const Geometry = dynamic(() => import('../GeometryAvatarRenderer').then(module => module.GeometryAvatarRenderer), { ssr: false, loading: () => <p role="status">Preparing geometry…</p> });
 
 /** Reuses the canonical renderer, including the active genome, body and cosmetics. */
-export function LivingCompanion({ geometry = false }: { geometry?: boolean } = {}) {
+export function LivingCompanion({ geometry = false, movement }: { geometry?: boolean; movement?: PetMovementPreset } = {}) {
   const petType = useStore(state => state.petType);
   const showGeometry = geometry || petType === 'geometry';
   const container = useRef<HTMLElement>(null);
@@ -30,7 +31,7 @@ export function LivingCompanion({ geometry = false }: { geometry?: boolean } = {
   }, []);
   const name = usePetRegistryStore(s => s.activeRecord?.name) ?? 'Your Pet';
   return <figure ref={container} className="living-companion" aria-label={name}>
-    <div className={`living-companion-form ${showGeometry ? "living-geometry-form" : ""}`} aria-hidden="true" inert>{pageVisible ? showGeometry ? <Geometry animated={visible} compact showPersonality={false} /> : visible ? <Companion compact /> : null : null}</div>
+    <div className={`living-companion-form ${showGeometry ? "living-geometry-form" : ""}`} aria-hidden="true" inert>{pageVisible ? showGeometry ? <Geometry animated={visible} movement={movement} compact showPersonality={false} /> : visible ? <Companion compact /> : null : null}</div>
     <figcaption>{name}</figcaption>
   </figure>;
 }

@@ -9,7 +9,7 @@ import { createDefaultBattleStats } from '@/lib/progression/types';
 const originalRecordBattle = useStore.getState().recordBattle;
 const motion = vi.hoisted(() => ({ reduced: false }));
 vi.mock('@/hooks/useReducedMotion', () => ({ useReducedMotion: () => motion.reduced }));
-vi.mock('./living-genome/LivingScene', () => ({ LivingCompanion: () => <div>Live companion</div> }));
+vi.mock('./living-genome/LivingScene', () => ({ LivingCompanion: ({ movement }: { movement?: string }) => <div data-testid="battle-companion" data-movement={movement}>Live companion</div> }));
 
 afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); motion.reduced = false; });
 
@@ -108,4 +108,50 @@ it('resolves without an animation delay when reduced motion is requested', () =>
   expect(execute).toHaveBeenCalledTimes(1);
   expect(screen.getAllByRole('progressbar').map(bar => bar.getAttribute('aria-valuenow'))).toEqual(['38', '42']);
   expect(screen.getAllByRole('button', { pressed: false })[0]).not.toBeDisabled();
+});
+
+
+describe('authored geometry battle movements', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    useStore.setState({ battle: createDefaultBattleStats(), recordBattle: originalRecordBattle });
+    vi.spyOn(engine, 'derivePlayerStats').mockReturnValue({ maxHp: 100, attack: 10, defense: 10, speed: 999 });
+  });
+
+  it('uses greeting, charge, response and ready poses without resolving extra turns', () => {
+    const execute = vi.spyOn(engine, 'executeTurn').mockReturnValue(turnOutcome);
+    render(<BattleArena />);
+    expect(screen.getByTestId('battle-companion')).toHaveAttribute('data-movement', 'wave');
+    enterBattle();
+    expect(screen.getByTestId('battle-companion')).toHaveAttribute('data-movement', 'shuffle');
+    const firstMove = screen.getAllByRole('button', { pressed: false })[0];
+    fireEvent.click(firstMove);
+    expect(screen.getByTestId('battle-companion').getAttribute('data-movement')).toMatch(/^(walk|dab)$/);
+    act(() => vi.advanceTimersByTime(325));
+    expect(screen.getByTestId('battle-companion')).toHaveAttribute('data-movement', 'shuffle');
+    expect(firstMove).toBeDisabled();
+    act(() => vi.advanceTimersByTime(325));
+    expect(firstMove).not.toBeDisabled();
+    expect(execute).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(['player', 'opponent'] as const)('shows a %s result pose and clears all feedback timers on exit', winner => {
+    vi.spyOn(engine, 'executeTurn').mockReturnValue({ ...turnOutcome, battleOver: true, winner });
+    const { unmount } = render(<BattleArena />);
+    enterBattle();
+    fireEvent.click(screen.getAllByRole('button', { pressed: false })[0]);
+    act(() => vi.advanceTimersByTime(650));
+    expect(screen.getByTestId('battle-companion')).toHaveAttribute('data-movement', winner === 'player' ? 'dance' : 'lotus');
+    unmount();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('uses still feedback immediately for reduced motion', () => {
+    motion.reduced = true;
+    vi.spyOn(engine, 'executeTurn').mockReturnValue(turnOutcome);
+    render(<BattleArena />);enterBattle();
+    fireEvent.click(screen.getAllByRole('button', { pressed: false })[0]);
+    expect(screen.getByTestId('battle-companion')).toHaveAttribute('data-movement', 'idle');
+    expect(vi.getTimerCount()).toBe(0);
+  });
 });
