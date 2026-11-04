@@ -60,8 +60,8 @@ export function LearnedCompanionMotion({ children }: { children: ReactNode }) {
   }, [petId, seed]);
   const learned = response?.petId === record?.petId ? response : null;
   return (
-    <div>
-      <div ref={stage}>{children}</div>
+    <div className="w-full min-w-0">
+      <div ref={stage} className="w-full">{children}</div>
       {learned && (
         <div className="mt-3 rounded border border-teal-400/40 p-3 text-sm text-teal-100">
           <button

@@ -184,7 +184,7 @@ export function GeometryAvatarRenderer({
   } as const;
 
   return (
-    <div data-geometry-sprite data-geometry-movement={reduceMotion ? "idle" : movement ?? behavior.movement} data-geometry-identity={selectedRecord?.petId ?? identityKeyOverride ?? "runtime"} className={`relative flex w-full items-center justify-center ${compact ? "aspect-square" : ""}`}>
+    <div data-geometry-sprite data-geometry-movement={reduceMotion ? "idle" : movement ?? behavior.movement} data-geometry-identity={selectedRecord?.petId ?? identityKeyOverride ?? "runtime"} className={`relative mx-auto flex aspect-square w-full items-center justify-center ${compact ? "" : "max-w-[520px]"}`}>
       <SriYantraPetDisplay
         red={petProfile.strands.red}
         blue={petProfile.strands.blue}
