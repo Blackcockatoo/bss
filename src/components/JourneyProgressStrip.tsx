@@ -8,6 +8,7 @@ import {
   getRouteProgression,
   getRouteProgressionKeyByPathname,
 } from "@/lib/routeProgression";
+import { useAppCopy } from "@/lib/appCopy";
 
 export function JourneyProgressStrip() {
   const pathname = usePathname();
@@ -16,6 +17,7 @@ export function JourneyProgressStrip() {
     : null;
   const shouldRender = pathname === "/" || currentRouteKey !== null;
   const { progress } = useJourneyProgressTracker();
+  const shellCopy = useAppCopy().shell;
 
   if (!shouldRender) {
     return null;
@@ -24,7 +26,7 @@ export function JourneyProgressStrip() {
   return (
     <div className="mx-auto mt-3 flex w-full max-w-6xl flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
       <p className="shrink-0 text-[10px] uppercase tracking-[0.24em] text-slate-500 sm:text-[11px]">
-        Journey Progress
+        {shellCopy.journey}
       </p>
       <div className="scrollbar-hide -mx-3 flex gap-2 overflow-x-auto px-3 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
         {ROUTE_PROGRESSION_SEQUENCE.map((routeKey, index) => {
@@ -47,7 +49,8 @@ export function JourneyProgressStrip() {
                       : "border-slate-800 bg-slate-900/70 text-slate-500"
               }`}
             >
-              {index + 1}. {step.shortLabel}
+              {index + 1}.{" "}
+              {routeKey === "school" ? step.shortLabel : shellCopy.steps[routeKey]}
             </span>
           );
         })}

@@ -98,13 +98,30 @@ function metaPetSchoolSitemap(): MetadataRoute.Sitemap {
 function blueSnakeStudiosSitemap(base: string): MetadataRoute.Sitemap {
   const lastModified = new Date();
 
+  const homeAlternates = {
+    languages: {
+      en: base,
+      ja: `${base}/ja`,
+      hi: `${base}/hi`,
+    },
+  };
+
   return [
     {
       url: base,
       lastModified,
       changeFrequency: "weekly",
       priority: 1,
+      alternates: homeAlternates,
     },
+    // Japanese and Hindi editions of the home page.
+    ...(["ja", "hi"] as const).map((locale) => ({
+      url: `${base}/${locale}`,
+      lastModified,
+      changeFrequency: "weekly" as const,
+      priority: 0.9,
+      alternates: homeAlternates,
+    })),
     {
       url: `${base}/pet`,
       lastModified,

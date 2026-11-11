@@ -280,3 +280,10 @@
     transition: none !important;
   }
 }
+
+/* Devanagari conjuncts break when letters are spaced apart, so drop the
+   decorative tracking for Hindi text. */
+:lang(hi) [class*="tracking-"],
+[class*="tracking-"]:lang(hi) {
+  letter-spacing: normal;
+}

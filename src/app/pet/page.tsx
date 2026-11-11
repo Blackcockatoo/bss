@@ -17,7 +17,9 @@ import {
 } from "@/components/RegistrationCertificate";
 import { WellnessSync } from "@/components/WellnessSync";
 import { Button } from "@/components/ui/button";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { initializeStarterAddons } from "@/lib/addons/starter";
+import { useAppCopy } from "@/lib/appCopy";
 import { useDnaImprint } from "@/lib/dnaImprint";
 import { ENABLE_CHILD_SAFE_BASELINE } from "@/lib/env/features";
 import { useJourneyProgressTracker } from "@/lib/journeyProgress";
@@ -76,6 +78,8 @@ const SECTION_LABEL =
   "text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400";
 
 export default function PetPage() {
+  const copy = useAppCopy();
+  const t = copy.pet;
   const startTick = useStore((s) => s.startTick);
   const stopTick = useStore((s) => s.stopTick);
   const evolution = useStore((s) => s.evolution);
@@ -260,7 +264,7 @@ export default function PetPage() {
   };
 
   // Switching form changes the renderer, never the companion identity.
-  const petName = activeRecord?.name ?? "Awakening Meta-Pet";
+  const petName = activeRecord?.name ?? t.awakening;
   const petId = activeRecord?.petId ?? "registration-pending";
 
   return (
@@ -275,42 +279,42 @@ export default function PetPage() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="space-y-2">
                 <p className="text-xs uppercase tracking-[0.28em] text-cyan-300/75">
-                  Bond Layer · {PET_FORM_LABELS[petType]}
+                  {t.bondLayer} · {t.forms[petType] ?? PET_FORM_LABELS[petType]}
                 </p>
-                <p className="text-sm text-zinc-200">{petStep.summary}</p>
+                <p className="text-sm text-zinc-200">{t.summary}</p>
                 {dnaImprint ? (
                   <div className="rounded-2xl border border-cyan-400/20 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-100">
-                    Latest DNA imprint:{" "}
-                    <strong>{dnaImprint.resonanceClass}</strong> from the{" "}
-                    <strong>{dnaImprint.selectedSeed}</strong> strand, last
-                    explored in <strong>{dnaImprint.completedMode}</strong>{" "}
-                    mode.
+                    {t.dnaLatest}{" "}
+                    <strong>{dnaImprint.resonanceClass}</strong> {t.dnaFrom}{" "}
+                    <strong>{dnaImprint.selectedSeed}</strong> {t.dnaStrand}{" "}
+                    <strong>{dnaImprint.completedMode}</strong> {t.dnaMode}
                     <Link
                       href="/digital-dna"
                       className="ml-2 font-semibold text-cyan-200 underline underline-offset-4"
                     >
-                      Re-open DNA Hub
+                      {t.dnaReopen}
                     </Link>
                   </div>
                 ) : (
                   <p className="text-xs text-slate-500">
-                    No DNA imprint yet. Visit the DNA route after bonding here
-                    to unlock a genome readback.
+                    {t.dnaNone}
                   </p>
                 )}
               </div>
 
               <div className="flex flex-shrink-0 flex-col items-stretch gap-2 sm:items-end">
+                <LanguageSwitcher className="self-start sm:self-end" />
                 <Button
                   type="button"
                   onClick={() => setWardrobeOpen(true)}
                   className="gap-2 border border-cyan-400/40 bg-gradient-to-r from-cyan-600 to-fuchsia-600 text-white hover:from-cyan-500 hover:to-fuchsia-500"
                 >
                   <Shirt className="h-4 w-4" />
-                  Open Wardrobe
+                  {t.wardrobe}
                 </Button>
                 <RouteTutorialControls
                   scope="pet"
+                  buttonLabel={t.replayTutorial}
                   className="self-start text-cyan-200 hover:text-white sm:self-end"
                 />
               </div>
@@ -330,13 +334,13 @@ export default function PetPage() {
           <div className="flex-shrink-0 border-t border-slate-700/50 bg-slate-900/90 p-4 sm:p-6">
             <HUD mode="simple" />
             <PetResponseOverlay enableAudio={true} enableAnticipation={true} />
-            <nav aria-label="Companion adventures" className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
-              <Link href="/app/activities?tab=games" className={`${CONTROL_IDLE} flex items-center justify-center rounded-lg border px-3 py-2 font-semibold`}>Play a game</Link>
-              <Link href="/app/activities?tab=vimana" className={`${CONTROL_IDLE} flex items-center justify-center rounded-lg border px-3 py-2 font-semibold`}>Explore together</Link>
-              <Link href="/project-forge" className={`${CONTROL_IDLE} flex items-center justify-center rounded-lg border px-3 py-2 font-semibold`}>Make something</Link>
+            <nav aria-label={t.adventures} className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <Link href="/app/activities?tab=games" className={`${CONTROL_IDLE} flex items-center justify-center rounded-lg border px-3 py-2 font-semibold`}>{t.playGame}</Link>
+              <Link href="/app/activities?tab=vimana" className={`${CONTROL_IDLE} flex items-center justify-center rounded-lg border px-3 py-2 font-semibold`}>{t.exploreTogether}</Link>
+              <Link href="/project-forge" className={`${CONTROL_IDLE} flex items-center justify-center rounded-lg border px-3 py-2 font-semibold`}>{t.makeSomething}</Link>
             </nav>
             <div className="mt-3 flex flex-wrap gap-2">
-              <Link href="/pet#family" onClick={openFamily} className={`${CONTROL_IDLE} inline-flex items-center rounded-lg border px-3 py-2`}>Companion family</Link>
+              <Link href="/pet#family" onClick={openFamily} className={`${CONTROL_IDLE} inline-flex items-center rounded-lg border px-3 py-2`}>{t.family}</Link>
               <CertificateButton variant="outline" onClick={() => setShowCertificate(true)} className={CONTROL_IDLE} />
             </div>
             <div className="mt-6 border-t border-slate-800/80 pt-4">
@@ -347,11 +351,10 @@ export default function PetPage() {
                 className="min-h-11 w-full justify-between border-slate-700 bg-slate-900/70 text-slate-200 hover:bg-slate-800"
                 aria-expanded={showAdvanced}
               >
-                <span className="font-semibold">Advanced / Mechanics Lab</span>
+                <span className="font-semibold">{t.lab}</span>
                 <span className="sr-only">
                   {" "}
-                  — peek under the hood to see identity, addons, and the crypto
-                  systems that keep your companion secure
+                  {t.labHint}
                 </span>
                 {showAdvanced ? (
                   <ChevronUp className="h-4 w-4" />
@@ -364,7 +367,7 @@ export default function PetPage() {
                 <div className="mt-4 overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-950/60">
                   <div
                     role="tablist"
-                    aria-label="Mechanics Lab sections"
+                    aria-label={t.labSections}
                     className="grid grid-cols-2 sm:grid-cols-4 gap-1 border-b border-slate-800/80 bg-slate-950/80 p-1"
                   >
                     {ADVANCED_TABS.map((tab, index) => {
@@ -389,7 +392,7 @@ export default function PetPage() {
                               : "text-slate-400 hover:bg-slate-900 hover:text-slate-200"
                           }`}
                         >
-                          {tab.label}
+                          {t.tabs[tab.id].label}
                         </button>
                       );
                     })}
@@ -397,10 +400,7 @@ export default function PetPage() {
 
                   <div className="p-4">
                     <p className="mb-4 text-xs text-slate-500">
-                      {
-                        ADVANCED_TABS.find((tab) => tab.id === advancedTab)
-                          ?.hint
-                      }
+                      {t.tabs[advancedTab].hint}
                     </p>
 
                     {advancedTab === "form" && (
@@ -411,7 +411,7 @@ export default function PetPage() {
                         className="space-y-4"
                       >
                         <div className="space-y-2">
-                          <p className={SECTION_LABEL}>Active body engine</p>
+                          <p className={SECTION_LABEL}>{t.activeEngine}</p>
                           <div className="grid gap-2 sm:grid-cols-3">
                             <Button
                               type="button"
@@ -452,7 +452,7 @@ export default function PetPage() {
                         </div>
 
                         <div className="space-y-2 border-t border-slate-800/80 pt-4">
-                          <p className={SECTION_LABEL}>Build a new body</p>
+                          <p className={SECTION_LABEL}>{t.buildBody}</p>
                           <Link href="/body-forge" className="inline-block">
                             <Button
                               variant="outline"
@@ -627,7 +627,7 @@ export default function PetPage() {
               )}
 
               <div className="mt-4 space-y-3">
-                <Link href="/project-forge" className="inline-flex min-h-11 items-center rounded-lg border border-teal-400/60 bg-teal-950/30 px-4 py-2 font-semibold text-teal-100 hover:bg-teal-900/50">Explore Project Forge · Learn and create</Link>
+                <Link href="/project-forge" className="inline-flex min-h-11 items-center rounded-lg border border-teal-400/60 bg-teal-950/30 px-4 py-2 font-semibold text-teal-100 hover:bg-teal-900/50">{t.projectForge}</Link>
                 <ForgeMemoryBadge petId={petId} />
               </div>
               <RouteProgressionCard route="pet" className="mt-4" />

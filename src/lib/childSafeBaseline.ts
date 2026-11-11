@@ -75,6 +75,9 @@ export const CHILD_SAFE_ROUTE_POLICIES: Record<
     fallbackPathname: "/app",
     allowedExact: new Set([
       "/",
+      // Japanese and Hindi editions of "/" (same content, translated).
+      "/ja",
+      "/hi",
       "/app",
       "/compass",
       "/pet",
