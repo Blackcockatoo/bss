@@ -2,6 +2,7 @@
 
 import { isFieldStudentPath, isTeacherWorkspace } from "@/lib/productSurfaces";
 import { DocumentLang } from "@/components/DocumentLang";
+import { homeLocaleForPath, LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useAppCopy } from "@/lib/appCopy";
 import { PetRegistryBootstrap } from "@/components/PetRegistryBootstrap";
 import LegalNotice from "@/components/LegalNotice";
@@ -61,6 +62,8 @@ export default function ClientBody({
   const shellCopy = useAppCopy().shell;
   const effectiveSchoolsMode =
     IS_SCHOOLS_PROFILE || isSchoolPath || fieldSurfaceActive;
+  // Same scope as DocumentLang: wherever translated copy can appear, the way back is on screen.
+  const showLanguageSwitcher = !effectiveSchoolsMode;
   const childSafeBlocked = useMemo(
     () =>
       (ENABLE_CHILD_SAFE_BASELINE || IS_SCHOOLS_PROFILE) &&
@@ -186,6 +189,12 @@ export default function ClientBody({
                 ? "MetaPet Schools"
                 : "Meta-Pet"}
           </div>
+          {showLanguageSwitcher ? (
+            <LanguageSwitcher
+              current={homeLocaleForPath(pathname)}
+              className="order-last w-full sm:order-none sm:ml-auto sm:w-auto"
+            />
+          ) : null}
           <button
             type="button"
             onClick={() => setPrivacyOpen((current) => !current)}
@@ -230,6 +239,9 @@ export default function ClientBody({
         </>
       ) : null}
       <footer className="app-shell-footer px-4 pb-24 pt-4 text-center sm:pb-6">
+        {showLanguageSwitcher ? (
+          <LanguageSwitcher current={homeLocaleForPath(pathname)} className="mb-4" />
+        ) : null}
         {(effectiveSchoolsMode || teacherWorkspace) && !fieldSurfaceActive ? (
           <a
             href="mailto:bluesssnakestudio@gmail.com?subject=Meta-Pet%20School%20Pilot%20Enquiry"

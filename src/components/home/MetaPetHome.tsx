@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ARCADE_GAMES, ARCADE_ROUTE } from "@/lib/games/arcade";
 import { HOME_COPY, type HomeLocale } from "@/lib/homeCopy";
 import { STUDIO_PORTAL_URL } from "@/lib/productSurfaces";
@@ -38,7 +37,6 @@ export function MetaPetHome({ locale }: { locale: HomeLocale }) {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.12),transparent_38%),radial-gradient(circle_at_80%_20%,rgba(245,158,11,0.1),transparent_34%)]" />
         <div className="relative mx-auto grid w-full max-w-6xl gap-12 px-6 py-20 md:py-28 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
           <div className="space-y-7">
-            <LanguageSwitcher current={locale} label={t.languageLabel} />
             <p className="text-xs font-semibold uppercase tracking-[0.34em] text-cyan-300/80">
               {t.eyebrow}
             </p>

@@ -17,7 +17,6 @@ import {
 } from "@/components/RegistrationCertificate";
 import { WellnessSync } from "@/components/WellnessSync";
 import { Button } from "@/components/ui/button";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { initializeStarterAddons } from "@/lib/addons/starter";
 import { useAppCopy } from "@/lib/appCopy";
 import { useDnaImprint } from "@/lib/dnaImprint";
@@ -303,7 +302,6 @@ export default function PetPage() {
               </div>
 
               <div className="flex flex-shrink-0 flex-col items-stretch gap-2 sm:items-end">
-                <LanguageSwitcher className="self-start sm:self-end" />
                 <Button
                   type="button"
                   onClick={() => setWardrobeOpen(true)}
