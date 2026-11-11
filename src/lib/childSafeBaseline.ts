@@ -81,6 +81,10 @@ export const CHILD_SAFE_ROUTE_POLICIES: Record<
       "/project-forge",
       "/school-game",
       "/legal",
+      // Linked from the shared footer on every surface, so they must not
+      // bounce to the fallback on a child-safe consumer deployment.
+      "/legal/privacy",
+      "/legal/terms",
       "/docs",
       ...REQUIRED_STATIC_ROUTES,
     ]),
@@ -106,6 +110,7 @@ export const CHILD_SAFE_ROUTE_POLICIES: Record<
       "/teachers/review",
       "/legal",
       "/legal/privacy",
+      "/legal/terms",
       "/legal/safety",
       "/legal/boundaries",
       ...REQUIRED_STATIC_ROUTES,
@@ -142,6 +147,7 @@ export const CHILD_SAFE_ROUTE_POLICIES: Record<
       "/school-game",
       "/legal",
       "/legal/privacy",
+      "/legal/terms",
       "/legal/safety",
       "/legal/boundaries",
       ...FIELD_REQUIRED_STATIC_ROUTES,

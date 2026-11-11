@@ -3,6 +3,7 @@
 import { isFieldStudentPath, isTeacherWorkspace } from "@/lib/productSurfaces";
 import { PetRegistryBootstrap } from "@/components/PetRegistryBootstrap";
 import LegalNotice from "@/components/LegalNotice";
+import Link from "next/link";
 import { JourneyProgressStrip } from "@/components/JourneyProgressStrip";
 import { QuickNav } from "@/components/QuickNav";
 import { WardrobeUnlockCeremony } from "@/components/wardrobe/WardrobeUnlockCeremony";
@@ -234,6 +235,17 @@ export default function ClientBody({
             Pilot Enquiry
           </a>
         ) : null}
+        <nav
+          aria-label="Legal"
+          className="mb-2 flex items-center justify-center gap-4 text-xs text-slate-400"
+        >
+          <Link href="/legal/privacy" className="underline hover:text-slate-300">
+            Privacy
+          </Link>
+          <Link href="/legal/terms" className="underline hover:text-slate-300">
+            Terms
+          </Link>
+        </nav>
         <LegalNotice schoolsMode={effectiveSchoolsMode} />
       </footer>
       {!fieldSurfaceActive && !teacherWorkspace && fieldUiResolved ? <QuickNav /> : null}

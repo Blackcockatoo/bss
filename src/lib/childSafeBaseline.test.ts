@@ -101,6 +101,14 @@ describe("declarative Field Mode route policy", () => {
     }
   });
 
+  it("approves the privacy and terms pages linked from the shared footer", () => {
+    for (const policyId of ["core", "schools", "field"] as const) {
+      for (const pathname of ["/legal/privacy", "/legal/terms"]) {
+        expect(isPathnameAllowedByPolicy(pathname, policyId), `${policyId} ${pathname}`).toBe(true);
+      }
+    }
+  });
+
   it("keeps consumer pricing out of both school policies", () => {
     expect(isPathnameAllowedByPolicy("/pricing", "field")).toBe(false);
     expect(isPathnameAllowedByPolicy("/pricing", "schools")).toBe(false);
