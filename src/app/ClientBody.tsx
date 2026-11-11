@@ -1,6 +1,9 @@
 "use client";
 
 import { isFieldStudentPath, isTeacherWorkspace } from "@/lib/productSurfaces";
+import { DocumentLang } from "@/components/DocumentLang";
+import { homeLocaleForPath, LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useAppCopy } from "@/lib/appCopy";
 import { PetRegistryBootstrap } from "@/components/PetRegistryBootstrap";
 import LegalNotice from "@/components/LegalNotice";
 import { JourneyProgressStrip } from "@/components/JourneyProgressStrip";
@@ -56,8 +59,11 @@ export default function ClientBody({
     (fieldUiActive === true &&
       isPathnameAllowedByPolicy(pathname ?? "/", "field"));
   const fieldUiResolved = isFieldPath || fieldUiActive !== null;
+  const shellCopy = useAppCopy().shell;
   const effectiveSchoolsMode =
     IS_SCHOOLS_PROFILE || isSchoolPath || fieldSurfaceActive;
+  // Same scope as DocumentLang: wherever translated copy can appear, the way back is on screen.
+  const showLanguageSwitcher = !effectiveSchoolsMode;
   const childSafeBlocked = useMemo(
     () =>
       (ENABLE_CHILD_SAFE_BASELINE || IS_SCHOOLS_PROFILE) &&
@@ -173,6 +179,7 @@ export default function ClientBody({
           : "pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]"
       }`}
     >
+      {!effectiveSchoolsMode && <DocumentLang />}
       <div className={`app-shell-header sticky top-0 z-40 border-b px-3 py-2 backdrop-blur sm:px-4 sm:py-3 ${effectiveSchoolsMode ? "border-border bg-background/95" : "border-slate-800 bg-slate-950/90"}`}>
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 sm:gap-3">
           <div className={`text-sm ${effectiveSchoolsMode ? "text-foreground font-medium" : "text-zinc-200"}`}>
@@ -182,13 +189,19 @@ export default function ClientBody({
                 ? "MetaPet Schools"
                 : "Meta-Pet"}
           </div>
+          {showLanguageSwitcher ? (
+            <LanguageSwitcher
+              current={homeLocaleForPath(pathname)}
+              className="order-last w-full sm:order-none sm:ml-auto sm:w-auto"
+            />
+          ) : null}
           <button
             type="button"
             onClick={() => setPrivacyOpen((current) => !current)}
             className={`min-h-9 rounded-full border px-3 py-1 text-xs transition-colors ${effectiveSchoolsMode ? "border-emerald-600/30 bg-emerald-50 text-emerald-700 hover:border-emerald-600/50 hover:bg-emerald-100" : "border-emerald-400/25 bg-emerald-500/10 text-emerald-200 hover:border-emerald-300/45 hover:bg-emerald-500/15"}`}
             aria-expanded={privacyOpen}
           >
-            Privacy & local saves
+            {effectiveSchoolsMode ? "Privacy & local saves" : shellCopy.privacy}
           </button>
         </div>
         {privacyOpen && (
@@ -226,6 +239,9 @@ export default function ClientBody({
         </>
       ) : null}
       <footer className="app-shell-footer px-4 pb-24 pt-4 text-center sm:pb-6">
+        {showLanguageSwitcher ? (
+          <LanguageSwitcher current={homeLocaleForPath(pathname)} className="mb-4" />
+        ) : null}
         {(effectiveSchoolsMode || teacherWorkspace) && !fieldSurfaceActive ? (
           <a
             href="mailto:bluesssnakestudio@gmail.com?subject=Meta-Pet%20School%20Pilot%20Enquiry"
