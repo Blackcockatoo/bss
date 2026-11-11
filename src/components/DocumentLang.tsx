@@ -15,9 +15,12 @@ export function DocumentLang() {
   const locale = useAppLocale();
   const pinned = pathname === "/ja" ? "ja" : pathname === "/hi" ? "hi" : pathname === "/" ? "en" : null;
 
+  // Remember /ja or /hi when the visitor arrives there, and only then. Re-running
+  // on locale changes would fight an explicit EN pick made on the way out of
+  // /ja or /hi (the switcher stores "en" before the route commits).
   useEffect(() => {
-    if (pinned && pinned !== "en" && locale !== pinned) storeLocale(pinned);
-  }, [pinned, locale]);
+    if (pinned === "ja" || pinned === "hi") storeLocale(pinned);
+  }, [pinned]);
 
   useEffect(() => {
     document.documentElement.lang = pinned ?? locale;
