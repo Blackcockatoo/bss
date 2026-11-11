@@ -24,18 +24,28 @@ const mapsEnabled = toEnabled(process.env.NEXT_PUBLIC_ENABLE_MAPS, false);
 const mapsForgeOrigin = toOrigin(
   process.env.NEXT_PUBLIC_FRONTEND_FORGE_API_URL || defaultMapsForgeUrl,
 );
+const isDevelopment = process.env.NODE_ENV !== "production";
+const PRIMARY_ORIGIN = "https://www.bluesnakestudios.com";
+const SCHOOL_ORIGIN = "https://www.metapet.school";
+const SCHOOL_HOST_PATTERN = "(?:www\\.)?metapet\\.school";
+
+// cdnjs is still required by public/geometry-sound.html (three.js r128 and
+// Tone.js 14.8.49 loaded via <script src>). Remove once those are vendored.
 const scriptSrc = new Set(["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"]);
 const styleSrc = new Set(["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"]);
-const imgSrc = new Set([
-  "'self'",
-  "data:",
-  "blob:",
-  "https://source.unsplash.com",
-  "https://images.unsplash.com",
-  "https://ext.same-assets.com",
-  "https://ugc.same-assets.com",
-]);
-const connectSrc = new Set(["'self'", "wss:"]);
+// Unsplash and same-assets.com were template leftovers; nothing in src/ or
+// public/ loads images from them any more.
+const imgSrc = new Set(["'self'", "data:", "blob:"]);
+// The app only talks to its own origin (API routes, Vercel Analytics at
+// /_vercel/insights, the Field Mode offline pack). No WebSocket host is used
+// in production, so bare `wss:` (any secure socket host) is no longer allowed.
+// `next dev` needs a socket for hot reload, which may be on a LAN address
+// because dev binds to 0.0.0.0.
+const connectSrc = new Set(["'self'"]);
+if (isDevelopment) {
+  connectSrc.add("ws:");
+  connectSrc.add("wss:");
+}
 const fontSrc = new Set(["'self'", "data:", "https://fonts.gstatic.com"]);
 
 if (mapsEnabled) {
@@ -73,28 +83,6 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "source.unsplash.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "ext.same-assets.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "ugc.same-assets.com",
-        pathname: "/**",
-      },
-    ],
   },
   async headers() {
     return [
@@ -116,6 +104,25 @@ const nextConfig = {
           {
             key: "Content-Security-Policy",
             value: contentSecurityPolicy,
+          },
+          // Vercel's CDN adds `Access-Control-Allow-Origin: *` to cached
+          // responses by default, which lets any website read our pages
+          // cross-origin. No route in this app is meant to be read by another
+          // origin (all fetches are same-origin), so pin it to our own origin.
+          // Later rules override this one for the school domain.
+          {
+            key: "Access-Control-Allow-Origin",
+            value: PRIMARY_ORIGIN,
+          },
+        ],
+      },
+      {
+        source: "/(.*)",
+        has: [{ type: "host", value: SCHOOL_HOST_PATTERN }],
+        headers: [
+          {
+            key: "Access-Control-Allow-Origin",
+            value: SCHOOL_ORIGIN,
           },
         ],
       },
