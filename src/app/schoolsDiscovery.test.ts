@@ -87,6 +87,18 @@ describe("sitemap.xml per public domain", () => {
     }
   });
 
+  it("lists the privacy page, teacher workspace and Moss60 on Blue Snake Studios", async () => {
+    setHost("www.bluesnakestudios.com");
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://www.bluesnakestudios.com");
+    const urls = (await sitemap()).map((entry) => entry.url);
+
+    for (const pathname of ["/legal/privacy", "/teach", "/app/moss60"]) {
+      expect(urls).toContain(`https://www.bluesnakestudios.com${pathname}`);
+    }
+    // Draft terms are noindex until reviewed.
+    expect(urls).not.toContain("https://www.bluesnakestudios.com/legal/terms");
+  });
+
   it("still serves the full product index on Blue Snake Studios", async () => {
     setHost("www.bluesnakestudios.com");
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://www.bluesnakestudios.com");

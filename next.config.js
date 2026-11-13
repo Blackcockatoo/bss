@@ -96,6 +96,15 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    // Short, guessable URLs for parents, schools and app-store reviewers.
+    // Config redirects run before the proxy, so they work on both domains.
+    // Temporary while the terms are in draft.
+    return [
+      { source: "/privacy", destination: "/legal/privacy", permanent: false },
+      { source: "/terms", destination: "/legal/terms", permanent: false },
+    ];
+  },
   async headers() {
     return [
       {

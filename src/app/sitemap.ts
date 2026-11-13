@@ -81,6 +81,7 @@ function metaPetSchoolSitemap(): MetadataRoute.Sitemap {
       changeFrequency: "yearly",
       priority: 0.5,
     },
+    // /legal/terms is a noindex draft. List it here once it is approved.
   ];
 
   for (const lesson of LESSON_DEFINITIONS) {
@@ -172,6 +173,25 @@ function blueSnakeStudiosSitemap(base: string): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.8,
     },
+    {
+      url: `${base}/app/moss60`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
+      url: `${base}/teach`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${base}/legal/privacy`,
+      lastModified,
+      changeFrequency: "yearly",
+      priority: 0.4,
+    },
+    // /legal/terms is a noindex draft. List it here once it is approved.
   ];
 }
 

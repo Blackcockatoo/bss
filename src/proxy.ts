@@ -29,6 +29,15 @@ const METAPET_SCHOOL_HOST_ALIASES = new Set([
   "metapet.school",
   "www.metapet.school",
 ]);
+/**
+ * Crawler discovery files for the classroom domain. `robots.ts` and
+ * `sitemap.ts` already emit a classroom-specific response for this host, but
+ * the Field policy does not list them, so they were redirected to Field Mode
+ * and crawlers received an HTML page instead of a robots file. They carry no
+ * child data and are served on this host only; an active Field session on the
+ * shared Blue Snake Studios host still follows the Field policy unchanged.
+ */
+const METAPET_SCHOOL_DISCOVERY_PATHS = new Set(["/robots.txt", "/sitemap.xml"]);
 
 function normalizeHost(value: string | null | undefined): string {
   if (!value) return "";
@@ -250,6 +259,13 @@ export function proxy(request: NextRequest) {
 
   if (isMetaPetSchoolHost(request) && pathname === "/") {
     return redirectSchoolRootToFieldMode(request);
+  }
+
+  if (
+    isMetaPetSchoolHost(request) &&
+    METAPET_SCHOOL_DISCOVERY_PATHS.has(pathname)
+  ) {
+    return NextResponse.next();
   }
 
   const policyId = activePolicyId(request);
