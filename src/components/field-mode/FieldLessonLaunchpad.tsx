@@ -5,9 +5,15 @@ import { useEffect, useMemo, useState } from "react";
 
 import {
   FIELD_MODE_PASSPORT_PATH,
+  FIELD_MODE_PRINT_ALL_PATH,
   FIELD_MODE_PRINT_PATH_PREFIX,
   FIELD_MODE_REVIEW_PATH,
+  SCHOOLS_DATA_PATH,
 } from "@/lib/childSafeBaseline";
+import {
+  curriculumAlignmentForSession,
+  mergeLearningAreas,
+} from "@/lib/schools/curriculumAlignment";
 import {
   DEFAULT_FIELD_SESSION,
   FIELD_DELIVERY_MODES,
@@ -90,16 +96,30 @@ export function FieldLessonLaunchpad() {
         </header>
 
         <section aria-labelledby="field-lessons-heading">
-          <div className="mb-4 flex items-center gap-3">
-            <BookOpenCheck className="h-6 w-6 text-emerald-800" aria-hidden="true" />
-            <h2 id="field-lessons-heading" className="text-2xl font-semibold">
-              The seven sessions
-            </h2>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <BookOpenCheck className="h-6 w-6 text-emerald-800" aria-hidden="true" />
+              <h2 id="field-lessons-heading" className="text-2xl font-semibold">
+                The seven sessions
+              </h2>
+            </div>
+            <a
+              href={FIELD_MODE_PRINT_ALL_PATH}
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              <Printer className="h-4 w-4" aria-hidden="true" />
+              Print all seven lessons plus the parent note
+            </a>
           </div>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {LESSON_DEFINITIONS.map((lesson) => {
               const status = selectLessonStatus(progress, lesson.id);
               const isRecommendedStart = lesson.number === 1;
+              const alignment = curriculumAlignmentForSession(lesson.number);
+              const areas = mergeLearningAreas(
+                lesson.learningAreas,
+                alignment.learningAreas,
+              );
               return (
                 <article
                   key={lesson.id}
@@ -126,8 +146,22 @@ export function FieldLessonLaunchpad() {
                   <p className="mt-2 flex-1 text-sm leading-6 text-slate-600">
                     {lesson.shortDescription}
                   </p>
+                  <div className="mt-3 space-y-1 text-xs leading-5 text-slate-600">
+                    <p>
+                      <span className="font-semibold text-slate-800">Learning areas:</span>{" "}
+                      {areas.join(" · ")}
+                    </p>
+                    {alignment.codes.length > 0 ? (
+                      <p>
+                        <span className="font-semibold text-slate-800">
+                          Australian Curriculum v9:
+                        </span>{" "}
+                        {alignment.codes.join(", ")}
+                      </p>
+                    ) : null}
+                  </div>
                   <p className="mt-4 text-xs font-medium text-slate-500">
-                    {FIELD_SESSION_LABELS.yearBand[session.yearBand]} · {session.durationMinutes} min · {FIELD_SESSION_LABELS.deliveryMode[session.deliveryMode]}
+                    Years 3–6 · {FIELD_SESSION_LABELS.yearBand[session.yearBand]} · {session.durationMinutes} min · {FIELD_SESSION_LABELS.deliveryMode[session.deliveryMode]}
                   </p>
                   <a
                     href={buildFieldLessonPath(lesson.slug, session)}
@@ -265,13 +299,23 @@ export function FieldLessonLaunchpad() {
               Review or delete lesson evidence stored on this classroom device.
             </p>
           </a>
+          <a
+            href={SCHOOLS_DATA_PATH}
+            className="rounded-3xl border border-slate-300 bg-white p-5 text-slate-950 hover:bg-slate-50 md:col-span-2"
+          >
+            <ShieldCheck className="h-6 w-6 text-emerald-800" aria-hidden="true" />
+            <h2 className="mt-3 text-xl font-semibold">Local-data controls</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-700">
+              See and delete classroom records stored in this browser.
+            </p>
+          </a>
         </section>
 
         <aside className="flex gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-700">
           <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-800" aria-hidden="true" />
-          This Field lesson path does not require student accounts or real
-          names, and has no public sharing or cloud classroom profiles. Use
-          aliases as instructed.
+          This lesson path does not require student accounts or real names,
+          and has no public sharing or cloud classroom profiles. Use aliases
+          as instructed.
         </aside>
       </div>
     </main>

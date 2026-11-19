@@ -12,6 +12,9 @@ export const FIELD_MODE_GUIDE_PATH = "/schools/field/guide";
 export const FIELD_MODE_SAFETY_PATH = "/schools/field/safety";
 export const FIELD_MODE_PACK_MANIFEST_PATH = "/schools/field/pack.json";
 export const FIELD_MODE_PRINT_PATH_PREFIX = "/schools/field/print";
+export const FIELD_MODE_PRINT_ALL_PATH = "/schools/field/print/all";
+export const SCHOOLS_DATA_PATH = "/schools/data";
+export const SCHOOLS_CONTRIBUTE_PATH = "/schools/contribute";
 export const FIELD_MODE_EXIT_PATH = "/schools/field/exit";
 export const FIELD_MODE_MANIFEST_PATH =
   "/schools/field/manifest.webmanifest";
@@ -57,6 +60,12 @@ const FIELD_REQUIRED_STATIC_ROUTES = [
   ...FIELD_MODE_INSTALL_ICON_PATHS,
   "/favicon.ico",
   "/sw.js",
+  // Discovery documents must reach their route handlers on the classroom
+  // host. Blocking them here caused /robots.txt and /sitemap.xml to be
+  // redirected to Field Home, which made the per-host robots/sitemap
+  // logic unreachable in production.
+  "/robots.txt",
+  "/sitemap.xml",
 ] as const;
 
 /**
@@ -126,6 +135,12 @@ export const CHILD_SAFE_ROUTE_POLICIES: Record<
     fallbackPathname: FIELD_MODE_HOME_PATH,
     allowedExact: new Set([
       "/schools",
+      // Teacher support pages on the dedicated school host. Field policy is
+      // always active on metapet.school, so these must be allowed here or
+      // teachers cannot open local-data controls or the optional contribution
+      // page. Classroom nav and lesson screens do not link to contribution.
+      SCHOOLS_DATA_PATH,
+      SCHOOLS_CONTRIBUTE_PATH,
       FIELD_MODE_HOME_PATH,
       FIELD_MODE_START_PATH,
       FIELD_MODE_LESSONS_PATH,
@@ -161,7 +176,7 @@ export const CHILD_SAFE_ROUTE_POLICIES: Record<
 
 /** The intentionally small navigation surface shown inside Field Mode. */
 export const FIELD_MODE_NAV_ITEMS: readonly FieldModeNavItem[] = [
-  { href: FIELD_MODE_HOME_PATH, label: "Field Home", kind: "home" },
+  { href: FIELD_MODE_HOME_PATH, label: "Home", kind: "home" },
   { href: FIELD_MODE_LESSONS_PATH, label: "Lessons", kind: "lessons" },
   {
     href: FIELD_MODE_CLASSROOM_PATH,
@@ -183,7 +198,7 @@ export const FIELD_MODE_NAV_ITEMS: readonly FieldModeNavItem[] = [
     label: "Safety & Privacy",
     kind: "safety",
   },
-  { href: FIELD_MODE_EXIT_PATH, label: "Exit Field Mode", kind: "exit" },
+  { href: FIELD_MODE_EXIT_PATH, label: "School overview", kind: "exit" },
 ] as const;
 
 export const CHILD_SAFE_NAV_ROUTES = new Set(

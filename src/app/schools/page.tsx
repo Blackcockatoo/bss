@@ -183,10 +183,9 @@ export default function SchoolsPage() {
               ))}
             </ul>
             <p className="mt-5 text-sm leading-6 text-slate-400">
-              Field Mode caches its pages so a session can survive a dropped
-              connection mid-lesson, and every session has a printable fallback.
-              Full offline operation has not been verified across school
-              hardware yet.
+              Classroom pages can be prepared for an unreliable network, and
+              every session has a printable fallback. Full offline operation
+              has not been verified across school hardware yet.
             </p>
           </div>
         </section>
@@ -279,38 +278,6 @@ export default function SchoolsPage() {
           </Link>
         </section>
 
-        {/* Trust material, kept discoverable rather than crowded into entry. */}
-        <section>
-          <SectionHeading
-            title="Material for reviewers"
-            description="Teacher, parent, privacy, safeguarding, curriculum and pilot documents, grouped by who needs to read them first."
-          />
-          <div className="mt-8 space-y-6">
-            {reviewerPathways.map((pathway) => (
-              <article key={pathway.title}>
-                <h3 className="text-lg font-medium text-white">
-                  {pathway.title}
-                </h3>
-                <div className="mt-2 flex flex-wrap gap-x-5 gap-y-2">
-                  {pathway.docSlugs.map((slug) => {
-                    const doc = docsBySlug.get(slug);
-                    if (!doc) return null;
-                    return (
-                      <Link
-                        key={doc.slug}
-                        className="text-sm text-slate-300 underline underline-offset-4 hover:text-white"
-                        href={doc.inAppHref}
-                      >
-                        {doc.title}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-
         <section>
           <SectionHeading
             title="Curriculum alignment with explicit classroom fit"
@@ -338,11 +305,13 @@ export default function SchoolsPage() {
 
         <section id="downloads">
           <SectionHeading
-            title="School pack downloads"
-            description="Read any document in the app, or download a printable copy."
+            title="Teacher downloads"
+            description="Lesson cards, the teacher guide, the parent note and the core classroom pack."
           />
           <div className="mt-8 space-y-8">
-            {schoolPackageDocCategories.map((category) => {
+            {schoolPackageDocCategories
+              .filter((category) => category === "Core Pack" || category === "Teacher Pack")
+              .map((category) => {
               const docs = schoolPackageDocs.filter(
                 (doc) => doc.category === category,
               );
@@ -377,7 +346,75 @@ export default function SchoolsPage() {
               );
             })}
           </div>
+        </section>
 
+        <section id="school-leadership">
+          <SectionHeading
+            title="For school leadership"
+            description="Privacy, safeguarding, pilot and ICT documents for principals, reviewers and wellbeing teams. Classroom teachers can start with the lessons and the teacher pack above."
+          />
+          <div className="mt-8 space-y-6">
+            {reviewerPathways.map((pathway) => (
+              <article key={pathway.title}>
+                <h3 className="text-lg font-medium text-white">
+                  {pathway.title}
+                </h3>
+                <div className="mt-2 flex flex-wrap gap-x-5 gap-y-2">
+                  {pathway.docSlugs.map((slug) => {
+                    const doc = docsBySlug.get(slug);
+                    if (!doc) return null;
+                    return (
+                      <Link
+                        key={doc.slug}
+                        className="text-sm text-slate-300 underline underline-offset-4 hover:text-white"
+                        href={doc.inAppHref}
+                      >
+                        {doc.title}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </article>
+            ))}
+          </div>
+          <div className="mt-10 space-y-8">
+            {schoolPackageDocCategories
+              .filter((category) => category !== "Core Pack" && category !== "Teacher Pack")
+              .map((category) => {
+              const docs = schoolPackageDocs.filter(
+                (doc) => doc.category === category,
+              );
+
+              return (
+                <div key={category}>
+                  <h3 className="text-lg font-medium text-white">{category}</h3>
+                  <ul className="mt-3 space-y-2">
+                    {docs.map((doc) => (
+                      <li
+                        key={doc.slug}
+                        className="flex flex-wrap items-baseline gap-x-4 text-base"
+                      >
+                        <Link
+                          className="text-slate-200 underline underline-offset-4 hover:text-white"
+                          href={doc.inAppHref}
+                        >
+                          {doc.title}
+                        </Link>
+                        <a
+                          aria-label={`Download ${doc.title}`}
+                          className="text-sm text-slate-500 hover:text-slate-300"
+                          download
+                          href={doc.href}
+                        >
+                          Download
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
           <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
             {curriculumSourceLinks.map((resource) => (
               <a
@@ -391,27 +428,6 @@ export default function SchoolsPage() {
               </a>
             ))}
           </div>
-        </section>
-
-        {/* The broader universe, clearly outside the classroom pathway. */}
-        <section className="border-t border-slate-800 pt-10">
-          <h2 className="text-lg font-medium text-white">
-            MetaPet School is not the whole MetaPet
-          </h2>
-          <p className="mt-2 max-w-3xl text-base leading-7 text-slate-400">
-            Blue $nake Studio also makes a broader consumer MetaPet experience.
-            It is a different product with different rules, and it sits entirely
-            outside the classroom pathway — no classroom screen links to it, and
-            no student route can reach it.
-          </p>
-          <a
-            className="mt-4 inline-block text-base text-slate-300 underline underline-offset-4 hover:text-white"
-            href="https://www.bluesnakestudios.com"
-            rel="noreferrer"
-            target="_blank"
-          >
-            Complete MetaPet at Blue $nake Studio
-          </a>
         </section>
       </div>
     </main>

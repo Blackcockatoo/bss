@@ -31,7 +31,7 @@ export async function generateMetadata({
     title: lesson?.title ?? "Classroom Lesson",
     description:
       lesson?.shortDescription ??
-      "A teacher-led MetaPet Field Mode classroom lesson.",
+      "A teacher-led MetaPet School classroom lesson.",
   };
 }
 

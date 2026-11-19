@@ -4,6 +4,7 @@ import { HeartHandshake, LockKeyhole, ShieldCheck, UsersRound } from "lucide-rea
 import {
   FIELD_MODE_CLASSROOM_PATH,
   FIELD_MODE_SAFETY_PATH,
+  SCHOOLS_DATA_PATH,
 } from "@/lib/childSafeBaseline";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
 import { SCHOOLS_LOCAL_DATA_RETENTION_DAYS } from "@/lib/schools/storage";
@@ -11,7 +12,7 @@ import { SCHOOLS_LOCAL_DATA_RETENTION_DAYS } from "@/lib/schools/storage";
 export const metadata: Metadata = {
   title: "Safety and Privacy",
   description:
-    "Field Mode safeguarding, privacy and parent information for Australian classrooms.",
+    "Safeguarding, privacy and parent information for Australian classrooms using MetaPet School.",
 };
 
 export default function FieldSafetyPage() {
@@ -28,7 +29,7 @@ export default function FieldSafetyPage() {
             Safety and privacy at a glance
           </h1>
           <p className="text-base leading-7 text-slate-700 md:text-lg">
-            Field Mode is a teacher-led classroom learning tool, not therapy,
+            MetaPet School is a teacher-led classroom learning tool, not therapy,
             counselling, social media or an always-on companion. Your
             school&apos;s existing child-safety and wellbeing procedures remain
             the authority.
@@ -92,16 +93,24 @@ export default function FieldSafetyPage() {
             <h2 className="text-xl font-semibold">Teacher supervision</h2>
           </div>
           <p className="mt-3 text-sm leading-6 text-slate-700">
-            A teacher remains present and leads every Field Mode session.
+            A teacher remains present and leads every classroom session.
             MetaPet must never be the primary response to a wellbeing issue and
             does not replace professional judgement or school procedures.
           </p>
-          <a
-            href={FIELD_MODE_CLASSROOM_PATH}
-            className="mt-5 inline-flex min-h-12 items-center rounded-xl bg-emerald-800 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
-          >
-            Open alias-only classroom controls
-          </a>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <a
+              href={FIELD_MODE_CLASSROOM_PATH}
+              className="inline-flex min-h-12 items-center rounded-xl bg-emerald-800 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
+            >
+              Open alias-only classroom controls
+            </a>
+            <a
+              href={SCHOOLS_DATA_PATH}
+              className="inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              Open local-data controls
+            </a>
+          </div>
         </section>
       </div>
     </main>

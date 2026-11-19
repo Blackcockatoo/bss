@@ -7,7 +7,7 @@ import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
 export const metadata: Metadata = {
   title: "Classroom",
   description:
-    "Alias-only classroom setup, lesson queue and local deletion controls for MetaPet Field Mode.",
+    "Alias-only classroom setup, lesson queue and local deletion controls for MetaPet School.",
 };
 
 export default function FieldClassroomPage() {

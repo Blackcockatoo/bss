@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 
 import { FieldModeNav } from "@/components/field-mode/FieldModeNav";
 import { FieldOfflineBadge } from "@/components/field-mode/FieldOfflineBadge";
@@ -94,6 +95,9 @@ export default function FieldModeLayout({ children }: { children: React.ReactNod
     // `dark` to <html> on the Blue Snake Studios build, and the classroom
     // pages are light in every deployment.
     <div className="field-surface">
+      <Script id="classroom-document-attributes" strategy="beforeInteractive">
+        {`document.documentElement.lang="en-AU";document.documentElement.classList.remove("dark");document.documentElement.classList.add("schools-theme");`}
+      </Script>
       <FieldStorageGuard />
       <FieldModeNav />
       <FieldOfflineBadge />

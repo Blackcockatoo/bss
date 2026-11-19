@@ -12,7 +12,7 @@ describe("Field-owned support pages", () => {
     render(<FieldTeacherGuidePage />);
 
     expect(
-      screen.getByRole("heading", { name: /Field Mode teacher guide/i }),
+      screen.getByRole("heading", { name: /^Teacher guide$/i }),
     ).toBeInTheDocument();
     expect(screen.getByText(/Before class/i)).toBeInTheDocument();
     expect(screen.getByText(/During the lesson/i)).toBeInTheDocument();

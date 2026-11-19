@@ -17,7 +17,7 @@ import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
 export const metadata: Metadata = {
   title: "Teacher Guide",
   description:
-    "A concise teacher guide for preparing and running MetaPet Field Mode lessons.",
+    "A concise teacher guide for preparing and running MetaPet School lessons.",
 };
 
 const RUN_STEPS = [
@@ -27,7 +27,7 @@ const RUN_STEPS = [
   },
   {
     title: "During the lesson",
-    body: "Keep the session teacher-led. Use the guided lesson prompts, invite observation and discussion, and keep student responses within normal classroom learning activities.",
+    body: "Keep the session teacher-led. Follow the teacher script and prompts, hide notes when the lesson is on a projector, invite observation and discussion, and keep student responses within normal classroom learning activities.",
   },
   {
     title: "After the lesson",
@@ -46,12 +46,13 @@ export default function FieldTeacherGuidePage() {
             Australian Years 3–6 · teacher-led
           </p>
           <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">
-            Field Mode teacher guide
+            Teacher guide
           </h1>
           <p className="text-base leading-7 text-slate-700 md:text-lg">
-            A simple checklist for running the existing seven-lesson sequence
-            as a focused classroom activity. Students do not need accounts and
-            classroom records use teacher-chosen aliases on this device.
+            Open a lesson, follow the teacher script, hide notes when you
+            project, and stop at the visible end point. Students do not need
+            accounts, and classroom records use teacher-chosen aliases on this
+            device.
           </p>
         </header>
 
@@ -98,8 +99,10 @@ export default function FieldTeacherGuidePage() {
             <HardDriveDownload className="h-6 w-6" aria-hidden="true" />
             <h2 className="mt-3 text-xl font-semibold">Network preparation</h2>
             <p className="mt-3 text-sm leading-6">
-              Install and verify the complete Field Pack while connected. Every
-              lesson also has a static print-or-save-PDF fallback. Updates are
+              If the school network may be unreliable, open the Offline Pack
+              page while you are still connected and follow the prep steps
+              there. Full offline operation has not been verified across school
+              hardware yet, so also print the seven-lesson pack. Updates are
               teacher-triggered and keep the last complete pack available for
               rollback.
             </p>

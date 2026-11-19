@@ -6,22 +6,31 @@ import { isPathnameAllowedByPolicy } from "@/lib/childSafeBaseline";
 
 afterEach(cleanup);
 
-describe("Field Mode entry", () => {
+describe("Classroom home", () => {
   it("identifies the Australian Years 3–6 classroom product", () => {
     render(<FieldModePage />);
     expect(screen.getAllByText(/MetaPet School/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Years 3–6/i).length).toBeGreaterThan(0);
   });
 
-  it("puts Session One one click from a cold visit", () => {
+  it("puts Lesson 1 one click from a cold visit", () => {
     render(<FieldModePage />);
 
     expect(
-      screen.getByRole("link", { name: /Start Session One/i }),
+      screen.getByRole("link", { name: /Start Lesson 1 in 15 minutes/i }),
     ).toHaveAttribute("href", "/schools/field/lessons/meet-the-system");
     expect(
-      screen.getByRole("link", { name: /Run the seven-session sequence/i }),
-    ).toHaveAttribute("href", "/schools/field/start");
+      screen.getByRole("link", { name: /Browse all seven lessons/i }),
+    ).toHaveAttribute("href", "/schools/field/lessons");
+  });
+
+  it("lists all seven lessons with published curriculum codes", () => {
+    render(<FieldModePage />);
+    expect(screen.getByRole("heading", { name: /The seven lessons/i })).toBeInTheDocument();
+    expect(screen.getByText("Meet the System")).toBeInTheDocument();
+    expect(screen.getByText("Test, Reflect and Improve")).toBeInTheDocument();
+    expect(screen.getAllByText(/AC9TDI4K01/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Digital Technologies/).length).toBeGreaterThan(0);
   });
 
   it("tells a teacher what they need before beginning", () => {
@@ -31,7 +40,7 @@ describe("Field Mode entry", () => {
       screen.getByRole("heading", { name: /What you need/i }),
     ).toBeInTheDocument();
     for (const requirement of [
-      /About 20 minutes/i,
+      /About 15–20 minutes/i,
       /No student accounts to create/i,
       /nothing to install/i,
     ]) {
@@ -39,20 +48,23 @@ describe("Field Mode entry", () => {
     }
   });
 
-  it("offers a printable fallback and a route to the data explanation", () => {
+  it("offers a printable pack, safety information and local-data controls", () => {
     render(<FieldModePage />);
 
     expect(
-      screen.getByRole("link", { name: /Print the Session One paper fallback/i }),
-    ).toHaveAttribute("href", "/schools/field/print/meet-the-system");
+      screen.getByRole("link", {
+        name: /Print all seven lessons plus the parent note/i,
+      }),
+    ).toHaveAttribute("href", "/schools/field/print/all");
     expect(
-      screen.getByRole("link", { name: /See exactly what data it uses/i }),
+      screen.getByRole("link", { name: /Safety and privacy/i }),
     ).toHaveAttribute("href", "/schools/field/safety");
+    expect(
+      screen.getByRole("link", { name: /Open local-data controls/i }),
+    ).toHaveAttribute("href", "/schools/data");
   });
 
-  it("links nowhere outside the Field Mode boundary", () => {
-    // A link off this page is a link a supervised child can follow. Every one
-    // has to be a route the Field policy already admits.
+  it("links only to routes the classroom policy already admits", () => {
     render(<FieldModePage />);
 
     const hrefs = screen
@@ -62,7 +74,13 @@ describe("Field Mode entry", () => {
     expect(hrefs.length).toBeGreaterThan(0);
     for (const href of hrefs) {
       expect(href.startsWith("/"), href).toBe(true);
-      expect(isPathnameAllowedByPolicy(new URL(href, "https://example.test").pathname, "field"), href).toBe(true);
+      expect(
+        isPathnameAllowedByPolicy(
+          new URL(href, "https://example.test").pathname,
+          "field",
+        ),
+        href,
+      ).toBe(true);
     }
   });
 
@@ -70,8 +88,6 @@ describe("Field Mode entry", () => {
     const { container } = render(<FieldModePage />);
     const text = (container.textContent ?? "").toLowerCase();
 
-    // Word-boundary matched: the page is allowed to say it has no shopping,
-    // it is not allowed to offer any.
     for (const phrase of [
       "subscribe",
       "upgrade",
@@ -82,6 +98,7 @@ describe("Field Mode entry", () => {
       "contribute",
       "buy",
       "wallet",
+      "go deeper",
     ]) {
       expect(text, phrase).not.toMatch(new RegExp(`\\b${phrase}\\b`));
     }

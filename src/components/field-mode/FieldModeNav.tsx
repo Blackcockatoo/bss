@@ -47,7 +47,7 @@ export function FieldModeNav() {
 
   return (
     <nav
-      aria-label="Field Mode"
+      aria-label="Classroom navigation"
       className="field-mode-nav field-print-hide border-b border-emerald-950/15 bg-white/95 px-4 py-3 text-slate-900 shadow-sm backdrop-blur"
     >
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-2">

@@ -7,7 +7,7 @@ import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
 export const metadata: Metadata = {
   title: "Offline and Emergency Pack",
   description:
-    "Prepare, verify, roll back, back up and print the local MetaPet Field Mode classroom pack.",
+    "Prepare, verify, roll back, back up and print the local MetaPet School classroom pack. Not yet verified on school hardware.",
 };
 
 export default function FieldOfflinePage() {
@@ -22,9 +22,16 @@ export default function FieldOfflinePage() {
           <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">
             Offline and Emergency Pack
           </h1>
+          <p className="max-w-3xl rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-base leading-7 text-amber-950">
+            This pack has not yet been verified on school hardware. Treat it as
+            a preparation step, and print the seven-lesson pack as the reliable
+            fallback if the network fails.
+          </p>
           <p className="max-w-3xl text-base leading-7 text-slate-700 md:text-lg">
-            Prepare one classroom device while connected, then keep the seven guided lessons,
-            static fallbacks and local records available when the school network is unreliable.
+            Prep while the device is connected: install or update the pack,
+            verify that it completed, and keep the last good pack for rollback.
+            Then print or save the seven lessons plus the parent note so the
+            class can continue on paper.
           </p>
         </header>
         <OfflinePackManager />
