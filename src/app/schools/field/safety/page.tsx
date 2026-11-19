@@ -4,8 +4,13 @@ import { HeartHandshake, LockKeyhole, ShieldCheck, UsersRound } from "lucide-rea
 import {
   FIELD_MODE_CLASSROOM_PATH,
   FIELD_MODE_SAFETY_PATH,
+  FIELD_MODE_VERIFIED_PATH,
   SCHOOLS_DATA_PATH,
 } from "@/lib/childSafeBaseline";
+import {
+  ESAFETY_TEACHER_LINKS,
+  OFFICIAL_LINK_CHECKED_AT,
+} from "@/lib/schools/classroomPack";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
 import { SCHOOLS_LOCAL_DATA_RETENTION_DAYS } from "@/lib/schools/storage";
 
@@ -85,6 +90,36 @@ export default function FieldSafetyPage() {
             <li>Record only the factual information required by school policy.</li>
             <li>Review whether the class or student should continue.</li>
           </ol>
+        </section>
+
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="text-xl font-semibold">Official eSafety Commissioner links</h2>
+          <p className="mt-3 text-sm leading-6 text-slate-700">
+            These official eSafety pages were reachable (HTTP 200) when checked
+            on {OFFICIAL_LINK_CHECKED_AT}. That check is not an eSafety
+            endorsement of MetaPet School. Your school&apos;s child-safety
+            procedures remain the first authority.
+          </p>
+          <ul className="mt-4 space-y-3 text-sm leading-6">
+            {ESAFETY_TEACHER_LINKS.map((link) => (
+              <li key={link.href}>
+                <a
+                  href={link.href}
+                  className="font-semibold text-emerald-900 underline underline-offset-2"
+                >
+                  {link.title}
+                </a>
+                <span className="block text-slate-700">{link.note}</span>
+              </li>
+            ))}
+          </ul>
+          <a
+            href={FIELD_MODE_VERIFIED_PATH}
+            className="mt-5 inline-flex min-h-11 items-center text-sm font-semibold text-emerald-900 underline underline-offset-2"
+          >
+            See what has and has not been verified
+          </a>
         </section>
 
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">

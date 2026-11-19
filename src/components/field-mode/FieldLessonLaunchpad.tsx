@@ -108,7 +108,7 @@ export function FieldLessonLaunchpad() {
               className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
             >
               <Printer className="h-4 w-4" aria-hidden="true" />
-              Print all seven lessons plus the parent note
+              Print the classroom pack
             </a>
           </div>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

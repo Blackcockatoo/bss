@@ -11,7 +11,9 @@ import {
   FIELD_MODE_GUIDE_PATH,
   FIELD_MODE_LESSONS_PATH,
   FIELD_MODE_OFFLINE_PATH,
+  FIELD_MODE_PRINT_ALL_PATH,
 } from "@/lib/childSafeBaseline";
+import { FIELD_MODE_PRINT_RELIEF_PATH } from "@/lib/schools/classroomPack";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
 
 export const metadata: Metadata = {
@@ -140,6 +142,18 @@ export default function FieldTeacherGuidePage() {
               className="inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
             >
               Prepare Offline Pack
+            </a>
+            <a
+              href={FIELD_MODE_PRINT_ALL_PATH}
+              className="inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              Print the classroom pack
+            </a>
+            <a
+              href={FIELD_MODE_PRINT_RELIEF_PATH}
+              className="inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              Relief teacher pack
             </a>
           </div>
         </section>

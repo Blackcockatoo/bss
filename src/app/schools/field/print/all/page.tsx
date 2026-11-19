@@ -1,10 +1,19 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
-
 import type { Metadata } from "next";
 
 import { PrintLessonButton } from "@/components/field-mode/PrintLessonButton";
 import { PrintableLessonDocument } from "@/components/field-mode/PrintableLessonDocument";
+import {
+  PrintableAssessmentTools,
+  PrintableExitTickets,
+  PrintableLeadershipBrief,
+  PrintableNoTechGuide,
+  PrintableOfficialLinks,
+  PrintablePackContents,
+  PrintableParentLetter,
+  PrintableReliefPack,
+  PrintableVerifiedStatus,
+  PrintableWordWalls,
+} from "@/components/field-mode/classroomPackDocuments";
 import {
   FIELD_MODE_HOME_PATH,
   FIELD_MODE_LESSONS_PATH,
@@ -14,62 +23,11 @@ import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
 import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
 
 export const metadata: Metadata = {
-  title: "Print all seven lessons and the parent note",
+  title: "Print the Years 3–6 classroom pack",
   description:
-    "One printable pack of the seven MetaPet School lessons plus the parent and carer note.",
+    "One printable pack of seven lesson planners, exit tickets, word walls, assessment tools, the parent letter, a relief pack, a leadership one-pager and what’s verified.",
   robots: { index: false, follow: false },
 };
-
-function ParentNoteDocument() {
-  const source = readFileSync(
-    join(process.cwd(), "public/docs/schools-au/teacher-pack/parent-note.md"),
-    "utf8",
-  );
-  const lines = source.split("\n");
-
-  return (
-    <article className="mx-auto max-w-4xl break-before-page rounded-2xl bg-white p-7 shadow-sm print:max-w-none print:rounded-none print:p-0 print:shadow-none md:p-10">
-      {lines.map((line, index) => {
-        if (line.startsWith("# ")) {
-          return (
-            <h2 key={index} className="text-3xl font-bold tracking-tight">
-              {line.slice(2)}
-            </h2>
-          );
-        }
-        if (line.startsWith("## ")) {
-          return (
-            <h2 key={index} className="mt-6 text-xl font-bold">
-              {line.slice(3)}
-            </h2>
-          );
-        }
-        if (line.startsWith("- ")) {
-          return (
-            <p key={index} className="mt-1 pl-4 text-base leading-7">
-              • {line.slice(2)}
-            </p>
-          );
-        }
-        if (line.startsWith("`") && line.endsWith("`") === false) {
-          return (
-            <p key={index} className="mt-3 text-base leading-7 text-slate-700">
-              {line.replaceAll("`", "")}
-            </p>
-          );
-        }
-        if (line.trim() === "") {
-          return null;
-        }
-        return (
-          <p key={index} className="mt-3 text-base leading-7 text-slate-700">
-            {line.replaceAll("`", "")}
-          </p>
-        );
-      })}
-    </article>
-  );
-}
 
 export default function PrintAllLessonsPage() {
   enforceChildSafeServerRoute(FIELD_MODE_PRINT_ALL_PATH, "field");
@@ -82,8 +40,9 @@ export default function PrintAllLessonsPage() {
             Printable classroom pack
           </p>
           <p className="text-sm text-slate-700">
-            All seven lessons and the parent and carer note. Use your browser’s
-            print dialog and choose “Save as PDF” if you need a file.
+            Lesson planners, paper tools, the parent letter and the leadership
+            brief. Use your browser’s print dialog and choose “Save as PDF” if
+            you need a file.
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -103,11 +62,15 @@ export default function PrintAllLessonsPage() {
         </div>
       </div>
       <h1 className="field-print-hide mx-auto mb-6 max-w-4xl text-3xl font-semibold tracking-tight">
-        Print all seven lessons and the parent note
+        Print the Years 3–6 classroom pack
       </h1>
       <div className="space-y-10">
+        <PrintablePackContents headingLevel={2} />
+        <div className="break-before-page">
+          <PrintableReliefPack headingLevel={2} />
+        </div>
         {LESSON_DEFINITIONS.map((lesson) => (
-          <div key={lesson.id} className="break-before-page first:break-before-auto">
+          <div key={lesson.id} className="break-before-page">
             <PrintableLessonDocument
               lesson={lesson}
               showToolbar={false}
@@ -115,7 +78,30 @@ export default function PrintAllLessonsPage() {
             />
           </div>
         ))}
-        <ParentNoteDocument />
+        <div className="break-before-page">
+          <PrintableExitTickets headingLevel={2} />
+        </div>
+        <div className="break-before-page">
+          <PrintableWordWalls headingLevel={2} />
+        </div>
+        <div className="break-before-page">
+          <PrintableAssessmentTools headingLevel={2} />
+        </div>
+        <div className="break-before-page">
+          <PrintableNoTechGuide headingLevel={2} />
+        </div>
+        <div className="break-before-page">
+          <PrintableParentLetter headingLevel={2} />
+        </div>
+        <div className="break-before-page">
+          <PrintableLeadershipBrief headingLevel={2} />
+        </div>
+        <div className="break-before-page">
+          <PrintableVerifiedStatus headingLevel={2} />
+        </div>
+        <div className="break-before-page">
+          <PrintableOfficialLinks headingLevel={2} includeCurriculum />
+        </div>
       </div>
     </main>
   );

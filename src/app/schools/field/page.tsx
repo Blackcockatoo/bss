@@ -9,6 +9,7 @@ import {
   FIELD_MODE_PRINT_ALL_PATH,
   FIELD_MODE_PRINT_PATH_PREFIX,
   FIELD_MODE_SAFETY_PATH,
+  FIELD_MODE_VERIFIED_PATH,
   SCHOOLS_DATA_PATH,
 } from "@/lib/childSafeBaseline";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
@@ -25,6 +26,14 @@ import {
   SCHOOL_PRIVACY_COMMITMENTS,
   SCHOOLS_LOCAL_DATA_RETENTION_DAYS,
 } from "@/lib/schools/privacyTruth";
+import {
+  FIELD_MODE_PRINT_CHECKLIST_PATH,
+  FIELD_MODE_PRINT_NO_TECH_PATH,
+  FIELD_MODE_PRINT_PARENT_LETTER_PATH,
+  FIELD_MODE_PRINT_RELIEF_PATH,
+  FIELD_MODE_PRINT_TICKETS_PATH,
+  FIELD_MODE_PRINT_WORD_WALLS_PATH,
+} from "@/lib/schools/classroomPack";
 import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
 
 const WHAT_YOU_NEED = [
@@ -96,7 +105,7 @@ export default function FieldModePage() {
                 className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
               >
                 <Printer className="h-4 w-4" aria-hidden="true" />
-                Print all seven lessons plus the parent note
+                Print the classroom pack
               </a>
             </div>
           </div>
@@ -160,6 +169,46 @@ export default function FieldModePage() {
               );
             })}
           </ol>
+        </section>
+
+
+        <section
+          aria-labelledby="classroom-pack-heading"
+          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8"
+        >
+          <h2
+            id="classroom-pack-heading"
+            className="text-2xl font-semibold text-slate-950"
+          >
+            Classroom pack
+          </h2>
+          <p className="mt-3 max-w-3xl text-base leading-7 text-slate-700">
+            One-page planners now include materials, estimated step timings,
+            published AC v9 codes and a two-minute explainer. Print the full
+            pack, or open one tool at a time.
+          </p>
+          <ul className="mt-5 flex flex-wrap gap-3">
+            {[
+              { href: FIELD_MODE_PRINT_ALL_PATH, label: "Print the full pack" },
+              { href: FIELD_MODE_PRINT_RELIEF_PATH, label: "Relief teacher pack" },
+              { href: FIELD_MODE_PRINT_TICKETS_PATH, label: "Exit tickets" },
+              { href: FIELD_MODE_PRINT_WORD_WALLS_PATH, label: "Word walls" },
+              { href: FIELD_MODE_PRINT_CHECKLIST_PATH, label: "Assessment checklist" },
+              { href: FIELD_MODE_PRINT_NO_TECH_PATH, label: "No-tech / paper path" },
+              { href: FIELD_MODE_PRINT_PARENT_LETTER_PATH, label: "Parent letter" },
+              { href: "/schools/field/print/leadership", label: "Leadership one-pager" },
+              { href: FIELD_MODE_VERIFIED_PATH, label: "What’s verified" },
+            ].map((item) => (
+              <li key={item.href}>
+                <a
+                  href={item.href}
+                  className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
         </section>
 
         <section

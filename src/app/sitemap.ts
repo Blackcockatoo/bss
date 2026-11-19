@@ -8,6 +8,7 @@ import {
   FIELD_MODE_LESSONS_PATH,
   FIELD_MODE_OFFLINE_PATH,
   FIELD_MODE_SAFETY_PATH,
+  FIELD_MODE_VERIFIED_PATH,
 } from "@/lib/childSafeBaseline";
 import { findSiteUrl } from "@/lib/env/siteUrl";
 import { getArcadeCrawlRoutes } from "@/lib/games/arcade";
@@ -62,6 +63,12 @@ function metaPetSchoolSitemap(): MetadataRoute.Sitemap {
       lastModified,
       changeFrequency: "monthly",
       priority: 0.8,
+    },
+    {
+      url: metaPetSchoolUrl(FIELD_MODE_VERIFIED_PATH),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.7,
     },
     {
       url: metaPetSchoolUrl("/schools/safeguarding"),

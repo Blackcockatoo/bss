@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 
 import { OfflinePackManager } from "@/components/field-mode/OfflinePackManager";
-import { FIELD_MODE_OFFLINE_PATH } from "@/lib/childSafeBaseline";
+import {
+  FIELD_MODE_OFFLINE_PATH,
+  FIELD_MODE_PRINT_ALL_PATH,
+  FIELD_MODE_VERIFIED_PATH,
+} from "@/lib/childSafeBaseline";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
 
 export const metadata: Metadata = {
@@ -35,6 +39,22 @@ export default function FieldOfflinePage() {
           </p>
         </header>
         <OfflinePackManager />
+        <p className="max-w-3xl text-sm leading-6 text-slate-700">
+          <a
+            href={FIELD_MODE_VERIFIED_PATH}
+            className="font-semibold text-emerald-900 underline underline-offset-2"
+          >
+            What’s verified
+          </a>
+          {" "}lists this Offline Pack as not yet checked on school hardware.{" "}
+          <a
+            href={FIELD_MODE_PRINT_ALL_PATH}
+            className="font-semibold text-emerald-900 underline underline-offset-2"
+          >
+            Print the classroom pack
+          </a>
+          {" "}as the paper fallback.
+        </p>
       </div>
     </main>
   );

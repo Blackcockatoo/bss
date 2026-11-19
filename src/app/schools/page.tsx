@@ -4,6 +4,7 @@ import {
   FIELD_MODE_LESSONS_PATH,
   FIELD_MODE_SAFETY_PATH,
   FIELD_MODE_START_PATH,
+  FIELD_MODE_VERIFIED_PATH,
 } from "@/lib/childSafeBaseline";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
 import {
@@ -353,6 +354,20 @@ export default function SchoolsPage() {
             title="For school leadership"
             description="Privacy, safeguarding, pilot and ICT documents for principals, reviewers and wellbeing teams. Classroom teachers can start with the lessons and the teacher pack above."
           />
+          <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2">
+            <Link
+              className="text-sm text-slate-300 underline underline-offset-4 hover:text-white"
+              href="/schools/field/print/leadership"
+            >
+              Principal and ICT one-pager
+            </Link>
+            <Link
+              className="text-sm text-slate-300 underline underline-offset-4 hover:text-white"
+              href={FIELD_MODE_VERIFIED_PATH}
+            >
+              What’s verified
+            </Link>
+          </div>
           <div className="mt-8 space-y-6">
             {reviewerPathways.map((pathway) => (
               <article key={pathway.title}>

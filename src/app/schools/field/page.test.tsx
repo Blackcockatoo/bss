@@ -53,7 +53,7 @@ describe("Classroom home", () => {
 
     expect(
       screen.getByRole("link", {
-        name: /Print all seven lessons plus the parent note/i,
+        name: /Print the classroom pack/i,
       }),
     ).toHaveAttribute("href", "/schools/field/print/all");
     expect(
