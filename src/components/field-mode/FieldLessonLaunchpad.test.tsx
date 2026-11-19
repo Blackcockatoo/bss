@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { FIELD_MODE_SESSION_STORAGE_KEY } from "@/lib/fieldMode/session";
 import { useLessonProgressStore } from "@/lib/teacher-lessons";
 import { FieldLessonLaunchpad } from "./FieldLessonLaunchpad";
+import { EMPTY_LESSON_FILTERS } from "@/lib/schools/lessonFilters";
 
 beforeEach(() => {
   window.localStorage.clear();
@@ -53,6 +54,31 @@ describe("Field lesson launchpad", () => {
         /^\/schools\/field\/print\//,
       );
     }
+  });
+
+  it("filters the list from shareable query values and keeps a GET form", () => {
+    render(
+      <FieldLessonLaunchpad
+        initialFilters={{ ...EMPTY_LESSON_FILTERS, minutes: 15 }}
+      />,
+    );
+    const form = screen.getByRole("form", { name: /Find a lesson/i });
+    expect(form).toHaveAttribute("method", "get");
+    expect(form).toHaveAttribute("action", "/schools/field/lessons");
+    expect(screen.getByRole("button", { name: /Show matching lessons/i })).toBeInTheDocument();
+    expect(screen.getByText(/Showing 2 of 7 lessons/)).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: /Start lesson/i })).toHaveLength(2);
+  });
+
+  it("can limit the list to paper-friendly lessons", () => {
+    render(
+      <FieldLessonLaunchpad
+        initialFilters={{ ...EMPTY_LESSON_FILTERS, paperFriendly: true }}
+      />,
+    );
+    expect(screen.getByText(/Showing 3 of 7 lessons/)).toBeInTheDocument();
+    expect(screen.getByText("Privacy and Responsible Design")).toBeInTheDocument();
+    expect(screen.queryByText("Meet the System")).not.toBeInTheDocument();
   });
 
   it("offers projector slides for every lesson", () => {

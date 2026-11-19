@@ -6,6 +6,7 @@ import {
   FIELD_MODE_HOME_PATH,
   FIELD_MODE_LESSONS_PATH,
   FIELD_MODE_PRINT_PATH_PREFIX,
+  FIELD_MODE_TOOLS_PATH,
 } from "@/lib/childSafeBaseline";
 import { twoMinuteExplainerFor } from "@/lib/schools/classroomPack";
 import type { LessonDefinition } from "@/lib/teacher-lessons/types";
@@ -154,6 +155,12 @@ export function LessonSlides({ lesson }: { lesson: LessonDefinition }) {
             className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold"
           >
             Print planner
+          </a>
+          <a
+            href={FIELD_MODE_TOOLS_PATH}
+            className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold"
+          >
+            Timer and groups
           </a>
           <a
             href={FIELD_MODE_HOME_PATH}

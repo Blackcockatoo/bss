@@ -12,6 +12,12 @@ import {
   twoMinuteExplainerFor,
 } from "@/lib/schools/classroomPack";
 import {
+  REPORT_COMMENT_CAVEAT,
+  REPORT_LEVEL_LABELS,
+  REPORT_LEVELS,
+  reportCommentBankFor,
+} from "@/lib/schools/reportComments";
+import {
   curriculumAlignmentForSession,
   mergeLearningAreas,
 } from "@/lib/schools/curriculumAlignment";
@@ -33,6 +39,7 @@ export function PrintableLessonDocument({
   const extras = plannerExtrasFor(lesson.id);
   const explainer = twoMinuteExplainerFor(lesson);
   const eald = ealdNotesFor(lesson.id);
+  const comments = reportCommentBankFor(lesson);
 
   return (
     <article className={printArticleClassName}>
@@ -50,6 +57,12 @@ export function PrintableLessonDocument({
               className="text-sm font-semibold text-emerald-900 underline underline-offset-2"
             >
               Projector slides
+            </a>
+            <a
+              href={`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/comments`}
+              className="text-sm font-semibold text-emerald-900 underline underline-offset-2"
+            >
+              Report comment starters
             </a>
           </div>
           <PrintLessonButton />
@@ -231,6 +244,19 @@ export function PrintableLessonDocument({
         <p className="mt-3 text-sm leading-6">
           <strong>During the lesson:</strong> {eald.duringLesson}
         </p>
+      </section>
+
+      <section className="mt-7 break-inside-avoid rounded-xl border border-slate-300 p-4 print:rounded-none">
+        <SectionHeading className="text-xl font-bold">Report comment starters</SectionHeading>
+        <p className="mt-2 text-sm leading-6 text-slate-600">{REPORT_COMMENT_CAVEAT}</p>
+        <dl className="mt-3 space-y-3 text-sm leading-6">
+          {REPORT_LEVELS.map((level) => (
+            <div key={level}>
+              <dt className="font-semibold">{REPORT_LEVEL_LABELS[level]}</dt>
+              <dd>{comments.starters[level]}</dd>
+            </div>
+          ))}
+        </dl>
       </section>
 
       <section className="mt-7 break-inside-avoid">

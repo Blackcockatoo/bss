@@ -27,6 +27,17 @@ import {
   sanitizeFieldSession,
   type FieldSessionConfig,
 } from "@/lib/fieldMode/session";
+import { plannerExtrasFor } from "@/lib/schools/classroomPack";
+import {
+  EMPTY_LESSON_FILTERS,
+  filterLessons,
+  hasActiveLessonFilters,
+  publishedCurriculumCodes,
+  type LessonSearchFilters,
+  LESSON_MINUTES_FILTERS,
+  LESSON_YEAR_BAND_FILTERS,
+  LESSON_YEAR_BAND_LABELS,
+} from "@/lib/schools/lessonFilters";
 import { touchSchoolsLocalState } from "@/lib/schools/storage";
 import {
   LESSON_DEFINITIONS,
@@ -47,10 +58,20 @@ function loadSession(): FieldSessionConfig {
   }
 }
 
-export function FieldLessonLaunchpad() {
+export function FieldLessonLaunchpad({
+  initialFilters = EMPTY_LESSON_FILTERS,
+}: {
+  initialFilters?: LessonSearchFilters;
+}) {
   const [session, setSession] = useState<FieldSessionConfig>(loadSession);
   const hydrated = useLessonProgressHydrated();
   const progress = useLessonProgressStore();
+  const visibleLessons = useMemo(
+    () => filterLessons(LESSON_DEFINITIONS, initialFilters),
+    [initialFilters],
+  );
+  const filtersActive = hasActiveLessonFilters(initialFilters);
+  const publishedCodes = useMemo(() => publishedCurriculumCodes(), []);
 
   useEffect(() => {
     try {
@@ -96,6 +117,116 @@ export function FieldLessonLaunchpad() {
           </p>
         </header>
 
+        <section
+          aria-labelledby="lesson-filters-heading"
+          className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-7"
+        >
+          <h2 id="lesson-filters-heading" className="text-2xl font-semibold">
+            Find a lesson
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            Filter by year band, time, curriculum code or paper path, or search
+            the lesson list. The form works without JavaScript and the address
+            bar keeps a link you can share.
+          </p>
+          <form
+            method="get"
+            action={FIELD_MODE_LESSONS_PATH}
+            aria-labelledby="lesson-filters-heading"
+            className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+          >
+            <label className="space-y-2 text-sm font-semibold text-slate-800 md:col-span-2 lg:col-span-3">
+              Search
+              <input
+                type="search"
+                name="q"
+                defaultValue={initialFilters.query}
+                placeholder="Title, intention or code"
+                className="min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3 font-normal"
+              />
+            </label>
+            <label className="space-y-2 text-sm font-semibold text-slate-800">
+              Year band
+              <select
+                name="years"
+                defaultValue={initialFilters.yearBand ?? ""}
+                className="min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3 font-normal"
+              >
+                <option value="">Any year band</option>
+                {LESSON_YEAR_BAND_FILTERS.map((value) => (
+                  <option key={value} value={value}>
+                    {LESSON_YEAR_BAND_LABELS[value]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="space-y-2 text-sm font-semibold text-slate-800">
+              Time available
+              <select
+                name="minutes"
+                defaultValue={initialFilters.minutes ? String(initialFilters.minutes) : ""}
+                className="min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3 font-normal"
+              >
+                <option value="">15 or 20 minutes</option>
+                {LESSON_MINUTES_FILTERS.map((value) => (
+                  <option key={value} value={value}>
+                    {value} minutes
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="space-y-2 text-sm font-semibold text-slate-800">
+              Australian Curriculum v9 code
+              <select
+                name="code"
+                defaultValue={initialFilters.code ?? ""}
+                className="min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3 font-normal"
+              >
+                <option value="">Any listed code</option>
+                {publishedCodes.map((code) => (
+                  <option key={code} value={code}>
+                    {code}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex items-center gap-3 text-sm font-semibold text-slate-800 md:col-span-2">
+              <input
+                type="checkbox"
+                name="paper"
+                value="yes"
+                defaultChecked={initialFilters.paperFriendly}
+                className="h-4 w-4"
+              />
+              Paper-friendly only
+            </label>
+            <div className="flex flex-wrap items-end gap-3 md:col-span-2 lg:col-span-3">
+              <button
+                type="submit"
+                className="min-h-12 rounded-xl bg-emerald-800 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
+              >
+                Show matching lessons
+              </button>
+              {filtersActive ? (
+                <a
+                  href={FIELD_MODE_LESSONS_PATH}
+                  className="inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+                >
+                  Clear filters
+                </a>
+              ) : null}
+            </div>
+          </form>
+          <p className="mt-4 text-sm leading-6 text-slate-600">
+            A year-band match means the lesson already lists a published AC v9
+            code with a Years 3–4 (…4…) or Years 5–6 (…6…) identifier. Every
+            lesson in this pack currently lists codes for both bands, so that
+            filter does not hide a lesson on its own. Paper-friendly means the
+            planner already says the lesson works well on paper, or can be run
+            on paper.
+          </p>
+        </section>
+
         <section aria-labelledby="field-lessons-heading">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
@@ -112,8 +243,26 @@ export function FieldLessonLaunchpad() {
               Print the classroom pack
             </a>
           </div>
+          <p className="mb-4 text-sm font-medium text-slate-700" aria-live="polite">
+            {filtersActive
+              ? `Showing ${visibleLessons.length} of ${LESSON_DEFINITIONS.length} lessons.`
+              : `All ${LESSON_DEFINITIONS.length} lessons.`}
+          </p>
+          {visibleLessons.length === 0 ? (
+            <p className="rounded-2xl border border-slate-200 bg-white p-5 text-sm leading-6 text-slate-700">
+              No lessons match these filters.{" "}
+              <a
+                href={FIELD_MODE_LESSONS_PATH}
+                className="font-semibold text-emerald-900 underline underline-offset-2"
+              >
+                Clear filters
+              </a>{" "}
+              to see all seven.
+            </p>
+          ) : null}
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {LESSON_DEFINITIONS.map((lesson) => {
+            {visibleLessons.map((lesson) => {
+              const paper = plannerExtrasFor(lesson.id).paper;
               const status = selectLessonStatus(progress, lesson.id);
               const isRecommendedStart = lesson.number === 1;
               const alignment = curriculumAlignmentForSession(lesson.number);
@@ -162,7 +311,7 @@ export function FieldLessonLaunchpad() {
                     ) : null}
                   </div>
                   <p className="mt-4 text-xs font-medium text-slate-500">
-                    Years 3–6 · {FIELD_SESSION_LABELS.yearBand[session.yearBand]} · {session.durationMinutes} min · {FIELD_SESSION_LABELS.deliveryMode[session.deliveryMode]}
+                    Years 3–6 · planned {lesson.durationMinutes} minutes · {paper.label}
                   </p>
                   <a
                     href={buildFieldLessonPath(lesson.slug, session)}
@@ -182,6 +331,12 @@ export function FieldLessonLaunchpad() {
                     className="mt-2 inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                   >
                     Projector slides
+                  </a>
+                  <a
+                    href={`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/comments`}
+                    className="mt-2 inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    Report comment starters
                   </a>
                 </article>
               );

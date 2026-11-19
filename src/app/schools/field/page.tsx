@@ -10,6 +10,8 @@ import {
   FIELD_MODE_PRINT_ALL_PATH,
   FIELD_MODE_PRINT_PATH_PREFIX,
   FIELD_MODE_SAFETY_PATH,
+  FIELD_MODE_TOOLS_PATH,
+  FIELD_MODE_COMMENTS_PATH,
   FIELD_MODE_VERIFIED_PATH,
   SCHOOLS_DATA_PATH,
 } from "@/lib/childSafeBaseline";
@@ -223,6 +225,8 @@ export default function FieldModePage() {
               { href: FIELD_MODE_PRINT_PARENT_LETTER_PATH, label: "Parent letter" },
               { href: "/schools/field/print/leadership", label: "Leadership one-pager" },
               { href: FIELD_MODE_VERIFIED_PATH, label: "What’s verified" },
+              { href: FIELD_MODE_TOOLS_PATH, label: "Timer and groups" },
+              { href: FIELD_MODE_COMMENTS_PATH, label: "Report comment starters" },
             ].map((item) => (
               <li key={item.href}>
                 <a
@@ -323,6 +327,18 @@ export default function FieldModePage() {
                 className="inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
               >
                 Alias roster and classroom setup
+              </a>
+              <a
+                href={FIELD_MODE_TOOLS_PATH}
+                className="inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Timer and groups
+              </a>
+              <a
+                href={FIELD_MODE_COMMENTS_PATH}
+                className="inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Report comment starters
               </a>
               <Link
                 href={FIELD_MODE_GUIDE_PATH}
