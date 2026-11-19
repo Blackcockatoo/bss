@@ -33,7 +33,7 @@ export const FOUNDATION_PAPER_PATHS: Record<FoundationSessionId, PaperPath> = {
     kind: "works-on-paper",
     label: "Works fully unplugged",
     summary:
-      "Use teacher-prepared generic example cards and two hoops or signs. Do not use real student names, addresses, birthdays, or photos of the class.",
+      "Use teacher-prepared generic example cards and two hoops or signs with a simple picture on each. Do not use real student names, addresses, birthdays, photographs, voice recordings, or a student's actual work.",
   },
   "parts-of-a-system": {
     kind: "works-on-paper",
@@ -61,7 +61,7 @@ export const FOUNDATION_LESSON_MATERIALS: Record<
   readonly string[]
 > = {
   "meet-a-system": [
-    "One classroom digital system the teacher already has (for example a classroom screen, a clock, or a simple classroom speaker), or a clear picture of one",
+    "One classroom digital system the teacher already has (for example a classroom screen, a digital clock, or a simple classroom speaker), or a clear picture of one",
     "Paper and pencils if students will draw the exit",
   ],
   "show-it-two-ways": [
@@ -70,8 +70,8 @@ export const FOUNDATION_LESSON_MATERIALS: Record<
     "Board or cards if you want to show the teacher's example symbol to the whole class",
   ],
   "what-is-mine-to-keep": [
-    "Teacher-prepared generic example cards only — no real student information",
-    "Two hoops, signs or floor spaces labelled “Personal and owned” and “Not personal”",
+    "Teacher-prepared generic example cards only — words or simple drawings, not real photographs, voice recordings, or student work",
+    "Two hoops, signs or floor spaces labelled “Personal and owned” and “Not personal”, each with a simple picture so pre-readers can use them",
   ],
   "parts-of-a-system": [
     "One classroom digital system the teacher already has, or a clear labelled picture of one",
@@ -83,6 +83,7 @@ export const FOUNDATION_LESSON_MATERIALS: Record<
   ],
   "follow-the-steps": [
     "A clear space such as the mat or a line",
+    "A circle card and a square card, or two other clear object cards, for the decision",
     "The algorithm written or drawn in simple words or pictures on a board or paper",
     "Optional decision and repeat cards for students who need a visual support",
   ],
@@ -124,7 +125,7 @@ export const FOUNDATION_VOCAB: Record<
     },
     {
       word: "keep",
-      meaning: "Hold on to, and not share, unless it is safe and agreed.",
+      meaning: "Hold on to, and not share with everyone.",
     },
   ],
   "parts-of-a-system": [
@@ -199,10 +200,10 @@ export const FOUNDATION_EALD_NOTES: Record<FoundationSessionId, EaldNotes> = {
     sentenceStarters: [
       "This data is personal.",
       "This data is not personal.",
-      "This is mine to keep.",
+      "I point to this card.",
     ],
     duringLesson:
-      "Use the two hoops or signs as a visual. Model one example in each group first. Students can use the support option: When the teacher holds up an example, point to the matching hoop after a classmate has modelled it.",
+      "Use only the prepared cards. Point to the hoop or sign as you sort each one, and model one example in each group first. Do not ask students to talk about their own information. Students can use the support option: When the teacher holds up an example, point to the matching hoop after a classmate has modelled it.",
   },
   "parts-of-a-system": {
     preteach: ["system", "component", "hardware", "software", "purpose"],

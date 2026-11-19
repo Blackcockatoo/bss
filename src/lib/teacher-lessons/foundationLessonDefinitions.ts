@@ -82,7 +82,7 @@ const FOUNDATION_RUNTIME: Record<string, FoundationRuntimeSpec> = {
       "I can say the job we used the system for (the purpose).",
     ],
     teacherScript:
-      "A system helps us do a job. A digital system has hardware — the parts we can touch — and software — the instructions inside. Let's look at one digital system, name a part we can touch, and use it for one job.",
+      "A system helps us do a job. Hardware is a part we can touch. Software is the instructions we cannot touch, like a program or an app. Let's look at one digital system, point to a part we can touch, and use it for one job.",
     studentInstructions:
       "Look at the system. Point to a part you can touch. Help use it for one job.",
     shortDescription:
@@ -108,7 +108,7 @@ const FOUNDATION_RUNTIME: Record<string, FoundationRuntimeSpec> = {
       {
         title: "One sentence to start",
         teacherPrompt:
-          "Say only this: \"A system helps us do a job. A digital system has parts we can touch, and instructions inside.\"",
+          "Say only this: \"A system helps us do a job. Hardware is a part we can touch. Software is the instructions we cannot touch.\"",
         studentTask: "Look at the teacher and the system.",
         whatDoINow: "Say the sentence. Then press Next.",
         expectedOutcome: "The class is looking at the teacher and the system.",
@@ -116,7 +116,7 @@ const FOUNDATION_RUNTIME: Record<string, FoundationRuntimeSpec> = {
       {
         title: "Find a part we can touch",
         teacherPrompt:
-          "Show the classroom digital system. Point to one hardware part and say its name. Give the class a moment to look.",
+          "Show the classroom digital system. Point to one hardware part and say its name. Ask everyone to point to it from their place, so the class does not need to crowd around the device.",
         studentTask: "Point to a part you can see and could touch.",
         whatDoINow: "Name one hardware part, then press Next.",
         expectedOutcome: "Students have pointed to a hardware part.",
@@ -156,7 +156,7 @@ const FOUNDATION_RUNTIME: Record<string, FoundationRuntimeSpec> = {
       "I can show the same data as a simple symbol.",
     ],
     teacherScript:
-      "Data is information. We can show the same data as a real object, as a picture, and as a simple symbol. Let's take one thing and show it in those three ways.",
+      "Data is information we can show. We can show the same data as a real object, as a picture, and as a simple symbol. Let's take one thing and show it in those three ways.",
     studentInstructions:
       "Use one object. Draw a picture of it. Show a simple symbol that stands for the same thing.",
     shortDescription:
@@ -230,20 +230,20 @@ const FOUNDATION_RUNTIME: Record<string, FoundationRuntimeSpec> = {
       "I can say that some data is mine to keep.",
     ],
     teacherScript:
-      "Some information is about a person, and some of that information is theirs to keep. I have some examples ready. We will decide together: is this personal data that someone owns, or is it not? We will not write our names, share photos of ourselves, or tell personal details.",
+      "Some information is about a person, and some of that information is theirs to keep. I have example cards ready. We will look only at my cards and decide: is this personal data that someone owns, or is it not? We will not write our names, share photos of ourselves, or tell personal details.",
     studentInstructions:
-      "Listen to the teacher's example. Point, use thumbs, or walk to a hoop to show if the data is personal and owned, or not personal.",
+      "Look at the teacher's card. Point or use thumbs to show if the data is personal and owned, or not personal.",
     shortDescription:
       "Students identify some data that is personal and owned, using only teacher-prepared generic examples. No names, photos or personal details are collected.",
     discussionPrompts: [
-      "What is one kind of data that is yours to keep?",
+      "Point to one of the teacher's cards that shows data someone should keep.",
       "How did you decide if an example was personal?",
       "What should we do if we are not sure?",
     ],
     completionMessage:
       "You identified some data that is personal and owned, and some data that is not.",
     extensionActivity:
-      "Think of one more teacher-safe example, such as a drawing a child made or the number of chairs in the room, and say which group it belongs in.",
+      "Sort one more teacher-prepared card, such as a card that says “a drawing someone made” or “how many chairs are in the room”, and point to the group it belongs in.",
     supportActivity:
       "When the teacher holds up an example, point to the matching hoop after a classmate has modelled it.",
     mainIdea:
@@ -264,7 +264,7 @@ const FOUNDATION_RUNTIME: Record<string, FoundationRuntimeSpec> = {
       {
         title: "See the two groups",
         teacherPrompt:
-          "Show two labelled hoops or signs: \"Personal and owned\" and \"Not personal.\" Hold up one clearly not-personal example (for example, how many windows are in the room) and one generic personal example (for example, a drawing a child made, or a photo card that is not of anyone in the class).",
+          "Show two labelled hoops or signs: \"Personal and owned\" and \"Not personal.\" Add a simple picture on each, such as a lock and a classroom object, so pre-readers can use them. Hold up one clearly not-personal card (for example, a card that says \"how many windows are in the room\") and one generic personal card (for example, a card that says \"a drawing someone made\" or \"a photo of a person\"). Use words or simple drawings on the cards. Do not use a real photograph, a voice recording, or anyone's actual work from the class.",
         studentTask: "Look at the two groups and the teacher's examples.",
         whatDoINow: "Show one example in each group, then press Next.",
         expectedOutcome: "Students can see the two groups.",
@@ -272,16 +272,16 @@ const FOUNDATION_RUNTIME: Record<string, FoundationRuntimeSpec> = {
       {
         title: "Sort a few examples",
         teacherPrompt:
-          "Read or show three to five prepared examples. After each one, students point, use thumbs, or walk to a hoop. Suggested generic examples: a child's own drawing; a photo of a person who is not in the class; a recording of a voice; how many chairs are in the room; the colour of the classroom door. Do not use real student names, addresses, birthdays, or photos of the class.",
+          "Read or show three to five prepared cards. After each one, students point or use thumbs. Walking to a hoop is optional if you have space and time. Use only generic cards, for example: \"a drawing someone made\"; \"a photo of a person\"; \"a recording of someone's voice\"; \"how many chairs are in the room\"; \"the colour of the classroom door\". Do not use real student names, addresses, birthdays, photographs, voice recordings, or a student's actual work.",
         studentTask: "Show which group each example belongs to.",
         whatDoINow: "Sort a few examples, then press Next.",
         expectedOutcome: "The class has sorted several examples without sharing personal details.",
       },
       {
-        title: "What is yours to keep?",
+        title: "Which card should someone keep?",
         teacherPrompt:
-          "Ask: \"What is one kind of data that is yours to keep?\" Accept a spoken answer, a point to a card, or a thumbs-up to a teacher example. Do not ask children to reveal personal information.",
-        studentTask: "Point to, or say, one kind of data that is yours to keep.",
+          "Ask students to point to one of the teacher's cards that shows data someone should keep. They may also give a thumbs-up to a card you hold up. Do not ask children to tell personal details or to invent a new example about themselves.",
+        studentTask: "Point to one of the teacher's cards that shows data someone should keep.",
         whatDoINow: "Take a few answers, then press Next.",
         expectedOutcome: "Students can identify some personal data without sharing their own.",
       },
@@ -304,7 +304,7 @@ const FOUNDATION_RUNTIME: Record<string, FoundationRuntimeSpec> = {
       "I can say the purpose we used it for.",
     ],
     teacherScript:
-      "A digital system has parts, called components. Some components are hardware — the parts we can touch. Some are software — the instructions. Let's look at one digital system, name more than one of its components, and use it for one purpose.",
+      "A digital system has parts, called components. Hardware is a part we can touch, such as a screen or a button. Software is the instructions we cannot touch, such as a program or an app. Let's look at one digital system, name more than one of its components, and use it for one purpose.",
     studentInstructions:
       "Name two or more components of the system, then help use it for one purpose.",
     shortDescription:
@@ -338,7 +338,7 @@ const FOUNDATION_RUNTIME: Record<string, FoundationRuntimeSpec> = {
       {
         title: "Name the components",
         teacherPrompt:
-          "Show one classroom digital system. Name two or more components (for example a screen, a button or keyboard, and the program or app that is running). Ask students to repeat or point.",
+          "Show one classroom digital system. Name two or more components (for example a screen, a button or keyboard, and the program or app that is running). Ask students to repeat or point from their place, so the class does not need to crowd around the device.",
         studentTask: "Point to, or name, two components.",
         whatDoINow: "Name at least two components, then press Next.",
         expectedOutcome: "Students have identified more than one component.",
@@ -486,7 +486,7 @@ const FOUNDATION_RUNTIME: Record<string, FoundationRuntimeSpec> = {
       {
         title: "Hear the algorithm",
         teacherPrompt:
-          "Say the algorithm slowly, and show it in simple words or pictures on the board. Example: \"1. Walk to the mat. 2. If you are wearing a jumper, sit on a cushion; if not, sit on the floor. 3. Clap twice, and repeat the claps until I say stop.\" You may use a different safe, classroom-appropriate algorithm with the same three parts.",
+          "Say the algorithm slowly, and show it in simple words or pictures on the board. Use this example, or another that does not sort students by clothing, appearance or personal details: \"1. Stand up. 2. Look at the teacher's card: if it is a circle, put your hands on your head; if it is a square, put your hands on your hips. 3. Tap your shoulders three times.\" The decision should come from an object you hold, and the repeat should be a set number of times.",
         studentTask: "Listen, and look at the steps.",
         whatDoINow: "Say and show the algorithm, then press Next.",
         expectedOutcome: "Students have heard the sequence, the decision and the repeat.",
@@ -494,8 +494,8 @@ const FOUNDATION_RUNTIME: Record<string, FoundationRuntimeSpec> = {
       {
         title: "Follow the algorithm",
         teacherPrompt:
-          "Lead the class through the algorithm once. Pause at the decision. Lead the repeat clearly, then say stop. No devices, names or photos.",
-        studentTask: "Follow the steps, make the decision, and repeat until the teacher says stop.",
+          "Lead the class through the algorithm once, from their places if space is tight. Pause at the decision and show the card clearly. Lead the repeat a set number of times, such as three. No devices, names or photos.",
+        studentTask: "Follow the steps, make the decision from the teacher's card, and do the last step three times.",
         whatDoINow: "Run the algorithm once, then press Next.",
         expectedOutcome: "The class has followed the algorithm.",
       },
@@ -526,7 +526,7 @@ const FOUNDATION_RUNTIME: Record<string, FoundationRuntimeSpec> = {
       "I can talk about whether an existing digital system would meet that need.",
     ],
     teacherScript:
-      "A known user is someone we can describe by their job or role, not by writing a student's name. Let's look at one simple problem for a known user in our school, and talk about whether an existing digital system would help. We will not use real student names or photos.",
+      "A known user is someone we can describe by their job or role, such as a librarian or a teacher, not by writing a student's name or a staff member's name. Let's look at one simple problem for a school user, and talk about whether an existing digital system would help. We will not use real student names or photos.",
     studentInstructions:
       "Investigate one simple problem for a known user, then talk about whether an existing digital system would meet that need.",
     shortDescription:
@@ -552,7 +552,7 @@ const FOUNDATION_RUNTIME: Record<string, FoundationRuntimeSpec> = {
       {
         title: "One sentence to start",
         teacherPrompt:
-          "Say only this: \"We will look at a simple problem for someone we can describe by their job, not by a student's name. Then we will talk about whether a digital system would help.\"",
+          "Say only this: \"We will look at a simple problem for a school user — someone we can describe by their job, not by a student's name. Then we will talk about whether a digital system would help.\"",
         studentTask: "Look at the teacher.",
         whatDoINow: "Say the sentence. Then press Next.",
         expectedOutcome: "The class knows the user will be described by role only.",
@@ -560,7 +560,7 @@ const FOUNDATION_RUNTIME: Record<string, FoundationRuntimeSpec> = {
       {
         title: "Meet the user and the problem",
         teacherPrompt:
-          "Introduce one known user by role, for example the librarian, a teacher taking the roll, or the class needing to know the time. State one simple problem, for example needing to know when it is time to pack up. Do not use a student's name or a private need.",
+          "Introduce one known user by role only, for example the librarian, a teacher taking the roll, or the class. State one simple problem, for example needing to know when it is time to pack up. Do not use a student's name, a staff member's name, or a private need.",
         studentTask: "Listen for who the user is and what the problem is.",
         whatDoINow: "Name the user and the problem, then press Next.",
         expectedOutcome: "Students can identify the known user and the simple problem.",
@@ -568,7 +568,7 @@ const FOUNDATION_RUNTIME: Record<string, FoundationRuntimeSpec> = {
       {
         title: "Look at an existing system",
         teacherPrompt:
-          "Show or name one existing digital system already in the school (for example a classroom clock, a shared screen, or a school speaker). Ask the class to investigate: could this system help the user with this problem?",
+          "Show or name one existing digital system already in the school (for example a digital classroom clock, a shared screen, or a school speaker). Ask the class: could this system help the user with this problem?",
         studentTask: "Look at the existing system and think about whether it would help.",
         whatDoINow: "Show the system and the question, then press Next.",
         expectedOutcome: "Students have a real existing system to discuss.",
