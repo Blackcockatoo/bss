@@ -72,7 +72,7 @@ export function buildLessonMetadata(
   const title = lessonDocumentTitle(lesson, surface);
   const description = lessonSearchDescription(lesson, surface);
   const url = metaPetSchoolUrl(path);
-  const socialTitle = `${title} — Years 3–6, ${lesson.durationMinutes} minutes`;
+  const socialTitle = `${title} — ${lessonSetLabel(lesson.yearBand)}, ${lesson.durationMinutes} minutes`;
   const image = {
     url: FIELD_MODE_ICON_512_PATH,
     width: 512,

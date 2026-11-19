@@ -117,15 +117,22 @@ describe("lesson search filters", () => {
     );
     expect(
       parseLessonSearchParams({
-        years: "7-8",
-        minutes: "45",
+        years: "9-10",
+        minutes: "30",
         code: "AC9NOTREAL",
         paper: "maybe",
       }),
     ).toEqual(EMPTY_LESSON_FILTERS);
+    expect(parseLessonSearchParams({ years: "7-8", minutes: "45" })).toEqual({
+      ...EMPTY_LESSON_FILTERS,
+      yearBand: "7-8",
+      minutes: 45,
+    });
     expect(publishedCurriculumCodes()).toContain("AC9HP4P05");
     expect(publishedCurriculumCodes()).toContain("AC9TDIFK01");
     expect(publishedCurriculumCodes()).toContain("AC9TDI2P01");
+    expect(publishedCurriculumCodes()).toContain("AC9TDI8K01");
+    expect(publishedCurriculumCodes()).toContain("AC9TDI8P14");
   });
 
   it("distinguishes F–2 lessons from Years 3–6 lessons", () => {
@@ -154,7 +161,19 @@ describe("lesson search filters", () => {
       ...EMPTY_LESSON_FILTERS,
       query: "unplugged",
     });
-    expect(unplugged).toHaveLength(7);
+    expect(unplugged).toHaveLength(14);
     expect(unplugged.every((lesson) => lesson.yearBand !== "years-3-6")).toBe(true);
+    const years78 = filterLessons(ALL_LESSON_DEFINITIONS, {
+      ...EMPTY_LESSON_FILTERS,
+      yearBand: "7-8",
+    });
+    expect(years78).toHaveLength(7);
+    expect(years78.every((lesson) => lesson.yearBand === "years-7-8")).toBe(true);
+    const fortyFive = filterLessons(ALL_LESSON_DEFINITIONS, {
+      ...EMPTY_LESSON_FILTERS,
+      minutes: 45,
+    });
+    expect(fortyFive).toHaveLength(7);
+    expect(fortyFive.every((lesson) => lesson.durationMinutes === 45)).toBe(true);
   });
 });

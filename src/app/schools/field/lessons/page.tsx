@@ -9,7 +9,7 @@ import { parseLessonSearchParams } from "@/lib/schools/lessonFilters";
 export const metadata: Metadata = {
   title: "Lessons",
   description:
-    "Find and launch one of seven short teacher-led Australian Years 3–6 classroom lessons.",
+    "Find and launch teacher-led Australian classroom lessons for Foundation to Year 8, including the Years 3–6 sequence, the F–2 unplugged set, and the Years 7–8 bridge unit.",
   alternates: { canonical: metaPetSchoolUrl(FIELD_MODE_LESSONS_PATH) },
 };
 

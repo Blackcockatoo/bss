@@ -19,17 +19,18 @@
 // Pass 2 evidence while evidence.ts continues to import shared types from here.
 import type { CanonicalSessionId } from "@/lib/schools/canonicalSequence";
 import type { FoundationSessionId } from "@/lib/schools/foundationSequence";
+import type { Years78SessionId } from "@/lib/schools/years78Sequence";
 import type { LessonAudienceBand } from "@/lib/schools/lessonYearBands";
 import type { LessonEvidence } from "./evidence";
 
 /**
  * Stable identifier for a teacher-led lesson.
  *
- * The Years 3–6 canonical sequence and the F–2 unplugged starter set share
- * this union so field routes, planners and comments can look up either set
- * without inventing a second runner.
+ * The Years 3–6 canonical sequence, the F–2 unplugged starter set and the
+ * Years 7–8 bridge unit share this union so field routes, planners and
+ * comments can look up any set without inventing a second runner.
  */
-export type LessonId = CanonicalSessionId | FoundationSessionId;
+export type LessonId = CanonicalSessionId | FoundationSessionId | Years78SessionId;
 
 /** Lifecycle status of a lesson as shown on the Teacher Hub. */
 export type LessonCardStatus =

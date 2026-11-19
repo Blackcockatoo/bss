@@ -50,7 +50,7 @@ describe("F–2 unplugged starter set", () => {
       ...EXPECTED_IDS,
     ]);
     expect(LESSON_DEFINITIONS).toHaveLength(7);
-    expect(ALL_LESSON_DEFINITIONS).toHaveLength(14);
+    expect(ALL_LESSON_DEFINITIONS).toHaveLength(21);
   });
 
   it("quotes only official AC v9 wording and does not invent codes", () => {

@@ -19,7 +19,7 @@ import {
   FIELD_MODE_ICON_512_PATH,
 } from "@/lib/fieldMode/pwa";
 
-const FIELD_MODE_TITLE = `${METAPET_SCHOOL_NAME} — Australian Years 3–6 Classroom Lessons`;
+const FIELD_MODE_TITLE = `${METAPET_SCHOOL_NAME} — Australian Foundation to Year 8 Classroom Lessons`;
 
 /**
  * The shared root layout paints Blue Snake Studios' near-black chrome on the

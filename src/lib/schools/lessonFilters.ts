@@ -5,8 +5,8 @@ import { lessonAudienceLabel, lessonSetLabel } from "@/lib/schools/lessonYearBan
 import { ALL_LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
 import type { LessonDefinition } from "@/lib/teacher-lessons/types";
 
-export const LESSON_YEAR_BAND_FILTERS = ["f", "1-2", "3-4", "5-6"] as const;
-export const LESSON_MINUTES_FILTERS = [15, 20] as const;
+export const LESSON_YEAR_BAND_FILTERS = ["f", "1-2", "3-4", "5-6", "7-8"] as const;
+export const LESSON_MINUTES_FILTERS = [15, 20, 45] as const;
 
 export type LessonYearBandFilter = (typeof LESSON_YEAR_BAND_FILTERS)[number];
 export type LessonMinutesFilter = (typeof LESSON_MINUTES_FILTERS)[number];
@@ -32,21 +32,24 @@ export const LESSON_YEAR_BAND_LABELS: Record<LessonYearBandFilter, string> = {
   "1-2": "Years 1–2",
   "3-4": "Years 3–4",
   "5-6": "Years 5–6",
+  "7-8": "Years 7–8",
 };
 
 /**
  * The year identifier already present in a published AC v9 code string:
- * F for Foundation, 2 for Years 1–2, 4 for Years 3–4, 6 for Years 5–6.
- * This reads the code only; it does not add a new curriculum claim.
+ * F for Foundation, 2 for Years 1–2, 4 for Years 3–4, 6 for Years 5–6,
+ * 8 for Years 7–8. This reads the code only; it does not add a new
+ * curriculum claim.
  */
 export function yearBandsInPublishedCode(
   code: string,
 ): readonly LessonYearBandFilter[] {
   if (/^AC9[A-Z]+F/.test(code)) return ["f"];
-  const match = /^AC9[A-Z]+([246])/.exec(code);
+  const match = /^AC9[A-Z]+([2468])/.exec(code);
   if (match?.[1] === "2") return ["1-2"];
   if (match?.[1] === "4") return ["3-4"];
   if (match?.[1] === "6") return ["5-6"];
+  if (match?.[1] === "8") return ["7-8"];
   return [];
 }
 

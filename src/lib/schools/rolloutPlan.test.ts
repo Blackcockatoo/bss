@@ -27,7 +27,7 @@ describe("rollout plan", () => {
     });
     expect(cleaned.schoolName).toBe("North Primary");
     expect(cleaned.lessons.find((row) => row.lessonId === "meet-the-system")?.when).toBe("Week 2");
-    expect(cleaned.lessons).toHaveLength(14);
+    expect(cleaned.lessons).toHaveLength(21);
     expect(parseRolloutPlan("not-json").schoolName).toBe("");
   });
 

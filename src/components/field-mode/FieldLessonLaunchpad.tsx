@@ -29,7 +29,11 @@ import {
   sanitizeFieldSession,
   type FieldSessionConfig,
 } from "@/lib/fieldMode/session";
-import { FIELD_MODE_PRINT_F2_ALL_PATH, plannerExtrasFor } from "@/lib/schools/classroomPack";
+import {
+  FIELD_MODE_PRINT_F2_ALL_PATH,
+  FIELD_MODE_PRINT_YEARS_78_ALL_PATH,
+  plannerExtrasFor,
+} from "@/lib/schools/classroomPack";
 import {
   EMPTY_LESSON_FILTERS,
   filterLessons,
@@ -105,14 +109,15 @@ export function FieldLessonLaunchpad({
       <div className="mx-auto w-full max-w-6xl space-y-8 px-5 py-10 md:px-8 md:py-14">
         <header className="max-w-3xl space-y-3">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-800">
-            Teacher launchpad · Australian Foundation to Year 6
+            Teacher launchpad · Australian Foundation to Year 8
           </p>
           <h1 className="text-4xl font-semibold tracking-tight text-slate-950 md:text-5xl">
             Ready when you are.
           </h1>
           <p className="text-base leading-7 text-slate-700 md:text-lg">
-            No account or payment required. Open a Years 3–6 session, or an
-            F–2 unplugged lesson. Records stay on this device.
+            No account or payment required. Open a Years 3–6 session, an
+            F–2 unplugged lesson, or a Years 7–8 bridge lesson. Records stay
+            on this device.
           </p>
           <p className="text-sm font-medium text-emerald-900" aria-live="polite">
             {hydrated ? `${completeCount} of ${ALL_LESSON_DEFINITIONS.length} lessons completed on this device` : "Loading local session records…"}
@@ -221,15 +226,18 @@ export function FieldLessonLaunchpad({
           </form>
           <p className="mt-4 text-sm leading-6 text-slate-600">
             A year-band match means the lesson already lists a published AC v9
-            code with a Foundation (…F…), Years 1–2 (…2…), Years 3–4 (…4…) or
-            Years 5–6 (…6…) identifier. That is how the list now distinguishes
-            F–2 lessons from Years 3–6 lessons. Paper-friendly means the planner
-            already says the lesson works well on paper, can be run on paper, or
-            works fully unplugged.
+            code with a Foundation (…F…), Years 1–2 (…2…), Years 3–4 (…4…),
+            Years 5–6 (…6…) or Years 7–8 (…8…) identifier. That is how the list
+            distinguishes F–2, Years 3–6 and Years 7–8 lessons. Paper-friendly
+            means the planner already says the lesson works well on paper, can
+            be run on paper, or works fully unplugged.
           </p>
         </section>
 
         <section aria-labelledby="field-lessons-heading" id="f2-unplugged">
+          <div id="years-7-8-bridge" className="sr-only">
+            Years 7–8 bridge unit
+          </div>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <BookOpenCheck className="h-6 w-6 text-emerald-800" aria-hidden="true" />
@@ -251,6 +259,13 @@ export function FieldLessonLaunchpad({
             >
               <Printer className="h-4 w-4" aria-hidden="true" />
               Print the F–2 unplugged pack
+            </a>
+            <a
+              href={FIELD_MODE_PRINT_YEARS_78_ALL_PATH}
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              <Printer className="h-4 w-4" aria-hidden="true" />
+              Print the Years 7–8 pack
             </a>
             <a
               href={FIELD_MODE_STAFF_PD_PATH}
