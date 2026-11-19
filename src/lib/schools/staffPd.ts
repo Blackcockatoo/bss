@@ -30,7 +30,7 @@ export const STAFF_PD_SLIDES: readonly StaffPdSlide[] = [
     id: "title",
     kicker: "Staff briefing · about 15 minutes",
     title: STAFF_PD_TITLE,
-    body: "A short, teacher-led classroom sequence for Australian Years 3–6. This briefing uses only what the classroom pack already states.",
+    body: "A short, teacher-led classroom sequence for Australian Years 3–6, plus a fully unplugged starter set for Foundation and Years 1–2. This briefing uses only what the classroom pack already states.",
     notes:
       "About 1 minute. Thank colleagues and say this is a 15-minute overview, not a full training day. Speaker notes stay hidden on the projector until you show them.",
     minutes: 1,
@@ -47,10 +47,13 @@ export const STAFF_PD_SLIDES: readonly StaffPdSlide[] = [
   {
     id: "lessons",
     kicker: "The seven lessons",
-    title: "Seven short sessions, in a set sequence",
-    bullets: lessonLines,
+    title: "Seven short Years 3–6 sessions, plus an F–2 unplugged set",
+    bullets: [
+      ...lessonLines,
+      "There is also an F–2 unplugged starter set of seven short lessons. Students do not need devices, and those lessons do not collect names or photos.",
+    ],
     notes:
-      "About 2 minutes. Sessions 1 and 2 are 15 minutes; sessions 3 to 7 are 20 minutes. You can start with Lesson 1 and follow the sequence.",
+      "About 2 minutes. In the Years 3–6 set, sessions 1 and 2 are 15 minutes; sessions 3 to 7 are 20 minutes. You can start with Lesson 1 and follow that sequence. If colleagues teach Foundation or Years 1–2, point them to the unplugged starter set on the lessons page.",
     minutes: 2,
   },
   {
@@ -85,7 +88,7 @@ export const STAFF_PD_SLIDES: readonly StaffPdSlide[] = [
     kicker: "Printables and relief",
     title: "A paper pack is ready if the network drops out",
     bullets: [
-      "Print the full classroom pack, or open one planner at a time.",
+      "Print the Years 3–6 classroom pack, the F–2 unplugged pack, or one planner at a time.",
       "The relief pack includes a runnable Lesson 1 planner.",
       "There is an editable parent and carer letter, a leadership one-pager, exit tickets, word walls and a no-tech path.",
     ],

@@ -1,12 +1,11 @@
 import { plannerExtrasFor } from "@/lib/schools/classroomPack";
-import {
-  curriculumAlignmentForSession,
-  mergeLearningAreas,
-} from "@/lib/schools/curriculumAlignment";
-import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
+import { mergeLearningAreas } from "@/lib/schools/curriculumAlignment";
+import { curriculumAlignmentForLesson } from "@/lib/schools/lessonAlignment";
+import { lessonAudienceLabel, lessonSetLabel } from "@/lib/schools/lessonYearBands";
+import { ALL_LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
 import type { LessonDefinition } from "@/lib/teacher-lessons/types";
 
-export const LESSON_YEAR_BAND_FILTERS = ["3-4", "5-6"] as const;
+export const LESSON_YEAR_BAND_FILTERS = ["f", "1-2", "3-4", "5-6"] as const;
 export const LESSON_MINUTES_FILTERS = [15, 20] as const;
 
 export type LessonYearBandFilter = (typeof LESSON_YEAR_BAND_FILTERS)[number];
@@ -29,19 +28,23 @@ export const EMPTY_LESSON_FILTERS: LessonSearchFilters = {
 };
 
 export const LESSON_YEAR_BAND_LABELS: Record<LessonYearBandFilter, string> = {
+  f: "Foundation",
+  "1-2": "Years 1–2",
   "3-4": "Years 3–4",
   "5-6": "Years 5–6",
 };
 
 /**
  * The year identifier already present in a published AC v9 code string:
- * 4 for Years 3–4, 6 for Years 5–6. This reads the code only; it does not
- * add a new curriculum claim.
+ * F for Foundation, 2 for Years 1–2, 4 for Years 3–4, 6 for Years 5–6.
+ * This reads the code only; it does not add a new curriculum claim.
  */
 export function yearBandsInPublishedCode(
   code: string,
 ): readonly LessonYearBandFilter[] {
-  const match = /^AC9[A-Z]+([46])/.exec(code);
+  if (/^AC9[A-Z]+F/.test(code)) return ["f"];
+  const match = /^AC9[A-Z]+([246])/.exec(code);
+  if (match?.[1] === "2") return ["1-2"];
   if (match?.[1] === "4") return ["3-4"];
   if (match?.[1] === "6") return ["5-6"];
   return [];
@@ -49,8 +52,8 @@ export function yearBandsInPublishedCode(
 
 export function publishedCurriculumCodes(): string[] {
   const codes = new Set<string>();
-  for (const lesson of LESSON_DEFINITIONS) {
-    for (const code of curriculumAlignmentForSession(lesson.number).codes) {
+  for (const lesson of ALL_LESSON_DEFINITIONS) {
+    for (const code of curriculumAlignmentForLesson(lesson).codes) {
       codes.add(code);
     }
   }
@@ -136,7 +139,7 @@ function normaliseSearchText(value: string): string {
 }
 
 export function lessonSearchHaystack(lesson: LessonDefinition): string {
-  const alignment = curriculumAlignmentForSession(lesson.number);
+  const alignment = curriculumAlignmentForLesson(lesson);
   const areas = mergeLearningAreas(lesson.learningAreas, alignment.learningAreas);
   const paper = plannerExtrasFor(lesson.id).paper;
   return [
@@ -147,7 +150,9 @@ export function lessonSearchHaystack(lesson: LessonDefinition): string {
     lesson.learningIntention,
     lesson.slug,
     `${lesson.durationMinutes} minutes`,
-    "Years 3-6",
+    lessonAudienceLabel(lesson.yearBand),
+    lessonSetLabel(lesson.yearBand),
+    lesson.yearBand === "years-3-6" ? "" : "unplugged",
     ...areas,
     ...alignment.codes,
     paper.label,
@@ -166,7 +171,7 @@ export function lessonMatchesFilters(
     return false;
   }
 
-  const alignment = curriculumAlignmentForSession(lesson.number);
+  const alignment = curriculumAlignmentForLesson(lesson);
   if (filters.code && !alignment.codes.includes(filters.code)) {
     return false;
   }

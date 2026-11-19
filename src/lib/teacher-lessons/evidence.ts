@@ -138,6 +138,11 @@ export interface ResponsibleCreatorPromiseEvidence extends LessonEvidenceBase {
   promise: string;
 }
 
+/** F–2 unplugged lessons — teacher observation only, no student identifiers. */
+export interface ClassroomObservationEvidence extends LessonEvidenceBase {
+  kind: "classroom-observation";
+}
+
 /** Discriminated union of every evidence kind. */
 export type LessonEvidence =
   | PetObservationCardEvidence
@@ -146,7 +151,8 @@ export type LessonEvidence =
   | CauseEffectChainEvidence
   | EmotionReflectionEvidence
   | VisualisationSelectionEvidence
-  | ResponsibleCreatorPromiseEvidence;
+  | ResponsibleCreatorPromiseEvidence
+  | ClassroomObservationEvidence;
 
 const EVIDENCE_KINDS: LessonEvidenceType[] = [
   "pet-observation-card",
@@ -156,6 +162,7 @@ const EVIDENCE_KINDS: LessonEvidenceType[] = [
   "emotion-reflection",
   "visualisation-selection",
   "responsible-creator-promise",
+  "classroom-observation",
 ];
 
 /** Type guard: is this string a known evidence kind? */
@@ -285,6 +292,11 @@ export function validateEvidence(raw: unknown): LessonEvidence | null {
               })
           : [],
         promise: asString(value.promise),
+      };
+    case "classroom-observation":
+      return {
+        ...base,
+        kind: "classroom-observation",
       };
     default:
       return null;

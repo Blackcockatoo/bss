@@ -24,10 +24,13 @@ import {
   METAPET_SCHOOL_NAME,
   metaPetSchoolUrl,
 } from "@/lib/fieldMode/identity";
+import { mergeLearningAreas } from "@/lib/schools/curriculumAlignment";
+import { curriculumAlignmentForLesson } from "@/lib/schools/lessonAlignment";
 import {
-  curriculumAlignmentForSession,
-  mergeLearningAreas,
-} from "@/lib/schools/curriculumAlignment";
+  FOUNDATION_ALIGNMENT_CAVEAT,
+  FOUNDATION_SEQUENCE_SUMMARY,
+} from "@/lib/schools/foundationSequence";
+import { lessonAudienceLabel } from "@/lib/schools/lessonYearBands";
 import {
   CANONICAL_SESSION_COUNT,
   FIRST_CANONICAL_SESSION,
@@ -38,13 +41,17 @@ import {
 } from "@/lib/schools/privacyTruth";
 import {
   FIELD_MODE_PRINT_CHECKLIST_PATH,
+  FIELD_MODE_PRINT_F2_ALL_PATH,
   FIELD_MODE_PRINT_NO_TECH_PATH,
   FIELD_MODE_PRINT_PARENT_LETTER_PATH,
   FIELD_MODE_PRINT_RELIEF_PATH,
   FIELD_MODE_PRINT_TICKETS_PATH,
   FIELD_MODE_PRINT_WORD_WALLS_PATH,
 } from "@/lib/schools/classroomPack";
-import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
+import {
+  FOUNDATION_LESSON_DEFINITIONS,
+  LESSON_DEFINITIONS,
+} from "@/lib/teacher-lessons/lessonDefinitions";
 
 const WHAT_YOU_NEED = [
   "Years 3–6 class",
@@ -80,16 +87,18 @@ export default function FieldModePage() {
         <section className="space-y-5">
           <div className="inline-flex items-center gap-2 rounded-full border border-emerald-900/15 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-900">
             <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-            {METAPET_SCHOOL_NAME} · Australian Years 3–6
+            {METAPET_SCHOOL_NAME} · Australian Foundation to Year 6
           </div>
 
           <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-slate-950 md:text-5xl">
-            {CANONICAL_SESSION_COUNT} short lessons about how systems work.
+            {CANONICAL_SESSION_COUNT} short Years 3–6 lessons, plus an F–2 unplugged set.
           </h1>
           <p className="max-w-2xl text-lg leading-8 text-slate-700">
-            A teacher-led classroom resource. Each lesson takes about 15–20
-            minutes. No student sign-in. Classroom records stay in this browser
-            during routine use, and you can delete them at any time.
+            A teacher-led classroom resource for Years 3–6, with a fully
+            unplugged starter set for Foundation and Years 1–2. Each lesson
+            takes about 15–20 minutes. No student sign-in. Classroom records
+            stay in this browser during routine use, and you can delete them at
+            any time. The F–2 lessons do not collect names or photos.
           </p>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -106,6 +115,12 @@ export default function FieldModePage() {
             >
               Browse all seven lessons
             </a>
+            <a
+              href={`${FIELD_MODE_LESSONS_PATH}#f2-unplugged`}
+              className="inline-flex min-h-14 items-center justify-center rounded-xl border border-slate-300 px-6 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800"
+            >
+              Browse the F–2 unplugged set
+            </a>
           </div>
 
           <p className="text-base text-slate-600">
@@ -121,7 +136,7 @@ export default function FieldModePage() {
               id="lesson-list-heading"
               className="text-2xl font-semibold text-slate-950"
             >
-              The seven lessons
+              The seven Years 3–6 lessons
             </h2>
             <div className="flex flex-wrap gap-3">
               <a
@@ -135,7 +150,7 @@ export default function FieldModePage() {
           </div>
           <ol className="grid gap-4">
             {LESSON_DEFINITIONS.map((lesson) => {
-              const alignment = curriculumAlignmentForSession(lesson.number);
+              const alignment = curriculumAlignmentForLesson(lesson);
               const areas = mergeLearningAreas(
                 lesson.learningAreas,
                 alignment.learningAreas,
@@ -201,6 +216,92 @@ export default function FieldModePage() {
           </ol>
         </section>
 
+        <section aria-labelledby="f2-lesson-list-heading" className="space-y-4" id="f2-unplugged">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <h2
+              id="f2-lesson-list-heading"
+              className="text-2xl font-semibold text-slate-950"
+            >
+              F–2 unplugged starter set
+            </h2>
+            <a
+              href={FIELD_MODE_PRINT_F2_ALL_PATH}
+              className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              <Printer className="h-4 w-4" aria-hidden="true" />
+              Print the F–2 pack
+            </a>
+          </div>
+          <p className="max-w-3xl text-base leading-7 text-slate-700">
+            {FOUNDATION_SEQUENCE_SUMMARY} {FOUNDATION_ALIGNMENT_CAVEAT}
+          </p>
+          <ol className="grid gap-4">
+            {FOUNDATION_LESSON_DEFINITIONS.map((lesson) => {
+              const alignment = curriculumAlignmentForLesson(lesson);
+              const areas = mergeLearningAreas(
+                lesson.learningAreas,
+                alignment.learningAreas,
+              );
+              return (
+                <li
+                  key={lesson.id}
+                  className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                >
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-800">
+                      F–2 · {lessonAudienceLabel(lesson.yearBand)} · Lesson {lesson.number}
+                    </p>
+                    <p className="text-sm font-medium text-slate-600">
+                      {lesson.durationMinutes} minutes · unplugged
+                    </p>
+                  </div>
+                  <h3 className="mt-2 text-xl font-semibold text-slate-950">
+                    {lesson.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-700">
+                    {lesson.shortDescription}
+                  </p>
+                  <p className="mt-3 text-sm text-slate-600">
+                    <span className="font-semibold text-slate-800">
+                      Learning areas:
+                    </span>{" "}
+                    {areas.join(" · ")}
+                  </p>
+                  {alignment.codes.length > 0 ? (
+                    <p className="mt-1 text-sm text-slate-600">
+                      <span className="font-semibold text-slate-800">
+                        Australian Curriculum v9:
+                      </span>{" "}
+                      {alignment.codes.join(", ")}
+                    </p>
+                  ) : null}
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <a
+                      href={`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}`}
+                      className="inline-flex min-h-11 items-center rounded-xl bg-emerald-800 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                    >
+                      {lesson.number === 1
+                        ? "Start F–2 Lesson 1"
+                        : "Open lesson"}
+                    </a>
+                    <a
+                      href={`${FIELD_MODE_PRINT_PATH_PREFIX}/${lesson.slug}`}
+                      className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      Print this lesson
+                    </a>
+                    <a
+                      href={`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/slides`}
+                      className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      Projector slides
+                    </a>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
 
         <section
           aria-labelledby="classroom-pack-heading"
@@ -219,7 +320,8 @@ export default function FieldModePage() {
           </p>
           <ul className="mt-5 flex flex-wrap gap-3">
             {[
-              { href: FIELD_MODE_PRINT_ALL_PATH, label: "Print the full pack" },
+              { href: FIELD_MODE_PRINT_ALL_PATH, label: "Print the Years 3–6 pack" },
+              { href: FIELD_MODE_PRINT_F2_ALL_PATH, label: "Print the F–2 unplugged pack" },
               { href: FIELD_MODE_PRINT_RELIEF_PATH, label: "Relief teacher pack" },
               { href: FIELD_MODE_PRINT_TICKETS_PATH, label: "Exit tickets" },
               { href: FIELD_MODE_PRINT_WORD_WALLS_PATH, label: "Word walls" },

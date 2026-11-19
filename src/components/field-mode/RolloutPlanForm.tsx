@@ -18,7 +18,8 @@ import {
   subscribeRolloutPlan,
   type RolloutPlan,
 } from "@/lib/schools/rolloutPlan";
-import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
+import { lessonDisplayTitle } from "@/lib/schools/lessonYearBands";
+import { ALL_LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
 
 const inputClassName =
   "mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3 font-normal";
@@ -207,16 +208,16 @@ export function RolloutPlanForm() {
                   </tr>
                 </thead>
                 <tbody>
-                  {LESSON_DEFINITIONS.map((lesson) => {
+                  {ALL_LESSON_DEFINITIONS.map((lesson) => {
                     const row = plan.lessons.find((item) => item.lessonId === lesson.id)!;
                     return (
                       <tr key={lesson.id}>
                         <th className="border border-slate-300 p-2 text-left font-medium">
-                          Lesson {lesson.number}: {lesson.title}
+                          {lessonDisplayTitle(lesson)}
                         </th>
                         <td className="border border-slate-300 p-1">
                           <input
-                            aria-label={`When for Lesson ${lesson.number}`}
+                            aria-label={`When for ${lessonDisplayTitle(lesson)}`}
                             className="min-h-11 w-full rounded-lg border-0 px-2"
                             value={row.when}
                             onChange={(event) =>
@@ -226,7 +227,7 @@ export function RolloutPlanForm() {
                         </td>
                         <td className="border border-slate-300 p-1">
                           <input
-                            aria-label={`Classes for Lesson ${lesson.number}`}
+                            aria-label={`Classes for ${lessonDisplayTitle(lesson)}`}
                             className="min-h-11 w-full rounded-lg border-0 px-2"
                             value={row.classes}
                             onChange={(event) =>
@@ -236,7 +237,7 @@ export function RolloutPlanForm() {
                         </td>
                         <td className="border border-slate-300 p-1">
                           <input
-                            aria-label={`Who leads Lesson ${lesson.number}`}
+                            aria-label={`Who leads ${lessonDisplayTitle(lesson)}`}
                             className="min-h-11 w-full rounded-lg border-0 px-2"
                             value={row.lead}
                             onChange={(event) =>

@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { isPathnameAllowedByPolicy } from "@/lib/childSafeBaseline";
-import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
+import { ALL_LESSON_DEFINITIONS, LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
 
 import {
   ASSESSMENT_SOURCE_PATH,
@@ -92,13 +92,16 @@ describe("classroom pack data", () => {
   it("does not invent verification results", () => {
     const checked = VERIFICATION_ITEMS.filter((item) => item.status === "checked");
     const notChecked = VERIFICATION_ITEMS.filter((item) => item.status === "not-checked");
-    expect(checked.length).toBe(3);
+    expect(checked.length).toBe(4);
     expect(notChecked.length).toBeGreaterThanOrEqual(3);
     expect(
       notChecked.some((item) => /school hardware/i.test(item.detail)),
     ).toBe(true);
     expect(
       checked.some((item) => /this browser/i.test(item.detail)),
+    ).toBe(true);
+    expect(
+      checked.some((item) => /F–2 Digital Technologies content descriptions/i.test(item.title)),
     ).toBe(true);
   });
 
@@ -112,7 +115,7 @@ describe("classroom pack data", () => {
 
 
   it("grounds EAL/D notes in the lesson's own vocab and support activity", () => {
-    for (const lesson of LESSON_DEFINITIONS) {
+    for (const lesson of ALL_LESSON_DEFINITIONS) {
       const notes = ealdNotesFor(lesson.id);
       const vocabWords = plannerExtrasFor(lesson.id).vocab.map((entry) => entry.word);
       expect(notes.preteach.length).toBeGreaterThan(0);

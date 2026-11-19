@@ -4,7 +4,8 @@ import {
   FIELD_MODE_LESSONS_PATH,
   FIELD_MODE_PRINT_PATH_PREFIX,
 } from "@/lib/childSafeBaseline";
-import { curriculumAlignmentForSession } from "@/lib/schools/curriculumAlignment";
+import { curriculumAlignmentForLesson } from "@/lib/schools/lessonAlignment";
+import { lessonAudienceLabel, lessonDisplayTitle, lessonSetLabel } from "@/lib/schools/lessonYearBands";
 import {
   METAPET_SCHOOL_NAME,
   metaPetSchoolUrl,
@@ -31,7 +32,7 @@ export function lessonDocumentTitle(
   lesson: LessonDefinition,
   surface: LessonPublicSurface,
 ): string {
-  const lessonLabel = `Lesson ${lesson.number}: ${lesson.title}`;
+  const lessonLabel = lessonDisplayTitle(lesson);
   if (surface === "print") {
     return `Print ${lessonLabel}`;
   }
@@ -45,12 +46,15 @@ export function lessonSearchDescription(
   lesson: LessonDefinition,
   surface: LessonPublicSurface,
 ): string {
-  const alignment = curriculumAlignmentForSession(lesson.number);
+  const alignment = curriculumAlignmentForLesson(lesson);
   const codes =
     alignment.codes.length > 0
       ? ` Australian Curriculum v9 codes on this lesson: ${alignment.codes.join(", ")}.`
       : "";
-  const base = `A ${lesson.durationMinutes}-minute teacher-led Years 3–6 classroom lesson. ${lesson.shortDescription}`;
+  const audience = lessonAudienceLabel(lesson.yearBand);
+  const unplugged =
+    lesson.yearBand === "years-3-6" ? "" : " Fully unplugged, with no names or photos collected.";
+  const base = `A ${lesson.durationMinutes}-minute teacher-led ${audience} classroom lesson in the ${lessonSetLabel(lesson.yearBand)} set. ${lesson.shortDescription}${unplugged}`;
   if (surface === "print") {
     return `Printable planner for ${base}${codes} Includes the teacher script, materials and a paper path.`;
   }

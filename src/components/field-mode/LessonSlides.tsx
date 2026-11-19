@@ -10,6 +10,11 @@ import {
   FIELD_MODE_TOOLS_PATH,
 } from "@/lib/childSafeBaseline";
 import { twoMinuteExplainerFor } from "@/lib/schools/classroomPack";
+import {
+  lessonAudienceLabel,
+  lessonDisplayTitle,
+  lessonSetLabel,
+} from "@/lib/schools/lessonYearBands";
 import type { LessonDefinition } from "@/lib/teacher-lessons/types";
 
 const linkClassName =
@@ -20,8 +25,8 @@ function buildSlides(lesson: LessonDefinition) {
   return [
     {
       id: "title",
-      kicker: `Years 3–6 · ${lesson.durationMinutes} minutes`,
-      title: `Lesson ${lesson.number}: ${lesson.title}`,
+      kicker: `${lessonSetLabel(lesson.yearBand)} · ${lessonAudienceLabel(lesson.yearBand)} · ${lesson.durationMinutes} minutes`,
+      title: lessonDisplayTitle(lesson),
       body: lesson.shortDescription,
       notes: "Open with the class looking at the shared screen. Hide these notes when you present.",
     },

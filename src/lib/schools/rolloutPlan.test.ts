@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { SCHOOLS_ROLLOUT_PLAN_STORAGE_KEY } from "@/lib/schools/storage";
-import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
+import { ALL_LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
 
 import {
   clearRolloutPlan,
@@ -15,7 +15,7 @@ describe("rollout plan", () => {
   it("starts with a row for every lesson and ignores unknown data", () => {
     const plan = emptyRolloutPlan();
     expect(plan.lessons.map((row) => row.lessonId)).toEqual(
-      LESSON_DEFINITIONS.map((lesson) => lesson.id),
+      ALL_LESSON_DEFINITIONS.map((lesson) => lesson.id),
     );
     const cleaned = sanitizeRolloutPlan({
       schoolName: "  North Primary  ",
@@ -26,8 +26,8 @@ describe("rollout plan", () => {
       ],
     });
     expect(cleaned.schoolName).toBe("North Primary");
-    expect(cleaned.lessons[0]?.when).toBe("Week 2");
-    expect(cleaned.lessons).toHaveLength(7);
+    expect(cleaned.lessons.find((row) => row.lessonId === "meet-the-system")?.when).toBe("Week 2");
+    expect(cleaned.lessons).toHaveLength(14);
     expect(parseRolloutPlan("not-json").schoolName).toBe("");
   });
 

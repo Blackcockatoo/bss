@@ -12,15 +12,26 @@ import {
   twoMinuteExplainerFor,
 } from "@/lib/schools/classroomPack";
 import {
+  FOUNDATION_ALIGNMENT_CAVEAT,
+} from "@/lib/schools/foundationSequence";
+import {
+  FOUNDATION_SHARED_CONDITIONS,
+  FOUNDATION_SHARED_MATERIALS,
+} from "@/lib/schools/foundationClassroomPack";
+import { officialWordingForCodes } from "@/lib/schools/foundationCurriculum";
+import { curriculumAlignmentForLesson } from "@/lib/schools/lessonAlignment";
+import {
+  lessonAudienceLabel,
+  lessonDisplayTitle,
+  lessonSetLabel,
+} from "@/lib/schools/lessonYearBands";
+import {
   REPORT_COMMENT_CAVEAT,
   REPORT_LEVEL_LABELS,
   REPORT_LEVELS,
   reportCommentBankFor,
 } from "@/lib/schools/reportComments";
-import {
-  curriculumAlignmentForSession,
-  mergeLearningAreas,
-} from "@/lib/schools/curriculumAlignment";
+import { mergeLearningAreas } from "@/lib/schools/curriculumAlignment";
 import type { LessonDefinition } from "@/lib/teacher-lessons/types";
 
 export function PrintableLessonDocument({
@@ -34,12 +45,20 @@ export function PrintableLessonDocument({
 }) {
   const Heading = headingLevel === 1 ? "h1" : "h2";
   const SectionHeading = headingLevel === 1 ? "h2" : "h3";
-  const alignment = curriculumAlignmentForSession(lesson.number);
+  const alignment = curriculumAlignmentForLesson(lesson);
   const areas = mergeLearningAreas(lesson.learningAreas, alignment.learningAreas);
   const extras = plannerExtrasFor(lesson.id);
   const explainer = twoMinuteExplainerFor(lesson);
   const eald = ealdNotesFor(lesson.id);
   const comments = reportCommentBankFor(lesson);
+  const isFoundationSet = lesson.yearBand !== "years-3-6";
+  const sharedMaterials = isFoundationSet
+    ? FOUNDATION_SHARED_MATERIALS
+    : SHARED_LESSON_MATERIALS;
+  const sharedConditions = isFoundationSet
+    ? FOUNDATION_SHARED_CONDITIONS
+    : SHARED_LESSON_CONDITIONS;
+  const officialWording = officialWordingForCodes(alignment.codes);
 
   return (
     <article className={printArticleClassName}>
@@ -74,7 +93,7 @@ export function PrintableLessonDocument({
           MetaPet School — lesson planner
         </p>
         <Heading className="mt-3 text-3xl font-bold tracking-tight">
-          Lesson {lesson.number}: {lesson.title}
+          {lessonDisplayTitle(lesson)}
         </Heading>
         <p className="mt-3 text-base leading-7 text-slate-700">
           {lesson.shortDescription}
@@ -82,7 +101,7 @@ export function PrintableLessonDocument({
         <dl className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
           <div>
             <dt className="font-semibold">Years</dt>
-            <dd>3–6</dd>
+            <dd>{lessonAudienceLabel(lesson.yearBand)}</dd>
           </div>
           <div>
             <dt className="font-semibold">Suggested time</dt>
@@ -94,7 +113,11 @@ export function PrintableLessonDocument({
           </div>
           <div>
             <dt className="font-semibold">Records</dt>
-            <dd>Alias-only, local device</dd>
+            <dd>
+              {isFoundationSet
+                ? "No names or photos collected"
+                : "Alias-only, local device"}
+            </dd>
           </div>
         </dl>
       </header>
@@ -130,16 +153,34 @@ export function PrintableLessonDocument({
           <strong>Learning areas:</strong> {areas.join(" · ")}
         </p>
         {alignment.codes.length > 0 ? (
-          <p className="mt-2 text-sm text-slate-600">
-            <strong>Australian Curriculum v9:</strong> {alignment.codes.join(", ")}
-          </p>
+          <div className="mt-2 text-sm text-slate-600">
+            <p>
+              <strong>Australian Curriculum v9:</strong> {alignment.codes.join(", ")}
+            </p>
+            {officialWording.length > 0 ? (
+              <ul className="mt-2 list-disc space-y-1 pl-5">
+                {officialWording.map((item) => (
+                  <li key={item.code}>
+                    <strong>{item.code}:</strong> {item.wording}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            {isFoundationSet ? (
+              <p className="mt-2">{FOUNDATION_ALIGNMENT_CAVEAT}</p>
+            ) : (
+              <p className="mt-2">
+                This is classroom alignment, not an official ACARA endorsement.
+              </p>
+            )}
+          </div>
         ) : null}
       </section>
 
       <section className="mt-6 break-inside-avoid">
         <SectionHeading className="text-xl font-bold">Materials</SectionHeading>
         <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6">
-          {SHARED_LESSON_MATERIALS.map((item) => (
+          {sharedMaterials.map((item) => (
             <li key={item}>{item}</li>
           ))}
           {extras.materials.map((item) => (
@@ -147,7 +188,7 @@ export function PrintableLessonDocument({
           ))}
         </ul>
         <p className="mt-3 text-sm leading-6 text-slate-600">
-          Planned time: {lesson.durationMinutes} minutes. {SHARED_LESSON_CONDITIONS}
+          Planned time: {lesson.durationMinutes} minutes. {sharedConditions}
         </p>
       </section>
 
@@ -277,7 +318,7 @@ export function PrintableLessonDocument({
 
       <footer className="mt-7 border-t border-slate-300 pt-4 text-xs leading-5 text-slate-600">
         Static emergency fallback · no student account required · no public sharing ·
-        Australian Years 3–6 classroom use
+        Australian {lessonSetLabel(lesson.yearBand)} classroom use
       </footer>
     </article>
   );

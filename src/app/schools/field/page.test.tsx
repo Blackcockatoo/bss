@@ -26,7 +26,8 @@ describe("Classroom home", () => {
 
   it("lists all seven lessons with published curriculum codes", () => {
     render(<FieldModePage />);
-    expect(screen.getByRole("heading", { name: /The seven lessons/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /The seven Years 3–6 lessons/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /F–2 unplugged starter set/i })).toBeInTheDocument();
     expect(screen.getByText("Meet the System")).toBeInTheDocument();
     expect(screen.getByText("Test, Reflect and Improve")).toBeInTheDocument();
     expect(screen.getAllByText(/AC9TDI4K01/).length).toBeGreaterThan(0);

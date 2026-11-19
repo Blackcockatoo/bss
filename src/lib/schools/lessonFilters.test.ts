@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { plannerExtrasFor } from "@/lib/schools/classroomPack";
 import { curriculumAlignmentForSession } from "@/lib/schools/curriculumAlignment";
-import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
+import {
+  ALL_LESSON_DEFINITIONS,
+  LESSON_DEFINITIONS,
+} from "@/lib/teacher-lessons/lessonDefinitions";
 
 import {
   EMPTY_LESSON_FILTERS,
@@ -121,5 +124,37 @@ describe("lesson search filters", () => {
       }),
     ).toEqual(EMPTY_LESSON_FILTERS);
     expect(publishedCurriculumCodes()).toContain("AC9HP4P05");
+    expect(publishedCurriculumCodes()).toContain("AC9TDIFK01");
+    expect(publishedCurriculumCodes()).toContain("AC9TDI2P01");
+  });
+
+  it("distinguishes F–2 lessons from Years 3–6 lessons", () => {
+    const foundation = filterLessons(ALL_LESSON_DEFINITIONS, {
+      ...EMPTY_LESSON_FILTERS,
+      yearBand: "f",
+    });
+    const years12 = filterLessons(ALL_LESSON_DEFINITIONS, {
+      ...EMPTY_LESSON_FILTERS,
+      yearBand: "1-2",
+    });
+    const years34 = filterLessons(ALL_LESSON_DEFINITIONS, {
+      ...EMPTY_LESSON_FILTERS,
+      yearBand: "3-4",
+    });
+    expect(foundation.map((lesson) => lesson.id)).toEqual([
+      "meet-a-system",
+      "show-it-two-ways",
+      "what-is-mine-to-keep",
+    ]);
+    expect(years12).toHaveLength(4);
+    expect(years12.every((lesson) => lesson.yearBand === "years-1-2")).toBe(true);
+    expect(years34).toHaveLength(7);
+    expect(years34.every((lesson) => lesson.yearBand === "years-3-6")).toBe(true);
+    const unplugged = filterLessons(ALL_LESSON_DEFINITIONS, {
+      ...EMPTY_LESSON_FILTERS,
+      query: "unplugged",
+    });
+    expect(unplugged).toHaveLength(7);
+    expect(unplugged.every((lesson) => lesson.yearBand !== "years-3-6")).toBe(true);
   });
 });
