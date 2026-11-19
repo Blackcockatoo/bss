@@ -4,6 +4,7 @@ import {
   FIELD_MODE_LESSONS_PATH,
 } from "@/lib/childSafeBaseline";
 import {
+  SHARED_LESSON_CONDITIONS,
   SHARED_LESSON_MATERIALS,
   estimatedStepMinutes,
   plannerExtrasFor,
@@ -122,6 +123,9 @@ export function PrintableLessonDocument({
             <li key={item}>{item}</li>
           ))}
         </ul>
+        <p className="mt-3 text-sm leading-6 text-slate-600">
+          Planned time: {lesson.durationMinutes} minutes. {SHARED_LESSON_CONDITIONS}
+        </p>
       </section>
 
       <section className="mt-6 break-inside-avoid rounded-xl border border-amber-300 bg-amber-50 p-4 print:rounded-none print:bg-white">
@@ -153,8 +157,12 @@ export function PrintableLessonDocument({
       <section className="mt-7">
         <SectionHeading className="text-xl font-bold">Five guided steps</SectionHeading>
         <p className="mt-2 text-sm text-slate-600">
-          Suggested minutes are planning estimates only. They add up to the
-          {` ${lesson.durationMinutes}-minute`} session.
+          Suggested minutes are planning estimates for the whole step,
+          including talk and waiting. They add up to the{" "}
+          {lesson.durationMinutes}-minute session. A short action described in
+          a step (for example ten seconds of watching) sits inside that
+          estimate, not on top of it. The optional movement moment, if you use
+          it, also sits inside the steps.
         </p>
         <ol className="mt-4 space-y-5">
           {lesson.steps.map((step, index) => (

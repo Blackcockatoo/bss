@@ -139,11 +139,13 @@ export interface LessonPlannerExtras {
 }
 
 export const SHARED_LESSON_MATERIALS: readonly string[] = [
-  "A Years 3–6 class and a teacher to lead the lesson",
-  "The suggested time on the lesson card (15 or 20 minutes)",
+  "A teacher to lead a Years 3–6 class",
   "Paper and pencils if you use an exit ticket or a word wall",
-  "No student accounts and nothing to install",
 ];
+
+/** Conditions, not materials — shown under the materials list. */
+export const SHARED_LESSON_CONDITIONS =
+  "No student accounts and nothing to install.";
 
 const SCREEN_MATERIALS: readonly string[] = [
   "A browser and a shared screen or projector for the demonstration companion",
@@ -182,7 +184,7 @@ const PAPER_PATHS: Record<CanonicalSessionId, PaperPath> = {
     kind: "works-on-paper",
     label: "Works well on paper",
     summary:
-      "Students sort examples into keep, ask first and never, then give a reason. That activity does not need the demonstration companion. Use a board, cards or the printed planner.",
+      "Students sort examples into keep, ask first and never, then give a reason. That activity does not need the demonstration companion. Use a board, cards or the printed planner, and choose a few concrete examples from ordinary classroom or home life. This pack does not list those examples for you.",
   },
   "design-a-better-feature": {
     kind: "paper-fallback",
@@ -215,6 +217,7 @@ const LESSON_MATERIALS: Record<CanonicalSessionId, readonly string[]> = {
   "privacy-and-responsible-design": [
     "Three labels or corners of the room: keep, ask first, and never",
     "A few concrete examples to sort, spoken or written",
+    "A shared screen or projector is optional for this lesson",
     ...PAPER_MATERIALS,
   ],
   "design-a-better-feature": [
@@ -249,7 +252,7 @@ const VOCAB: Record<CanonicalSessionId, readonly VocabEntry[]> = {
     },
     {
       word: "guess",
-      meaning: "A possible meaning, not a proved fact.",
+      meaning: "One possible meaning, not a fact.",
     },
     {
       word: "response",
@@ -263,11 +266,11 @@ const VOCAB: Record<CanonicalSessionId, readonly VocabEntry[]> = {
     },
     {
       word: "same",
-      meaning: "What stayed true in both views, even if they looked different.",
+      meaning: "What did not change in both views, even if they looked different.",
     },
     {
       word: "different",
-      meaning: "How the two views do not look alike, even when they show one thing.",
+      meaning: "How two views can look unlike each other and still show the same thing.",
     },
   ],
   "choices-and-algorithms": [
@@ -281,11 +284,11 @@ const VOCAB: Record<CanonicalSessionId, readonly VocabEntry[]> = {
     },
     {
       word: "reset",
-      meaning: "Go back to the start and try again, without treating the first try as a failure.",
+      meaning: "Go back to the start and try again.",
     },
     {
       word: "order",
-      meaning: "The sequence of steps you try.",
+      meaning: "Which step you do first, second and next.",
     },
   ],
   "privacy-and-responsible-design": [
@@ -312,12 +315,12 @@ const VOCAB: Record<CanonicalSessionId, readonly VocabEntry[]> = {
       meaning: "One part of the design you can change.",
     },
     {
-      word: "change",
-      meaning: "The single difference you choose to make.",
+      word: "design",
+      meaning: "The way something is put together, which you can change on purpose.",
     },
     {
-      word: "help",
-      meaning: "Who is better off because of your change, and who might not be.",
+      word: "change",
+      meaning: "The single difference you choose to make.",
     },
   ],
   "test-reflect-and-improve": [
@@ -331,7 +334,7 @@ const VOCAB: Record<CanonicalSessionId, readonly VocabEntry[]> = {
     },
     {
       word: "improve",
-      meaning: "Say what you would try next time, after looking back.",
+      meaning: "Look back, then decide what to try next so it works better.",
     },
   ],
 };
@@ -422,6 +425,7 @@ export const PARENT_LETTER_BLANKS: readonly string[] = [
   "Teacher name",
   "Date",
   "School contact",
+  "Return by (optional)",
 ];
 
 export const PARENT_NOTE_SOURCE_PATH =
@@ -452,18 +456,18 @@ export const ASSESSMENT_SOURCE_PATH =
 export const LEADERSHIP_ONE_PAGER = {
   title: "MetaPet School — principal and ICT one-pager",
   whatItIs:
-    "A teacher-led, low-data classroom tool for Years 3–6. Seven short sessions of about 15–20 minutes.",
+    "A teacher-led classroom tool for Years 3–6. Seven short sessions of about 15 or 20 minutes. Students do not need accounts. Ordinary page requests still go to the website host; classroom records stay in the browser during routine use.",
   whatItTeaches:
-    "Systems thinking, digital responsibility, and online safety habits, aligned to published Australian Curriculum v9 codes already listed on the lesson cards.",
+    "Systems thinking, digital responsibility, and online safety habits, using the Australian Curriculum v9 codes already listed on the lesson cards. This is a classroom alignment, not an official ACARA endorsement.",
   whatItAvoids:
-    "Student accounts, social features, open chat, and retention pressure loops.",
+    "Student accounts, social features, open chat, and features designed to keep students coming back outside the lesson.",
   operatingRules: [
     "Use aliases only; do not enter real student names.",
-    "Keep sessions time-bounded.",
+    "Keep each session to the planned 15 or 20 minutes.",
     "Do not position it as therapy or counselling.",
     "Confirm the school’s family participation process before the first lesson.",
     "Review any export before it leaves the device.",
-    "Teachers can delete local classroom data at any time.",
+    "Teachers can delete local classroom data at any time. Automatic removal after 35 days only happens when a school page next opens.",
   ],
   reviewFirst: [
     "This one-pager and the what’s-verified page",

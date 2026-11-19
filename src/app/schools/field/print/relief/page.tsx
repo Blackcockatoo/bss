@@ -20,7 +20,7 @@ export default function Page() {
   return (
     <main className={printMainClassName}>
       <PrintToolbar backHref={FIELD_MODE_HOME_PATH} backLabel="Back to home" />
-      <PrintableReliefPack headingLevel={1} />
+      <PrintableReliefPack headingLevel={1} includePlanner />
     </main>
   );
 }

@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { PrintableLessonDocument } from "@/components/field-mode/PrintableLessonDocument";
 import { printArticleClassName } from "@/components/field-mode/PrintToolbar";
 import { CANONICAL_SESSIONS } from "@/lib/schools/canonicalSequence";
 import {
@@ -18,6 +19,7 @@ import {
   OFFICIAL_LINK_CHECKED_AT,
   PARENT_LETTER_BLANKS,
   PARENT_NOTE_SOURCE_PATH,
+  SHARED_LESSON_CONDITIONS,
   SHARED_LESSON_MATERIALS,
   STUDENT_REFLECTION_PROMPTS,
   TEACHER_OBSERVATION_CHECKLIST_ITEMS,
@@ -252,11 +254,17 @@ export function PrintableNoTechGuide({
 
 export function PrintableReliefPack({
   headingLevel = 1,
-  lesson = LESSON_DEFINITIONS[0],
+  includePlanner = false,
+  lesson = LESSON_DEFINITIONS.find((item) => item.id === "meet-the-system")
+    ?? LESSON_DEFINITIONS[0],
 }: {
   headingLevel?: 1 | 2;
+  includePlanner?: boolean;
   lesson?: LessonDefinition;
 }) {
+  if (!lesson) {
+    return null;
+  }
   const extras = plannerExtrasFor(lesson.id);
   const explainer = twoMinuteExplainerFor(lesson);
   const session = FIRST_CANONICAL_SESSION;
@@ -306,16 +314,32 @@ export function PrintableReliefPack({
             <li key={item}>{item}</li>
           ))}
         </ul>
+        <p className="mt-3 text-sm leading-6 text-slate-600">
+          Planned time: {lesson.durationMinutes} minutes. {SHARED_LESSON_CONDITIONS}
+        </p>
         <p className="mt-3 text-sm leading-6">
           <strong>{extras.paper.label}.</strong> {extras.paper.summary}
         </p>
       </section>
 
-      <p className="mt-6 text-sm leading-6 text-slate-700">
-        The full Lesson 1 planner, exit ticket and word wall are in this same
-        classroom pack. Open or print “Lesson 1: Meet the System” and follow
-        the five guided steps.
-      </p>
+      {includePlanner ? (
+        <div className="mt-8">
+          <p className="mb-4 text-sm leading-6 text-slate-700">
+            Follow the Lesson 1 planner below. You do not need any other
+            MetaPet page to run this session.
+          </p>
+          <PrintableLessonDocument
+            lesson={lesson}
+            showToolbar={false}
+            headingLevel={2}
+          />
+        </div>
+      ) : (
+        <p className="mt-6 text-sm leading-6 text-slate-700">
+          The full Lesson 1 planner, exit ticket and word wall follow in this
+          same classroom pack. Use those pages to run the five guided steps.
+        </p>
+      )}
     </article>
   );
 }
