@@ -32,6 +32,10 @@ export const FIELD_MODE_PRINT_LEADERSHIP_PATH =
 export const FIELD_MODE_PRINT_NO_TECH_PATH = "/schools/field/print/no-tech";
 export const FIELD_MODE_PRINT_VERIFIED_PATH =
   "/schools/field/print/verified";
+export const FIELD_MODE_PRINT_STAFF_PD_PATH =
+  "/schools/field/print/staff-pd";
+export const FIELD_MODE_PRINT_ROLLOUT_PATH =
+  "/schools/field/print/rollout";
 
 export interface OfficialLink {
   title: string;
@@ -519,6 +523,12 @@ export const VERIFICATION_ITEMS: readonly VerificationItem[] = [
     status: "not-checked",
     detail:
       "This page does not record an external security audit, accessibility audit, or an official ACARA or eSafety endorsement.",
+  },
+  {
+    title: "Rollout plan and private teacher feedback storage",
+    status: "checked",
+    detail:
+      "In this source, the whole-school rollout plan and the private teacher feedback tool write only to this browser, with an export or copy option for feedback. They do not add a server endpoint, a third-party feedback service, or product analytics. This is a statement about the current source, not a production-host audit.",
   },
 ];
 

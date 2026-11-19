@@ -12,6 +12,9 @@ import {
   FIELD_MODE_SAFETY_PATH,
   FIELD_MODE_TOOLS_PATH,
   FIELD_MODE_COMMENTS_PATH,
+  FIELD_MODE_STAFF_PD_PATH,
+  FIELD_MODE_ROLLOUT_PATH,
+  FIELD_MODE_FEEDBACK_PATH,
   FIELD_MODE_VERIFIED_PATH,
   SCHOOLS_DATA_PATH,
 } from "@/lib/childSafeBaseline";
@@ -227,6 +230,9 @@ export default function FieldModePage() {
               { href: FIELD_MODE_VERIFIED_PATH, label: "What’s verified" },
               { href: FIELD_MODE_TOOLS_PATH, label: "Timer and groups" },
               { href: FIELD_MODE_COMMENTS_PATH, label: "Report comment starters" },
+              { href: FIELD_MODE_STAFF_PD_PATH, label: "15-minute staff briefing" },
+              { href: FIELD_MODE_ROLLOUT_PATH, label: "Term rollout plan" },
+              { href: FIELD_MODE_FEEDBACK_PATH, label: "Private teacher feedback" },
             ].map((item) => (
               <li key={item.href}>
                 <a
@@ -339,6 +345,24 @@ export default function FieldModePage() {
                 className="inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
               >
                 Report comment starters
+              </a>
+              <a
+                href={FIELD_MODE_STAFF_PD_PATH}
+                className="inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                15-minute staff briefing
+              </a>
+              <a
+                href={FIELD_MODE_ROLLOUT_PATH}
+                className="inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Term rollout plan
+              </a>
+              <a
+                href={FIELD_MODE_FEEDBACK_PATH}
+                className="inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Private teacher feedback
               </a>
               <Link
                 href={FIELD_MODE_GUIDE_PATH}

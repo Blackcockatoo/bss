@@ -4,11 +4,14 @@ import { BookOpenCheck, ClipboardCheck, FileText, Printer, ShieldCheck } from "l
 import { useEffect, useMemo, useState } from "react";
 
 import {
+  FIELD_MODE_FEEDBACK_PATH,
   FIELD_MODE_LESSONS_PATH,
   FIELD_MODE_PASSPORT_PATH,
   FIELD_MODE_PRINT_ALL_PATH,
   FIELD_MODE_PRINT_PATH_PREFIX,
   FIELD_MODE_REVIEW_PATH,
+  FIELD_MODE_ROLLOUT_PATH,
+  FIELD_MODE_STAFF_PD_PATH,
   SCHOOLS_DATA_PATH,
 } from "@/lib/childSafeBaseline";
 import {
@@ -235,6 +238,7 @@ export function FieldLessonLaunchpad({
                 The seven sessions
               </h2>
             </div>
+            <div className="flex flex-wrap gap-2">
             <a
               href={FIELD_MODE_PRINT_ALL_PATH}
               className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
@@ -242,6 +246,19 @@ export function FieldLessonLaunchpad({
               <Printer className="h-4 w-4" aria-hidden="true" />
               Print the classroom pack
             </a>
+            <a
+              href={FIELD_MODE_STAFF_PD_PATH}
+              className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              Staff briefing
+            </a>
+            <a
+              href={FIELD_MODE_ROLLOUT_PATH}
+              className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              Rollout plan
+            </a>
+            </div>
           </div>
           <p className="mb-4 text-sm font-medium text-slate-700" aria-live="polite">
             {filtersActive
@@ -337,6 +354,12 @@ export function FieldLessonLaunchpad({
                     className="mt-2 inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                   >
                     Report comment starters
+                  </a>
+                  <a
+                    href={`${FIELD_MODE_FEEDBACK_PATH}?lesson=${lesson.slug}`}
+                    className="mt-2 inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    Private teacher feedback
                   </a>
                 </article>
               );

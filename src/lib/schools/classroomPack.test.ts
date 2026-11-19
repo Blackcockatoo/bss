@@ -17,6 +17,8 @@ import {
   FIELD_MODE_PRINT_RELIEF_PATH,
   FIELD_MODE_PRINT_TICKETS_PATH,
   FIELD_MODE_PRINT_VERIFIED_PATH,
+  FIELD_MODE_PRINT_STAFF_PD_PATH,
+  FIELD_MODE_PRINT_ROLLOUT_PATH,
   FIELD_MODE_PRINT_WORD_WALLS_PATH,
   FIELD_MODE_VERIFIED_PATH,
   STUDENT_REFLECTION_PROMPTS,
@@ -90,10 +92,13 @@ describe("classroom pack data", () => {
   it("does not invent verification results", () => {
     const checked = VERIFICATION_ITEMS.filter((item) => item.status === "checked");
     const notChecked = VERIFICATION_ITEMS.filter((item) => item.status === "not-checked");
-    expect(checked.length).toBe(2);
+    expect(checked.length).toBe(3);
     expect(notChecked.length).toBeGreaterThanOrEqual(3);
     expect(
       notChecked.some((item) => /school hardware/i.test(item.detail)),
+    ).toBe(true);
+    expect(
+      checked.some((item) => /this browser/i.test(item.detail)),
     ).toBe(true);
   });
 
@@ -133,6 +138,8 @@ describe("classroom pack data", () => {
       FIELD_MODE_PRINT_LEADERSHIP_PATH,
       FIELD_MODE_PRINT_NO_TECH_PATH,
       FIELD_MODE_PRINT_VERIFIED_PATH,
+  FIELD_MODE_PRINT_STAFF_PD_PATH,
+  FIELD_MODE_PRINT_ROLLOUT_PATH,
     ]) {
       expect(isPathnameAllowedByPolicy(pathname, "field"), pathname).toBe(true);
     }

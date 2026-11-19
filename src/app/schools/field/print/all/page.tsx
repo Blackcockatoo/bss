@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 
 import { PrintLessonButton } from "@/components/field-mode/PrintLessonButton";
 import { PrintableLessonDocument } from "@/components/field-mode/PrintableLessonDocument";
+import { PrintableRolloutPlan } from "@/components/field-mode/PrintableRolloutPlan";
+import { PrintableStaffPd } from "@/components/field-mode/PrintableStaffPd";
 import {
   PrintableAssessmentTools,
   PrintableExitTickets,
@@ -109,6 +111,12 @@ export default function PrintAllLessonsPage() {
         </div>
         <div className="break-before-page">
           <PrintableLeadershipBrief headingLevel={2} />
+        </div>
+        <div className="break-before-page">
+          <PrintableStaffPd headingLevel={2} />
+        </div>
+        <div className="break-before-page">
+          <PrintableRolloutPlan headingLevel={2} />
         </div>
         <div className="break-before-page">
           <PrintableVerifiedStatus headingLevel={2} />

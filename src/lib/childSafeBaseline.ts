@@ -13,6 +13,9 @@ export const FIELD_MODE_SAFETY_PATH = "/schools/field/safety";
 export const FIELD_MODE_VERIFIED_PATH = "/schools/field/verified";
 export const FIELD_MODE_TOOLS_PATH = "/schools/field/tools";
 export const FIELD_MODE_COMMENTS_PATH = "/schools/field/comments";
+export const FIELD_MODE_STAFF_PD_PATH = "/schools/field/staff-pd";
+export const FIELD_MODE_ROLLOUT_PATH = "/schools/field/rollout";
+export const FIELD_MODE_FEEDBACK_PATH = "/schools/field/feedback";
 export const FIELD_MODE_PACK_MANIFEST_PATH = "/schools/field/pack.json";
 export const FIELD_MODE_PRINT_PATH_PREFIX = "/schools/field/print";
 export const FIELD_MODE_PRINT_ALL_PATH = "/schools/field/print/all";
@@ -158,6 +161,9 @@ export const CHILD_SAFE_ROUTE_POLICIES: Record<
       FIELD_MODE_VERIFIED_PATH,
       FIELD_MODE_TOOLS_PATH,
       FIELD_MODE_COMMENTS_PATH,
+      FIELD_MODE_STAFF_PD_PATH,
+      FIELD_MODE_ROLLOUT_PATH,
+      FIELD_MODE_FEEDBACK_PATH,
       FIELD_MODE_PACK_MANIFEST_PATH,
       FIELD_MODE_EXIT_PATH,
       FIELD_MODE_MANIFEST_PATH,
