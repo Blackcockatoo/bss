@@ -8,6 +8,8 @@ import {
   FIELD_MODE_LESSONS_PATH,
   FIELD_MODE_OFFLINE_PATH,
   FIELD_MODE_SAFETY_PATH,
+  FIELD_MODE_PRINT_ALL_PATH,
+  FIELD_MODE_PRINT_PATH_PREFIX,
   FIELD_MODE_VERIFIED_PATH,
 } from "@/lib/childSafeBaseline";
 import { findSiteUrl } from "@/lib/env/siteUrl";
@@ -90,12 +92,31 @@ function metaPetSchoolSitemap(): MetadataRoute.Sitemap {
     },
   ];
 
+  entries.push({
+    url: metaPetSchoolUrl(FIELD_MODE_PRINT_ALL_PATH),
+    lastModified,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  });
+
   for (const lesson of LESSON_DEFINITIONS) {
     entries.push({
       url: metaPetSchoolUrl(`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}`),
       lastModified,
       changeFrequency: "monthly",
       priority: 0.8,
+    });
+    entries.push({
+      url: metaPetSchoolUrl(`${FIELD_MODE_PRINT_PATH_PREFIX}/${lesson.slug}`),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    });
+    entries.push({
+      url: metaPetSchoolUrl(`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/slides`),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.7,
     });
   }
 

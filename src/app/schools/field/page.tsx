@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Printer, ShieldCheck } from "lucide-react";
 
@@ -13,7 +14,11 @@ import {
   SCHOOLS_DATA_PATH,
 } from "@/lib/childSafeBaseline";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
-import { METAPET_SCHOOL_NAME } from "@/lib/fieldMode/identity";
+import {
+  METAPET_SCHOOL_DESCRIPTION,
+  METAPET_SCHOOL_NAME,
+  metaPetSchoolUrl,
+} from "@/lib/fieldMode/identity";
 import {
   curriculumAlignmentForSession,
   mergeLearningAreas,
@@ -44,6 +49,20 @@ const WHAT_YOU_NEED = [
   SCHOOL_PRIVACY_COMMITMENTS.accountsShort,
   "A printer if you want the paper fallback",
 ] as const;
+
+export const metadata: Metadata = {
+  title: `${METAPET_SCHOOL_NAME} — Australian Years 3–6 Classroom Lessons`,
+  description: METAPET_SCHOOL_DESCRIPTION,
+  alternates: { canonical: metaPetSchoolUrl(FIELD_MODE_HOME_PATH) },
+  openGraph: {
+    type: "website",
+    siteName: METAPET_SCHOOL_NAME,
+    title: `${METAPET_SCHOOL_NAME} — Australian Years 3–6 Classroom Lessons`,
+    description: METAPET_SCHOOL_DESCRIPTION,
+    url: metaPetSchoolUrl(FIELD_MODE_HOME_PATH),
+    locale: "en_AU",
+  },
+};
 
 const SESSION_ONE_PATH = `${FIELD_MODE_LESSONS_PATH}/${FIRST_CANONICAL_SESSION.slug}`;
 
@@ -163,6 +182,12 @@ export default function FieldModePage() {
                       className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
                     >
                       Print this lesson
+                    </a>
+                    <a
+                      href={`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/slides`}
+                      className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      Projector slides
                     </a>
                   </div>
                 </li>

@@ -6,6 +6,7 @@ import {
 import {
   SHARED_LESSON_CONDITIONS,
   SHARED_LESSON_MATERIALS,
+  ealdNotesFor,
   estimatedStepMinutes,
   plannerExtrasFor,
   twoMinuteExplainerFor,
@@ -31,17 +32,26 @@ export function PrintableLessonDocument({
   const areas = mergeLearningAreas(lesson.learningAreas, alignment.learningAreas);
   const extras = plannerExtrasFor(lesson.id);
   const explainer = twoMinuteExplainerFor(lesson);
+  const eald = ealdNotesFor(lesson.id);
 
   return (
     <article className={printArticleClassName}>
       {showToolbar ? (
         <div className="field-print-hide mb-7 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-5">
-          <a
-            href={`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}`}
-            className="text-sm font-semibold text-emerald-900 underline underline-offset-2"
-          >
-            Return to guided lesson
-          </a>
+          <div className="flex flex-wrap gap-4">
+            <a
+              href={`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}`}
+              className="text-sm font-semibold text-emerald-900 underline underline-offset-2"
+            >
+              Return to guided lesson
+            </a>
+            <a
+              href={`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/slides`}
+              className="text-sm font-semibold text-emerald-900 underline underline-offset-2"
+            >
+              Projector slides
+            </a>
+          </div>
           <PrintLessonButton />
         </div>
       ) : null}
@@ -201,6 +211,26 @@ export function PrintableLessonDocument({
           <SectionHeading className="font-bold">Extension option</SectionHeading>
           <p className="mt-2 text-sm leading-6">{lesson.extensionActivity}</p>
         </div>
+      </section>
+
+      <section className="mt-7 break-inside-avoid rounded-xl border border-slate-300 p-4 print:rounded-none">
+        <SectionHeading className="text-xl font-bold">EAL/D notes</SectionHeading>
+        <p className="mt-2 text-sm leading-6 text-slate-600">
+          Practical language support for this lesson, using the word-wall words
+          and the support option already on this planner.
+        </p>
+        <p className="mt-3 text-sm leading-6">
+          <strong>Pre-teach:</strong> {eald.preteach.join(" · ")}
+        </p>
+        <p className="mt-3 text-sm font-semibold">Sentence starters</p>
+        <ul className="mt-1 list-disc space-y-1 pl-5 text-sm leading-6">
+          {eald.sentenceStarters.map((starter) => (
+            <li key={starter}>{starter}</li>
+          ))}
+        </ul>
+        <p className="mt-3 text-sm leading-6">
+          <strong>During the lesson:</strong> {eald.duringLesson}
+        </p>
       </section>
 
       <section className="mt-7 break-inside-avoid">

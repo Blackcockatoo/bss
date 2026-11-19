@@ -5,7 +5,6 @@ import { FieldModeNav } from "@/components/field-mode/FieldModeNav";
 import { FieldOfflineBadge } from "@/components/field-mode/FieldOfflineBadge";
 import { FieldStorageGuard } from "@/components/field-mode/FieldStorageGuard";
 import {
-  FIELD_MODE_HOME_PATH,
   FIELD_MODE_MANIFEST_PATH,
 } from "@/lib/childSafeBaseline";
 import {
@@ -13,7 +12,6 @@ import {
   METAPET_SCHOOL_NAME,
   METAPET_SCHOOL_ORIGIN,
   METAPET_SCHOOL_THEME_COLOR,
-  metaPetSchoolUrl,
 } from "@/lib/fieldMode/identity";
 import {
   FIELD_MODE_APPLE_TOUCH_ICON_PATH,
@@ -47,15 +45,11 @@ export const metadata: Metadata = {
   description: METAPET_SCHOOL_DESCRIPTION,
   applicationName: METAPET_SCHOOL_NAME,
   manifest: FIELD_MODE_MANIFEST_PATH,
-  alternates: {
-    canonical: metaPetSchoolUrl(FIELD_MODE_HOME_PATH),
-  },
   openGraph: {
     type: "website",
     siteName: METAPET_SCHOOL_NAME,
     title: FIELD_MODE_TITLE,
     description: METAPET_SCHOOL_DESCRIPTION,
-    url: metaPetSchoolUrl(FIELD_MODE_HOME_PATH),
     locale: "en_AU",
   },
   twitter: {

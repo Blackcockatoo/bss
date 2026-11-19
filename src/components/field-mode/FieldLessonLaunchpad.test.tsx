@@ -54,4 +54,15 @@ describe("Field lesson launchpad", () => {
       );
     }
   });
+
+  it("offers projector slides for every lesson", () => {
+    render(<FieldLessonLaunchpad />);
+    const slideLinks = screen.getAllByRole("link", { name: /Projector slides/i });
+    expect(slideLinks).toHaveLength(7);
+    for (const link of slideLinks) {
+      expect(link.getAttribute("href")).toMatch(
+        /^\/schools\/field\/lessons\/.+\/slides$/,
+      );
+    }
+  });
 });

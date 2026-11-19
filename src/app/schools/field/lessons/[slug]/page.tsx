@@ -4,6 +4,7 @@ import { LessonRunner } from "@/components/teacher-lessons";
 import { FIELD_MODE_LESSONS_PATH } from "@/lib/childSafeBaseline";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
 import { parseFieldSession } from "@/lib/fieldMode/session";
+import { buildLessonMetadata } from "@/lib/schools/lessonMetadata";
 import {
   LESSON_DEFINITIONS,
   getLessonBySlug,
@@ -27,12 +28,10 @@ export async function generateMetadata({
 }: FieldLessonPageProps): Promise<Metadata> {
   const { slug } = await params;
   const lesson = getLessonBySlug(slug);
-  return {
-    title: lesson?.title ?? "Classroom Lesson",
-    description:
-      lesson?.shortDescription ??
-      "A teacher-led MetaPet School classroom lesson.",
-  };
+  if (!lesson) {
+    return { title: "Classroom Lesson" };
+  }
+  return buildLessonMetadata(lesson, "lesson");
 }
 
 function first(value: string | string[] | undefined): string | undefined {

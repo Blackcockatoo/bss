@@ -22,6 +22,7 @@ import {
   STUDENT_REFLECTION_PROMPTS,
   TEACHER_OBSERVATION_CHECKLIST_ITEMS,
   VERIFICATION_ITEMS,
+  ealdNotesFor,
   estimatedStepMinutes,
   lessonSourceText,
   plannerExtrasFor,
@@ -102,6 +103,23 @@ describe("classroom pack data", () => {
       expect(link.title.length).toBeGreaterThan(3);
     }
     expect(ESAFETY_TEACHER_LINKS.length).toBeGreaterThanOrEqual(5);
+  });
+
+
+  it("grounds EAL/D notes in the lesson's own vocab and support activity", () => {
+    for (const lesson of LESSON_DEFINITIONS) {
+      const notes = ealdNotesFor(lesson.id);
+      const vocabWords = plannerExtrasFor(lesson.id).vocab.map((entry) => entry.word);
+      expect(notes.preteach.length).toBeGreaterThan(0);
+      expect(notes.sentenceStarters.length).toBeGreaterThan(0);
+      for (const word of notes.preteach) {
+        expect(vocabWords, `${lesson.id}:${word}`).toContain(word);
+      }
+      expect(notes.duringLesson).toContain(lesson.supportActivity);
+      expect(notes.duringLesson).not.toMatch(
+        /research|study shows|evidence-based|proven to/i,
+      );
+    }
   });
 
   it("keeps every new classroom-pack path on the field allowlist", () => {

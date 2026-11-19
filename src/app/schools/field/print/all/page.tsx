@@ -20,13 +20,27 @@ import {
   FIELD_MODE_PRINT_ALL_PATH,
 } from "@/lib/childSafeBaseline";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
+import {
+  METAPET_SCHOOL_NAME,
+  metaPetSchoolUrl,
+} from "@/lib/fieldMode/identity";
 import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
+
+const PRINT_ALL_DESCRIPTION =
+  "One printable pack of seven lesson planners, exit tickets, word walls, assessment tools, the parent letter, a relief pack, a leadership one-pager and what’s verified.";
 
 export const metadata: Metadata = {
   title: "Print the Years 3–6 classroom pack",
-  description:
-    "One printable pack of seven lesson planners, exit tickets, word walls, assessment tools, the parent letter, a relief pack, a leadership one-pager and what’s verified.",
-  robots: { index: false, follow: false },
+  description: PRINT_ALL_DESCRIPTION,
+  alternates: { canonical: metaPetSchoolUrl(FIELD_MODE_PRINT_ALL_PATH) },
+  openGraph: {
+    type: "website",
+    siteName: METAPET_SCHOOL_NAME,
+    title: "Print the Years 3–6 classroom pack",
+    description: PRINT_ALL_DESCRIPTION,
+    url: metaPetSchoolUrl(FIELD_MODE_PRINT_ALL_PATH),
+    locale: "en_AU",
+  },
 };
 
 export default function PrintAllLessonsPage() {

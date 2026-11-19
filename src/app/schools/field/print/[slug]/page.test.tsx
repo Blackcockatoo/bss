@@ -25,10 +25,28 @@ describe("printable Field lesson fallback", () => {
     expect(screen.getByText(/aliases only/i)).toBeInTheDocument();
   });
 
-  it("is explicitly excluded from search indexing", async () => {
+  it("is indexed as the public printable planner for the lesson", async () => {
     const metadata = await generateMetadata({
       params: Promise.resolve({ slug: "meet-the-system" }),
     });
-    expect(metadata.robots).toEqual({ index: false, follow: false });
+    expect(metadata.title).toBe("Print Lesson 1: Meet the System");
+    expect(metadata.robots).toBeUndefined();
+    expect(String(metadata.alternates?.canonical)).toContain(
+      "/schools/field/print/meet-the-system",
+    );
+  });
+
+  it("includes EAL/D notes and a projector-slides link on the planner", async () => {
+    const page = await PrintableLessonPage({
+      params: Promise.resolve({ slug: "meet-the-system" }),
+    });
+    render(page);
+
+    expect(screen.getByRole("heading", { name: "EAL/D notes" })).toBeInTheDocument();
+    expect(screen.getAllByText(/Point to one thing on the screen and say one word about it/).length).toBeGreaterThan(0);
+    expect(screen.getByRole("link", { name: /Projector slides/i })).toHaveAttribute(
+      "href",
+      "/schools/field/lessons/meet-the-system/slides",
+    );
   });
 });

@@ -522,6 +522,92 @@ export const VERIFICATION_ITEMS: readonly VerificationItem[] = [
   },
 ];
 
+
+export interface EaldNotes {
+  /** Word-wall words to say, show and repeat before the activity. */
+  preteach: readonly string[];
+  /** Stems taken from the lesson's own evidence or instructions. */
+  sentenceStarters: readonly string[];
+  /** What to do in the lesson, using the existing support option. */
+  duringLesson: string;
+}
+
+const EALD_NOTES: Record<CanonicalSessionId, EaldNotes> = {
+  "meet-the-system": {
+    preteach: ["system", "input", "change"],
+    sentenceStarters: [
+      "I did ___ and the system showed ___.",
+      "It changed because ___.",
+    ],
+    duringLesson:
+      "Show the word wall and say each word once before you start. Students can use the support option: Point to one thing on the screen and say one word about it. A one-word answer or a completed sentence starter is enough.",
+  },
+  "read-the-signals": {
+    preteach: ["signal", "guess", "response"],
+    sentenceStarters: [
+      "I can see this signal: ___.",
+      "It might mean ___. It could also mean ___.",
+      "My response is ___.",
+    ],
+    duringLesson:
+      "Keep the three words visible. Students can use the support option: Point to one signal and say one word for how it looks. They do not need a long explanation.",
+  },
+  "one-identity-many-representations": {
+    preteach: ["view", "same", "different"],
+    sentenceStarters: [
+      "This view shows ___.",
+      "This stayed the same in both views: ___.",
+      "This looks different, but it is still ___.",
+    ],
+    duringLesson:
+      "Point as you say view, same and different. Students can use the support option: Point to one part that looks the same in both views.",
+  },
+  "choices-and-algorithms": {
+    preteach: ["if–then", "predict", "reset", "order"],
+    sentenceStarters: [
+      "I predict ___.",
+      "If ___, then ___.",
+      "We will reset and try this order: ___.",
+    ],
+    duringLesson:
+      "Act out if, then, predict and reset with a simple hand signal as you say the word. Students can use the support option: Say one action and one thing it might change.",
+  },
+  "privacy-and-responsible-design": {
+    preteach: ["keep", "ask first", "never", "remember"],
+    sentenceStarters: [
+      "I would keep ___, because ___.",
+      "I would ask first about ___, because ___.",
+      "I would never remember ___, because ___.",
+    ],
+    duringLesson:
+      "Leave the three labels (keep, ask first, never) where everyone can see them. Students can use the support option: Choose one example and say keep, ask first, or never.",
+  },
+  "design-a-better-feature": {
+    preteach: ["feature", "design", "change"],
+    sentenceStarters: [
+      "The feature I will change is ___.",
+      "My change is ___.",
+      "This change helps ___. It might not help ___.",
+    ],
+    duringLesson:
+      "Hold up or point to the one part being changed as you use the words feature, design and change. Students can use the support option: Choose one part and say why you like it.",
+  },
+  "test-reflect-and-improve": {
+    preteach: ["test", "pattern", "improve"],
+    sentenceStarters: [
+      "The idea I will test is ___.",
+      "The pattern I noticed is ___.",
+      "Next time I would try ___.",
+    ],
+    duringLesson:
+      "Write test, pattern and improve on the board and leave them up. Students can use the support option: Point to one thing that happened more than once.",
+  },
+};
+
+export function ealdNotesFor(sessionId: CanonicalSessionId): EaldNotes {
+  return EALD_NOTES[sessionId];
+}
+
 export function allPlannerLessons(): LessonDefinition[] {
   return LESSON_DEFINITIONS.map((lesson) => {
     const found = getLessonById(lesson.id);

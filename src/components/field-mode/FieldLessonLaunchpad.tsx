@@ -4,6 +4,7 @@ import { BookOpenCheck, ClipboardCheck, FileText, Printer, ShieldCheck } from "l
 import { useEffect, useMemo, useState } from "react";
 
 import {
+  FIELD_MODE_LESSONS_PATH,
   FIELD_MODE_PASSPORT_PATH,
   FIELD_MODE_PRINT_ALL_PATH,
   FIELD_MODE_PRINT_PATH_PREFIX,
@@ -175,6 +176,12 @@ export function FieldLessonLaunchpad() {
                   >
                     <Printer className="h-4 w-4" aria-hidden="true" />
                     Print / save PDF fallback
+                  </a>
+                  <a
+                    href={`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/slides`}
+                    className="mt-2 inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    Projector slides
                   </a>
                 </article>
               );

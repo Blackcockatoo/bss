@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { PrintableLessonDocument } from "@/components/field-mode/PrintableLessonDocument";
 import { FIELD_MODE_PRINT_PATH_PREFIX } from "@/lib/childSafeBaseline";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
+import { buildLessonMetadata } from "@/lib/schools/lessonMetadata";
 import {
   LESSON_DEFINITIONS,
   getLessonBySlug,
@@ -22,11 +23,10 @@ export async function generateMetadata({
 }: PrintableLessonPageProps): Promise<Metadata> {
   const { slug } = await params;
   const lesson = getLessonBySlug(slug);
-  return {
-    title: lesson ? `Printable Lesson ${lesson.number}: ${lesson.title}` : "Printable classroom lesson",
-    description: lesson?.shortDescription,
-    robots: { index: false, follow: false },
-  };
+  if (!lesson) {
+    return { title: "Printable classroom lesson" };
+  }
+  return buildLessonMetadata(lesson, "print");
 }
 
 export default async function PrintableLessonPage({
