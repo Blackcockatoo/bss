@@ -170,6 +170,19 @@ export default function SchoolsPage() {
               </li>
             ))}
           </ol>
+          <div className="mt-8 rounded-2xl border border-emerald-500/30 bg-emerald-950/30 p-6">
+            <p className="text-xs font-semibold uppercase tracking-widest text-amber-300">Optional companion lab · Years 3–6</p>
+            <h3 className="mt-2 text-xl font-semibold text-white">The Invisible Trail — digital footprints and privacy</h3>
+            <p className="mt-2 max-w-2xl text-base leading-7 text-slate-300">
+              A teacher-led, 15-minute interactive activity with fictional data,
+              privacy goggles and a take-it-offline class discussion. Separate
+              from the seven-session learning sequence.
+            </p>
+            <Link href="/schools/field/play/invisible-trail"
+              className="mt-4 inline-block text-base font-semibold text-emerald-200 underline underline-offset-4 hover:text-white">
+              Open The Invisible Trail
+            </Link>
+          </div>
         </section>
 
         {/* What teachers do. */}
