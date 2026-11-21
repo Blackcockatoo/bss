@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import {
   FIELD_MODE_LESSONS_PATH,
+  FIELD_MODE_GUIDE_PATH,
   FIELD_MODE_SAFETY_PATH,
   FIELD_MODE_START_PATH,
   FIELD_MODE_VERIFIED_PATH,
@@ -80,6 +81,7 @@ export default function SchoolsPage() {
           {SCHOOL_HEADLINE}
         </h1>
         <p className="mt-6 text-lg leading-8 text-slate-300">
+          <strong className="block text-cyan-200">Digital independence starts with understanding.</strong>
           {SCHOOL_SUPPORTING_STATEMENT}
         </p>
 
@@ -91,11 +93,15 @@ export default function SchoolsPage() {
           {START_TEACHING_ACTION}
         </Link>
 
-        {/* Body text, not microcopy. It is the whole access model. */}
+        <Link href="/schools/field/play/invisible-trail" prefetch={false}
+          className="mt-3 flex min-h-12 w-fit items-center rounded-xl border border-cyan-400/50 px-5 py-3 font-semibold text-cyan-100 sm:ml-3 sm:inline-flex">
+          Try The Invisible Trail
+        </Link>
         <p className="mt-5 max-w-xl text-base leading-7 text-slate-200">
           {FREE_PROMISE}
         </p>
 
+        <p className="mt-2 text-slate-300">No student account required. Teacher-led learning. Printable alternatives.</p>
         <div className="mt-8 flex flex-wrap gap-x-8 gap-y-3 text-base">
           <Link
             className="text-slate-300 underline underline-offset-4 hover:text-white"
@@ -111,6 +117,9 @@ export default function SchoolsPage() {
           >
             Review safety and privacy
           </Link>
+          <Link className="text-slate-300 underline underline-offset-4" href={FIELD_MODE_GUIDE_PATH}>Teacher guide</Link>
+          <Link className="text-slate-300 underline underline-offset-4" href="/schools/parents">Parent information</Link>
+          <a className="text-slate-300 underline underline-offset-4" href="#downloads">Classroom materials</a>
         </div>
       </section>
 
@@ -136,13 +145,9 @@ export default function SchoolsPage() {
         {/* Where it fits — the one thing a principal has to rule out first. */}
         <section>
           <SectionHeading
-            title="This does not replace the software that runs your school"
+            title="Digital Independence"
             description={SCHOOL_POSITIONING_STATEMENT}
           />
-          <p className="mt-4 max-w-3xl text-base leading-7 text-slate-400">
-            It is not a school-management system, a learning management system,
-            a parent portal or a behaviour-points platform.
-          </p>
         </section>
 
         {/* What children do — the canonical sequence, one line each. */}
@@ -171,6 +176,19 @@ export default function SchoolsPage() {
               </li>
             ))}
           </ol>
+          <div className="mt-8 rounded-2xl border border-emerald-500/30 bg-emerald-950/30 p-6">
+            <p className="text-xs font-semibold uppercase tracking-widest text-amber-300">Optional companion lab · Years 3–6</p>
+            <h3 className="mt-2 text-xl font-semibold text-white">The Invisible Trail — digital footprints and privacy</h3>
+            <p className="mt-2 max-w-2xl text-base leading-7 text-slate-300">
+              A teacher-led, 15-minute interactive activity with fictional data,
+              privacy goggles and a take-it-offline class discussion. Separate
+              from the seven-session learning sequence.
+            </p>
+            <Link href="/schools/field/play/invisible-trail"
+              className="mt-4 inline-block text-base font-semibold text-emerald-200 underline underline-offset-4 hover:text-white">
+              Open The Invisible Trail
+            </Link>
+          </div>
         </section>
 
         {/* What teachers do. */}
@@ -354,7 +372,15 @@ export default function SchoolsPage() {
             title="For school leadership"
             description="Privacy, safeguarding, pilot and ICT documents for principals, reviewers and wellbeing teams. Classroom teachers can start with the lessons and the teacher pack above."
           />
-          <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2">
+          <p className="mt-4 text-base leading-7 text-slate-300">
+            Available for teacher-led use: seven classroom sessions, printable fallbacks and an optional privacy lab.
+            The lab uses fictional choices held in memory. Classroom learning outcomes still need independent educator evaluation.
+            Use the materials below to review the lesson under adult supervision.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
+            <Link href="/schools/safeguarding" className="text-sm text-emerald-200 underline underline-offset-4 hover:text-white">
+              Safeguarding and contact information
+            </Link>
             <Link
               className="text-sm text-slate-300 underline underline-offset-4 hover:text-white"
               href="/schools/field/print/leadership"

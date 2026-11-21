@@ -54,4 +54,14 @@ describe("Field lesson launchpad", () => {
       );
     }
   });
+
+  it("links the optional Invisible Trail lab and its printable guide", () => {
+    render(<FieldLessonLaunchpad />);
+    expect(
+      screen.getByRole("link", { name: "Try The Invisible Trail" }),
+    ).toHaveAttribute("href", "/schools/field/play/invisible-trail");
+    expect(
+      screen.getByRole("link", { name: "Printable teacher guide" }),
+    ).toHaveAttribute("href", "/schools/field/print/invisible-trail.html");
+  });
 });
