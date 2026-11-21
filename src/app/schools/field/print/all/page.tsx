@@ -56,7 +56,8 @@ export default function PrintAllLessonsPage() {
           <p className="text-sm text-slate-700">
             Lesson planners, paper tools, the parent letter and the leadership
             brief. Use your browser’s print dialog and choose “Save as PDF” if
-            you need a file.
+            you need a file. The optional Invisible Trail teacher guide is a
+            separate page that also works with JavaScript turned off.
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -116,6 +117,20 @@ export default function PrintAllLessonsPage() {
         <div className="break-before-page">
           <PrintableOfficialLinks headingLevel={2} includeCurriculum />
         </div>
+        <article className="field-print-hide mx-auto max-w-4xl rounded-2xl border border-emerald-900/20 bg-white p-6 shadow-sm">
+          <h2 className="text-xl font-semibold">Optional: The Invisible Trail teacher guide</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-700">
+            A 30-minute optional companion lab (15 minutes interactive, 15 minutes
+            discussion), using only fictional data. Open the standalone guide to
+            print it, including when JavaScript is off.
+          </p>
+          <a
+            href="/schools/field/print/invisible-trail.html"
+            className="mt-3 inline-flex min-h-11 items-center font-semibold text-emerald-900 underline"
+          >
+            Open the printable Invisible Trail teacher guide
+          </a>
+        </article>
       </div>
     </main>
   );
