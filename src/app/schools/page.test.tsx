@@ -42,7 +42,7 @@ describe("SchoolsPage entry", () => {
 
     expect(screen.getByText("MetaPet School")).toBeInTheDocument();
     expect(
-      screen.getByText("An education initiative of Blue $nake Studio"),
+      screen.getByText("Created by Blue $nake Studio"),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { level: 1, name: SCHOOL_HEADLINE }),
@@ -134,7 +134,7 @@ describe("SchoolsPage contribution placement", () => {
     expect(contributionAt).toBeGreaterThan(-1);
 
     for (const earlier of [
-      "This does not replace the software that runs your school",
+      "Digital Independence",
       "What children do",
       "What teachers do",
       "What happens to the data?",
@@ -208,14 +208,12 @@ describe("SchoolsPage preserved material", () => {
     }
   });
 
-  it("still separates MetaPet School from school-management software", () => {
+  it("links to the optional privacy lab from the entry screen", () => {
     render(<SchoolsPage />);
 
     expect(
-      screen.getByText(
-        /Keep your existing school platform for attendance, payments, timetables and communication/i,
-      ),
-    ).toBeInTheDocument();
+      screen.getByRole("link", { name: "Try The Invisible Trail" }),
+    ).toHaveAttribute("href", "/schools/field/play/invisible-trail");
   });
 
   it("still routes no evaluator into the consumer product", () => {

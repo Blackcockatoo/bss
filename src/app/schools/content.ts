@@ -470,16 +470,16 @@ export const lessonCards: LessonCard[] = CANONICAL_SESSIONS.map((session) => ({
  * The hero. One headline, one supporting statement, one trust line — kept here
  * so the page and its test read from the same words.
  */
-export const SCHOOL_HEADLINE = "Creative technology that gives attention back.";
+export const SCHOOL_HEADLINE = "Teach the child to read the machine.";
 
 export const SCHOOL_SUPPORTING_STATEMENT =
-  "Seven short, teacher-led lessons for Years 3-6 - without student accounts, advertising or another permanent digital profile.";
+  "Classroom activities for Years 3–6 that help children investigate how digital systems work, what they can learn about us and what choices we have.";
 
 export const SCHOOL_PROOF_LINE =
   "Open the lesson. Guide the activity. Capture light evidence. Get back to teaching.";
 
 export const SCHOOL_ATTRIBUTION =
-  "An education initiative of Blue $nake Studio";
+  "Created by Blue $nake Studio";
 
 /**
  * How MetaPet School relates to the software a school already runs. This is
@@ -487,7 +487,7 @@ export const SCHOOL_ATTRIBUTION =
  * replacement, which it is not and does not try to be.
  */
 export const SCHOOL_POSITIONING_STATEMENT =
-  "Keep your existing school platform for attendance, payments, timetables and communication. MetaPet School performs a different job: it gives children a bounded learning experience without requiring another student identity system.";
+  "Children change a variable, observe what the system does, and explain their choices. In The Invisible Trail, they follow fictional data from a single click to a prediction and decide what an app should collect, share or erase.";
 
 /** What a teacher needs before Session One. Deliberately short. */
 export const whatYouNeed: readonly string[] = [
