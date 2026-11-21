@@ -40,6 +40,12 @@ function metaPetSchoolSitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
+      url: metaPetSchoolUrl("/schools/field/play/invisible-trail"),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
       url: metaPetSchoolUrl(FIELD_MODE_GUIDE_PATH),
       lastModified,
       changeFrequency: "monthly",
