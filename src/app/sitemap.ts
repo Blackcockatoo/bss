@@ -22,6 +22,8 @@ import {
 import {
   FIELD_MODE_PRINT_F2_ALL_PATH,
   FIELD_MODE_PRINT_YEARS_78_ALL_PATH,
+  FIELD_MODE_CURRICULUM_PATH,
+  FIELD_MODE_PRINT_CURRICULUM_PATH,
 } from "@/lib/schools/classroomPack";
 import { ALL_LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
 
@@ -125,6 +127,36 @@ function metaPetSchoolSitemap(): MetadataRoute.Sitemap {
     lastModified,
     changeFrequency: "monthly",
     priority: 0.7,
+  });
+  entries.push({
+    url: metaPetSchoolUrl(FIELD_MODE_CURRICULUM_PATH),
+    lastModified,
+    changeFrequency: "monthly",
+    priority: 0.8,
+  });
+  entries.push({
+    url: metaPetSchoolUrl(FIELD_MODE_PRINT_CURRICULUM_PATH),
+    lastModified,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  });
+  entries.push({
+    url: metaPetSchoolUrl("/schools/field/print/invisible-trail"),
+    lastModified,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  });
+  entries.push({
+    url: metaPetSchoolUrl("/schools/field/play/invisible-trail/slides"),
+    lastModified,
+    changeFrequency: "monthly",
+    priority: 0.6,
+  });
+  entries.push({
+    url: metaPetSchoolUrl("/schools/field/play/invisible-trail/comments"),
+    lastModified,
+    changeFrequency: "monthly",
+    priority: 0.6,
   });
 
   for (const lesson of ALL_LESSON_DEFINITIONS) {
