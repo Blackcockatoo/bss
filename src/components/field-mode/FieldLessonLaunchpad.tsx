@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { BookOpenCheck, ClipboardCheck, FileText, Printer, ShieldCheck } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -364,6 +365,40 @@ export function FieldLessonLaunchpad({
                 </article>
               );
             })}
+          </div>
+        </section>
+
+        <section
+          aria-labelledby="invisible-trail-heading"
+          className="rounded-3xl border border-emerald-900/20 bg-white p-5 shadow-sm md:p-7"
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-800">
+            Optional companion lab · Years 3–6
+          </p>
+          <h2 id="invisible-trail-heading" className="mt-2 text-2xl font-semibold">
+            The Invisible Trail
+          </h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-700">
+            An optional Digital Independence activity, separate from the seven
+            sessions. Students use fictional data to see how a click leaves a
+            record, how a system makes a guess, and how a privacy choice changes
+            the result. No student accounts or real student data. The lab’s own
+            guide lists AC9TDI4P09, AC9TDI6P10, VC2TDI4D05 and VC2TDI6D06. This
+            is classroom alignment, not an official ACARA or VCAA endorsement.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link
+              href="/schools/field/play/invisible-trail"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-800 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
+            >
+              Try The Invisible Trail
+            </Link>
+            <a
+              href="/schools/field/print/invisible-trail.html"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              Printable teacher guide
+            </a>
           </div>
         </section>
 
