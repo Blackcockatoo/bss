@@ -33,7 +33,7 @@ What if children learned how apps make predictions about them using no real pers
 
 ## For teachers
 
-Put The Invisible Trail on the classroom screen. Ask the class to predict what a click might leave behind before turning on the Privacy Goggles. Spend 15 minutes testing the five missions and 15 minutes redrawing one data trail on paper. Finish by asking students to show who receives one record and which choice changes its destination. [Open the printable guide](https://www.metapet.school/schools/field/play/invisible-trail#teacher-guide)
+Put The Invisible Trail on the classroom screen. Ask the class to predict what a click might leave behind before turning on the Privacy Goggles. Spend 15 minutes testing the five missions and 15 minutes redrawing one data trail on paper. Finish by asking students to show who receives one record and which choice changes its destination. [Open the printable guide](https://www.metapet.school/schools/field/print/invisible-trail.html)
 
 ## School outreach email
 

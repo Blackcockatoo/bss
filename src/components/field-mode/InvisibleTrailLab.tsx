@@ -147,7 +147,7 @@ export function InvisibleTrailLab() {
               <path d="M12 151 L24 139 M156 139 L168 151" stroke="#67e8f9" strokeWidth="5" strokeLinecap="round" />
             </svg>
           </div>
-          <a href="#teacher-guide" className="mt-5 inline-flex min-h-12 items-center font-semibold text-cyan-200 underline underline-offset-4">Printable teacher guide</a>
+          <a href="/schools/field/print/invisible-trail.html" className="mt-5 inline-flex min-h-12 items-center font-semibold text-cyan-200 underline underline-offset-4">Printable teacher guide</a>
           <div className="mt-6 flex flex-wrap gap-2 text-sm font-semibold">
             <span className="rounded-full bg-white/10 px-3 py-2">Years 3–6</span>
             <span className="rounded-full bg-white/10 px-3 py-2">15 min play + 15 min discussion</span>
@@ -186,10 +186,6 @@ export function InvisibleTrailLab() {
             {CHAPTERS[chapter].label}
           </h2>
           <p className="mt-2 text-base text-slate-600">{CHAPTERS[chapter].detail}</p>
-
-          <noscript>
-            <p className="mt-4">Use the printable teacher guide below to run all five missions with paper cards.</p>
-          </noscript>
 
           {chapter === 0 ? (
             <div className="mt-6 space-y-5">

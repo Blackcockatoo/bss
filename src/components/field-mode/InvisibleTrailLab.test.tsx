@@ -10,6 +10,7 @@ describe("The Invisible Trail", () => {
     expect(screen.getByRole("heading", { name: "THE INVISIBLE TRAIL" })).toBeInTheDocument();
     expect(screen.getByText("Pretend data only")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Teacher guide · Take it offline" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Printable teacher guide" })).toHaveAttribute("href", "/schools/field/print/invisible-trail.html");
   });
 
   it("reveals only selected imaginary footprints", () => {
