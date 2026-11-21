@@ -18,8 +18,18 @@ import {
   FOUNDATION_SHARED_CONDITIONS,
   FOUNDATION_SHARED_MATERIALS,
 } from "@/lib/schools/foundationClassroomPack";
-import { officialWordingForCodes } from "@/lib/schools/foundationCurriculum";
-import { curriculumAlignmentForLesson } from "@/lib/schools/lessonAlignment";
+import {
+  YEARS_78_SHARED_CONDITIONS,
+  YEARS_78_SHARED_MATERIALS,
+} from "@/lib/schools/years78ClassroomPack";
+import {
+  YEARS_78_ALIGNMENT_CAVEAT,
+  YEARS_78_PERIOD_NOTE,
+} from "@/lib/schools/years78Sequence";
+import {
+  curriculumAlignmentForLesson,
+  officialWordingForLessonCodes,
+} from "@/lib/schools/lessonAlignment";
 import {
   lessonAudienceLabel,
   lessonDisplayTitle,
@@ -51,14 +61,25 @@ export function PrintableLessonDocument({
   const explainer = twoMinuteExplainerFor(lesson);
   const eald = ealdNotesFor(lesson.id);
   const comments = reportCommentBankFor(lesson);
-  const isFoundationSet = lesson.yearBand !== "years-3-6";
-  const sharedMaterials = isFoundationSet
-    ? FOUNDATION_SHARED_MATERIALS
-    : SHARED_LESSON_MATERIALS;
-  const sharedConditions = isFoundationSet
-    ? FOUNDATION_SHARED_CONDITIONS
-    : SHARED_LESSON_CONDITIONS;
-  const officialWording = officialWordingForCodes(alignment.codes);
+  const isFoundationSet =
+    lesson.yearBand === "foundation" || lesson.yearBand === "years-1-2";
+  const isYears78Set = lesson.yearBand === "years-7-8";
+  const sharedMaterials = isYears78Set
+    ? YEARS_78_SHARED_MATERIALS
+    : isFoundationSet
+      ? FOUNDATION_SHARED_MATERIALS
+      : SHARED_LESSON_MATERIALS;
+  const sharedConditions = isYears78Set
+    ? YEARS_78_SHARED_CONDITIONS
+    : isFoundationSet
+      ? FOUNDATION_SHARED_CONDITIONS
+      : SHARED_LESSON_CONDITIONS;
+  const officialWording = officialWordingForLessonCodes(alignment.codes);
+  const alignmentCaveat = isYears78Set
+    ? YEARS_78_ALIGNMENT_CAVEAT
+    : isFoundationSet
+      ? FOUNDATION_ALIGNMENT_CAVEAT
+      : "This is classroom alignment, not an official ACARA endorsement.";
 
   return (
     <article className={printArticleClassName}>
@@ -114,8 +135,8 @@ export function PrintableLessonDocument({
           <div>
             <dt className="font-semibold">Records</dt>
             <dd>
-              {isFoundationSet
-                ? "No names or photos collected"
+              {isFoundationSet || isYears78Set
+                ? "No names or personal data collected"
                 : "Alias-only, local device"}
             </dd>
           </div>
@@ -166,13 +187,7 @@ export function PrintableLessonDocument({
                 ))}
               </ul>
             ) : null}
-            {isFoundationSet ? (
-              <p className="mt-2">{FOUNDATION_ALIGNMENT_CAVEAT}</p>
-            ) : (
-              <p className="mt-2">
-                This is classroom alignment, not an official ACARA endorsement.
-              </p>
-            )}
+            <p className="mt-2">{alignmentCaveat}</p>
           </div>
         ) : null}
       </section>
@@ -189,6 +204,7 @@ export function PrintableLessonDocument({
         </ul>
         <p className="mt-3 text-sm leading-6 text-slate-600">
           Planned time: {lesson.durationMinutes} minutes. {sharedConditions}
+          {isYears78Set ? ` ${YEARS_78_PERIOD_NOTE}` : ""}
         </p>
       </section>
 

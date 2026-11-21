@@ -19,7 +19,10 @@ import {
   isMetaPetSchoolHostname,
   metaPetSchoolUrl,
 } from "@/lib/fieldMode/identity";
-import { FIELD_MODE_PRINT_F2_ALL_PATH } from "@/lib/schools/classroomPack";
+import {
+  FIELD_MODE_PRINT_F2_ALL_PATH,
+  FIELD_MODE_PRINT_YEARS_78_ALL_PATH,
+} from "@/lib/schools/classroomPack";
 import { ALL_LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
 
 /**
@@ -113,6 +116,12 @@ function metaPetSchoolSitemap(): MetadataRoute.Sitemap {
   });
   entries.push({
     url: metaPetSchoolUrl(FIELD_MODE_PRINT_F2_ALL_PATH),
+    lastModified,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  });
+  entries.push({
+    url: metaPetSchoolUrl(FIELD_MODE_PRINT_YEARS_78_ALL_PATH),
     lastModified,
     changeFrequency: "monthly",
     priority: 0.7,

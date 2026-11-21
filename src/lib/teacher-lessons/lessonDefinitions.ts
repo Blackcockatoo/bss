@@ -22,6 +22,8 @@ import {
 } from "@/lib/schools/canonicalSequence";
 import { FOUNDATION_LESSON_DEFINITIONS } from "@/lib/teacher-lessons/foundationLessonDefinitions";
 export { FOUNDATION_LESSON_DEFINITIONS } from "@/lib/teacher-lessons/foundationLessonDefinitions";
+import { YEARS_78_LESSON_DEFINITIONS } from "@/lib/teacher-lessons/years78LessonDefinitions";
+export { YEARS_78_LESSON_DEFINITIONS } from "@/lib/teacher-lessons/years78LessonDefinitions";
 import type { CanonicalSessionId } from "@/lib/schools/canonicalSequence";
 
 import type {
@@ -691,21 +693,22 @@ function toLessonDefinition(session: CanonicalSession): LessonDefinition {
 export const LESSON_DEFINITIONS: LessonDefinition[] =
   CANONICAL_SESSIONS.map(toLessonDefinition);
 
-/** Years 3–6 plus the F–2 unplugged starter set. */
+/** Years 3–6, the F–2 unplugged starter set, and the Years 7–8 bridge unit. */
 export const ALL_LESSON_DEFINITIONS: LessonDefinition[] = [
   ...FOUNDATION_LESSON_DEFINITIONS,
   ...LESSON_DEFINITIONS,
+  ...YEARS_78_LESSON_DEFINITIONS,
 ];
 
 /** All Years 3–6 lesson ids in canonical order. */
 export const LESSON_IDS: LessonId[] = LESSON_DEFINITIONS.map((l) => l.id);
 
-/** Lookup map from lesson id to definition, including F–2. */
+/** Lookup map from lesson id to definition, including F–2 and Years 7–8. */
 const LESSON_BY_ID: Map<LessonId, LessonDefinition> = new Map(
   ALL_LESSON_DEFINITIONS.map((lesson) => [lesson.id, lesson]),
 );
 
-/** Lookup map from slug to definition, including F–2. */
+/** Lookup map from slug to definition, including F–2 and Years 7–8. */
 const LESSON_BY_SLUG: Map<string, LessonDefinition> = new Map(
   ALL_LESSON_DEFINITIONS.map((lesson) => [lesson.slug, lesson]),
 );

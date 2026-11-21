@@ -100,10 +100,47 @@ const SUPPORTING_CLAUSES: Record<
     nextStep: "Next step: say who the user is and what they need.",
     above: "and can give a reason whether the existing system would meet that need.",
   },
+  "hardware-for-the-job": {
+    nextStep: "Next step: name one specification and say how it would affect performance.",
+    above: "and can give a clear reason for selecting hardware for a particular task.",
+  },
+  "data-as-numbers": {
+    nextStep: "Next step: represent one more kind of data as integers.",
+    above: "and can say what was gained or lost in that representation.",
+  },
+  "why-binary": {
+    nextStep: "Next step: convert one more integer to binary.",
+    above: "and can explain why two states are useful in digital hardware.",
+  },
+  "trace-the-algorithm": {
+    nextStep: "Next step: record the values for one more input.",
+    above: "and can identify an error and say how to correct it.",
+  },
+  "design-an-algorithm": {
+    nextStep: "Next step: show the same algorithm in the other representation.",
+    above: "and can point to the nested control structure in both representations.",
+  },
+  "what-data-is-essential": {
+    nextStep: "Next step: say whether one collected item is essential to the purpose.",
+    above: "and can suggest a way to manage the digital footprint.",
+  },
+  "evaluate-a-system-for-a-user": {
+    nextStep: "Next step: write the user story or one design criterion more clearly.",
+    above: "and can judge the system against those tests and note a possible future impact.",
+  },
 };
 
 function beginningClause(intention: string): string {
   const clause = intentionClause(intention);
+  if (clause.startsWith("investigate ")) {
+    return `is beginning to investigate ${clause.slice("investigate ".length)}`;
+  }
+  if (clause.startsWith("trace ")) {
+    return `is beginning to trace ${clause.slice("trace ".length)}`;
+  }
+  if (clause.startsWith("define ")) {
+    return `is beginning to define ${clause.slice("define ".length)}`;
+  }
   if (clause.startsWith("explain ")) {
     return `is beginning to explain ${clause.slice("explain ".length)}`;
   }
