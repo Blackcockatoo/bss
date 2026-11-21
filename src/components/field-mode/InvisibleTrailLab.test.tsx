@@ -23,6 +23,9 @@ describe("The Invisible Trail", () => {
   it("can complete the designer challenge without any identity input", () => {
     render(<InvisibleTrailLab />);
     fireEvent.click(screen.getByRole("button", { name: "Open chapter 5: Data Defender" }));
+    expect(screen.getByText("Keep investigating")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Keep play history on this device" }));
+    fireEvent.click(screen.getByRole("button", { name: "Let players erase saved progress" }));
     expect(screen.getByText("Privacy-first design!")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Require a real name to play" }));
     expect(screen.getByText("Keep investigating")).toBeInTheDocument();
