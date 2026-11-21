@@ -1,75 +1,49 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
-
 import type { Metadata } from "next";
 
 import { PrintLessonButton } from "@/components/field-mode/PrintLessonButton";
 import { PrintableLessonDocument } from "@/components/field-mode/PrintableLessonDocument";
+import { PrintableRolloutPlan } from "@/components/field-mode/PrintableRolloutPlan";
+import { PrintableStaffPd } from "@/components/field-mode/PrintableStaffPd";
+import {
+  PrintableAssessmentTools,
+  PrintableExitTickets,
+  PrintableLeadershipBrief,
+  PrintableNoTechGuide,
+  PrintableOfficialLinks,
+  PrintablePackContents,
+  PrintableParentLetter,
+  PrintableReliefPack,
+  PrintableVerifiedStatus,
+  PrintableWordWalls,
+} from "@/components/field-mode/classroomPackDocuments";
 import {
   FIELD_MODE_HOME_PATH,
   FIELD_MODE_LESSONS_PATH,
   FIELD_MODE_PRINT_ALL_PATH,
 } from "@/lib/childSafeBaseline";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
+import {
+  METAPET_SCHOOL_NAME,
+  metaPetSchoolUrl,
+} from "@/lib/fieldMode/identity";
 import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
 
+const PRINT_ALL_DESCRIPTION =
+  "One printable pack of seven lesson planners, exit tickets, word walls, assessment tools, the parent letter, a relief pack, a leadership one-pager and what’s verified.";
+
 export const metadata: Metadata = {
-  title: "Print all seven lessons and the parent note",
-  description:
-    "One printable pack of the seven MetaPet School lessons plus the parent and carer note.",
-  robots: { index: false, follow: false },
+  title: "Print the Years 3–6 classroom pack",
+  description: PRINT_ALL_DESCRIPTION,
+  alternates: { canonical: metaPetSchoolUrl(FIELD_MODE_PRINT_ALL_PATH) },
+  openGraph: {
+    type: "website",
+    siteName: METAPET_SCHOOL_NAME,
+    title: "Print the Years 3–6 classroom pack",
+    description: PRINT_ALL_DESCRIPTION,
+    url: metaPetSchoolUrl(FIELD_MODE_PRINT_ALL_PATH),
+    locale: "en_AU",
+  },
 };
-
-function ParentNoteDocument() {
-  const source = readFileSync(
-    join(process.cwd(), "public/docs/schools-au/teacher-pack/parent-note.md"),
-    "utf8",
-  );
-  const lines = source.split("\n");
-
-  return (
-    <article className="mx-auto max-w-4xl break-before-page rounded-2xl bg-white p-7 shadow-sm print:max-w-none print:rounded-none print:p-0 print:shadow-none md:p-10">
-      {lines.map((line, index) => {
-        if (line.startsWith("# ")) {
-          return (
-            <h2 key={index} className="text-3xl font-bold tracking-tight">
-              {line.slice(2)}
-            </h2>
-          );
-        }
-        if (line.startsWith("## ")) {
-          return (
-            <h2 key={index} className="mt-6 text-xl font-bold">
-              {line.slice(3)}
-            </h2>
-          );
-        }
-        if (line.startsWith("- ")) {
-          return (
-            <p key={index} className="mt-1 pl-4 text-base leading-7">
-              • {line.slice(2)}
-            </p>
-          );
-        }
-        if (line.startsWith("`") && line.endsWith("`") === false) {
-          return (
-            <p key={index} className="mt-3 text-base leading-7 text-slate-700">
-              {line.replaceAll("`", "")}
-            </p>
-          );
-        }
-        if (line.trim() === "") {
-          return null;
-        }
-        return (
-          <p key={index} className="mt-3 text-base leading-7 text-slate-700">
-            {line.replaceAll("`", "")}
-          </p>
-        );
-      })}
-    </article>
-  );
-}
 
 export default function PrintAllLessonsPage() {
   enforceChildSafeServerRoute(FIELD_MODE_PRINT_ALL_PATH, "field");
@@ -82,10 +56,10 @@ export default function PrintAllLessonsPage() {
             Printable classroom pack
           </p>
           <p className="text-sm text-slate-700">
-            All seven lessons and the parent and carer note. Use your browser’s
-            print dialog and choose “Save as PDF” if you need a file. The
-            optional Invisible Trail teacher guide is a separate page that also
-            works with JavaScript turned off.
+            Lesson planners, paper tools, the parent letter and the leadership
+            brief. Use your browser’s print dialog and choose “Save as PDF” if
+            you need a file. The optional Invisible Trail teacher guide is a
+            separate page that also works with JavaScript turned off.
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -105,11 +79,15 @@ export default function PrintAllLessonsPage() {
         </div>
       </div>
       <h1 className="field-print-hide mx-auto mb-6 max-w-4xl text-3xl font-semibold tracking-tight">
-        Print all seven lessons and the parent note
+        Print the Years 3–6 classroom pack
       </h1>
       <div className="space-y-10">
+        <PrintablePackContents headingLevel={2} />
+        <div className="break-before-page">
+          <PrintableReliefPack headingLevel={2} />
+        </div>
         {LESSON_DEFINITIONS.map((lesson) => (
-          <div key={lesson.id} className="break-before-page first:break-before-auto">
+          <div key={lesson.id} className="break-before-page">
             <PrintableLessonDocument
               lesson={lesson}
               showToolbar={false}
@@ -117,7 +95,36 @@ export default function PrintAllLessonsPage() {
             />
           </div>
         ))}
-        <ParentNoteDocument />
+        <div className="break-before-page">
+          <PrintableExitTickets headingLevel={2} />
+        </div>
+        <div className="break-before-page">
+          <PrintableWordWalls headingLevel={2} />
+        </div>
+        <div className="break-before-page">
+          <PrintableAssessmentTools headingLevel={2} />
+        </div>
+        <div className="break-before-page">
+          <PrintableNoTechGuide headingLevel={2} />
+        </div>
+        <div className="break-before-page">
+          <PrintableParentLetter headingLevel={2} />
+        </div>
+        <div className="break-before-page">
+          <PrintableLeadershipBrief headingLevel={2} />
+        </div>
+        <div className="break-before-page">
+          <PrintableStaffPd headingLevel={2} />
+        </div>
+        <div className="break-before-page">
+          <PrintableRolloutPlan headingLevel={2} />
+        </div>
+        <div className="break-before-page">
+          <PrintableVerifiedStatus headingLevel={2} />
+        </div>
+        <div className="break-before-page">
+          <PrintableOfficialLinks headingLevel={2} includeCurriculum />
+        </div>
         <article className="field-print-hide mx-auto max-w-4xl rounded-2xl border border-emerald-900/20 bg-white p-6 shadow-sm">
           <h2 className="text-xl font-semibold">Optional: The Invisible Trail teacher guide</h2>
           <p className="mt-2 text-sm leading-6 text-slate-700">

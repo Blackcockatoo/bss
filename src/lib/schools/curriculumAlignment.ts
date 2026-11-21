@@ -75,11 +75,13 @@ export function learningAreasFromCodes(codes: readonly string[]): string[] {
   return areas;
 }
 
-export function curriculumAlignmentForSession(sessionNumber: number): {
+export interface CurriculumAlignment {
   codes: string[];
   learningAreas: string[];
   outcomes: LearningOutcome[];
-} {
+}
+
+export function curriculumAlignmentForSession(sessionNumber: number): CurriculumAlignment {
   const outcomes = outcomesForSession(sessionNumber);
   const codes = curriculumCodesForSession(sessionNumber);
   return {

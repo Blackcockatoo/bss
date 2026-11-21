@@ -33,10 +33,10 @@ export const METAPET_SCHOOL_NAME = "MetaPet School";
 export const METAPET_SCHOOL_SHORT_NAME = "MetaPet School";
 
 export const METAPET_SCHOOL_TAGLINE =
-  "Australian classroom lessons for Years 3–6";
+  "Australian classroom lessons for Foundation to Year 8";
 
 export const METAPET_SCHOOL_DESCRIPTION =
-  `MetaPet School is a calm Australian Years 3–6 classroom experience. ${SCHOOL_PROFILE_DESCRIPTION}`;
+  `MetaPet School is a calm Australian classroom resource for Foundation to Year 8. ${SCHOOL_PROFILE_DESCRIPTION}`;
 
 /** Emerald used for browser chrome and the install splash. */
 export const METAPET_SCHOOL_THEME_COLOR = "#065f46";

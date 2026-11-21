@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { metadata as homeMetadata } from "@/app/schools/field/page";
 import { metadata, viewport } from "@/app/schools/field/layout";
 import {
   METAPET_SCHOOL_NAME,
@@ -18,7 +19,7 @@ describe("MetaPet School standalone identity", () => {
     const metadataBase = metadata.metadataBase;
     expect(metadataBase).toBeInstanceOf(URL);
     expect((metadataBase as URL).origin).toBe(METAPET_SCHOOL_ORIGIN);
-    expect(metadata.alternates?.canonical).toBe(
+    expect(homeMetadata.alternates?.canonical).toBe(
       `${METAPET_SCHOOL_ORIGIN}/schools/field`,
     );
   });

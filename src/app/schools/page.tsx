@@ -5,6 +5,7 @@ import {
   FIELD_MODE_GUIDE_PATH,
   FIELD_MODE_SAFETY_PATH,
   FIELD_MODE_START_PATH,
+  FIELD_MODE_VERIFIED_PATH,
 } from "@/lib/childSafeBaseline";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
 import {
@@ -376,9 +377,23 @@ export default function SchoolsPage() {
             The lab uses fictional choices held in memory. Classroom learning outcomes still need independent educator evaluation.
             Use the materials below to review the lesson under adult supervision.
           </p>
-          <Link href="/schools/safeguarding" className="mt-3 inline-block text-emerald-200 underline underline-offset-4">
-            Safeguarding and contact information
-          </Link>
+          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
+            <Link href="/schools/safeguarding" className="text-sm text-emerald-200 underline underline-offset-4 hover:text-white">
+              Safeguarding and contact information
+            </Link>
+            <Link
+              className="text-sm text-slate-300 underline underline-offset-4 hover:text-white"
+              href="/schools/field/print/leadership"
+            >
+              Principal and ICT one-pager
+            </Link>
+            <Link
+              className="text-sm text-slate-300 underline underline-offset-4 hover:text-white"
+              href={FIELD_MODE_VERIFIED_PATH}
+            >
+              What’s verified
+            </Link>
+          </div>
           <div className="mt-8 space-y-6">
             {reviewerPathways.map((pathway) => (
               <article key={pathway.title}>

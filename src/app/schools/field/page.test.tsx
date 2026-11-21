@@ -26,7 +26,9 @@ describe("Classroom home", () => {
 
   it("lists all seven lessons with published curriculum codes", () => {
     render(<FieldModePage />);
-    expect(screen.getByRole("heading", { name: /The seven lessons/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /The seven Years 3–6 lessons/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /F–2 unplugged starter set/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "Years 7–8 bridge unit" })).toBeInTheDocument();
     expect(screen.getByText("Meet the System")).toBeInTheDocument();
     expect(screen.getByText("Test, Reflect and Improve")).toBeInTheDocument();
     expect(screen.getAllByText(/AC9TDI4K01/).length).toBeGreaterThan(0);
@@ -63,7 +65,7 @@ describe("Classroom home", () => {
 
     expect(
       screen.getByRole("link", {
-        name: /Print all seven lessons plus the parent note/i,
+        name: /Print the classroom pack/i,
       }),
     ).toHaveAttribute("href", "/schools/field/print/all");
     expect(
