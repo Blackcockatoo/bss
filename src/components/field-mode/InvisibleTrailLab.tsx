@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   ArrowLeft,
   ArrowRight,
@@ -352,9 +353,9 @@ export function InvisibleTrailLab() {
           </p>
         </aside>
         <nav className="mt-7 flex flex-wrap gap-4 text-sm font-semibold">
-          <a href="/schools/field/play" className="text-emerald-800 underline underline-offset-4">Back to student activities</a>
-          <a href="/schools/field/lessons" className="text-emerald-800 underline underline-offset-4">Explore the seven lessons</a>
-          <a href="/schools/field/safety" className="text-emerald-800 underline underline-offset-4">Safety and privacy</a>
+          <Link href="/schools/field/play" className="text-emerald-800 underline underline-offset-4">Back to student activities</Link>
+          <Link href="/schools/field/lessons" className="text-emerald-800 underline underline-offset-4">Explore the seven lessons</Link>
+          <Link href="/schools/field/safety" className="text-emerald-800 underline underline-offset-4">Safety and privacy</Link>
         </nav>
       </div>
     </main>
