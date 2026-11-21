@@ -6,7 +6,7 @@ import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
 import { parseFieldSession } from "@/lib/fieldMode/session";
 import { buildLessonMetadata } from "@/lib/schools/lessonMetadata";
 import {
-  LESSON_DEFINITIONS,
+  ALL_LESSON_DEFINITIONS,
   getLessonBySlug,
 } from "@/lib/teacher-lessons/lessonDefinitions";
 import {
@@ -20,7 +20,7 @@ interface FieldLessonPageProps {
 }
 
 export function generateStaticParams() {
-  return LESSON_DEFINITIONS.map((lesson) => ({ slug: lesson.slug }));
+  return ALL_LESSON_DEFINITIONS.map((lesson) => ({ slug: lesson.slug }));
 }
 
 export async function generateMetadata({

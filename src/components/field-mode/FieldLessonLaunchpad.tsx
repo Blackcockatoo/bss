@@ -5,17 +5,19 @@ import { BookOpenCheck, ClipboardCheck, FileText, Printer, ShieldCheck } from "l
 import { useEffect, useMemo, useState } from "react";
 
 import {
+  FIELD_MODE_FEEDBACK_PATH,
   FIELD_MODE_LESSONS_PATH,
   FIELD_MODE_PASSPORT_PATH,
   FIELD_MODE_PRINT_ALL_PATH,
   FIELD_MODE_PRINT_PATH_PREFIX,
   FIELD_MODE_REVIEW_PATH,
+  FIELD_MODE_ROLLOUT_PATH,
+  FIELD_MODE_STAFF_PD_PATH,
   SCHOOLS_DATA_PATH,
 } from "@/lib/childSafeBaseline";
-import {
-  curriculumAlignmentForSession,
-  mergeLearningAreas,
-} from "@/lib/schools/curriculumAlignment";
+import { mergeLearningAreas } from "@/lib/schools/curriculumAlignment";
+import { curriculumAlignmentForLesson } from "@/lib/schools/lessonAlignment";
+import { lessonAudienceLabel, lessonSetLabel } from "@/lib/schools/lessonYearBands";
 import {
   DEFAULT_FIELD_SESSION,
   FIELD_DELIVERY_MODES,
@@ -28,7 +30,11 @@ import {
   sanitizeFieldSession,
   type FieldSessionConfig,
 } from "@/lib/fieldMode/session";
-import { plannerExtrasFor } from "@/lib/schools/classroomPack";
+import {
+  FIELD_MODE_PRINT_F2_ALL_PATH,
+  FIELD_MODE_PRINT_YEARS_78_ALL_PATH,
+  plannerExtrasFor,
+} from "@/lib/schools/classroomPack";
 import {
   EMPTY_LESSON_FILTERS,
   filterLessons,
@@ -41,7 +47,7 @@ import {
 } from "@/lib/schools/lessonFilters";
 import { touchSchoolsLocalState } from "@/lib/schools/storage";
 import {
-  LESSON_DEFINITIONS,
+  ALL_LESSON_DEFINITIONS,
   selectLessonStatus,
   useLessonProgressHydrated,
   useLessonProgressStore,
@@ -68,7 +74,7 @@ export function FieldLessonLaunchpad({
   const hydrated = useLessonProgressHydrated();
   const progress = useLessonProgressStore();
   const visibleLessons = useMemo(
-    () => filterLessons(LESSON_DEFINITIONS, initialFilters),
+    () => filterLessons(ALL_LESSON_DEFINITIONS, initialFilters),
     [initialFilters],
   );
   const filtersActive = hasActiveLessonFilters(initialFilters);
@@ -88,7 +94,7 @@ export function FieldLessonLaunchpad({
 
   const completeCount = useMemo(
     () =>
-      LESSON_DEFINITIONS.filter(
+      ALL_LESSON_DEFINITIONS.filter(
         (lesson) => selectLessonStatus(progress, lesson.id) === "completed",
       ).length,
     [progress],
@@ -104,17 +110,18 @@ export function FieldLessonLaunchpad({
       <div className="mx-auto w-full max-w-6xl space-y-8 px-5 py-10 md:px-8 md:py-14">
         <header className="max-w-3xl space-y-3">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-800">
-            Teacher launchpad · Australian Years 3–6
+            Teacher launchpad · Australian Foundation to Year 8
           </p>
           <h1 className="text-4xl font-semibold tracking-tight text-slate-950 md:text-5xl">
             Ready when you are.
           </h1>
           <p className="text-base leading-7 text-slate-700 md:text-lg">
-            No account or payment required. Open Session One and start teaching,
-            or pick any other session. Records stay on this device.
+            No account or payment required. Open a Years 3–6 session, an
+            F–2 unplugged lesson, or a Years 7–8 bridge lesson. Records stay
+            on this device.
           </p>
           <p className="text-sm font-medium text-emerald-900" aria-live="polite">
-            {hydrated ? `${completeCount} of 7 sessions completed on this device` : "Loading local session records…"}
+            {hydrated ? `${completeCount} of ${ALL_LESSON_DEFINITIONS.length} lessons completed on this device` : "Loading local session records…"}
           </p>
         </header>
 
@@ -220,34 +227,65 @@ export function FieldLessonLaunchpad({
           </form>
           <p className="mt-4 text-sm leading-6 text-slate-600">
             A year-band match means the lesson already lists a published AC v9
-            code with a Years 3–4 (…4…) or Years 5–6 (…6…) identifier. Every
-            lesson in this pack currently lists codes for both bands, so that
-            filter does not hide a lesson on its own. Paper-friendly means the
-            planner already says the lesson works well on paper, or can be run
-            on paper.
+            code with a Foundation (…F…), Years 1–2 (…2…), Years 3–4 (…4…),
+            Years 5–6 (…6…) or Years 7–8 (…8…) identifier. That is how the list
+            distinguishes F–2, Years 3–6 and Years 7–8 lessons. Paper-friendly
+            means the planner already says the lesson works well on paper, can
+            be run on paper, or works fully unplugged.
           </p>
         </section>
 
-        <section aria-labelledby="field-lessons-heading">
+        <section aria-labelledby="field-lessons-heading" id="f2-unplugged">
+          <div id="years-7-8-bridge" className="sr-only">
+            Years 7–8 bridge unit
+          </div>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <BookOpenCheck className="h-6 w-6 text-emerald-800" aria-hidden="true" />
               <h2 id="field-lessons-heading" className="text-2xl font-semibold">
-                The seven sessions
+                The lesson list
               </h2>
             </div>
+            <div className="flex flex-wrap gap-2">
             <a
               href={FIELD_MODE_PRINT_ALL_PATH}
               className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
             >
               <Printer className="h-4 w-4" aria-hidden="true" />
-              Print the classroom pack
+              Print the Years 3–6 pack
             </a>
+            <a
+              href={FIELD_MODE_PRINT_F2_ALL_PATH}
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              <Printer className="h-4 w-4" aria-hidden="true" />
+              Print the F–2 unplugged pack
+            </a>
+            <a
+              href={FIELD_MODE_PRINT_YEARS_78_ALL_PATH}
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              <Printer className="h-4 w-4" aria-hidden="true" />
+              Print the Years 7–8 pack
+            </a>
+            <a
+              href={FIELD_MODE_STAFF_PD_PATH}
+              className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              Staff briefing
+            </a>
+            <a
+              href={FIELD_MODE_ROLLOUT_PATH}
+              className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              Rollout plan
+            </a>
+            </div>
           </div>
           <p className="mb-4 text-sm font-medium text-slate-700" aria-live="polite">
             {filtersActive
-              ? `Showing ${visibleLessons.length} of ${LESSON_DEFINITIONS.length} lessons.`
-              : `All ${LESSON_DEFINITIONS.length} lessons.`}
+              ? `Showing ${visibleLessons.length} of ${ALL_LESSON_DEFINITIONS.length} lessons.`
+              : `All ${ALL_LESSON_DEFINITIONS.length} lessons.`}
           </p>
           {visibleLessons.length === 0 ? (
             <p className="rounded-2xl border border-slate-200 bg-white p-5 text-sm leading-6 text-slate-700">
@@ -258,7 +296,7 @@ export function FieldLessonLaunchpad({
               >
                 Clear filters
               </a>{" "}
-              to see all seven.
+              to see all lessons.
             </p>
           ) : null}
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -266,7 +304,7 @@ export function FieldLessonLaunchpad({
               const paper = plannerExtrasFor(lesson.id).paper;
               const status = selectLessonStatus(progress, lesson.id);
               const isRecommendedStart = lesson.number === 1;
-              const alignment = curriculumAlignmentForSession(lesson.number);
+              const alignment = curriculumAlignmentForLesson(lesson);
               const areas = mergeLearningAreas(
                 lesson.learningAreas,
                 alignment.learningAreas,
@@ -282,7 +320,7 @@ export function FieldLessonLaunchpad({
                 >
                   <div className="flex items-start justify-between gap-3">
                     <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-800">
-                      Session {lesson.number}
+                      {lessonSetLabel(lesson.yearBand)} · {lessonAudienceLabel(lesson.yearBand)} · Lesson {lesson.number}
                     </p>
                     <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium capitalize text-slate-700">
                       {status.replace("-", " ")}
@@ -312,7 +350,7 @@ export function FieldLessonLaunchpad({
                     ) : null}
                   </div>
                   <p className="mt-4 text-xs font-medium text-slate-500">
-                    Years 3–6 · planned {lesson.durationMinutes} minutes · {paper.label}
+                    {lessonAudienceLabel(lesson.yearBand)} · planned {lesson.durationMinutes} minutes · {paper.label}
                   </p>
                   <a
                     href={buildFieldLessonPath(lesson.slug, session)}
@@ -338,6 +376,12 @@ export function FieldLessonLaunchpad({
                     className="mt-2 inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                   >
                     Report comment starters
+                  </a>
+                  <a
+                    href={`${FIELD_MODE_FEEDBACK_PATH}?lesson=${lesson.slug}`}
+                    className="mt-2 inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    Private teacher feedback
                   </a>
                 </article>
               );

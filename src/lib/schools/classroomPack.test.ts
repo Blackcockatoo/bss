@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { isPathnameAllowedByPolicy } from "@/lib/childSafeBaseline";
-import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
+import { ALL_LESSON_DEFINITIONS, LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
 
 import {
   ASSESSMENT_SOURCE_PATH,
@@ -17,6 +17,8 @@ import {
   FIELD_MODE_PRINT_RELIEF_PATH,
   FIELD_MODE_PRINT_TICKETS_PATH,
   FIELD_MODE_PRINT_VERIFIED_PATH,
+  FIELD_MODE_PRINT_STAFF_PD_PATH,
+  FIELD_MODE_PRINT_ROLLOUT_PATH,
   FIELD_MODE_PRINT_WORD_WALLS_PATH,
   FIELD_MODE_VERIFIED_PATH,
   STUDENT_REFLECTION_PROMPTS,
@@ -90,10 +92,19 @@ describe("classroom pack data", () => {
   it("does not invent verification results", () => {
     const checked = VERIFICATION_ITEMS.filter((item) => item.status === "checked");
     const notChecked = VERIFICATION_ITEMS.filter((item) => item.status === "not-checked");
-    expect(checked.length).toBe(2);
+    expect(checked.length).toBe(5);
     expect(notChecked.length).toBeGreaterThanOrEqual(3);
     expect(
       notChecked.some((item) => /school hardware/i.test(item.detail)),
+    ).toBe(true);
+    expect(
+      checked.some((item) => /this browser/i.test(item.detail)),
+    ).toBe(true);
+    expect(
+      checked.some((item) => /F–2 Digital Technologies content descriptions/i.test(item.title)),
+    ).toBe(true);
+    expect(
+      checked.some((item) => /Years 7–8 Digital Technologies content descriptions/i.test(item.title)),
     ).toBe(true);
   });
 
@@ -107,7 +118,7 @@ describe("classroom pack data", () => {
 
 
   it("grounds EAL/D notes in the lesson's own vocab and support activity", () => {
-    for (const lesson of LESSON_DEFINITIONS) {
+    for (const lesson of ALL_LESSON_DEFINITIONS) {
       const notes = ealdNotesFor(lesson.id);
       const vocabWords = plannerExtrasFor(lesson.id).vocab.map((entry) => entry.word);
       expect(notes.preteach.length).toBeGreaterThan(0);
@@ -133,6 +144,8 @@ describe("classroom pack data", () => {
       FIELD_MODE_PRINT_LEADERSHIP_PATH,
       FIELD_MODE_PRINT_NO_TECH_PATH,
       FIELD_MODE_PRINT_VERIFIED_PATH,
+  FIELD_MODE_PRINT_STAFF_PD_PATH,
+  FIELD_MODE_PRINT_ROLLOUT_PATH,
     ]) {
       expect(isPathnameAllowedByPolicy(pathname, "field"), pathname).toBe(true);
     }
