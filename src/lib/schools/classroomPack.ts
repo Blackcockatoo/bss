@@ -9,10 +9,32 @@ import { FIELD_MODE_VERIFIED_PATH } from "@/lib/childSafeBaseline";
 import { CANONICAL_SESSIONS } from "@/lib/schools/canonicalSequence";
 import type { CanonicalSessionId } from "@/lib/schools/canonicalSequence";
 import {
+  FOUNDATION_CURRICULUM_SOURCES,
+} from "@/lib/schools/foundationCurriculum";
+import {
+  foundationEaldNotesFor,
+  foundationPlannerExtrasFor,
+} from "@/lib/schools/foundationClassroomPack";
+import {
+  FOUNDATION_SESSIONS,
+  isFoundationSessionId,
+} from "@/lib/schools/foundationSequence";
+import {
+  YEARS_78_CURRICULUM_SOURCES,
+} from "@/lib/schools/years78Curriculum";
+import {
+  years78EaldNotesFor,
+  years78PlannerExtrasFor,
+} from "@/lib/schools/years78ClassroomPack";
+import {
+  YEARS_78_SESSIONS,
+  isYears78SessionId,
+} from "@/lib/schools/years78Sequence";
+import {
   LESSON_DEFINITIONS,
   getLessonById,
 } from "@/lib/teacher-lessons/lessonDefinitions";
-import type { LessonDefinition } from "@/lib/teacher-lessons/types";
+import type { LessonDefinition, LessonId } from "@/lib/teacher-lessons/types";
 
 /** Date and zone for outbound official-link checks done for this pack. */
 export const OFFICIAL_LINK_CHECKED_AT =
@@ -36,6 +58,9 @@ export const FIELD_MODE_PRINT_STAFF_PD_PATH =
   "/schools/field/print/staff-pd";
 export const FIELD_MODE_PRINT_ROLLOUT_PATH =
   "/schools/field/print/rollout";
+export const FIELD_MODE_PRINT_F2_ALL_PATH = "/schools/field/print/f2";
+export const FIELD_MODE_PRINT_YEARS_78_ALL_PATH =
+  "/schools/field/print/years-7-8";
 
 export interface OfficialLink {
   title: string;
@@ -113,6 +138,16 @@ export const CURRICULUM_SOURCE_LINKS: readonly OfficialLink[] = [
     href: "https://www.australiancurriculum.edu.au/content/dam/en/curriculum/ac-version-9/downloads/health-and-physical-education/health-and-physical-education-curriculum-content-f-6-v9.docx",
     note: "Official AC v9 HPE document.",
   },
+  ...FOUNDATION_CURRICULUM_SOURCES.map((source) => ({
+    title: source.title,
+    href: source.href,
+    note: source.notes,
+  })),
+  ...YEARS_78_CURRICULUM_SOURCES.map((source) => ({
+    title: source.title,
+    href: source.href,
+    note: source.notes,
+  })),
 ];
 
 export type PaperPathKind = "works-on-paper" | "paper-fallback";
@@ -136,7 +171,7 @@ export interface TwoMinuteExplainer {
 }
 
 export interface LessonPlannerExtras {
-  sessionId: CanonicalSessionId;
+  sessionId: LessonId;
   materials: readonly string[];
   paper: PaperPath;
   vocab: readonly VocabEntry[];
@@ -359,6 +394,9 @@ export function estimatedStepMinutes(
   if (stepCount === 5 && totalMinutes === 20) {
     return [3, 4, 5, 5, 3][stepIndex] ?? 0;
   }
+  if (stepCount === 5 && totalMinutes === 45) {
+    return [5, 8, 15, 12, 5][stepIndex] ?? 0;
+  }
   const base = Math.floor(totalMinutes / stepCount);
   const remainder = totalMinutes - base * stepCount;
   return base + (stepIndex < remainder ? 1 : 0);
@@ -367,9 +405,10 @@ export function estimatedStepMinutes(
 export function twoMinuteExplainerFor(
   lesson: LessonDefinition,
 ): TwoMinuteExplainer {
-  const session = CANONICAL_SESSIONS.find(
-    (candidate) => candidate.id === lesson.id,
-  );
+  const session =
+    CANONICAL_SESSIONS.find((candidate) => candidate.id === lesson.id) ??
+    FOUNDATION_SESSIONS.find((candidate) => candidate.id === lesson.id) ??
+    YEARS_78_SESSIONS.find((candidate) => candidate.id === lesson.id);
   return {
     intention: lesson.learningIntention,
     sayThis: lesson.teacherScript,
@@ -378,9 +417,13 @@ export function twoMinuteExplainerFor(
   };
 }
 
-export function plannerExtrasFor(
-  sessionId: CanonicalSessionId,
-): LessonPlannerExtras {
+export function plannerExtrasFor(sessionId: LessonId): LessonPlannerExtras {
+  if (isFoundationSessionId(sessionId)) {
+    return foundationPlannerExtrasFor(sessionId);
+  }
+  if (isYears78SessionId(sessionId)) {
+    return years78PlannerExtrasFor(sessionId);
+  }
   return {
     sessionId,
     materials: LESSON_MATERIALS[sessionId],
@@ -390,9 +433,10 @@ export function plannerExtrasFor(
 }
 
 export function lessonSourceText(lesson: LessonDefinition): string {
-  const session = CANONICAL_SESSIONS.find(
-    (candidate) => candidate.id === lesson.id,
-  );
+  const session =
+    CANONICAL_SESSIONS.find((candidate) => candidate.id === lesson.id) ??
+    FOUNDATION_SESSIONS.find((candidate) => candidate.id === lesson.id) ??
+    YEARS_78_SESSIONS.find((candidate) => candidate.id === lesson.id);
   return [
     lesson.title,
     lesson.shortDescription,
@@ -460,14 +504,14 @@ export const ASSESSMENT_SOURCE_PATH =
 export const LEADERSHIP_ONE_PAGER = {
   title: "MetaPet School — principal and ICT one-pager",
   whatItIs:
-    "A teacher-led classroom tool for Years 3–6. Seven short sessions of about 15 or 20 minutes. Students do not need accounts. Ordinary page requests still go to the website host; classroom records stay in the browser during routine use.",
+    "A teacher-led classroom tool for Years 3–6, with a fully unplugged starter set for Foundation and Years 1–2, and a Years 7–8 bridge unit of seven lessons of about 45 minutes. The F–6 sessions are about 15 or 20 minutes. Students do not need accounts. Ordinary page requests still go to the website host; classroom records stay in the browser during routine use. The F–2 and Years 7–8 lessons do not collect names or personal data.",
   whatItTeaches:
     "Systems thinking, digital responsibility, and online safety habits, using the Australian Curriculum v9 codes already listed on the lesson cards. This is a classroom alignment, not an official ACARA endorsement.",
   whatItAvoids:
     "Student accounts, social features, open chat, and features designed to keep students coming back outside the lesson.",
   operatingRules: [
     "Use aliases only; do not enter real student names.",
-    "Keep each session to the planned 15 or 20 minutes.",
+    "Keep each session to the planned time: about 15 or 20 minutes for F–6, or about 45 minutes for Years 7–8.",
     "Do not position it as therapy or counselling.",
     "Confirm the school’s family participation process before the first lesson.",
     "Review any export before it leaves the device.",
@@ -529,6 +573,18 @@ export const VERIFICATION_ITEMS: readonly VerificationItem[] = [
     status: "checked",
     detail:
       "In this source, the whole-school rollout plan and the private teacher feedback tool write only to this browser, with an export or copy option for feedback. They do not add a server endpoint, a third-party feedback service, or product analytics. This is a statement about the current source, not a production-host audit.",
+  },
+  {
+    title: "F–2 Digital Technologies content descriptions in the unplugged starter set",
+    status: "checked",
+    detail:
+      `The eight Australian Curriculum v9 codes used in the F–2 starter set, and the content-description wording shown beside them, were copied from official ACARA Digital Technologies documents that returned HTTP 200 on ${OFFICIAL_LINK_CHECKED_AT}: the F–6 curriculum content download, the F–10 scope and sequence, and, for AC9TDIFK01 and AC9TDIFK02, the Foundation work sample “Observations: Data is all around us”. This is classroom alignment, not an official ACARA endorsement.`,
+  },
+  {
+    title: "Years 7–8 Digital Technologies content descriptions in the bridge unit",
+    status: "checked",
+    detail:
+      "The eight Australian Curriculum v9 codes used in the Years 7–8 bridge unit, and the content-description wording shown beside them, were copied from official ACARA Digital Technologies documents that returned HTTP 200 on 20 November 2026, Australia/Sydney: the 7–10 curriculum content download, and the F–10 scope and sequence. This is classroom alignment, not an official ACARA endorsement.",
   },
 ];
 
@@ -614,7 +670,13 @@ const EALD_NOTES: Record<CanonicalSessionId, EaldNotes> = {
   },
 };
 
-export function ealdNotesFor(sessionId: CanonicalSessionId): EaldNotes {
+export function ealdNotesFor(sessionId: LessonId): EaldNotes {
+  if (isFoundationSessionId(sessionId)) {
+    return foundationEaldNotesFor(sessionId);
+  }
+  if (isYears78SessionId(sessionId)) {
+    return years78EaldNotesFor(sessionId);
+  }
   return EALD_NOTES[sessionId];
 }
 

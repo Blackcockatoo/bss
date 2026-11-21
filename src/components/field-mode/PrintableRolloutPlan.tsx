@@ -4,7 +4,8 @@ import {
   emptyRolloutPlan,
   type RolloutPlan,
 } from "@/lib/schools/rolloutPlan";
-import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
+import { lessonDisplayTitle } from "@/lib/schools/lessonYearBands";
+import { ALL_LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
 
 function blank(value: string): string {
   return value.trim() ? value : "________________________________";
@@ -83,12 +84,12 @@ export function PrintableRolloutPlan({
           </tr>
         </thead>
         <tbody>
-          {LESSON_DEFINITIONS.map((lesson) => {
+          {ALL_LESSON_DEFINITIONS.map((lesson) => {
             const row = plan.lessons.find((item) => item.lessonId === lesson.id);
             return (
               <tr key={lesson.id}>
                 <td className="border border-slate-300 p-2">
-                  Lesson {lesson.number}: {lesson.title} ({lesson.durationMinutes} min)
+                  {lessonDisplayTitle(lesson)} ({lesson.durationMinutes} min)
                 </td>
                 <td className="border border-slate-300 p-2">{blank(row?.when ?? "")}</td>
                 <td className="border border-slate-300 p-2">{blank(row?.classes ?? "")}</td>

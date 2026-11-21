@@ -1,15 +1,15 @@
-import type { CanonicalSessionId } from "@/lib/schools/canonicalSequence";
 import {
   SCHOOLS_ROLLOUT_PLAN_STORAGE_KEY,
   touchSchoolsLocalState,
 } from "@/lib/schools/storage";
-import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
+import { ALL_LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
+import type { LessonId } from "@/lib/teacher-lessons/types";
 
 export const ROLLOUT_PLAN_CAVEAT =
   "This is a planning template for staff. Edits stay in this browser on this device. Do not enter student names, contact details or other identifying information. Print or copy the plan if you need it off this device.";
 
 export interface RolloutLessonRow {
-  lessonId: CanonicalSessionId;
+  lessonId: LessonId;
   when: string;
   classes: string;
   lead: string;
@@ -48,7 +48,7 @@ export function emptyRolloutPlan(): RolloutPlan {
     paperFallback: "",
     parentLetterWhen: "",
     notes: "",
-    lessons: LESSON_DEFINITIONS.map((lesson) => ({
+    lessons: ALL_LESSON_DEFINITIONS.map((lesson) => ({
       lessonId: lesson.id,
       when: "",
       classes: "",

@@ -18,10 +18,10 @@ afterEach(() => {
 });
 
 describe("Field lesson launchpad", () => {
-  it("links all seven cards into the Field lesson route", async () => {
+  it("links every lesson card into the Field lesson route", async () => {
     render(<FieldLessonLaunchpad />);
     const starts = screen.getAllByRole("link", { name: /Start lesson/i });
-    expect(starts).toHaveLength(7);
+    expect(starts).toHaveLength(21);
     for (const link of starts) {
       expect(link.getAttribute("href")).toMatch(
         /^\/schools\/field\/lessons\//,
@@ -48,7 +48,7 @@ describe("Field lesson launchpad", () => {
     const printLinks = screen.getAllByRole("link", {
       name: /Print \/ save PDF fallback/i,
     });
-    expect(printLinks).toHaveLength(7);
+    expect(printLinks).toHaveLength(21);
     for (const link of printLinks) {
       expect(link.getAttribute("href")).toMatch(
         /^\/schools\/field\/print\//,
@@ -66,8 +66,8 @@ describe("Field lesson launchpad", () => {
     expect(form).toHaveAttribute("method", "get");
     expect(form).toHaveAttribute("action", "/schools/field/lessons");
     expect(screen.getByRole("button", { name: /Show matching lessons/i })).toBeInTheDocument();
-    expect(screen.getByText(/Showing 2 of 7 lessons/)).toBeInTheDocument();
-    expect(screen.getAllByRole("link", { name: /Start lesson/i })).toHaveLength(2);
+    expect(screen.getByText(/Showing 5 of 21 lessons/)).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: /Start lesson/i })).toHaveLength(5);
   });
 
   it("can limit the list to paper-friendly lessons", () => {
@@ -76,7 +76,7 @@ describe("Field lesson launchpad", () => {
         initialFilters={{ ...EMPTY_LESSON_FILTERS, paperFriendly: true }}
       />,
     );
-    expect(screen.getByText(/Showing 3 of 7 lessons/)).toBeInTheDocument();
+    expect(screen.getByText(/Showing 17 of 21 lessons/)).toBeInTheDocument();
     expect(screen.getByText("Privacy and Responsible Design")).toBeInTheDocument();
     expect(screen.queryByText("Meet the System")).not.toBeInTheDocument();
   });
@@ -84,7 +84,7 @@ describe("Field lesson launchpad", () => {
   it("offers projector slides for every lesson", () => {
     render(<FieldLessonLaunchpad />);
     const slideLinks = screen.getAllByRole("link", { name: /Projector slides/i });
-    expect(slideLinks).toHaveLength(7);
+    expect(slideLinks).toHaveLength(21);
     for (const link of slideLinks) {
       expect(link.getAttribute("href")).toMatch(
         /^\/schools\/field\/lessons\/.+\/slides$/,

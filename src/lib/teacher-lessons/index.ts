@@ -8,12 +8,15 @@
 export * from "./types";
 export {
   LESSON_DEFINITIONS,
+  ALL_LESSON_DEFINITIONS,
   LESSON_IDS,
   TOTAL_LESSONS,
   getLessonById,
   getLessonBySlug,
   isLessonId,
 } from "./lessonDefinitions";
+export { FOUNDATION_LESSON_DEFINITIONS } from "./foundationLessonDefinitions";
+export { YEARS_78_LESSON_DEFINITIONS } from "./years78LessonDefinitions";
 export {
   TEACHER_HUB_PATH,
   LESSON_BASE_PATH,

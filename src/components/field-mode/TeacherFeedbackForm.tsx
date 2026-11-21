@@ -19,8 +19,9 @@ import {
   subscribeTeacherFeedback,
   type TeacherFeedbackRating,
 } from "@/lib/schools/teacherFeedback";
-import type { CanonicalSessionId } from "@/lib/schools/canonicalSequence";
-import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
+import { lessonDisplayTitle } from "@/lib/schools/lessonYearBands";
+import { ALL_LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
+import type { LessonId } from "@/lib/teacher-lessons/types";
 
 function getSnapshot(): string {
   return readTeacherFeedbackRaw(window.localStorage);
@@ -29,7 +30,7 @@ function getSnapshot(): string {
 export function TeacherFeedbackForm({
   initialLessonId = "",
 }: {
-  initialLessonId?: CanonicalSessionId | "";
+  initialLessonId?: LessonId | "";
 }) {
   const raw = useSyncExternalStore(
     subscribeTeacherFeedback,
@@ -37,7 +38,7 @@ export function TeacherFeedbackForm({
     () => "",
   );
   const entries = useMemo(() => parseTeacherFeedbackList(raw || null), [raw]);
-  const [lessonId, setLessonId] = useState<CanonicalSessionId | "">(initialLessonId);
+  const [lessonId, setLessonId] = useState<LessonId | "">(initialLessonId);
   const [rating, setRating] = useState<TeacherFeedbackRating | null>(null);
   const [note, setNote] = useState("");
   const [status, setStatus] = useState("");
@@ -115,13 +116,13 @@ export function TeacherFeedbackForm({
               className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3 font-normal"
               value={lessonId}
               onChange={(event) =>
-                setLessonId((event.target.value || "") as CanonicalSessionId | "")
+                setLessonId((event.target.value || "") as LessonId | "")
               }
             >
               <option value="">Not specified</option>
-              {LESSON_DEFINITIONS.map((lesson) => (
+              {ALL_LESSON_DEFINITIONS.map((lesson) => (
                 <option key={lesson.id} value={lesson.id}>
-                  Lesson {lesson.number}: {lesson.title}
+                  {lessonDisplayTitle(lesson)}
                 </option>
               ))}
             </select>
@@ -187,7 +188,7 @@ export function TeacherFeedbackForm({
             <>
               <ul className="space-y-3">
                 {entries.map((entry) => {
-                  const lesson = LESSON_DEFINITIONS.find((item) => item.id === entry.lessonId);
+                  const lesson = ALL_LESSON_DEFINITIONS.find((item) => item.id === entry.lessonId);
                   return (
                     <li
                       key={entry.id}

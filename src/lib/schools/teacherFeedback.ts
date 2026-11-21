@@ -1,10 +1,12 @@
-import type { CanonicalSessionId } from "@/lib/schools/canonicalSequence";
 import {
   SCHOOLS_TEACHER_FEEDBACK_STORAGE_KEY,
   touchSchoolsLocalState,
 } from "@/lib/schools/storage";
-import { CANONICAL_SESSION_IDS } from "@/lib/schools/canonicalSequence";
-import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
+import {
+  ALL_LESSON_DEFINITIONS,
+  isLessonId as isKnownLessonId,
+} from "@/lib/teacher-lessons/lessonDefinitions";
+import type { LessonId } from "@/lib/teacher-lessons/types";
 
 export const TEACHER_FEEDBACK_RATINGS = [
   "worked-well",
@@ -31,7 +33,7 @@ export const TEACHER_FEEDBACK_MAX_ENTRIES = 40;
 
 export interface TeacherLessonFeedback {
   id: string;
-  lessonId: CanonicalSessionId | "";
+  lessonId: LessonId | "";
   rating: TeacherFeedbackRating;
   note: string;
   recordedAt: number;
@@ -44,11 +46,8 @@ function isRating(value: unknown): value is TeacherFeedbackRating {
   );
 }
 
-function isLessonId(value: unknown): value is CanonicalSessionId {
-  return (
-    typeof value === "string" &&
-    CANONICAL_SESSION_IDS.includes(value as CanonicalSessionId)
-  );
+function isLessonId(value: unknown): value is LessonId {
+  return typeof value === "string" && isKnownLessonId(value);
 }
 
 export function sanitizeTeacherFeedback(
@@ -104,7 +103,7 @@ export function formatTeacherFeedbackExport(
     "",
   ];
   for (const entry of [...entries].sort((a, b) => b.recordedAt - a.recordedAt)) {
-    const lesson = LESSON_DEFINITIONS.find((item) => item.id === entry.lessonId);
+    const lesson = ALL_LESSON_DEFINITIONS.find((item) => item.id === entry.lessonId);
     const lessonLabel = lesson
       ? `Lesson ${lesson.number}: ${lesson.title}`
       : "Lesson not specified";

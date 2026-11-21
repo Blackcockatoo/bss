@@ -25,7 +25,7 @@ import {
 export function GET() {
   return NextResponse.json(
     {
-      name: `${METAPET_SCHOOL_NAME} — Australian Years 3–6 Classroom Lessons`,
+      name: `${METAPET_SCHOOL_NAME} — Australian Foundation to Year 8 Classroom Lessons`,
       short_name: METAPET_SCHOOL_SHORT_NAME,
       description: METAPET_SCHOOL_DESCRIPTION,
       id: FIELD_MODE_APP_ID,

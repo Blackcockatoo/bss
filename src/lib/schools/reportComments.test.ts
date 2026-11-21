@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { curriculumAlignmentForSession } from "@/lib/schools/curriculumAlignment";
-import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
+import { curriculumAlignmentForLesson } from "@/lib/schools/lessonAlignment";
+import { ALL_LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
 
 import {
   REPORT_COMMENT_CAVEAT,
@@ -12,10 +12,10 @@ import {
 
 describe("report comment starters", () => {
   it("ties every bank to the lesson's own intention and published codes", () => {
-    expect(allReportCommentBanks()).toHaveLength(LESSON_DEFINITIONS.length);
-    for (const lesson of LESSON_DEFINITIONS) {
+    expect(allReportCommentBanks()).toHaveLength(ALL_LESSON_DEFINITIONS.length);
+    for (const lesson of ALL_LESSON_DEFINITIONS) {
       const bank = reportCommentBankFor(lesson);
-      const codes = curriculumAlignmentForSession(lesson.number).codes;
+      const codes = curriculumAlignmentForLesson(lesson).codes;
       expect(bank.intention).toBe(lesson.learningIntention);
       expect([...bank.codes]).toEqual(codes);
       expect(bank.starters.at).toBe(
@@ -31,8 +31,8 @@ describe("report comment starters", () => {
 
   it("does not invent codes or quote achievement-standard language", () => {
     const published = new Set(
-      LESSON_DEFINITIONS.flatMap(
-        (lesson) => curriculumAlignmentForSession(lesson.number).codes,
+      ALL_LESSON_DEFINITIONS.flatMap(
+        (lesson) => curriculumAlignmentForLesson(lesson).codes,
       ),
     );
     const starterText = allReportCommentBanks()

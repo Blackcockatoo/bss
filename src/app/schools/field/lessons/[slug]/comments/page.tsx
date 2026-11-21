@@ -6,7 +6,7 @@ import { FIELD_MODE_LESSONS_PATH } from "@/lib/childSafeBaseline";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
 import { reportCommentBankFor } from "@/lib/schools/reportComments";
 import {
-  LESSON_DEFINITIONS,
+  ALL_LESSON_DEFINITIONS,
   getLessonBySlug,
 } from "@/lib/teacher-lessons/lessonDefinitions";
 
@@ -15,7 +15,7 @@ interface LessonCommentsPageProps {
 }
 
 export function generateStaticParams() {
-  return LESSON_DEFINITIONS.map((lesson) => ({ slug: lesson.slug }));
+  return ALL_LESSON_DEFINITIONS.map((lesson) => ({ slug: lesson.slug }));
 }
 
 export async function generateMetadata({
