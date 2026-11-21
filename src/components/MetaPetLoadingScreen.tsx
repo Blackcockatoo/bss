@@ -14,7 +14,7 @@ type MetaPetLoadingScreenProps = {
 };
 
 const CORE_STAGE_MESSAGES: { threshold: number; label: string }[] = [
-  { threshold: 0, label: "Preparing privacy-first demo…" },
+  { threshold: 0, label: "Opening MetaPet…" },
   { threshold: 10, label: "Checking local-only browser storage…" },
   { threshold: 25, label: "Loading the companion safely…" },
   { threshold: 45, label: "Keeping accounts, ads, and trackers out…" },
@@ -79,7 +79,7 @@ export function MetaPetLoadingScreen(props: MetaPetLoadingScreenProps) {
 
   const displayLabel =
     props.statusMessage === "Generating genome sequence"
-      ? "Preparing privacy-first demo"
+      ? "Loading MetaPet"
       : props.statusMessage ?? derivedLabel;
 
   const glow = useMotionValue(0);
@@ -249,7 +249,7 @@ export function MetaPetLoadingScreen(props: MetaPetLoadingScreenProps) {
                 <h1 className="text-2xl md:text-3xl font-semibold text-slate-50">
                   {IS_SCHOOLS_PROFILE
                     ? "Preparing the classroom review path"
-                    : "Preparing the privacy-first demo"}
+                    : "Loading MetaPet"}
                 </h1>
                 <p className="mt-2 text-sm text-slate-300/80">
                   {IS_SCHOOLS_PROFILE

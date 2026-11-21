@@ -1,13 +1,23 @@
 "use client";
 
+import Link from "next/link";
 import { BookOpenCheck, ClipboardCheck, FileText, Printer, ShieldCheck } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import {
+  FIELD_MODE_FEEDBACK_PATH,
+  FIELD_MODE_LESSONS_PATH,
   FIELD_MODE_PASSPORT_PATH,
+  FIELD_MODE_PRINT_ALL_PATH,
   FIELD_MODE_PRINT_PATH_PREFIX,
   FIELD_MODE_REVIEW_PATH,
+  FIELD_MODE_ROLLOUT_PATH,
+  FIELD_MODE_STAFF_PD_PATH,
+  SCHOOLS_DATA_PATH,
 } from "@/lib/childSafeBaseline";
+import { mergeLearningAreas } from "@/lib/schools/curriculumAlignment";
+import { curriculumAlignmentForLesson } from "@/lib/schools/lessonAlignment";
+import { lessonAudienceLabel, lessonSetLabel } from "@/lib/schools/lessonYearBands";
 import {
   DEFAULT_FIELD_SESSION,
   FIELD_DELIVERY_MODES,
@@ -20,9 +30,24 @@ import {
   sanitizeFieldSession,
   type FieldSessionConfig,
 } from "@/lib/fieldMode/session";
+import {
+  FIELD_MODE_PRINT_F2_ALL_PATH,
+  FIELD_MODE_PRINT_YEARS_78_ALL_PATH,
+  plannerExtrasFor,
+} from "@/lib/schools/classroomPack";
+import {
+  EMPTY_LESSON_FILTERS,
+  filterLessons,
+  hasActiveLessonFilters,
+  publishedCurriculumCodes,
+  type LessonSearchFilters,
+  LESSON_MINUTES_FILTERS,
+  LESSON_YEAR_BAND_FILTERS,
+  LESSON_YEAR_BAND_LABELS,
+} from "@/lib/schools/lessonFilters";
 import { touchSchoolsLocalState } from "@/lib/schools/storage";
 import {
-  LESSON_DEFINITIONS,
+  ALL_LESSON_DEFINITIONS,
   selectLessonStatus,
   useLessonProgressHydrated,
   useLessonProgressStore,
@@ -40,10 +65,20 @@ function loadSession(): FieldSessionConfig {
   }
 }
 
-export function FieldLessonLaunchpad() {
+export function FieldLessonLaunchpad({
+  initialFilters = EMPTY_LESSON_FILTERS,
+}: {
+  initialFilters?: LessonSearchFilters;
+}) {
   const [session, setSession] = useState<FieldSessionConfig>(loadSession);
   const hydrated = useLessonProgressHydrated();
   const progress = useLessonProgressStore();
+  const visibleLessons = useMemo(
+    () => filterLessons(ALL_LESSON_DEFINITIONS, initialFilters),
+    [initialFilters],
+  );
+  const filtersActive = hasActiveLessonFilters(initialFilters);
+  const publishedCodes = useMemo(() => publishedCurriculumCodes(), []);
 
   useEffect(() => {
     try {
@@ -59,7 +94,7 @@ export function FieldLessonLaunchpad() {
 
   const completeCount = useMemo(
     () =>
-      LESSON_DEFINITIONS.filter(
+      ALL_LESSON_DEFINITIONS.filter(
         (lesson) => selectLessonStatus(progress, lesson.id) === "completed",
       ).length,
     [progress],
@@ -75,31 +110,205 @@ export function FieldLessonLaunchpad() {
       <div className="mx-auto w-full max-w-6xl space-y-8 px-5 py-10 md:px-8 md:py-14">
         <header className="max-w-3xl space-y-3">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-800">
-            Teacher launchpad · Australian Years 3–6
+            Teacher launchpad · Australian Foundation to Year 8
           </p>
           <h1 className="text-4xl font-semibold tracking-tight text-slate-950 md:text-5xl">
             Ready when you are.
           </h1>
           <p className="text-base leading-7 text-slate-700 md:text-lg">
-            No account or payment required. Open Session One and start teaching,
-            or pick any other session. Records stay on this device.
+            No account or payment required. Open a Years 3–6 session, an
+            F–2 unplugged lesson, or a Years 7–8 bridge lesson. Records stay
+            on this device.
           </p>
           <p className="text-sm font-medium text-emerald-900" aria-live="polite">
-            {hydrated ? `${completeCount} of 7 sessions completed on this device` : "Loading local session records…"}
+            {hydrated ? `${completeCount} of ${ALL_LESSON_DEFINITIONS.length} lessons completed on this device` : "Loading local session records…"}
           </p>
         </header>
 
-        <section aria-labelledby="field-lessons-heading">
-          <div className="mb-4 flex items-center gap-3">
-            <BookOpenCheck className="h-6 w-6 text-emerald-800" aria-hidden="true" />
-            <h2 id="field-lessons-heading" className="text-2xl font-semibold">
-              The seven sessions
-            </h2>
+        <section
+          aria-labelledby="lesson-filters-heading"
+          className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-7"
+        >
+          <h2 id="lesson-filters-heading" className="text-2xl font-semibold">
+            Find a lesson
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            Filter by year band, time, curriculum code or paper path, or search
+            the lesson list. The form works without JavaScript and the address
+            bar keeps a link you can share.
+          </p>
+          <form
+            method="get"
+            action={FIELD_MODE_LESSONS_PATH}
+            aria-labelledby="lesson-filters-heading"
+            className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+          >
+            <label className="space-y-2 text-sm font-semibold text-slate-800 md:col-span-2 lg:col-span-3">
+              Search
+              <input
+                type="search"
+                name="q"
+                defaultValue={initialFilters.query}
+                placeholder="Title, intention or code"
+                className="min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3 font-normal"
+              />
+            </label>
+            <label className="space-y-2 text-sm font-semibold text-slate-800">
+              Year band
+              <select
+                name="years"
+                defaultValue={initialFilters.yearBand ?? ""}
+                className="min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3 font-normal"
+              >
+                <option value="">Any year band</option>
+                {LESSON_YEAR_BAND_FILTERS.map((value) => (
+                  <option key={value} value={value}>
+                    {LESSON_YEAR_BAND_LABELS[value]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="space-y-2 text-sm font-semibold text-slate-800">
+              Time available
+              <select
+                name="minutes"
+                defaultValue={initialFilters.minutes ? String(initialFilters.minutes) : ""}
+                className="min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3 font-normal"
+              >
+                <option value="">15 or 20 minutes</option>
+                {LESSON_MINUTES_FILTERS.map((value) => (
+                  <option key={value} value={value}>
+                    {value} minutes
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="space-y-2 text-sm font-semibold text-slate-800">
+              Australian Curriculum v9 code
+              <select
+                name="code"
+                defaultValue={initialFilters.code ?? ""}
+                className="min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3 font-normal"
+              >
+                <option value="">Any listed code</option>
+                {publishedCodes.map((code) => (
+                  <option key={code} value={code}>
+                    {code}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex items-center gap-3 text-sm font-semibold text-slate-800 md:col-span-2">
+              <input
+                type="checkbox"
+                name="paper"
+                value="yes"
+                defaultChecked={initialFilters.paperFriendly}
+                className="h-4 w-4"
+              />
+              Paper-friendly only
+            </label>
+            <div className="flex flex-wrap items-end gap-3 md:col-span-2 lg:col-span-3">
+              <button
+                type="submit"
+                className="min-h-12 rounded-xl bg-emerald-800 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
+              >
+                Show matching lessons
+              </button>
+              {filtersActive ? (
+                <a
+                  href={FIELD_MODE_LESSONS_PATH}
+                  className="inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+                >
+                  Clear filters
+                </a>
+              ) : null}
+            </div>
+          </form>
+          <p className="mt-4 text-sm leading-6 text-slate-600">
+            A year-band match means the lesson already lists a published AC v9
+            code with a Foundation (…F…), Years 1–2 (…2…), Years 3–4 (…4…),
+            Years 5–6 (…6…) or Years 7–8 (…8…) identifier. That is how the list
+            distinguishes F–2, Years 3–6 and Years 7–8 lessons. Paper-friendly
+            means the planner already says the lesson works well on paper, can
+            be run on paper, or works fully unplugged.
+          </p>
+        </section>
+
+        <section aria-labelledby="field-lessons-heading" id="f2-unplugged">
+          <div id="years-7-8-bridge" className="sr-only">
+            Years 7–8 bridge unit
           </div>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <BookOpenCheck className="h-6 w-6 text-emerald-800" aria-hidden="true" />
+              <h2 id="field-lessons-heading" className="text-2xl font-semibold">
+                The lesson list
+              </h2>
+            </div>
+            <div className="flex flex-wrap gap-2">
+            <a
+              href={FIELD_MODE_PRINT_ALL_PATH}
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              <Printer className="h-4 w-4" aria-hidden="true" />
+              Print the Years 3–6 pack
+            </a>
+            <a
+              href={FIELD_MODE_PRINT_F2_ALL_PATH}
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              <Printer className="h-4 w-4" aria-hidden="true" />
+              Print the F–2 unplugged pack
+            </a>
+            <a
+              href={FIELD_MODE_PRINT_YEARS_78_ALL_PATH}
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              <Printer className="h-4 w-4" aria-hidden="true" />
+              Print the Years 7–8 pack
+            </a>
+            <a
+              href={FIELD_MODE_STAFF_PD_PATH}
+              className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              Staff briefing
+            </a>
+            <a
+              href={FIELD_MODE_ROLLOUT_PATH}
+              className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              Rollout plan
+            </a>
+            </div>
+          </div>
+          <p className="mb-4 text-sm font-medium text-slate-700" aria-live="polite">
+            {filtersActive
+              ? `Showing ${visibleLessons.length} of ${ALL_LESSON_DEFINITIONS.length} lessons.`
+              : `All ${ALL_LESSON_DEFINITIONS.length} lessons.`}
+          </p>
+          {visibleLessons.length === 0 ? (
+            <p className="rounded-2xl border border-slate-200 bg-white p-5 text-sm leading-6 text-slate-700">
+              No lessons match these filters.{" "}
+              <a
+                href={FIELD_MODE_LESSONS_PATH}
+                className="font-semibold text-emerald-900 underline underline-offset-2"
+              >
+                Clear filters
+              </a>{" "}
+              to see all lessons.
+            </p>
+          ) : null}
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {LESSON_DEFINITIONS.map((lesson) => {
+            {visibleLessons.map((lesson) => {
+              const paper = plannerExtrasFor(lesson.id).paper;
               const status = selectLessonStatus(progress, lesson.id);
               const isRecommendedStart = lesson.number === 1;
+              const alignment = curriculumAlignmentForLesson(lesson);
+              const areas = mergeLearningAreas(
+                lesson.learningAreas,
+                alignment.learningAreas,
+              );
               return (
                 <article
                   key={lesson.id}
@@ -111,7 +320,7 @@ export function FieldLessonLaunchpad() {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-800">
-                      Session {lesson.number}
+                      {lessonSetLabel(lesson.yearBand)} · {lessonAudienceLabel(lesson.yearBand)} · Lesson {lesson.number}
                     </p>
                     <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium capitalize text-slate-700">
                       {status.replace("-", " ")}
@@ -126,8 +335,22 @@ export function FieldLessonLaunchpad() {
                   <p className="mt-2 flex-1 text-sm leading-6 text-slate-600">
                     {lesson.shortDescription}
                   </p>
+                  <div className="mt-3 space-y-1 text-xs leading-5 text-slate-600">
+                    <p>
+                      <span className="font-semibold text-slate-800">Learning areas:</span>{" "}
+                      {areas.join(" · ")}
+                    </p>
+                    {alignment.codes.length > 0 ? (
+                      <p>
+                        <span className="font-semibold text-slate-800">
+                          Australian Curriculum v9:
+                        </span>{" "}
+                        {alignment.codes.join(", ")}
+                      </p>
+                    ) : null}
+                  </div>
                   <p className="mt-4 text-xs font-medium text-slate-500">
-                    {FIELD_SESSION_LABELS.yearBand[session.yearBand]} · {session.durationMinutes} min · {FIELD_SESSION_LABELS.deliveryMode[session.deliveryMode]}
+                    {lessonAudienceLabel(lesson.yearBand)} · planned {lesson.durationMinutes} minutes · {paper.label}
                   </p>
                   <a
                     href={buildFieldLessonPath(lesson.slug, session)}
@@ -142,9 +365,61 @@ export function FieldLessonLaunchpad() {
                     <Printer className="h-4 w-4" aria-hidden="true" />
                     Print / save PDF fallback
                   </a>
+                  <a
+                    href={`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/slides`}
+                    className="mt-2 inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    Projector slides
+                  </a>
+                  <a
+                    href={`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/comments`}
+                    className="mt-2 inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    Report comment starters
+                  </a>
+                  <a
+                    href={`${FIELD_MODE_FEEDBACK_PATH}?lesson=${lesson.slug}`}
+                    className="mt-2 inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    Private teacher feedback
+                  </a>
                 </article>
               );
             })}
+          </div>
+        </section>
+
+        <section
+          aria-labelledby="invisible-trail-heading"
+          className="rounded-3xl border border-emerald-900/20 bg-white p-5 shadow-sm md:p-7"
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-800">
+            Optional companion lab · Years 3–6
+          </p>
+          <h2 id="invisible-trail-heading" className="mt-2 text-2xl font-semibold">
+            The Invisible Trail
+          </h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-700">
+            An optional Digital Independence activity, separate from the seven
+            sessions. Students use fictional data to see how a click leaves a
+            record, how a system makes a guess, and how a privacy choice changes
+            the result. No student accounts or real student data. The lab’s own
+            guide lists AC9TDI4P09, AC9TDI6P10, VC2TDI4D05 and VC2TDI6D06. This
+            is classroom alignment, not an official ACARA or VCAA endorsement.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link
+              href="/schools/field/play/invisible-trail"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-800 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
+            >
+              Try The Invisible Trail
+            </Link>
+            <a
+              href="/schools/field/print/invisible-trail.html"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              Printable teacher guide
+            </a>
           </div>
         </section>
 
@@ -265,13 +540,23 @@ export function FieldLessonLaunchpad() {
               Review or delete lesson evidence stored on this classroom device.
             </p>
           </a>
+          <a
+            href={SCHOOLS_DATA_PATH}
+            className="rounded-3xl border border-slate-300 bg-white p-5 text-slate-950 hover:bg-slate-50 md:col-span-2"
+          >
+            <ShieldCheck className="h-6 w-6 text-emerald-800" aria-hidden="true" />
+            <h2 className="mt-3 text-xl font-semibold">Local-data controls</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-700">
+              See and delete classroom records stored in this browser.
+            </p>
+          </a>
         </section>
 
         <aside className="flex gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-700">
           <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-800" aria-hidden="true" />
-          This Field lesson path does not require student accounts or real
-          names, and has no public sharing or cloud classroom profiles. Use
-          aliases as instructed.
+          This lesson path does not require student accounts or real names,
+          and has no public sharing or cloud classroom profiles. Use aliases
+          as instructed.
         </aside>
       </div>
     </main>

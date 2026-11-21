@@ -1,15 +1,41 @@
 "use client";
 
 import { isFieldStudentPath, isTeacherWorkspace } from "@/lib/productSurfaces";
+import dynamic from "next/dynamic";
+
 import { DocumentLang } from "@/components/DocumentLang";
 import { homeLocaleForPath, LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useAppCopy } from "@/lib/appCopy";
-import { PetRegistryBootstrap } from "@/components/PetRegistryBootstrap";
 import LegalNotice from "@/components/LegalNotice";
-import { JourneyProgressStrip } from "@/components/JourneyProgressStrip";
-import { QuickNav } from "@/components/QuickNav";
-import { WardrobeUnlockCeremony } from "@/components/wardrobe/WardrobeUnlockCeremony";
-import { WardrobeProgressBridge } from "@/lib/wardrobe/WardrobeProgressBridge";
+
+const PetRegistryBootstrap = dynamic(
+  () =>
+    import("@/components/PetRegistryBootstrap").then((mod) => mod.PetRegistryBootstrap),
+  { ssr: false },
+);
+const JourneyProgressStrip = dynamic(
+  () =>
+    import("@/components/JourneyProgressStrip").then((mod) => mod.JourneyProgressStrip),
+  { ssr: false },
+);
+const QuickNav = dynamic(
+  () => import("@/components/QuickNav").then((mod) => mod.QuickNav),
+  { ssr: false },
+);
+const WardrobeUnlockCeremony = dynamic(
+  () =>
+    import("@/components/wardrobe/WardrobeUnlockCeremony").then(
+      (mod) => mod.WardrobeUnlockCeremony,
+    ),
+  { ssr: false },
+);
+const WardrobeProgressBridge = dynamic(
+  () =>
+    import("@/lib/wardrobe/WardrobeProgressBridge").then(
+      (mod) => mod.WardrobeProgressBridge,
+    ),
+  { ssr: false },
+);
 import {
   FIELD_MODE_COOKIE_VALUE,
   FIELD_MODE_HOME_PATH,
@@ -74,6 +100,20 @@ export default function ClientBody({
   useEffect(() => {
     document.body.classList.add("antialiased");
   }, []);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const host = window.location.hostname.toLowerCase();
+    const onSchoolHost =
+      host === "metapet.school" || host === "www.metapet.school";
+    if (isFieldPath || onSchoolHost || isSchoolPath) {
+      root.lang = "en-AU";
+    }
+    if (isFieldPath) {
+      root.classList.remove("dark");
+      root.classList.add("schools-theme");
+    }
+  }, [isFieldPath, isSchoolPath, pathname]);
 
   useEffect(() => {
     if (isFieldPath) {
@@ -184,7 +224,7 @@ export default function ClientBody({
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 sm:gap-3">
           <div className={`text-sm ${effectiveSchoolsMode ? "text-foreground font-medium" : "text-zinc-200"}`}>
             {fieldSurfaceActive
-              ? isFieldStudentPath(pathname ?? "/") ? "MetaPet" : "MetaPet Field Mode"
+              ? isFieldStudentPath(pathname ?? "/") ? "MetaPet" : "MetaPet School"
               : effectiveSchoolsMode
                 ? "MetaPet Schools"
                 : "Meta-Pet"}
@@ -214,12 +254,12 @@ export default function ClientBody({
         {!effectiveSchoolsMode && !teacherWorkspace && <JourneyProgressStrip />}
         {fieldSurfaceActive && !isFieldPath ? (
           <div className="mx-auto mt-3 flex w-full max-w-6xl items-center justify-between gap-3 rounded-xl border border-emerald-700/20 bg-emerald-50 px-3 py-2 text-xs text-emerald-950">
-            <span>Approved Field Mode information</span>
+            <span>Approved classroom information</span>
             <a
               href={FIELD_MODE_HOME_PATH}
               className="font-semibold underline underline-offset-2"
             >
-              Return to Field Mode
+              Return to classroom home
             </a>
           </div>
         ) : null}

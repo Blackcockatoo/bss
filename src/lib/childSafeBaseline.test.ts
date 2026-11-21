@@ -47,6 +47,22 @@ describe("declarative Field Mode route policy", () => {
       "/schools/parents",
       "/schools/safeguarding",
       "/legal/privacy",
+      "/robots.txt",
+      "/sitemap.xml",
+      "/favicon.ico",
+      "/schools/data",
+      "/schools/contribute",
+      "/schools/field/print/all",
+      "/schools/field/verified",
+      "/schools/field/print/relief",
+      "/schools/field/tools",
+      "/schools/field/comments",
+      "/schools/field/lessons/meet-the-system/comments",
+      "/schools/field/staff-pd",
+      "/schools/field/rollout",
+      "/schools/field/feedback",
+      "/schools/field/print/staff-pd",
+      "/schools/field/print/rollout",
     ]) {
       expect(isPathnameAllowedByPolicy(pathname, "field"), pathname).toBe(true);
     }
@@ -78,8 +94,6 @@ describe("declarative Field Mode route policy", () => {
       "/teachers",
       "/teachers/passport",
       "/manifest.webmanifest",
-      "/robots.txt",
-      "/sitemap.xml",
     ]) {
       expect(isPathnameAllowedByPolicy(pathname, "field"), pathname).toBe(false);
     }
@@ -90,15 +104,19 @@ describe("declarative Field Mode route policy", () => {
     expect(isPathnameAllowedByPolicy("/schools/field/social", "field")).toBe(false);
   });
 
-  it("keeps the adult-only contribution and data pages out of Field Mode", () => {
-    // A child on a classroom device must never be able to reach a page that
-    // discusses money or exposes the local-data controls.
+  it("allows teacher data and contribution pages on the school host, but not in classroom nav", () => {
+    // On metapet.school the field policy is always active, so teachers cannot
+    // open these pages unless they are allowed here. They remain off the
+    // classroom navigation, and lesson screens do not link to contribution.
     for (const pathname of ["/schools/contribute", "/schools/data"]) {
-      expect(isPathnameAllowedByPolicy(pathname, "field"), pathname).toBe(false);
+      expect(isPathnameAllowedByPolicy(pathname, "field"), pathname).toBe(true);
       expect(isPathnameAllowedByPolicy(pathname, "schools"), pathname).toBe(
         true,
       );
     }
+    const navHrefs = FIELD_MODE_NAV_ITEMS.map((item) => item.href);
+    expect(navHrefs).not.toContain("/schools/contribute");
+    expect(navHrefs).not.toContain("/schools/data");
   });
 
   it("keeps consumer pricing out of both school policies", () => {

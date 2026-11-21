@@ -1,5 +1,7 @@
 import { CANONICAL_SESSIONS } from "@/lib/schools/canonicalSequence";
 import { SCHOOL_DATA_LIFECYCLE } from "@/lib/schools/privacyTruth";
+export type { LearningOutcome } from "@/lib/schools/curriculumAlignment";
+export { learningOutcomes } from "@/lib/schools/curriculumAlignment";
 
 export interface SchoolPackageDoc {
   slug: string;
@@ -14,12 +16,6 @@ export interface SchoolPackageDoc {
     | "Governance Pack"
     | "Pilot Ops Pack"
     | "Evidence Pack";
-}
-
-export interface LearningOutcome {
-  statement: string;
-  lessons: string;
-  codes: string[];
 }
 
 export interface LessonCard {
@@ -414,44 +410,6 @@ export const schoolPackageDocs: SchoolPackageDoc[] = ([
   },
 ] as Omit<SchoolPackageDoc, "inAppHref">[]).map(withInAppHref);
 
-export const learningOutcomes: LearningOutcome[] = [
-  {
-    statement:
-      "Explain that a digital system responds to inputs and changes state over time.",
-    lessons: "Sessions 1, 2 and 4",
-    codes: ["AC9TDI4K01", "AC9TDI4P02", "AC9TDI6P02"],
-  },
-  {
-    statement:
-      "Read the signals a system shows and use them to make a reasoned choice.",
-    lessons: "Sessions 1, 2 and 3",
-    codes: ["AC9TDI4K03", "AC9TDI4P04", "AC9TDI6K03"],
-  },
-  {
-    statement:
-      "Describe simple if-then rules, cause and effect, and patterns in a system.",
-    lessons: "Sessions 4 and 7",
-    codes: ["AC9TDI4P02", "AC9TDI6P05", "AC9TDI6P06"],
-  },
-  {
-    statement:
-      "Use classroom wellbeing language to name a signal, a response and a settling strategy.",
-    lessons: "Sessions 2 and 5",
-    codes: ["AC9HP4P05", "AC9HP6P05", "AC9HP4P08"],
-  },
-  {
-    statement:
-      "Work with others to compare observations, justify a design choice and reflect on responsible digital use.",
-    lessons: "Sessions 3, 5, 6 and 7",
-    codes: ["AC9HP4P03", "AC9HP6P03", "AC9HP6P08"],
-  },
-];
-
-/**
- * The public lesson snapshot. Derived from {@link CANONICAL_SESSIONS} so the
- * marketing page, the runner and the printable pack can never advertise three
- * different seven-session sequences again.
- */
 export const lessonCards: LessonCard[] = CANONICAL_SESSIONS.map((session) => ({
   session: `Session ${session.number}`,
   title: session.title,
@@ -487,7 +445,7 @@ export const SCHOOL_ATTRIBUTION =
  * replacement, which it is not and does not try to be.
  */
 export const SCHOOL_POSITIONING_STATEMENT =
-  "Children change a variable, observe what the system does, and explain their choices. In The Invisible Trail, they follow fictional data from a single click to a prediction and decide what an app should collect, share or erase.";
+  "Children change a variable, observe what the system does, and explain their choices. In The Invisible Trail, they follow fictional data from a single click to a prediction and decide what an app should collect, share or erase. MetaPet School does not replace the software a school already uses for attendance, payments, timetables or communication.";
 
 /** What a teacher needs before Session One. Deliberately short. */
 export const whatYouNeed: readonly string[] = [
@@ -575,11 +533,11 @@ export const curriculumSourceLinks: ExternalResourceLink[] = [
     href: "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-curriculum-connection/mental-health-and-wellbeing",
   },
   {
-    label: "HPE Years 3-4 scope and sequence",
-    href: "https://www.australiancurriculum.edu.au/media/7160/primary_scope_and_sequence_years_3-4.pdf",
+    label: "HPE Scope and sequence F–10 (Australian Curriculum v9)",
+    href: "https://www.australiancurriculum.edu.au/content/dam/en/curriculum/ac-version-9/downloads/health-and-physical-education/health-and-physical-education-scope-and-sequence-f-10-v9.docx",
   },
   {
-    label: "HPE Years 5-6 scope and sequence",
-    href: "https://www.australiancurriculum.edu.au/media/7163/primary_scope_and_sequence_years_5-6.pdf",
+    label: "HPE Curriculum content F–6 (Australian Curriculum v9)",
+    href: "https://www.australiancurriculum.edu.au/content/dam/en/curriculum/ac-version-9/downloads/health-and-physical-education/health-and-physical-education-curriculum-content-f-6-v9.docx",
   },
 ];
