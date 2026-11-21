@@ -18,15 +18,19 @@
 // Type-only import (no runtime cycle) so a progress record can hold typed
 // Pass 2 evidence while evidence.ts continues to import shared types from here.
 import type { CanonicalSessionId } from "@/lib/schools/canonicalSequence";
+import type { FoundationSessionId } from "@/lib/schools/foundationSequence";
+import type { Years78SessionId } from "@/lib/schools/years78Sequence";
+import type { LessonAudienceBand } from "@/lib/schools/lessonYearBands";
 import type { LessonEvidence } from "./evidence";
 
 /**
- * Stable identifier for each of the seven lessons.
+ * Stable identifier for a teacher-led lesson.
  *
- * Aliased to the canonical school sequence so the runner cannot drift from the
- * sequence the landing page, teacher pack and printable fallback advertise.
+ * The Years 3–6 canonical sequence, the F–2 unplugged starter set and the
+ * Years 7–8 bridge unit share this union so field routes, planners and
+ * comments can look up any set without inventing a second runner.
  */
-export type LessonId = CanonicalSessionId;
+export type LessonId = CanonicalSessionId | FoundationSessionId | Years78SessionId;
 
 /** Lifecycle status of a lesson as shown on the Teacher Hub. */
 export type LessonCardStatus =
@@ -50,7 +54,8 @@ export type LessonAppDestination =
   | "vitals"
   | "emotions"
   | "visualisation"
-  | "challenge";
+  | "challenge"
+  | "unplugged";
 
 /** High-level shape of the student interaction inside a lesson. */
 export type LessonActivityType =
@@ -60,7 +65,8 @@ export type LessonActivityType =
   | "care"
   | "interpret"
   | "predict"
-  | "create";
+  | "create"
+  | "unplugged";
 
 /**
  * The five canonical placeholder phases every Pass 1 lesson moves through.
@@ -81,7 +87,8 @@ export type LessonEvidenceType =
   | "cause-effect-chain"
   | "emotion-reflection"
   | "visualisation-selection"
-  | "responsible-creator-promise";
+  | "responsible-creator-promise"
+  | "classroom-observation";
 
 /**
  * Optional feature flags a lesson may require before its real activity can run.
@@ -143,6 +150,8 @@ export interface LessonDefinition {
   shortDescription: string;
   /** Suggested duration in minutes. */
   durationMinutes: number;
+  /** Audience year band for this lesson, not a new curriculum claim. */
+  yearBand: LessonAudienceBand;
   /** Suggested learning areas (curriculum-friendly labels). */
   learningAreas: string[];
   /** The single learning intention for the lesson. */

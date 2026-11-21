@@ -55,6 +55,14 @@ describe("declarative Field Mode route policy", () => {
       "/schools/field/print/all",
       "/schools/field/verified",
       "/schools/field/print/relief",
+      "/schools/field/tools",
+      "/schools/field/comments",
+      "/schools/field/lessons/meet-the-system/comments",
+      "/schools/field/staff-pd",
+      "/schools/field/rollout",
+      "/schools/field/feedback",
+      "/schools/field/print/staff-pd",
+      "/schools/field/print/rollout",
     ]) {
       expect(isPathnameAllowedByPolicy(pathname, "field"), pathname).toBe(true);
     }

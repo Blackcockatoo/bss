@@ -8,7 +8,7 @@ import {
   lessonPublicPath,
 } from "@/lib/schools/lessonMetadata";
 import {
-  LESSON_DEFINITIONS,
+  ALL_LESSON_DEFINITIONS,
   getLessonBySlug,
 } from "@/lib/teacher-lessons/lessonDefinitions";
 
@@ -17,7 +17,7 @@ interface LessonSlidesPageProps {
 }
 
 export function generateStaticParams() {
-  return LESSON_DEFINITIONS.map((lesson) => ({ slug: lesson.slug }));
+  return ALL_LESSON_DEFINITIONS.map((lesson) => ({ slug: lesson.slug }));
 }
 
 export async function generateMetadata({

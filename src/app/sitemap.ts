@@ -19,7 +19,11 @@ import {
   isMetaPetSchoolHostname,
   metaPetSchoolUrl,
 } from "@/lib/fieldMode/identity";
-import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
+import {
+  FIELD_MODE_PRINT_F2_ALL_PATH,
+  FIELD_MODE_PRINT_YEARS_78_ALL_PATH,
+} from "@/lib/schools/classroomPack";
+import { ALL_LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
 
 /**
  * The classroom index. Only routes the field policy actually allows appear
@@ -110,8 +114,20 @@ function metaPetSchoolSitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly",
     priority: 0.7,
   });
+  entries.push({
+    url: metaPetSchoolUrl(FIELD_MODE_PRINT_F2_ALL_PATH),
+    lastModified,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  });
+  entries.push({
+    url: metaPetSchoolUrl(FIELD_MODE_PRINT_YEARS_78_ALL_PATH),
+    lastModified,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  });
 
-  for (const lesson of LESSON_DEFINITIONS) {
+  for (const lesson of ALL_LESSON_DEFINITIONS) {
     entries.push({
       url: metaPetSchoolUrl(`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}`),
       lastModified,
@@ -129,6 +145,12 @@ function metaPetSchoolSitemap(): MetadataRoute.Sitemap {
       lastModified,
       changeFrequency: "monthly",
       priority: 0.7,
+    });
+    entries.push({
+      url: metaPetSchoolUrl(`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/comments`),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.6,
     });
   }
 

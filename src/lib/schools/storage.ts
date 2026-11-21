@@ -34,6 +34,10 @@ export const SCHOOLS_TEACHER_PET_PROFILE_STORAGE_KEY =
 export const SCHOOLS_TEACHER_PET_UPDATE_STORAGE_KEY =
   "metapet-teacher-pet-update";
 export const SCHOOLS_TEACHER_PILOT_STORAGE_KEY = "metapet-teacher-pilot";
+export const SCHOOLS_ROLLOUT_PLAN_STORAGE_KEY =
+  "metapet-schools-rollout-plan";
+export const SCHOOLS_TEACHER_FEEDBACK_STORAGE_KEY =
+  "metapet-schools-teacher-feedback";
 
 const LEGACY_SCHOOL_STORAGE_KEYS = [
   "metapet-classroom-roster",
@@ -59,6 +63,8 @@ export const SCHOOLS_STORAGE_KEYS = [
   SCHOOLS_TEACHER_PET_PROFILE_STORAGE_KEY,
   SCHOOLS_TEACHER_PET_UPDATE_STORAGE_KEY,
   SCHOOLS_TEACHER_PILOT_STORAGE_KEY,
+  SCHOOLS_ROLLOUT_PLAN_STORAGE_KEY,
+  SCHOOLS_TEACHER_FEEDBACK_STORAGE_KEY,
   ...LEGACY_SCHOOL_STORAGE_KEYS,
 ] as const;
 
@@ -207,6 +213,16 @@ export const SCHOOLS_LOCAL_DATA_CATEGORIES: readonly SchoolsDataCategory[] = [
       "metapet-education-queue",
       "metapet-teacher-onboarding",
       "teacher-hub-pairing-state",
+    ],
+  },
+  {
+    id: "staff-planning",
+    label: "Staff planning and private feedback",
+    purpose:
+      "An optional whole-school rollout plan and short teacher-only notes about how a lesson went. These are not student records. Do not enter student names or other identifying information.",
+    keys: [
+      SCHOOLS_ROLLOUT_PLAN_STORAGE_KEY,
+      SCHOOLS_TEACHER_FEEDBACK_STORAGE_KEY,
     ],
   },
 ] as const;

@@ -14,6 +14,8 @@ import {
   FIELD_MODE_PRINT_RELIEF_PATH,
   FIELD_MODE_PRINT_TICKETS_PATH,
   FIELD_MODE_PRINT_WORD_WALLS_PATH,
+  FIELD_MODE_PRINT_STAFF_PD_PATH,
+  FIELD_MODE_PRINT_ROLLOUT_PATH,
   FIELD_MODE_VERIFIED_PATH,
   LEADERSHIP_ONE_PAGER,
   OFFICIAL_LINK_CHECKED_AT,
@@ -567,6 +569,7 @@ export function PrintablePackContents({
         <li>No-tech / paper path</li>
         <li>Editable parent and carer letter</li>
         <li>Principal and ICT one-pager, what’s-verified page, and official eSafety links</li>
+        <li>15-minute staff briefing handout and a blank term rollout plan</li>
       </ol>
       <p className="mt-5 text-xs leading-5 text-slate-600">
         Suggested step timings are estimates. Curriculum codes are the ones
@@ -587,4 +590,6 @@ export const CLASSROOM_PACK_PRINT_LINKS = [
   { href: FIELD_MODE_PRINT_PARENT_LETTER_PATH, label: "Parent letter" },
   { href: "/schools/field/print/leadership", label: "Leadership one-pager" },
   { href: FIELD_MODE_VERIFIED_PATH, label: "What’s verified" },
+  { href: FIELD_MODE_PRINT_STAFF_PD_PATH, label: "Staff briefing handout" },
+  { href: FIELD_MODE_PRINT_ROLLOUT_PATH, label: "Rollout plan template" },
 ] as const;
