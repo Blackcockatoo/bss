@@ -92,7 +92,7 @@ describe("classroom pack data", () => {
   it("does not invent verification results", () => {
     const checked = VERIFICATION_ITEMS.filter((item) => item.status === "checked");
     const notChecked = VERIFICATION_ITEMS.filter((item) => item.status === "not-checked");
-    expect(checked.length).toBe(5);
+    expect(checked.length).toBe(6);
     expect(notChecked.length).toBeGreaterThanOrEqual(3);
     expect(
       notChecked.some((item) => /school hardware/i.test(item.detail)),
@@ -105,6 +105,9 @@ describe("classroom pack data", () => {
     ).toBe(true);
     expect(
       checked.some((item) => /Years 7–8 Digital Technologies content descriptions/i.test(item.title)),
+    ).toBe(true);
+    expect(
+      checked.some((item) => /Victorian Curriculum 2.0 and NSW syllabus maps/i.test(item.title)),
     ).toBe(true);
   });
 

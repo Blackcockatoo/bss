@@ -33,6 +33,7 @@ import {
 import {
   FIELD_MODE_PRINT_F2_ALL_PATH,
   FIELD_MODE_PRINT_YEARS_78_ALL_PATH,
+  FIELD_MODE_CURRICULUM_PATH,
   plannerExtrasFor,
 } from "@/lib/schools/classroomPack";
 import {
@@ -268,6 +269,12 @@ export function FieldLessonLaunchpad({
               <Printer className="h-4 w-4" aria-hidden="true" />
               Print the Years 7–8 pack
             </a>
+            <Link
+              href={FIELD_MODE_CURRICULUM_PATH}
+              className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              Victorian and NSW maps
+            </Link>
             <a
               href={FIELD_MODE_STAFF_PD_PATH}
               className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
@@ -420,6 +427,24 @@ export function FieldLessonLaunchpad({
             >
               Printable teacher guide
             </a>
+            <Link
+              href="/schools/field/print/invisible-trail"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              Planner pack
+            </Link>
+            <Link
+              href="/schools/field/play/invisible-trail/slides"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              Invisible Trail slides
+            </Link>
+            <Link
+              href="/schools/field/play/invisible-trail/comments"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              Invisible Trail comments
+            </Link>
           </div>
         </section>
 
