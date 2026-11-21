@@ -406,6 +406,22 @@ export default function FieldModePage() {
           </ol>
         </section>
 
+        <section aria-labelledby="digital-independence-heading" className="rounded-2xl border border-emerald-900/20 bg-white p-6">
+          <h2 id="digital-independence-heading" className="text-2xl font-semibold">Teach the child to read the machine.</h2>
+          <p className="mt-3 max-w-2xl leading-7 text-slate-700">
+            The Invisible Trail is an optional Digital Independence lesson. Students use fictional data
+            to see how a click leaves a record, how a system makes a guess and how a privacy choice changes the result.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1">
+            <Link href="/schools/field/play/invisible-trail" className="inline-flex min-h-12 items-center font-semibold text-emerald-900 underline">
+              Try The Invisible Trail
+            </Link>
+            <a href="/schools/field/print/invisible-trail.html" className="inline-flex min-h-12 items-center font-semibold text-emerald-900 underline">
+              Printable teacher guide
+            </a>
+          </div>
+        </section>
+
         <section
           aria-labelledby="classroom-pack-heading"
           className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8"
@@ -426,6 +442,7 @@ export default function FieldModePage() {
               { href: FIELD_MODE_PRINT_ALL_PATH, label: "Print the Years 3–6 pack" },
               { href: FIELD_MODE_PRINT_F2_ALL_PATH, label: "Print the F–2 unplugged pack" },
               { href: FIELD_MODE_PRINT_YEARS_78_ALL_PATH, label: "Print the Years 7–8 pack" },
+              { href: "/schools/field/print/invisible-trail.html", label: "Invisible Trail teacher guide" },
               { href: FIELD_MODE_PRINT_RELIEF_PATH, label: "Relief teacher pack" },
               { href: FIELD_MODE_PRINT_TICKETS_PATH, label: "Exit tickets" },
               { href: FIELD_MODE_PRINT_WORD_WALLS_PATH, label: "Word walls" },

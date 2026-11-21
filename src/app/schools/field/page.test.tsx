@@ -50,6 +50,16 @@ describe("Classroom home", () => {
     }
   });
 
+  it("links the optional Invisible Trail lab and its printable guide", () => {
+    render(<FieldModePage />);
+    expect(
+      screen.getByRole("link", { name: /Try The Invisible Trail/i }),
+    ).toHaveAttribute("href", "/schools/field/play/invisible-trail");
+    expect(
+      screen.getByRole("link", { name: /Printable teacher guide/i }),
+    ).toHaveAttribute("href", "/schools/field/print/invisible-trail.html");
+  });
+
   it("offers a printable pack, safety information and local-data controls", () => {
     render(<FieldModePage />);
 
