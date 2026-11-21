@@ -88,7 +88,7 @@ export function InvisibleTrailLab() {
   const [interest, setInterest] = useState("shapes");
   const [sharing, setSharing] = useState(false);
   const [clues, setClues] = useState<string[]>([]);
-  const [design, setDesign] = useState<string[]>(["local", "delete"]);
+  const [design, setDesign] = useState<string[]>([]);
 
   const changeChapter = (next: number) => {
     setChapter(Math.max(0, Math.min(CHAPTERS.length - 1, next)));
@@ -101,7 +101,7 @@ export function InvisibleTrailLab() {
     setInterest("shapes");
     setSharing(false);
     setClues([]);
-    setDesign(["local", "delete"]);
+    setDesign([]);
   };
 
   const predictions: Record<string, string> = {
