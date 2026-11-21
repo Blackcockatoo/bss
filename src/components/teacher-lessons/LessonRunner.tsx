@@ -27,6 +27,7 @@ import {
   fieldTimingMode,
   type FieldSessionConfig,
 } from "@/lib/fieldMode/session";
+import { FIELD_MODE_FEEDBACK_PATH } from "@/lib/childSafeBaseline";
 import { touchSchoolsLocalState } from "@/lib/schools/storage";
 import {
   LESSON_DEFINITIONS,
@@ -300,6 +301,11 @@ export function LessonRunner({
                 : undefined
             }
             documentNavigation={fieldMode}
+            feedbackHref={
+              fieldMode
+                ? `${FIELD_MODE_FEEDBACK_PATH}?lesson=${lesson.slug}`
+                : undefined
+            }
           />
         </div>
       </ClassroomFocusMode>

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 
 import { PrintLessonButton } from "@/components/field-mode/PrintLessonButton";
 import { PrintableLessonDocument } from "@/components/field-mode/PrintableLessonDocument";
+import { PrintableRolloutPlan } from "@/components/field-mode/PrintableRolloutPlan";
+import { PrintableStaffPd } from "@/components/field-mode/PrintableStaffPd";
 import {
   PrintableAssessmentTools,
   PrintableExitTickets,
@@ -20,13 +22,27 @@ import {
   FIELD_MODE_PRINT_ALL_PATH,
 } from "@/lib/childSafeBaseline";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
+import {
+  METAPET_SCHOOL_NAME,
+  metaPetSchoolUrl,
+} from "@/lib/fieldMode/identity";
 import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
+
+const PRINT_ALL_DESCRIPTION =
+  "One printable pack of seven lesson planners, exit tickets, word walls, assessment tools, the parent letter, a relief pack, a leadership one-pager and what’s verified.";
 
 export const metadata: Metadata = {
   title: "Print the Years 3–6 classroom pack",
-  description:
-    "One printable pack of seven lesson planners, exit tickets, word walls, assessment tools, the parent letter, a relief pack, a leadership one-pager and what’s verified.",
-  robots: { index: false, follow: false },
+  description: PRINT_ALL_DESCRIPTION,
+  alternates: { canonical: metaPetSchoolUrl(FIELD_MODE_PRINT_ALL_PATH) },
+  openGraph: {
+    type: "website",
+    siteName: METAPET_SCHOOL_NAME,
+    title: "Print the Years 3–6 classroom pack",
+    description: PRINT_ALL_DESCRIPTION,
+    url: metaPetSchoolUrl(FIELD_MODE_PRINT_ALL_PATH),
+    locale: "en_AU",
+  },
 };
 
 export default function PrintAllLessonsPage() {
@@ -96,6 +112,12 @@ export default function PrintAllLessonsPage() {
         </div>
         <div className="break-before-page">
           <PrintableLeadershipBrief headingLevel={2} />
+        </div>
+        <div className="break-before-page">
+          <PrintableStaffPd headingLevel={2} />
+        </div>
+        <div className="break-before-page">
+          <PrintableRolloutPlan headingLevel={2} />
         </div>
         <div className="break-before-page">
           <PrintableVerifiedStatus headingLevel={2} />

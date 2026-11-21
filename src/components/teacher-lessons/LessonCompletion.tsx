@@ -19,6 +19,7 @@ interface LessonCompletionProps {
   nextLessonPath?: string;
   hubLabel?: string;
   documentNavigation?: boolean;
+  feedbackHref?: string;
 }
 
 /**
@@ -35,6 +36,7 @@ export function LessonCompletion({
   nextLessonPath,
   hubLabel = "Teacher Hub",
   documentNavigation = false,
+  feedbackHref,
 }: LessonCompletionProps) {
   const hubLink = documentNavigation ? (
     <a href={hubPath} onClick={onReturnToHub}>
@@ -93,6 +95,19 @@ export function LessonCompletion({
                 Next: {nextLesson.title}
                 <ArrowRight className="ml-1.5 h-4 w-4" aria-hidden="true" />
               </Link>
+            )}
+          </Button>
+        ) : null}
+        {feedbackHref ? (
+          <Button
+            asChild
+            variant="outline"
+            className="border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-800"
+          >
+            {documentNavigation ? (
+              <a href={feedbackHref}>Leave private teacher feedback</a>
+            ) : (
+              <Link href={feedbackHref}>Leave private teacher feedback</Link>
             )}
           </Button>
         ) : null}
