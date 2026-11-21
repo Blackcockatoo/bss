@@ -91,7 +91,7 @@ export default function FieldModePage() {
           </div>
 
           <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-slate-950 md:text-5xl">
-            {CANONICAL_SESSION_COUNT} short Years 3–6 lessons, plus an F–2 unplugged set.
+            {CANONICAL_SESSION_COUNT} short lessons about how systems work, plus an F–2 unplugged set.
           </h1>
           <p className="max-w-2xl text-lg leading-8 text-slate-700">
             A teacher-led classroom resource for Years 3–6, with a fully
