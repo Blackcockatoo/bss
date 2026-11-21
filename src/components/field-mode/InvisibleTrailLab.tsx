@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -9,9 +9,7 @@ import {
   Eye,
   EyeOff,
   Footprints,
-  LockKeyhole,
   RotateCcw,
-  ShieldCheck,
 } from "lucide-react";
 
 const CHAPTERS = [
@@ -32,6 +30,7 @@ const PERMISSIONS = [
   { id: "microphone", label: "Microphone", detail: "The shape puzzle doesn't listen to voices." },
   { id: "location", label: "Precise location", detail: "A shape puzzle doesn't need a real location." },
   { id: "contacts", label: "Contacts", detail: "The puzzle doesn't need anyone's address book." },
+  { id: "input", label: "Read taps on the puzzle board", detail: "The puzzle needs to know which tile the player selects. Reading a tile tap needs no device permission prompt." },
   { id: "local", label: "Optional local save", detail: "Saving progress on this device could be useful, if the player chooses." },
 ] as const;
 
@@ -42,10 +41,10 @@ const CLUES = [
 ] as const;
 
 const DESIGN = [
-  { id: "local", label: "Keep play history on this device", safe: true },
-  { id: "sell", label: "Send play history to advertisers", safe: false },
-  { id: "delete", label: "Let players erase saved progress", safe: true },
-  { id: "name", label: "Require a real name to play", safe: false },
+  { id: "local", label: "Keep play history on this device" },
+  { id: "sell", label: "Send play history to advertisers" },
+  { id: "delete", label: "Let players erase saved progress" },
+  { id: "name", label: "Require a real name to play" },
 ] as const;
 
 function toggle(items: string[], id: string): string[] {
@@ -67,7 +66,7 @@ function ToggleChoice({
       aria-pressed={pressed}
       onClick={onClick}
       className={
-        "flex min-h-14 w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left text-base font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 " +
+        "motion-reduce:transition-none flex min-h-14 w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left text-base font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 " +
         (pressed
           ? "border-emerald-600 bg-emerald-100 text-emerald-950"
           : "border-slate-300 bg-white text-slate-800 hover:border-emerald-600")
@@ -90,12 +89,14 @@ export function InvisibleTrailLab() {
   const [sharing, setSharing] = useState(false);
   const [clues, setClues] = useState<string[]>([]);
   const [design, setDesign] = useState<string[]>([]);
+  const heading = useRef<HTMLHeadingElement>(null);
 
   const changeChapter = (next: number) => {
-    setChapter(Math.max(0, Math.min(CHAPTERS.length - 1, next)));
+    setChapter(next);
+    requestAnimationFrame(() => heading.current?.focus());
   };
   const reset = () => {
-    setChapter(0);
+    changeChapter(0);
     setTrail([]);
     setGoggles(false);
     setPermissions([]);
@@ -110,12 +111,13 @@ export function InvisibleTrailLab() {
     music: "Maybe this player likes music.",
     stars: "Maybe this player likes astronomy.",
   };
-  const designGood = DESIGN.every((item) => design.includes(item.id) === item.safe);
+  const keepsHistory = design.includes("local");
+  const allowsDeletion = design.includes("delete");
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
       <div className="mx-auto w-full max-w-5xl px-4 pb-20 pt-8 sm:px-6 sm:pt-12">
-        <header className="overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 p-6 text-white shadow-xl sm:p-9">
+        <header className="print:hidden overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 p-6 text-white shadow-xl sm:p-9">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">
             MetaPet School · Bonus digital-independence lab
           </p>
@@ -145,6 +147,7 @@ export function InvisibleTrailLab() {
               <path d="M12 151 L24 139 M156 139 L168 151" stroke="#67e8f9" strokeWidth="5" strokeLinecap="round" />
             </svg>
           </div>
+          <a href="/schools/field/print/invisible-trail.html" className="mt-5 inline-flex min-h-12 items-center font-semibold text-cyan-200 underline underline-offset-4">Printable teacher guide</a>
           <div className="mt-6 flex flex-wrap gap-2 text-sm font-semibold">
             <span className="rounded-full bg-white/10 px-3 py-2">Years 3–6</span>
             <span className="rounded-full bg-white/10 px-3 py-2">15 min play + 15 min discussion</span>
@@ -153,7 +156,7 @@ export function InvisibleTrailLab() {
           </div>
         </header>
 
-        <section aria-label="Activity chapters" className="mt-7">
+        <section aria-label="Activity chapters" className="mt-7 print:hidden">
           <div className="grid grid-cols-5 gap-2">
             {CHAPTERS.map((item, index) => (
               <button
@@ -175,11 +178,11 @@ export function InvisibleTrailLab() {
           </div>
         </section>
 
-        <section aria-labelledby="mission-heading" className="mt-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
+        <section aria-labelledby="mission-heading" className="mt-6 print:hidden rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
           <p className="text-sm font-semibold uppercase tracking-widest text-emerald-800">
             Mission {chapter + 1} of {CHAPTERS.length}
           </p>
-          <h2 id="mission-heading" className="mt-2 text-3xl font-bold tracking-tight">
+          <h2 id="mission-heading" ref={heading} tabIndex={-1} className="mt-2 text-3xl font-bold tracking-tight">
             {CHAPTERS[chapter].label}
           </h2>
           <p className="mt-2 text-base text-slate-600">{CHAPTERS[chapter].detail}</p>
@@ -229,8 +232,12 @@ export function InvisibleTrailLab() {
                     <li key={item.id}><strong>{item.label}:</strong> {item.detail}</li>
                   ))}
                 </ul>
-                <p className="mt-4 font-semibold text-amber-950">
-                  {permissions.some((id) => id !== "local") ? "Could you play without granting those extra permissions?" : "You can enjoy the puzzle without giving it access to your private information."}
+                <p className="mt-4 font-semibold text-amber-950" aria-live="polite">
+                  {permissions.some((id) => id !== "input" && id !== "local")
+                    ? "Could you play without granting those extra permissions?"
+                    : permissions.includes("input")
+                      ? "Tile taps run the game. Saving progress is a separate choice."
+                      : "How will the puzzle know which tile you picked?"}
                 </p>
               </div>
             </div>
@@ -283,6 +290,7 @@ export function InvisibleTrailLab() {
                     {CLUES.filter((item) => clues.includes(item.id)).map((item) => <li key={item.id}>{item.guess}</li>)}
                   </ul>
                 ) : <p className="mt-2">Choose a pretend clue to see a possible guess.</p>}
+                {clues.includes("rhythm") && clues.includes("evening") ? <p className="mt-3 font-semibold">Together those clues suggest this player might like an evening music challenge. Someone else might use the device at 6 pm.</p> : null}
                 <p className="mt-4 text-sm leading-6">Real profiling systems can combine many signals, but guesses are not facts. People should be able to challenge misleading profiles.</p>
               </div>
             </div>
@@ -298,17 +306,16 @@ export function InvisibleTrailLab() {
                   </ToggleChoice>
                 ))}
               </div>
-              <div className={"rounded-2xl border p-5 " + (designGood ? "border-emerald-300 bg-emerald-50" : "border-amber-300 bg-amber-50")} aria-live="polite">
-                <h3 className="flex items-center gap-2 text-xl font-bold">
-                  {designGood ? <ShieldCheck size={22} /> : <LockKeyhole size={22} />}
-                  {designGood ? "Privacy-first design!" : "Keep investigating"}
-                </h3>
+              <div className="rounded-2xl border border-cyan-300 bg-cyan-50 p-5" aria-live="polite">
+                <h3 className="text-xl font-bold">What your design does</h3>
                 <p className="mt-2 leading-7">
-                  {designGood
-                    ? "Your pretend pet learns without selling play history, and the player can erase their records. Nice work."
-                    : "Think about whether a real name or advertiser sharing helps this pet learn. Can the player erase anything saved?"}
+                  {keepsHistory
+                    ? allowsDeletion ? "Your app keeps history on the device. The player can erase it." : "Your app keeps history on the device. How long does it need it, and who can erase it?"
+                    : "Your app can run without saving a local play history. What would the player need to do again next time?"}
                 </p>
-                <p className="mt-3 text-sm">A safe service must also protect any data it genuinely needs to use. This is a design exercise, not a security certification.</p>
+                {design.includes("sell") ? <p className="mt-2">Advertisers receive play history. Which part of the game needs that transfer?</p> : null}
+                {design.includes("name") ? <p className="mt-2">Players must give a real name. What could you use instead if the game needs a label?</p> : null}
+                <p className="mt-3 text-sm font-semibold">Explain one choice you would keep and one trade-off it creates.</p>
               </div>
             </div>
           ) : null}
@@ -317,31 +324,42 @@ export function InvisibleTrailLab() {
             <button type="button" disabled={chapter === 0} onClick={() => changeChapter(chapter - 1)} className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-slate-300 px-4 py-3 font-semibold disabled:cursor-not-allowed disabled:opacity-40">
               <ArrowLeft size={18} /> Previous
             </button>
+            <button type="button" onClick={reset} className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-slate-300 px-4 py-3 font-semibold">
+              <RotateCcw size={18} /> Reset activity
+            </button>
             {chapter < CHAPTERS.length - 1 ? (
               <button type="button" onClick={() => changeChapter(chapter + 1)} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-emerald-800 px-5 py-3 font-semibold text-white hover:bg-emerald-700">
                 Next mission <ArrowRight size={18} />
               </button>
-            ) : (
-              <button type="button" onClick={reset} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-emerald-800 px-5 py-3 font-semibold text-white hover:bg-emerald-700">
-                <RotateCcw size={18} /> Play again
-              </button>
-            )}
+            ) : null}
           </div>
         </section>
 
-        <aside className="mt-8 space-y-4 rounded-3xl border border-slate-200 bg-white p-5 sm:p-8" aria-label="Teacher discussion guide">
+        <aside id="teacher-guide" className="mt-8 space-y-4 rounded-3xl border border-slate-200 bg-white p-5 sm:p-8" aria-label="Teacher discussion guide">
           <h2 className="text-2xl font-bold">Teacher guide · Take it offline</h2>
           <p className="leading-7 text-slate-700">
-            After 15 minutes of play, ask pairs to draw a fictional data trail on paper.
-            Give them a fictional puzzle-app card and three choices: a helpful local record,
-            an unnecessary permission, and a third-party data transfer.
+            The Invisible Trail · Years 3–6 · Optional companion to the seven classroom sessions.
+            Allow 15 minutes for the five missions and 15 minutes to discuss and redraw one example.
+            Use one teacher screen and take class votes, or read the examples aloud and run the whole lesson on paper.
           </p>
-          <ol className="list-inside list-decimal space-y-2 text-slate-700">
-            <li>What information did the pretend app actually need?</li>
-            <li>Who could see it if the app shared it with another company?</li>
-            <li>Could someone infer something inaccurate from the trail?</li>
-            <li>How would you redesign the app to give the child more control?</li>
+          <p>Materials: paper, pencils and five slips per pair. Print this page from your browser for a handout.</p>
+          <ol className="list-decimal space-y-3 pl-5 text-slate-700">
+            <li><strong>Footprint Forest.</strong> Write “shape puzzle opened” on a slip after a pretend tap. Ask what caused the record and who could see it. Look for an action linked to a record.</li>
+            <li><strong>Permission Gates.</strong> Sort tile taps, microphone and saved progress into needed, unnecessary and optional. Ask students to justify where they put each one.</li>
+            <li><strong>Mirror Market.</strong> Pass a “played rhythm garden” slip to a pretend advertiser only when sharing is on. Ask what someone might guess and why that guess could be wrong.</li>
+            <li><strong>Shadow Profile.</strong> Combine “plays rhythm levels” and “usually plays at 6 pm”. Ask what changes if a second player uses the device. Look for a distinction between evidence and a guess.</li>
+            <li><strong>Data Defender.</strong> Draw a data trail for an app that saves progress or starts fresh. Cross out unnecessary transfers and show where a player could erase a record. Ask who can still see any copy already shared.</li>
           </ol>
+          <p className="leading-7 text-slate-700">
+            Years 3–4 can sort and explain aloud with one record at a time. Years 5–6 can trace a second copy and explain a trade-off.
+            Exit prompt: draw or describe one piece of data, who could receive it and a choice that changes where it goes.
+          </p>
+          <p className="text-sm leading-6 text-slate-700">
+            Curriculum connections: Years 3–4 identify stored or shared information and discuss risks
+            (AC9TDI4P09 · VC2TDI4D05). Years 5–6 explain how footprints form and persist, and consider
+            privacy when collecting data (AC9TDI6P10 · VC2TDI6D06).
+            The five fictional missions support these outcomes through discussion and a paper exit task.
+          </p>
           <p className="text-sm leading-6 text-slate-600">
             Facilitation note: do not ask students to reveal their actual apps, locations,
             health information, personal experiences or family accounts. Use invented
@@ -352,7 +370,7 @@ export function InvisibleTrailLab() {
             A clever machine knows what you like. A wiser child knows how it found out.
           </p>
         </aside>
-        <nav className="mt-7 flex flex-wrap gap-4 text-sm font-semibold">
+        <nav className="mt-7 flex flex-wrap gap-4 text-sm font-semibold print:hidden">
           <Link href="/schools/field/play" className="text-emerald-800 underline underline-offset-4">Back to student activities</Link>
           <Link href="/schools/field/lessons" className="text-emerald-800 underline underline-offset-4">Explore the seven lessons</Link>
           <Link href="/schools/field/safety" className="text-emerald-800 underline underline-offset-4">Safety and privacy</Link>
