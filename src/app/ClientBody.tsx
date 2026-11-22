@@ -7,6 +7,7 @@ import { DocumentLang } from "@/components/DocumentLang";
 import { homeLocaleForPath, LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useAppCopy } from "@/lib/appCopy";
 import LegalNotice from "@/components/LegalNotice";
+import Link from "next/link";
 
 const PetRegistryBootstrap = dynamic(
   () =>
@@ -284,6 +285,17 @@ export default function ClientBody({
             Pilot Enquiry
           </a>
         ) : null}
+        <nav
+          aria-label="Legal"
+          className="mb-2 flex items-center justify-center gap-4 text-xs text-slate-400"
+        >
+          <Link href="/legal/privacy" className="underline hover:text-slate-300">
+            Privacy
+          </Link>
+          <Link href="/legal/terms" className="underline hover:text-slate-300">
+            Terms
+          </Link>
+        </nav>
         <LegalNotice schoolsMode={effectiveSchoolsMode} />
       </footer>
       {!fieldSurfaceActive && !teacherWorkspace && fieldUiResolved ? <QuickNav /> : null}

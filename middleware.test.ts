@@ -222,6 +222,34 @@ describe("MetaPet.school hostname boundary", () => {
     await expect(apiResponse.json()).resolves.toEqual({ error: "not_found" });
   });
 
+  it("serves robots.txt and sitemap.xml on the school domain instead of redirecting", async () => {
+    const { proxy } = await loadProxy("core", {
+      siteUrl: "https://www.bluesnakestudios.com",
+      vercelEnv: "production",
+    });
+
+    for (const pathname of ["/robots.txt", "/sitemap.xml"]) {
+      const response = proxy(
+        new NextRequest(`https://www.metapet.school${pathname}`),
+      );
+      expect(response.status, pathname).toBe(200);
+      expect(response.headers.get("location"), pathname).toBeNull();
+    }
+  });
+
+  it("allows the legal pages on the school domain", async () => {
+    const { proxy } = await loadProxy("core");
+
+    for (const pathname of ["/legal/privacy", "/legal/terms"]) {
+      expect(
+        proxy(
+          new NextRequest(`https://www.metapet.school${pathname}`),
+        ).headers.get("location"),
+        pathname,
+      ).toBeNull();
+    }
+  });
+
   it("leaves the full MetaPet product available on Blue Snake Studios", async () => {
     const { proxy } = await loadProxy("core");
 

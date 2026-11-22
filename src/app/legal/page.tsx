@@ -11,6 +11,12 @@ const SCHOOL_LEGAL_LINKS = [
       "Privacy policy, child notice, parent/carer notice, retention schedule, data inventory, and third-party services register.",
   },
   {
+    href: "/legal/terms",
+    title: "Terms of use (draft)",
+    description:
+      "Plain-language terms for families, students and schools. Draft pending review.",
+  },
+  {
     href: "/legal/safety",
     title: "Safety materials",
     description:
@@ -73,6 +79,14 @@ export default function LegalPage() {
         This page outlines licensing and intellectual property notices for the
         Meta-Pet experience.
       </p>
+      <nav aria-label="Legal documents" className="flex flex-wrap gap-4 text-sm">
+        <Link href="/legal/privacy" className="text-emerald-200 underline underline-offset-4">
+          Privacy
+        </Link>
+        <Link href="/legal/terms" className="text-emerald-200 underline underline-offset-4">
+          Terms of use (draft)
+        </Link>
+      </nav>
       <section className="rounded-lg border border-slate-800 bg-slate-950/40 p-4">
         <LegalNotice className="text-slate-300" />
       </section>
