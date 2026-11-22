@@ -31,28 +31,29 @@ const TERMS_SECTIONS: readonly TermsSection[] = [
   {
     heading: "2. The short version",
     paragraphs: [
-      "MetaPet is a digital companion and learning tool. Be kind, use it to learn and play, and don't try to break it or use it to hurt anyone. We try to collect as little information as we can. Our privacy materials explain exactly what is stored and where.",
+      "MetaPet is a digital companion and learning tool. Be kind, use it to learn and play, and don't try to break it or use it to hurt anyone. Our privacy materials explain what is stored and where. The classroom edition does not require student accounts and does not collect student data; aliases and teacher feedback are stored only on the device.",
     ],
   },
   {
     heading: "3. Children and young people",
     paragraphs: [
       "MetaPet is designed with children in mind. If you are under 18, please use MetaPet with permission from a parent, carer or teacher, and ask them if anything here is unclear.",
-      "MetaPet does not ask children to create an account, and you should not enter your real full name, address, school name, photos or other personal details into any text box or pet name.",
+      "The classroom edition does not require a student account, student email, real name, photo or login. You should not enter a real full name, address, school name, photos or other personal details into any text box or pet name.",
       "If you see anything on MetaPet that makes you feel unsafe or upset, stop and tell a trusted adult.",
     ],
   },
   {
     heading: "4. Schools and teachers",
     paragraphs: [
-      "The classroom edition (MetaPet Schools / Field Mode) is designed to run without student logins. Student records use aliases and stay on the classroom device unless a teacher chooses to export them.",
+      "The classroom edition (MetaPet Schools / Field Mode) does not require student accounts and does not collect student data. Aliases and teacher feedback are stored only on the device, in the browser. Classroom record contents stay in this browser on this device during routine use. Routine classroom use does not submit classroom-record contents to Blue Snake Studios. The hosting provider still receives ordinary page requests, and a deliberate teacher export leaves the browser.",
+      "Classroom, school and teacher routes do not load consumer product analytics or behavioural tracking, and no advertising is loaded on classroom routes. The supervising adult can delete the covered classroom records immediately from the local-data controls or by clearing this site's browser data. Classroom data in this browser is cleared on the next school-route load after 35 days without use.",
       "Teachers and schools remain responsible for supervising students, following their own school, sector and state or territory policies, and deciding whether MetaPet suits their setting. Our safety and product-boundary pages are there to help with that review.",
     ],
   },
   {
     heading: "5. Your privacy",
     paragraphs: [
-      "How we handle information is explained in our privacy materials and privacy policy. Pets and progress are saved in your browser on your device. Clearing your browser data can remove them, and we cannot recover them for you.",
+      "How we handle information is explained in our privacy materials. On the consumer companion, pets and progress are saved in your browser on your device. Clearing your browser data can remove them, and we cannot recover them for you. On school and child-facing classroom routes, no student data is collected, aliases and feedback are stored only on the device, and analytics is off.",
     ],
   },
   {
@@ -66,7 +67,7 @@ const TERMS_SECTIONS: readonly TermsSection[] = [
     heading: "7. Content and ownership",
     paragraphs: [
       "MetaPet's software, artwork, characters, lessons and other content belong to Blue Snake Studios or the people who licensed them to us. You may use MetaPet for personal learning and play, and teachers may use and print the classroom materials for their own teaching.",
-      "Pet names and anything else you create stay yours. Because they are stored on your device, we generally don't see them.",
+      "Pet names and anything else you type are stored on your device. Routine classroom use does not submit classroom-record contents to Blue Snake Studios. The hosting provider still receives ordinary page requests.",
     ],
   },
   {
