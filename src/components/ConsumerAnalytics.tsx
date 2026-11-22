@@ -20,8 +20,10 @@ const Analytics = dynamic(
  * statement false on every classroom page, so the beacon is gated twice:
  *
  * 1. build profile — the schools build never mounts it at all;
- * 2. pathname — the shared Blue Snake Studios build never mounts it on a
- *    school, teacher, classroom, or school-governance route.
+ * 2. pathname: analytics is default-off and only mounts on an explicit
+ *    allowlist of adult marketing pages (see `analyticsBoundary.ts`). It never
+ *    mounts on pet, play, identity, DNA, arcade, Moss60, school, teacher, Field
+ *    Mode or governance routes.
  *
  * The pathname check is the one that matters: classroom routes are reachable
  * from the combined production build, so a build-time flag alone would not hold.
