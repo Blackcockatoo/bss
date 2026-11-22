@@ -6,7 +6,7 @@ import { ALL_LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions"
 import type { LessonDefinition } from "@/lib/teacher-lessons/types";
 
 export const LESSON_YEAR_BAND_FILTERS = ["f", "1-2", "3-4", "5-6", "7-8"] as const;
-export const LESSON_MINUTES_FILTERS = [15, 20, 45] as const;
+export const LESSON_MINUTES_FILTERS = [15, 20, 25, 45] as const;
 
 export type LessonYearBandFilter = (typeof LESSON_YEAR_BAND_FILTERS)[number];
 export type LessonMinutesFilter = (typeof LESSON_MINUTES_FILTERS)[number];
@@ -155,6 +155,7 @@ export function lessonSearchHaystack(lesson: LessonDefinition): string {
     `${lesson.durationMinutes} minutes`,
     lessonAudienceLabel(lesson.yearBand),
     lessonSetLabel(lesson.yearBand),
+    lesson.yearBand === "years-5-8" ? "topical mini-lessons Years 5-8" : "",
     lesson.yearBand === "years-3-6" ? "" : "unplugged",
     ...areas,
     ...alignment.codes,

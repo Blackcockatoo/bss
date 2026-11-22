@@ -56,7 +56,7 @@ describe("Years 7–8 bridge unit", () => {
     );
     expect(LESSON_DEFINITIONS).toHaveLength(7);
     expect(FOUNDATION_LESSON_DEFINITIONS).toHaveLength(7);
-    expect(ALL_LESSON_DEFINITIONS).toHaveLength(21);
+    expect(ALL_LESSON_DEFINITIONS).toHaveLength(24);
     expect(YEARS_78_PERIOD_NOTE).toMatch(/45 minutes/);
   });
 

@@ -19,7 +19,7 @@ import {
   STATE_CURRICULUM_NOT_AN_ENDORSEMENT,
 } from "@/lib/schools/stateCurriculumSources";
 
-const BANDS: StateMapBand[] = ["f-2", "3-6", "7-8", "invisible-trail"];
+const BANDS: StateMapBand[] = ["f-2", "3-6", "years-5-8", "7-8", "invisible-trail"];
 
 function MapResult({ result }: { result: StateMapResult }) {
   if (result.status === "not-mapped-yet") {

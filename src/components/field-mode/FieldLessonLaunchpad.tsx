@@ -33,6 +33,7 @@ import {
 import {
   FIELD_MODE_PRINT_F2_ALL_PATH,
   FIELD_MODE_PRINT_YEARS_78_ALL_PATH,
+  FIELD_MODE_PRINT_TOPICAL_PATH,
   FIELD_MODE_CURRICULUM_PATH,
   plannerExtrasFor,
 } from "@/lib/schools/classroomPack";
@@ -240,6 +241,9 @@ export function FieldLessonLaunchpad({
           <div id="years-7-8-bridge" className="sr-only">
             Years 7–8 bridge unit
           </div>
+          <div id="topical-mini-lessons" className="sr-only">
+            Years 5–8 topical mini-lessons
+          </div>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <BookOpenCheck className="h-6 w-6 text-emerald-800" aria-hidden="true" />
@@ -268,6 +272,13 @@ export function FieldLessonLaunchpad({
             >
               <Printer className="h-4 w-4" aria-hidden="true" />
               Print the Years 7–8 pack
+            </a>
+            <a
+              href={FIELD_MODE_PRINT_TOPICAL_PATH}
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              <Printer className="h-4 w-4" aria-hidden="true" />
+              Print the topical pack
             </a>
             <Link
               href={FIELD_MODE_CURRICULUM_PATH}

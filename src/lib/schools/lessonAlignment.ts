@@ -12,6 +12,11 @@ import {
   years78AlignmentFor,
 } from "@/lib/schools/years78Curriculum";
 import { isYears78SessionId } from "@/lib/schools/years78Sequence";
+import {
+  officialTopicalWordingForCodes,
+  topicalAlignmentFor,
+} from "@/lib/schools/topicalCurriculum";
+import { isTopicalSessionId } from "@/lib/schools/topicalSequence";
 import type { OfficialContentDescription } from "@/lib/schools/foundationCurriculum";
 
 /**
@@ -29,6 +34,9 @@ export function curriculumAlignmentForLesson(lesson: {
   if (isYears78SessionId(lesson.id)) {
     return years78AlignmentFor(lesson.id);
   }
+  if (isTopicalSessionId(lesson.id)) {
+    return topicalAlignmentFor(lesson.id);
+  }
   return curriculumAlignmentForSession(lesson.number);
 }
 
@@ -36,8 +44,16 @@ export function curriculumAlignmentForLesson(lesson: {
 export function officialWordingForLessonCodes(
   codes: readonly string[],
 ): OfficialContentDescription[] {
-  return [
+  const seen = new Set<string>();
+  const wording: OfficialContentDescription[] = [];
+  for (const official of [
     ...officialF2WordingForCodes(codes),
     ...officialY78WordingForCodes(codes),
-  ];
+    ...officialTopicalWordingForCodes(codes),
+  ]) {
+    if (seen.has(official.code)) continue;
+    seen.add(official.code);
+    wording.push(official);
+  }
+  return wording;
 }

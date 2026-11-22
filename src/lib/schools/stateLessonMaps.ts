@@ -14,7 +14,7 @@ import { ALL_LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions"
 import { lessonDisplayTitle } from "@/lib/schools/lessonYearBands";
 
 export type StateCurriculumJurisdiction = "victoria" | "nsw";
-export type StateMapBand = "f-2" | "3-6" | "7-8" | "invisible-trail";
+export type StateMapBand = "f-2" | "3-6" | "7-8" | "years-5-8" | "invisible-trail";
 
 export interface OfficialStateDescription {
   code: string;
@@ -472,6 +472,32 @@ export const LESSON_STATE_MAPS: readonly LessonStateMap[] = [
     victorian: vc(["VC2TDI8C01", "VC2TDI8C05"]),
     nsw: nsw(["TE4-DES-01"]),
   },
+  {
+    id: "chatbots-and-checking",
+    band: "years-5-8",
+    title: lessonTitle("chatbots-and-checking", "Chatbots and Checking Answers"),
+    australianCodes: acCodes("chatbots-and-checking", 1),
+    victorian: vc(["VC2TDI6C05", "VC2TDI8C05"]),
+    nsw: nsw(["ST3-DDT-01", "TE4-DES-01"]),
+  },
+  {
+    id: "feeds-and-recommendations",
+    band: "years-5-8",
+    title: lessonTitle("feeds-and-recommendations", "Feeds and Recommendations"),
+    australianCodes: acCodes("feeds-and-recommendations", 2),
+    victorian: vc(["VC2TDI6C02", "VC2TDI6D06", "VC2TDI8D06"]),
+    nsw: unmapped(
+      "No official Science and Technology K–6 Syllabus (2024) or Technology 7–8 Syllabus (2023) outcome is a clear match for this unplugged lesson. The official Stage 3 outcome ST3-DDT-02 refers to creating, evaluating and modifying algorithms to code or control digital devices and systems, which this lesson does not do. TE4-DIG-02 requires using data and digital systems to code, design and produce projects.",
+    ),
+  },
+  {
+    id: "loot-boxes-and-purchases",
+    band: "years-5-8",
+    title: lessonTitle("loot-boxes-and-purchases", "Loot Boxes and In-game Purchases"),
+    australianCodes: acCodes("loot-boxes-and-purchases", 3),
+    victorian: vc(["VC2TDI6C05", "VC2TDI8C05"]),
+    nsw: nsw(["ST3-DAT-01", "ST3-DDT-01", "TE4-DES-01"]),
+  },
   INVISIBLE_TRAIL_STATE_MAP,
 ];
 
@@ -479,6 +505,7 @@ export const STATE_MAP_BAND_LABELS: Record<StateMapBand, string> = {
   "f-2": "F–2 unplugged starter set",
   "3-6": "Years 3–6 classroom lessons",
   "7-8": "Years 7–8 bridge unit",
+  "years-5-8": "Years 5–8 topical mini-lessons",
   "invisible-trail": "The Invisible Trail (optional companion)",
 };
 

@@ -7,6 +7,7 @@
 import { CANONICAL_SESSIONS } from "@/lib/schools/canonicalSequence";
 import { FOUNDATION_SESSIONS } from "@/lib/schools/foundationSequence";
 import { YEARS_78_SESSIONS } from "@/lib/schools/years78Sequence";
+import { TOPICAL_SESSIONS } from "@/lib/schools/topicalSequence";
 
 /** Named classroom print packs that are not a per-lesson planner. */
 export const FIELD_PRINT_PACK_SLUGS = [
@@ -26,12 +27,14 @@ export const FIELD_PRINT_PACK_SLUGS = [
   "verified",
   "word-walls",
   "years-7-8",
+  "topical",
 ] as const;
 
 const LESSON_PRINT_SLUGS = [
   ...CANONICAL_SESSIONS,
   ...FOUNDATION_SESSIONS,
   ...YEARS_78_SESSIONS,
+  ...TOPICAL_SESSIONS,
 ].map((session) => session.slug);
 
 const FIELD_PRINT_ALIAS_SLUGS = new Set<string>([

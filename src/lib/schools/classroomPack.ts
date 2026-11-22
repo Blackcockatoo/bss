@@ -34,6 +34,15 @@ import {
   YEARS_78_SESSIONS,
   isYears78SessionId,
 } from "@/lib/schools/years78Sequence";
+import { TOPICAL_CURRICULUM_SOURCES } from "@/lib/schools/topicalCurriculum";
+import {
+  topicalEaldNotesFor,
+  topicalPlannerExtrasFor,
+} from "@/lib/schools/topicalClassroomPack";
+import {
+  TOPICAL_SESSIONS,
+  isTopicalSessionId,
+} from "@/lib/schools/topicalSequence";
 import {
   LESSON_DEFINITIONS,
   getLessonById,
@@ -67,6 +76,7 @@ export const FIELD_MODE_PRINT_YEARS_78_ALL_PATH =
   "/schools/field/print/years-7-8";
 export const FIELD_MODE_PRINT_CURRICULUM_PATH =
   "/schools/field/print/curriculum";
+export const FIELD_MODE_PRINT_TOPICAL_PATH = "/schools/field/print/topical";
 
 export interface OfficialLink {
   title: string;
@@ -150,6 +160,17 @@ export const CURRICULUM_SOURCE_LINKS: readonly OfficialLink[] = [
     note: source.notes,
   })),
   ...YEARS_78_CURRICULUM_SOURCES.map((source) => ({
+    title: source.title,
+    href: source.href,
+    note: source.notes,
+  })),
+  ...TOPICAL_CURRICULUM_SOURCES.filter(
+    (source) =>
+      ![
+        ...FOUNDATION_CURRICULUM_SOURCES,
+        ...YEARS_78_CURRICULUM_SOURCES,
+      ].some((existing) => existing.href === source.href),
+  ).map((source) => ({
     title: source.title,
     href: source.href,
     note: source.notes,
@@ -408,6 +429,9 @@ export function estimatedStepMinutes(
   if (stepCount === 5 && totalMinutes === 45) {
     return [5, 8, 15, 12, 5][stepIndex] ?? 0;
   }
+  if (stepCount === 5 && totalMinutes === 25) {
+    return [4, 5, 8, 5, 3][stepIndex] ?? 0;
+  }
   const base = Math.floor(totalMinutes / stepCount);
   const remainder = totalMinutes - base * stepCount;
   return base + (stepIndex < remainder ? 1 : 0);
@@ -419,7 +443,8 @@ export function twoMinuteExplainerFor(
   const session =
     CANONICAL_SESSIONS.find((candidate) => candidate.id === lesson.id) ??
     FOUNDATION_SESSIONS.find((candidate) => candidate.id === lesson.id) ??
-    YEARS_78_SESSIONS.find((candidate) => candidate.id === lesson.id);
+    YEARS_78_SESSIONS.find((candidate) => candidate.id === lesson.id) ??
+    TOPICAL_SESSIONS.find((candidate) => candidate.id === lesson.id);
   return {
     intention: lesson.learningIntention,
     sayThis: lesson.teacherScript,
@@ -435,6 +460,9 @@ export function plannerExtrasFor(sessionId: LessonId): LessonPlannerExtras {
   if (isYears78SessionId(sessionId)) {
     return years78PlannerExtrasFor(sessionId);
   }
+  if (isTopicalSessionId(sessionId)) {
+    return topicalPlannerExtrasFor(sessionId);
+  }
   return {
     sessionId,
     materials: LESSON_MATERIALS[sessionId],
@@ -447,7 +475,8 @@ export function lessonSourceText(lesson: LessonDefinition): string {
   const session =
     CANONICAL_SESSIONS.find((candidate) => candidate.id === lesson.id) ??
     FOUNDATION_SESSIONS.find((candidate) => candidate.id === lesson.id) ??
-    YEARS_78_SESSIONS.find((candidate) => candidate.id === lesson.id);
+    YEARS_78_SESSIONS.find((candidate) => candidate.id === lesson.id) ??
+    TOPICAL_SESSIONS.find((candidate) => candidate.id === lesson.id);
   return [
     lesson.title,
     lesson.shortDescription,
@@ -693,6 +722,9 @@ export function ealdNotesFor(sessionId: LessonId): EaldNotes {
   }
   if (isYears78SessionId(sessionId)) {
     return years78EaldNotesFor(sessionId);
+  }
+  if (isTopicalSessionId(sessionId)) {
+    return topicalEaldNotesFor(sessionId);
   }
   return EALD_NOTES[sessionId];
 }

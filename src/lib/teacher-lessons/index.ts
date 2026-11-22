@@ -17,6 +17,7 @@ export {
 } from "./lessonDefinitions";
 export { FOUNDATION_LESSON_DEFINITIONS } from "./foundationLessonDefinitions";
 export { YEARS_78_LESSON_DEFINITIONS } from "./years78LessonDefinitions";
+export { TOPICAL_LESSON_DEFINITIONS } from "./topicalLessonDefinitions";
 export {
   TEACHER_HUB_PATH,
   LESSON_BASE_PATH,

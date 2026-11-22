@@ -1,0 +1,50 @@
+[
+  {
+    "number": 1,
+    "id": "chatbots-and-checking",
+    "slug": "chatbots-and-checking",
+    "title": "Chatbots and Checking Answers",
+    "minutes": 25,
+    "yearBand": "years-5-8",
+    "learningIntention": "I can explain how a chatbot makes text, give a reason it can be wrong, and check a reply against a trusted source.",
+    "teacherIntroduction": "A chatbot is a computer program that writes a reply in everyday language. Today we will use a simple, unplugged model of how it makes text, look at why a fluent reply can still be wrong, and check prepared replies against a teacher-provided fact card. We will not create accounts, and we will not type personal information into a chatbot.",
+    "childActivity": "Use teacher-prepared prompt and reply cards, check each reply against a fact card, write a short user story and two design criteria, then judge the fictional chatbot and suggest one change.",
+    "reflectionPrompt": "What is one way you can check a chatbot reply before you rely on it?",
+    "movementMoment": "Stand in two zones — Checked against the fact card, or Not yet checked — while you hold up one reply card, then sit and write your check.",
+    "stoppingPoint": "We stop after checking the prepared replies and judging the fictional chatbot against the criteria. We do not create accounts or type personal information into a chatbot.",
+    "lightEvidence": "Notice whether a student can say how the chatbot makes text, give one reason a reply can be wrong, and check a reply against the fact card. Do not collect names or personal data.",
+    "bestFit": "A short Years 5–8 Digital Technologies mini-lesson on chatbots, run unplugged with prepared cards. No student accounts or live chatbot use is required."
+  },
+  {
+    "number": 2,
+    "id": "feeds-and-recommendations",
+    "slug": "feeds-and-recommendations",
+    "title": "Feeds and Recommendations",
+    "minutes": 25,
+    "yearBand": "years-5-8",
+    "learningIntention": "I can design a simple rule for choosing items in a feed and say whether the data a recommendation system collects is essential to its purpose.",
+    "teacherIntroduction": "A feed is a list of posts or videos chosen for a person. A recommendation system uses data about what has been watched or tapped, then follows rules to choose what to show next. Today we will design a simple rule with branching and a repeat, and we will sort invented data items into essential and not essential. We will use a fictional feed only. We will not log in, and we will not inspect anyone’s real feed or digital footprint.",
+    "childActivity": "Design a simple branching recommendation rule on paper, use it to fill a short fictional feed, then sort invented data items into Essential to the purpose and Not essential.",
+    "reflectionPrompt": "Which data item was not essential to choosing the next video, and why?",
+    "movementMoment": "Stand in two zones — Essential to the purpose, or Not essential — while you hold one invented data card, then sit and write a reason.",
+    "stoppingPoint": "We stop after designing the rule and sorting the invented data items. We do not log in or look at anyone’s real feed or digital footprint.",
+    "lightEvidence": "Notice whether a student can describe a branching rule, fill a short feed by repeating it, and say whether an invented data item is essential to the purpose. Do not collect names or personal data.",
+    "bestFit": "A short Years 5–8 Digital Technologies mini-lesson on recommendation systems, run unplugged with a fictional feed. No student accounts."
+  },
+  {
+    "number": 3,
+    "id": "loot-boxes-and-purchases",
+    "slug": "loot-boxes-and-purchases",
+    "title": "Loot Boxes and In-game Purchases",
+    "minutes": 25,
+    "yearBand": "years-5-8",
+    "learningIntention": "I can explain that a loot box is a chance purchase, interpret a simple tally of results, and evaluate a fictional game’s design against agreed tests.",
+    "teacherIntroduction": "A loot box is a purchase in a game that gives a chance item. You pay, or spend in-game currency, then chance decides what you get. You might not get the item you wanted, and some designs make it easy to try again. Today we will use a fair, unplugged chance model with teacher-prepared cards, record a class tally, and evaluate a fictional game against a user story and design criteria. We will not ask about anyone’s real spending or the games they play at home.",
+    "childActivity": "Draw from a set of ten teacher-prepared cards (one rare, nine common), record a class tally, write a user story and design criteria, then judge a fictional loot-box design and suggest one change.",
+    "reflectionPrompt": "What is one design choice that would make the chance clearer before someone spends?",
+    "movementMoment": "After the first draw, stand in two zones — Common item, or Rare item — then sit and add your result to the class tally.",
+    "stoppingPoint": "We stop after the tally and the evaluation of the fictional game. We do not ask about real spending, payment details, or games students play at home.",
+    "lightEvidence": "Notice whether a student can explain that the item is decided by chance, use the class tally to support a statement, and judge the fictional design against a criterion. Do not collect names, spending details or personal data.",
+    "bestFit": "A short Years 5–8 Digital Technologies mini-lesson on chance purchases in games, run unplugged with cards. No student accounts, and no discussion of real spending."
+  }
+]

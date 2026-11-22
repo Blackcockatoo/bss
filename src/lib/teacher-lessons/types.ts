@@ -20,6 +20,7 @@
 import type { CanonicalSessionId } from "@/lib/schools/canonicalSequence";
 import type { FoundationSessionId } from "@/lib/schools/foundationSequence";
 import type { Years78SessionId } from "@/lib/schools/years78Sequence";
+import type { TopicalSessionId } from "@/lib/schools/topicalSequence";
 import type { LessonAudienceBand } from "@/lib/schools/lessonYearBands";
 import type { LessonEvidence } from "./evidence";
 
@@ -30,7 +31,7 @@ import type { LessonEvidence } from "./evidence";
  * Years 7–8 bridge unit share this union so field routes, planners and
  * comments can look up any set without inventing a second runner.
  */
-export type LessonId = CanonicalSessionId | FoundationSessionId | Years78SessionId;
+export type LessonId = CanonicalSessionId | FoundationSessionId | Years78SessionId | TopicalSessionId;
 
 /** Lifecycle status of a lesson as shown on the Teacher Hub. */
 export type LessonCardStatus =

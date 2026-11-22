@@ -17,6 +17,7 @@ import { FIELD_MODE_INSTALL_ICON_PATHS } from "@/lib/fieldMode/pwa";
 import {
   FIELD_MODE_PRINT_F2_ALL_PATH,
   FIELD_MODE_PRINT_YEARS_78_ALL_PATH,
+  FIELD_MODE_PRINT_TOPICAL_PATH,
   FIELD_MODE_CURRICULUM_PATH,
   FIELD_MODE_PRINT_CURRICULUM_PATH,
 } from "@/lib/schools/classroomPack";
@@ -31,6 +32,7 @@ import {
   FOUNDATION_LESSON_DEFINITIONS,
   LESSON_DEFINITIONS,
   YEARS_78_LESSON_DEFINITIONS,
+  TOPICAL_LESSON_DEFINITIONS,
 } from "@/lib/teacher-lessons/lessonDefinitions";
 
 export const FIELD_PACK_SCHEMA_VERSION = 1;
@@ -114,6 +116,19 @@ export const FIELD_PACK_ROUTE_PATHS = Array.from(
       (lesson) => `${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/comments`,
     ),
     FIELD_MODE_PRINT_YEARS_78_ALL_PATH,
+    ...TOPICAL_LESSON_DEFINITIONS.map(
+      (lesson) => `${FIELD_MODE_LESSONS_PATH}/${lesson.slug}`,
+    ),
+    ...TOPICAL_LESSON_DEFINITIONS.map(
+      (lesson) => `${FIELD_MODE_PRINT_PATH_PREFIX}/${lesson.slug}`,
+    ),
+    ...TOPICAL_LESSON_DEFINITIONS.map(
+      (lesson) => `${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/slides`,
+    ),
+    ...TOPICAL_LESSON_DEFINITIONS.map(
+      (lesson) => `${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/comments`,
+    ),
+    FIELD_MODE_PRINT_TOPICAL_PATH,
     FIELD_MODE_CURRICULUM_PATH,
     FIELD_MODE_PRINT_CURRICULUM_PATH,
     INVISIBLE_TRAIL_LAB_PATH,
@@ -149,6 +164,7 @@ export interface FieldPackManifest {
   lessons: FieldPackLessonEntry[];
   foundationLessons: FieldPackLessonEntry[];
   years78Lessons: FieldPackLessonEntry[];
+  topicalLessons: FieldPackLessonEntry[];
   guarantees: {
     update: "atomic-candidate";
     rollback: "previous-complete-pack";
@@ -211,6 +227,13 @@ export function buildFieldPackManifest(
       printRoute: `${FIELD_MODE_PRINT_PATH_PREFIX}/${lesson.slug}`,
     })),
     years78Lessons: YEARS_78_LESSON_DEFINITIONS.map((lesson) => ({
+      number: lesson.number,
+      slug: lesson.slug,
+      title: lesson.title,
+      route: `${FIELD_MODE_LESSONS_PATH}/${lesson.slug}`,
+      printRoute: `${FIELD_MODE_PRINT_PATH_PREFIX}/${lesson.slug}`,
+    })),
+    topicalLessons: TOPICAL_LESSON_DEFINITIONS.map((lesson) => ({
       number: lesson.number,
       slug: lesson.slug,
       title: lesson.title,
