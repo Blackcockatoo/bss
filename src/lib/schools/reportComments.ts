@@ -128,6 +128,18 @@ const SUPPORTING_CLAUSES: Record<
     nextStep: "Next step: write the user story or one design criterion more clearly.",
     above: "and can judge the system against those tests and note a possible future impact.",
   },
+  "chatbots-and-checking": {
+    nextStep: "Next step: check one more reply against the fact card and say whether it matches.",
+    above: "and can judge the fictional chatbot against the design criteria they wrote.",
+  },
+  "feeds-and-recommendations": {
+    nextStep: "Next step: say whether one collected item is essential to the purpose.",
+    above: "and can explain how repeating the rule fills the feed.",
+  },
+  "loot-boxes-and-purchases": {
+    nextStep: "Next step: use the class tally to support one statement about chance.",
+    above: "and can suggest one design change that would make the chance clearer.",
+  },
 };
 
 function beginningClause(intention: string): string {

@@ -133,6 +133,8 @@ describe("lesson search filters", () => {
     expect(publishedCurriculumCodes()).toContain("AC9TDI2P01");
     expect(publishedCurriculumCodes()).toContain("AC9TDI8K01");
     expect(publishedCurriculumCodes()).toContain("AC9TDI8P14");
+    expect(publishedCurriculumCodes()).toContain("AC9TDI6P01");
+    expect(publishedCurriculumCodes()).toContain("AC9TDI6P10");
   });
 
   it("distinguishes F–2 lessons from Years 3–6 lessons", () => {
@@ -161,14 +163,37 @@ describe("lesson search filters", () => {
       ...EMPTY_LESSON_FILTERS,
       query: "unplugged",
     });
-    expect(unplugged).toHaveLength(14);
+    expect(unplugged).toHaveLength(17);
     expect(unplugged.every((lesson) => lesson.yearBand !== "years-3-6")).toBe(true);
     const years78 = filterLessons(ALL_LESSON_DEFINITIONS, {
       ...EMPTY_LESSON_FILTERS,
       yearBand: "7-8",
     });
-    expect(years78).toHaveLength(7);
-    expect(years78.every((lesson) => lesson.yearBand === "years-7-8")).toBe(true);
+    expect(years78).toHaveLength(10);
+    expect(
+      years78.every(
+        (lesson) =>
+          lesson.yearBand === "years-7-8" || lesson.yearBand === "years-5-8",
+      ),
+    ).toBe(true);
+    const years56 = filterLessons(ALL_LESSON_DEFINITIONS, {
+      ...EMPTY_LESSON_FILTERS,
+      yearBand: "5-6",
+    });
+    expect(
+      years56.some((lesson) => lesson.id === "chatbots-and-checking"),
+    ).toBe(true);
+    const topical = filterLessons(ALL_LESSON_DEFINITIONS, {
+      ...EMPTY_LESSON_FILTERS,
+      query: "topical",
+    });
+    expect(topical).toHaveLength(3);
+    expect(topical.every((lesson) => lesson.yearBand === "years-5-8")).toBe(true);
+    const twentyFive = filterLessons(ALL_LESSON_DEFINITIONS, {
+      ...EMPTY_LESSON_FILTERS,
+      minutes: 25,
+    });
+    expect(twentyFive).toHaveLength(3);
     const fortyFive = filterLessons(ALL_LESSON_DEFINITIONS, {
       ...EMPTY_LESSON_FILTERS,
       minutes: 45,

@@ -12,6 +12,9 @@ describe("short /print aliases", () => {
     expect(fieldPrintAliasTarget("/print/years-7-8")).toBe(
       "/schools/field/print/years-7-8",
     );
+    expect(fieldPrintAliasTarget("/print/topical")).toBe(
+      "/schools/field/print/topical",
+    );
     expect(fieldPrintAliasTarget("/print/relief")).toBe(
       "/schools/field/print/relief",
     );
@@ -46,5 +49,6 @@ describe("short /print aliases", () => {
     expect(FIELD_PRINT_PACK_SLUGS).toContain("f2");
     expect(FIELD_PRINT_PACK_SLUGS).toContain("years-7-8");
     expect(FIELD_PRINT_PACK_SLUGS).toContain("relief");
+    expect(FIELD_PRINT_PACK_SLUGS).toContain("topical");
   });
 });

@@ -24,6 +24,8 @@ import { FOUNDATION_LESSON_DEFINITIONS } from "@/lib/teacher-lessons/foundationL
 export { FOUNDATION_LESSON_DEFINITIONS } from "@/lib/teacher-lessons/foundationLessonDefinitions";
 import { YEARS_78_LESSON_DEFINITIONS } from "@/lib/teacher-lessons/years78LessonDefinitions";
 export { YEARS_78_LESSON_DEFINITIONS } from "@/lib/teacher-lessons/years78LessonDefinitions";
+import { TOPICAL_LESSON_DEFINITIONS } from "@/lib/teacher-lessons/topicalLessonDefinitions";
+export { TOPICAL_LESSON_DEFINITIONS } from "@/lib/teacher-lessons/topicalLessonDefinitions";
 import type { CanonicalSessionId } from "@/lib/schools/canonicalSequence";
 
 import type {
@@ -698,6 +700,7 @@ export const ALL_LESSON_DEFINITIONS: LessonDefinition[] = [
   ...FOUNDATION_LESSON_DEFINITIONS,
   ...LESSON_DEFINITIONS,
   ...YEARS_78_LESSON_DEFINITIONS,
+  ...TOPICAL_LESSON_DEFINITIONS,
 ];
 
 /** All Years 3–6 lesson ids in canonical order. */

@@ -22,6 +22,7 @@ import {
 import {
   FIELD_MODE_PRINT_F2_ALL_PATH,
   FIELD_MODE_PRINT_YEARS_78_ALL_PATH,
+  FIELD_MODE_PRINT_TOPICAL_PATH,
   FIELD_MODE_CURRICULUM_PATH,
   FIELD_MODE_PRINT_CURRICULUM_PATH,
 } from "@/lib/schools/classroomPack";
@@ -124,6 +125,12 @@ function metaPetSchoolSitemap(): MetadataRoute.Sitemap {
   });
   entries.push({
     url: metaPetSchoolUrl(FIELD_MODE_PRINT_YEARS_78_ALL_PATH),
+    lastModified,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  });
+  entries.push({
+    url: metaPetSchoolUrl(FIELD_MODE_PRINT_TOPICAL_PATH),
     lastModified,
     changeFrequency: "monthly",
     priority: 0.7,

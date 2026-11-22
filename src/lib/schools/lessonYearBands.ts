@@ -3,6 +3,7 @@ export const LESSON_AUDIENCE_BANDS = [
   "years-1-2",
   "years-3-6",
   "years-7-8",
+  "years-5-8",
 ] as const;
 
 export type LessonAudienceBand = (typeof LESSON_AUDIENCE_BANDS)[number];
@@ -12,6 +13,7 @@ export const LESSON_AUDIENCE_BAND_LABELS: Record<LessonAudienceBand, string> = {
   "years-1-2": "Years 1–2",
   "years-3-6": "Years 3–6",
   "years-7-8": "Years 7–8",
+  "years-5-8": "Years 5–8",
 };
 
 export function lessonAudienceLabel(yearBand: LessonAudienceBand): string {
@@ -21,6 +23,7 @@ export function lessonAudienceLabel(yearBand: LessonAudienceBand): string {
 export function lessonSetLabel(yearBand: LessonAudienceBand): string {
   if (yearBand === "years-3-6") return "Years 3–6";
   if (yearBand === "years-7-8") return "Years 7–8 bridge";
+  if (yearBand === "years-5-8") return "Topical mini-lessons";
   return "F–2 unplugged";
 }
 

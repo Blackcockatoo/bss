@@ -35,6 +35,11 @@ import {
   YEARS_78_PERIOD_NOTE,
   YEARS_78_SEQUENCE_SUMMARY,
 } from "@/lib/schools/years78Sequence";
+import {
+  TOPICAL_ALIGNMENT_CAVEAT,
+  TOPICAL_PERIOD_NOTE,
+  TOPICAL_SEQUENCE_SUMMARY,
+} from "@/lib/schools/topicalSequence";
 import { lessonAudienceLabel } from "@/lib/schools/lessonYearBands";
 import {
   CANONICAL_SESSION_COUNT,
@@ -48,6 +53,7 @@ import {
   FIELD_MODE_PRINT_CHECKLIST_PATH,
   FIELD_MODE_PRINT_F2_ALL_PATH,
   FIELD_MODE_PRINT_YEARS_78_ALL_PATH,
+  FIELD_MODE_PRINT_TOPICAL_PATH,
   FIELD_MODE_CURRICULUM_PATH,
   FIELD_MODE_PRINT_NO_TECH_PATH,
   FIELD_MODE_PRINT_PARENT_LETTER_PATH,
@@ -59,11 +65,12 @@ import {
   FOUNDATION_LESSON_DEFINITIONS,
   LESSON_DEFINITIONS,
   YEARS_78_LESSON_DEFINITIONS,
+  TOPICAL_LESSON_DEFINITIONS,
 } from "@/lib/teacher-lessons/lessonDefinitions";
 
 const WHAT_YOU_NEED = [
   "A Foundation to Year 8 class, depending on the set",
-  "About 15–20 minutes for F–6, or about 45 minutes for Years 7–8",
+  "About 15–20 minutes for F–6, about 25 minutes for a topical mini-lesson, or about 45 minutes for Years 7–8",
   "A teacher to lead it",
   "A browser — nothing to install",
   SCHOOL_PRIVACY_COMMITMENTS.accountsShort,
@@ -407,6 +414,94 @@ export default function FieldModePage() {
           </ol>
         </section>
 
+        <section aria-labelledby="topical-lesson-list-heading" className="space-y-4" id="topical-mini-lessons">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <h2
+              id="topical-lesson-list-heading"
+              className="text-2xl font-semibold text-slate-950"
+            >
+              Years 5–8 topical mini-lessons
+            </h2>
+            <a
+              href={FIELD_MODE_PRINT_TOPICAL_PATH}
+              className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              <Printer className="h-4 w-4" aria-hidden="true" />
+              Print the topical pack
+            </a>
+          </div>
+          <p className="max-w-3xl text-base leading-7 text-slate-700">
+            {TOPICAL_SEQUENCE_SUMMARY} {TOPICAL_PERIOD_NOTE}{" "}
+            {TOPICAL_ALIGNMENT_CAVEAT}
+          </p>
+          <ol className="grid gap-4">
+            {TOPICAL_LESSON_DEFINITIONS.map((lesson) => {
+              const alignment = curriculumAlignmentForLesson(lesson);
+              const areas = mergeLearningAreas(
+                lesson.learningAreas,
+                alignment.learningAreas,
+              );
+              return (
+                <li
+                  key={lesson.id}
+                  className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                >
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-800">
+                      Years 5–8 · Mini-lesson {lesson.number}
+                    </p>
+                    <p className="text-sm font-medium text-slate-600">
+                      {lesson.durationMinutes} minutes · unplugged
+                    </p>
+                  </div>
+                  <h3 className="mt-2 text-xl font-semibold text-slate-950">
+                    {lesson.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-700">
+                    {lesson.shortDescription}
+                  </p>
+                  <p className="mt-3 text-sm text-slate-600">
+                    <span className="font-semibold text-slate-800">
+                      Learning areas:
+                    </span>{" "}
+                    {areas.join(" · ")}
+                  </p>
+                  {alignment.codes.length > 0 ? (
+                    <p className="mt-1 text-sm text-slate-600">
+                      <span className="font-semibold text-slate-800">
+                        Australian Curriculum v9:
+                      </span>{" "}
+                      {alignment.codes.join(", ")}
+                    </p>
+                  ) : null}
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <a
+                      href={`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}`}
+                      className="inline-flex min-h-11 items-center rounded-xl bg-emerald-800 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                    >
+                      {lesson.number === 1
+                        ? "Start topical Lesson 1"
+                        : "Open lesson"}
+                    </a>
+                    <a
+                      href={`${FIELD_MODE_PRINT_PATH_PREFIX}/${lesson.slug}`}
+                      className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      Print this lesson
+                    </a>
+                    <a
+                      href={`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/slides`}
+                      className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      Projector slides
+                    </a>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+
         <section aria-labelledby="digital-independence-heading" className="rounded-2xl border border-emerald-900/20 bg-white p-6">
           <h2 id="digital-independence-heading" className="text-2xl font-semibold">Teach the child to read the machine.</h2>
           <p className="mt-3 max-w-2xl leading-7 text-slate-700">
@@ -443,6 +538,7 @@ export default function FieldModePage() {
               { href: FIELD_MODE_PRINT_ALL_PATH, label: "Print the Years 3–6 pack" },
               { href: FIELD_MODE_PRINT_F2_ALL_PATH, label: "Print the F–2 unplugged pack" },
               { href: FIELD_MODE_PRINT_YEARS_78_ALL_PATH, label: "Print the Years 7–8 pack" },
+              { href: FIELD_MODE_PRINT_TOPICAL_PATH, label: "Print the topical mini-lesson pack" },
               { href: "/schools/field/print/invisible-trail.html", label: "Invisible Trail teacher guide" },
               { href: FIELD_MODE_PRINT_RELIEF_PATH, label: "Relief teacher pack" },
               { href: FIELD_MODE_PRINT_TICKETS_PATH, label: "Exit tickets" },
