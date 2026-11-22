@@ -1,9 +1,13 @@
+import { readdirSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 import {
+  ANALYTICS_ALLOWED_PREFIXES,
   ANALYTICS_EXCLUDED_PREFIXES,
   isAnalyticsAllowedPathname,
 } from "./analyticsBoundary";
+import { getArcadeCrawlRoutes } from "./games/arcade";
 import {
   CHILD_SAFE_ROUTE_POLICIES,
   FIELD_MODE_HOME_PATH,
@@ -61,16 +65,76 @@ describe("analytics boundary", () => {
     expect(isAnalyticsAllowedPathname("")).toBe(false);
   });
 
-  it("still allows analytics on consumer routes", () => {
-    for (const pathname of ["/", "/app/wellness", "/pricing", "/legal"]) {
-      expect(isAnalyticsAllowedPathname(pathname)).toBe(true);
+  it("allows analytics only on the adult marketing allowlist", () => {
+    for (const pathname of ["/pricing", "/studio"]) {
+      expect(isAnalyticsAllowedPathname(pathname), pathname).toBe(true);
     }
   });
 
-  it("does not exclude an unrelated route that merely shares a prefix string", () => {
-    // `/schoolsomething` is not `/schools`; prefix matching must be segment
-    // aware so the exclusion list stays honest about what it covers.
-    expect(isAnalyticsAllowedPathname("/schoolsomething")).toBe(true);
+  it("is off by default on every kid-facing consumer route", () => {
+    for (const pathname of [
+      "/",
+      "/app",
+      "/app/wellness",
+      "/app/moss60",
+      "/app/pet",
+      "/app/battle",
+      "/pet",
+      "/shop",
+      "/arcade",
+      "/moss60",
+      "/identity",
+      "/digital-dna",
+      "/dna-hub",
+      "/genome-explorer",
+      "/body-forge",
+      "/geometry-sound",
+      "/space-jewbles",
+      "/monkey-invaders",
+      "/qr-messaging",
+      "/share/demo",
+      "/legal",
+      "/legal/terms",
+      "/a-route-added-next-month",
+    ]) {
+      expect(isAnalyticsAllowedPathname(pathname), pathname).toBe(false);
+    }
+  });
+
+  it("never allows analytics on any arcade route from the registry", () => {
+    for (const route of getArcadeCrawlRoutes()) {
+      expect(isAnalyticsAllowedPathname(route), route).toBe(false);
+    }
+  });
+
+  it("allows analytics on no top-level app route outside the allowlist", () => {
+    const appDir = path.resolve(__dirname, "../app");
+    const topLevelRoutes = readdirSync(appDir, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .filter((name) => !name.startsWith("(") && !name.startsWith("_") && name !== "api")
+      .map((name) => `/${name}`);
+
+    expect(topLevelRoutes.length).toBeGreaterThan(10);
+    for (const route of topLevelRoutes) {
+      const allowlisted = (ANALYTICS_ALLOWED_PREFIXES as readonly string[]).includes(route);
+      expect(isAnalyticsAllowedPathname(route), route).toBe(allowlisted);
+    }
+  });
+
+  it("never lets the allowlist overlap the exclusion list", () => {
+    for (const allowed of ANALYTICS_ALLOWED_PREFIXES) {
+      expect(
+        (ANALYTICS_EXCLUDED_PREFIXES as readonly string[]).includes(allowed),
+        allowed,
+      ).toBe(false);
+    }
+  });
+
+  it("matches allowlisted prefixes by path segment", () => {
+    expect(isAnalyticsAllowedPathname("/pricingsomething")).toBe(false);
+    expect(isAnalyticsAllowedPathname("/studiofake")).toBe(false);
+    expect(isAnalyticsAllowedPathname("/studio/team")).toBe(true);
     expect(ANALYTICS_EXCLUDED_PREFIXES).toContain("/schools");
   });
 });
