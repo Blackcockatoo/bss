@@ -19,6 +19,7 @@ import {
   APP_PROFILE,
   ENFORCE_CHILD_SAFE_BOUNDARY,
 } from "@/lib/env/features";
+import { fieldPrintAliasTarget } from "@/lib/schools/printAliases";
 
 const DEFAULT_CANONICAL_ORIGIN = "https://www.bluesnakestudios.com";
 const CORE_HOST_ALIASES = new Set([
@@ -243,6 +244,13 @@ export function proxy(request: NextRequest) {
   }
 
   const { pathname } = request.nextUrl;
+
+  const printAlias = fieldPrintAliasTarget(pathname);
+  if (printAlias) {
+    const redirectUrl = sameHostUrl(request, printAlias);
+    redirectUrl.search = request.nextUrl.search;
+    return NextResponse.redirect(redirectUrl, 308);
+  }
 
   if (isMetaPetSchoolHost(request) && isTeacherWorkspace(pathname)) {
     return NextResponse.redirect(new URL(`${pathname}${request.nextUrl.search}`, METAPET_ORIGIN), 307);

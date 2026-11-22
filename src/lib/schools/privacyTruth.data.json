@@ -1,6 +1,6 @@
 {
   "retentionDays": 35,
-  "profileDescription": "Teacher-led, time-bounded sessions for Years 3-6. No student account is required. Classroom routes have no advertising or behavioural tracking; classroom record contents stay in the browser during routine use.",
+  "profileDescription": "Teacher-led, time-bounded sessions for Foundation to Year 8. No student account is required. Classroom routes have no advertising or behavioural tracking; classroom record contents stay in the browser during routine use.",
   "commitments": {
     "accounts": "No student account, student email, real name, photo or login is required by the classroom build.",
     "accountsShort": "No student accounts to create",

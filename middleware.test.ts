@@ -404,6 +404,50 @@ describe("proxy Field Mode boundary", () => {
   });
 });
 
+describe("short /print aliases", () => {
+  it("sends known classroom pack shortcuts to the matching Field print packs", async () => {
+    const { proxy } = await loadProxy("core");
+
+    const cases = [
+      ["/print/f2", "/schools/field/print/f2"],
+      ["/print/years-7-8", "/schools/field/print/years-7-8"],
+      ["/print/relief", "/schools/field/print/relief"],
+      ["/print/all", "/schools/field/print/all"],
+      ["/print/curriculum", "/schools/field/print/curriculum"],
+      ["/print/invisible-trail", "/schools/field/print/invisible-trail"],
+    ] as const;
+
+    for (const [from, to] of cases) {
+      const response = proxy(new NextRequest(`https://www.metapet.school${from}`));
+      expect(response.status, from).toBe(308);
+      expect(response.headers.get("location"), from).toBe(
+        `https://www.metapet.school${to}`,
+      );
+    }
+  });
+
+  it("keeps an unknown short /print path on the Field home fallback", async () => {
+    const { proxy } = await loadProxy("core");
+    const response = proxy(
+      new NextRequest("https://www.metapet.school/print/not-a-pack"),
+    );
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe(
+      "https://www.metapet.school/schools/field",
+    );
+  });
+
+  it("preserves the query string on a short print alias", async () => {
+    const { proxy } = await loadProxy("core");
+    const response = proxy(
+      new NextRequest("https://www.metapet.school/print/f2?view=teacher"),
+    );
+    expect(response.headers.get("location")).toBe(
+      "https://www.metapet.school/schools/field/print/f2?view=teacher",
+    );
+  });
+});
+
 it("takes school teachers deliberately to the full teacher workspace", async () => {
   const { proxy } = await loadProxy("core");
   for (const path of ["/teach", "/teach/lab", "/teachers/passport"]) {
