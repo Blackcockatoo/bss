@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { PrintLessonButton } from "@/components/field-mode/PrintLessonButton";
 import { PrintableLessonDocument } from "@/components/field-mode/PrintableLessonDocument";
@@ -125,19 +126,35 @@ export default function PrintAllLessonsPage() {
         <div className="break-before-page">
           <PrintableOfficialLinks headingLevel={2} includeCurriculum />
         </div>
-        <article className="field-print-hide mx-auto max-w-4xl rounded-2xl border border-emerald-900/20 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold">Optional: The Invisible Trail teacher guide</h2>
+        <article className="mx-auto max-w-4xl rounded-2xl border border-emerald-900/20 bg-white p-6 shadow-sm">
+          <h2 className="text-xl font-semibold">Optional: The Invisible Trail companion pack</h2>
           <p className="mt-2 text-sm leading-6 text-slate-700">
-            A 30-minute optional companion lab (15 minutes interactive, 15 minutes
-            discussion), using only fictional data. Open the standalone guide to
-            print it, including when JavaScript is off.
+            A 30-minute optional companion lab (15 minutes on the teacher screen,
+            15 minutes to discuss, redraw and complete an exit ticket), using only
+            fictional data. The planner includes materials, timings, EAL/D notes,
+            a word wall, an exit ticket and report comment starters. The
+            standalone teacher guide still works with JavaScript turned off.
           </p>
-          <a
-            href="/schools/field/print/invisible-trail.html"
-            className="mt-3 inline-flex min-h-11 items-center font-semibold text-emerald-900 underline"
-          >
-            Open the printable Invisible Trail teacher guide
-          </a>
+          <div className="mt-3 flex flex-col gap-2">
+            <Link
+              href="/schools/field/print/invisible-trail"
+              className="inline-flex min-h-11 items-center font-semibold text-emerald-900 underline"
+            >
+              Open the Invisible Trail planner pack
+            </Link>
+            <a
+              href="/schools/field/print/invisible-trail.html"
+              className="inline-flex min-h-11 items-center font-semibold text-emerald-900 underline"
+            >
+              Open the no-JavaScript teacher guide
+            </a>
+            <Link
+              href="/schools/field/play/invisible-trail/slides"
+              className="field-print-hide inline-flex min-h-11 items-center font-semibold text-emerald-900 underline"
+            >
+              Open the projector slides
+            </Link>
+          </div>
         </article>
       </div>
     </main>

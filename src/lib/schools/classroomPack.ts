@@ -5,7 +5,10 @@
  * here — use {@link curriculumAlignmentForSession}.
  */
 
-import { FIELD_MODE_VERIFIED_PATH } from "@/lib/childSafeBaseline";
+import {
+  FIELD_MODE_CURRICULUM_PATH,
+  FIELD_MODE_VERIFIED_PATH,
+} from "@/lib/childSafeBaseline";
 import { CANONICAL_SESSIONS } from "@/lib/schools/canonicalSequence";
 import type { CanonicalSessionId } from "@/lib/schools/canonicalSequence";
 import {
@@ -22,6 +25,7 @@ import {
 import {
   YEARS_78_CURRICULUM_SOURCES,
 } from "@/lib/schools/years78Curriculum";
+import { ALL_STATE_CURRICULUM_SOURCES } from "@/lib/schools/stateCurriculumSources";
 import {
   years78EaldNotesFor,
   years78PlannerExtrasFor,
@@ -40,7 +44,7 @@ import type { LessonDefinition, LessonId } from "@/lib/teacher-lessons/types";
 export const OFFICIAL_LINK_CHECKED_AT =
   "19 November 2026, Australia/Melbourne";
 
-export { FIELD_MODE_VERIFIED_PATH };
+export { FIELD_MODE_CURRICULUM_PATH, FIELD_MODE_VERIFIED_PATH };
 export const FIELD_MODE_PRINT_TICKETS_PATH = "/schools/field/print/tickets";
 export const FIELD_MODE_PRINT_WORD_WALLS_PATH =
   "/schools/field/print/word-walls";
@@ -61,6 +65,8 @@ export const FIELD_MODE_PRINT_ROLLOUT_PATH =
 export const FIELD_MODE_PRINT_F2_ALL_PATH = "/schools/field/print/f2";
 export const FIELD_MODE_PRINT_YEARS_78_ALL_PATH =
   "/schools/field/print/years-7-8";
+export const FIELD_MODE_PRINT_CURRICULUM_PATH =
+  "/schools/field/print/curriculum";
 
 export interface OfficialLink {
   title: string;
@@ -144,6 +150,11 @@ export const CURRICULUM_SOURCE_LINKS: readonly OfficialLink[] = [
     note: source.notes,
   })),
   ...YEARS_78_CURRICULUM_SOURCES.map((source) => ({
+    title: source.title,
+    href: source.href,
+    note: source.notes,
+  })),
+  ...ALL_STATE_CURRICULUM_SOURCES.map((source) => ({
     title: source.title,
     href: source.href,
     note: source.notes,
@@ -566,7 +577,7 @@ export const VERIFICATION_ITEMS: readonly VerificationItem[] = [
     title: "Third-party security, accessibility or curriculum audit",
     status: "not-checked",
     detail:
-      "This page does not record an external security audit, accessibility audit, or an official ACARA or eSafety endorsement.",
+      "This page does not record an external security audit, accessibility audit, or an official ACARA, eSafety, VCAA or NESA endorsement.",
   },
   {
     title: "Rollout plan and private teacher feedback storage",
@@ -585,6 +596,12 @@ export const VERIFICATION_ITEMS: readonly VerificationItem[] = [
     status: "checked",
     detail:
       "The eight Australian Curriculum v9 codes used in the Years 7–8 bridge unit, and the content-description wording shown beside them, were copied from official ACARA Digital Technologies documents that returned HTTP 200 on 20 November 2026, Australia/Sydney: the 7–10 curriculum content download, and the F–10 scope and sequence. This is classroom alignment, not an official ACARA endorsement.",
+  },
+  {
+    title: "Victorian Curriculum 2.0 and NSW syllabus maps",
+    status: "checked",
+    detail:
+      "Victorian Curriculum F–10 Version 2.0 Digital Technologies wording used in the state maps was copied from the official vic.gov.au Version 2.0 Technologies Word download and the official full-curriculum CSV extract dated 20 October 2026. Those files, and the official downloads page, returned HTTP 200 on 21 November 2026, Australia/Sydney. The official F–10 website at f10.vcaa.vic.edu.au was in maintenance and directed readers to that downloads page; victoriancurriculum.vcaa.vic.edu.au returned HTTP 503. NSW outcome wording was copied from official NESA pages for the Science and Technology K–6 Syllabus (2024) and the Technology 7–8 Syllabus (2023), each HTTP 200 on the same date. Rows marked “not mapped yet” were left unmapped rather than guessed. This is classroom alignment, not a VCAA, NESA or Victorian Government endorsement.",
   },
 ];
 

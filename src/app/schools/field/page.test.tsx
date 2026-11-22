@@ -60,6 +60,13 @@ describe("Classroom home", () => {
     ).toHaveAttribute("href", "/schools/field/print/invisible-trail.html");
   });
 
+  it("links Victorian and NSW curriculum maps", () => {
+    render(<FieldModePage />);
+    expect(
+      screen.getByRole("link", { name: /Victorian and NSW maps/i }),
+    ).toHaveAttribute("href", "/schools/field/curriculum");
+  });
+
   it("offers a printable pack, safety information and local-data controls", () => {
     render(<FieldModePage />);
 

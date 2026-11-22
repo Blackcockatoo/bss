@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { metadata as homeMetadata } from "@/app/schools/field/page";
+import { metadata as schoolsMetadata } from "@/app/schools/layout";
 import { metadata, viewport } from "@/app/schools/field/layout";
 import {
   METAPET_SCHOOL_NAME,
@@ -51,5 +52,22 @@ describe("MetaPet School standalone identity", () => {
     expect(
       openGraph && "locale" in openGraph ? openGraph.locale : null,
     ).toBe("en_AU");
+  });
+});
+
+describe("schools page metadata", () => {
+  it("describes Foundation to Year 8 on the page and social cards", () => {
+    const description = String(schoolsMetadata.description ?? "");
+    expect(description).toMatch(/Foundation to Year 8/);
+    expect(description).not.toMatch(/Years 3[-–]6/);
+
+    const openGraph = schoolsMetadata.openGraph;
+    const twitter = schoolsMetadata.twitter;
+    expect(
+      openGraph && "description" in openGraph ? openGraph.description : null,
+    ).toBe(description);
+    expect(
+      twitter && "description" in twitter ? twitter.description : null,
+    ).toBe(description);
   });
 });

@@ -100,5 +100,21 @@ describe("Field lesson launchpad", () => {
     expect(
       screen.getByRole("link", { name: "Printable teacher guide" }),
     ).toHaveAttribute("href", "/schools/field/print/invisible-trail.html");
+    expect(
+      screen.getByRole("link", { name: "Planner pack" }),
+    ).toHaveAttribute("href", "/schools/field/print/invisible-trail");
+    expect(
+      screen.getByRole("link", { name: "Invisible Trail slides" }),
+    ).toHaveAttribute("href", "/schools/field/play/invisible-trail/slides");
+    expect(
+      screen.getByRole("link", { name: "Invisible Trail comments" }),
+    ).toHaveAttribute("href", "/schools/field/play/invisible-trail/comments");
+  });
+
+  it("links the Victorian and NSW curriculum maps", () => {
+    render(<FieldLessonLaunchpad />);
+    expect(
+      screen.getByRole("link", { name: "Victorian and NSW maps" }),
+    ).toHaveAttribute("href", "/schools/field/curriculum");
   });
 });
