@@ -80,9 +80,20 @@ describe("sitemap.xml per public domain", () => {
     const urls = new Set(entries.map((entry) => entry.url));
 
     expect(LESSON_DEFINITIONS.length).toBeGreaterThan(0);
+    expect(urls.has(`${METAPET_SCHOOL_ORIGIN}/schools/field/print/all`)).toBe(
+      true,
+    );
     for (const lesson of LESSON_DEFINITIONS) {
       expect(
         urls.has(`${METAPET_SCHOOL_ORIGIN}/schools/field/lessons/${lesson.slug}`),
+      ).toBe(true);
+      expect(
+        urls.has(`${METAPET_SCHOOL_ORIGIN}/schools/field/print/${lesson.slug}`),
+      ).toBe(true);
+      expect(
+        urls.has(
+          `${METAPET_SCHOOL_ORIGIN}/schools/field/lessons/${lesson.slug}/slides`,
+        ),
       ).toBe(true);
     }
   });

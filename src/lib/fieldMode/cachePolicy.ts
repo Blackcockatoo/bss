@@ -14,7 +14,26 @@ import {
 } from "@/lib/childSafeBaseline";
 import { FIELD_PLAY_HOME } from "@/lib/productSurfaces";
 import { FIELD_MODE_INSTALL_ICON_PATHS } from "@/lib/fieldMode/pwa";
-import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
+import {
+  FIELD_MODE_PRINT_F2_ALL_PATH,
+  FIELD_MODE_PRINT_YEARS_78_ALL_PATH,
+  FIELD_MODE_PRINT_TOPICAL_PATH,
+  FIELD_MODE_CURRICULUM_PATH,
+  FIELD_MODE_PRINT_CURRICULUM_PATH,
+} from "@/lib/schools/classroomPack";
+import {
+  INVISIBLE_TRAIL_COMMENTS_PATH,
+  INVISIBLE_TRAIL_LAB_PATH,
+  INVISIBLE_TRAIL_PRINT_PLANNER_PATH,
+  INVISIBLE_TRAIL_SLIDES_PATH,
+  INVISIBLE_TRAIL_STATIC_GUIDE_PATH,
+} from "@/lib/schools/invisibleTrailPack";
+import {
+  FOUNDATION_LESSON_DEFINITIONS,
+  LESSON_DEFINITIONS,
+  YEARS_78_LESSON_DEFINITIONS,
+  TOPICAL_LESSON_DEFINITIONS,
+} from "@/lib/teacher-lessons/lessonDefinitions";
 
 export const FIELD_PACK_SCHEMA_VERSION = 1;
 export const FIELD_PACK_RELEASE = "pass-4";
@@ -53,12 +72,70 @@ export const FIELD_PACK_PRINT_ROUTES = LESSON_DEFINITIONS.map(
   (lesson) => `${FIELD_MODE_PRINT_PATH_PREFIX}/${lesson.slug}`,
 );
 
+export const FIELD_PACK_FOUNDATION_LESSON_ROUTES =
+  FOUNDATION_LESSON_DEFINITIONS.map(
+    (lesson) => `${FIELD_MODE_LESSONS_PATH}/${lesson.slug}`,
+  );
+
+export const FIELD_PACK_FOUNDATION_PRINT_ROUTES =
+  FOUNDATION_LESSON_DEFINITIONS.map(
+    (lesson) => `${FIELD_MODE_PRINT_PATH_PREFIX}/${lesson.slug}`,
+  );
+
+export const FIELD_PACK_YEARS_78_LESSON_ROUTES =
+  YEARS_78_LESSON_DEFINITIONS.map(
+    (lesson) => `${FIELD_MODE_LESSONS_PATH}/${lesson.slug}`,
+  );
+
+export const FIELD_PACK_YEARS_78_PRINT_ROUTES =
+  YEARS_78_LESSON_DEFINITIONS.map(
+    (lesson) => `${FIELD_MODE_PRINT_PATH_PREFIX}/${lesson.slug}`,
+  );
+
 export const FIELD_PACK_ROUTE_PATHS = Array.from(
   new Set([
     ...FIELD_PACK_BASE_ROUTES,
     ...FIELD_PACK_LESSON_ROUTES,
     ...LESSON_DEFINITIONS.map(lesson => `${FIELD_PLAY_HOME}/${lesson.slug}`),
     ...FIELD_PACK_PRINT_ROUTES,
+    ...FIELD_PACK_FOUNDATION_LESSON_ROUTES,
+    ...FIELD_PACK_FOUNDATION_PRINT_ROUTES,
+    ...FOUNDATION_LESSON_DEFINITIONS.map(
+      (lesson) => `${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/slides`,
+    ),
+    ...FOUNDATION_LESSON_DEFINITIONS.map(
+      (lesson) => `${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/comments`,
+    ),
+    FIELD_MODE_PRINT_F2_ALL_PATH,
+    ...FIELD_PACK_YEARS_78_LESSON_ROUTES,
+    ...FIELD_PACK_YEARS_78_PRINT_ROUTES,
+    ...YEARS_78_LESSON_DEFINITIONS.map(
+      (lesson) => `${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/slides`,
+    ),
+    ...YEARS_78_LESSON_DEFINITIONS.map(
+      (lesson) => `${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/comments`,
+    ),
+    FIELD_MODE_PRINT_YEARS_78_ALL_PATH,
+    ...TOPICAL_LESSON_DEFINITIONS.map(
+      (lesson) => `${FIELD_MODE_LESSONS_PATH}/${lesson.slug}`,
+    ),
+    ...TOPICAL_LESSON_DEFINITIONS.map(
+      (lesson) => `${FIELD_MODE_PRINT_PATH_PREFIX}/${lesson.slug}`,
+    ),
+    ...TOPICAL_LESSON_DEFINITIONS.map(
+      (lesson) => `${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/slides`,
+    ),
+    ...TOPICAL_LESSON_DEFINITIONS.map(
+      (lesson) => `${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/comments`,
+    ),
+    FIELD_MODE_PRINT_TOPICAL_PATH,
+    FIELD_MODE_CURRICULUM_PATH,
+    FIELD_MODE_PRINT_CURRICULUM_PATH,
+    INVISIBLE_TRAIL_LAB_PATH,
+    INVISIBLE_TRAIL_SLIDES_PATH,
+    INVISIBLE_TRAIL_COMMENTS_PATH,
+    INVISIBLE_TRAIL_PRINT_PLANNER_PATH,
+    INVISIBLE_TRAIL_STATIC_GUIDE_PATH,
   ]),
 );
 
@@ -85,6 +162,9 @@ export interface FieldPackManifest {
   routes: string[];
   assets: string[];
   lessons: FieldPackLessonEntry[];
+  foundationLessons: FieldPackLessonEntry[];
+  years78Lessons: FieldPackLessonEntry[];
+  topicalLessons: FieldPackLessonEntry[];
   guarantees: {
     update: "atomic-candidate";
     rollback: "previous-complete-pack";
@@ -133,6 +213,27 @@ export function buildFieldPackManifest(
     routes: [...FIELD_PACK_ROUTE_PATHS],
     assets: [...FIELD_PACK_STATIC_ASSET_PATHS],
     lessons: LESSON_DEFINITIONS.map((lesson) => ({
+      number: lesson.number,
+      slug: lesson.slug,
+      title: lesson.title,
+      route: `${FIELD_MODE_LESSONS_PATH}/${lesson.slug}`,
+      printRoute: `${FIELD_MODE_PRINT_PATH_PREFIX}/${lesson.slug}`,
+    })),
+    foundationLessons: FOUNDATION_LESSON_DEFINITIONS.map((lesson) => ({
+      number: lesson.number,
+      slug: lesson.slug,
+      title: lesson.title,
+      route: `${FIELD_MODE_LESSONS_PATH}/${lesson.slug}`,
+      printRoute: `${FIELD_MODE_PRINT_PATH_PREFIX}/${lesson.slug}`,
+    })),
+    years78Lessons: YEARS_78_LESSON_DEFINITIONS.map((lesson) => ({
+      number: lesson.number,
+      slug: lesson.slug,
+      title: lesson.title,
+      route: `${FIELD_MODE_LESSONS_PATH}/${lesson.slug}`,
+      printRoute: `${FIELD_MODE_PRINT_PATH_PREFIX}/${lesson.slug}`,
+    })),
+    topicalLessons: TOPICAL_LESSON_DEFINITIONS.map((lesson) => ({
       number: lesson.number,
       slug: lesson.slug,
       title: lesson.title,

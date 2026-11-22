@@ -29,6 +29,7 @@ import {
   IS_SCHOOLS_PROFILE,
 } from "@/lib/env/features";
 import { isTeacherWorkspace } from "@/lib/productSurfaces";
+import { appCopyFor, useAppLocale } from "@/lib/appCopy";
 import { triggerHaptic } from "@/lib/haptics";
 import { useClassroomFocusActive } from "@/lib/teacher-lessons/classroomFocusSignal";
 
@@ -54,6 +55,7 @@ export const SCHOOLS_QUICK_NAV_ITEMS = [
 export function QuickNav() {
   const pathname = usePathname();
   const router = useRouter();
+  const locale = useAppLocale();
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const isSchoolPath = useMemo(
@@ -163,7 +165,7 @@ export function QuickNav() {
 
   return (
     <nav
-      aria-label="Meta-Pet navigation"
+      aria-label={effectiveSchoolsMode ? "Meta-Pet navigation" : appCopyFor(locale).nav.label}
       className="pointer-events-none fixed inset-x-0 bottom-0 z-50 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4"
     >
       <div className="mx-auto max-w-2xl">
@@ -175,7 +177,7 @@ export function QuickNav() {
             size="icon"
             onClick={handleBack}
             className={`h-11 w-11 rounded-xl touch-manipulation sm:h-12 sm:w-12 ${effectiveSchoolsMode ? "text-muted-foreground hover:bg-secondary hover:text-foreground" : "text-slate-400 hover:bg-slate-800/80 hover:text-white"}`}
-            aria-label="Go back"
+            aria-label={effectiveSchoolsMode ? "Go back" : appCopyFor(locale).nav.back}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -217,7 +219,9 @@ export function QuickNav() {
                     <span
                       className={`text-[11px] font-medium sm:text-xs ${isActive ? "opacity-100" : "opacity-70"}`}
                     >
-                      {item.label}
+                      {effectiveSchoolsMode
+                        ? item.label
+                        : appCopyFor(locale).nav.items[item.href as keyof ReturnType<typeof appCopyFor>["nav"]["items"]] ?? item.label}
                     </span>
                   </div>
                 </Link>
@@ -235,7 +239,7 @@ export function QuickNav() {
                 size="icon"
                 onClick={handleInstall}
                 className="h-11 w-11 rounded-xl text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 touch-manipulation sm:h-12 sm:w-12"
-                aria-label="Install app"
+                aria-label={appCopyFor(locale).nav.install}
               >
                 <ArrowDownToLine className="h-5 w-5" />
               </Button>

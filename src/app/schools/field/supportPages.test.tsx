@@ -12,7 +12,7 @@ describe("Field-owned support pages", () => {
     render(<FieldTeacherGuidePage />);
 
     expect(
-      screen.getByRole("heading", { name: /Field Mode teacher guide/i }),
+      screen.getByRole("heading", { name: /^Teacher guide$/i }),
     ).toBeInTheDocument();
     expect(screen.getByText(/Before class/i)).toBeInTheDocument();
     expect(screen.getByText(/During the lesson/i)).toBeInTheDocument();
@@ -28,6 +28,9 @@ describe("Field-owned support pages", () => {
     expect(screen.getByText(/Parent and carer information/i)).toBeInTheDocument();
     expect(screen.getByText(/35 days/i)).toBeInTheDocument();
     expect(screen.getByText(/If a concern arises/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /eSafety Commissioner — educators/i }),
+    ).toHaveAttribute("href", "https://www.esafety.gov.au/educators");
   });
 
   it("only links to routes approved by the Field profile", () => {
@@ -36,6 +39,9 @@ describe("Field-owned support pages", () => {
       for (const anchor of container.querySelectorAll("a[href]")) {
         const href = anchor.getAttribute("href");
         expect(href).not.toBeNull();
+        if (href?.startsWith("http://") || href?.startsWith("https://")) {
+          continue;
+        }
         expect(isPathnameAllowedByPolicy(href ?? "", "field"), href ?? "").toBe(
           true,
         );

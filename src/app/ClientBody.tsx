@@ -1,13 +1,42 @@
 "use client";
 
 import { isFieldStudentPath, isTeacherWorkspace } from "@/lib/productSurfaces";
-import { PetRegistryBootstrap } from "@/components/PetRegistryBootstrap";
+import dynamic from "next/dynamic";
+
+import { DocumentLang } from "@/components/DocumentLang";
+import { homeLocaleForPath, LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useAppCopy } from "@/lib/appCopy";
 import LegalNotice from "@/components/LegalNotice";
 import Link from "next/link";
-import { JourneyProgressStrip } from "@/components/JourneyProgressStrip";
-import { QuickNav } from "@/components/QuickNav";
-import { WardrobeUnlockCeremony } from "@/components/wardrobe/WardrobeUnlockCeremony";
-import { WardrobeProgressBridge } from "@/lib/wardrobe/WardrobeProgressBridge";
+
+const PetRegistryBootstrap = dynamic(
+  () =>
+    import("@/components/PetRegistryBootstrap").then((mod) => mod.PetRegistryBootstrap),
+  { ssr: false },
+);
+const JourneyProgressStrip = dynamic(
+  () =>
+    import("@/components/JourneyProgressStrip").then((mod) => mod.JourneyProgressStrip),
+  { ssr: false },
+);
+const QuickNav = dynamic(
+  () => import("@/components/QuickNav").then((mod) => mod.QuickNav),
+  { ssr: false },
+);
+const WardrobeUnlockCeremony = dynamic(
+  () =>
+    import("@/components/wardrobe/WardrobeUnlockCeremony").then(
+      (mod) => mod.WardrobeUnlockCeremony,
+    ),
+  { ssr: false },
+);
+const WardrobeProgressBridge = dynamic(
+  () =>
+    import("@/lib/wardrobe/WardrobeProgressBridge").then(
+      (mod) => mod.WardrobeProgressBridge,
+    ),
+  { ssr: false },
+);
 import {
   FIELD_MODE_COOKIE_VALUE,
   FIELD_MODE_HOME_PATH,
@@ -57,8 +86,11 @@ export default function ClientBody({
     (fieldUiActive === true &&
       isPathnameAllowedByPolicy(pathname ?? "/", "field"));
   const fieldUiResolved = isFieldPath || fieldUiActive !== null;
+  const shellCopy = useAppCopy().shell;
   const effectiveSchoolsMode =
     IS_SCHOOLS_PROFILE || isSchoolPath || fieldSurfaceActive;
+  // Same scope as DocumentLang: wherever translated copy can appear, the way back is on screen.
+  const showLanguageSwitcher = !effectiveSchoolsMode;
   const childSafeBlocked = useMemo(
     () =>
       (ENABLE_CHILD_SAFE_BASELINE || IS_SCHOOLS_PROFILE) &&
@@ -69,6 +101,20 @@ export default function ClientBody({
   useEffect(() => {
     document.body.classList.add("antialiased");
   }, []);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const host = window.location.hostname.toLowerCase();
+    const onSchoolHost =
+      host === "metapet.school" || host === "www.metapet.school";
+    if (isFieldPath || onSchoolHost || isSchoolPath) {
+      root.lang = "en-AU";
+    }
+    if (isFieldPath) {
+      root.classList.remove("dark");
+      root.classList.add("schools-theme");
+    }
+  }, [isFieldPath, isSchoolPath, pathname]);
 
   useEffect(() => {
     if (isFieldPath) {
@@ -174,11 +220,12 @@ export default function ClientBody({
           : "pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]"
       }`}
     >
+      {!effectiveSchoolsMode && <DocumentLang />}
       <div className={`app-shell-header sticky top-0 z-40 border-b px-3 py-2 backdrop-blur sm:px-4 sm:py-3 ${effectiveSchoolsMode ? "border-border bg-background/95" : "border-slate-800 bg-slate-950/90"}`}>
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 sm:gap-3">
           <div className={`text-sm ${effectiveSchoolsMode ? "text-foreground font-medium" : "text-zinc-200"}`}>
             {fieldSurfaceActive
-              ? isFieldStudentPath(pathname ?? "/") ? "MetaPet" : "MetaPet Field Mode"
+              ? isFieldStudentPath(pathname ?? "/") ? "MetaPet" : "MetaPet School"
               : effectiveSchoolsMode
                 ? "MetaPet Schools"
                 : "Meta-Pet"}
@@ -186,11 +233,14 @@ export default function ClientBody({
           <button
             type="button"
             onClick={() => setPrivacyOpen((current) => !current)}
-            className={`min-h-9 rounded-full border px-3 py-1 text-xs transition-colors ${effectiveSchoolsMode ? "border-emerald-600/30 bg-emerald-50 text-emerald-700 hover:border-emerald-600/50 hover:bg-emerald-100" : "border-emerald-400/25 bg-emerald-500/10 text-emerald-200 hover:border-emerald-300/45 hover:bg-emerald-500/15"}`}
+            className={`ml-auto min-h-9 rounded-full border px-3 py-1 text-xs transition-colors ${effectiveSchoolsMode ? "border-emerald-600/30 bg-emerald-50 text-emerald-700 hover:border-emerald-600/50 hover:bg-emerald-100" : "border-emerald-400/25 bg-emerald-500/10 text-emerald-200 hover:border-emerald-300/45 hover:bg-emerald-500/15"}`}
             aria-expanded={privacyOpen}
           >
-            Privacy & local saves
+            {effectiveSchoolsMode ? "Privacy & local saves" : shellCopy.privacy}
           </button>
+          {showLanguageSwitcher ? (
+            <LanguageSwitcher current={homeLocaleForPath(pathname)} />
+          ) : null}
         </div>
         {privacyOpen && (
           <div className={`mx-auto mt-3 w-full max-w-6xl rounded-2xl border p-3 text-xs leading-5 sm:leading-6 ${effectiveSchoolsMode ? "border-border bg-card text-muted-foreground" : "border-slate-800 bg-slate-900/60 text-zinc-300"}`}>
@@ -205,12 +255,12 @@ export default function ClientBody({
         {!effectiveSchoolsMode && !teacherWorkspace && <JourneyProgressStrip />}
         {fieldSurfaceActive && !isFieldPath ? (
           <div className="mx-auto mt-3 flex w-full max-w-6xl items-center justify-between gap-3 rounded-xl border border-emerald-700/20 bg-emerald-50 px-3 py-2 text-xs text-emerald-950">
-            <span>Approved Field Mode information</span>
+            <span>Approved classroom information</span>
             <a
               href={FIELD_MODE_HOME_PATH}
               className="font-semibold underline underline-offset-2"
             >
-              Return to Field Mode
+              Return to classroom home
             </a>
           </div>
         ) : null}

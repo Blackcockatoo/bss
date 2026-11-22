@@ -1,16 +1,46 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Printer, ShieldCheck } from "lucide-react";
 
 import {
+  FIELD_MODE_CLASSROOM_PATH,
   FIELD_MODE_GUIDE_PATH,
   FIELD_MODE_HOME_PATH,
   FIELD_MODE_LESSONS_PATH,
+  FIELD_MODE_PRINT_ALL_PATH,
   FIELD_MODE_PRINT_PATH_PREFIX,
   FIELD_MODE_SAFETY_PATH,
-  FIELD_MODE_START_PATH,
+  FIELD_MODE_TOOLS_PATH,
+  FIELD_MODE_COMMENTS_PATH,
+  FIELD_MODE_STAFF_PD_PATH,
+  FIELD_MODE_ROLLOUT_PATH,
+  FIELD_MODE_FEEDBACK_PATH,
+  FIELD_MODE_VERIFIED_PATH,
+  SCHOOLS_DATA_PATH,
 } from "@/lib/childSafeBaseline";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
-import { METAPET_SCHOOL_NAME } from "@/lib/fieldMode/identity";
+import {
+  METAPET_SCHOOL_DESCRIPTION,
+  METAPET_SCHOOL_NAME,
+  metaPetSchoolUrl,
+} from "@/lib/fieldMode/identity";
+import { mergeLearningAreas } from "@/lib/schools/curriculumAlignment";
+import { curriculumAlignmentForLesson } from "@/lib/schools/lessonAlignment";
+import {
+  FOUNDATION_ALIGNMENT_CAVEAT,
+  FOUNDATION_SEQUENCE_SUMMARY,
+} from "@/lib/schools/foundationSequence";
+import {
+  YEARS_78_ALIGNMENT_CAVEAT,
+  YEARS_78_PERIOD_NOTE,
+  YEARS_78_SEQUENCE_SUMMARY,
+} from "@/lib/schools/years78Sequence";
+import {
+  TOPICAL_ALIGNMENT_CAVEAT,
+  TOPICAL_PERIOD_NOTE,
+  TOPICAL_SEQUENCE_SUMMARY,
+} from "@/lib/schools/topicalSequence";
+import { lessonAudienceLabel } from "@/lib/schools/lessonYearBands";
 import {
   CANONICAL_SESSION_COUNT,
   FIRST_CANONICAL_SESSION,
@@ -19,18 +49,49 @@ import {
   SCHOOL_PRIVACY_COMMITMENTS,
   SCHOOLS_LOCAL_DATA_RETENTION_DAYS,
 } from "@/lib/schools/privacyTruth";
+import {
+  FIELD_MODE_PRINT_CHECKLIST_PATH,
+  FIELD_MODE_PRINT_F2_ALL_PATH,
+  FIELD_MODE_PRINT_YEARS_78_ALL_PATH,
+  FIELD_MODE_PRINT_TOPICAL_PATH,
+  FIELD_MODE_CURRICULUM_PATH,
+  FIELD_MODE_PRINT_NO_TECH_PATH,
+  FIELD_MODE_PRINT_PARENT_LETTER_PATH,
+  FIELD_MODE_PRINT_RELIEF_PATH,
+  FIELD_MODE_PRINT_TICKETS_PATH,
+  FIELD_MODE_PRINT_WORD_WALLS_PATH,
+} from "@/lib/schools/classroomPack";
+import {
+  FOUNDATION_LESSON_DEFINITIONS,
+  LESSON_DEFINITIONS,
+  YEARS_78_LESSON_DEFINITIONS,
+  TOPICAL_LESSON_DEFINITIONS,
+} from "@/lib/teacher-lessons/lessonDefinitions";
 
 const WHAT_YOU_NEED = [
-  "Years 3–6 class",
-  "About 20 minutes",
+  "A Foundation to Year 8 class, depending on the set",
+  "About 15–20 minutes for F–6, about 25 minutes for a topical mini-lesson, or about 45 minutes for Years 7–8",
   "A teacher to lead it",
   "A browser — nothing to install",
   SCHOOL_PRIVACY_COMMITMENTS.accountsShort,
   "A printer if you want the paper fallback",
 ] as const;
 
+export const metadata: Metadata = {
+  title: `${METAPET_SCHOOL_NAME} — Australian Foundation to Year 8 Classroom Lessons`,
+  description: METAPET_SCHOOL_DESCRIPTION,
+  alternates: { canonical: metaPetSchoolUrl(FIELD_MODE_HOME_PATH) },
+  openGraph: {
+    type: "website",
+    siteName: METAPET_SCHOOL_NAME,
+    title: `${METAPET_SCHOOL_NAME} — Australian Foundation to Year 8 Classroom Lessons`,
+    description: METAPET_SCHOOL_DESCRIPTION,
+    url: metaPetSchoolUrl(FIELD_MODE_HOME_PATH),
+    locale: "en_AU",
+  },
+};
+
 const SESSION_ONE_PATH = `${FIELD_MODE_LESSONS_PATH}/${FIRST_CANONICAL_SESSION.slug}`;
-const SESSION_ONE_PRINT_PATH = `${FIELD_MODE_PRINT_PATH_PREFIX}/${FIRST_CANONICAL_SESSION.slug}`;
 
 export default function FieldModePage() {
   enforceChildSafeServerRoute(FIELD_MODE_HOME_PATH, "field");
@@ -41,16 +102,20 @@ export default function FieldModePage() {
         <section className="space-y-5">
           <div className="inline-flex items-center gap-2 rounded-full border border-emerald-900/15 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-900">
             <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-            {METAPET_SCHOOL_NAME} · Australian Years 3–6
+            {METAPET_SCHOOL_NAME} · Australian Foundation to Year 8
           </div>
 
           <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-slate-950 md:text-5xl">
-            {CANONICAL_SESSION_COUNT} short lessons about how systems work.
+            {CANONICAL_SESSION_COUNT} short lessons about how systems work, plus an F–2 unplugged set and a Years 7–8 bridge unit.
           </h1>
           <p className="max-w-2xl text-lg leading-8 text-slate-700">
-            Teacher-led, about 15–20 minutes each. No student sign-in. Classroom
-            record contents stay in this browser during routine use, and the
-            supervising adult can delete them at any time.
+            A teacher-led classroom resource for Years 3–6, with a fully
+            unplugged starter set for Foundation and Years 1–2, and a Years
+            7–8 bridge unit of about 45 minutes a lesson. F–6 lessons take
+            about 15–20 minutes. No student sign-in. Classroom records stay in
+            this browser during routine use, and you can delete them at any
+            time. The F–2 and Years 7–8 lessons do not collect names or
+            personal data.
           </p>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -58,30 +123,448 @@ export default function FieldModePage() {
               href={SESSION_ONE_PATH}
               className="inline-flex min-h-14 items-center justify-center rounded-xl bg-emerald-800 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-emerald-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800"
             >
-              Start Session One
+              Start Lesson 1 in 15 minutes
               <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
             </a>
             <a
-              href={FIELD_MODE_START_PATH}
+              href={FIELD_MODE_LESSONS_PATH}
               className="inline-flex min-h-14 items-center justify-center rounded-xl border-2 border-emerald-800 px-6 py-3 text-base font-semibold text-emerald-900 hover:bg-emerald-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800"
             >
-              Run the seven-session sequence
+              Browse all seven lessons
+            </a>
+            <a
+              href={`${FIELD_MODE_LESSONS_PATH}#f2-unplugged`}
+              className="inline-flex min-h-14 items-center justify-center rounded-xl border border-slate-300 px-6 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800"
+            >
+              Browse the F–2 unplugged set
+            </a>
+            <a
+              href={`${FIELD_MODE_LESSONS_PATH}#years-7-8-bridge`}
+              className="inline-flex min-h-14 items-center justify-center rounded-xl border border-slate-300 px-6 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800"
+            >
+              Browse the Years 7–8 bridge unit
             </a>
           </div>
 
           <p className="text-base text-slate-600">
-            Session One is a complete lesson on its own. Running only that one
-            is a legitimate way to finish.
+            The flow is simple: open the lesson, follow the teacher script, hide
+            notes when you project, and stop at the visible end point. Lesson 1
+            is a complete lesson on its own.
           </p>
         </section>
 
-        <section aria-label="Teacher pathways" className="rounded-2xl border border-emerald-900/20 bg-white p-6">
-          <h2 className="text-2xl font-semibold">Ready to use it with your class?</h2>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <Link href="/schools/field/play" className="inline-flex min-h-12 items-center rounded-xl bg-emerald-800 px-5 py-3 font-semibold text-white">Open student activities</Link>
-            <a href="/schools/field/exit?destination=teach" className="inline-flex min-h-12 items-center rounded-xl border border-emerald-800 px-5 py-3 font-semibold text-emerald-900">Go deeper: teacher workspace</a>
+        <section aria-labelledby="lesson-list-heading" className="space-y-4">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <h2
+              id="lesson-list-heading"
+              className="text-2xl font-semibold text-slate-950"
+            >
+              The seven Years 3–6 lessons
+            </h2>
+            <div className="flex flex-wrap gap-3">
+              <a
+                href={FIELD_MODE_PRINT_ALL_PATH}
+                className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+              >
+                <Printer className="h-4 w-4" aria-hidden="true" />
+                Print the classroom pack
+              </a>
+            </div>
           </div>
-          <p className="mt-4 text-sm leading-6 text-slate-600">The student view keeps teacher notes and classroom controls out of the way. Go deeper opens full MetaPet for teachers. Local saves stay on this website.</p>
+          <ol className="grid gap-4">
+            {LESSON_DEFINITIONS.map((lesson) => {
+              const alignment = curriculumAlignmentForLesson(lesson);
+              const areas = mergeLearningAreas(
+                lesson.learningAreas,
+                alignment.learningAreas,
+              );
+              return (
+                <li
+                  key={lesson.id}
+                  className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                >
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-800">
+                      Lesson {lesson.number}
+                    </p>
+                    <p className="text-sm font-medium text-slate-600">
+                      Years 3–6 · {lesson.durationMinutes} minutes
+                    </p>
+                  </div>
+                  <h3 className="mt-2 text-xl font-semibold text-slate-950">
+                    {lesson.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-700">
+                    {lesson.shortDescription}
+                  </p>
+                  <p className="mt-3 text-sm text-slate-600">
+                    <span className="font-semibold text-slate-800">
+                      Learning areas:
+                    </span>{" "}
+                    {areas.join(" · ")}
+                  </p>
+                  {alignment.codes.length > 0 ? (
+                    <p className="mt-1 text-sm text-slate-600">
+                      <span className="font-semibold text-slate-800">
+                        Australian Curriculum v9:
+                      </span>{" "}
+                      {alignment.codes.join(", ")}
+                    </p>
+                  ) : null}
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <a
+                      href={`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}`}
+                      className="inline-flex min-h-11 items-center rounded-xl bg-emerald-800 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                    >
+                      {lesson.number === 1
+                        ? "Start Lesson 1"
+                        : "Open lesson"}
+                    </a>
+                    <a
+                      href={`${FIELD_MODE_PRINT_PATH_PREFIX}/${lesson.slug}`}
+                      className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      Print this lesson
+                    </a>
+                    <a
+                      href={`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/slides`}
+                      className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      Projector slides
+                    </a>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+
+        <section aria-labelledby="f2-lesson-list-heading" className="space-y-4" id="f2-unplugged">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <h2
+              id="f2-lesson-list-heading"
+              className="text-2xl font-semibold text-slate-950"
+            >
+              F–2 unplugged starter set
+            </h2>
+            <a
+              href={FIELD_MODE_PRINT_F2_ALL_PATH}
+              className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              <Printer className="h-4 w-4" aria-hidden="true" />
+              Print the F–2 pack
+            </a>
+          </div>
+          <p className="max-w-3xl text-base leading-7 text-slate-700">
+            {FOUNDATION_SEQUENCE_SUMMARY} {FOUNDATION_ALIGNMENT_CAVEAT}
+          </p>
+          <ol className="grid gap-4">
+            {FOUNDATION_LESSON_DEFINITIONS.map((lesson) => {
+              const alignment = curriculumAlignmentForLesson(lesson);
+              const areas = mergeLearningAreas(
+                lesson.learningAreas,
+                alignment.learningAreas,
+              );
+              return (
+                <li
+                  key={lesson.id}
+                  className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                >
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-800">
+                      F–2 · {lessonAudienceLabel(lesson.yearBand)} · Lesson {lesson.number}
+                    </p>
+                    <p className="text-sm font-medium text-slate-600">
+                      {lesson.durationMinutes} minutes · unplugged
+                    </p>
+                  </div>
+                  <h3 className="mt-2 text-xl font-semibold text-slate-950">
+                    {lesson.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-700">
+                    {lesson.shortDescription}
+                  </p>
+                  <p className="mt-3 text-sm text-slate-600">
+                    <span className="font-semibold text-slate-800">
+                      Learning areas:
+                    </span>{" "}
+                    {areas.join(" · ")}
+                  </p>
+                  {alignment.codes.length > 0 ? (
+                    <p className="mt-1 text-sm text-slate-600">
+                      <span className="font-semibold text-slate-800">
+                        Australian Curriculum v9:
+                      </span>{" "}
+                      {alignment.codes.join(", ")}
+                    </p>
+                  ) : null}
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <a
+                      href={`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}`}
+                      className="inline-flex min-h-11 items-center rounded-xl bg-emerald-800 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                    >
+                      {lesson.number === 1
+                        ? "Start F–2 Lesson 1"
+                        : "Open lesson"}
+                    </a>
+                    <a
+                      href={`${FIELD_MODE_PRINT_PATH_PREFIX}/${lesson.slug}`}
+                      className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      Print this lesson
+                    </a>
+                    <a
+                      href={`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/slides`}
+                      className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      Projector slides
+                    </a>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+
+        <section aria-labelledby="y78-lesson-list-heading" className="space-y-4" id="years-7-8-bridge">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <h2
+              id="y78-lesson-list-heading"
+              className="text-2xl font-semibold text-slate-950"
+            >
+              Years 7–8 bridge unit
+            </h2>
+            <a
+              href={FIELD_MODE_PRINT_YEARS_78_ALL_PATH}
+              className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              <Printer className="h-4 w-4" aria-hidden="true" />
+              Print the Years 7–8 pack
+            </a>
+          </div>
+          <p className="max-w-3xl text-base leading-7 text-slate-700">
+            {YEARS_78_SEQUENCE_SUMMARY} {YEARS_78_PERIOD_NOTE}{" "}
+            {YEARS_78_ALIGNMENT_CAVEAT}
+          </p>
+          <ol className="grid gap-4">
+            {YEARS_78_LESSON_DEFINITIONS.map((lesson) => {
+              const alignment = curriculumAlignmentForLesson(lesson);
+              const areas = mergeLearningAreas(
+                lesson.learningAreas,
+                alignment.learningAreas,
+              );
+              return (
+                <li
+                  key={lesson.id}
+                  className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                >
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-800">
+                      Years 7–8 · Lesson {lesson.number}
+                    </p>
+                    <p className="text-sm font-medium text-slate-600">
+                      {lesson.durationMinutes} minutes · unplugged or teacher screen
+                    </p>
+                  </div>
+                  <h3 className="mt-2 text-xl font-semibold text-slate-950">
+                    {lesson.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-700">
+                    {lesson.shortDescription}
+                  </p>
+                  <p className="mt-3 text-sm text-slate-600">
+                    <span className="font-semibold text-slate-800">
+                      Learning areas:
+                    </span>{" "}
+                    {areas.join(" · ")}
+                  </p>
+                  {alignment.codes.length > 0 ? (
+                    <p className="mt-1 text-sm text-slate-600">
+                      <span className="font-semibold text-slate-800">
+                        Australian Curriculum v9:
+                      </span>{" "}
+                      {alignment.codes.join(", ")}
+                    </p>
+                  ) : null}
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <a
+                      href={`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}`}
+                      className="inline-flex min-h-11 items-center rounded-xl bg-emerald-800 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                    >
+                      {lesson.number === 1
+                        ? "Start Years 7–8 Lesson 1"
+                        : "Open lesson"}
+                    </a>
+                    <a
+                      href={`${FIELD_MODE_PRINT_PATH_PREFIX}/${lesson.slug}`}
+                      className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      Print this lesson
+                    </a>
+                    <a
+                      href={`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/slides`}
+                      className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      Projector slides
+                    </a>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+
+        <section aria-labelledby="topical-lesson-list-heading" className="space-y-4" id="topical-mini-lessons">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <h2
+              id="topical-lesson-list-heading"
+              className="text-2xl font-semibold text-slate-950"
+            >
+              Years 5–8 topical mini-lessons
+            </h2>
+            <a
+              href={FIELD_MODE_PRINT_TOPICAL_PATH}
+              className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              <Printer className="h-4 w-4" aria-hidden="true" />
+              Print the topical pack
+            </a>
+          </div>
+          <p className="max-w-3xl text-base leading-7 text-slate-700">
+            {TOPICAL_SEQUENCE_SUMMARY} {TOPICAL_PERIOD_NOTE}{" "}
+            {TOPICAL_ALIGNMENT_CAVEAT}
+          </p>
+          <ol className="grid gap-4">
+            {TOPICAL_LESSON_DEFINITIONS.map((lesson) => {
+              const alignment = curriculumAlignmentForLesson(lesson);
+              const areas = mergeLearningAreas(
+                lesson.learningAreas,
+                alignment.learningAreas,
+              );
+              return (
+                <li
+                  key={lesson.id}
+                  className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                >
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-800">
+                      Years 5–8 · Mini-lesson {lesson.number}
+                    </p>
+                    <p className="text-sm font-medium text-slate-600">
+                      {lesson.durationMinutes} minutes · unplugged
+                    </p>
+                  </div>
+                  <h3 className="mt-2 text-xl font-semibold text-slate-950">
+                    {lesson.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-700">
+                    {lesson.shortDescription}
+                  </p>
+                  <p className="mt-3 text-sm text-slate-600">
+                    <span className="font-semibold text-slate-800">
+                      Learning areas:
+                    </span>{" "}
+                    {areas.join(" · ")}
+                  </p>
+                  {alignment.codes.length > 0 ? (
+                    <p className="mt-1 text-sm text-slate-600">
+                      <span className="font-semibold text-slate-800">
+                        Australian Curriculum v9:
+                      </span>{" "}
+                      {alignment.codes.join(", ")}
+                    </p>
+                  ) : null}
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <a
+                      href={`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}`}
+                      className="inline-flex min-h-11 items-center rounded-xl bg-emerald-800 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                    >
+                      {lesson.number === 1
+                        ? "Start topical Lesson 1"
+                        : "Open lesson"}
+                    </a>
+                    <a
+                      href={`${FIELD_MODE_PRINT_PATH_PREFIX}/${lesson.slug}`}
+                      className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      Print this lesson
+                    </a>
+                    <a
+                      href={`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/slides`}
+                      className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      Projector slides
+                    </a>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+
+        <section aria-labelledby="digital-independence-heading" className="rounded-2xl border border-emerald-900/20 bg-white p-6">
+          <h2 id="digital-independence-heading" className="text-2xl font-semibold">Teach the child to read the machine.</h2>
+          <p className="mt-3 max-w-2xl leading-7 text-slate-700">
+            The Invisible Trail is an optional Digital Independence lesson. Students use fictional data
+            to see how a click leaves a record, how a system makes a guess and how a privacy choice changes the result.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1">
+            <Link href="/schools/field/play/invisible-trail" className="inline-flex min-h-12 items-center font-semibold text-emerald-900 underline">
+              Try The Invisible Trail
+            </Link>
+            <a href="/schools/field/print/invisible-trail.html" className="inline-flex min-h-12 items-center font-semibold text-emerald-900 underline">
+              Printable teacher guide
+            </a>
+          </div>
+        </section>
+
+        <section
+          aria-labelledby="classroom-pack-heading"
+          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8"
+        >
+          <h2
+            id="classroom-pack-heading"
+            className="text-2xl font-semibold text-slate-950"
+          >
+            Classroom pack
+          </h2>
+          <p className="mt-3 max-w-3xl text-base leading-7 text-slate-700">
+            One-page planners now include materials, estimated step timings,
+            published AC v9 codes and a two-minute explainer. Print the full
+            pack, or open one tool at a time.
+          </p>
+          <ul className="mt-5 flex flex-wrap gap-3">
+            {[
+              { href: FIELD_MODE_PRINT_ALL_PATH, label: "Print the Years 3–6 pack" },
+              { href: FIELD_MODE_PRINT_F2_ALL_PATH, label: "Print the F–2 unplugged pack" },
+              { href: FIELD_MODE_PRINT_YEARS_78_ALL_PATH, label: "Print the Years 7–8 pack" },
+              { href: FIELD_MODE_PRINT_TOPICAL_PATH, label: "Print the topical mini-lesson pack" },
+              { href: "/schools/field/print/invisible-trail.html", label: "Invisible Trail teacher guide" },
+              { href: FIELD_MODE_PRINT_RELIEF_PATH, label: "Relief teacher pack" },
+              { href: FIELD_MODE_PRINT_TICKETS_PATH, label: "Exit tickets" },
+              { href: FIELD_MODE_PRINT_WORD_WALLS_PATH, label: "Word walls" },
+              { href: FIELD_MODE_PRINT_CHECKLIST_PATH, label: "Assessment checklist" },
+              { href: FIELD_MODE_PRINT_NO_TECH_PATH, label: "No-tech / paper path" },
+              { href: FIELD_MODE_PRINT_PARENT_LETTER_PATH, label: "Parent letter" },
+              { href: "/schools/field/print/leadership", label: "Leadership one-pager" },
+              { href: FIELD_MODE_CURRICULUM_PATH, label: "Victorian and NSW maps" },
+              { href: FIELD_MODE_VERIFIED_PATH, label: "What’s verified" },
+              { href: FIELD_MODE_TOOLS_PATH, label: "Timer and groups" },
+              { href: FIELD_MODE_COMMENTS_PATH, label: "Report comment starters" },
+              { href: FIELD_MODE_STAFF_PD_PATH, label: "15-minute staff briefing" },
+              { href: FIELD_MODE_ROLLOUT_PATH, label: "Term rollout plan" },
+              { href: FIELD_MODE_FEEDBACK_PATH, label: "Private teacher feedback" },
+            ].map((item) => (
+              <li key={item.href}>
+                <a
+                  href={item.href}
+                  className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
         </section>
 
         <section
@@ -108,21 +591,14 @@ export default function FieldModePage() {
               </li>
             ))}
           </ul>
-          <a
-            href={SESSION_ONE_PRINT_PATH}
-            className="mt-6 inline-flex min-h-12 items-center gap-2 rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500"
-          >
-            <Printer className="h-4 w-4" aria-hidden="true" />
-            Print the Session One paper fallback
-          </a>
         </section>
 
         <section
-          aria-labelledby="before-you-start-heading"
+          aria-labelledby="teacher-tools-heading"
           className="grid gap-4 md:grid-cols-2"
         >
-          <h2 id="before-you-start-heading" className="sr-only">
-            Before you start
+          <h2 id="teacher-tools-heading" className="sr-only">
+            Teacher tools
           </h2>
 
           <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -130,7 +606,10 @@ export default function FieldModePage() {
               What this stores
             </h3>
             <ul className="mt-4 space-y-2 text-base leading-7 text-slate-700">
-              <li>Teacher-chosen aliases; real names are not required and should not be entered</li>
+              <li>
+                Teacher-chosen aliases; real names are not required and should
+                not be entered
+              </li>
               <li>Lesson progress and any light evidence you record</li>
               <li>{SCHOOL_PRIVACY_COMMITMENTS.localRecords}</li>
               <li>
@@ -138,39 +617,83 @@ export default function FieldModePage() {
                 {SCHOOLS_LOCAL_DATA_RETENTION_DAYS} days without use
               </li>
             </ul>
-            <a
-              href={FIELD_MODE_SAFETY_PATH}
-              className="mt-5 inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500"
-            >
-              See exactly what data it uses
-            </a>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <a
+                href={FIELD_MODE_SAFETY_PATH}
+                className="inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Safety and privacy
+              </a>
+              <a
+                href={SCHOOLS_DATA_PATH}
+                className="inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Open local-data controls
+              </a>
+            </div>
           </article>
 
           <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <h3 className="text-xl font-semibold text-slate-950">
-              What this is not
+              Before you teach
             </h3>
             <ul className="mt-4 space-y-2 text-base leading-7 text-slate-700">
-              <li>Not a replacement for your school platform</li>
-              <li>Not therapy, counselling or a wellbeing assessment</li>
-              <li>No chat, social feed, sharing or public profile</li>
-              <li>No streaks, leaderboards or rewards to chase</li>
+              <li>Prepare an alias-only classroom roster if you need one.</li>
+              <li>
+                Adjust year band, time and grouping on the lessons page if the
+                defaults do not suit the class.
+              </li>
+              <li>
+                Hide teacher notes when the lesson is on a projector.
+              </li>
+              <li>Print the paper pack if the network may drop out.</li>
             </ul>
-            <a
-              href={FIELD_MODE_GUIDE_PATH}
-              className="mt-5 inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500"
-            >
-              Open the teacher guide
-            </a>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <a
+                href={FIELD_MODE_CLASSROOM_PATH}
+                className="inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Alias roster and classroom setup
+              </a>
+              <a
+                href={FIELD_MODE_TOOLS_PATH}
+                className="inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Timer and groups
+              </a>
+              <a
+                href={FIELD_MODE_COMMENTS_PATH}
+                className="inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Report comment starters
+              </a>
+              <a
+                href={FIELD_MODE_STAFF_PD_PATH}
+                className="inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                15-minute staff briefing
+              </a>
+              <a
+                href={FIELD_MODE_ROLLOUT_PATH}
+                className="inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Term rollout plan
+              </a>
+              <a
+                href={FIELD_MODE_FEEDBACK_PATH}
+                className="inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Private teacher feedback
+              </a>
+              <Link
+                href={FIELD_MODE_GUIDE_PATH}
+                className="inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Open the teacher guide
+              </Link>
+            </div>
           </article>
         </section>
-
-        <aside className="rounded-2xl bg-white p-5 text-sm leading-6 text-slate-600 shadow-sm">
-          Field Mode keeps consumer, shopping, identity, sharing, social,
-          marketplace and advanced laboratory areas outside the classroom route
-          boundary. Nothing on this side of the boundary asks a student for an
-          account, a name or anything else about them.
-        </aside>
       </div>
     </main>
   );
