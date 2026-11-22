@@ -1,5 +1,6 @@
 'use client';
 
+import { useAppCopy } from '@/lib/appCopy';
 import { useStore } from '@/lib/store';
 import { UtensilsCrossed, Sparkles, Droplets, Zap } from 'lucide-react';
 import { Button } from './ui/button';
@@ -16,28 +17,33 @@ export function HUD({ mode = 'full' }: HUDProps) {
   const clean = useStore(state => state.clean);
   const play = useStore(state => state.play);
   const sleep = useStore(state => state.sleep);
+  const { hud: t } = useAppCopy();
 
   const statBars = [
     {
-      label: 'Hunger',
+      key: 'hunger',
+      label: t.hunger,
       value: vitals.hunger,
       icon: <UtensilsCrossed className="w-4 h-4" />,
       color: 'from-orange-500 to-red-500',
     },
     {
-      label: 'Hygiene',
+      key: 'hygiene',
+      label: t.hygiene,
       value: vitals.hygiene,
       icon: <Droplets className="w-4 h-4" />,
       color: 'from-blue-500 to-cyan-500',
     },
     {
-      label: 'Mood',
+      key: 'mood',
+      label: t.mood,
       value: vitals.mood,
       icon: <Sparkles className="w-4 h-4" />,
       color: 'from-pink-500 to-purple-500',
     },
     {
-      label: 'Energy',
+      key: 'energy',
+      label: t.energy,
       value: vitals.energy,
       icon: <Zap className="w-4 h-4" />,
       color: 'from-yellow-500 to-amber-500',
@@ -49,8 +55,9 @@ export function HUD({ mode = 'full' }: HUDProps) {
       <div className="space-y-3">
         {statBars.slice(0, mode === 'simple' ? 3 : 4).map((stat) => (
           <StatBar
-            key={stat.label}
+            key={stat.key}
             label={stat.label}
+            status={t}
             value={stat.value}
             icon={stat.icon}
             color={stat.color}
@@ -61,35 +68,35 @@ export function HUD({ mode = 'full' }: HUDProps) {
       <div className="grid grid-cols-4 gap-2">
         <Button
           onClick={feed}
-          title="Nourish your companion — consistent feeding builds trust and supports growth"
+          title={t.feedHint}
           className="gap-1.5 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white border-0 shadow-lg"
         >
           <UtensilsCrossed className="w-4 h-4" />
-          Feed
+          {t.feed}
         </Button>
         <Button
           onClick={clean}
-          title="Keep things tidy — hygiene affects mood and overall wellbeing"
+          title={t.cleanHint}
           className="gap-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white border-0 shadow-lg"
         >
           <Droplets className="w-4 h-4" />
-          Clean
+          {t.clean}
         </Button>
         <Button
           onClick={play}
-          title="Play lifts mood and strengthens your bond — happy companions evolve faster"
+          title={t.playHint}
           className="gap-1.5 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white border-0 shadow-lg"
         >
           <Sparkles className="w-4 h-4" />
-          Play
+          {t.play}
         </Button>
         <Button
           onClick={sleep}
-          title="Rest restores energy — every living thing needs downtime to grow"
+          title={t.sleepHint}
           className="gap-1.5 bg-gradient-to-r from-yellow-600 to-amber-600 hover:from-yellow-500 hover:to-amber-500 text-white border-0 shadow-lg"
         >
           <Zap className="w-4 h-4" />
-          Sleep
+          {t.sleep}
         </Button>
       </div>
     </div>
@@ -143,20 +150,21 @@ export function HUDAdvancedStats() {
 
 interface StatBarProps {
   label: string;
+  status: { thriving: string; steady: string; needsCare: string; critical: string };
   value: number;
   icon: React.ReactNode;
   color: string;
 }
 
-function getHealthState(value: number): { barColor: string; statusLabel: string; statusColor: string; pulse: boolean } {
-  if (value >= 70) return { barColor: 'from-emerald-500 to-green-400',  statusLabel: 'Thriving',   statusColor: 'text-emerald-400', pulse: false };
-  if (value >= 40) return { barColor: 'from-amber-400 to-yellow-400',   statusLabel: 'Steady',     statusColor: 'text-amber-400',   pulse: false };
-  if (value >= 20) return { barColor: 'from-orange-500 to-amber-500',   statusLabel: 'Needs care', statusColor: 'text-orange-400',  pulse: false };
-  return              { barColor: 'from-red-600 to-red-400',           statusLabel: 'Critical!',  statusColor: 'text-red-400',     pulse: true  };
+function getHealthState(value: number, status: StatBarProps['status']): { barColor: string; statusLabel: string; statusColor: string; pulse: boolean } {
+  if (value >= 70) return { barColor: 'from-emerald-500 to-green-400',  statusLabel: status.thriving,  statusColor: 'text-emerald-400', pulse: false };
+  if (value >= 40) return { barColor: 'from-amber-400 to-yellow-400',   statusLabel: status.steady,    statusColor: 'text-amber-400',   pulse: false };
+  if (value >= 20) return { barColor: 'from-orange-500 to-amber-500',   statusLabel: status.needsCare, statusColor: 'text-orange-400',  pulse: false };
+  return              { barColor: 'from-red-600 to-red-400',           statusLabel: status.critical,  statusColor: 'text-red-400',     pulse: true  };
 }
 
-function StatBar({ label, value, icon, color: _color }: StatBarProps) {
-  const { barColor, statusLabel, statusColor, pulse } = getHealthState(value);
+function StatBar({ label, status, value, icon, color: _color }: StatBarProps) {
+  const { barColor, statusLabel, statusColor, pulse } = getHealthState(value, status);
   return (
     <div>
       <div className="flex items-center justify-between mb-1 text-sm">

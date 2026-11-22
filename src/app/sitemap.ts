@@ -8,6 +8,9 @@ import {
   FIELD_MODE_LESSONS_PATH,
   FIELD_MODE_OFFLINE_PATH,
   FIELD_MODE_SAFETY_PATH,
+  FIELD_MODE_PRINT_ALL_PATH,
+  FIELD_MODE_PRINT_PATH_PREFIX,
+  FIELD_MODE_VERIFIED_PATH,
 } from "@/lib/childSafeBaseline";
 import { findSiteUrl } from "@/lib/env/siteUrl";
 import { getArcadeCrawlRoutes } from "@/lib/games/arcade";
@@ -16,7 +19,14 @@ import {
   isMetaPetSchoolHostname,
   metaPetSchoolUrl,
 } from "@/lib/fieldMode/identity";
-import { LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
+import {
+  FIELD_MODE_PRINT_F2_ALL_PATH,
+  FIELD_MODE_PRINT_YEARS_78_ALL_PATH,
+  FIELD_MODE_PRINT_TOPICAL_PATH,
+  FIELD_MODE_CURRICULUM_PATH,
+  FIELD_MODE_PRINT_CURRICULUM_PATH,
+} from "@/lib/schools/classroomPack";
+import { ALL_LESSON_DEFINITIONS } from "@/lib/teacher-lessons/lessonDefinitions";
 
 /**
  * The classroom index. Only routes the field policy actually allows appear
@@ -38,6 +48,18 @@ function metaPetSchoolSitemap(): MetadataRoute.Sitemap {
       lastModified,
       changeFrequency: "weekly",
       priority: 0.9,
+    },
+    {
+      url: metaPetSchoolUrl("/schools/field/play/invisible-trail"),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: metaPetSchoolUrl("/schools/field/print/invisible-trail.html"),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.7,
     },
     {
       url: metaPetSchoolUrl(FIELD_MODE_GUIDE_PATH),
@@ -64,6 +86,12 @@ function metaPetSchoolSitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
+      url: metaPetSchoolUrl(FIELD_MODE_VERIFIED_PATH),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
       url: metaPetSchoolUrl("/schools/safeguarding"),
       lastModified,
       changeFrequency: "monthly",
@@ -83,12 +111,85 @@ function metaPetSchoolSitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  for (const lesson of LESSON_DEFINITIONS) {
+  entries.push({
+    url: metaPetSchoolUrl(FIELD_MODE_PRINT_ALL_PATH),
+    lastModified,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  });
+  entries.push({
+    url: metaPetSchoolUrl(FIELD_MODE_PRINT_F2_ALL_PATH),
+    lastModified,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  });
+  entries.push({
+    url: metaPetSchoolUrl(FIELD_MODE_PRINT_YEARS_78_ALL_PATH),
+    lastModified,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  });
+  entries.push({
+    url: metaPetSchoolUrl(FIELD_MODE_PRINT_TOPICAL_PATH),
+    lastModified,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  });
+  entries.push({
+    url: metaPetSchoolUrl(FIELD_MODE_CURRICULUM_PATH),
+    lastModified,
+    changeFrequency: "monthly",
+    priority: 0.8,
+  });
+  entries.push({
+    url: metaPetSchoolUrl(FIELD_MODE_PRINT_CURRICULUM_PATH),
+    lastModified,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  });
+  entries.push({
+    url: metaPetSchoolUrl("/schools/field/print/invisible-trail"),
+    lastModified,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  });
+  entries.push({
+    url: metaPetSchoolUrl("/schools/field/play/invisible-trail/slides"),
+    lastModified,
+    changeFrequency: "monthly",
+    priority: 0.6,
+  });
+  entries.push({
+    url: metaPetSchoolUrl("/schools/field/play/invisible-trail/comments"),
+    lastModified,
+    changeFrequency: "monthly",
+    priority: 0.6,
+  });
+
+  for (const lesson of ALL_LESSON_DEFINITIONS) {
     entries.push({
       url: metaPetSchoolUrl(`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}`),
       lastModified,
       changeFrequency: "monthly",
       priority: 0.8,
+    });
+    entries.push({
+      url: metaPetSchoolUrl(`${FIELD_MODE_PRINT_PATH_PREFIX}/${lesson.slug}`),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    });
+    entries.push({
+      url: metaPetSchoolUrl(`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/slides`),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    });
+    entries.push({
+      url: metaPetSchoolUrl(`${FIELD_MODE_LESSONS_PATH}/${lesson.slug}/comments`),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.6,
     });
   }
 
@@ -98,13 +199,30 @@ function metaPetSchoolSitemap(): MetadataRoute.Sitemap {
 function blueSnakeStudiosSitemap(base: string): MetadataRoute.Sitemap {
   const lastModified = new Date();
 
+  const homeAlternates = {
+    languages: {
+      en: base,
+      ja: `${base}/ja`,
+      hi: `${base}/hi`,
+    },
+  };
+
   return [
     {
       url: base,
       lastModified,
       changeFrequency: "weekly",
       priority: 1,
+      alternates: homeAlternates,
     },
+    // Japanese and Hindi editions of the home page.
+    ...(["ja", "hi"] as const).map((locale) => ({
+      url: `${base}/${locale}`,
+      lastModified,
+      changeFrequency: "weekly" as const,
+      priority: 0.9,
+      alternates: homeAlternates,
+    })),
     {
       url: `${base}/pet`,
       lastModified,

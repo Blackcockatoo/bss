@@ -2,8 +2,10 @@ import Link from "next/link";
 
 import {
   FIELD_MODE_LESSONS_PATH,
+  FIELD_MODE_GUIDE_PATH,
   FIELD_MODE_SAFETY_PATH,
   FIELD_MODE_START_PATH,
+  FIELD_MODE_VERIFIED_PATH,
 } from "@/lib/childSafeBaseline";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
 import {
@@ -79,6 +81,7 @@ export default function SchoolsPage() {
           {SCHOOL_HEADLINE}
         </h1>
         <p className="mt-6 text-lg leading-8 text-slate-300">
+          <strong className="block text-cyan-200">Digital independence starts with understanding.</strong>
           {SCHOOL_SUPPORTING_STATEMENT}
         </p>
 
@@ -90,11 +93,15 @@ export default function SchoolsPage() {
           {START_TEACHING_ACTION}
         </Link>
 
-        {/* Body text, not microcopy. It is the whole access model. */}
+        <Link href="/schools/field/play/invisible-trail" prefetch={false}
+          className="mt-3 flex min-h-12 w-fit items-center rounded-xl border border-cyan-400/50 px-5 py-3 font-semibold text-cyan-100 sm:ml-3 sm:inline-flex">
+          Try The Invisible Trail
+        </Link>
         <p className="mt-5 max-w-xl text-base leading-7 text-slate-200">
           {FREE_PROMISE}
         </p>
 
+        <p className="mt-2 text-slate-300">No student account required. Teacher-led learning. Printable alternatives.</p>
         <div className="mt-8 flex flex-wrap gap-x-8 gap-y-3 text-base">
           <Link
             className="text-slate-300 underline underline-offset-4 hover:text-white"
@@ -110,6 +117,9 @@ export default function SchoolsPage() {
           >
             Review safety and privacy
           </Link>
+          <Link className="text-slate-300 underline underline-offset-4" href={FIELD_MODE_GUIDE_PATH}>Teacher guide</Link>
+          <Link className="text-slate-300 underline underline-offset-4" href="/schools/parents">Parent information</Link>
+          <a className="text-slate-300 underline underline-offset-4" href="#downloads">Classroom materials</a>
         </div>
       </section>
 
@@ -135,13 +145,9 @@ export default function SchoolsPage() {
         {/* Where it fits — the one thing a principal has to rule out first. */}
         <section>
           <SectionHeading
-            title="This does not replace the software that runs your school"
+            title="Digital Independence"
             description={SCHOOL_POSITIONING_STATEMENT}
           />
-          <p className="mt-4 max-w-3xl text-base leading-7 text-slate-400">
-            It is not a school-management system, a learning management system,
-            a parent portal or a behaviour-points platform.
-          </p>
         </section>
 
         {/* What children do — the canonical sequence, one line each. */}
@@ -170,6 +176,19 @@ export default function SchoolsPage() {
               </li>
             ))}
           </ol>
+          <div className="mt-8 rounded-2xl border border-emerald-500/30 bg-emerald-950/30 p-6">
+            <p className="text-xs font-semibold uppercase tracking-widest text-amber-300">Optional companion lab · Years 3–6</p>
+            <h3 className="mt-2 text-xl font-semibold text-white">The Invisible Trail — digital footprints and privacy</h3>
+            <p className="mt-2 max-w-2xl text-base leading-7 text-slate-300">
+              A teacher-led, 15-minute interactive activity with fictional data,
+              privacy goggles and a take-it-offline class discussion. Separate
+              from the seven-session learning sequence.
+            </p>
+            <Link href="/schools/field/play/invisible-trail"
+              className="mt-4 inline-block text-base font-semibold text-emerald-200 underline underline-offset-4 hover:text-white">
+              Open The Invisible Trail
+            </Link>
+          </div>
         </section>
 
         {/* What teachers do. */}
@@ -183,10 +202,9 @@ export default function SchoolsPage() {
               ))}
             </ul>
             <p className="mt-5 text-sm leading-6 text-slate-400">
-              Field Mode caches its pages so a session can survive a dropped
-              connection mid-lesson, and every session has a printable fallback.
-              Full offline operation has not been verified across school
-              hardware yet.
+              Classroom pages can be prepared for an unreliable network, and
+              every session has a printable fallback. Full offline operation
+              has not been verified across school hardware yet.
             </p>
           </div>
         </section>
@@ -279,38 +297,6 @@ export default function SchoolsPage() {
           </Link>
         </section>
 
-        {/* Trust material, kept discoverable rather than crowded into entry. */}
-        <section>
-          <SectionHeading
-            title="Material for reviewers"
-            description="Teacher, parent, privacy, safeguarding, curriculum and pilot documents, grouped by who needs to read them first."
-          />
-          <div className="mt-8 space-y-6">
-            {reviewerPathways.map((pathway) => (
-              <article key={pathway.title}>
-                <h3 className="text-lg font-medium text-white">
-                  {pathway.title}
-                </h3>
-                <div className="mt-2 flex flex-wrap gap-x-5 gap-y-2">
-                  {pathway.docSlugs.map((slug) => {
-                    const doc = docsBySlug.get(slug);
-                    if (!doc) return null;
-                    return (
-                      <Link
-                        key={doc.slug}
-                        className="text-sm text-slate-300 underline underline-offset-4 hover:text-white"
-                        href={doc.inAppHref}
-                      >
-                        {doc.title}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-
         <section>
           <SectionHeading
             title="Curriculum alignment with explicit classroom fit"
@@ -338,11 +324,13 @@ export default function SchoolsPage() {
 
         <section id="downloads">
           <SectionHeading
-            title="School pack downloads"
-            description="Read any document in the app, or download a printable copy."
+            title="Teacher downloads"
+            description="Lesson cards, the teacher guide, the parent note and the core classroom pack."
           />
           <div className="mt-8 space-y-8">
-            {schoolPackageDocCategories.map((category) => {
+            {schoolPackageDocCategories
+              .filter((category) => category === "Core Pack" || category === "Teacher Pack")
+              .map((category) => {
               const docs = schoolPackageDocs.filter(
                 (doc) => doc.category === category,
               );
@@ -377,7 +365,97 @@ export default function SchoolsPage() {
               );
             })}
           </div>
+        </section>
 
+        <section id="school-leadership">
+          <SectionHeading
+            title="For school leadership"
+            description="Privacy, safeguarding, pilot and ICT documents for principals, reviewers and wellbeing teams. Classroom teachers can start with the lessons and the teacher pack above."
+          />
+          <p className="mt-4 text-base leading-7 text-slate-300">
+            Available for teacher-led use: seven classroom sessions, printable fallbacks and an optional privacy lab.
+            The lab uses fictional choices held in memory. Classroom learning outcomes still need independent educator evaluation.
+            Use the materials below to review the lesson under adult supervision.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
+            <Link href="/schools/safeguarding" className="text-sm text-emerald-200 underline underline-offset-4 hover:text-white">
+              Safeguarding and contact information
+            </Link>
+            <Link
+              className="text-sm text-slate-300 underline underline-offset-4 hover:text-white"
+              href="/schools/field/print/leadership"
+            >
+              Principal and ICT one-pager
+            </Link>
+            <Link
+              className="text-sm text-slate-300 underline underline-offset-4 hover:text-white"
+              href={FIELD_MODE_VERIFIED_PATH}
+            >
+              What’s verified
+            </Link>
+          </div>
+          <div className="mt-8 space-y-6">
+            {reviewerPathways.map((pathway) => (
+              <article key={pathway.title}>
+                <h3 className="text-lg font-medium text-white">
+                  {pathway.title}
+                </h3>
+                <div className="mt-2 flex flex-wrap gap-x-5 gap-y-2">
+                  {pathway.docSlugs.map((slug) => {
+                    const doc = docsBySlug.get(slug);
+                    if (!doc) return null;
+                    return (
+                      <Link
+                        key={doc.slug}
+                        className="text-sm text-slate-300 underline underline-offset-4 hover:text-white"
+                        href={doc.inAppHref}
+                      >
+                        {doc.title}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </article>
+            ))}
+          </div>
+          <div className="mt-10 space-y-8">
+            {schoolPackageDocCategories
+              .filter((category) => category !== "Core Pack" && category !== "Teacher Pack")
+              .map((category) => {
+              const docs = schoolPackageDocs.filter(
+                (doc) => doc.category === category,
+              );
+
+              return (
+                <div key={category}>
+                  <h3 className="text-lg font-medium text-white">{category}</h3>
+                  <ul className="mt-3 space-y-2">
+                    {docs.map((doc) => (
+                      <li
+                        key={doc.slug}
+                        className="flex flex-wrap items-baseline gap-x-4 text-base"
+                      >
+                        <Link
+                          className="text-slate-200 underline underline-offset-4 hover:text-white"
+                          href={doc.inAppHref}
+                        >
+                          {doc.title}
+                        </Link>
+                        <a
+                          aria-label={`Download ${doc.title}`}
+                          className="text-sm text-slate-500 hover:text-slate-300"
+                          download
+                          href={doc.href}
+                        >
+                          Download
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
           <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
             {curriculumSourceLinks.map((resource) => (
               <a
@@ -391,27 +469,6 @@ export default function SchoolsPage() {
               </a>
             ))}
           </div>
-        </section>
-
-        {/* The broader universe, clearly outside the classroom pathway. */}
-        <section className="border-t border-slate-800 pt-10">
-          <h2 className="text-lg font-medium text-white">
-            MetaPet School is not the whole MetaPet
-          </h2>
-          <p className="mt-2 max-w-3xl text-base leading-7 text-slate-400">
-            Blue $nake Studio also makes a broader consumer MetaPet experience.
-            It is a different product with different rules, and it sits entirely
-            outside the classroom pathway — no classroom screen links to it, and
-            no student route can reach it.
-          </p>
-          <a
-            className="mt-4 inline-block text-base text-slate-300 underline underline-offset-4 hover:text-white"
-            href="https://www.bluesnakestudios.com"
-            rel="noreferrer"
-            target="_blank"
-          >
-            Complete MetaPet at Blue $nake Studio
-          </a>
         </section>
       </div>
     </main>

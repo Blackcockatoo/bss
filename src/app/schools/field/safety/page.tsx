@@ -4,14 +4,20 @@ import { HeartHandshake, LockKeyhole, ShieldCheck, UsersRound } from "lucide-rea
 import {
   FIELD_MODE_CLASSROOM_PATH,
   FIELD_MODE_SAFETY_PATH,
+  FIELD_MODE_VERIFIED_PATH,
+  SCHOOLS_DATA_PATH,
 } from "@/lib/childSafeBaseline";
+import {
+  ESAFETY_TEACHER_LINKS,
+  OFFICIAL_LINK_CHECKED_AT,
+} from "@/lib/schools/classroomPack";
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
 import { SCHOOLS_LOCAL_DATA_RETENTION_DAYS } from "@/lib/schools/storage";
 
 export const metadata: Metadata = {
   title: "Safety and Privacy",
   description:
-    "Field Mode safeguarding, privacy and parent information for Australian classrooms.",
+    "Safeguarding, privacy and parent information for Australian classrooms using MetaPet School.",
 };
 
 export default function FieldSafetyPage() {
@@ -28,7 +34,7 @@ export default function FieldSafetyPage() {
             Safety and privacy at a glance
           </h1>
           <p className="text-base leading-7 text-slate-700 md:text-lg">
-            Field Mode is a teacher-led classroom learning tool, not therapy,
+            MetaPet School is a teacher-led classroom learning tool, not therapy,
             counselling, social media or an always-on companion. Your
             school&apos;s existing child-safety and wellbeing procedures remain
             the authority.
@@ -86,22 +92,60 @@ export default function FieldSafetyPage() {
           </ol>
         </section>
 
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="text-xl font-semibold">Official eSafety Commissioner links</h2>
+          <p className="mt-3 text-sm leading-6 text-slate-700">
+            These official eSafety pages were reachable (HTTP 200) when checked
+            on {OFFICIAL_LINK_CHECKED_AT}. That check is not an eSafety
+            endorsement of MetaPet School. Your school&apos;s child-safety
+            procedures remain the first authority.
+          </p>
+          <ul className="mt-4 space-y-3 text-sm leading-6">
+            {ESAFETY_TEACHER_LINKS.map((link) => (
+              <li key={link.href}>
+                <a
+                  href={link.href}
+                  className="font-semibold text-emerald-900 underline underline-offset-2"
+                >
+                  {link.title}
+                </a>
+                <span className="block text-slate-700">{link.note}</span>
+              </li>
+            ))}
+          </ul>
+          <a
+            href={FIELD_MODE_VERIFIED_PATH}
+            className="mt-5 inline-flex min-h-11 items-center text-sm font-semibold text-emerald-900 underline underline-offset-2"
+          >
+            See what has and has not been verified
+          </a>
+        </section>
+
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center gap-3">
             <ShieldCheck className="h-6 w-6 text-emerald-800" aria-hidden="true" />
             <h2 className="text-xl font-semibold">Teacher supervision</h2>
           </div>
           <p className="mt-3 text-sm leading-6 text-slate-700">
-            A teacher remains present and leads every Field Mode session.
+            A teacher remains present and leads every classroom session.
             MetaPet must never be the primary response to a wellbeing issue and
             does not replace professional judgement or school procedures.
           </p>
-          <a
-            href={FIELD_MODE_CLASSROOM_PATH}
-            className="mt-5 inline-flex min-h-12 items-center rounded-xl bg-emerald-800 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
-          >
-            Open alias-only classroom controls
-          </a>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <a
+              href={FIELD_MODE_CLASSROOM_PATH}
+              className="inline-flex min-h-12 items-center rounded-xl bg-emerald-800 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
+            >
+              Open alias-only classroom controls
+            </a>
+            <a
+              href={SCHOOLS_DATA_PATH}
+              className="inline-flex min-h-12 items-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              Open local-data controls
+            </a>
+          </div>
         </section>
       </div>
     </main>

@@ -18,6 +18,7 @@ import { NeedsActivity } from "./NeedsActivity";
 import { FeelingsActivity } from "./FeelingsActivity";
 import { PatternsActivity } from "./PatternsActivity";
 import { ResponsibleCreatorActivity } from "./ResponsibleCreatorActivity";
+import { UnpluggedActivity } from "./UnpluggedActivity";
 
 /**
  * The generic activity registry: `activityType → component`. The shared Runner
@@ -35,6 +36,7 @@ export const ACTIVITY_REGISTRY: Record<
   interpret: FeelingsActivity,
   predict: PatternsActivity,
   create: ResponsibleCreatorActivity,
+  unplugged: UnpluggedActivity,
 };
 
 /**

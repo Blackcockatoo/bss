@@ -10,8 +10,18 @@ export const FIELD_MODE_REVIEW_PATH = "/schools/field/review";
 export const FIELD_MODE_OFFLINE_PATH = "/schools/field/offline";
 export const FIELD_MODE_GUIDE_PATH = "/schools/field/guide";
 export const FIELD_MODE_SAFETY_PATH = "/schools/field/safety";
+export const FIELD_MODE_VERIFIED_PATH = "/schools/field/verified";
+export const FIELD_MODE_TOOLS_PATH = "/schools/field/tools";
+export const FIELD_MODE_COMMENTS_PATH = "/schools/field/comments";
+export const FIELD_MODE_STAFF_PD_PATH = "/schools/field/staff-pd";
+export const FIELD_MODE_ROLLOUT_PATH = "/schools/field/rollout";
+export const FIELD_MODE_FEEDBACK_PATH = "/schools/field/feedback";
+export const FIELD_MODE_CURRICULUM_PATH = "/schools/field/curriculum";
 export const FIELD_MODE_PACK_MANIFEST_PATH = "/schools/field/pack.json";
 export const FIELD_MODE_PRINT_PATH_PREFIX = "/schools/field/print";
+export const FIELD_MODE_PRINT_ALL_PATH = "/schools/field/print/all";
+export const SCHOOLS_DATA_PATH = "/schools/data";
+export const SCHOOLS_CONTRIBUTE_PATH = "/schools/contribute";
 export const FIELD_MODE_EXIT_PATH = "/schools/field/exit";
 export const FIELD_MODE_MANIFEST_PATH =
   "/schools/field/manifest.webmanifest";
@@ -57,6 +67,12 @@ const FIELD_REQUIRED_STATIC_ROUTES = [
   ...FIELD_MODE_INSTALL_ICON_PATHS,
   "/favicon.ico",
   "/sw.js",
+  // Discovery documents must reach their route handlers on the classroom
+  // host. Blocking them here caused /robots.txt and /sitemap.xml to be
+  // redirected to Field Home, which made the per-host robots/sitemap
+  // logic unreachable in production.
+  "/robots.txt",
+  "/sitemap.xml",
 ] as const;
 
 /**
@@ -75,6 +91,9 @@ export const CHILD_SAFE_ROUTE_POLICIES: Record<
     fallbackPathname: "/app",
     allowedExact: new Set([
       "/",
+      // Japanese and Hindi editions of "/" (same content, translated).
+      "/ja",
+      "/hi",
       "/app",
       "/compass",
       "/pet",
@@ -123,6 +142,12 @@ export const CHILD_SAFE_ROUTE_POLICIES: Record<
     fallbackPathname: FIELD_MODE_HOME_PATH,
     allowedExact: new Set([
       "/schools",
+      // Teacher support pages on the dedicated school host. Field policy is
+      // always active on metapet.school, so these must be allowed here or
+      // teachers cannot open local-data controls or the optional contribution
+      // page. Classroom nav and lesson screens do not link to contribution.
+      SCHOOLS_DATA_PATH,
+      SCHOOLS_CONTRIBUTE_PATH,
       FIELD_MODE_HOME_PATH,
       FIELD_MODE_START_PATH,
       FIELD_MODE_LESSONS_PATH,
@@ -134,6 +159,13 @@ export const CHILD_SAFE_ROUTE_POLICIES: Record<
       FIELD_MODE_OFFLINE_PATH,
       FIELD_MODE_GUIDE_PATH,
       FIELD_MODE_SAFETY_PATH,
+      FIELD_MODE_VERIFIED_PATH,
+      FIELD_MODE_TOOLS_PATH,
+      FIELD_MODE_COMMENTS_PATH,
+      FIELD_MODE_STAFF_PD_PATH,
+      FIELD_MODE_ROLLOUT_PATH,
+      FIELD_MODE_FEEDBACK_PATH,
+      FIELD_MODE_CURRICULUM_PATH,
       FIELD_MODE_PACK_MANIFEST_PATH,
       FIELD_MODE_EXIT_PATH,
       FIELD_MODE_MANIFEST_PATH,
@@ -158,7 +190,7 @@ export const CHILD_SAFE_ROUTE_POLICIES: Record<
 
 /** The intentionally small navigation surface shown inside Field Mode. */
 export const FIELD_MODE_NAV_ITEMS: readonly FieldModeNavItem[] = [
-  { href: FIELD_MODE_HOME_PATH, label: "Field Home", kind: "home" },
+  { href: FIELD_MODE_HOME_PATH, label: "Home", kind: "home" },
   { href: FIELD_MODE_LESSONS_PATH, label: "Lessons", kind: "lessons" },
   {
     href: FIELD_MODE_CLASSROOM_PATH,
@@ -180,7 +212,7 @@ export const FIELD_MODE_NAV_ITEMS: readonly FieldModeNavItem[] = [
     label: "Safety & Privacy",
     kind: "safety",
   },
-  { href: FIELD_MODE_EXIT_PATH, label: "Exit Field Mode", kind: "exit" },
+  { href: FIELD_MODE_EXIT_PATH, label: "School overview", kind: "exit" },
 ] as const;
 
 export const CHILD_SAFE_NAV_ROUTES = new Set(
