@@ -5,10 +5,11 @@ import { useEffect, useState } from "react";
 import { getPetRepository, usePetRegistryStore, type PetRecordV2 } from "@/lib/registry";
 import { normalizePetForm, PET_FORM_STORAGE_KEY, type PetForm } from "@/lib/petForms";
 import { makeCreatureSnapshot, type CreatureSnapshot } from "@/lib/expressions/snapshot";
+import { readTake, type PerformanceTake } from "@/lib/expressions/take";
 import { ExpressionStudio } from "@/components/expressions/ExpressionStudio";
 
 type LoadState = { status: "loading" | "empty" | "error" } |
-  { status: "ready"; id: string; pet: CreatureSnapshot; form: PetForm };
+  { status: "ready"; id: string; pet: CreatureSnapshot; form: PetForm; take: PerformanceTake | null };
 
 export default function ExpressionsPage() {
   const record = usePetRegistryStore(state => state.activeRecord);
@@ -23,7 +24,8 @@ export default function ExpressionsPage() {
       }
       let form: PetForm = "auralia";
       try { form = normalizePetForm(localStorage.getItem(PET_FORM_STORAGE_KEY)); } catch { /* Use the default. */ }
-      setResult({ status: "ready", id: active.petId, pet: makeCreatureSnapshot(active), form });
+      const take = new URLSearchParams(window.location.search).get("take") === "latest" ? readTake(active.petId) : null;
+      setResult({ status: "ready", id: active.petId, pet: makeCreatureSnapshot(active), form: take?.form ?? form, take });
     };
     void Promise.resolve().then(() => record ?? getPetRepository().loadActiveRecord()).then(prepare)
       .catch(() => { if (current) setResult({ status: "error" }); });
@@ -40,7 +42,7 @@ export default function ExpressionsPage() {
           <h1 className="text-4xl font-black tracking-tight text-[#fff3d1] sm:text-6xl">MetaPet Expressions</h1>
         </header>
         {result.status === "ready" && (!record || record.petId === result.id) ?
-          <ExpressionStudio key={result.id} id={result.id} pet={result.pet} initialForm={result.form} /> : (
+          <ExpressionStudio key={result.id} id={result.id} pet={result.pet} initialForm={result.form} initialTake={result.take} /> : (
           <section className="rounded-xl border border-slate-700 p-5">
             <p role="status">{result.status === "error" ? "Your registered MetaPet could not be loaded." :
               result.status === "empty" ? "Open My Pet to set up your companion first." : "Opening your registered companion…"}</p>

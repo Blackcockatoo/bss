@@ -1,15 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { capturePhase, durationMs, sampleExpression } from "@/lib/expressions/studio";
+import { artworkCapturePhase, artworkDuration, sampleArtwork, type Artwork } from "./artwork";
 import { ExpressionArt } from "./ExpressionArt";
-import type { Artwork } from "./export";
 
 export function ExpressionPreview({
   art, playing, replay, still = false,
 }: { art: Artwork; playing: boolean; replay: number; still?: boolean }) {
-  const { settings, pet, expression, reducedMotion } = art;
+  const { settings, reducedMotion } = art;
   const playhead = useRef(0);
   const [progress, setProgress] = useState(0);
-  const duration = durationMs(expression, settings, pet.personality);
+  const duration = artworkDuration(art);
   useEffect(() => {
     playhead.current = 0;
     const initial = requestAnimationFrame(() => setProgress(0));
@@ -32,7 +31,5 @@ export function ExpressionPreview({
     id = requestAnimationFrame(advance);
     return () => cancelAnimationFrame(id);
   }, [playing, reducedMotion, still, duration, settings.loop, replay]);
-  const frame = sampleExpression(expression, still ? capturePhase(expression, settings) : progress,
-    settings, pet.personality, pet.seed, reducedMotion);
-  return <ExpressionArt {...art} frame={frame} />;
+  return <ExpressionArt {...sampleArtwork(art, still ? artworkCapturePhase(art) : progress)} />;
 }

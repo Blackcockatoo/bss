@@ -16,6 +16,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { Gesture } from "@/pet/alive/director";
 import type { BodyPerformanceState } from "@/pet/performance";
 import { MovementPriority } from "@/pet/movement/movementVocabulary";
 import {
@@ -50,6 +51,7 @@ export interface TouchNervousSystemInputs {
   onGesture?: (gesture: "tap" | "hold" | "swipe") => void;
   /** Fired once per entry into `pleased` (rate-limited by the hook). */
   onAffection?: () => void;
+  onPerformanceGesture?: (gesture: Gesture) => void;
 }
 
 export interface TouchNervousSystemApi {
@@ -114,6 +116,7 @@ export function useTouchNervousSystem(
     activeClipPriority = MovementPriority.IdleBreathing,
     onGesture,
     onAffection,
+    onPerformanceGesture,
   } = inputs;
 
   const [state, setState] = useState<InteractionState>("idle");
@@ -122,6 +125,8 @@ export function useTouchNervousSystem(
     deriveInteractionOverlay("idle", 0, DEFAULT_INTERACTION_CONTEXT),
   );
 
+  const insideRef = useRef(false);
+  const tapRef = useRef({ at: -Infinity, count: 0 });
   const stateRef = useRef<InteractionState>("idle");
   const contextRef = useRef<InteractionContext>({ ...DEFAULT_INTERACTION_CONTEXT });
   const contactRef = useRef<{
@@ -184,6 +189,7 @@ export function useTouchNervousSystem(
   const onPointerEnter = useCallback(
     (event: React.PointerEvent) => {
       if (gateRef.current.sealed) return;
+      insideRef.current = true;
       rawPointRef.current = { clientX: event.clientX, clientY: event.clientY, region: "outside" };
       dispatch("pointer-near", performance.now());
     },
@@ -191,6 +197,8 @@ export function useTouchNervousSystem(
   );
 
   const onPointerMove = useCallback((event: React.PointerEvent) => {
+    if (gateRef.current.sealed || (contactRef.current && contactRef.current.pointerId !== event.pointerId)) return;
+    insideRef.current = true;
     rawPointRef.current = {
       clientX: event.clientX,
       clientY: event.clientY,
@@ -200,8 +208,13 @@ export function useTouchNervousSystem(
 
   const onPointerDown = useCallback(
     (event: React.PointerEvent) => {
-      if (gateRef.current.sealed) return;
+      if (gateRef.current.sealed || (event.pointerType && event.isPrimary === false) || (event.button !== undefined && event.button !== 0) ||
+        contactRef.current || (event.target instanceof Element &&
+          event.target.closest("button, a, input, select, [data-alive-interactive]"))) return;
       (event.currentTarget as Element).setPointerCapture?.(event.pointerId);
+      insideRef.current = true;
+      rawPointRef.current = { clientX: event.clientX, clientY: event.clientY, region: "outside" };
+      velocityRef.current = { velocity: 0, direction: 0 };
       const now = performance.now();
       contactRef.current = {
         active: true,
@@ -221,7 +234,7 @@ export function useTouchNervousSystem(
   const endContact = useCallback(
     (event: React.PointerEvent, released: boolean) => {
       const contact = contactRef.current;
-      if (!contact) return;
+      if (!contact || contact.pointerId !== event.pointerId) return;
       const now = performance.now();
       if (released) {
         const distance = Math.hypot(event.clientX - contact.startX, event.clientY - contact.startY);
@@ -229,21 +242,32 @@ export function useTouchNervousSystem(
         const window = classifyGesture({
           duration,
           distance,
-          velocity: velocityRef.current.velocity,
+          velocity: Math.max(velocityRef.current.velocity, distance / Math.max(16, duration)),
           direction: velocityRef.current.direction,
           contact: false,
           released: true,
         });
         if (window.isTap) {
+          const count = now - tapRef.current.at <= 390 ? tapRef.current.count + 1 : 1;
+          tapRef.current = { at: now, count };
           onGesture?.("tap");
+          onPerformanceGesture?.({ kind: count === 1 ? "tap" : count === 2 ? "double-tap" : "rhythm",
+            intensity: Math.min(.85, .25 + count * .14), direction: count % 2 ? 1 : -1 });
           dispatch("gesture-tap", now);
+        } else if (!runFiredRef.current.swipe && window.isFastSwipe) {
+          onGesture?.("swipe");
+          onPerformanceGesture?.({ kind: "swipe", intensity: window.intensity, direction: event.clientX < contact.startX ? -1 : 1 });
+        } else if (!runFiredRef.current.swipe && (runFiredRef.current.hold || runFiredRef.current.stroke)) {
+          onPerformanceGesture?.({ kind: "release", intensity: .15, direction: 1 });
         }
       }
-      (event.currentTarget as Element).releasePointerCapture?.(contact.pointerId ?? event.pointerId);
+      const target = event.currentTarget as Element;
+      if (target.hasPointerCapture?.(event.pointerId) !== false) target.releasePointerCapture?.(event.pointerId);
       contactRef.current = null;
+      if (!released || contact.pointerType !== "mouse") insideRef.current = false;
       dispatch("contact-end", now);
     },
-    [dispatch, onGesture],
+    [dispatch, onGesture, onPerformanceGesture],
   );
 
   const onPointerUp = useCallback((event: React.PointerEvent) => endContact(event, true), [
@@ -254,6 +278,7 @@ export function useTouchNervousSystem(
   ]);
   const onPointerLeave = useCallback(
     (event: React.PointerEvent) => {
+      insideRef.current = false;
       if (contactRef.current) {
         endContact(event, false);
         return;
@@ -265,7 +290,7 @@ export function useTouchNervousSystem(
 
   // ── rAF loop: smoothing + throttled commits ──────────────────────────
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || sealed) return;
     let raf = 0;
     let lastCommit = 0;
 
@@ -273,7 +298,7 @@ export function useTouchNervousSystem(
       raf = window.requestAnimationFrame(step);
       const now = performance.now();
 
-      const rect = stageRef.current?.getBoundingClientRect();
+      const rect = insideRef.current ? stageRef.current?.getBoundingClientRect() : null;
       const point = rawPointRef.current;
       if (rect) {
         const normalized = normalizePointerPosition(point.clientX, point.clientY, {
@@ -299,11 +324,17 @@ export function useTouchNervousSystem(
 
         if (now - lastCommit >= 30) {
           setGaze((current) => {
-            const nx = Math.round(normalized.stageX * 60) / 60;
-            const ny = Math.round(normalized.stageY * 60) / 60;
+            const nx = Math.round((current.x * .3 + normalized.stageX * .7) * 60) / 60;
+            const ny = Math.round((current.y * .3 + normalized.stageY * .7) * 60) / 60;
             return current.x === nx && current.y === ny ? current : { x: nx, y: ny };
           });
         }
+      } else if (now - lastCommit >= 30) {
+        setGaze(current => {
+          const x = Math.round(current.x * 30) / 60;
+          const y = Math.round(current.y * 30) / 60;
+          return current.x === 0 && current.y === 0 ? current : { x: Math.abs(x) <= 1/60 ? 0 : x, y: Math.abs(y) <= 1/60 ? 0 : y };
+        });
       }
 
       const contact = contactRef.current;
@@ -319,16 +350,19 @@ export function useTouchNervousSystem(
           released: false,
         });
         const fired = runFiredRef.current;
-        if (window.isFastSwipe) {
+        if (window.isFastSwipe && !fired.swipe) {
           onGesture?.("swipe");
+          onPerformanceGesture?.({ kind: "swipe", intensity: window.intensity, direction: point.clientX < contact.startX ? -1 : 1 });
           dispatch("gesture-fast-swipe", now, point.region);
           fired.swipe = true;
         } else if (window.isSlowStroke && !fired.stroke) {
           fired.stroke = true;
+          onPerformanceGesture?.({ kind: "stroke", intensity: window.intensity, direction: point.clientX < contact.startX ? -1 : 1 });
           dispatch("gesture-slow-stroke", now, point.region);
         } else if (window.isHold && !fired.hold && !fired.stroke) {
           fired.hold = true;
           onGesture?.("hold");
+          onPerformanceGesture?.({ kind: "hold", intensity: window.intensity, direction: 1 });
           dispatch("gesture-hold", now, point.region);
         }
       }
@@ -379,7 +413,7 @@ export function useTouchNervousSystem(
 
     raf = window.requestAnimationFrame(step);
     return () => window.cancelAnimationFrame(raf);
-  }, [dispatch, faceFraction, onGesture, stageRef]);
+  }, [dispatch, faceFraction, onGesture, onPerformanceGesture, sealed, stageRef]);
 
   const pointerHandlers = useMemo(
     () => ({ onPointerEnter, onPointerMove, onPointerDown, onPointerUp, onPointerCancel, onPointerLeave }),

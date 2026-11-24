@@ -235,6 +235,9 @@ export function useMovementController(
   const playAction = useCallback(
     (action: CareActionId) => {
       const gate = gateRef.current;
+      const current = activeRef.current;
+      if (action !== "evolution" && current.clip.priority === MovementPriority.EvolutionCeremony &&
+        Date.now() - current.startedAt < current.clip.duration) return;
       let sequence: readonly string[] = ACTION_SEQUENCES[action];
       if (action === "play") {
         // Rare ceremonial variant, deterministically seeded per invocation.

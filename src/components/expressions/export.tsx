@@ -1,12 +1,12 @@
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 import { serializeLocalSprite, stripGeometryBackdrop } from "@/lib/games/geometryPilot";
-import { capturePhase, durationMs, sampleExpression, type Settings } from "@/lib/expressions/studio";
+import { animationFramePlan, artworkCapturePhase, sampleArtwork, type Artwork } from "./artwork";
 import { isStudioWardrobeAsset } from "@/lib/expressions/wardrobeAssets";
 import type { GifCommand } from "@/lib/expressions/gif.worker";
-import { ASPECTS, ExpressionArt, type ArtProps } from "./ExpressionArt";
+import { ASPECTS, ExpressionArt } from "./ExpressionArt";
 
-export type Artwork = Omit<ArtProps, "frame"> & { settings: Settings; reducedMotion?: boolean };
+export type { Artwork } from "./artwork";
 export type PanelArtwork = Artwork;
 export type Progress = (done: number, total: number) => void;
 
@@ -69,10 +69,9 @@ export function createFrameRenderer() {
   const root = createRoot(host, { identifierPrefix: "expression-export-" });
   const wardrobe = new Map<string, string>();
   return {
-    async draw(art: Artwork, size: number, signal: AbortSignal, progress = capturePhase(art.expression, art.settings)) {
+    async draw(art: Artwork, size: number, signal: AbortSignal, progress = artworkCapturePhase(art)) {
       signal.throwIfAborted();
-      const frame = sampleExpression(art.expression, progress, art.settings, art.pet.personality, art.pet.seed, art.reducedMotion);
-      flushSync(() => root.render(<ExpressionArt {...art} frame={frame} />));
+      flushSync(() => root.render(<ExpressionArt {...sampleArtwork(art, progress)} />));
       const original = host.querySelector("svg");
       if (!original) throw new Error("The creature frame is missing.");
       const svg = original.cloneNode(true) as SVGSVGElement;
@@ -166,17 +165,15 @@ export async function exportGif(art: Artwork, signal: AbortSignal, update: Progr
   const worker = new Worker(new URL("../../lib/expressions/gif.worker.ts", import.meta.url));
   const renderer = createFrameRenderer();
   try {
-    const duration = durationMs(art.expression, art.settings, art.pet.personality);
-    const frames = art.reducedMotion ? 1 : Math.max(10, Math.min(32, Math.round(duration / 85)));
-    for (let index = 0; index < frames; index++) {
-      const phase = index / (art.settings.loop ? frames : Math.max(1, frames - 1));
-      const { canvas, context } = await renderer.draw(art, 256, signal, phase);
+    const frames = animationFramePlan(art);
+    for (const [index, frame] of frames.entries()) {
+      const { canvas, context } = await renderer.draw(art, 256, signal, frame.progress);
       const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
       await gifRequest(worker, {
         type: "frame", pixels, width: canvas.width, height: canvas.height,
-        delay: Math.round(duration / frames), loop: art.settings.loop && frames > 1,
+        delay: frame.delay, loop: art.settings.loop && frames.length > 1,
       }, signal);
-      update(index + 1, frames);
+      update(index + 1, frames.length);
     }
     const bytes = await gifRequest(worker, { type: "finish" }, signal);
     if (!bytes) throw new Error("The animation encoder produced no frames.");
@@ -191,19 +188,17 @@ export async function exportWebp(art: Artwork, signal: AbortSignal, update: Prog
   const { animatedWebp, readWebpPixels } = await import("@/lib/expressions/webp");
   const renderer = createFrameRenderer();
   try {
-    const duration = durationMs(art.expression, art.settings, art.pet.personality);
-    const frames = Math.max(10, Math.min(32, Math.round(duration / 85)));
+    const frames = animationFramePlan(art);
     const [width, height] = ASPECTS[art.aspect ?? "square"].map(axis => axis / 2);
     const pixels: ReturnType<typeof readWebpPixels>[] = [];
-    for (let index = 0; index < frames; index++) {
-      const phase = index / (art.settings.loop ? frames : frames - 1);
-      const { canvas } = await renderer.draw(art, 256, signal, phase);
+    for (const [index, sample] of frames.entries()) {
+      const { canvas } = await renderer.draw(art, 256, signal, sample.progress);
       const frame = await canvasBlob(canvas, "image/webp");
       pixels.push(readWebpPixels(new Uint8Array(await frame.arrayBuffer())));
-      update(index + 1, frames);
+      update(index + 1, frames.length);
     }
     signal.throwIfAborted();
-    return animatedWebp(width, height, pixels, Math.round(duration / frames), art.settings.loop);
+    return animatedWebp(width, height, pixels, frames.map(frame => frame.delay), art.settings.loop);
   } finally {
     renderer.dispose();
   }

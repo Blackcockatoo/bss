@@ -1,3 +1,5 @@
+import { useAliveFrame, weightedFrame } from "@/pet/alive/AliveContext";
+import { expressionEyes } from "@/pet/alive/presentation";
 import type { DerivedTraits } from "@/lib/genome";
 import type { EvolutionState } from "@/evolution/types";
 import { getCumulativeEvolutionUpgrade } from "@/evolution/stageUpgrades";
@@ -167,14 +169,19 @@ interface AuraliaCreatureProps {
   isBeingSquished?: boolean;
   annoyanceLevel?: number;
   live?: boolean;
+  nativePerformance?: boolean;
+  reducedMotion?: boolean;
 }
 
 export function AuraliaCreature({
   activeForm, evolutionState, traits, eyeState, eyePos, red60, blue60, black60,
   stageEmphasis = 0, transformationMode = "normal", orbDeformation = {x: 0, y: 0, intensity: 0},
-  aiMode, isBeingSquished = false, annoyanceLevel = 0, live = false,
+  aiMode, isBeingSquished = false, annoyanceLevel = 0, live = false, nativePerformance = false, reducedMotion = false,
 }: AuraliaCreatureProps) {
   const currentForm = AURALIA_FORMS[activeForm];
+  const sample = useAliveFrame();
+  const performed = nativePerformance && sample ? weightedFrame(sample) : null;
+  const showMotion = live && !reducedMotion;
   const stageUpgrade = getCumulativeEvolutionUpgrade(evolutionState);
   const stagePalette = resolveStagePalette(evolutionState, traits);
   const STAGE_ANCHOR = {
@@ -221,11 +228,11 @@ export function AuraliaCreature({
       />
       <g
         className={`
-        ${aiMode === "idle" ? "ai-idle" : ""}
-        ${aiMode === "playing" ? "ai-playing" : ""}
-        ${aiMode === "dreaming" ? "ai-dreaming" : ""}
-        ${aiMode === "observing" ? "ai-observing" : ""}
-        ${aiMode === "focusing" ? "ai-focusing" : ""}
+        ${showMotion && !performed && aiMode === "idle" ? "ai-idle" : ""}
+        ${showMotion && !performed && aiMode === "playing" ? "ai-playing" : ""}
+        ${showMotion && !performed && aiMode === "dreaming" ? "ai-dreaming" : ""}
+        ${showMotion && !performed && aiMode === "observing" ? "ai-observing" : ""}
+        ${showMotion && !performed && aiMode === "focusing" ? "ai-focusing" : ""}
       `}
         style={{
           transform: `translate(${orbDeformation.x}px, ${orbDeformation.y}px)`,
@@ -261,7 +268,7 @@ export function AuraliaCreature({
               : currentForm.baseColor
           }
           opacity={transformationMode === "grumpy" ? 0.95 : 0.9}
-          className={live ? "breathe-anim" : undefined}
+          className={showMotion && !performed ? "breathe-anim" : undefined}
           style={{
             transformOrigin: "200px 210px",
             transform: `scale(${1 - orbDeformation.intensity * 0.1})`,
@@ -295,7 +302,7 @@ export function AuraliaCreature({
               : currentForm.baseColor
           }
           opacity={transformationMode === "grumpy" ? 0.95 : 0.9}
-          className={live ? "breathe-anim" : undefined}
+          className={showMotion && !performed ? "breathe-anim" : undefined}
           style={{
             transformOrigin: "200px 145px",
             transform: `scale(${1 - orbDeformation.intensity * 0.15})`,
@@ -375,7 +382,7 @@ export function AuraliaCreature({
             strokeWidth="0.5"
             opacity="0.4"
           >
-            {live && (<animate
+            {showMotion && (<animate
               attributeName="r"
               values="80;85;80"
               dur="4s"
@@ -389,7 +396,7 @@ export function AuraliaCreature({
             strokeWidth="0.5"
             opacity="0.3"
           >
-            {live && (<animate
+            {showMotion && (<animate
               attributeName="r"
               values="65;70;65"
               dur="5s"
@@ -406,7 +413,7 @@ export function AuraliaCreature({
                 opacity="0.8"
                 filter="url(#strongGlow)"
               >
-                {live && (<animate
+                {showMotion && (<animate
                   attributeName="opacity"
                   values="0.4;1;0.4"
                   dur="3s"
@@ -419,7 +426,7 @@ export function AuraliaCreature({
                 fill={currentForm.tealAccent}
                 opacity="0.6"
               >
-                {live && (<animate
+                {showMotion && (<animate
                   attributeName="opacity"
                   values="0.3;0.8;0.3"
                   dur="3s"
@@ -447,7 +454,7 @@ export function AuraliaCreature({
                 opacity="0.7"
                 filter="url(#glow)"
               >
-                {live && (<animate
+                {showMotion && (<animate
                   attributeName="d"
                   values={`M 0 -55 Q ${5 + i * 2} -${65 + i * 3} ${8 + i * 3} -${75 + i * 5};M 0 -55 Q ${7 + i * 2} -${68 + i * 3} ${10 + i * 3} -${78 + i * 5};M 0 -55 Q ${5 + i * 2} -${65 + i * 3} ${8 + i * 3} -${75 + i * 5}`}
                   dur={`${2 + i * 0.3}s`}
@@ -461,7 +468,7 @@ export function AuraliaCreature({
                 fill={currentForm.tealAccent}
                 opacity="0.6"
               >
-                {live && (<animate
+                {showMotion && (<animate
                   attributeName="r"
                   values="3;5;3"
                   dur={`${2 + i * 0.3}s`}
@@ -484,14 +491,14 @@ export function AuraliaCreature({
       )}
 
       {/* Enhanced expressive eyes */}
-      {(!live || activeForm !== "meditation") ? (
+      {(!live || activeForm !== "meditation" || performed) ? (
         <EyeRenderer
-          eyeState={eyeState}
-          eyePos={eyePos}
+          eyeState={performed && sample ? expressionEyes(performed, eyeState, sample.weight) : eyeState}
+          eyePos={performed && !reducedMotion ? { x: eyePos.x * .5 + performed.gazeX * 7, y: eyePos.y * .5 + performed.gazeY * 5 } : eyePos}
           leftEyeCenter={{ x: 180, y: 145 }}
           rightEyeCenter={{ x: 220, y: 145 }}
           annoyanceLevel={annoyanceLevel}
-          animate={live}
+          animate={showMotion && !performed}
         />
       ) : (
         <>

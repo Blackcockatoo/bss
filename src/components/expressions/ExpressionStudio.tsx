@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState, type ChangeEvent, type ReactNode } 
 import { createPortal } from "react-dom";
 import type { PetForm } from "@/lib/petForms";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { clearTake, saveTake, type PerformanceTake, type PerformanceCue } from "@/lib/expressions/take";
 import type { CreatureSnapshot } from "@/lib/expressions/snapshot";
 import {
   DEFAULT_SETTINGS, EXPRESSIONS, FORMS, PACKS, SETTINGS_LIMITS, getExpression, parseRecipe,
@@ -24,7 +25,7 @@ const primary = button + " border-amber-300 bg-amber-300 text-[#0a1322]";
 const input = "min-h-11 w-full min-w-0 rounded-lg border border-[#536179] bg-[#0a1323] px-3 text-sm text-slate-100";
 const section = "min-w-0 space-y-4 rounded-xl border border-[#35435c] bg-[#101828] p-3 sm:p-4";
 const modes = ["Stickers", "Animation Lab", "Meme Machine", "Comics", "Director", "Export Vault"] as const;
-type Mode = typeof modes[number];
+type Mode = typeof modes[number] | "Recording";
 
 const starterTemplates = [
   ["Nobody:", "Absolutely nobody:"], ["Me when…", ""], ["That moment when…", ""],
@@ -76,9 +77,12 @@ const advancedSettings: [keyof typeof SETTINGS_LIMITS, string][] = [
   ["velocity", "Particle velocity"], ["capture", "PNG capture position"],
 ];
 
-export function ExpressionStudio({ id, pet, initialForm }: { id: string; pet: CreatureSnapshot; initialForm: PetForm }) {
+export function ExpressionStudio({ id, pet, initialForm, initialTake = null }: {
+  id: string; pet: CreatureSnapshot; initialForm: PetForm; initialTake?: PerformanceTake | null;
+}) {
   const [creative, setCreative] = useState(() => loadCreativeData(id));
-  const [mode, setMode] = useState<Mode>("Stickers");
+  const [mode, setMode] = useState<Mode>(initialTake ? "Recording" : "Stickers");
+  const [take, setTake] = useState(initialTake);
   const [form, setForm] = useState(initialForm);
   const [selected, setSelected] = useState<Expression>(getExpression("happy")!);
   const [settings, setSettings] = useState<Settings>({ ...DEFAULT_SETTINGS });
@@ -109,17 +113,19 @@ export function ExpressionStudio({ id, pet, initialForm }: { id: string; pet: Cr
   const preferencesReduce = useReducedMotion();
   const reducedMotion = preferencesReduce || pet.auralia.reduceMotion;
   const panel = panels[activePanel];
+  const inRecording = mode === "Recording";
   const inComic = mode === "Comics";
   const inMeme = mode === "Meme Machine";
-  const previewExpression = inComic ? getExpression(panel.expressionId)! : selected;
+  const previewExpression = inRecording && take ? getExpression(take.cues[0].expressionId)! : inComic ? getExpression(panel.expressionId)! : selected;
   const previewForm = inComic ? panel.form : form;
   const artwork: Artwork = {
     pet, form: previewForm, expression: previewExpression, settings: inComic ? DEFAULT_SETTINGS : settings,
     scene: inComic ? { ...DEFAULT_SCENE, background: panel.background } : scene,
     caption: inComic ? { ...DEFAULT_CAPTION, bubble: panel.bubble, style: panel.style } :
-      inMeme ? meme : { ...DEFAULT_CAPTION, bottom: captionOn ? selected.caption : "" },
+      inMeme ? meme : { ...DEFAULT_CAPTION, bottom: captionOn ? previewExpression.caption : "" },
     aspect: inMeme ? aspect : "square",
     reducedMotion,
+    take: inRecording ? take ?? undefined : undefined,
   };
   const visible = EXPRESSIONS.filter(expression => {
     const term = search.trim().toLowerCase();
@@ -244,7 +250,7 @@ export function ExpressionStudio({ id, pet, initialForm }: { id: string; pet: Cr
       setBusy(false);
     }
   }
-  const baseName = `metapet-${previewForm}-${previewExpression.id}`;
+  const baseName = `metapet-${previewForm}-${inRecording ? "performance" : previewExpression.id}`;
   const pngName = `${baseName}-${size}.png`;
   const png = (signal: AbortSignal) => exportPng(artwork, size, signal);
   const sharing = (blob: Blob) => {
@@ -270,13 +276,13 @@ export function ExpressionStudio({ id, pet, initialForm }: { id: string; pet: Cr
         document.body,
       )}
       <nav aria-label="Creative tools" className="mb-5 flex flex-wrap gap-2">
-        {modes.map(item => <button key={item} type="button" className={button + selectedStyle(mode === item)}
+        {([...(take ? ["Recording" as const] : []), ...modes]).map(item => <button key={item} type="button" className={button + selectedStyle(mode === item)}
           aria-pressed={mode === item} onClick={() => setMode(item)}>{item}</button>)}
       </nav>
       <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <section aria-labelledby="expression-preview" className={section + " lg:sticky lg:top-20"}>
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 id="expression-preview" className="text-xl font-bold text-[#fff3d1]">{previewExpression.label}</h2>
+            <h2 id="expression-preview" className="text-xl font-bold text-[#fff3d1]">{inRecording ? "Recorded performance" : previewExpression.label}</h2>
             {!inComic && (
               <div aria-label="Creature form" role="group" className="flex flex-wrap gap-1.5">
                 {FORMS.map(item => <button type="button" key={item} className={button + selectedStyle(item === form)}
@@ -306,7 +312,7 @@ export function ExpressionStudio({ id, pet, initialForm }: { id: string; pet: Cr
               <button type="button" className={primary} disabled={busy} onClick={() => void runExport(pngName, png)}>Download PNG</button>
               {!reducedMotion && <button type="button" className={button} disabled={busy}
                 onClick={() => void runExport(baseName + ".gif", (signal, update) => exportGif(artwork, signal, update))}>Download GIF</button>}
-              {canWebp && !reducedMotion && mode === "Export Vault" && <button type="button" className={button} disabled={busy}
+              {canWebp && !reducedMotion && (mode === "Export Vault" || inRecording) && <button type="button" className={button} disabled={busy}
                 onClick={() => void runExport(baseName + ".webp", (signal, update) => exportWebp(artwork, signal, update))}>Download WebP</button>}
               {canShare && <button type="button" className={button} disabled={busy}
                 onClick={() => void runExport(pngName, png, sharing)}>Share PNG</button>}
@@ -320,6 +326,34 @@ export function ExpressionStudio({ id, pet, initialForm }: { id: string; pet: Cr
         </section>
         <section className={section} aria-label={mode}>
           <h2 className="text-xl font-bold text-[#fff3d1]">{mode === "Stickers" ? "Sticker Factory" : mode}</h2>
+          {inRecording && take && <>
+            <p className="text-sm text-slate-300">Change a cue or its timing, then replay the take or export it from the preview.</p>
+            <ol className="space-y-2">
+              {take.cues.map((cue, index) => {
+                function update(change: Partial<PerformanceCue>) {
+                  if (!take) return;
+                  setTake({ ...take, cues: take.cues.map((item, i) => i === index ? { ...item, ...change } : item) });
+                }
+                const min = take.cues[index - 1]?.at ?? 0;
+                const max = take.cues[index + 1]?.at ?? 12_000;
+                return <li key={index} className="grid gap-2 rounded-lg border border-slate-700 p-2 sm:grid-cols-[2fr_1fr_auto]">
+                  <Select label={`Cue ${index + 1}`} value={cue.expressionId} onChange={expressionId => update({ expressionId })}>
+                    {EXPRESSIONS.map(item => <option value={item.id} key={item.id}>{item.label}</option>)}
+                  </Select>
+                  <label className="grid gap-1 text-sm">Start (ms)
+                    <input className={input} type="number" min={min} max={max} step="1" value={cue.at}
+                      onChange={event => update({ at: Math.min(max, Math.max(min, Number(event.target.value || "0"))) })} />
+                  </label>
+                  <button type="button" className={button + " self-end"} disabled={take.cues.length === 1} aria-label={`Remove cue ${index + 1}`}
+                    onClick={() => setTake({ ...take, cues: take.cues.filter((_, i) => i !== index) })}>Remove</button>
+                </li>;
+              })}
+            </ol>
+            <button type="button" className={button} onClick={() => {
+              try { saveTake(id, { ...take, form }); setMessage("Performance edits saved on this device."); }
+              catch { setError("This browser could not save the performance."); }
+            }}>Save performance edits</button>
+          </>}
           {mode === "Stickers" && <>
             <label className="block space-y-1 text-sm">Search expressions
               <input className={input} type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Try laugh, victory or sleepy" />
@@ -455,6 +489,8 @@ export function ExpressionStudio({ id, pet, initialForm }: { id: string; pet: Cr
             <button type="button" className={button} disabled={busy} onClick={() => {
               try {
                 clearCreativeData(id);
+                clearTake(id);
+                setTake(null);
                 void clearThumbnailCache().then(() => setThumbEpoch(value => value + 1));
                 setCreative(emptyCreativeData());
                 setPanels([newPanel(form, "hello"), newPanel(form, "happy")]);

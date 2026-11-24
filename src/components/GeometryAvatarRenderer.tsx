@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { useStore } from "@/lib/store";
 import { deriveMoss60PetProfile } from "@/lib/moss60/petProfile";
 import { decodeGenome, type DerivedTraits, type Genome } from "@/lib/genome";
@@ -10,6 +10,9 @@ import {
 } from "@/lib/geometry/projection";
 import { deriveHeptaProfile, type HeptaProfileV2 } from "@/lib/heptaProfile";
 import { usePetRegistryStore, type PetRecordV2 } from "@/lib/registry";
+import { useAlive, useAliveActive, useAlivePaused } from "@/pet/alive/AliveContext";
+import { AliveGeometryMotion } from "@/pet/alive/LiveEffects";
+import { useTouchNervousSystem } from "@/pet/interaction";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useGeometryBehavior } from "@/pet/behavior/useGeometryBehavior";
 import { DEFAULT_VITALS } from "@metapet/core/vitals";
@@ -68,7 +71,14 @@ export function GeometryAvatarRenderer({
   const lastActionAt = useStore((state) => state.lastActionAt);
   const activeRecord = usePetRegistryStore((state) => state.activeRecord);
   const runtimeEvolutionState = useStore((state) => state.evolution?.state);
-  const reduceMotion = useReducedMotion();
+  const alive = useAlive();
+  const paused = useAlivePaused();
+  const performing = useAliveActive();
+  const osReduced = useReducedMotion();
+  const reduceMotion = osReduced || paused;
+  const aliveStage = useRef<HTMLDivElement>(null);
+  const touch = useTouchNervousSystem({ stageRef: aliveStage, sealed: !alive || paused,
+    reducedMotion: reduceMotion, onPerformanceGesture: alive?.gesture });
   // An explicit genome is a self-contained preview. Never pair a child's
   // geometry with the active parent's traits/profile by accident.
   const selectedRecord = record ?? (genomeOverride ? null : activeRecord);
@@ -170,15 +180,15 @@ export function GeometryAvatarRenderer({
   });
 
 
-  return (
-    <div data-geometry-sprite data-geometry-movement={reduceMotion ? "idle" : movement ?? behavior.movement} data-geometry-identity={selectedRecord?.petId ?? identityKeyOverride ?? "runtime"} className={`relative mx-auto flex aspect-square w-full items-center justify-center ${compact ? "" : "max-w-[520px]"}`}>
+  const spriteMovement = reduceMotion || performing ? "idle" : movement ?? behavior.movement;
+  const artwork = <>
       <SriYantraPetDisplay
         red={petProfile.strands.red}
         blue={petProfile.strands.blue}
         black={petProfile.strands.black}
         animated={animated && !reduceMotion}
         compact={compact}
-        movement={reduceMotion ? "idle" : movement ?? behavior.movement}
+        movement={spriteMovement}
       />
       <svg
         viewBox="0 0 400 400"
@@ -188,6 +198,11 @@ export function GeometryAvatarRenderer({
       >
         <GeometryEvolutionAdornment evolutionState={evolutionState} traits={traits} stageEmphasis={stageEmphasis} />
       </svg>
+  </>;
+  return (
+    <div ref={aliveStage} data-alive-touch={alive ? "geometry" : undefined} style={alive ? touch.stageStyle : undefined}
+      {...(alive ? touch.pointerHandlers : {})} data-geometry-sprite data-geometry-movement={spriteMovement} data-geometry-identity={selectedRecord?.petId ?? identityKeyOverride ?? "runtime"} className={`relative mx-auto flex aspect-square w-full items-center justify-center ${compact ? "" : "max-w-[520px]"}`}>
+      {alive ? <AliveGeometryMotion gaze={touch.gaze}>{artwork}</AliveGeometryMotion> : artwork}
       {showPersonality && genome && (
         <div
           className="pointer-events-none absolute bottom-3 left-1/2 z-10 w-[min(92%,28rem)] -translate-x-1/2 rounded-2xl border border-cyan-300/20 bg-slate-950/80 px-4 py-3 text-center shadow-xl backdrop-blur"

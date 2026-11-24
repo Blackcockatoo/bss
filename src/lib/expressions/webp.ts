@@ -36,7 +36,7 @@ function uint24(bytes: Uint8Array, offset: number, value: number) {
   bytes[offset + 2] = (value >> 16) & 255;
 }
 
-export function animatedWebp(width: number, height: number, frames: ReturnType<typeof readWebpPixels>[], delay: number, loop: boolean) {
+export function animatedWebp(width: number, height: number, frames: ReturnType<typeof readWebpPixels>[], delay: number | readonly number[], loop: boolean) {
   const extended = new Uint8Array(10);
   extended[0] = 2 | (frames.some(frame => frame.alpha) ? 16 : 0);
   uint24(extended, 4, width - 1);
@@ -44,11 +44,11 @@ export function animatedWebp(width: number, height: number, frames: ReturnType<t
   const animation = new Uint8Array(6);
   animation[4] = loop ? 0 : 1;
   const parts = [tag("WEBP"), chunkHeader(10, "VP8X"), extended, chunkHeader(6, "ANIM"), animation];
-  for (const frame of frames) {
+  for (const [index, frame] of frames.entries()) {
     const header = new Uint8Array(16);
     uint24(header, 6, width - 1);
     uint24(header, 9, height - 1);
-    uint24(header, 12, delay);
+    uint24(header, 12, typeof delay === "number" ? delay : delay[index] ?? 100);
     header[15] = 2; // Replace the previous full canvas, including transparent pixels.
     const size = frame.chunks.reduce((total, bytes) => total + bytes.byteLength, header.byteLength);
     parts.push(chunkHeader(size, "ANMF"), header, ...frame.chunks);

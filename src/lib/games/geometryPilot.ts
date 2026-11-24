@@ -25,7 +25,7 @@ export function serializeGeometrySprite(
   // Remove only the scene backdrop from the exported copy, never the locked asset.
   stripGeometryBackdrop(svg);
   for (const originalOverlay of sprite.querySelectorAll<SVGSVGElement>(
-    ':scope > svg[data-testid="geometry-evolution-stage"]',
+    'svg[data-testid="geometry-evolution-stage"]',
   )) {
     const overlay = originalOverlay.cloneNode(true) as SVGSVGElement;
     overlay.removeAttribute("class");

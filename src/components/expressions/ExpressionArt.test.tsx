@@ -1,4 +1,5 @@
 import { render } from "@testing-library/react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { buildPetRecord } from "@/lib/registry/registration";
 import { makeCreatureSnapshot } from "@/lib/expressions/snapshot";
@@ -84,16 +85,14 @@ describe("expression renderer snapshots", () => {
       for (const phase of [expression.staticFrame, .5, expression.reducedMotionFrame]) {
         const frame = sampleExpression(expression, phase, DEFAULT_SETTINGS, pet.personality, pet.seed);
         for (const form of FORMS) {
-          const { container, unmount } = render(
+          const html = renderToStaticMarkup(
             <ExpressionArt pet={pet} frame={frame} expression={expression} form={form}
               caption={{ ...DEFAULT_CAPTION, bottom: expression.caption }} scene={DEFAULT_SCENE} />,
           );
-          const html = container.innerHTML;
           expect(html, `${expression.id}/${form}`).not.toMatch(/(?:href|src)="(?:https?:|\/\/|javascript:)/i);
           expect(html).not.toContain("NaN");
-          const ids = [...container.querySelectorAll("[id]")].map(node => node.id);
+          const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map(match => match[1]);
           expect(new Set(ids).size, `${expression.id}/${form}`).toBe(ids.length);
-          unmount();
         }
       }
     }

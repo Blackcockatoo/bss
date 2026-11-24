@@ -11,7 +11,8 @@ import { DEFAULT_VITALS } from "@metapet/core/vitals";
 import type { PetForm } from "@/lib/petForms";
 import type { CreatureSnapshot } from "@/lib/expressions/snapshot";
 import { clamp, type Expression, type ExpressionFrame } from "@/lib/expressions/studio";
-import type { Effect, EyeMood } from "@/lib/expressions/contract";
+import { expressionBody, expressionEyes } from "@/pet/alive/presentation";
+import type { Effect } from "@/lib/expressions/contract";
 import { PROP_ANCHORS, PropLayer } from "./PropLayer";
 
 export const FORM_LABELS: Record<PetForm, string> = { auralia: "Auralia", evolved: "Evolved", geometry: "Geometry" };
@@ -34,36 +35,13 @@ export const DEFAULT_CAPTION: Caption = {
   top: "", bottom: "", bubble: "", style: "speech", align: "center", size: 32, outline: true,
 };
 
-const AURALIA_EYES: Record<EyeMood, Pick<EyeState, "emotion" | "shape"> & { pupil?: number; sparkles?: boolean; wink?: boolean }> = {
-  normal: { emotion: "normal", shape: "round" },
-  happy: { emotion: "content", shape: "squinted" },
-  sad: { emotion: "sleepy", shape: "half-lidded", pupil: 8 },
-  sleepy: { emotion: "sleepy", shape: "half-lidded" },
-  surprised: { emotion: "surprised", shape: "wide", pupil: 5 },
-  confused: { emotion: "confused", shape: "spiral" },
-  curious: { emotion: "curious", shape: "round", pupil: 9 },
-  focused: { emotion: "focused", shape: "slit" },
-  grumpy: { emotion: "grumpy", shape: "half-lidded" },
-  love: { emotion: "content", shape: "heart" },
-  playful: { emotion: "playful", shape: "round", wink: true },
-  pleading: { emotion: "normal", shape: "wide", pupil: 11, sparkles: true },
-  scared: { emotion: "scared", shape: "wide", pupil: 4 },
-  closed: { emotion: "blinking", shape: "round" },
-  star: { emotion: "normal", shape: "star", sparkles: true },
-};
-
 function AuraliaExpression({ pet, frame }: AdapterProps) {
   const style = AURALIA_FORMS[pet.auralia.form];
-  const mood = AURALIA_EYES[frame.eyes];
-  const blinking = frame.lid < .15 || mood.emotion === "blinking";
-  const eyeState: EyeState = {
-    emotion: blinking ? "blinking" : frame.lid > 1.1 && mood.emotion === "normal" ? "surprised" : mood.emotion,
-    shape: frame.lid > 1.1 && mood.shape === "round" ? "wide" : mood.shape,
-    pupilSize: (mood.pupil ?? 7) + frame.mouthOpen, irisSize: 14, irisColor: style.eyeColor,
-    glowIntensity: .79 + frame.aura * .2, blinkSpeed: 0, trackingSpeed: 0,
-    verticalScale: clamp(frame.lid, .6, 1.2), sparkles: mood.sparkles ?? false, jitter: false, wink: mood.wink ?? false,
-    offset: { x: 0, y: 0 },
-  };
+  const eyeState: EyeState = expressionEyes(frame, {
+    emotion: "normal", shape: "round", pupilSize: 7, irisSize: 14, irisColor: style.eyeColor,
+    glowIntensity: .79, blinkSpeed: 0, trackingSpeed: 0, verticalScale: 1,
+    sparkles: false, jitter: false, wink: false, offset: { x: 0, y: 0 },
+  });
   const { form, markings, energy, bond, curiosity, health } = pet.auralia;
   // The inner orb trails the body: organic follow-through without simulation.
   const deformation = { x: frame.lag.x * .6, y: frame.lag.y * .6, intensity: Math.min(1, Math.abs(frame.squash) * 3) };
@@ -106,23 +84,8 @@ const restingBody = resolveBodyPerformance({
   vitals: DEFAULT_VITALS, personality: null, essence: 0, anomalyActive: false, reducedMotion: true,
 });
 
-const EVOLVED_PUPILS: Partial<Record<EyeMood, number>> = {
-  surprised: 1.28, scared: .68, love: 1.22, pleading: 1.3, focused: .82, grumpy: .9, star: 1.15, curious: 1.12,
-};
-
 function EvolvedExpression({ pet, frame }: AdapterProps) {
-  const lid = frame.eyes === "closed" ? .05 : frame.eyes === "grumpy" || frame.eyes === "sleepy" ? Math.min(frame.lid, .55) :
-    frame.eyes === "happy" ? Math.min(frame.lid, .5) : frame.lid;
-  const performance = {
-    ...NEUTRAL_PERFORMANCE,
-    eyelidOpen: lid, gazeX: frame.gazeX, gazeY: frame.gazeY,
-    pupilScale: (EVOLVED_PUPILS[frame.eyes] ?? 1) * (.9 + Math.min(1, frame.lid) * .15),
-    // Wings and appendages follow through behind the body's motion.
-    wingSpread: clamp(.98 + frame.aura * .22 - frame.lag.y * .025, .7, 1.3),
-    wingFold: clamp((1 - Math.min(1, frame.lid)) * .18 + Math.max(0, frame.lag.y) * .02, 0, .5),
-    headTilt: frame.angle * .33 + frame.lag.angle * .5,
-    featureIntensity: frame.aura, auraScale: 1 + frame.aura * .14,
-  };
+  const performance = expressionBody(frame, NEUTRAL_PERFORMANCE, 1, false);
   const spec: BodySpec = { ...pet.body, name: "Evolved", expression: "neutral" };
   return (
     <svg x="71" y="84" width="370" height="320" viewBox="0 0 280 250" overflow="visible">

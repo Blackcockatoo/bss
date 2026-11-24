@@ -2,6 +2,10 @@
 
 import { useAddonStore } from "@/lib/addons";
 import { useStore } from "@/lib/store";
+import { useAlive, useAlivePaused } from "@/pet/alive/AliveContext";
+import { AliveSvgMotion } from "@/pet/alive/LiveEffects";
+import { useTouchNervousSystem } from "@/pet/interaction";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type {
   AccessibilitySettings,
   AudioSettings,
@@ -465,7 +469,12 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
   // New state for enhanced features
   const [masterVolume, setMasterVolume] = useState<number>(0.8);
   const [audioMuted, setAudioMuted] = useState<boolean>(true);
-  const [reduceMotion, setReduceMotion] = useState<boolean>(false);
+  const [localReduceMotion, setReduceMotion] = useState(false);
+  const alive = useAlive();
+  const pauseMotion = useAlivePaused();
+  const deviceReduceMotion = useReducedMotion();
+  const reduceMotion = localReduceMotion || pauseMotion || deviceReduceMotion;
+  const aliveStage = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState<boolean>(true);
   const [showDebugOverlay, setShowDebugOverlay] = useState<boolean>(false);
   const [dreamJournal, setDreamJournal] = useState<DreamInsightEntry[]>([]);
@@ -529,6 +538,11 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
   // Use external edit mode if provided, otherwise use internal state
   const addonEditMode =
     externalEditMode !== undefined ? externalEditMode : internalEditMode;
+  const performanceTouch = useTouchNervousSystem({
+    stageRef: aliveStage, sealed: !alive || addonEditMode || pauseMotion,
+    reducedMotion: reduceMotion, onPerformanceGesture: alive?.gesture,
+  });
+
   const setAddonEditMode = (enabled: boolean) => {
     setInternalEditMode(enabled);
     onAddonEditModeChange?.(enabled);
@@ -1041,7 +1055,7 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
         dreamJournal,
         unlockedLore,
         accessibility: {
-          reduceMotion,
+          reduceMotion: localReduceMotion,
           highContrast,
           audioOffByDefault: audioMuted,
         },
@@ -1071,7 +1085,7 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
     breedingPartner,
     dreamJournal,
     unlockedLore,
-    reduceMotion,
+    localReduceMotion,
     audioMuted,
     masterVolume,
   ]);
@@ -1600,15 +1614,19 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
   }, [field, energy, bond, aiState.mode, reduceMotion, isVisible]);
 
   useEffect(() => {
+    if (reduceMotion) return;
     let blinkTimeout: ReturnType<typeof setTimeout>;
+    let openTimeout: ReturnType<typeof setTimeout>;
+    let count = 0;
+    const wait = () => 3000 + (((Math.imul(alive?.seed ?? 41, 31) + Math.imul(++count, 9137)) >>> 0) % 4800);
     const blink = () => {
       setIsBlinking(true);
-      setTimeout(() => setIsBlinking(false), 150);
-      blinkTimeout = setTimeout(blink, 3000 + Math.random() * 5000);
+      openTimeout = setTimeout(() => setIsBlinking(false), 150);
+      blinkTimeout = setTimeout(blink, wait());
     };
-    blinkTimeout = setTimeout(blink, 3000 + Math.random() * 5000);
-    return () => clearTimeout(blinkTimeout);
-  }, []);
+    blinkTimeout = setTimeout(blink, wait());
+    return () => { clearTimeout(blinkTimeout); clearTimeout(openTimeout); };
+  }, [alive, reduceMotion]);
 
   const activeForm = resolveAuraliaForm({
     energy, health, bond, dreamCount, curiosity, activatedCount: activatedPoints.size,
@@ -2143,6 +2161,7 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
 
   // Spring physics for smooth eye tracking
   useEffect(() => {
+    if (reduceMotion) return;
     let rafId: number;
     let lastTime = Date.now();
 
@@ -2177,6 +2196,7 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
         const newPosX = currentPos.x + newVelX * dt;
         const newPosY = currentPos.y + newVelY * dt;
 
+        if (Math.abs(dx) + Math.abs(dy) + Math.abs(newVelX) + Math.abs(newVelY) < .01) return currentPos;
         return { x: newPosX, y: newPosY };
       });
 
@@ -2185,10 +2205,11 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
 
     rafId = requestAnimationFrame(updatePhysics);
     return () => cancelAnimationFrame(rafId);
-  }, [eyeTarget, eyeState.trackingSpeed]);
+  }, [eyeTarget, eyeState.trackingSpeed, reduceMotion]);
 
   // Pupil size animation based on emotion
   useEffect(() => {
+    if (reduceMotion) return;
     const targetSize = eyeState.pupilSize;
 
     let rafId: number;
@@ -2216,7 +2237,7 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
 
     rafId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(rafId);
-  }, [eyeState.pupilSize, eyeState.emotion, pupilSize]);
+  }, [eyeState.pupilSize, eyeState.emotion, pupilSize, reduceMotion]);
 
   // Addon animation loop
   useEffect(() => {
@@ -2403,13 +2424,15 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
           <div className="bg-gray-900/80 rounded-2xl p-8 border border-yellow-600/20 lg:sticky lg:top-4">
             <div
               className="aspect-square bg-gradient-to-br from-blue-950/30 to-gray-900/30 rounded-xl flex items-center justify-center relative overflow-hidden"
-              onPointerMove={handlePointerMove}
-              onPointerLeave={() => {
-                setEyeTarget({ x: 0, y: 0 });
-                setHoverIntensity(0);
-              }}
-              onPointerDown={handleAvatarPointerDown}
-              onPointerUp={handleAvatarPointerUp}
+              ref={aliveStage}
+              data-alive-touch={alive ? "auralia" : undefined}
+              style={alive && !addonEditMode ? performanceTouch.stageStyle : undefined}
+              {...(alive ? performanceTouch.pointerHandlers : {
+                onPointerMove: handlePointerMove,
+                onPointerLeave: () => { setEyeTarget({ x: 0, y: 0 }); setHoverIntensity(0); },
+                onPointerDown: handleAvatarPointerDown,
+                onPointerUp: handleAvatarPointerUp,
+              })}
             >
               <div
                 className="absolute inset-0 opacity-30 blur-3xl breathe-anim"
@@ -2458,21 +2481,21 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
               <svg
                 ref={svgRef}
                 viewBox="0 0 400 400"
-                className="auralia-pet-svg w-full h-full max-w-3xl relative z-10 cursor-pointer touch-none"
+                className={`auralia-pet-svg w-full h-full max-w-3xl relative z-10 cursor-pointer ${alive && !addonEditMode ? "touch-pan-y" : "touch-none"}`}
                 role="img"
-                aria-label="Auralia guardian avatar - interact by petting, poking, or throwing"
-                onMouseDown={handleOrbMouseDown}
-                onMouseMove={handleOrbMouseMove}
-                onMouseUp={handleOrbMouseUp}
-                onMouseLeave={handleOrbMouseUp}
-                onTouchStart={handleOrbMouseDown}
-                onTouchMove={handleOrbMouseMove}
-                onTouchEnd={handleOrbMouseUp}
-                onClick={handleOrbClick}
+                aria-label={alive ? "Auralia guardian avatar, touch to interact" : "Auralia guardian avatar - interact by petting, poking, or throwing"}
+                onMouseDown={alive ? undefined : handleOrbMouseDown}
+                onMouseMove={alive ? undefined : handleOrbMouseMove}
+                onMouseUp={alive ? undefined : handleOrbMouseUp}
+                onMouseLeave={alive ? undefined : handleOrbMouseUp}
+                onTouchStart={alive ? undefined : handleOrbMouseDown}
+                onTouchMove={alive ? undefined : handleOrbMouseMove}
+                onTouchEnd={alive ? undefined : handleOrbMouseUp}
+                onClick={alive ? undefined : handleOrbClick}
                 style={{ userSelect: "none" }}
               >
                 <defs>
-                  <AuraliaCreatureDefs activeForm={activeForm} red60={red60} />
+                  <AuraliaCreatureDefs activeForm={activeForm} red60={red60} animate={!reduceMotion} />
 
                   {/* Addon filters and effects */}
                   <AddonSVGDefs />
@@ -2549,6 +2572,7 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
                   )}
                 </g>
 
+                <AliveSvgMotion reduced={reduceMotion}>
                 <g
                   style={{
                     filter: transitioning
@@ -2640,6 +2664,7 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
                                 ? "url(#glow)"
                                 : "none"
                           }
+                          data-alive-interactive=""
                           onClick={() => handleSigilClick(i, p)}
                           onMouseEnter={() => handleSigilHover(i, p)}
                           onMouseLeave={() => handleSigilHover(null)}
@@ -2658,7 +2683,10 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
 
                   <AuraliaCreature
                     live activeForm={activeForm} evolutionState={evolutionState} traits={storeTraits}
-                    eyeState={eyeState} eyePos={eyePos} red60={red60} blue60={blue60} black60={black60}
+                    eyeState={reduceMotion && isBlinking ? { ...eyeState, emotion: "normal", verticalScale: 1 } : eyeState}
+                    eyePos={alive && !reduceMotion && performanceTouch.gaze.x ** 2 + performanceTouch.gaze.y ** 2 > .001
+                      ? { x: performanceTouch.gaze.x * 8, y: performanceTouch.gaze.y * 5 } : eyePos}
+                    nativePerformance={Boolean(alive)} reducedMotion={reduceMotion} red60={red60} blue60={blue60} black60={black60}
                     stageEmphasis={stageEmphasis} transformationMode={transformationMode}
                     orbDeformation={orbDeformation} aiMode={aiState.mode}
                     isBeingSquished={isBeingSquished} annoyanceLevel={annoyanceLevel}
@@ -2712,6 +2740,8 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
                     onResetPosition={() => resetAddonPosition(addon.id)}
                   />
                 ))}
+
+                </AliveSvgMotion>
 
                 {auraRipples.map((r) => (
                   <g key={r.id} opacity={r.life}>
@@ -3635,10 +3665,10 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
                       Reduce Motion
                     </label>
                     <button
-                      onClick={() => setReduceMotion(!reduceMotion)}
+                      onClick={() => setReduceMotion(!localReduceMotion)}
                       className={`relative w-12 h-6 rounded-full transition-colors ${reduceMotion ? "bg-purple-500" : "bg-gray-600"}`}
                       role="switch"
-                      aria-checked={reduceMotion}
+                      aria-checked={localReduceMotion}
                       aria-label="Toggle reduce motion"
                     >
                       <span

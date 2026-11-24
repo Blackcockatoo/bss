@@ -328,6 +328,7 @@ export default function PetPage() {
             className={`relative flex-1 bg-gradient-to-br from-slate-900 ${imprintAccentClass} to-slate-900 ${wardrobeOpen ? "max-h-[38vh] overflow-hidden lg:max-h-none" : ""}`}
           >
             <PetRuntimeStage
+              interactivePerformance
               addonEditMode={addonEditMode}
               onAddonEditModeChange={setAddonEditMode}
               showAdvanced={showAdvanced}

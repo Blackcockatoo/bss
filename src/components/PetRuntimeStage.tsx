@@ -5,6 +5,9 @@ import AuraliaMetaPet from '@/components/AuraliaMetaPet';
 import { GeometryAvatarRenderer } from '@/components/GeometryAvatarRenderer';
 import { VisualDNAPet } from '@/components/VisualDNAPet';
 import { PetRuntimeDiagnostics } from '@/components/dev/PetRuntimeDiagnostics';
+import { AliveProvider } from "@/pet/alive/AliveContext";
+import { AliveControls } from "@/pet/alive/AliveControls";
+import { usePetRegistryStore } from "@/lib/registry/runtime";
 import { useStore } from '@/lib/store';
 import { useSyncExternalStore } from 'react';
 
@@ -17,6 +20,7 @@ interface PetRuntimeStageProps {
   addonEditMode?: boolean;
   onAddonEditModeChange?: (enabled: boolean) => void;
   showAdvanced?: boolean;
+  interactivePerformance?: boolean;
 }
 
 /**
@@ -33,6 +37,7 @@ export function PetRuntimeStage({
   addonEditMode,
   onAddonEditModeChange,
   showAdvanced = false,
+  interactivePerformance = false,
 }: PetRuntimeStageProps) {
   const clientReady = useSyncExternalStore(
     subscribeToClientReady,
@@ -40,11 +45,20 @@ export function PetRuntimeStage({
     getServerReadySnapshot,
   );
   const petType = useStore((state) => state.petType);
+  const record = usePetRegistryStore(state => state.activeRecord);
+
+  function withPerformance(children: React.ReactNode) {
+    if (!interactivePerformance || !record) return children;
+    return <AliveProvider key={`${record.petId}:${petType}`} record={record} form={petType} editing={Boolean(addonEditMode)}>
+      {children}
+      <AliveControls petId={record.petId} />
+    </AliveProvider>;
+  }
 
   // Auralia and the DNA renderers use time, canvas, and reduced-motion state.
   // Keep them out of the server snapshot so hydration is deterministic, then
   // mount exactly one authoritative renderer as soon as the client is ready.
-  if (!clientReady) {
+  if (!clientReady || (interactivePerformance && !record)) {
     return (
       <div
         data-testid="pet-runtime-loading"
@@ -57,7 +71,7 @@ export function PetRuntimeStage({
   }
 
   if (petType === 'auralia') {
-    return (
+    return withPerformance(
       <div
         data-testid="auralia-pet-runtime"
         className="relative h-full min-h-[520px]"
@@ -73,7 +87,7 @@ export function PetRuntimeStage({
   }
 
   if (petType === 'geometry') {
-    return (
+    return withPerformance(
       <div
         data-testid="geometry-pet-runtime"
         className="relative flex h-full min-h-[520px] items-center justify-center p-3 sm:p-5"
@@ -84,7 +98,7 @@ export function PetRuntimeStage({
     );
   }
 
-  return (
+  return withPerformance(
     <div
       data-testid="visual-dna-pet-runtime"
       className="relative flex h-full min-h-[520px] items-center justify-center p-3 sm:p-5"
