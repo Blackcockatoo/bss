@@ -25,6 +25,7 @@ import { useJourneyProgressTracker } from "@/lib/journeyProgress";
 import { getRouteProgression } from "@/lib/routeProgression";
 import { usePetRegistryStore } from "@/lib/registry";
 import { useStore, type PetType } from "@/lib/store";
+import { capturePortrait } from "@/lib/expressions/studio";
 import {
   ChevronDown,
   ChevronUp,
@@ -89,6 +90,8 @@ export default function PetPage() {
   const activeRecord = usePetRegistryStore((state) => state.activeRecord);
   const dnaImprint = useDnaImprint();
   const petStep = getRouteProgression("pet");
+  const [expressionBusy, setExpressionBusy] = useState(false);
+  const [expressionError, setExpressionError] = useState("");
   const [showAddonPanel, setShowAddonPanel] = useState(false);
   const [showProfilePanel, setShowProfilePanel] = useState(false);
   const [showEvolutionPanel, setShowEvolutionPanel] = useState(false);
@@ -310,6 +313,22 @@ export default function PetPage() {
                   <Shirt className="h-4 w-4" />
                   {t.wardrobe}
                 </Button>
+                <Button type="button" variant="outline" disabled={expressionBusy || !activeRecord}
+                  onClick={async () => {
+                    if (!activeRecord || expressionBusy) return;
+                    setExpressionBusy(true); setExpressionError("");
+                    try {
+                      await capturePortrait(petType, activeRecord.petId);
+                      if (usePetRegistryStore.getState().activeRecord?.petId !== activeRecord.petId) throw new Error("Your active pet changed. Please capture again.");
+                      window.location.assign("/expressions");
+                    } catch (error) {
+                      setExpressionError(error instanceof Error ? error.message : "Could not capture your pet.");
+                    } finally { setExpressionBusy(false); }
+                  }}
+                  className="min-h-11 border-amber-300/40 text-amber-200">
+                  {expressionBusy ? "Capturing…" : "Make a pet sticker"}
+                </Button>
+                {expressionError && <p role="alert" className="text-xs text-rose-300">{expressionError}</p>}
                 <RouteTutorialControls
                   scope="pet"
                   buttonLabel={t.replayTutorial}
