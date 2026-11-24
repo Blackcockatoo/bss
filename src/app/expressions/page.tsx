@@ -69,11 +69,11 @@ export default function ExpressionStudio() {
           <section className="space-y-4 rounded-2xl border border-slate-700 bg-slate-900/60 p-4">
             <h2 className="text-xl font-bold">Sticker Factory</h2>
             <div className="grid grid-cols-3 gap-2">
-              {FORMS.map(f => <button key={f} type="button" aria-pressed={f===form} onClick={()=>setForm(f)} className={"min-h-12 rounded-xl border px-2 text-sm "+(f===form?"border-amber-300 bg-amber-300/10 text-amber-200":"border-slate-700")}>{labels[f]}<span className="block text-xs text-slate-400">{portraits[f]?"Captured":"Not captured"}</span></button>)}
+              {FORMS.map(f => <button key={f} type="button" aria-pressed={f===form} onClick={()=>{if(f!==form){setReady(false);setForm(f);}}} className={"min-h-12 rounded-xl border px-2 text-sm "+(f===form?"border-amber-300 bg-amber-300/10 text-amber-200":"border-slate-700")}>{labels[f]}<span className="block text-xs text-slate-400">{portraits[f]?"Captured":"Not captured"}</span></button>)}
             </div>
             <label className="block text-sm">Search expressions<input value={search} onChange={e=>setSearch(e.target.value)} className="mt-1 min-h-11 w-full rounded-lg border border-slate-600 bg-slate-950 px-3" placeholder="Try victory or love"/></label>
             <div className="flex flex-wrap gap-2">{packs.map(p=><button key={p} type="button" aria-pressed={p===pack} onClick={()=>setPack(p)} className={"min-h-11 rounded-full border px-3 text-sm "+(p===pack?"border-amber-300 text-amber-200":"border-slate-700")}>{p}</button>)}</div>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">{visible.map(e=><button key={e[0]} type="button" aria-pressed={selected[0]===e[0]} onClick={()=>{setReady(false);setSelected(e);}} className={"min-h-20 rounded-xl border p-2 text-sm "+(selected[0]===e[0]?"border-amber-300 bg-amber-300/10":"border-slate-700 bg-slate-950")}><span aria-hidden className="block text-2xl text-amber-200">{e[3]}</span>{e[1]}</button>)}</div>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">{visible.map(e=><button key={e[0]} type="button" aria-pressed={selected[0]===e[0]} onClick={()=>{if(e!==selected){setReady(false);setSelected(e);}}} className={"min-h-20 rounded-xl border p-2 text-sm "+(selected[0]===e[0]?"border-amber-300 bg-amber-300/10":"border-slate-700 bg-slate-950")}><span aria-hidden className="block text-2xl text-amber-200">{e[3]}</span>{e[1]}</button>)}</div>
             {visible.length===0 && <p className="text-sm text-slate-400">No matching expressions.</p>}
           </section>
           <section className="space-y-4 rounded-2xl border border-slate-700 bg-slate-900/60 p-4">
