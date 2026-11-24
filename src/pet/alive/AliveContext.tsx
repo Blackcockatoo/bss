@@ -6,9 +6,8 @@ import type { PetRecordV2 } from "@/lib/registry";
 import type { PetForm } from "@/lib/petForms";
 import { seedFor } from "@/lib/expressions/studio";
 import { getGenomeVisualFingerprint } from "@/visual-dna/bodyForgeAdapter";
-import { seededUnit } from "@/pet/movement/movementScheduler";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { CUE_PRIORITY, createDirector, idleExpression, type Director } from "./director";
+import { CUE_PRIORITY, createDirector, idleDelayMs, idleExpression, type Director } from "./director";
 import { weightedFrame } from "@/lib/expressions/take";
 
 const Context = createContext<Director | null>(null);
@@ -71,21 +70,21 @@ export function AliveProvider({ record, form, editing, children }: {
     const instance = stage.current;
     const observer = typeof IntersectionObserver === "function" && instance ? new IntersectionObserver(([entry]) => {
       const now = Date.now();
-      const next = entry.isIntersecting;
+      const next = entry.isIntersecting && entry.intersectionRatio >= .12;
       if (!next && visible) { away = now; director.stop(); }
-      if (next && (!warmed || (!visible && now - away > 25_000)) && !reduced) welcome();
+      if (next && (!warmed || (!visible && now - away > 12_000)) && !reduced) welcome();
       warmed ||= next;
       visible = next;
     }, { threshold: .12 }) : null;
     if (observer && instance) observer.observe(instance);
     let timeout = 0;
     function schedule() {
-      const delay = 8700 + seededUnit(director.seed, index, 7) * 5500;
+      const delay = idleDelayMs(director.seed, index, director.getMode());
       timeout = window.setTimeout(() => {
         const { vitals } = useStore.getState();
         if (visible && !document.hidden && !reduced) {
           director.play(idleExpression(director.seed, index, director.getMode(), vitals.energy < 33, director.personality.curiosity),
-            { source: "ambient", intensity: .56 });
+            { source: "ambient", intensity: .77 });
         }
         index++;
         schedule();
@@ -93,7 +92,7 @@ export function AliveProvider({ record, form, editing, children }: {
     }
     function onVisibility() {
       if (document.hidden) { away = Date.now(); director.stop(); }
-      else if (visible && !reduced && Date.now() - away > 25_000) welcome();
+      else if (visible && !reduced && Date.now() - away > 12_000) welcome();
     }
     document.addEventListener("visibilitychange", onVisibility);
     schedule();

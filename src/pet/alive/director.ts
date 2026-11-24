@@ -7,13 +7,13 @@ import { seededUnit } from "@/pet/movement/movementScheduler";
 
 export type AliveMode = "playful" | "calm" | "dance";
 export type Gesture = {
-  kind: "tap" | "double-tap" | "rhythm" | "hold" | "stroke" | "swipe" | "release";
+  kind: "hover" | "tap" | "double-tap" | "rhythm" | "hold" | "stroke" | "swipe" | "release";
   intensity: number;
   direction: -1 | 1;
 };
 
 export const CUE_PRIORITY: Record<CueSource, MovementPriority> = {
-  ambient: MovementPriority.MoodExpression,
+  ambient: MovementPriority.Attention,
   touch: MovementPriority.TouchReaction,
   learned: MovementPriority.AudioBeat,
   music: MovementPriority.AudioBeat,
@@ -30,14 +30,34 @@ export function gestureExpression(gesture: Gesture, mode: AliveMode, personality
   return mode === "dance" ? "dance" : mode === "calm" ? "curious" : personality.social > 50 ? "hello" : "cheeky";
 }
 
+const idleRepertoires = {
+  tired: ["sleepy", "yawn", "moonbeam", "goodnight"],
+  calm: ["peace", "stargazing", "shimmer", "mandala"],
+  dance: ["dance", "resonance", "spiral", "blue-streak"],
+  curious: ["curious", "explore", "discovery", "question"],
+  playful: ["stretching", "wink", "cheeky", "shimmer", "zoomies", "snake-energy"],
+} as const;
+
 export function idleExpression(seed: number, index: number, mode: AliveMode, tired: boolean, curiosity: number) {
-  if (tired) return "sleepy";
-  const roll = seededUnit(seed, index, 17);
-  if (mode === "calm") return roll < .5 ? "peace" : "curious";
-  if (mode === "dance") return roll < .62 ? "dance" : "resonance";
-  if (roll < curiosity / 210) return "curious";
-  return roll < .74 ? "stretching" : roll < .94 ? "cheeky" : "snake-energy";
+  const pool = tired ? idleRepertoires.tired : mode === "calm" ? idleRepertoires.calm :
+    mode === "dance" ? idleRepertoires.dance :
+    seededUnit(seed, index, 17) < curiosity / 210 ? idleRepertoires.curious : idleRepertoires.playful;
+  // Step through the pool from a per-pet offset so neighbouring picks vary.
+  return pool[(Math.floor(seededUnit(seed, 0, 18) * pool.length) + index) % pool.length];
 }
+
+export function idleDelayMs(seed: number, index: number, mode: AliveMode) {
+  const spread = seededUnit(seed, index, 7);
+  return mode === "calm" ? 4500 + spread * 2200 : 2500 + spread * 1600;
+}
+
+const touchVariations: Partial<Record<Gesture["kind"], readonly string[]>> = {
+  tap: ["wink", "high-five", "cheer"],
+  "double-tap": ["happy", "lol", "wobbly"],
+  rhythm: ["dance", "zoomies", "resonance"],
+  stroke: ["shimmer", "best-friends", "hug"],
+  swipe: ["spin-out", "blue-streak", "wobbly"],
+};
 
 type CueOptions = { source: CueSource; duration?: number; intensity?: number; direction?: -1 | 1; replay?: Pick<PerformanceCue, "intensity" | "exaggeration"> };
 type Clock = { now: () => number; request: (f: FrameRequestCallback) => number; cancel: (id: number) => void };
@@ -65,6 +85,8 @@ export function createDirector(config: DirectorConfig) {
   let exaggeration = .8;
   let recording: { start: number; cues: PerformanceCue[] } | null = null;
   let last: PerformanceCue | null = null;
+  let lastLook = -Infinity;
+  const gestures = new Map<Gesture["kind"], number>();
 
   function publish(next: PerformanceSample | null) {
     if (sample !== next) {
@@ -129,11 +151,26 @@ export function createDirector(config: DirectorConfig) {
     seed: config.seed,
     play,
     gesture(gesture: Gesture) {
-      return play(gestureExpression(gesture, mode, config.personality), {
+      if (gesture.kind === "hover") {
+        const now = timer.now();
+        const current = timeline.cues.at(-1);
+        if (config.reduced() || now - lastLook < 3000 ||
+          (current && current.source !== "ambient" && now < current.at + current.duration)) return false;
+        const accepted = play("curious", { source: "ambient", intensity: .69, direction: gesture.direction });
+        if (accepted) lastLook = now;
+        return accepted;
+      }
+      const count = gestures.get(gesture.kind) ?? 0;
+      const options = touchVariations[gesture.kind];
+      const variation = count % 2 === 1 && options && mode === "playful" && !config.reduced()
+        ? options[(Math.floor(count / 2) + config.seed % options.length) % options.length] : undefined;
+      const accepted = play(variation ?? gestureExpression(gesture, mode, config.personality), {
         source: "touch", direction: gesture.direction,
-        intensity: .67 + clamp(gesture.intensity, 0, 1) * .4,
+        intensity: .79 + clamp(gesture.intensity, 0, 1) * .46,
         duration: gesture.kind === "release" ? 830 : undefined,
       });
+      if (accepted) gestures.set(gesture.kind, count + 1);
+      return accepted;
     },
     replay() {
       return last ? play(last.expressionId, { source: "directed", duration: last.duration, direction: last.direction, replay: last }) : false;

@@ -38,6 +38,7 @@ async function loadLayout(
 }
 
 afterEach(() => {
+  vi.unstubAllEnvs();
   vi.resetModules();
   vi.doUnmock("@/lib/env/features");
   vi.doUnmock("@/lib/env/siteUrl");
@@ -61,6 +62,7 @@ describe("layout metadata", () => {
     });
     expect(appleWebApp?.title).toBe("MetaPet Schools");
     expect(metadata.openGraph?.siteName).toBe("MetaPet Schools");
+    expect(metadata.openGraph?.images).toBeUndefined();
   });
 
   it("uses MetaPet product metadata in the core profile", async () => {
@@ -72,11 +74,20 @@ describe("layout metadata", () => {
 
     expect(metadata.title).toBe("MetaPet");
     expect(metadata.icons).toMatchObject({
-      icon: "/icon.svg",
-      apple: "/icon.svg",
+      icon: "/icons/metapet-orb-192.png",
+      apple: "/icons/metapet-orb-192.png",
     });
     expect(appleWebApp?.title).toBe("MetaPet");
     expect(metadata.openGraph?.siteName).toBe("MetaPet");
+  });
+
+  it("links to the thumbnail on the preview deployment", async () => {
+    vi.stubEnv("VERCEL_ENV", "preview");
+    vi.stubEnv("VERCEL_URL", "metapet-preview.vercel.app");
+    const { metadata } = await loadLayout(false);
+    expect(metadata.openGraph?.images).toEqual([
+      expect.objectContaining({ url: "https://metapet-preview.vercel.app/icons/metapet-orb-512.png" }),
+    ]);
   });
 
   it.each([

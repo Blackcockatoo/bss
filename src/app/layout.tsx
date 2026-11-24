@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import type { CSSProperties } from "react";
 import "./globals.css";
 import { findSiteUrl, findSiteUrlObject } from "@/lib/env/siteUrl";
+import { CONSUMER_APP_ICON_192, CONSUMER_APP_THUMBNAIL } from "@/lib/consumerAppArtwork";
 import { IS_SCHOOLS_PROFILE } from "@/lib/env/features";
 import { METAPET_SCHOOL_ORIGIN } from "@/lib/fieldMode/identity";
 import {
@@ -30,16 +31,23 @@ const siteDescription = IS_SCHOOLS_PROFILE
   ? SCHOOL_PROFILE_DESCRIPTION
   : "MetaPet by Blue $nake Studios: a living digital companion with DNA, evolution, games and creative experiments.";
 
+const socialThumbnail = {
+  ...CONSUMER_APP_THUMBNAIL,
+  url: process.env.VERCEL_ENV === "preview" && process.env.VERCEL_URL
+    ? new URL(CONSUMER_APP_THUMBNAIL.url, `https://${process.env.VERCEL_URL}`).href
+    : CONSUMER_APP_THUMBNAIL.url,
+};
+
 export const metadata: Metadata = {
   metadataBase: siteUrlObject,
   title: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "MetaPet",
   description: siteDescription,
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: IS_SCHOOLS_PROFILE ? FIELD_MODE_ICON_192_PATH : "/icon.svg",
+    icon: IS_SCHOOLS_PROFILE ? FIELD_MODE_ICON_192_PATH : CONSUMER_APP_ICON_192,
     apple: IS_SCHOOLS_PROFILE
       ? FIELD_MODE_APPLE_TOUCH_ICON_PATH
-      : "/icon.svg",
+      : CONSUMER_APP_ICON_192,
   },
   appleWebApp: {
     capable: true,
@@ -52,9 +60,11 @@ export const metadata: Metadata = {
     ...(siteUrl ? { url: siteUrl } : {}),
     siteName: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "MetaPet",
     type: "website",
+    ...(!IS_SCHOOLS_PROFILE ? { images: [socialThumbnail] } : {}),
   },
   twitter: {
     card: "summary",
+    ...(!IS_SCHOOLS_PROFILE ? { images: [socialThumbnail] } : {}),
     title: IS_SCHOOLS_PROFILE ? "MetaPet Schools" : "MetaPet",
     description: siteDescription,
   },

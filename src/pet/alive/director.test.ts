@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { PersonalityTraits } from "@/genome/types";
 import { parseTake, readTake, sampleTake, saveTake, takeDuration, takeFramePlan, weightedFrame } from "@/lib/expressions/take";
-import { createDirector, gestureExpression, idleExpression } from "./director";
+import { createDirector, gestureExpression, idleDelayMs, idleExpression } from "./director";
 import { genomeMotif, playBeatPose } from "./music";
 import { trackPulse } from "./useLocalTrack";
 
@@ -83,9 +83,39 @@ describe("live performance director", () => {
     const tap = { kind: "double-tap" as const, intensity: .5, direction: 1 as const };
     expect(gestureExpression(tap, "playful", personality)).toBe("lol");
     expect(gestureExpression(tap, "playful", { ...personality, playfulness: 20 })).toBe("happy");
-    expect(idleExpression(81, 3, "calm", true, 50)).toBe("sleepy");
+    expect(idleExpression(81, 3, "calm", true, 50)).toMatch(/sleepy|yawn|moonbeam|goodnight/);
     expect(idleExpression(81, 2, "playful", false, 50)).toBe(idleExpression(81, 2, "playful", false, 50));
     expect(new Set(Array.from({ length: 24 }, (_, i) => idleExpression(81, i, "playful", false, 50))).size).toBeGreaterThan(1);
+  });
+
+  it("uses a quicker playful cadence and exercises more existing poses", () => {
+    const picks = Array.from({ length: 32 }, (_, i) => idleExpression(81, i, "playful", false, 72));
+    expect(new Set(picks).size).toBeGreaterThanOrEqual(6);
+    expect(idleDelayMs(81, 0, "playful")).toBeLessThan(4200);
+    expect(idleDelayMs(81, 0, "calm")).toBeGreaterThanOrEqual(4500);
+    const { director, at } = rig();
+    const tap = { kind: "tap", intensity: .5, direction: 1 } as const;
+    director.gesture(tap);
+    at(230);
+    expect(director.getFrame()?.cue.expressionId).toBe("hello");
+    director.gesture(tap);
+    at(500);
+    expect(director.getFrame()?.cue.expressionId).toMatch(/^(wink|high-five|cheer)$/);
+  });
+
+  it("lets the pet notice a pointer without interrupting a deliberate gesture", () => {
+    const { director, at, reduce } = rig();
+    const hover = { kind: "hover", intensity: .5, direction: -1 } as const;
+    expect(director.gesture(hover)).toBe(true);
+    at(140);
+    expect(director.getFrame()?.cue).toMatchObject({ expressionId: "curious", direction: -1 });
+    expect(director.gesture(hover)).toBe(false);
+    at(3500);
+    director.play("win", { source: "directed" });
+    expect(director.gesture(hover)).toBe(false);
+    at(9000);
+    reduce();
+    expect(director.gesture(hover)).toBe(false);
   });
 
   it("drives the shared sampler from downbeat, note interval and tempo", () => {

@@ -126,6 +126,7 @@ export function useTouchNervousSystem(
   );
 
   const insideRef = useRef(false);
+  const hoverAt = useRef<number | null>(null);
   const tapRef = useRef({ at: -Infinity, count: 0 });
   const stateRef = useRef<InteractionState>("idle");
   const contextRef = useRef<InteractionContext>({ ...DEFAULT_INTERACTION_CONTEXT });
@@ -189,9 +190,11 @@ export function useTouchNervousSystem(
   const onPointerEnter = useCallback(
     (event: React.PointerEvent) => {
       if (gateRef.current.sealed) return;
+      const now = performance.now();
       insideRef.current = true;
+      hoverAt.current = event.pointerType === "mouse" || event.pointerType === "pen" ? now : null;
       rawPointRef.current = { clientX: event.clientX, clientY: event.clientY, region: "outside" };
-      dispatch("pointer-near", performance.now());
+      dispatch("pointer-near", now);
     },
     [dispatch],
   );
@@ -211,6 +214,7 @@ export function useTouchNervousSystem(
       if (gateRef.current.sealed || (event.pointerType && event.isPrimary === false) || (event.button !== undefined && event.button !== 0) ||
         contactRef.current || (event.target instanceof Element &&
           event.target.closest("button, a, input, select, [data-alive-interactive]"))) return;
+      hoverAt.current = null;
       (event.currentTarget as Element).setPointerCapture?.(event.pointerId);
       insideRef.current = true;
       rawPointRef.current = { clientX: event.clientX, clientY: event.clientY, region: "outside" };
@@ -279,6 +283,7 @@ export function useTouchNervousSystem(
   const onPointerLeave = useCallback(
     (event: React.PointerEvent) => {
       insideRef.current = false;
+      hoverAt.current = null;
       if (contactRef.current) {
         endContact(event, false);
         return;
@@ -306,6 +311,11 @@ export function useTouchNervousSystem(
           faceFraction,
         });
         rawPointRef.current = { ...point, region: normalized.region };
+        if (hoverAt.current !== null && now - hoverAt.current >= 380 && !contactRef.current) {
+          hoverAt.current = null;
+          if (!gateRef.current.reducedMotion && normalized.region !== "outside")
+            onPerformanceGesture?.({ kind: "hover", intensity: .5, direction: normalized.stageX < 0 ? -1 : 1 });
+        }
 
         // Smooth velocity/direction from the last committed sample.
         const last = lastSampleRef.current;

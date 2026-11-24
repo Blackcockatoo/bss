@@ -58,6 +58,9 @@ describe("app manifest", () => {
     expect(result.name).toBe("Meta-Pet");
     expect(result.start_url).toBe("/");
     expect(result.description).toMatch(/genome-based evolution/i);
-    expect(result.icons?.[0]?.src).toBe("/icon.svg");
+    expect(result.icons).toEqual([
+      { src: "/icons/metapet-orb-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "/icons/metapet-orb-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+    ]);
   });
 });
