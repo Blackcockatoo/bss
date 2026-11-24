@@ -129,3 +129,13 @@ describe("bodyFit", () => {
     expect(247 + frame.y - 185 * (1 - frame.squash) * fit).toBeGreaterThanOrEqual(8 - 1e-6);
   });
 });
+
+describe("bodyFit with Geometry aura rings", () => {
+  it("keeps the outer ring inside the stage on a stretched jump", () => {
+    const frame = { x: 0, y: -45, angle: 0, scale: 1, squash: -.23, aura: 1, mouthOpen: 1 } as Parameters<typeof bodyFit>[1];
+    const fit = bodyFit("geometry", frame);
+    const ring = (148 + 2 * 17 + 6) * 356 / 400 + 1;
+    expect(fit).toBeLessThan(1);
+    expect(247 + frame.y - ring * (1 - frame.squash) * fit).toBeGreaterThanOrEqual(8 - 1e-6);
+  });
+});

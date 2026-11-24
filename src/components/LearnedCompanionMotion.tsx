@@ -75,6 +75,14 @@ export function LearnedCompanionMotion({ children }: { children: ReactNode }) {
             className="min-h-11 rounded border px-3"
             onClick={() => {
               const values = learned.sequence;
+              // Reduced motion wins over every performer, including the living director.
+              if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                setMessage({
+                  petId: record?.petId ?? null,
+                  text: `Still response from ${learned.source || "your saved project"}: ${values.join(", ")}. Motion is reduced.`,
+                });
+                return;
+              }
               if (director) {
                 for (const timer of timers.current) window.clearTimeout(timer);
                 timers.current.length = 0;
@@ -88,10 +96,7 @@ export function LearnedCompanionMotion({ children }: { children: ReactNode }) {
                 setMessage({ petId, text: `Movement echoes ${learned.source || "your saved project"}.` });
                 return;
               }
-              if (
-                !stage.current?.animate ||
-                window.matchMedia("(prefers-reduced-motion: reduce)").matches
-              ) {
+              if (!stage.current?.animate) {
                 setMessage({
                   petId: record?.petId ?? null,
                   text: `Still response from ${learned.source || "your saved project"}: ${values.join(", ")}. Motion is reduced.`,

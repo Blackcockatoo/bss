@@ -107,11 +107,18 @@ const GeometryCore = memo(function GeometryCore({ pet }: { pet: CreatureSnapshot
  * engine is rendered unchanged; resonance, rotation and harmonic rings are
  * transforms and overlays around it.
  */
+const geometryRings = (frame: ExpressionFrame) => frame.aura > .2 ? (frame.aura > .7 ? 3 : 2) : 0;
+/** Outer aura ring radius in stage units (the Geometry svg maps 400 to 356), plus half its stroke. */
+function geometryRingRadius(frame: ExpressionFrame) {
+  const rings = geometryRings(frame);
+  return rings ? (148 + (rings - 1) * 17 + frame.mouthOpen * 6) * 356 / 400 + 1 : 0;
+}
+
 function GeometryExpression({ pet, frame, expression }: AdapterProps) {
   const swing = expression.effect === "orbit" ? Math.sin(frame.phase * Math.PI * 2) * frame.aura * 19 : frame.gazeX * -13;
   const resonance = swing + frame.lag.angle * 1.5;
   const pulse = 1 + frame.mouthOpen * .05 + frame.aura * .03;
-  const rings = frame.aura > .2 ? (frame.aura > .7 ? 3 : 2) : 0;
+  const rings = geometryRings(frame);
   return (
     <svg x="78" y="71" width="356" height="356" viewBox="0 0 400 400" overflow="visible">
       {Array.from({ length: rings }, (_, k) => (
@@ -274,6 +281,12 @@ export function bodyFit(form: PetForm, frame: ExpressionFrame) {
   for (const [cx, cy] of [[-left, -top], [right, -top], [-left, bottom], [right, bottom]]) {
     const x = cx * sx * cos - cy * sy * sin, y = cx * sx * sin + cy * sy * cos;
     minX = Math.min(minX, x); maxX = Math.max(maxX, x); minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+  }
+  const ring = geometryRingRadius(frame);
+  if (form === "geometry" && ring) {
+    // The aura rings ride with the body, so they stretch and turn with it.
+    const halfWidth = Math.hypot(ring * sx * cos, ring * sy * sin), halfHeight = Math.hypot(ring * sx * sin, ring * sy * cos);
+    minX = Math.min(minX, -halfWidth); maxX = Math.max(maxX, halfWidth); minY = Math.min(minY, -halfHeight); maxY = Math.max(maxY, halfHeight);
   }
   const room = (space: number, reach: number) => reach > 0 ? Math.max(.1, space - STAGE_MARGIN) / reach : Infinity;
   const fit = Math.min(1, room(256 + frame.x, -minX), room(256 - frame.x, maxX),
