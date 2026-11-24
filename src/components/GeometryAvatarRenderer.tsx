@@ -164,24 +164,11 @@ export function GeometryAvatarRenderer({
     selectedRecord?.evolution?.state ??
     (genomeOverride ? "GENETICS" : runtimeEvolutionState) ??
     "GENETICS";
-  const stageUpgrade = getCumulativeEvolutionUpgrade(evolutionState);
-  const stagePalette = resolveStagePalette(evolutionState, traits);
   const stageEmphasis = useEvolutionStageTransition(evolutionState, {
     reduceMotion,
     paused: !animated,
   });
-  // The yantra is radially symmetric and centred, so "head" is its upper
-  // pole and "body" its core — the anchor box the shared adornments expect.
-  const stageAnchor = {
-    headX: 200,
-    headY: 132,
-    headRx: 46,
-    headRy: 34,
-    bodyX: 200,
-    bodyY: 214,
-    bodyRx: 82,
-    bodyRy: 70,
-  } as const;
+
 
   return (
     <div data-geometry-sprite data-geometry-movement={reduceMotion ? "idle" : movement ?? behavior.movement} data-geometry-identity={selectedRecord?.petId ?? identityKeyOverride ?? "runtime"} className={`relative mx-auto flex aspect-square w-full items-center justify-center ${compact ? "" : "max-w-[520px]"}`}>
@@ -199,33 +186,7 @@ export function GeometryAvatarRenderer({
         aria-hidden
         data-testid="geometry-evolution-stage"
       >
-        <g
-          transform={`translate(200 190) scale(${(
-            stageUpgrade.bodyScale + stageEmphasis * 0.06
-          ).toFixed(4)}) translate(-200 -190)`}
-          opacity={0.78 + stageUpgrade.glowBonus + stageEmphasis * 0.2}
-        >
-          <EvolutionStageAdornments
-            {...stageAnchor}
-            state={evolutionState}
-            layer="behind"
-            color={stagePalette.color}
-            accentColor={stagePalette.accentColor}
-            underlayColor="#050b18"
-            emphasis={stageEmphasis}
-            strokeWidth={2.8}
-          />
-          <EvolutionStageAdornments
-            {...stageAnchor}
-            state={evolutionState}
-            layer="front"
-            color={stagePalette.color}
-            accentColor={stagePalette.accentColor}
-            underlayColor="#050b18"
-            emphasis={stageEmphasis}
-            strokeWidth={2.8}
-          />
-        </g>
+        <GeometryEvolutionAdornment evolutionState={evolutionState} traits={traits} stageEmphasis={stageEmphasis} />
       </svg>
       {showPersonality && genome && (
         <div
@@ -242,5 +203,74 @@ export function GeometryAvatarRenderer({
         </div>
       )}
     </div>
+  );
+}
+
+
+/** Presentation shared by the live renderer and read-only expression frames. */
+export function GeometryEvolutionAdornment({
+  evolutionState, traits, stageEmphasis = 0,
+}: { evolutionState: EvolutionState; traits: DerivedTraits | null; stageEmphasis?: number }) {
+  const stageUpgrade = getCumulativeEvolutionUpgrade(evolutionState);
+  const stagePalette = resolveStagePalette(evolutionState, traits);
+  // The yantra is radially symmetric and centred, so "head" is its upper
+  // pole and "body" its core — the anchor box the shared adornments expect.
+  const stageAnchor = {
+    headX: 200,
+    headY: 132,
+    headRx: 46,
+    headRy: 34,
+    bodyX: 200,
+    bodyY: 214,
+    bodyRx: 82,
+    bodyRy: 70,
+  } as const;
+  return (
+    <g
+      transform={`translate(200 190) scale(${(
+        stageUpgrade.bodyScale + stageEmphasis * 0.06
+      ).toFixed(4)}) translate(-200 -190)`}
+      opacity={0.78 + stageUpgrade.glowBonus + stageEmphasis * 0.2}
+    >
+      <EvolutionStageAdornments
+        {...stageAnchor}
+        state={evolutionState}
+        layer="behind"
+        color={stagePalette.color}
+        accentColor={stagePalette.accentColor}
+        underlayColor="#050b18"
+        emphasis={stageEmphasis}
+        strokeWidth={2.8}
+      />
+      <EvolutionStageAdornments
+        {...stageAnchor}
+        state={evolutionState}
+        layer="front"
+        color={stagePalette.color}
+        accentColor={stagePalette.accentColor}
+        underlayColor="#050b18"
+        emphasis={stageEmphasis}
+        strokeWidth={2.8}
+      />
+    </g>
+  );
+}
+
+
+/** Static geometry portrait for deterministic, read-only studio sampling. */
+export function GeometryPortraitSprite({
+  strands, evolutionState, traits,
+}: {
+  strands: { red: string; blue: string; black: string };
+  evolutionState: EvolutionState;
+  traits: DerivedTraits;
+}) {
+  return (
+    <>
+      <svg data-expression-lattice="" viewBox="0 0 400 400" width="400" height="400" overflow="visible">
+        <SriYantraPetDisplay {...strands} animated={false} compact />
+      </svg>
+      <GeometryEvolutionAdornment traits={traits} evolutionState={evolutionState} />
+    </>
   );
 }

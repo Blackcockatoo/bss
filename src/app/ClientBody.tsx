@@ -64,6 +64,7 @@ export default function ClientBody({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const expressionStudio = pathname === "/expressions";
   const teacherWorkspace = isTeacherWorkspace(pathname ?? "/");
   const refreshIdentityProfile = useIdentityProfileStore(
     (state) => state.refreshProfile,
@@ -140,7 +141,7 @@ export default function ClientBody({
   // Body Forge (or any session) never silently reverts the renderer.
   // Restored after hydration to keep server markup deterministic.
   useEffect(() => {
-    if (!fieldUiResolved || effectiveSchoolsMode) return;
+    if (!fieldUiResolved || effectiveSchoolsMode || expressionStudio) return;
     try {
       const stored = window.localStorage.getItem(PET_FORM_STORAGE_KEY);
       if (stored) {
@@ -157,12 +158,12 @@ export default function ClientBody({
         // Non-fatal: the session keeps working without the preference.
       }
     });
-  }, [effectiveSchoolsMode, fieldUiResolved]);
+  }, [effectiveSchoolsMode, fieldUiResolved, expressionStudio]);
 
   useEffect(() => {
-    if (!fieldUiResolved || effectiveSchoolsMode) return;
+    if (!fieldUiResolved || effectiveSchoolsMode || expressionStudio) return;
     refreshIdentityProfile();
-  }, [effectiveSchoolsMode, fieldUiResolved, refreshIdentityProfile]);
+  }, [effectiveSchoolsMode, fieldUiResolved, expressionStudio, refreshIdentityProfile]);
 
   useEffect(() => {
     if (!childSafeBlocked || !pathname) {
@@ -266,11 +267,11 @@ export default function ClientBody({
         ) : null}
       </div>
 
-      {!effectiveSchoolsMode && fieldUiResolved ? <PetRegistryBootstrap /> : null}
+      {!effectiveSchoolsMode && !expressionStudio && fieldUiResolved ? <PetRegistryBootstrap /> : null}
       <div className="flex-1 pb-2">{children}</div>
       {/* Wardrobe progression: the bridge feeds live gameplay into the
           persistent progress record; the ceremony surfaces new unlocks. */}
-      {!effectiveSchoolsMode ? (
+      {!effectiveSchoolsMode && !expressionStudio ? (
         <>
           <WardrobeProgressBridge />
           <WardrobeUnlockCeremony />

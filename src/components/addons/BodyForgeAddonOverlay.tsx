@@ -25,6 +25,7 @@ export interface BodyForgeAddonLayerProps {
   layer: "behind-body" | "front";
   animationPhase?: number;
   reduceMotion?: boolean;
+  includeDefs?: boolean;
   arrangeMode?: boolean;
   stageRef?: React.RefObject<SVGSVGElement | null>;
   positionOverrides?: Record<string, AddonPositionOverride>;
@@ -40,6 +41,7 @@ export function BodyForgeAddonLayer({
   layer,
   animationPhase = 0,
   reduceMotion = false,
+  includeDefs = layer === "front",
   arrangeMode = false,
   stageRef,
   positionOverrides,
@@ -53,7 +55,7 @@ export function BodyForgeAddonLayer({
 
   return (
     <>
-      {layer === "front" && <AddonSVGDefs />}
+      {includeDefs && <AddonSVGDefs />}
       {items.map((addon) => (
         <AddonRenderer
           key={addon.id}

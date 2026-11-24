@@ -359,6 +359,7 @@ export interface EyeRendererProps {
   leftEyeCenter: { x: number; y: number };
   rightEyeCenter: { x: number; y: number };
   annoyanceLevel?: number;
+  animate?: boolean;
 }
 
 /**
@@ -370,6 +371,7 @@ export function EyeRenderer({
   leftEyeCenter,
   rightEyeCenter,
   annoyanceLevel = 0,
+  animate = true,
 }: EyeRendererProps) {
   const {
     emotion,
@@ -455,10 +457,10 @@ export function EyeRenderer({
         />
         {/* Pulsing red glow */}
         <circle cx={leftEyeCenter.x} cy={leftEyeCenter.y - 3} r="12" fill="#FF0000" opacity="0.2">
-          <animate attributeName="opacity" values="0.1;0.3;0.1" dur="0.8s" repeatCount="indefinite" />
+          {animate && (<animate attributeName="opacity" values="0.1;0.3;0.1" dur="0.8s" repeatCount="indefinite" />)}
         </circle>
         <circle cx={rightEyeCenter.x} cy={rightEyeCenter.y - 3} r="12" fill="#FF0000" opacity="0.2">
-          <animate attributeName="opacity" values="0.1;0.3;0.1" dur="0.8s" repeatCount="indefinite" />
+          {animate && (<animate attributeName="opacity" values="0.1;0.3;0.1" dur="0.8s" repeatCount="indefinite" />)}
         </circle>
       </g>
     );
@@ -484,8 +486,7 @@ export function EyeRenderer({
 
     return (
       <g
-        transform={`scale(1, ${verticalScale})`}
-        style={{ transformOrigin: `${finalX} ${finalY}` }}
+        transform={`translate(0 ${finalY}) scale(1 ${verticalScale}) translate(0 ${-finalY})`}
       >
         {/* Sclera (dark background) */}
         <circle cx={finalX} cy={finalY} r={irisSize + 2} fill="#0d1321" opacity="0.8" />
@@ -499,7 +500,7 @@ export function EyeRenderer({
           filter={filterUrl}
           opacity={glowIntensity}
         >
-          {shape === 'round' && (
+          {animate && shape === 'round' && (
             <animate attributeName="r" values={`${irisSize};${irisSize + 1};${irisSize}`} dur="5s" repeatCount="indefinite" />
           )}
         </circle>
@@ -543,14 +544,14 @@ export function EyeRenderer({
               fill="none"
               opacity="0.5"
             >
-              <animateTransform
+              {animate && (<animateTransform
                 attributeName="transform"
                 type="rotate"
                 from={`0 ${finalX} ${finalY}`}
                 to={`360 ${finalX} ${finalY}`}
                 dur="3s"
                 repeatCount="indefinite"
-              />
+              />)}
             </path>
           </g>
         ) : (
@@ -570,7 +571,7 @@ export function EyeRenderer({
             fill={secondaryColor}
             opacity="0.15"
           >
-            <animate attributeName="opacity" values="0.1;0.2;0.1" dur="2s" repeatCount="indefinite" />
+            {animate && (<animate attributeName="opacity" values="0.1;0.2;0.1" dur="2s" repeatCount="indefinite" />)}
           </circle>
         )}
 
@@ -578,13 +579,13 @@ export function EyeRenderer({
         {sparkles && (
           <g opacity="0.7">
             <circle cx={finalX - 6} cy={finalY - 6} r="1.5" fill={secondaryColor || 'white'}>
-              <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite" />
+              {animate && (<animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite" />)}
             </circle>
             <circle cx={finalX + 7} cy={finalY - 4} r="1" fill={secondaryColor || 'white'}>
-              <animate attributeName="opacity" values="0.2;0.9;0.2" dur="2s" repeatCount="indefinite" begin="0.5s" />
+              {animate && (<animate attributeName="opacity" values="0.2;0.9;0.2" dur="2s" repeatCount="indefinite" begin="0.5s" />)}
             </circle>
             <circle cx={finalX + 3} cy={finalY + 8} r="1.2" fill={secondaryColor || 'white'}>
-              <animate attributeName="opacity" values="0.3;1;0.3" dur="1.8s" repeatCount="indefinite" begin="1s" />
+              {animate && (<animate attributeName="opacity" values="0.3;1;0.3" dur="1.8s" repeatCount="indefinite" begin="1s" />)}
             </circle>
           </g>
         )}
