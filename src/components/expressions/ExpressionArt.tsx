@@ -248,6 +248,39 @@ function CaptionLayer({ caption, width, height }: { caption: Caption; width: num
   );
 }
 
+/**
+ * Conservative extent of each form's body around the stage pivot (256, 247),
+ * as [left, right, top, bottom]. Only Geometry is tall enough to leave the
+ * frame when a spin turns it upside down while stretched; the others never
+ * reach the edge, so they are left untouched.
+ */
+const BODY_EXTENTS: Partial<Record<PetForm, readonly [number, number, number, number]>> = {
+  geometry: [130, 130, 130, 185],
+};
+const STAGE_MARGIN = 8;
+const fitTransform = (form: PetForm, frame: ExpressionFrame) => {
+  const fit = bodyFit(form, frame);
+  return fit < 1 ? ` scale(${fit})` : "";
+};
+
+/** Shrinks the body just enough to keep a spinning, stretched pose inside the 512 stage. */
+export function bodyFit(form: PetForm, frame: ExpressionFrame) {
+  const extent = BODY_EXTENTS[form];
+  if (!extent) return 1;
+  const [left, right, top, bottom] = extent;
+  const sx = frame.scale * (1 + frame.squash), sy = frame.scale * (1 - frame.squash);
+  const radians = frame.angle * Math.PI / 180, cos = Math.cos(radians), sin = Math.sin(radians);
+  let minX = 0, maxX = 0, minY = 0, maxY = 0;
+  for (const [cx, cy] of [[-left, -top], [right, -top], [-left, bottom], [right, bottom]]) {
+    const x = cx * sx * cos - cy * sy * sin, y = cx * sx * sin + cy * sy * cos;
+    minX = Math.min(minX, x); maxX = Math.max(maxX, x); minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+  }
+  const room = (space: number, reach: number) => reach > 0 ? Math.max(.1, space - STAGE_MARGIN) / reach : Infinity;
+  const fit = Math.min(1, room(256 + frame.x, -minX), room(256 - frame.x, maxX),
+    room(247 + frame.y, -minY), room(265 - frame.y, maxY));
+  return Math.floor(fit * 1e4) / 1e4;
+}
+
 export type ArtProps = AdapterProps & {
   form: PetForm; caption: Caption; scene: Scene; aspect?: Aspect;
 };
@@ -263,7 +296,7 @@ export function ExpressionArt({ pet, frame, expression, form, caption, scene, as
         {scene.light > 0 && <ellipse cx="256" cy="234" rx="153" ry="148" fill="#efc477" opacity={scene.light * .15} />}
         <SceneProp scene={scene} />
         <Effects pet={pet} form={form} frame={frame} expression={expression} />
-        <g transform={`translate(${256 + frame.x} ${247 + frame.y}) rotate(${frame.angle}) scale(${frame.scale * (1 + frame.squash)} ${frame.scale * (1 - frame.squash)}) translate(-256 -247)`}>
+        <g transform={`translate(${256 + frame.x} ${247 + frame.y}) rotate(${frame.angle})${fitTransform(form, frame)} scale(${frame.scale * (1 + frame.squash)} ${frame.scale * (1 - frame.squash)}) translate(-256 -247)`}>
           <Renderer pet={pet} frame={frame} expression={expression} />
         </g>
         {/* Props ride with the body but stop short of the top edge at the peak of a jump. */}

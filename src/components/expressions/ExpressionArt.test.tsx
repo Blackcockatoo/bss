@@ -9,7 +9,7 @@ import { PROP_ANCHORS, PropLayer } from "./PropLayer";
 import { getGenomeVisualFingerprint } from "@/visual-dna/bodyForgeAdapter";
 import { DEFAULT_BODY_SPEC } from "@/components/body-forge/PetBodyRenderer";
 import { getWardrobeItemById } from "@/lib/wardrobe/catalog";
-import { DEFAULT_CAPTION, DEFAULT_SCENE, ExpressionArt } from "./ExpressionArt";
+import { DEFAULT_CAPTION, DEFAULT_SCENE, ExpressionArt, bodyFit } from "./ExpressionArt";
 
 async function representativePet(offset: number) {
   const hmacKey = await crypto.subtle.generateKey({ name: "HMAC", hash: "SHA-256" }, false, ["sign", "verify"]);
@@ -112,5 +112,20 @@ describe("expression renderer snapshots", () => {
       expect(container.querySelector("text, image, foreignObject")).toBeNull();
       unmount();
     }
+  });
+});
+
+describe("bodyFit", () => {
+  const still = { x: 0, y: 0, angle: 0, scale: 1, squash: 0 } as Parameters<typeof bodyFit>[1];
+  it("leaves resting poses and the round forms alone", () => {
+    expect(bodyFit("geometry", still)).toBe(1);
+    expect(bodyFit("auralia", { ...still, angle: 180, y: -45, squash: -.25, scale: 1.3 })).toBe(1);
+  });
+  it("keeps an upside-down, stretched Geometry jump inside the stage", () => {
+    const frame = { ...still, angle: 180, y: -18, squash: -.2 };
+    const fit = bodyFit("geometry", frame);
+    expect(fit).toBeLessThan(1);
+    // The body's former bottom (185 below the pivot) now points up; it must clear the top margin.
+    expect(247 + frame.y - 185 * (1 - frame.squash) * fit).toBeGreaterThanOrEqual(8 - 1e-6);
   });
 });
