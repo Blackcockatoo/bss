@@ -19,12 +19,19 @@ const ORIGINAL_IDS = [
 ];
 
 describe("expression catalogue integrity", () => {
-  it("keeps every original id and fills all twelve packs", () => {
+  it("keeps every original id and fills all twelve packs with ten each", () => {
     const ids = EXPRESSIONS.map(e => e.id);
     for (const id of ORIGINAL_IDS) expect(ids).toContain(id);
     expect(PACKS).toHaveLength(12);
-    for (const pack of PACKS) expect(EXPRESSIONS.filter(e => e.category === pack).length, pack).toBeGreaterThanOrEqual(3);
+    for (const pack of PACKS) expect(EXPRESSIONS.filter(e => e.category === pack).length, pack).toBe(10);
     expect(new Set(EXPRESSIONS.map(e => e.label.toLowerCase())).size).toBe(EXPRESSIONS.length);
+  });
+
+  it("keeps labels, captions and search tags child-appropriate", () => {
+    const blocked = /\b(kill|dead|die|blood|gun|weapon|hate|stupid|idiot|dumb|ugly|fat|drunk|beer|wine|sexy|kiss|damn|hell|crap|scary|scream|vomit|poo)\b/i;
+    for (const e of EXPRESSIONS) {
+      expect([e.label, e.caption, ...e.tags].join(" "), e.id).not.toMatch(blocked);
+    }
   });
 
   it("only uses declared vocabulary in every performance", () => {

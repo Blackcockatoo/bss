@@ -4,6 +4,8 @@ import { serializeLocalSprite, stripGeometryBackdrop } from "@/lib/games/geometr
 import { animationFramePlan, artworkCapturePhase, sampleArtwork, type Artwork } from "./artwork";
 import { isStudioWardrobeAsset } from "@/lib/expressions/wardrobeAssets";
 import type { GifCommand } from "@/lib/expressions/gif.worker";
+import type { ZipCommand } from "@/lib/expressions/zip.worker";
+import { MAX_PACK_BYTES, MAX_PACK_STICKERS, startWorker, workerRequest } from "@/lib/expressions/exportPlan";
 import { ASPECTS, ExpressionArt } from "./ExpressionArt";
 
 export type { Artwork } from "./artwork";
@@ -126,57 +128,27 @@ export async function exportPng(art: Artwork, size: number, signal: AbortSignal)
   }
 }
 
-function gifRequest(worker: Worker, message: GifCommand, signal: AbortSignal) {
-  return new Promise<Uint8Array<ArrayBuffer> | undefined>((resolve, reject) => {
-    function clean() {
-      signal.removeEventListener("abort", abort);
-      worker.removeEventListener("message", response);
-      worker.removeEventListener("error", fail);
-      worker.removeEventListener("messageerror", fail);
-    }
-    function fail() {
-      clean();
-      reject(new Error("The animation encoder stopped. Try a PNG or retry the GIF."));
-    }
-    function abort() {
-      clean();
-      reject(signal.reason);
-    }
-    function response(event: MessageEvent<{ error?: string; bytes?: Uint8Array<ArrayBuffer> }>) {
-      clean();
-      if (event.data.error) reject(new Error(event.data.error));
-      else resolve(event.data.bytes);
-    }
-    signal.throwIfAborted();
-    signal.addEventListener("abort", abort, { once: true });
-    worker.addEventListener("message", response, { once: true });
-    worker.addEventListener("error", fail, { once: true });
-    worker.addEventListener("messageerror", fail, { once: true });
-    try {
-      worker.postMessage(message, message.type === "frame" ? [message.pixels.buffer] : []);
-    } catch (error) {
-      clean();
-      reject(error);
-    }
-  });
-}
+const GIF_FAILURE = "The animation encoder stopped. Try a PNG or retry the GIF.";
+const ZIP_FAILURE = "The sticker pack builder stopped. Try again or choose a smaller pack.";
 
 export async function exportGif(art: Artwork, signal: AbortSignal, update: Progress) {
-  const worker = new Worker(new URL("../../lib/expressions/gif.worker.ts", import.meta.url));
+  const worker = startWorker(() => new Worker(new URL("../../lib/expressions/gif.worker.ts", import.meta.url)), GIF_FAILURE);
   const renderer = createFrameRenderer();
   try {
     const frames = animationFramePlan(art);
+    update(0, frames.length);
     for (const [index, frame] of frames.entries()) {
       const { canvas, context } = await renderer.draw(art, 256, signal, frame.progress);
       const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
-      await gifRequest(worker, {
+      const command: GifCommand = {
         type: "frame", pixels, width: canvas.width, height: canvas.height,
         delay: frame.delay, loop: art.settings.loop && frames.length > 1,
-      }, signal);
+      };
+      await workerRequest(worker, command, [pixels.buffer], signal, GIF_FAILURE);
       update(index + 1, frames.length);
     }
-    const bytes = await gifRequest(worker, { type: "finish" }, signal);
-    if (!bytes) throw new Error("The animation encoder produced no frames.");
+    const { bytes } = await workerRequest<{ bytes?: Uint8Array<ArrayBuffer> }>(worker, { type: "finish" } satisfies GifCommand, [], signal, GIF_FAILURE);
+    if (!bytes?.length) throw new Error("The animation encoder produced no frames.");
     return new Blob([bytes], { type: "image/gif" });
   } finally {
     worker.terminate();
@@ -191,8 +163,10 @@ export async function exportWebp(art: Artwork, signal: AbortSignal, update: Prog
     const frames = animationFramePlan(art);
     const [width, height] = ASPECTS[art.aspect ?? "square"].map(axis => axis / 2);
     const pixels: ReturnType<typeof readWebpPixels>[] = [];
+    update(0, frames.length);
     for (const [index, sample] of frames.entries()) {
       const { canvas } = await renderer.draw(art, 256, signal, sample.progress);
+      // The browser encodes each WebP frame asynchronously; only the RIFF muxing happens here.
       const frame = await canvasBlob(canvas, "image/webp");
       pixels.push(readWebpPixels(new Uint8Array(await frame.arrayBuffer())));
       update(index + 1, frames.length);
@@ -205,20 +179,35 @@ export async function exportWebp(art: Artwork, signal: AbortSignal, update: Prog
 }
 
 export async function exportPack(art: Artwork[], signal: AbortSignal, update: Progress) {
-  const { zipSync } = await import("fflate");
+  if (art.length === 0) throw new Error("This pack is empty. Choose a pack or favourite some expressions first.");
+  if (art.length > MAX_PACK_STICKERS) throw new Error(`Packs can hold up to ${MAX_PACK_STICKERS} stickers.`);
   const renderer = createFrameRenderer();
   const files: Record<string, Uint8Array> = {};
+  let bytes = 0;
   try {
+    update(0, art.length + 1);
     for (const [index, item] of art.entries()) {
       const { canvas } = await renderer.draw(item, 512, signal);
-      const png = await canvasBlob(canvas);
-      files[`${item.form}-${item.expression.id}.png`] = new Uint8Array(await png.arrayBuffer());
-      update(index + 1, art.length);
+      const png = new Uint8Array(await (await canvasBlob(canvas)).arrayBuffer());
+      bytes += png.length;
+      if (bytes > MAX_PACK_BYTES) throw new Error("This pack is too large to build here. Choose a smaller pack.");
+      files[`${item.form}-${item.expression.id}.png`] = png;
+      update(index + 1, art.length + 1);
     }
-    signal.throwIfAborted();
-    return new Blob([zipSync(files, { level: 0 })], { type: "application/zip" });
   } finally {
     renderer.dispose();
+  }
+  signal.throwIfAborted();
+  const worker = startWorker(() => new Worker(new URL("../../lib/expressions/zip.worker.ts", import.meta.url)), ZIP_FAILURE);
+  try {
+    const command: ZipCommand = { type: "zip", files };
+    const { bytes: zipped } = await workerRequest<{ bytes?: Uint8Array<ArrayBuffer> }>(
+      worker, command, Object.values(files).map(file => file.buffer as ArrayBuffer), signal, ZIP_FAILURE);
+    if (!zipped?.length) throw new Error(ZIP_FAILURE);
+    update(art.length + 1, art.length + 1);
+    return new Blob([zipped], { type: "application/zip" });
+  } finally {
+    worker.terminate();
   }
 }
 

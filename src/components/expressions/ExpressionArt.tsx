@@ -266,7 +266,8 @@ export function ExpressionArt({ pet, frame, expression, form, caption, scene, as
         <g transform={`translate(${256 + frame.x} ${247 + frame.y}) rotate(${frame.angle}) scale(${frame.scale * (1 + frame.squash)} ${frame.scale * (1 - frame.squash)}) translate(-256 -247)`}>
           <Renderer pet={pet} frame={frame} expression={expression} />
         </g>
-        <g transform={`translate(${frame.x + frame.lag.x * .5} ${frame.y + frame.lag.y * .5})`}>
+        {/* Props ride with the body but stop short of the top edge at the peak of a jump. */}
+        <g transform={`translate(${frame.x + frame.lag.x * .5} ${Math.max(-36, frame.y + frame.lag.y * .5)})`}>
           <PropLayer props={frame.props} anchor={PROP_ANCHORS[form]} />
         </g>
       </g>

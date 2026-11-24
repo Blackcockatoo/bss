@@ -1,4 +1,4 @@
-import { FORMS, getExpression, parseRecipe, type Recipe } from "@/lib/expressions/studio";
+import { EXPRESSIONS, FORMS, getExpression, parseRecipe, type Recipe } from "@/lib/expressions/studio";
 import type { PetForm } from "@/lib/petForms";
 import { BACKGROUNDS, DEFAULT_CAPTION, DEFAULT_SCENE, type Caption, type Scene } from "./ExpressionArt";
 
@@ -49,7 +49,7 @@ export function loadCreativeData(petId: string): CreativeData {
     }
     let recipe: Recipe | null = null;
     try { recipe = parseRecipe(JSON.stringify(data.recipe)); } catch { /* A corrupt recipe is discarded independently. */ }
-    return { favorites: ids(data.favorites, 24), recent: ids(data.recent, 8),
+    return { favorites: ids(data.favorites, EXPRESSIONS.length), recent: ids(data.recent, 8),
       recipe, comic: comic.length === data.comic?.length ? comic : [], meme: readCaption(data.meme) };
   } catch {
     return emptyCreativeData();

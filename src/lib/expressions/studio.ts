@@ -11,6 +11,7 @@ export type { Effect, Expression };
 export const DEFAULT_SETTINGS = {
   speed: 1, energy: 1, amplitude: 1, squash: 1, rotation: 1, aura: 1,
   frequency: 1, ridiculousness: 1, scale: 1, translation: 1, density: 1, velocity: 1, phase: 0, duration: 1, capture: -1,
+  variation: 0,
   easing: "smooth", loop: true,
 } as const;
 
@@ -24,7 +25,30 @@ export const SETTINGS_LIMITS = {
   rotation: [0, 1.5], aura: [0, 1.5], frequency: [.5, 2], ridiculousness: [0, 1.7],
   scale: [.8, 1.1], translation: [0, 1.45], density: [0, 1.5],
   velocity: [.4, 1.5], phase: [0, 1], duration: [.6, 1.5], capture: [-1, 1],
+  variation: [0, 999],
 } as const;
+
+/** One-tap starting points for beginners; every value is inside SETTINGS_LIMITS. */
+export const QUICK_STYLES: Record<string, Partial<Settings>> = {
+  Gentle: { speed: .8, energy: .7, amplitude: .7, aura: .8, ridiculousness: .4, squash: .7, easing: "smooth" },
+  Bouncy: { speed: 1.1, energy: 1.2, amplitude: 1.15, squash: 1.35, ridiculousness: 1.1, easing: "spring" },
+  Wild: { speed: 1.4, energy: 1.5, amplitude: 1.45, squash: 1.5, rotation: 1.5, aura: 1.4, ridiculousness: 1.7, easing: "spring" },
+  "Slow motion": { speed: .5, duration: 1.5, easing: "smooth" },
+};
+
+/** Controls added after the first recipe format; older recipes fall back to the default. */
+const OPTIONAL_SETTINGS = new Set<keyof typeof SETTINGS_LIMITS>(["variation"]);
+const INTEGER_SETTINGS = new Set<keyof typeof SETTINGS_LIMITS>(["variation"]);
+
+/**
+ * Seeded variation: the creature's own seed combined with a small, user-chosen
+ * integer. The same pet, expression, settings and variation always replay the
+ * same particles and secondary motion.
+ */
+export function variedSeed(seed: number, variation: number): number {
+  if (!variation) return seed;
+  return (((seed ^ 0x9e3779b9) >>> 0) + Math.imul(variation, 0x85ebca6b)) >>> 0;
+}
 
 export type Recipe = { version: 1; expressionId: string; settings: Settings };
 
@@ -36,9 +60,11 @@ export function parseRecipe(text: string): Recipe {
     typeof data.settings !== "object" || Array.isArray(data.settings)) throw new Error("Invalid expression recipe.");
   const settings: Settings = { ...DEFAULT_SETTINGS };
   for (const key of Object.keys(SETTINGS_LIMITS) as (keyof typeof SETTINGS_LIMITS)[]) {
+    if (!Object.hasOwn(data.settings, key) && OPTIONAL_SETTINGS.has(key)) continue;
     const value = data.settings[key];
     const [min, max] = SETTINGS_LIMITS[key];
-    if (typeof value !== "number" || !Number.isFinite(value) || value < min || value > max) throw new Error("Recipe controls are out of range.");
+    if (typeof value !== "number" || !Number.isFinite(value) || value < min || value > max ||
+      (INTEGER_SETTINGS.has(key) && !Number.isInteger(value))) throw new Error("Recipe controls are out of range.");
     settings[key] = value;
   }
   if (!["smooth", "linear", "spring"].includes(data.settings.easing) ||

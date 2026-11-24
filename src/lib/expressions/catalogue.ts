@@ -1,4 +1,5 @@
-import { defineExpression, type Expression, type Oscillator, type PropCue } from "./contract";
+import { PACKS, defineExpression, type Expression, type Oscillator, type PropCue } from "./contract";
+import { EXTENDED_EXPRESSIONS } from "./catalogueExtended";
 
 const prop = (kind: PropCue["kind"], from: number, to: number): PropCue => ({ kind, from, to });
 const osc = (kind: Oscillator["kind"], amp: number, cycles: number, from: number, to: number): Oscillator =>
@@ -12,7 +13,7 @@ const osc = (kind: Oscillator["kind"], amp: number, cycles: number, from: number
  * Pose tuples: [time, x, y, rotation, squash, eyelid, gazeX, gazeY, mouth, aura].
  * Beats: the same fields by name, each inheriting from the previous beat.
  */
-export const EXPRESSIONS = [
+const CORE_EXPRESSIONS = [
   // ── Everyday ───────────────────────────────────────────────────────────
   defineExpression({ id: "hello", label: "Hello", category: "Everyday", tags: "hi greeting wave", duration: 1680,
     effect: "stars", personality: "social", staticFrame: .32, eyes: "happy", mouth: "smile",
@@ -335,3 +336,9 @@ export const EXPRESSIONS = [
     beats: [{ t: .2, y: 8, sq: .16, lid: .4, a: .3 }, { t: .4, y: -18, sq: -.2, lid: 1.15, a: 1 }, { t: .7, y: -12, sq: -.08, m: .8 },
       { t: .85, y: -4, sq: 0, a: .6 }] }),
 ] as const satisfies readonly Expression[];
+
+/** All expressions, grouped by pack in pack order (stable within a pack). */
+export const EXPRESSIONS: readonly Expression[] = [...CORE_EXPRESSIONS, ...EXTENDED_EXPRESSIONS]
+  .map((expression, index) => ({ expression, index }))
+  .sort((a, b) => PACKS.indexOf(a.expression.category) - PACKS.indexOf(b.expression.category) || a.index - b.index)
+  .map(({ expression }) => expression);

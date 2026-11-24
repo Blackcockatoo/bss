@@ -14,7 +14,7 @@ export type PropAnchor = { cx: number; top: number; eye: number; headR: number; 
 export const PROP_ANCHORS: Record<PetForm, PropAnchor> = {
   auralia: { cx: 256, top: 128, eye: 178, headR: 50, right: 330, left: 182, base: 372 },
   evolved: { cx: 256, top: 132, eye: 200, headR: 70, right: 372, left: 140, base: 372 },
-  geometry: { cx: 256, top: 118, eye: 237, headR: 58, right: 371, left: 141, base: 394 },
+  geometry: { cx: 256, top: 128, eye: 237, headR: 58, right: 371, left: 141, base: 394 },
 };
 
 const GOLD = "#d9b45a";
@@ -59,7 +59,7 @@ function Prop({ kind, t, a }: { kind: PropKind; t: number; a: PropAnchor }) {
       return <path opacity={o} transform={`translate(${a.cx + a.headR * .9} ${a.top - 10 - t * 26}) scale(${2.2 + Math.sin(t * Math.PI * 6) * .3})`}
         d="M0 5C-11-1-5-9 0-4 5-9 11-1 0 5Z" fill={PINK} />;
     case "bulb":
-      return <g opacity={o} transform={`translate(${a.cx} ${a.top - 40}) scale(${.7 + Math.min(1, t * 5) * .3})`}>
+      return <g opacity={o} transform={`translate(${a.cx} ${a.top - 30}) scale(${.7 + Math.min(1, t * 5) * .3})`}>
         {[0, 1, 2, 3, 4].map(i => <path key={i} d="M0-36V-46" stroke={GOLD} strokeWidth="3.5" strokeLinecap="round" transform={`rotate(${-60 + i * 30})`} />)}
         <circle cx="0" cy="-10" r="17" fill="#ffe08a" stroke={GOLD} strokeWidth="3" />
         <path d="M-8 8H8V16H-8Z" fill={CREAM} stroke={GOLD} strokeWidth="2" />

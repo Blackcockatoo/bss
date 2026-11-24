@@ -101,6 +101,35 @@ function assertPixelsOnly(bytes) {
   assert.deepEqual(chunks.filter(type => !allowed.has(type)), [], `unexpected PNG chunks ${chunks}`);
 }
 
+/** Decodes every frame of an animation and counts frames with opaque pixels on the 2px border. */
+async function animatedFraming(page, bytes) {
+  return page.evaluate(async base64 => {
+    const raw = Uint8Array.from(atob(base64), char => char.charCodeAt(0));
+    const decoder = new ImageDecoder({ data: raw, type: "image/gif" });
+    await decoder.tracks.ready;
+    const frames = decoder.tracks.selectedTrack.frameCount;
+    let border = 0;
+    for (let index = 0; index < frames; index++) {
+      const { image } = await decoder.decode({ frameIndex: index });
+      const width = image.displayWidth;
+      const height = image.displayHeight;
+      const ctx = new OffscreenCanvas(width, height).getContext("2d");
+      ctx.drawImage(image, 0, 0);
+      image.close();
+      const rgba = ctx.getImageData(0, 0, width, height).data;
+      let hit = false;
+      for (let y = 0; y < height && !hit; y++) {
+        for (let x = 0; x < width; x++) {
+          if ((x < 2 || y < 2 || x >= width - 2 || y >= height - 2) && rgba[(y * width + x) * 4 + 3] > 24) { hit = true; break; }
+        }
+      }
+      if (hit) border++;
+    }
+    decoder.close();
+    return { frames, border };
+  }, bytes.toString("base64"));
+}
+
 async function verifyPreviewFidelity(page, png) {
   // Render both the deterministic PNG pose and downloaded pixels against the
   // same CSS backdrop. A screenshot regression catches selector/clip bugs.
@@ -206,7 +235,7 @@ try {
   // Every catalogued expression on every form exports a framed PNG pose.
   if (process.env.EXPRESSIONS_FULL_SWEEP === "1") {
     const ids = await page.locator("[data-expression-id]").evaluateAll(nodes => nodes.map(node => node.getAttribute("data-expression-id")));
-    assert.ok(ids.length >= 69, String(ids.length));
+    assert.equal(ids.length, 120);
     let swept = 0;
     const framing = [];
     for (const form of forms) {
@@ -220,9 +249,23 @@ try {
         swept++;
       }
     }
+    // Mid-animation framing: every frame of every looping GIF stays clear of the border.
+    if (process.env.EXPRESSIONS_ANIMATION_SWEEP !== "0") {
+      for (const form of forms) {
+        await page.getByRole("button", { name: form, exact: true }).click();
+        for (const id of ids) {
+          await page.locator(`[data-expression-id="${id}"]`).click();
+          const gifFile = await download(page, "Download GIF");
+          const metrics = await animatedFraming(page, gifFile.bytes);
+          if (metrics.frames < 10) framing.push(`${form}/${id} GIF has ${metrics.frames} frames`);
+          if (metrics.border) framing.push(`${form}/${id} touches the border in ${metrics.border} frame(s)`);
+          swept++;
+        }
+      }
+    }
     assert.deepEqual(framing, []);
     results.push({ sweptExports: swept });
-    console.log(`Swept ${swept} expression/form PNG exports.`);
+    console.log(`Swept ${swept} expression/form exports (PNG poses and every GIF frame).`);
     await page.getByRole("button", { name: "Auralia", exact: true }).click();
     await page.locator('[data-expression-id="happy"]').click();
     await page.getByRole("button", { name: "PNG pose", exact: true }).click();
@@ -235,6 +278,66 @@ try {
   await page.getByText("Thumbnail cache cleared.").waitFor();
   await page.locator('[data-thumbnail="ready"]').first().waitFor();
   console.log("Verified thumbnail cache clear and redraw.");
+
+  // Search, packs, favourites and recents.
+  const tiles = page.locator("[data-expression-id]");
+  const search = page.getByRole("searchbox", { name: "Search expressions" });
+  await search.fill("cake");
+  assert.deepEqual(await tiles.evaluateAll(nodes => nodes.map(node => node.getAttribute("data-expression-id"))), ["birthday"]);
+  await search.fill("zzzz-no-such-expression");
+  await page.getByText("No matching expressions.").waitFor();
+  assert.equal(await tiles.count(), 0);
+  await search.fill("");
+  assert.equal(await tiles.count(), 120);
+  await page.getByLabel("Browse pack").selectOption("Chaos");
+  assert.equal(await tiles.count(), 10);
+  await search.fill("whirl");
+  assert.deepEqual(await tiles.evaluateAll(nodes => nodes.map(node => node.getAttribute("data-expression-id"))), ["spin-out"]);
+  await search.fill("");
+  await page.getByLabel("Browse pack").selectOption("All");
+  for (const id of ["oops", "high-five", "portal"]) await page.locator(`[data-expression-id="${id}"]`).click();
+  await page.getByRole("button", { name: "Favourite this expression", exact: true }).click();
+  await page.getByRole("button", { name: "Remove favourite", exact: true }).waitFor();
+  await page.locator('[data-expression-id="wink"]').click();
+  await page.getByRole("button", { name: "Favourite this expression", exact: true }).click();
+  await page.getByLabel("Browse pack").selectOption("Recent");
+  assert.deepEqual((await tiles.evaluateAll(nodes => nodes.map(node => node.getAttribute("data-expression-id")))).slice(0, 4),
+    ["wink", "portal", "high-five", "oops"]);
+  await page.getByLabel("Browse pack").selectOption("Favourites");
+  assert.deepEqual(await tiles.evaluateAll(nodes => nodes.map(node => node.getAttribute("data-expression-id"))), ["wink", "portal"]);
+  // Favourites and recents survive a reload (local creative storage only).
+  await page.reload();
+  await page.getByRole("heading", { name: "Sticker Factory" }).waitFor();
+  await page.getByLabel("Browse pack").selectOption("Favourites");
+  assert.deepEqual(await tiles.evaluateAll(nodes => nodes.map(node => node.getAttribute("data-expression-id"))), ["wink", "portal"]);
+  await page.locator('[data-expression-id="portal"]').click();
+  await page.getByRole("button", { name: "Remove favourite", exact: true }).click();
+  assert.deepEqual(await tiles.evaluateAll(nodes => nodes.map(node => node.getAttribute("data-expression-id"))), ["wink"]);
+  await page.getByLabel("Browse pack").selectOption("All");
+  await page.locator('[data-expression-id="happy"]').click();
+  assert.equal(JSON.stringify(await canonicalRecord(page)) === JSON.stringify(before), true, "Browsing edited the canonical record.");
+  console.log("Verified search, packs, favourites and recents.");
+  // Export progress and cancellation, then recovery.
+  // Start a GIF and cancel it from inside the page as soon as the Cancel control
+  // renders, so the export is reliably still running when it is pressed.
+  const sawProgress = await page.evaluate(async () => {
+    const find = name => [...document.querySelectorAll("button")].find(item => item.textContent === name);
+    find("Download GIF").click();
+    for (let i = 0; i < 100; i++) {
+      await new Promise(resolve => setTimeout(resolve, 5));
+      const cancel = find("Cancel export");
+      if (cancel) {
+        const progress = !!document.querySelector('progress[aria-label="Export progress"]');
+        cancel.click();
+        return progress;
+      }
+    }
+    throw new Error("Cancel export never appeared");
+  });
+  await page.getByText("Export cancelled.").waitFor();
+  assert.equal(sawProgress, true, "no progress bar while exporting");
+  assert.equal(await page.getByRole("button", { name: "Download GIF", exact: true }).isEnabled(), true);
+  console.log("Verified export progress, cancel and recovery.");
   const gif = await download(page, "Download GIF");
   const gifMetrics = await imageMetrics(page, gif.bytes, "image/gif");
   assert.ok(gifMetrics.frames > 5 && gifMetrics.distinctFrames);
@@ -251,9 +354,9 @@ try {
   console.log("Verified", results.at(-1));
 
   const zip = await download(page, "Download ZIP");
-  // The first pack (Everyday) has eight stickers.
+  // Every pack has ten stickers.
   const packFiles = Object.keys(unzipSync(zip.bytes));
-  assert.equal(packFiles.length, 8, packFiles.join());
+  assert.equal(packFiles.length, 10, packFiles.join());
   await page.getByRole("button", { name: "Prepare sticker sheet" }).click();
   await page.getByRole("button", { name: "Print prepared page" }).waitFor();
   await page.emulateMedia({ media: "print" });
@@ -281,9 +384,70 @@ try {
   assert.equal(await page.getByRole("textbox", { name: "Panel text", exact: true }).inputValue(), "Keep exploring");
 
   await page.getByRole("button", { name: "Animation Lab" }).click();
+  // Real-time feedback: the readout follows the playhead.
+  await page.getByLabel("Expression", { exact: true }).selectOption("fireworks");
+  const readoutTime = page.locator('[data-readout="time"]');
+  await readoutTime.waitFor();
+  const firstTime = await readoutTime.textContent();
+  await page.waitForTimeout(400);
+  assert.notEqual(await readoutTime.textContent(), firstTime, "readout did not follow playback");
+  // Beginner quick styles.
+  await page.getByRole("button", { name: "Wild", exact: true }).click();
+  await page.getByText("Wild style applied.").waitFor();
+  // Scrubbing holds a deterministic frame.
+  await page.getByLabel("Scrub timeline").check();
+  const playhead = page.getByRole("slider", { name: /Playhead/ });
+  await playhead.fill("0.25");
+  const stageShot = () => page.getByRole("img", { name: /performing/ }).screenshot({ animations: "disabled" });
+  const scrubA = await stageShot();
+  await page.waitForTimeout(250);
+  assert.ok(scrubA.equals(await stageShot()), "scrubbed frame is not stable");
+  const heldTime = await readoutTime.textContent();
+  await playhead.fill("0.75");
+  assert.ok(!scrubA.equals(await stageShot()), "scrubbing did not move the performance");
+  assert.notEqual(await readoutTime.textContent(), heldTime);
+  // Seeded variation changes particles but replays exactly.
+  await playhead.fill("0.5");
+  const variation0 = await stageShot();
+  await page.getByRole("button", { name: "Next variation", exact: true }).click();
+  assert.equal(await page.getByRole("spinbutton", { name: "Variation" }).inputValue(), "1");
+  const variation1 = await stageShot();
+  assert.ok(!variation0.equals(variation1), "variation did not change the seeded performance");
+  await page.getByRole("button", { name: "Previous variation", exact: true }).click();
+  assert.ok(variation0.equals(await stageShot()), "variation 0 did not replay identically");
+  await page.getByRole("button", { name: "Next variation", exact: true }).click();
+  // Recipes: save, reopen after reload, export and re-import.
+  await page.getByRole("button", { name: "Save recipe" }).click();
+  const exported = await download(page, "Export recipe");
+  const exportedRecipe = JSON.parse(exported.bytes.toString("utf8"));
+  assert.equal(exportedRecipe.expressionId, "fireworks");
+  assert.equal(exportedRecipe.settings.variation, 1);
+  assert.deepEqual(Object.keys(exportedRecipe).sort(), ["expressionId", "settings", "version"]);
+  await page.reload();
+  await page.getByRole("button", { name: "Animation Lab" }).click();
+  await page.getByRole("button", { name: "Open saved recipe" }).click();
+  await page.getByText("Recipe opened.").waitFor();
+  assert.equal(await page.getByLabel("Expression", { exact: true }).inputValue(), "fireworks");
+  assert.equal(await page.getByRole("spinbutton", { name: "Variation" }).inputValue(), "1");
+  await page.getByRole("button", { name: "Reset controls", exact: true }).click();
+  assert.equal(await page.getByRole("spinbutton", { name: "Variation" }).inputValue(), "0");
+  await page.getByLabel("Import recipe").setInputFiles({ name: "recipe.json", mimeType: "application/json", buffer: exported.bytes });
+  await page.getByText("Recipe opened.").waitFor();
+  assert.equal(await page.getByRole("spinbutton", { name: "Variation" }).inputValue(), "1");
+  for (const [name, text] of [
+    ["out-of-range.json", JSON.stringify({ ...exportedRecipe, settings: { ...exportedRecipe.settings, speed: 99 } })],
+    ["unknown.json", JSON.stringify({ ...exportedRecipe, expressionId: "<img src=x onerror=alert(1)>" })],
+    ["huge.json", JSON.stringify({ ...exportedRecipe, pad: "x".repeat(6000) })],
+  ]) {
+    await page.getByLabel("Import recipe").setInputFiles({ name, mimeType: "application/json", buffer: Buffer.from(text) });
+    await page.locator("main").getByRole("alert").waitFor();
+    assert.equal(await page.getByRole("spinbutton", { name: "Variation" }).inputValue(), "1", `${name} changed the controls`);
+  }
+  console.log("Verified Animation Lab feedback, scrubbing, quick styles, variation and recipes.");
   await page.getByRole("button", { name: "Advanced controls" }).click();
   await page.getByRole("button", { name: "Save recipe" }).click();
   await page.getByRole("button", { name: "Open saved recipe" }).click();
+
   await page.getByLabel("Import recipe").setInputFiles({ name: "corrupt.json", mimeType: "application/json", buffer: Buffer.from("bad") });
   await page.locator("main").getByRole("alert").waitFor();
   assert.equal(JSON.stringify(await canonicalRecord(page)) === JSON.stringify(before), true, "Studio edited the canonical record.");

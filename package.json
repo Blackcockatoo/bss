@@ -20,7 +20,8 @@
     "sync:kpps-exports": "node scripts/sync-kpps-package-exports.mjs",
     "sync:school-docs": "node scripts/sync-school-docs.mjs",
     "check:school-docs": "node scripts/sync-school-docs.mjs --check",
-    "generate:school-docs": "node scripts/generate-school-docs.cjs"
+    "generate:school-docs": "node scripts/generate-school-docs.cjs",
+    "check:expressions-visual": "node scripts/expressions-visual-baseline.mjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",

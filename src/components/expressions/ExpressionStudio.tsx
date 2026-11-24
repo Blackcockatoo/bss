@@ -7,7 +7,7 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { clearTake, saveTake, type PerformanceTake, type PerformanceCue } from "@/lib/expressions/take";
 import type { CreatureSnapshot } from "@/lib/expressions/snapshot";
 import {
-  DEFAULT_SETTINGS, EXPRESSIONS, FORMS, PACKS, SETTINGS_LIMITS, getExpression, parseRecipe,
+  DEFAULT_SETTINGS, EXPRESSIONS, FORMS, PACKS, QUICK_STYLES, SETTINGS_LIMITS, getExpression, parseRecipe,
   type Expression, type Recipe, type Settings,
 } from "@/lib/expressions/studio";
 import {
@@ -15,6 +15,7 @@ import {
   type Aspect, type Caption, type Scene,
 } from "./ExpressionArt";
 import { StickerCatalogue } from "./StickerCatalogue";
+import { EXPORT_TIME_LIMIT_MS, ExportTimeoutError, MAX_PACK_STICKERS } from "@/lib/expressions/exportPlan";
 import { clearThumbnailCache } from "./thumbnailCache";
 import { ExpressionPreview } from "./ExpressionPreview";
 import { downloadBlob, exportGif, exportPack, exportPng, exportSheet, exportWebp, type Artwork, type Progress } from "./export";
@@ -89,6 +90,8 @@ export function ExpressionStudio({ id, pet, initialForm, initialTake = null }: {
   const [advanced, setAdvanced] = useState(false);
   const [captionOn, setCaptionOn] = useState(false);
   const [thumbEpoch, setThumbEpoch] = useState(0);
+  const [scrubbing, setScrubbing] = useState(false);
+  const [scrubAt, setScrubAt] = useState(.5);
   const [meme, setMeme] = useState<Caption>(creative.meme ?? DEFAULT_CAPTION);
   const [aspect, setAspect] = useState<Aspect>("square");
   const [scene, setScene] = useState<Scene>(DEFAULT_SCENE);
@@ -110,6 +113,7 @@ export function ExpressionStudio({ id, pet, initialForm, initialTake = null }: {
   const [canWebp, setCanWebp] = useState(false);
   const [printUrl, setPrintUrl] = useState<string>();
   const job = useRef<AbortController | null>(null);
+  const lastExport = useRef<(() => Promise<void>) | null>(null);
   const preferencesReduce = useReducedMotion();
   const reducedMotion = preferencesReduce || pet.auralia.reduceMotion;
   const panel = panels[activePanel];
@@ -205,7 +209,7 @@ export function ExpressionStudio({ id, pet, initialForm, initialTake = null }: {
   }
 
   function makePack() {
-    const ids = packChoice === "Favourites" ? creative.favorites :
+    const ids = packChoice === "Favourites" ? creative.favorites.slice(0, MAX_PACK_STICKERS) :
       EXPRESSIONS.filter(expression => expression.category === packChoice).map(expression => expression.id);
     return ids.flatMap(expressionId => {
       const expression = getExpression(expressionId);
@@ -228,6 +232,8 @@ export function ExpressionStudio({ id, pet, initialForm, initialTake = null }: {
     if (job.current) return;
     const controller = new AbortController();
     job.current = controller;
+    lastExport.current = () => runExport(filename, generate, output);
+    const limit = window.setTimeout(() => controller.abort(new ExportTimeoutError()), EXPORT_TIME_LIMIT_MS);
     setBusy(true);
     setPrintUrl(undefined);
     setError("");
@@ -239,14 +245,23 @@ export function ExpressionStudio({ id, pet, initialForm, initialTake = null }: {
       if (output) await output(blob);
       else downloadBlob(blob, filename);
       setMessage(output ? "Export ready." : "Download ready.");
+      lastExport.current = null;
     } catch (failure) {
-      if (controller.signal.aborted || (failure instanceof DOMException && failure.name === "AbortError")) setMessage("Export cancelled.");
-      else {
+      const reason = controller.signal.aborted ? controller.signal.reason : failure;
+      if (reason instanceof ExportTimeoutError) {
+        setMessage("");
+        setError(reason.message);
+      } else if (controller.signal.aborted || (failure instanceof DOMException && failure.name === "AbortError")) {
+        setMessage("Export cancelled.");
+        lastExport.current = null;
+      } else {
         setMessage("");
         setError(failure instanceof Error ? failure.message : "Could not export. Try again.");
       }
     } finally {
+      window.clearTimeout(limit);
       job.current = null;
+      setProgress({ done: 0, total: 0 });
       setBusy(false);
     }
   }
@@ -291,7 +306,8 @@ export function ExpressionStudio({ id, pet, initialForm, initialTake = null }: {
             )}
           </div>
           <div className="mx-auto w-full max-w-[450px] overflow-hidden rounded-lg border border-[#43546d] bg-[#0b1424]">
-            <ExpressionPreview art={artwork} playing={playing && !busy} replay={replay} still={still || inComic} />
+            <ExpressionPreview art={artwork} playing={playing && !busy} replay={replay} still={still || inComic}
+              scrub={mode === "Animation Lab" && scrubbing && !reducedMotion ? scrubAt : undefined} feedback={mode === "Animation Lab"} />
           </div>
           {!inComic && (
             <div className="flex flex-wrap gap-2">
@@ -322,6 +338,8 @@ export function ExpressionStudio({ id, pet, initialForm, initialTake = null }: {
           {busy && progress.total > 0 && <progress aria-label="Export progress" className="w-full" value={progress.done} max={progress.total} />}
           <p role="status" className="text-sm text-slate-300">{message}{busy && progress.total > 0 && ` ${progress.done}/${progress.total}`}</p>
           {error && <p role="alert" className="text-sm text-rose-300">{error}</p>}
+          {error && !busy && lastExport.current && <button type="button" className={button}
+            onClick={() => { const retry = lastExport.current; setError(""); void retry?.(); }}>Try export again</button>}
           {printUrl && <button className={button} type="button" onClick={() => window.print()}>Print prepared page</button>}
         </section>
         <section className={section} aria-label={mode}>
@@ -381,6 +399,28 @@ export function ExpressionStudio({ id, pet, initialForm, initialTake = null }: {
               {EXPRESSIONS.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}
             </Select>}
           {mode === "Animation Lab" && <>
+            <div role="group" aria-label="Quick styles" className="flex flex-wrap gap-2">
+              {Object.entries(QUICK_STYLES).map(([name, preset]) => <button key={name} type="button" className={button}
+                onClick={() => { setSettings({ ...DEFAULT_SETTINGS, variation: settings.variation, ...preset }); replayNow(); setMessage(`${name} style applied.`); }}>{name}</button>)}
+              <button type="button" className={button} onClick={() => { setSettings({ ...DEFAULT_SETTINGS }); replayNow(); setMessage("Controls reset."); }}>Reset controls</button>
+            </div>
+            {!reducedMotion && <div className="grid gap-2">
+              <Toggle checked={scrubbing} onChange={value => { setScrubbing(value); if (!value) replayNow(); }}>Scrub timeline</Toggle>
+              {scrubbing && <Slider label="Playhead" value={scrubAt} min={0} max={1} step={.01} onChange={setScrubAt} />}
+            </div>}
+            <div className="flex flex-wrap items-end gap-2">
+              <label className="grid gap-1 text-sm">Variation
+                <input className={input + " w-28"} type="number" inputMode="numeric" min={0} max={999} step={1} value={settings.variation}
+                  onChange={event => {
+                    const value = Math.round(Number(event.target.value));
+                    if (Number.isFinite(value)) updateSetting("variation", Math.min(999, Math.max(0, value)));
+                  }} />
+              </label>
+              <button type="button" className={button} disabled={settings.variation <= 0}
+                onClick={() => updateSetting("variation", settings.variation - 1)}>Previous variation</button>
+              <button type="button" className={button} disabled={settings.variation >= 999}
+                onClick={() => updateSetting("variation", settings.variation + 1)}>Next variation</button>
+            </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {range("speed", "Speed")}{range("energy", "Energy")}{range("amplitude", "Movement intensity")}{range("aura", "Aura strength")}{range("ridiculousness", "Ridiculousness")}
             </div>
@@ -480,6 +520,8 @@ export function ExpressionStudio({ id, pet, initialForm, initialTake = null }: {
             <Select label="Sticker pack" value={packChoice} onChange={setPackChoice}>
               {[...PACKS, "Favourites"].map(item => <option key={item}>{item}</option>)}
             </Select>
+            {packChoice === "Favourites" && creative.favorites.length > MAX_PACK_STICKERS &&
+              <p className="text-sm text-slate-300">Packs hold up to {MAX_PACK_STICKERS} stickers, so this pack uses your first {MAX_PACK_STICKERS} favourites.</p>}
             <div className="flex flex-wrap gap-2">
               <button type="button" className={primary} disabled={busy || makePack().length === 0}
                 onClick={() => void runExport("metapet-stickers.zip", (signal, update) => exportPack(makePack(), signal, update))}>Download ZIP</button>
