@@ -2,7 +2,9 @@ import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { buildPetRecord } from "@/lib/registry/registration";
 import { makeCreatureSnapshot } from "@/lib/expressions/snapshot";
-import { DEFAULT_SETTINGS, FORMS, getExpression, sampleExpression } from "@/lib/expressions/studio";
+import { DEFAULT_SETTINGS, EXPRESSIONS, FORMS, getExpression, sampleExpression } from "@/lib/expressions/studio";
+import { PROP_KINDS } from "@/lib/expressions/contract";
+import { PROP_ANCHORS, PropLayer } from "./PropLayer";
 import { getGenomeVisualFingerprint } from "@/visual-dna/bodyForgeAdapter";
 import { DEFAULT_BODY_SPEC } from "@/components/body-forge/PetBodyRenderer";
 import { getWardrobeItemById } from "@/lib/wardrobe/catalog";
@@ -62,5 +64,54 @@ describe("expression renderer snapshots", () => {
       }
     }
     expect([basic, advanced]).toEqual(before);
+  });
+
+  it("renders every expression on every form from a frozen snapshot without touching the record", async () => {
+    const record = await representativePet(2);
+    const before = structuredClone(record);
+    const freeze = <T,>(value: T): T => {
+      if (value && typeof value === "object" && !Object.isFrozen(value)) {
+        Object.freeze(value);
+        for (const key of Object.keys(value)) freeze((value as Record<string, unknown>)[key]);
+      }
+      return value;
+    };
+    const pet = freeze(makeCreatureSnapshot(record));
+    // The snapshot is a copy: nothing in it aliases the canonical record.
+    expect(pet.personality).not.toBe(record.traits.personality);
+    expect(pet.evolution).not.toBe(record.evolution);
+    for (const expression of EXPRESSIONS) {
+      for (const phase of [expression.staticFrame, .5, expression.reducedMotionFrame]) {
+        const frame = sampleExpression(expression, phase, DEFAULT_SETTINGS, pet.personality, pet.seed);
+        for (const form of FORMS) {
+          const { container, unmount } = render(
+            <ExpressionArt pet={pet} frame={frame} expression={expression} form={form}
+              caption={{ ...DEFAULT_CAPTION, bottom: expression.caption }} scene={DEFAULT_SCENE} />,
+          );
+          const html = container.innerHTML;
+          expect(html, `${expression.id}/${form}`).not.toMatch(/(?:href|src)="(?:https?:|\/\/|javascript:)/i);
+          expect(html).not.toContain("NaN");
+          const ids = [...container.querySelectorAll("[id]")].map(node => node.id);
+          expect(new Set(ids).size, `${expression.id}/${form}`).toBe(ids.length);
+          unmount();
+        }
+      }
+    }
+    expect(record).toEqual(before);
+  }, 60_000);
+
+  it("draws every prop as inline vector art at each form's anchor", () => {
+    for (const form of FORMS) {
+      const { container, unmount } = render(
+        <svg><PropLayer props={PROP_KINDS.map(kind => ({ kind, t: .5 }))} anchor={PROP_ANCHORS[form]} /></svg>,
+      );
+      for (const kind of PROP_KINDS) {
+        const node = container.querySelector(`[data-prop="${kind}"]`);
+        expect(node, `${form}/${kind}`).toBeTruthy();
+        expect(node!.querySelectorAll("path, circle, ellipse, rect, line, polygon, polyline").length).toBeGreaterThan(0);
+      }
+      expect(container.querySelector("text, image, foreignObject")).toBeNull();
+      unmount();
+    }
   });
 });

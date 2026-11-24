@@ -4,12 +4,18 @@ import type { CreatureSnapshot } from "@/lib/expressions/snapshot";
 import { DEFAULT_SETTINGS, getExpression, type Expression } from "@/lib/expressions/studio";
 import { DEFAULT_CAPTION, DEFAULT_SCENE } from "./ExpressionArt";
 import { canvasBlob, createFrameRenderer } from "./export";
+import { appearanceHash, readThumbnail, thumbnailRequestKey, writeThumbnail } from "./thumbnailCache";
+
+/** Thumbnails are per form: the same expression looks different on each body. */
+export const thumbKey = (form: PetForm, id: string) => `${form}:${id}`;
 
 export function StickerCatalogue({
-  visible, pet, form, selected, buttonClass, onSelect, busy,
+  visible, pet, form, selected, buttonClass, onSelect, busy, epoch = 0,
 }: {
   visible: Expression[]; pet: CreatureSnapshot; form: PetForm; selected: string; buttonClass: string;
   onSelect: (expression: Expression) => void; busy: boolean;
+  /** Bumped when the user clears the thumbnail cache, so in-memory images are dropped too. */
+  epoch?: number;
 }) {
   const region = useRef<HTMLDivElement>(null);
   const cache = useRef(new Map<string, string>());
@@ -17,10 +23,16 @@ export function StickerCatalogue({
   // Filtering only changes which static images get requested.
   const listKey = visible.map(item => item.id).join(" ");
 
-  useEffect(() => () => {
-    for (const url of cache.current.values()) URL.revokeObjectURL(url);
-    cache.current.clear();
-  }, []);
+  const appearance = appearanceHash(pet);
+
+  useEffect(() => {
+    const owned = cache.current;
+    return () => {
+      for (const url of owned.values()) URL.revokeObjectURL(url);
+      owned.clear();
+      setImages({});
+    };
+  }, [epoch, appearance]);
 
   useEffect(() => {
     const list = region.current;
@@ -36,17 +48,24 @@ export function StickerCatalogue({
       if (!next || controller.signal.aborted) { active = false; return; }
       queue.delete(next);
       const expression = getExpression(next);
-      if (expression && !cache.current.has(next)) {
+      const key = thumbKey(form, next);
+      if (expression && !cache.current.has(key)) {
         try {
-          const { canvas } = await renderer.draw({
-            pet, form, expression, scene: DEFAULT_SCENE, caption: DEFAULT_CAPTION,
-            settings: DEFAULT_SETTINGS, reducedMotion: true,
-          }, 96, controller.signal);
-          const blob = await canvasBlob(canvas);
+          const stored = thumbnailRequestKey(appearance, form, next);
+          let blob = await readThumbnail(stored);
+          if (!blob) {
+            const { canvas } = await renderer.draw({
+              pet, form, expression, scene: DEFAULT_SCENE, caption: DEFAULT_CAPTION,
+              settings: DEFAULT_SETTINGS, reducedMotion: true,
+            }, 96, controller.signal);
+            blob = await canvasBlob(canvas);
+            controller.signal.throwIfAborted();
+            await writeThumbnail(stored, blob);
+          }
           controller.signal.throwIfAborted();
           const url = URL.createObjectURL(blob);
-          cache.current.set(next, url);
-          setImages(old => ({ ...old, [next]: url }));
+          cache.current.set(key, url);
+          setImages(old => ({ ...old, [key]: url }));
         } catch { /* A failed thumbnail still has a labelled expression button. */ }
       }
       if (!controller.signal.aborted) timer = window.setTimeout(() => void drawNext(), 48);
@@ -56,7 +75,7 @@ export function StickerCatalogue({
       for (const entry of entries) {
         if (!entry.isIntersecting) continue;
         const id = entry.target.getAttribute("data-expression-id");
-        if (id && !cache.current.has(id)) queue.add(id);
+        if (id && !cache.current.has(thumbKey(form, id))) queue.add(id);
         observer.unobserve(entry.target);
       }
       if (!active && queue.size) {
@@ -73,16 +92,17 @@ export function StickerCatalogue({
       // outside the current React commit.
       queueMicrotask(() => renderer.dispose());
     };
-  }, [busy, form, listKey, pet]);
+  }, [appearance, busy, epoch, form, listKey, pet]);
 
   return (
-    <div ref={region} className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+    <div ref={region} role="group" aria-label="Expression catalogue"
+      className="grid max-h-[30rem] grid-cols-2 gap-2 overflow-y-auto overscroll-contain pr-1 sm:grid-cols-3 lg:max-h-[38rem]">
       {visible.map(item => (
         <button type="button" key={item.id} data-expression-id={item.id} aria-pressed={item.id === selected}
           className={buttonClass + (item.id === selected ? " border-amber-300 bg-amber-300/10 text-amber-200" : "") + " grid justify-items-center break-words py-1.5"}
           onClick={() => onSelect(item)}>
-          <span aria-hidden="true" className="block size-[58px]">
-            {images[item.id] && <img src={images[item.id]} width="58" height="58" alt="" loading="lazy" decoding="async" />}
+          <span aria-hidden="true" className="block size-[58px]" data-thumbnail={images[thumbKey(form, item.id)] ? "ready" : "pending"}>
+            {images[thumbKey(form, item.id)] && <img src={images[thumbKey(form, item.id)]} width="58" height="58" alt="" loading="lazy" decoding="async" />}
           </span>
           {item.label}
         </button>

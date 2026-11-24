@@ -14,9 +14,9 @@ const personality: PersonalityTraits = {
 afterEach(() => vi.unstubAllGlobals());
 
 describe("expression studio contracts", () => {
-  it("provides 24 unique performances with ordered keyframes and three adapters", () => {
-    expect(EXPRESSIONS).toHaveLength(24);
-    expect(new Set(EXPRESSIONS.map(e => e.id)).size).toBe(24);
+  it("provides 69 unique performances with ordered keyframes and three adapters", () => {
+    expect(EXPRESSIONS).toHaveLength(69);
+    expect(new Set(EXPRESSIONS.map(e => e.id)).size).toBe(69);
     expect(FORMS).toEqual(["auralia", "evolved", "geometry"]);
     for (const item of EXPRESSIONS) {
       expect(Object.keys(item.capabilities)).toEqual([...FORMS]);

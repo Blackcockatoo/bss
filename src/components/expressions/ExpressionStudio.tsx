@@ -14,6 +14,7 @@ import {
   type Aspect, type Caption, type Scene,
 } from "./ExpressionArt";
 import { StickerCatalogue } from "./StickerCatalogue";
+import { clearThumbnailCache } from "./thumbnailCache";
 import { ExpressionPreview } from "./ExpressionPreview";
 import { downloadBlob, exportGif, exportPack, exportPng, exportSheet, exportWebp, type Artwork, type Progress } from "./export";
 import { clearCreativeData, emptyCreativeData, loadCreativeData, MAX_CAPTION, newPanel, PANEL_COUNTS, saveCreativeData, type CreativeData, type Panel } from "./projects";
@@ -83,6 +84,7 @@ export function ExpressionStudio({ id, pet, initialForm }: { id: string; pet: Cr
   const [settings, setSettings] = useState<Settings>({ ...DEFAULT_SETTINGS });
   const [advanced, setAdvanced] = useState(false);
   const [captionOn, setCaptionOn] = useState(false);
+  const [thumbEpoch, setThumbEpoch] = useState(0);
   const [meme, setMeme] = useState<Caption>(creative.meme ?? DEFAULT_CAPTION);
   const [aspect, setAspect] = useState<Aspect>("square");
   const [scene, setScene] = useState<Scene>(DEFAULT_SCENE);
@@ -115,7 +117,7 @@ export function ExpressionStudio({ id, pet, initialForm }: { id: string; pet: Cr
     pet, form: previewForm, expression: previewExpression, settings: inComic ? DEFAULT_SETTINGS : settings,
     scene: inComic ? { ...DEFAULT_SCENE, background: panel.background } : scene,
     caption: inComic ? { ...DEFAULT_CAPTION, bubble: panel.bubble, style: panel.style } :
-      inMeme ? meme : { ...DEFAULT_CAPTION, bottom: captionOn ? selected.label : "" },
+      inMeme ? meme : { ...DEFAULT_CAPTION, bottom: captionOn ? selected.caption : "" },
     aspect: inMeme ? aspect : "square",
     reducedMotion,
   };
@@ -202,7 +204,7 @@ export function ExpressionStudio({ id, pet, initialForm }: { id: string; pet: Cr
     return ids.flatMap(expressionId => {
       const expression = getExpression(expressionId);
       return expression ? [{ ...artwork, expression, aspect: "square" as const, caption: {
-        ...DEFAULT_CAPTION, bottom: captionOn ? expression.label : "",
+        ...DEFAULT_CAPTION, bottom: captionOn ? expression.caption : "",
       } }] : [];
     });
   }
@@ -332,8 +334,13 @@ export function ExpressionStudio({ id, pet, initialForm }: { id: string; pet: Cr
               {creative.favorites.includes(selected.id) ? "Remove favourite" : "Favourite this expression"}
             </button>
             <StickerCatalogue key={form} form={form} pet={pet} visible={visible} selected={selected.id}
-              buttonClass={button} onSelect={selectExpression} busy={busy} />
+              buttonClass={button} onSelect={selectExpression} busy={busy} epoch={thumbEpoch} />
             {visible.length === 0 && <p className="text-sm text-slate-300">No matching expressions.</p>}
+            <button type="button" className={button} disabled={busy} onClick={() => void clearThumbnailCache().then(ok => {
+              setThumbEpoch(value => value + 1);
+              if (ok) setMessage("Thumbnail cache cleared. Thumbnails will redraw from your creature.");
+              else setError("This browser could not clear the thumbnail cache.");
+            })}>Clear thumbnail cache</button>
           </>}
           {(mode === "Animation Lab" || inMeme || mode === "Director") &&
             <Select label="Expression" value={selected.id} onChange={value => selectExpression(getExpression(value)!)}>
@@ -448,6 +455,7 @@ export function ExpressionStudio({ id, pet, initialForm }: { id: string; pet: Cr
             <button type="button" className={button} disabled={busy} onClick={() => {
               try {
                 clearCreativeData(id);
+                void clearThumbnailCache().then(() => setThumbEpoch(value => value + 1));
                 setCreative(emptyCreativeData());
                 setPanels([newPanel(form, "hello"), newPanel(form, "happy")]);
                 setActivePanel(0);

@@ -10,7 +10,9 @@ import { NEUTRAL_PERFORMANCE, resolveBodyPerformance } from "@/pet/performance";
 import { DEFAULT_VITALS } from "@metapet/core/vitals";
 import type { PetForm } from "@/lib/petForms";
 import type { CreatureSnapshot } from "@/lib/expressions/snapshot";
-import type { Expression, ExpressionFrame } from "@/lib/expressions/studio";
+import { clamp, type Expression, type ExpressionFrame } from "@/lib/expressions/studio";
+import type { Effect, EyeMood } from "@/lib/expressions/contract";
+import { PROP_ANCHORS, PropLayer } from "./PropLayer";
 
 export const FORM_LABELS: Record<PetForm, string> = { auralia: "Auralia", evolved: "Evolved", geometry: "Geometry" };
 export const BACKGROUNDS = {
@@ -32,26 +34,46 @@ export const DEFAULT_CAPTION: Caption = {
   top: "", bottom: "", bubble: "", style: "speech", align: "center", size: 32, outline: true,
 };
 
-function AuraliaExpression({ pet, frame, expression }: AdapterProps) {
+const AURALIA_EYES: Record<EyeMood, Pick<EyeState, "emotion" | "shape"> & { pupil?: number; sparkles?: boolean; wink?: boolean }> = {
+  normal: { emotion: "normal", shape: "round" },
+  happy: { emotion: "content", shape: "squinted" },
+  sad: { emotion: "sleepy", shape: "half-lidded", pupil: 8 },
+  sleepy: { emotion: "sleepy", shape: "half-lidded" },
+  surprised: { emotion: "surprised", shape: "wide", pupil: 5 },
+  confused: { emotion: "confused", shape: "spiral" },
+  curious: { emotion: "curious", shape: "round", pupil: 9 },
+  focused: { emotion: "focused", shape: "slit" },
+  grumpy: { emotion: "grumpy", shape: "half-lidded" },
+  love: { emotion: "content", shape: "heart" },
+  playful: { emotion: "playful", shape: "round", wink: true },
+  pleading: { emotion: "normal", shape: "wide", pupil: 11, sparkles: true },
+  scared: { emotion: "scared", shape: "wide", pupil: 4 },
+  closed: { emotion: "blinking", shape: "round" },
+  star: { emotion: "normal", shape: "star", sparkles: true },
+};
+
+function AuraliaExpression({ pet, frame }: AdapterProps) {
   const style = AURALIA_FORMS[pet.auralia.form];
-  const blinking = frame.lid < .15;
+  const mood = AURALIA_EYES[frame.eyes];
+  const blinking = frame.lid < .15 || mood.emotion === "blinking";
   const eyeState: EyeState = {
-    emotion: blinking ? "blinking" : frame.lid > 1.04 ? "surprised" :
-      frame.lid < .49 ? "sleepy" : expression.id === "confused" ? "confused" : "normal",
-    shape: expression.effect === "hearts" && frame.aura > .5 ? "heart" :
-      expression.id === "confused" ? "spiral" :
-      frame.lid > 1.08 ? "wide" : frame.lid < .65 ? "half-lidded" : "round",
-    pupilSize: 7 + frame.mouth, irisSize: 14, irisColor: style.eyeColor,
+    emotion: blinking ? "blinking" : frame.lid > 1.1 && mood.emotion === "normal" ? "surprised" : mood.emotion,
+    shape: frame.lid > 1.1 && mood.shape === "round" ? "wide" : mood.shape,
+    pupilSize: (mood.pupil ?? 7) + frame.mouthOpen, irisSize: 14, irisColor: style.eyeColor,
     glowIntensity: .79 + frame.aura * .2, blinkSpeed: 0, trackingSpeed: 0,
-    verticalScale: frame.lid, sparkles: false, jitter: false, wink: false,
+    verticalScale: clamp(frame.lid, .6, 1.2), sparkles: mood.sparkles ?? false, jitter: false, wink: mood.wink ?? false,
     offset: { x: 0, y: 0 },
   };
   const { form, markings, energy, bond, curiosity, health } = pet.auralia;
+  // The inner orb trails the body: organic follow-through without simulation.
+  const deformation = { x: frame.lag.x * .6, y: frame.lag.y * .6, intensity: Math.min(1, Math.abs(frame.squash) * 3) };
   return (
-    <svg x="31" y="24" width="450" height="450" viewBox="0 0 400 400" overflow="visible">
+    <svg x="76" y="67" width="360" height="360" viewBox="87.5 77.5 225 225" overflow="visible">
       <defs><AuraliaCreatureDefs activeForm={form} red60={markings.red60} animate={false} /><AddonSVGDefs /></defs>
       <AuraliaCreature activeForm={form} evolutionState={pet.evolution} traits={pet.traits}
-        eyeState={eyeState} eyePos={{ x: frame.gazeX * 7, y: frame.gazeY * 5 }} {...markings} />
+        eyeState={eyeState} eyePos={{ x: frame.gazeX * 7, y: frame.gazeY * 5 }} {...markings}
+        orbDeformation={deformation}
+        transformationMode={frame.eyes === "grumpy" && frame.mouth < -.5 ? "grumpy" : "normal"} />
       {(["behind", "front"] as const).map(layer => (
         <WardrobeCosmeticLayer key={layer} layer={layer} items={pet.cosmetics}
           resolveAnchor={resolveAuraliaCosmeticAnchor} reduceMotion bodyRadius={72} />
@@ -84,19 +106,29 @@ const restingBody = resolveBodyPerformance({
   vitals: DEFAULT_VITALS, personality: null, essence: 0, anomalyActive: false, reducedMotion: true,
 });
 
+const EVOLVED_PUPILS: Partial<Record<EyeMood, number>> = {
+  surprised: 1.28, scared: .68, love: 1.22, pleading: 1.3, focused: .82, grumpy: .9, star: 1.15, curious: 1.12,
+};
+
 function EvolvedExpression({ pet, frame }: AdapterProps) {
+  const lid = frame.eyes === "closed" ? .05 : frame.eyes === "grumpy" || frame.eyes === "sleepy" ? Math.min(frame.lid, .55) :
+    frame.eyes === "happy" ? Math.min(frame.lid, .5) : frame.lid;
   const performance = {
     ...NEUTRAL_PERFORMANCE,
-    eyelidOpen: frame.lid, gazeX: frame.gazeX, gazeY: frame.gazeY,
-    pupilScale: .9 + frame.lid * .15, wingSpread: .98 + frame.aura * .22,
-    wingFold: (1 - Math.min(1, frame.lid)) * .18, headTilt: frame.angle * .33,
+    eyelidOpen: lid, gazeX: frame.gazeX, gazeY: frame.gazeY,
+    pupilScale: (EVOLVED_PUPILS[frame.eyes] ?? 1) * (.9 + Math.min(1, frame.lid) * .15),
+    // Wings and appendages follow through behind the body's motion.
+    wingSpread: clamp(.98 + frame.aura * .22 - frame.lag.y * .025, .7, 1.3),
+    wingFold: clamp((1 - Math.min(1, frame.lid)) * .18 + Math.max(0, frame.lag.y) * .02, 0, .5),
+    headTilt: frame.angle * .33 + frame.lag.angle * .5,
     featureIntensity: frame.aura, auraScale: 1 + frame.aura * .14,
   };
   const spec: BodySpec = { ...pet.body, name: "Evolved", expression: "neutral" };
   return (
     <svg x="71" y="84" width="370" height="320" viewBox="0 0 280 250" overflow="visible">
       <PetBodyRenderer spec={spec} animate={false} performance={performance}
-        living={{ ...restingBody, mouthCurve: frame.mouth }} evolutionMark={pet.mark}
+        living={{ ...restingBody, mouthCurve: frame.mouth, mouthOpen: frame.mouthOpen > .05 ? .45 + frame.mouthOpen * 1.6 : 0 }}
+        evolutionMark={pet.mark}
         addonsBehind={<EvolvedWardrobe pet={pet} layer="behind" />}
         addonsFront={<EvolvedWardrobe pet={pet} layer="front" />} />
     </svg>
@@ -107,11 +139,27 @@ const GeometryCore = memo(function GeometryCore({ pet }: { pet: CreatureSnapshot
   return <GeometryPortraitSprite strands={pet.strands} traits={pet.traits} evolutionState={pet.evolution} />;
 });
 
+/**
+ * Geometry choreography wraps the locked Sri Yantra portrait. The protected
+ * engine is rendered unchanged; resonance, rotation and harmonic rings are
+ * transforms and overlays around it.
+ */
 function GeometryExpression({ pet, frame, expression }: AdapterProps) {
-  const resonance = expression.effect === "orbit" ? Math.sin(frame.phase * Math.PI * 2) * frame.aura * 19 : frame.gazeX * -13;
+  const swing = expression.effect === "orbit" ? Math.sin(frame.phase * Math.PI * 2) * frame.aura * 19 : frame.gazeX * -13;
+  const resonance = swing + frame.lag.angle * 1.5;
+  const pulse = 1 + frame.mouthOpen * .05 + frame.aura * .03;
+  const rings = frame.aura > .2 ? (frame.aura > .7 ? 3 : 2) : 0;
   return (
-    <svg x="58" y="51" width="396" height="396" viewBox="0 0 400 400" overflow="visible">
-      <g transform={`rotate(${resonance} 200 200)`}><GeometryCore pet={pet} /></g>
+    <svg x="78" y="71" width="356" height="356" viewBox="0 0 400 400" overflow="visible">
+      {Array.from({ length: rings }, (_, k) => (
+        <circle key={k} cx="200" cy="200" r={148 + k * 17 + frame.mouthOpen * 6} fill="none"
+          stroke={k % 2 ? "#8be8ef" : "#d9b45a"} strokeWidth="1.4" strokeDasharray={`${6 + k * 3} ${9 + k * 2}`}
+          opacity={frame.aura * (.55 - k * .12)} transform={`rotate(${frame.phase * 140 * (k % 2 ? -1 : 1) + frame.lag.angle * 3} 200 200)`} />
+      ))}
+      <g opacity={frame.lid < .3 ? .78 : 1}
+        transform={`rotate(${resonance} 200 200) translate(200 200) scale(${pulse}) translate(-200 -200)`}>
+        <GeometryCore pet={pet} />
+      </g>
     </svg>
   );
 }
@@ -149,8 +197,14 @@ function SceneProp({ scene }: { scene: Scene }) {
   );
 }
 
+const EFFECT_COLOURS: Record<Effect, string> = {
+  halo: "#ffd482", stars: "#ffd482", hearts: "#ffaac7", ripples: "#9fd8ef", orbit: "#8be8ef",
+  sparks: "#ffcf6b", confetti: "#ffd482", bubbles: "#bfe9f5",
+};
+const CONFETTI = ["#ffd482", "#8be8ef", "#ff9cbf", "#b9a4ff", "#9be6a8"];
+
 function Effects({ expression, frame, form }: AdapterProps & { form: PetForm }) {
-  const color = expression.effect === "hearts" ? "#ffaac7" : expression.effect === "orbit" ? "#8be8ef" : "#ffd482";
+  const color = EFFECT_COLOURS[expression.effect];
   return (
     <g opacity={frame.aura * .86} fill={color} stroke={color}>
       {expression.effect === "halo" || expression.effect === "ripples" || form === "geometry" ? (
@@ -158,13 +212,21 @@ function Effects({ expression, frame, form }: AdapterProps & { form: PetForm }) 
           fill="none" strokeWidth={form === "geometry" ? 2 : 1} opacity=".57" strokeDasharray={form === "geometry" ? "8 9" : undefined}
           transform={`rotate(${frame.angle * 2} 256 241)`} />
       ) : null}
-      {frame.particles.map(({ x, y, size }, i) => {
+      {frame.particles.map(({ x, y, size, opacity, rotate }, i) => {
         const points = `0,${-size * 2} ${size * .42},${-size * .42} ${size * 2},0 ${size * .42},${size * .42} 0,${size * 2} ${-size * .42},${size * .42} ${-size * 2},0 ${-size * .42},${-size * .42}`;
-        return expression.effect === "hearts" ? (
-          <path key={i} d="M0 5C-11-1-5-9 0-4 5-9 11-1 0 5Z" transform={`translate(${x} ${y}) scale(${size / 4})`} />
-        ) : expression.effect === "stars" || expression.effect === "sparks" ? (
-          <polygon key={i} points={points} transform={`translate(${x} ${y}) rotate(${frame.phase * 85 + i * 23})`} stroke="none" />
-        ) : <circle key={i} cx={x} cy={y} r={size * .67} />;
+        switch (expression.effect) {
+          case "hearts":
+            return <path key={i} opacity={opacity} d="M0 5C-11-1-5-9 0-4 5-9 11-1 0 5Z" transform={`translate(${x} ${y}) scale(${size / 4})`} />;
+          case "stars": case "sparks":
+            return <polygon key={i} opacity={opacity} points={points} transform={`translate(${x} ${y}) rotate(${rotate})`} stroke="none" />;
+          case "confetti":
+            return <rect key={i} opacity={opacity} x={-size} y={-size * .55} width={size * 2} height={size * 1.1}
+              fill={CONFETTI[i % CONFETTI.length]} stroke="none" transform={`translate(${x} ${y}) rotate(${rotate * 3})`} />;
+          case "bubbles":
+            return <circle key={i} opacity={opacity} cx={x} cy={y} r={size * 1.6} fill="none" strokeWidth="1.5" />;
+          default:
+            return <circle key={i} opacity={opacity} cx={x} cy={y} r={size * .67} />;
+        }
       })}
     </g>
   );
@@ -240,6 +302,9 @@ export function ExpressionArt({ pet, frame, expression, form, caption, scene, as
         <Effects pet={pet} form={form} frame={frame} expression={expression} />
         <g transform={`translate(${256 + frame.x} ${247 + frame.y}) rotate(${frame.angle}) scale(${frame.scale * (1 + frame.squash)} ${frame.scale * (1 - frame.squash)}) translate(-256 -247)`}>
           <Renderer pet={pet} frame={frame} expression={expression} />
+        </g>
+        <g transform={`translate(${frame.x + frame.lag.x * .5} ${frame.y + frame.lag.y * .5})`}>
+          <PropLayer props={frame.props} anchor={PROP_ANCHORS[form]} />
         </g>
       </g>
       <CaptionLayer caption={caption} width={width} height={height} />

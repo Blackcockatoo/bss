@@ -83,6 +83,24 @@ async function imageMetrics(page, bytes, mime) {
   }, { base64: bytes.toString("base64"), mime });
 }
 
+/** Lists PNG chunk types so exports can be checked for metadata (tEXt, iTXt, zTXt, eXIf, tIME...). */
+function pngChunks(bytes) {
+  assert.equal(bytes.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
+  const chunks = [];
+  for (let at = 8; at < bytes.length;) {
+    const length = bytes.readUInt32BE(at);
+    chunks.push(bytes.subarray(at + 4, at + 8).toString("latin1"));
+    at += 12 + length;
+  }
+  return chunks;
+}
+
+function assertPixelsOnly(bytes) {
+  const allowed = new Set(["IHDR", "IDAT", "IEND", "sRGB", "gAMA", "cHRM", "pHYs"]);
+  const chunks = pngChunks(bytes);
+  assert.deepEqual(chunks.filter(type => !allowed.has(type)), [], `unexpected PNG chunks ${chunks}`);
+}
+
 async function verifyPreviewFidelity(page, png) {
   // Render both the deterministic PNG pose and downloaded pixels against the
   // same CSS backdrop. A screenshot regression catches selector/clip bugs.
@@ -157,6 +175,7 @@ try {
     }
     await page.getByRole("img", { name: `${form} performing Happy` }).waitFor();
     const png = await download(page, "Download PNG");
+    assertPixelsOnly(png.bytes);
     const metrics = await imageMetrics(page, png.bytes, "image/png");
     assert.equal(metrics.width, 512);
     assert.equal(metrics.height, 512);
@@ -165,14 +184,57 @@ try {
     results.push({ form, pngMs: png.time, previewError: await verifyPreviewFidelity(page, png.bytes), pixels: metrics.nonempty });
     console.log("Verified", results.at(-1));
   }
-  for (const size of [256, 1024]) {
-    await page.getByLabel("PNG size").selectOption(String(size));
-    const metrics = await imageMetrics(page, (await download(page, "Download PNG")).bytes, "image/png");
-    assert.equal(metrics.width, size);
-    assert.equal(metrics.height, size);
-    assert.equal(metrics.border, 0);
+  // Transparent PNG at every size on every form.
+  for (const form of forms) {
+    await page.getByRole("button", { name: form, exact: true }).click();
+    await page.getByRole("button", { name: "PNG pose", exact: true }).click();
+    for (const size of [256, 512, 1024]) {
+      await page.getByLabel("PNG size").selectOption(String(size));
+      const file = await download(page, "Download PNG");
+      assertPixelsOnly(file.bytes);
+      const metrics = await imageMetrics(page, file.bytes, "image/png");
+      assert.equal(metrics.width, size);
+      assert.equal(metrics.height, size);
+      assert.equal(metrics.border, 0, `${form} ${size} touches the border`);
+      assert.ok(metrics.nonempty < size * size * .8, `${form} ${size} is not transparent`);
+      results.push({ form, size, transparentPixels: size * size - metrics.nonempty });
+    }
   }
+  console.log("Verified transparent PNG at 256/512/1024 on all three forms.");
   await page.getByLabel("PNG size").selectOption("512");
+
+  // Every catalogued expression on every form exports a framed PNG pose.
+  if (process.env.EXPRESSIONS_FULL_SWEEP === "1") {
+    const ids = await page.locator("[data-expression-id]").evaluateAll(nodes => nodes.map(node => node.getAttribute("data-expression-id")));
+    assert.ok(ids.length >= 69, String(ids.length));
+    let swept = 0;
+    const framing = [];
+    for (const form of forms) {
+      await page.getByRole("button", { name: form, exact: true }).click();
+      for (const id of ids) {
+        await page.locator(`[data-expression-id="${id}"]`).click();
+        await page.getByRole("button", { name: "PNG pose", exact: true }).click();
+        const metrics = await imageMetrics(page, (await download(page, "Download PNG")).bytes, "image/png");
+        if (metrics.border !== 0) framing.push(`${form}/${id} touches the border (${metrics.border}px)`);
+        if (metrics.nonempty <= 1200) framing.push(`${form}/${id} rendered nearly empty`);
+        swept++;
+      }
+    }
+    assert.deepEqual(framing, []);
+    results.push({ sweptExports: swept });
+    console.log(`Swept ${swept} expression/form PNG exports.`);
+    await page.getByRole("button", { name: "Auralia", exact: true }).click();
+    await page.locator('[data-expression-id="happy"]').click();
+    await page.getByRole("button", { name: "PNG pose", exact: true }).click();
+  }
+
+  // Thumbnails are cached per form and can be cleared and redrawn.
+  await page.locator('[data-thumbnail="ready"]').first().waitFor();
+  assert.ok(await page.evaluate(async () => (await caches.keys()).some(name => name.startsWith("metapet-expression-thumbs-"))));
+  await page.getByRole("button", { name: "Clear thumbnail cache", exact: true }).click();
+  await page.getByText("Thumbnail cache cleared.").waitFor();
+  await page.locator('[data-thumbnail="ready"]').first().waitFor();
+  console.log("Verified thumbnail cache clear and redraw.");
   const gif = await download(page, "Download GIF");
   const gifMetrics = await imageMetrics(page, gif.bytes, "image/gif");
   assert.ok(gifMetrics.frames > 5 && gifMetrics.distinctFrames);
@@ -189,7 +251,9 @@ try {
   console.log("Verified", results.at(-1));
 
   const zip = await download(page, "Download ZIP");
-  assert.equal(Object.keys(unzipSync(zip.bytes)).length, 4);
+  // The first pack (Everyday) has eight stickers.
+  const packFiles = Object.keys(unzipSync(zip.bytes));
+  assert.equal(packFiles.length, 8, packFiles.join());
   await page.getByRole("button", { name: "Prepare sticker sheet" }).click();
   await page.getByRole("button", { name: "Print prepared page" }).waitFor();
   await page.emulateMedia({ media: "print" });
