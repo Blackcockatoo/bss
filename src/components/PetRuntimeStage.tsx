@@ -5,8 +5,8 @@ import AuraliaMetaPet from '@/components/AuraliaMetaPet';
 import { GeometryAvatarRenderer } from '@/components/GeometryAvatarRenderer';
 import { VisualDNAPet } from '@/components/VisualDNAPet';
 import { PetRuntimeDiagnostics } from '@/components/dev/PetRuntimeDiagnostics';
-import { AliveProvider } from "@/pet/alive/AliveContext";
 import { AliveControls } from "@/pet/alive/AliveControls";
+import { AliveProvider } from "@/pet/alive/AliveContext";
 import { usePetRegistryStore } from "@/lib/registry/runtime";
 import { useStore } from '@/lib/store';
 import { useSyncExternalStore } from 'react';
@@ -49,9 +49,9 @@ export function PetRuntimeStage({
 
   function withPerformance(children: React.ReactNode) {
     if (!interactivePerformance || !record) return children;
-    return <AliveProvider key={`${record.petId}:${petType}`} record={record} form={petType} editing={Boolean(addonEditMode)}>
+    return <AliveProvider key={`${record.petId}:${petType}`} record={record} form={petType} editing={Boolean(addonEditMode)}
+      controls={<AliveControls petId={record.petId} />}>
       {children}
-      <AliveControls petId={record.petId} />
     </AliveProvider>;
   }
 

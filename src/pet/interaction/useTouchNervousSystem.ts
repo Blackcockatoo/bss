@@ -255,8 +255,11 @@ export function useTouchNervousSystem(
           const count = now - tapRef.current.at <= 390 ? tapRef.current.count + 1 : 1;
           tapRef.current = { at: now, count };
           onGesture?.("tap");
+          const bounds = stageRef.current?.getBoundingClientRect();
+          const relativeX = bounds?.width ? (event.clientX - bounds.left) / bounds.width : .5;
+          const greetingSide = relativeX < .4 ? -1 : relativeX > .6 ? 1 : 0;
           onPerformanceGesture?.({ kind: count === 1 ? "tap" : count === 2 ? "double-tap" : "rhythm",
-            intensity: Math.min(.85, .25 + count * .14), direction: count % 2 ? 1 : -1 });
+            intensity: Math.min(.85, .25 + count * .14), direction: count % 2 ? 1 : -1, greetingSide });
           dispatch("gesture-tap", now);
         } else if (!runFiredRef.current.swipe && window.isFastSwipe) {
           onGesture?.("swipe");
@@ -271,7 +274,7 @@ export function useTouchNervousSystem(
       if (!released || contact.pointerType !== "mouse") insideRef.current = false;
       dispatch("contact-end", now);
     },
-    [dispatch, onGesture, onPerformanceGesture],
+    [dispatch, onGesture, onPerformanceGesture, stageRef],
   );
 
   const onPointerUp = useCallback((event: React.PointerEvent) => endContact(event, true), [

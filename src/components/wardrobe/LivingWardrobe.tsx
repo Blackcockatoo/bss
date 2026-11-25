@@ -115,6 +115,7 @@ export function LivingWardrobe({ isOpen, onClose, form }: LivingWardrobeProps) {
   const closeWardrobe = useWardrobeStore((s) => s.closeWardrobe);
   const previewAddonForForm = useWardrobeStore((s) => s.previewAddonForForm);
   const clearPreview = useWardrobeStore((s) => s.clearPreview);
+  const commitPreview = useWardrobeStore((s) => s.commitPreview);
   const toggleArrangeMode = useWardrobeStore((s) => s.toggleArrangeMode);
   const setActiveCategory = useWardrobeStore((s) => s.setActiveCategory);
 
@@ -176,8 +177,7 @@ export function LivingWardrobe({ isOpen, onClose, form }: LivingWardrobeProps) {
     if (!currentPreview) return;
     const entry = catalog.find((e) => e.addon.id === currentPreview.id);
     if (!entry?.owned) return;
-    equipAddon(currentPreview.id);
-    clearPreview();
+    if (equipAddon(currentPreview.id)) commitPreview(currentPreview.id);
   };
 
   const handleRemove = (addon: Addon) => {

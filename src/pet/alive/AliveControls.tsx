@@ -5,9 +5,11 @@ import { useEffect, useRef, useState } from "react";
 import { EXPRESSIONS } from "@/lib/expressions/studio";
 import { readTake, saveTake, TAKE_LIMIT_MS } from "@/lib/expressions/take";
 import { useForgeAudio } from "@/lib/tools/useForgeAudio";
-import { useAlive, useAlivePaused } from "./AliveContext";
+import { useAlive, useAlivePaused, useAliveScene, useGreetingHabit } from "./AliveContext";
 import { genomeMotif, playBeatPose } from "./music";
 import { useLocalTrack } from "./useLocalTrack";
+import { MirrorGesture } from "./MirrorGesture";
+import { BeatReply } from "./BeatReply";
 import type { AliveMode } from "./director";
 
 const control = "min-h-11 min-w-11 rounded-lg border border-slate-600 px-3 py-2 text-sm text-slate-100 hover:border-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300 disabled:opacity-50";
@@ -16,6 +18,8 @@ const modes: AliveMode[] = ["playful", "calm", "dance"];
 export function AliveControls({ petId }: { petId: string }) {
   const director = useAlive();
   const paused = useAlivePaused();
+  const habit = useGreetingHabit();
+  const scene = useAliveScene();
   const [mode, setMode] = useState<AliveMode>("playful");
   const [expression, setExpression] = useState("happy");
   const [intensity, setIntensity] = useState(1);
@@ -134,6 +138,23 @@ export function AliveControls({ petId }: { petId: string }) {
             {hasTake ? "Open recorded performance" : "Open Expression Studio"}
           </Link>
         </div>
+        <details className="space-y-3">
+          <summary className="flex min-h-11 cursor-pointer items-center font-medium">Living interactions</summary>
+          {scene && <button type="button" className={control} aria-pressed={scene.garden} onClick={scene.toggleGarden}>Moonlit garden</button>}
+          <BeatReply director={performer} controlClass={control} />
+          <MirrorGesture director={performer} controlClass={control} />
+          {habit && <div className="flex flex-wrap items-center gap-2">
+            <label className="flex min-h-11 items-center gap-2 px-2 text-sm">
+              <input type="checkbox" className="size-5" checked={habit.enabled} onChange={event => {
+                const saved = habit.setEnabled(event.target.checked);
+                setNotice(saved ? "" : "This browser could not save the greeting setting.");
+              }} /> Remember greeting side
+            </label>
+            <button type="button" className={control} disabled={!habit.enabled} onClick={() => {
+              setNotice(habit.reset() ? "Greeting habit reset." : "Greeting habit reset for this session only.");
+            }}>Reset greeting habit</button>
+          </div>}
+        </details>
         {notice && <p role="status" className="text-sm text-slate-300">{notice}</p>}
       </div>
     </details>

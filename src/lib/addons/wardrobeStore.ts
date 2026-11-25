@@ -27,6 +27,7 @@ interface WardrobeState {
   /** Which pet form the current preview belongs to (guards against a
    * preview started for one form leaking onto another). */
   previewForm: PetForm | null;
+  committedPreviewId: string | null;
   activeCategory: Addon["category"] | "all";
 
   openWardrobe: (form: PetForm) => void;
@@ -35,6 +36,7 @@ interface WardrobeState {
   closeWardrobe: () => void;
   previewAddonForForm: (addon: Addon, form: PetForm) => void;
   clearPreview: () => void;
+  commitPreview: (addonId: string) => void;
   setArrangeMode: (value: boolean) => void;
   toggleArrangeMode: () => void;
   setActiveCategory: (category: Addon["category"] | "all") => void;
@@ -45,17 +47,19 @@ export const useWardrobeStore = create<WardrobeState>((set) => ({
   arrangeMode: false,
   previewAddon: null,
   previewForm: null,
+  committedPreviewId: null,
   activeCategory: "all",
 
   openWardrobe: (form) =>
     // Always opens clean: any preview left over from an unmounted/aborted
     // session is discarded rather than resurfacing unexpectedly.
-    set({ isOpen: true, previewForm: form, previewAddon: null, arrangeMode: false }),
+    set({ isOpen: true, previewForm: form, previewAddon: null, arrangeMode: false, committedPreviewId: null }),
   closeWardrobe: () =>
-    set({ isOpen: false, arrangeMode: false, previewAddon: null, previewForm: null }),
+    set({ isOpen: false, arrangeMode: false, previewAddon: null, previewForm: null, committedPreviewId: null }),
   previewAddonForForm: (addon, form) =>
-    set({ previewAddon: addon, previewForm: form }),
-  clearPreview: () => set({ previewAddon: null }),
+    set({ previewAddon: addon, previewForm: form, committedPreviewId: null }),
+  clearPreview: () => set({ previewAddon: null, committedPreviewId: null }),
+  commitPreview: addonId => set({ previewAddon: null, committedPreviewId: addonId }),
   setArrangeMode: (value) =>
     // Entering Arrange Mode always drops any live preview — you arrange
     // equipped items, not previews.

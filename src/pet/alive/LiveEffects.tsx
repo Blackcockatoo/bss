@@ -2,6 +2,9 @@
 
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useAliveFrame, useAlivePaused, weightedFrame } from "./AliveContext";
+import { useAddonStore } from "@/lib/addons/store";
+import { useWardrobeStore } from "@/lib/addons/wardrobeStore";
+import { OLD_VIC_MANTLE } from "@/lib/addons/oldVicMantle";
 import { clamp } from "@/lib/expressions/studio";
 import type { ReactNode } from "react";
 
@@ -30,12 +33,20 @@ export function AliveGeometryMotion({ children, gaze }: { children: ReactNode; g
   const reduced = useReducedMotion();
   const paused = useAlivePaused();
   const frame = sample && weightedFrame(sample);
+  const previewId = useWardrobeStore(state => state.previewForm === "geometry" ? state.previewAddon?.id : undefined);
+  const equippedId = useAddonStore(state => state.equipped.accessory);
+  const mantle = (previewId ?? equippedId) === OLD_VIC_MANTLE.id;
   const turn = clamp((frame?.angle ?? 0) * .6 + gaze.x * 8, -32, 32);
   const scale = 1 + (frame?.aura ?? 0) * .052;
   return <div className="relative aspect-square w-full" data-alive-cue={sample?.cue.expressionId}
     style={paused || reduced ? undefined : {
       transform: `translate(${(frame?.x ?? 0) * .45}px, ${(frame?.y ?? 0) * .45}px) rotate(${turn}deg) scale(${scale})`,
     }}>
+    {mantle && <svg aria-hidden="true" className="pointer-events-none absolute inset-[13%] h-[74%] w-[74%]" viewBox="0 0 100 100"
+      data-alive-wardrobe={OLD_VIC_MANTLE.id}>
+      <path d={OLD_VIC_MANTLE.visual.svgPath} fill={OLD_VIC_MANTLE.visual.colors.primary}
+        stroke={OLD_VIC_MANTLE.visual.colors.secondary} strokeWidth="1.7" />
+    </svg>}
     {children}
     {frame && frame.aura > .03 && <div aria-hidden className="pointer-events-none absolute inset-[14%] rounded-full border border-cyan-200"
       style={{ opacity: frame.aura * .6 }} />}

@@ -132,6 +132,17 @@ try {
   const mobPanel = await openPanel(phone);
   const target = await mobPanel.getByRole("button", { name: "Perform", exact: true }).boundingBox();
   assert.ok(target.height >= 44);
+  await mobPanel.getByText("Living interactions", { exact: true }).click();
+  await mobPanel.getByRole("button", { name: "Play three beats", exact: true }).tap();
+  await mobPanel.getByText(/^Reply: three beats/).waitFor();
+  await mobPanel.getByRole("checkbox", { name: "Remember greeting side" }).check();
+  const habitKey = `metapet:alive:greeting:v1:${before.id}`;
+  assert.equal(await phone.evaluate(key => localStorage.getItem(key), habitKey), "0");
+  await mobPanel.getByRole("button", { name: "Reset greeting habit", exact: true }).click();
+  await mobPanel.getByText("Greeting habit reset.", { exact: true }).waitFor();
+  await mobPanel.getByRole("checkbox", { name: "Remember greeting side" }).uncheck();
+  assert.equal(await phone.evaluate(key => localStorage.getItem(key), habitKey), null);
+  console.log("Verified mobile reduced-motion beat reply and local greeting controls.");
   assert.deepEqual(await identity(phone), before);
   assert.deepEqual(problems, []);
   console.log("Verified 360px touch, vertical scrolling policy, reduced-motion recovery and identity preservation.");

@@ -3,6 +3,7 @@ import type { PetForm } from "@/lib/petForms";
 import { clamp, DEFAULT_SETTINGS, durationMs, getExpression } from "@/lib/expressions/studio";
 import { sampleTake, TAKE_LIMIT_CUES, TAKE_LIMIT_MS, type CueSource, type PerformanceCue, type PerformanceSample, type PerformanceTake } from "@/lib/expressions/take";
 import { MovementPriority } from "@/pet/movement/movementVocabulary";
+import type { GreetingSide } from "./greetingHabit";
 import { seededUnit } from "@/pet/movement/movementScheduler";
 
 export type AliveMode = "playful" | "calm" | "dance";
@@ -10,6 +11,7 @@ export type Gesture = {
   kind: "hover" | "tap" | "double-tap" | "rhythm" | "hold" | "stroke" | "swipe" | "release";
   intensity: number;
   direction: -1 | 1;
+  greetingSide?: GreetingSide;
 };
 
 export const CUE_PRIORITY: Record<CueSource, MovementPriority> = {
@@ -59,11 +61,12 @@ const touchVariations: Partial<Record<Gesture["kind"], readonly string[]>> = {
   swipe: ["spin-out", "blue-streak", "wobbly"],
 };
 
-type CueOptions = { source: CueSource; duration?: number; intensity?: number; direction?: -1 | 1; replay?: Pick<PerformanceCue, "intensity" | "exaggeration"> };
+type CueOptions = { source: CueSource; duration?: number; intensity?: number; direction?: -1 | 1; record?: boolean; replay?: Pick<PerformanceCue, "intensity" | "exaggeration"> };
 type Clock = { now: () => number; request: (f: FrameRequestCallback) => number; cancel: (id: number) => void };
 type DirectorConfig = {
   form: PetForm; personality: PersonalityTraits; seed: number;
   blocked: () => boolean; reduced: () => boolean; clock?: Clock;
+  onGreeting?: (side: GreetingSide) => void;
 };
 const clock: Clock = {
   now: () => performance.now(), request: callback => requestAnimationFrame(callback), cancel: id => cancelAnimationFrame(id),
@@ -126,16 +129,17 @@ export function createDirector(config: DirectorConfig) {
     // Intentional touches interrupt passive motion. Equal-priority gestures
     // can continue a rhythm. One active cue owns the performance channels.
     const incoming = CUE_PRIORITY[options.source];
-    if (current && now < current.at + current.duration && incoming < CUE_PRIORITY[current.source] &&
-      !(options.source === "touch" && current.source === "music")) return false;
+    if (current && now < current.at + current.duration &&
+      (options.source === "ambient" || (incoming < CUE_PRIORITY[current.source] &&
+        !(options.source === "touch" && current.source === "music")))) return false;
     const cue: PerformanceCue = {
       at: now, expressionId, source: options.source,
       duration: Math.round(clamp(options.duration ?? durationMs(expression, DEFAULT_SETTINGS, config.personality), 120, 5000)),
       intensity: options.replay?.intensity ?? clamp(intensity * (options.intensity ?? 1) * (mode === "calm" ? .68 : 1), .45, 1.45),
       exaggeration: options.replay?.exaggeration ?? exaggeration, direction: options.direction ?? 1,
     };
-    if (options.source !== "ambient") last = cue;
-    if (recording && options.source !== "ambient" && recording.cues.length < TAKE_LIMIT_CUES &&
+    if (options.source !== "ambient" && options.record !== false) last = cue;
+    if (recording && options.record !== false && options.source !== "ambient" && recording.cues.length < TAKE_LIMIT_CUES &&
       now - recording.start <= TAKE_LIMIT_MS) {
       recording.cues.push({ ...cue, at: Math.round(now - recording.start) });
     }
@@ -150,6 +154,12 @@ export function createDirector(config: DirectorConfig) {
     personality: config.personality,
     seed: config.seed,
     play,
+    isBlocked: config.blocked,
+    isReduced: config.reduced,
+    stopCue(id: string) {
+      const current = timeline.cues.at(-1);
+      if (current?.expressionId === id) stop();
+    },
     gesture(gesture: Gesture) {
       if (gesture.kind === "hover") {
         const now = timer.now();
@@ -169,7 +179,10 @@ export function createDirector(config: DirectorConfig) {
         intensity: .79 + clamp(gesture.intensity, 0, 1) * .46,
         duration: gesture.kind === "release" ? 830 : undefined,
       });
-      if (accepted) gestures.set(gesture.kind, count + 1);
+      if (accepted) {
+        gestures.set(gesture.kind, count + 1);
+        if (gesture.kind === "tap" && gesture.greetingSide) config.onGreeting?.(gesture.greetingSide);
+      }
       return accepted;
     },
     replay() {
