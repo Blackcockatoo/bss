@@ -1,12 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { beatGaps } from "./BeatReply";
-import { isRepeatedFigureEight } from "./MirrorGesture";
+import { beatGaps, continuesBeat, isRepeatedFigureEight } from "./gestureMath";
 import { readGreetingHabit, rememberedGreetingSide, updateGreetingHabit, writeGreetingHabit } from "./greetingHabit";
 
 describe("living interactions", () => {
   it("bounds the two reply intervals to the playable range", () => {
     expect(beatGaps([200, 230, 1440, 1490])).toEqual([150, 900]);
     expect(beatGaps([0, 230.4, 540.8])).toEqual([230, 310]);
+    expect(continuesBeat(100, 1000)).toBe(true);
+    expect(continuesBeat(100, 1001)).toBe(false);
+    expect(continuesBeat(100, 99)).toBe(false);
   });
 
   it("requires four alternating closed lobes for two sideways eights", () => {
@@ -17,6 +19,8 @@ describe("living interactions", () => {
     const normal = [...makeLobe(1), ...makeLobe(-1)];
     expect(isRepeatedFigureEight([...normal, ...normal])).toBe(true);
     expect(isRepeatedFigureEight(normal)).toBe(false);
+    expect(isRepeatedFigureEight([...normal, ...normal].map(({ x, y }) => ({ x: .6 + x * .4, y: .4 + y * .27 })))).toBe(true);
+    expect(isRepeatedFigureEight([...normal, ...normal].map(({ x, y }) => ({ x: x * .03, y: y * .03 })))).toBe(false);
     expect(isRepeatedFigureEight(makeLobe(1).concat(makeLobe(1), makeLobe(1), makeLobe(1)))).toBe(false);
     expect(isRepeatedFigureEight(normal.map(point => ({ ...point, y: 0 })))).toBe(false);
   });

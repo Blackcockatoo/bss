@@ -141,7 +141,7 @@ export function AliveControls({ petId }: { petId: string }) {
         <details className="space-y-3">
           <summary className="flex min-h-11 cursor-pointer items-center font-medium">Living interactions</summary>
           {scene && <button type="button" className={control} aria-pressed={scene.garden} onClick={scene.toggleGarden}>Moonlit garden</button>}
-          <BeatReply director={performer} controlClass={control} />
+          <BeatReply director={performer} controlClass={control} onStageStatus={scene?.setRhythmStatus} />
           <MirrorGesture director={performer} controlClass={control} />
           {habit && <div className="flex flex-wrap items-center gap-2">
             <label className="flex min-h-11 items-center gap-2 px-2 text-sm">

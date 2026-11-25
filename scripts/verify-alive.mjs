@@ -102,6 +102,32 @@ try {
   assert.deepEqual(await identity(page), before);
   console.log("Verified native Evolved and Geometry performances, pause, and opt-in genome audio.");
 
+  const geometryStage = touch(page, "geometry");
+  for (let index = 0; index < 3; index++) {
+    await geometryStage.click();
+    if (index < 2) await page.waitForTimeout(270);
+  }
+  const stageStatus = page.locator("[data-stage-gesture-status]");
+  await stageStatus.filter({ hasText: /^Reply: three beats/ }).waitFor();
+  await page.getByRole("button", { name: "Draw on pet", exact: true }).click();
+  await geometryStage.scrollIntoViewIfNeeded();
+  const box = await geometryStage.boundingBox();
+  assert.ok(box);
+  const x = box.x + box.width / 2;
+  const y = box.y + box.height / 2;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  for (const side of [1, -1, 1, -1]) {
+    for (let step = 1; step <= 26; step++) {
+      const phase = step / 26 * Math.PI * 2;
+      await page.mouse.move(x + side * box.width * .17 * (1 - Math.cos(phase)), y + box.height * .2 * Math.sin(phase));
+    }
+  }
+  await page.mouse.up();
+  await stageStatus.filter({ hasText: "Your companion echoed the figure eight." }).waitFor();
+  await cue(page, "mirror-eight").waitFor();
+  console.log("Verified a tap rhythm and a drawn figure eight directly on the creature stage.");
+
   await geometryControls.getByText("Living interactions", { exact: true }).click();
   await geometryControls.getByRole("button", { name: "Mirror figure eight", exact: true }).click();
   await cue(page, "mirror-eight").waitFor();
@@ -147,6 +173,11 @@ try {
   await phone.locator("[data-alive-cue]").first().waitFor({ state: "detached" });
   assert.equal(await phone.locator("[data-alive-touch]").count(), 1);
   assert.equal(await phone.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false);
+  for (let index = 0; index < 3; index++) {
+    await touch(phone, "geometry").tap();
+    if (index < 2) await phone.waitForTimeout(270);
+  }
+  await phone.locator("[data-stage-gesture-status]").filter({ hasText: /^Reply: three beats/ }).waitFor();
   const mobPanel = await openPanel(phone);
   const target = await mobPanel.getByRole("button", { name: "Perform", exact: true }).boundingBox();
   assert.ok(target.height >= 44);

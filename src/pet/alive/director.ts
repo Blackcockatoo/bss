@@ -12,6 +12,7 @@ export type Gesture = {
   intensity: number;
   direction: -1 | 1;
   greetingSide?: GreetingSide;
+  tapAt?: number;
 };
 
 export const CUE_PRIORITY: Record<CueSource, MovementPriority> = {
@@ -78,6 +79,7 @@ export function createDirector(config: DirectorConfig) {
   const timeline: PerformanceTake = { version: 1, form: config.form, cues: [] };
   const listeners = new Set<() => void>();
   const policyListeners = new Set<() => void>();
+  const stageTapListeners = new Set<(at: number | null) => boolean>();
   let sample: PerformanceSample | null = null;
   let request = 0;
   let lastTick = -Infinity;
@@ -160,7 +162,21 @@ export function createDirector(config: DirectorConfig) {
       const current = timeline.cues.at(-1);
       if (current?.expressionId === id) stop();
     },
+    subscribeStageTap(listener: (at: number | null) => boolean) {
+      stageTapListeners.add(listener);
+      return () => { stageTapListeners.delete(listener); };
+    },
+    clearStageTaps() {
+      for (const listener of stageTapListeners) listener(null);
+    },
     gesture(gesture: Gesture) {
+      if (gesture.tapAt !== undefined && !config.blocked()) {
+        for (const listener of stageTapListeners) {
+          if (listener(gesture.tapAt)) return true;
+        }
+      } else if (gesture.kind === "hold" || gesture.kind === "swipe" || gesture.kind === "stroke") {
+        for (const listener of stageTapListeners) listener(null);
+      }
       if (gesture.kind === "hover") {
         const now = timer.now();
         const current = timeline.cues.at(-1);
