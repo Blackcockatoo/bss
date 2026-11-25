@@ -65,7 +65,7 @@ export function AliveProvider({ record, form, editing, children, controls }: {
     blocked: () => {
       const state = useStore.getState();
       const now = Date.now();
-      return document.hidden || !visible.current || clock.current.editing || state.systemState === "sealed" ||
+      return document.hidden || clock.current.editing || state.systemState === "sealed" ||
         state.vitals.isSick || state.vitals.hunger >= 90 || state.vitals.energy <= 8 ||
         now < clock.current.ceremonyUntil || (!!state.lastAction && now - state.lastActionAt < 2700);
     },
