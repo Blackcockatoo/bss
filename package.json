@@ -20,14 +20,17 @@
     "sync:kpps-exports": "node scripts/sync-kpps-package-exports.mjs",
     "sync:school-docs": "node scripts/sync-school-docs.mjs",
     "check:school-docs": "node scripts/sync-school-docs.mjs --check",
-    "generate:school-docs": "node scripts/generate-school-docs.cjs"
+    "generate:school-docs": "node scripts/generate-school-docs.cjs",
+    "check:expressions-visual": "node scripts/expressions-visual-baseline.mjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
     "@vercel/analytics": "^2.0.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "fflate": "^0.8.3",
     "framer-motion": "^12.23.24",
+    "gifenc": "^1.0.3",
     "jsqr": "^1.4.0",
     "lucide-react": "^0.553.0",
     "next": "^16.4.6",

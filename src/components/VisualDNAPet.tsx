@@ -37,6 +37,9 @@ import {
 } from "@/pet/movement";
 import { resolveBodyPerformance } from "@/pet/performance";
 import { useTouchNervousSystem } from "@/pet/interaction";
+import { useAlive, useAliveFrame, useAlivePaused, weightedFrame } from "@/pet/alive/AliveContext";
+import { expressionBody } from "@/pet/alive/presentation";
+import { MovementPriority } from "@/pet/movement/movementVocabulary";
 import { BodyForgeAddonLayer } from "@/components/addons/BodyForgeAddonOverlay";
 import { useAddonStore } from "@/lib/addons/store";
 import { useWardrobeStore } from "@/lib/addons/wardrobeStore";
@@ -160,7 +163,10 @@ export function VisualDNAPet({
   const systemState = useStore((state) => state.systemState);
   const essence = useStore((state) => state.essence);
   const vimanaNodes = useStore((state) => state.vimana?.nodes);
-  const reducedMotion = useReducedMotion();
+  const alive = useAlive();
+  const osReduceMotion = useReducedMotion();
+  const motionPaused = useAlivePaused();
+  const reducedMotion = Boolean(osReduceMotion) || motionPaused;
   const sealed = systemState === "sealed";
   // Tracks which action timestamp has aged past the reaction window. Keeps
   // render pure (no Date.now during render): while an action is fresh the
@@ -305,7 +311,7 @@ export function VisualDNAPet({
     evolutionState: evolution.state,
     identityKey: fingerprint,
     reduceMotion: Boolean(reducedMotion),
-    paused: sealed,
+    paused: sealed || motionPaused,
   });
 
   // Dev-only: surface the active Moss60 clip for the diagnostics readout.
@@ -353,20 +359,25 @@ export function VisualDNAPet({
   // as one reusable controller (mouse, touch and pen via Pointer Events).
   // See src/pet/interaction for the state machine and priority docs.
   const stageRef = useRef<HTMLDivElement>(null);
+  const cue = useAliveFrame(movement.active.clip.priority);
+  const expressionFrame = cue ? weightedFrame(cue) : null;
   const interaction = useTouchNervousSystem({
     stageRef,
-    sealed,
+    sealed: sealed || motionPaused,
     reducedMotion: Boolean(reducedMotion),
     trust: living.trust,
     stress: living.stress,
     activeClipPriority: movement.active.clip.priority,
-    onGesture: (gesture) => movement.onGesture(gesture),
-    onAffection: () => movement.onAffection(),
+    onGesture: alive ? undefined : movement.onGesture,
+    onAffection: alive ? undefined : movement.onAffection,
+    onPerformanceGesture: alive?.gesture,
   });
-  const livingWithTouch = useMemo(
-    () => interaction.applyOverlay(living),
-    [interaction, living],
-  );
+  const livingWithTouch = interaction.applyOverlay(living);
+  const performedBody = expressionFrame && cue ? {
+    ...livingWithTouch,
+    mouthCurve: livingWithTouch.mouthCurve * (1 - cue.weight) + expressionFrame.mouth,
+    mouthOpen: expressionFrame.mouthOpen * 1.6,
+  } : livingWithTouch;
 
   // The stage sigil etched on the body. It uses the shared branch-tinted
   // stage palette rather than the genome's own colours, so every reached
@@ -509,15 +520,19 @@ export function VisualDNAPet({
   // living baseline to avoid double application.
   const performanceFrame = useMemo(() => {
     if (!bodyContext || sealed) return null;
-    const raw = interpretMovement(movement.active.clip.id, movement.progress, {
+    // Preserve native priority and slow posture. The shared cue owns fast
+    // channels while playing, replacing the interpreter's ambient clip.
+    const nativeClip = expressionFrame || motionPaused ? "idle_breathe" : movement.active.clip.id;
+    const raw = interpretMovement(nativeClip, motionPaused ? 0 : movement.progress, {
       body: bodyContext,
       performance: livingWithTouch,
       intensity: movement.active.clip.intensity,
       reducedMotion: Boolean(reducedMotion),
       seed: movement.seed,
     });
-    const gaze = interaction.gaze;
-    return {
+    const gaze = motionPaused || movement.active.clip.priority >= MovementPriority.EvolutionCeremony
+      ? { x: 0, y: 0 } : interaction.gaze;
+    const base = {
       ...raw,
       eyelidOpen: clampValue(
         raw.eyelidOpen / Math.max(0.08, livingWithTouch.eyelidOpen),
@@ -540,10 +555,15 @@ export function VisualDNAPet({
         1,
       ),
     };
+    return expressionFrame && cue ? expressionBody(expressionFrame, base, cue.weight, !reducedMotion) : base;
   }, [
     bodyContext,
     livingWithTouch,
     interaction.gaze,
+    expressionFrame,
+    cue,
+    motionPaused,
+    movement.active.clip.priority,
     movement.active.clip.id,
     movement.active.clip.intensity,
     movement.progress,
@@ -770,6 +790,8 @@ export function VisualDNAPet({
           className="relative min-h-[360px] select-none"
           style={interaction.stageStyle}
           data-interaction-state={interaction.state}
+          data-alive-touch={alive ? "evolved" : undefined}
+          data-alive-cue={cue?.cue.expressionId}
           {...interaction.pointerHandlers}
         >
           <div className="absolute inset-0 flex items-center justify-center">
@@ -780,7 +802,7 @@ export function VisualDNAPet({
               className="h-auto w-full max-w-xl overflow-visible"
               showForgeAura
               performance={performanceFrame}
-              living={sealed ? null : livingWithTouch}
+              living={sealed ? null : performedBody}
               activeClipId={sealed ? null : movement.active.clip.id}
               evolutionMark={evolutionMark}
               addonsBehind={addonLayers?.behind}
@@ -856,6 +878,8 @@ export function VisualDNAPet({
           className="relative min-h-[360px] select-none"
           style={interaction.stageStyle}
           data-interaction-state={interaction.state}
+          data-alive-touch={alive ? "evolved" : undefined}
+          data-alive-cue={cue?.cue.expressionId}
           {...interaction.pointerHandlers}
         >
           <motion.svg
@@ -933,7 +957,7 @@ export function VisualDNAPet({
                   animate={!reducedMotion}
                   className="overflow-visible"
                   performance={performanceFrame}
-                  living={sealed ? null : livingWithTouch}
+                  living={sealed ? null : performedBody}
                   activeClipId={sealed ? null : movement.active.clip.id}
                   evolutionMark={evolutionMark}
                   addonsBehind={addonLayers?.behind}

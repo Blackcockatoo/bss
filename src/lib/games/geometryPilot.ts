@@ -23,11 +23,9 @@ export function serializeGeometrySprite(
   svg.removeAttribute("class");
   svg.removeAttribute("style");
   // Remove only the scene backdrop from the exported copy, never the locked asset.
-  [...svg.children]
-    .find((node) => node.tagName.toLowerCase() === "rect")
-    ?.remove();
+  stripGeometryBackdrop(svg);
   for (const originalOverlay of sprite.querySelectorAll<SVGSVGElement>(
-    ':scope > svg[data-testid="geometry-evolution-stage"]',
+    'svg[data-testid="geometry-evolution-stage"]',
   )) {
     const overlay = originalOverlay.cloneNode(true) as SVGSVGElement;
     overlay.removeAttribute("class");
@@ -37,13 +35,28 @@ export function serializeGeometrySprite(
     overlay.setAttribute("height", String(height));
     svg.appendChild(overlay);
   }
+  return serializeLocalSprite(svg);
+}
+
+/** Remove the scene colour plane from a cloned geometry SVG. */
+export function stripGeometryBackdrop(svg: SVGSVGElement) {
+  [...svg.children].find((node) => node.tagName.toLowerCase() === "rect")?.remove();
+}
+
+export function serializeLocalSprite(
+  svg: SVGSVGElement,
+  { allowEmbeddedPng = false }: { allowEmbeddedPng?: boolean } = {},
+): string {
   // Exports must be entirely self-contained before rasterising to local pixels.
-  if (svg.querySelector("script, foreignObject, image, iframe, style, link"))
+  if (svg.querySelector("script, foreignObject, iframe, style, link") ||
+      (!allowEmbeddedPng && svg.querySelector("image")))
     throw new Error("The sprite contains unsupported external content.");
   for (const node of [svg, ...svg.querySelectorAll("*")]) {
     for (const attribute of [...node.attributes]) {
       const value = attribute.value.trim();
       const isReference = /(?:^|:)(?:href|src)$/i.test(attribute.name);
+      const localPng = allowEmbeddedPng && node.localName === "image" &&
+        value.length <= 900_000 && /^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(value);
       const externalUrl = [...value.matchAll(/url\(([^)]*)\)/gi)].some(
         (match) =>
           !match[1]
@@ -53,7 +66,8 @@ export function serializeGeometrySprite(
       );
       if (
         /^on/i.test(attribute.name) ||
-        (isReference && !value.startsWith("#")) ||
+        attribute.name === "xml:base" ||
+        (isReference && !localPng && !value.startsWith("#")) ||
         externalUrl
       ) {
         throw new Error("The sprite contains unsupported external content.");

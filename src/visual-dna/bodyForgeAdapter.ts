@@ -806,7 +806,7 @@ function sanitizeOrigin(value: unknown): BodyPacketOrigin | undefined {
  * the dev diagnostics readout and anywhere provenance matters; `loadForgedBody`
  * remains the plain body accessor.
  */
-export function loadForgedBodyPacket(): StoredBodyPacket | null {
+export function loadForgedBodyPacket({ migrate = true }: { migrate?: boolean } = {}): StoredBodyPacket | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = window.localStorage.getItem(BODY_FORGE_STORAGE_KEY);
@@ -838,6 +838,15 @@ export function loadForgedBodyPacket(): StoredBodyPacket | null {
         ? legacyParsed.body
         : legacyParsed;
       const migrated = sanitizeBodySpec(legacyBody);
+      if (!migrate) {
+        return {
+          version: STORED_BODY_PACKET_VERSION,
+          savedAt: 0,
+          genomeFingerprint: typeof legacyParsed.genomeFingerprint === "string" ? legacyParsed.genomeFingerprint : "",
+          migratedFrom: origin,
+          body: migrated,
+        };
+      }
       saveForgedBody(migrated, undefined, 0, origin);
       window.localStorage.removeItem(legacyKey);
       return loadForgedBodyPacket();

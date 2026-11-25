@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { useStore } from "@/lib/store";
 import { deriveMoss60PetProfile } from "@/lib/moss60/petProfile";
 import { decodeGenome, type DerivedTraits, type Genome } from "@/lib/genome";
@@ -10,6 +10,9 @@ import {
 } from "@/lib/geometry/projection";
 import { deriveHeptaProfile, type HeptaProfileV2 } from "@/lib/heptaProfile";
 import { usePetRegistryStore, type PetRecordV2 } from "@/lib/registry";
+import { useAlive, useAliveActive, useAlivePaused } from "@/pet/alive/AliveContext";
+import { AliveGeometryMotion } from "@/pet/alive/LiveEffects";
+import { useTouchNervousSystem } from "@/pet/interaction";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useGeometryBehavior } from "@/pet/behavior/useGeometryBehavior";
 import { DEFAULT_VITALS } from "@metapet/core/vitals";
@@ -68,7 +71,14 @@ export function GeometryAvatarRenderer({
   const lastActionAt = useStore((state) => state.lastActionAt);
   const activeRecord = usePetRegistryStore((state) => state.activeRecord);
   const runtimeEvolutionState = useStore((state) => state.evolution?.state);
-  const reduceMotion = useReducedMotion();
+  const alive = useAlive();
+  const paused = useAlivePaused();
+  const performing = useAliveActive();
+  const osReduced = useReducedMotion();
+  const reduceMotion = osReduced || paused;
+  const aliveStage = useRef<HTMLDivElement>(null);
+  const touch = useTouchNervousSystem({ stageRef: aliveStage, sealed: !alive || paused,
+    reducedMotion: reduceMotion, onPerformanceGesture: alive?.gesture });
   // An explicit genome is a self-contained preview. Never pair a child's
   // geometry with the active parent's traits/profile by accident.
   const selectedRecord = record ?? (genomeOverride ? null : activeRecord);
@@ -164,34 +174,21 @@ export function GeometryAvatarRenderer({
     selectedRecord?.evolution?.state ??
     (genomeOverride ? "GENETICS" : runtimeEvolutionState) ??
     "GENETICS";
-  const stageUpgrade = getCumulativeEvolutionUpgrade(evolutionState);
-  const stagePalette = resolveStagePalette(evolutionState, traits);
   const stageEmphasis = useEvolutionStageTransition(evolutionState, {
     reduceMotion,
     paused: !animated,
   });
-  // The yantra is radially symmetric and centred, so "head" is its upper
-  // pole and "body" its core — the anchor box the shared adornments expect.
-  const stageAnchor = {
-    headX: 200,
-    headY: 132,
-    headRx: 46,
-    headRy: 34,
-    bodyX: 200,
-    bodyY: 214,
-    bodyRx: 82,
-    bodyRy: 70,
-  } as const;
 
-  return (
-    <div data-geometry-sprite data-geometry-movement={reduceMotion ? "idle" : movement ?? behavior.movement} data-geometry-identity={selectedRecord?.petId ?? identityKeyOverride ?? "runtime"} className={`relative mx-auto flex aspect-square w-full items-center justify-center ${compact ? "" : "max-w-[520px]"}`}>
+
+  const spriteMovement = reduceMotion || performing ? "idle" : movement ?? behavior.movement;
+  const artwork = <>
       <SriYantraPetDisplay
         red={petProfile.strands.red}
         blue={petProfile.strands.blue}
         black={petProfile.strands.black}
         animated={animated && !reduceMotion}
         compact={compact}
-        movement={reduceMotion ? "idle" : movement ?? behavior.movement}
+        movement={spriteMovement}
       />
       <svg
         viewBox="0 0 400 400"
@@ -199,34 +196,13 @@ export function GeometryAvatarRenderer({
         aria-hidden
         data-testid="geometry-evolution-stage"
       >
-        <g
-          transform={`translate(200 190) scale(${(
-            stageUpgrade.bodyScale + stageEmphasis * 0.06
-          ).toFixed(4)}) translate(-200 -190)`}
-          opacity={0.78 + stageUpgrade.glowBonus + stageEmphasis * 0.2}
-        >
-          <EvolutionStageAdornments
-            {...stageAnchor}
-            state={evolutionState}
-            layer="behind"
-            color={stagePalette.color}
-            accentColor={stagePalette.accentColor}
-            underlayColor="#050b18"
-            emphasis={stageEmphasis}
-            strokeWidth={2.8}
-          />
-          <EvolutionStageAdornments
-            {...stageAnchor}
-            state={evolutionState}
-            layer="front"
-            color={stagePalette.color}
-            accentColor={stagePalette.accentColor}
-            underlayColor="#050b18"
-            emphasis={stageEmphasis}
-            strokeWidth={2.8}
-          />
-        </g>
+        <GeometryEvolutionAdornment evolutionState={evolutionState} traits={traits} stageEmphasis={stageEmphasis} />
       </svg>
+  </>;
+  return (
+    <div ref={aliveStage} data-alive-touch={alive ? "geometry" : undefined} style={alive ? touch.stageStyle : undefined}
+      {...(alive ? touch.pointerHandlers : {})} data-geometry-sprite data-geometry-movement={spriteMovement} data-geometry-identity={selectedRecord?.petId ?? identityKeyOverride ?? "runtime"} className={`relative mx-auto flex aspect-square w-full items-center justify-center ${compact ? "" : "max-w-[520px]"}`}>
+      {alive ? <AliveGeometryMotion gaze={touch.gaze}>{artwork}</AliveGeometryMotion> : artwork}
       {showPersonality && genome && (
         <div
           className="pointer-events-none absolute bottom-3 left-1/2 z-10 w-[min(92%,28rem)] -translate-x-1/2 rounded-2xl border border-cyan-300/20 bg-slate-950/80 px-4 py-3 text-center shadow-xl backdrop-blur"
@@ -242,5 +218,74 @@ export function GeometryAvatarRenderer({
         </div>
       )}
     </div>
+  );
+}
+
+
+/** Presentation shared by the live renderer and read-only expression frames. */
+export function GeometryEvolutionAdornment({
+  evolutionState, traits, stageEmphasis = 0,
+}: { evolutionState: EvolutionState; traits: DerivedTraits | null; stageEmphasis?: number }) {
+  const stageUpgrade = getCumulativeEvolutionUpgrade(evolutionState);
+  const stagePalette = resolveStagePalette(evolutionState, traits);
+  // The yantra is radially symmetric and centred, so "head" is its upper
+  // pole and "body" its core — the anchor box the shared adornments expect.
+  const stageAnchor = {
+    headX: 200,
+    headY: 132,
+    headRx: 46,
+    headRy: 34,
+    bodyX: 200,
+    bodyY: 214,
+    bodyRx: 82,
+    bodyRy: 70,
+  } as const;
+  return (
+    <g
+      transform={`translate(200 190) scale(${(
+        stageUpgrade.bodyScale + stageEmphasis * 0.06
+      ).toFixed(4)}) translate(-200 -190)`}
+      opacity={0.78 + stageUpgrade.glowBonus + stageEmphasis * 0.2}
+    >
+      <EvolutionStageAdornments
+        {...stageAnchor}
+        state={evolutionState}
+        layer="behind"
+        color={stagePalette.color}
+        accentColor={stagePalette.accentColor}
+        underlayColor="#050b18"
+        emphasis={stageEmphasis}
+        strokeWidth={2.8}
+      />
+      <EvolutionStageAdornments
+        {...stageAnchor}
+        state={evolutionState}
+        layer="front"
+        color={stagePalette.color}
+        accentColor={stagePalette.accentColor}
+        underlayColor="#050b18"
+        emphasis={stageEmphasis}
+        strokeWidth={2.8}
+      />
+    </g>
+  );
+}
+
+
+/** Static geometry portrait for deterministic, read-only studio sampling. */
+export function GeometryPortraitSprite({
+  strands, evolutionState, traits,
+}: {
+  strands: { red: string; blue: string; black: string };
+  evolutionState: EvolutionState;
+  traits: DerivedTraits;
+}) {
+  return (
+    <>
+      <svg data-expression-lattice="" viewBox="0 0 400 400" width="400" height="400" overflow="visible">
+        <SriYantraPetDisplay {...strands} animated={false} compact />
+      </svg>
+      <GeometryEvolutionAdornment traits={traits} evolutionState={evolutionState} />
+    </>
   );
 }

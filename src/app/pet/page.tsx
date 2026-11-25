@@ -310,6 +310,11 @@ export default function PetPage() {
                   <Shirt className="h-4 w-4" />
                   {t.wardrobe}
                 </Button>
+                {activeRecord && (
+                  <Button asChild variant="outline" className="min-h-11 border-amber-300/40 text-amber-200">
+                    <Link href="/expressions">Open Expressions</Link>
+                  </Button>
+                )}
                 <RouteTutorialControls
                   scope="pet"
                   buttonLabel={t.replayTutorial}
@@ -323,6 +328,7 @@ export default function PetPage() {
             className={`relative flex-1 bg-gradient-to-br from-slate-900 ${imprintAccentClass} to-slate-900 ${wardrobeOpen ? "max-h-[38vh] overflow-hidden lg:max-h-none" : ""}`}
           >
             <PetRuntimeStage
+              interactivePerformance
               addonEditMode={addonEditMode}
               onAddonEditModeChange={setAddonEditMode}
               showAdvanced={showAdvanced}
@@ -653,6 +659,7 @@ export default function PetPage() {
       />
 
       <LivingWardrobe
+        key={activeRecord?.petId}
         isOpen={wardrobeOpen}
         onClose={() => setWardrobeOpen(false)}
         form={petType}

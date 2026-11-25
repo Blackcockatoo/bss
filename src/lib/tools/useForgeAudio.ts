@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { playForgeSequence } from "./audio";
+import { playForgeSequence, type ForgeBeat } from "./audio";
 /** Stop on navigation/unmount, and prevent overlapping playback across all Forge views. */
 export function useForgeAudio() {
   const [playing, setPlaying] = useState(false);
@@ -23,6 +23,7 @@ export function useForgeAudio() {
       tempo: number,
       repeats = 1,
       rhythm: readonly number[] = [1],
+      onBeat?: (beat: ForgeBeat) => void,
     ) => {
       current.current?.abort();
       const controller = new AbortController();
@@ -35,6 +36,7 @@ export function useForgeAudio() {
           repeats,
           rhythm,
           controller.signal,
+          onBeat,
         );
       } finally {
         if (mounted.current && current.current === controller)

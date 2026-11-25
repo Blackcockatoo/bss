@@ -3,6 +3,8 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { usePetRegistryStore } from "@/lib/registry/runtime";
 import { loadForgeMemory } from "@/lib/tools/forgePersistence";
 import { adaptation } from "@/lib/tools/activities";
+import { useAlive } from "@/pet/alive/AliveContext";
+import { playBeatPose } from "@/pet/alive/music";
 function cancelMotion(node: HTMLDivElement | null) {
   node?.getAnimations?.().forEach((animation) => {
     void animation.finished.catch(() => {}); // A learner/identity change may cancel deliberately.
@@ -11,6 +13,8 @@ function cancelMotion(node: HTMLDivElement | null) {
 }
 /** A child-triggered learned response moves the EXISTING renderer, never identity. */
 export function LearnedCompanionMotion({ children }: { children: ReactNode }) {
+  const director = useAlive();
+  const timers = useRef<number[]>([]);
   const record = usePetRegistryStore((s) => s.activeRecord);
   const petId = record?.petId ?? null;
   const seed = record ? JSON.stringify(record.genomeHash) : "";
@@ -29,6 +33,7 @@ export function LearnedCompanionMotion({ children }: { children: ReactNode }) {
     let active = true;
     let generation = 0;
     const node = stage.current;
+    const pending = timers.current;
     const sync = () => {
       const token = ++generation;
       if (petId)
@@ -55,6 +60,8 @@ export function LearnedCompanionMotion({ children }: { children: ReactNode }) {
       active = false;
       window.removeEventListener("metapet:forge-changed", sync);
       window.removeEventListener("focus", sync);
+      for (const timer of pending) window.clearTimeout(timer);
+      pending.length = 0;
       cancelMotion(node);
     };
   }, [petId, seed]);
@@ -68,10 +75,28 @@ export function LearnedCompanionMotion({ children }: { children: ReactNode }) {
             className="min-h-11 rounded border px-3"
             onClick={() => {
               const values = learned.sequence;
-              if (
-                !stage.current?.animate ||
-                window.matchMedia("(prefers-reduced-motion: reduce)").matches
-              ) {
+              // Reduced motion wins over every performer, including the living director.
+              if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                setMessage({
+                  petId: record?.petId ?? null,
+                  text: `Still response from ${learned.source || "your saved project"}: ${values.join(", ")}. Motion is reduced.`,
+                });
+                return;
+              }
+              if (director) {
+                for (const timer of timers.current) window.clearTimeout(timer);
+                timers.current.length = 0;
+                const durationMs = 60_000 / learned.tempo;
+                values.slice(0, Math.ceil(6000 / durationMs)).forEach((note, index) => {
+                  const beat = { note, index, interval: note - values[(index + values.length - 1) % values.length],
+                    durationMs, downbeat: index % 4 === 0 };
+                  if (index === 0) playBeatPose(director, beat, "learned");
+                  else timers.current.push(window.setTimeout(() => playBeatPose(director, beat, "learned"), index * durationMs));
+                });
+                setMessage({ petId, text: `Movement echoes ${learned.source || "your saved project"}.` });
+                return;
+              }
+              if (!stage.current?.animate) {
                 setMessage({
                   petId: record?.petId ?? null,
                   text: `Still response from ${learned.source || "your saved project"}: ${values.join(", ")}. Motion is reduced.`,

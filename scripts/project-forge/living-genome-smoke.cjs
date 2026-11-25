@@ -106,6 +106,8 @@ const viewports = [
     await page.screenshot({path:`${output}/practical-flow-mobile.png`,fullPage:true});
     await page.getByRole('link',{name:'Companion family',exact:true}).click();
     const chamber=page.getByTestId('breeding-chamber');await chamber.waitFor();
+    // The panel opens on click; the router commits #family a frame later. Reload only once it has.
+    await page.waitForURL(/\/pet#family$/);
     await page.reload({waitUntil:'networkidle'});await chamber.waitFor();
     report.familyDeepLink=true;
     const founder=chamber.getByRole('button',{name:'Awaken Second Founder'});

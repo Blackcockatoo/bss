@@ -58,3 +58,6 @@ jewble_metapet_artifact.jsx
 
 # Local Netlify folder
 .netlify
+
+# Failed visual-baseline comparisons (scripts/expressions-visual-baseline.mjs)
+*.actual.png

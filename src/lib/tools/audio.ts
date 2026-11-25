@@ -1,3 +1,4 @@
+export type ForgeBeat = { index: number; note: number; interval: number; durationMs: number; downbeat: boolean };
 /** Optional, gesture-triggered, bounded audio. The latest playback owns one context. */
 let active: AbortController | null = null;
 export function stopForgeAudio(): void {
@@ -9,6 +10,7 @@ export async function playForgeSequence(
   repeats = 1,
   rhythm: readonly number[] = [1],
   signal?: AbortSignal,
+  onBeat?: (beat: ForgeBeat) => void,
 ): Promise<void> {
   if (
     sequence.length < 1 ||
@@ -35,6 +37,7 @@ export async function playForgeSequence(
   const externalAbort = () => controller.abort();
   signal?.addEventListener("abort", externalAbort, { once: true });
   let timer: ReturnType<typeof setTimeout> | undefined;
+  const beatTimers: ReturnType<typeof setTimeout>[] = [];
   let interrupt!: () => void;
   const interrupted = new Promise<void>((resolve) => {
     interrupt = resolve;
@@ -59,6 +62,14 @@ export async function playForgeSequence(
       gain.gain.linearRampToValueAtTime(0.08, at + 0.01);
       gain.gain.exponentialRampToValueAtTime(0.001, at + beatDuration * 0.8);
       oscillator.connect(gain).connect(context.destination);
+      if (onBeat) {
+        const note = sequence[i % sequence.length];
+        const previous = sequence[(i + sequence.length - 1) % sequence.length];
+        const beat = { index: i, note, interval: note - previous, durationMs: beatDuration * 1000, downbeat: i % 4 === 0 };
+        beatTimers.push(setTimeout(() => {
+          if (!controller.signal.aborted) onBeat(beat);
+        }, Math.max(0, (at - context.currentTime) * 1000)));
+      }
       oscillator.start(at);
       oscillator.stop(at + beatDuration * 0.85);
     }
@@ -70,6 +81,7 @@ export async function playForgeSequence(
     ]);
   } finally {
     clearTimeout(timer);
+    for (const beat of beatTimers) clearTimeout(beat);
     controller.signal.removeEventListener("abort", interrupt);
     signal?.removeEventListener("abort", externalAbort);
     if (active === controller) active = null;

@@ -5,6 +5,7 @@
  * with crypto signatures tied to specific owners.
  */
 
+import { OLD_VIC_MANTLE } from "./oldVicMantle";
 import { CUSTOM_ADDONS } from "./customAddons";
 import { GIRL_ADDONS } from "./girlAddons";
 import type {
@@ -720,6 +721,7 @@ export const ADDON_CATALOG: Record<string, AddonTemplate> = {
   "crystal-heart-001": CRYSTAL_HEART,
   "void-mask-001": VOID_MASK,
   ...CUSTOM_ADDONS,
+  [OLD_VIC_MANTLE.id]: OLD_VIC_MANTLE,
   ...GIRL_ADDONS,
 };
 

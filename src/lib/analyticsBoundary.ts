@@ -43,6 +43,7 @@ export const ANALYTICS_EXCLUDED_PREFIXES = [
   "/",
   "/app",
   "/pet",
+  "/expressions",
   "/project-forge",
   "/shop",
   "/arcade",

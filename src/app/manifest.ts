@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 
+import { CONSUMER_APP_ICON_192, CONSUMER_APP_ICON_512 } from "@/lib/consumerAppArtwork";
 import { IS_SCHOOLS_PROFILE } from "@/lib/env/features";
 import {
   FIELD_MODE_ICON_192_PATH,
@@ -59,12 +60,8 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#020617",
     orientation: "portrait",
     icons: [
-      {
-        src: "/icon.svg",
-        sizes: "any",
-        type: "image/svg+xml",
-        purpose: "maskable",
-      },
+      { src: CONSUMER_APP_ICON_192, sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: CONSUMER_APP_ICON_512, sizes: "512x512", type: "image/png", purpose: "any" },
     ],
   };
 }

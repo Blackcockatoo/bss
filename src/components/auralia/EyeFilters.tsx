@@ -3,10 +3,11 @@
  * Provides color transformations and visual effects for different eye emotions
  */
 
-export function EyeEmotionFilters() {
+export function EyeEmotionFilters({ includeGlow = true, animate = true }: { includeGlow?: boolean; animate?: boolean } = {}) {
   return (
     <defs>
       {/* Normal glow filter (existing) */}
+      {includeGlow && (
       <filter id="strongGlow" x="-50%" y="-50%" width="200%" height="200%">
         <feGaussianBlur stdDeviation="3" result="coloredBlur" />
         <feMerge>
@@ -14,6 +15,7 @@ export function EyeEmotionFilters() {
           <feMergeNode in="SourceGraphic" />
         </feMerge>
       </filter>
+      )}
 
       {/* Surprised - Brightened with extra glow */}
       <filter id="eyeFilter-surprised" x="-50%" y="-50%" width="200%" height="200%">
@@ -117,7 +119,7 @@ export function EyeEmotionFilters() {
       {/* Confused - Hue rotation */}
       <filter id="eyeFilter-confused" x="-50%" y="-50%" width="200%" height="200%">
         <feColorMatrix type="hueRotate" values="15">
-          <animate attributeName="values" values="15;-15;15" dur="2s" repeatCount="indefinite" />
+          {animate && (<animate attributeName="values" values="15;-15;15" dur="2s" repeatCount="indefinite" />)}
         </feColorMatrix>
         <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
         <feMerge>
@@ -144,26 +146,26 @@ export function EyeEmotionFilters() {
       {/* Rainbow gradient for playful emotion */}
       <linearGradient id="rainbowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" stopColor="#FF6B6B">
-          <animate attributeName="stop-color" values="#FF6B6B;#FFD93D;#6BCB77;#4D96FF;#FF6B6B" dur="3s" repeatCount="indefinite" />
+          {animate && (<animate attributeName="stop-color" values="#FF6B6B;#FFD93D;#6BCB77;#4D96FF;#FF6B6B" dur="3s" repeatCount="indefinite" />)}
         </stop>
         <stop offset="50%" stopColor="#FFD93D">
-          <animate attributeName="stop-color" values="#FFD93D;#6BCB77;#4D96FF;#FF6B6B;#FFD93D" dur="3s" repeatCount="indefinite" />
+          {animate && (<animate attributeName="stop-color" values="#FFD93D;#6BCB77;#4D96FF;#FF6B6B;#FFD93D" dur="3s" repeatCount="indefinite" />)}
         </stop>
         <stop offset="100%" stopColor="#4D96FF">
-          <animate attributeName="stop-color" values="#4D96FF;#FF6B6B;#FFD93D;#6BCB77;#4D96FF" dur="3s" repeatCount="indefinite" />
+          {animate && (<animate attributeName="stop-color" values="#4D96FF;#FF6B6B;#FFD93D;#6BCB77;#4D96FF" dur="3s" repeatCount="indefinite" />)}
         </stop>
       </linearGradient>
 
       {/* Sparkle pattern for curious/playful */}
       <pattern id="sparklePattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
         <circle cx="5" cy="5" r="1" fill="white" opacity="0.8">
-          <animate attributeName="opacity" values="0.3;0.9;0.3" dur="1.5s" repeatCount="indefinite" />
+          {animate && (<animate attributeName="opacity" values="0.3;0.9;0.3" dur="1.5s" repeatCount="indefinite" />)}
         </circle>
         <circle cx="15" cy="10" r="0.5" fill="white" opacity="0.6">
-          <animate attributeName="opacity" values="0.2;0.8;0.2" dur="2s" repeatCount="indefinite" begin="0.5s" />
+          {animate && (<animate attributeName="opacity" values="0.2;0.8;0.2" dur="2s" repeatCount="indefinite" begin="0.5s" />)}
         </circle>
         <circle cx="10" cy="15" r="0.75" fill="white" opacity="0.7">
-          <animate attributeName="opacity" values="0.2;0.9;0.2" dur="1.8s" repeatCount="indefinite" begin="1s" />
+          {animate && (<animate attributeName="opacity" values="0.2;0.9;0.2" dur="1.8s" repeatCount="indefinite" begin="1s" />)}
         </circle>
       </pattern>
     </defs>

@@ -73,6 +73,17 @@ describe("Bounded optional sound", () => {
     await second;
     expect(contexts[1].close).toHaveBeenCalledOnce();
   });
+  it("emits scheduled notes with tempo, subdivisions and downbeats", async () => {
+    const beat = vi.fn();
+    const playing = playForgeSequence([2, 9], 120, 1, [.5, 2], undefined, beat);
+    await vi.advanceTimersByTimeAsync(40);
+    expect(beat.mock.calls[0]?.[0]).toEqual({ index: 0, note: 2, interval: -7, durationMs: 250, downbeat: true });
+    await vi.advanceTimersByTimeAsync(260);
+    expect(beat.mock.calls[1]?.[0]).toEqual({ index: 1, note: 9, interval: 7, durationMs: 1000, downbeat: false });
+    stopForgeAudio();
+    await playing;
+    expect(vi.getTimerCount()).toBe(0);
+  });
   it("stops promptly when the owning view leaves", async () => {
     const abort = new AbortController();
     const playing = playForgeSequence([1, 2], 90, 1, [1], abort.signal);

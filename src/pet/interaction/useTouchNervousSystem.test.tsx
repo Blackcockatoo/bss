@@ -18,6 +18,7 @@ function Harness(props: Partial<TouchNervousSystemInputs> & { onGesture?: (g: "t
 }
 
 beforeEach(() => {
+  Element.prototype.hasPointerCapture = vi.fn(() => true);
   Element.prototype.setPointerCapture = vi.fn();
   Element.prototype.releasePointerCapture = vi.fn();
 });
@@ -50,6 +51,19 @@ describe("useTouchNervousSystem — DOM wiring", () => {
     fireEvent.pointerDown(stage, { pointerId: 3, clientX: 10, clientY: 10 });
     fireEvent.pointerUp(stage, { pointerId: 3, clientX: 11, clientY: 10 });
     expect(onGesture).toHaveBeenCalledWith("tap");
+  });
+
+  it("distinguishes a double tap and rhythmic taps while ignoring cancelled contact", () => {
+    const react = vi.fn();
+    const { getByTestId } = render(<Harness onPerformanceGesture={react} />);
+    const stage = getByTestId("stage");
+    for (let i = 0; i < 3; i++) {
+      fireEvent.pointerDown(stage, { pointerId: 2, clientX: 10, clientY: 10 });
+      fireEvent.pointerUp(stage, { pointerId: 2, clientX: 10, clientY: 10 });
+    }
+    fireEvent.pointerDown(stage, { pointerId: 2, clientX: 10, clientY: 10 });
+    fireEvent.pointerCancel(stage, { pointerId: 2 });
+    expect(react.mock.calls.map(([event]) => event.kind)).toEqual(["tap", "double-tap", "rhythm"]);
   });
 
   it("a sealed pet ignores pointerdown entirely — no capture, no gesture", () => {
