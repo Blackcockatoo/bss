@@ -184,8 +184,8 @@ export function classifyGesture(window: GestureWindow): GestureSignals {
   // duration (distance/duration -> huge) can never misfire as a swipe.
   const avgVelocity = duration > 0 ? distance / duration : 0;
   const isFastSwipe =
-    velocity >= T.fastSwipeVelocity ||
-    (distance >= T.fastSwipeMinDistancePx && avgVelocity >= T.fastSwipeVelocity * 0.85);
+    distance >= T.fastSwipeMinDistancePx &&
+    (velocity >= T.fastSwipeVelocity || avgVelocity >= T.fastSwipeVelocity * 0.85);
 
   const isTap =
     !isFastSwipe &&

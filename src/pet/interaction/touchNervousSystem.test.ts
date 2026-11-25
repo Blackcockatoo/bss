@@ -123,6 +123,19 @@ describe("classifyGesture", () => {
     expect(result.isHold).toBe(false);
   });
 
+  it("keeps a high-velocity pointer jitter within tap distance a tap", () => {
+    const result = classifyGesture({
+      duration: 4,
+      distance: 5,
+      velocity: 1.25,
+      direction: 0,
+      contact: false,
+      released: true,
+    });
+    expect(result.isFastSwipe).toBe(false);
+    expect(result.isTap).toBe(true);
+  });
+
   it("detects a fast swipe on high velocity", () => {
     const result = classifyGesture({
       duration: 100,
