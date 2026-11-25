@@ -1,5 +1,6 @@
 import type { PersonalityTraits } from "@/genome/types";
 import { EXPRESSIONS } from "./catalogue";
+import { LIVING_CUES } from "./livingCues";
 import {
   FORMS, PACKS, type Effect, type EyeMood, type Expression, type MouthShape, type Pose, type PropKind,
 } from "./contract";
@@ -83,7 +84,7 @@ export function parseRecipe(text: string): Recipe {
 }
 
 export function getExpression(id: unknown): Expression | undefined {
-  return EXPRESSIONS.find(item => item.id === id);
+  return EXPRESSIONS.find(item => item.id === id) ?? LIVING_CUES.find(item => item.id === id);
 }
 
 export const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));

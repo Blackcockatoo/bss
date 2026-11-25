@@ -86,8 +86,8 @@ export function AliveProvider({ record, form, editing, children, controls }: {
     if (state.previewAddon === previous.previewAddon &&
       state.committedPreviewId === previous.committedPreviewId) return;
     const id = state.previewAddon?.id ?? state.committedPreviewId;
-    if (id === OLD_VIC_MANTLE_ID) director.play("thanks", { source: "directed", intensity: .76, record: false });
-    else if ((previous.previewAddon?.id ?? previous.committedPreviewId) === OLD_VIC_MANTLE_ID) director.stopCue("thanks");
+    if (id === OLD_VIC_MANTLE_ID) director.play("mantle-bow", { source: "directed", intensity: .76, record: false });
+    else if ((previous.previewAddon?.id ?? previous.committedPreviewId) === OLD_VIC_MANTLE_ID) director.stopCue("mantle-bow");
   }), [director, form]);
   useEffect(() => {
     clock.current.editing = editing;

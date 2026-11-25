@@ -43,7 +43,11 @@ export function AliveGeometryMotion({ children, gaze }: { children: ReactNode; g
       transform: `translate(${(frame?.x ?? 0) * .45}px, ${(frame?.y ?? 0) * .45}px) rotate(${turn}deg) scale(${scale})`,
     }}>
     {mantle && <svg aria-hidden="true" className="pointer-events-none absolute inset-[13%] h-[74%] w-[74%]" viewBox="0 0 100 100"
-      data-alive-wardrobe={OLD_VIC_MANTLE.id}>
+      data-alive-wardrobe={OLD_VIC_MANTLE.id}
+      style={paused || reduced || !frame ? undefined : {
+        transform: `translate(${frame.lag.x * .28}px, ${frame.lag.y * .28}px) rotate(${frame.lag.angle * .28}deg)`,
+        transformOrigin: "center 25%",
+      }}>
       <path d={OLD_VIC_MANTLE.visual.svgPath} fill={OLD_VIC_MANTLE.visual.colors.primary}
         stroke={OLD_VIC_MANTLE.visual.colors.secondary} strokeWidth="1.7" />
     </svg>}

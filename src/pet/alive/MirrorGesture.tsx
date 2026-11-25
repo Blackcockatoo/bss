@@ -43,7 +43,7 @@ export function MirrorGesture({ director, controlClass }: { director: Director; 
   }, []);
 
   function mirror() {
-    const played = director.play("spiral", { source: "touch", duration: 1200, intensity: .58 });
+    const played = director.play("mirror-eight", { source: "touch", intensity: .68 });
     setStatus(played ? "Your companion echoed the figure eight." : "Figure eight selected. Your companion is resting.");
   }
 
