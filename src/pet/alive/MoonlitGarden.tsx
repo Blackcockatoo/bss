@@ -45,9 +45,9 @@ export function MoonlitGarden({ director }: { director: Director }) {
     };
   }, [director, paused]);
 
-  return <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 overflow-hidden rounded-xl"
+  return <div aria-hidden="true" data-alive-scene="moonlit-garden" className="pointer-events-none absolute inset-0 z-10 overflow-hidden rounded-xl"
     style={{ boxShadow: midnight ? "inset 0 0 110px #2e187b80" : "inset 0 0 85px #26367a55" }}>
-    {flight > 0 && !paused && <div key={flight}
+    {flight > 0 && !paused && <div key={flight} data-alive-moth=""
       className="absolute top-[19%] motion-reduce:hidden"
       style={{ [flight % 2 ? "right" : "left"]: "20%", animation: `pet-garden-moth-${flight % 2 ? "left" : "right"} 2.35s ease-in-out both` }}>
       <span className="inline-block h-3 w-4 rounded-[60%_15%] bg-violet-200 shadow-[0_0_12px_#c4b5fd]" />

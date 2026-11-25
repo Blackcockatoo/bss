@@ -102,6 +102,23 @@ try {
   assert.deepEqual(await identity(page), before);
   console.log("Verified native Evolved and Geometry performances, pause, and opt-in genome audio.");
 
+  await geometryControls.getByText("Living interactions", { exact: true }).click();
+  await geometryControls.getByRole("button", { name: "Mirror figure eight", exact: true }).click();
+  await cue(page, "spiral").waitFor();
+  await geometryControls.getByRole("button", { name: "Moonlit garden", exact: true }).click();
+  await touch(page, "geometry").scrollIntoViewIfNeeded();
+  await page.locator("[data-alive-moth]").waitFor();
+  await page.getByRole("button", { name: "Wardrobe", exact: true }).click();
+  const wardrobe = page.getByRole("dialog", { name: "Living Wardrobe", exact: true });
+  await wardrobe.getByRole("button", { name: /Old Vic State Mantle/ }).click();
+  const mantle = page.locator('[data-alive-wardrobe="old-vic-state-mantle"]');
+  await mantle.waitFor();
+  await cue(page, "thanks").waitFor();
+  await wardrobe.getByRole("button", { name: "Close", exact: true }).click();
+  await mantle.waitFor({ state: "detached" });
+  assert.deepEqual(await identity(page), before);
+  console.log("Verified native mirror cue, garden encounter and reversible Geometry mantle preview.");
+
   const mobile = await browser.newContext({
     viewport: { width: 360, height: 720 }, isMobile: true, hasTouch: true, reducedMotion: "reduce",
     storageState: await desktop.storageState({ indexedDB: true }),

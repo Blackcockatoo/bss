@@ -659,6 +659,7 @@ export default function PetPage() {
       />
 
       <LivingWardrobe
+        key={activeRecord?.petId}
         isOpen={wardrobeOpen}
         onClose={() => setWardrobeOpen(false)}
         form={petType}

@@ -123,8 +123,10 @@ export function LivingWardrobe({ isOpen, onClose, form }: LivingWardrobeProps) {
   const [detailId, setDetailId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isOpen) openWardrobe(form);
-  }, [isOpen, form, openWardrobe]);
+    if (!isOpen) return;
+    openWardrobe(form);
+    return closeWardrobe;
+  }, [isOpen, form, openWardrobe, closeWardrobe]);
 
   const catalog = useMemo(() => buildWardrobeCatalog(addons), [addons]);
   const filtered = useMemo(
@@ -196,7 +198,7 @@ export function LivingWardrobe({ isOpen, onClose, form }: LivingWardrobeProps) {
       <button
         type="button"
         aria-label="Close wardrobe"
-        className="absolute inset-0 bg-slate-950/75 backdrop-blur-sm"
+        className="absolute inset-0 bg-slate-950/25"
         onClick={handleClose}
       />
 
@@ -240,10 +242,8 @@ export function LivingWardrobe({ isOpen, onClose, form }: LivingWardrobeProps) {
 
         {form === "geometry" && (
           <div className="mx-4 mt-3 rounded-xl border border-amber-700/50 bg-amber-950/30 px-3 py-2 text-xs text-amber-200 sm:mx-5">
-            The Geometry / Sri Yantra form doesn't have a compatible add-on
-            anchor system yet — items below will show as incompatible rather
-            than silently disappearing. Switch to Evolved or Auralia to wear
-            them.
+            Geometry supports the Old Vic State Mantle. Items that need a body anchor
+            are available on Evolved or Auralia.
           </div>
         )}
 
