@@ -107,6 +107,7 @@ try {
   await cue(page, "spiral").waitFor();
   await geometryControls.getByRole("button", { name: "Moonlit garden", exact: true }).click();
   await touch(page, "geometry").scrollIntoViewIfNeeded();
+  await page.locator('[data-alive-scene="moonlit-garden"]').waitFor();
   await page.locator("[data-alive-moth]").waitFor();
   await page.getByRole("button", { name: "Wardrobe", exact: true }).click();
   const wardrobe = page.getByRole("dialog", { name: "Living Wardrobe", exact: true });

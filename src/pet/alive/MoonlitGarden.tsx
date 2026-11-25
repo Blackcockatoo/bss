@@ -15,12 +15,14 @@ export function MoonlitGarden({ director }: { director: Director }) {
     let settle: ReturnType<typeof setTimeout>;
     let midnightTimer: ReturnType<typeof setTimeout>;
     function fly() {
-      if (!director.isBlocked() && director.getMode() !== "calm" &&
-        director.play("curious", { source: "ambient", intensity: .65, duration: 2300, direction: flightIndex % 2 ? -1 : 1 })) {
+      const quiet = director.getMode() === "calm";
+      const accepted = !director.isBlocked() && !quiet &&
+        director.play("curious", { source: "ambient", intensity: .65, duration: 2300, direction: flightIndex % 2 ? -1 : 1 });
+      if (accepted) {
         setFlight(++flightIndex);
         settle = setTimeout(() => setFlight(0), 2350);
       }
-      if (!document.hidden) timer = setTimeout(fly, 16_000);
+      if (!document.hidden) timer = setTimeout(fly, accepted || quiet ? 16_000 : 1400);
     }
     function schedule() {
       clearTimeout(timer);
