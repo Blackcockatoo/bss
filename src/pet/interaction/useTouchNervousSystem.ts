@@ -22,6 +22,7 @@ import { MovementPriority } from "@/pet/movement/movementVocabulary";
 import {
   DEFAULT_INTERACTION_CONTEXT,
   classifyGesture,
+  GESTURE_THRESHOLDS,
   deriveInteractionOverlay,
   normalizePointerPosition,
   reduceInteractionState,
@@ -135,6 +136,7 @@ export function useTouchNervousSystem(
     startAt: number;
     startX: number;
     startY: number;
+    maxDistance: number;
     pointerId: number | null;
     pointerType: PointerKind;
   } | null>(null);
@@ -201,6 +203,8 @@ export function useTouchNervousSystem(
 
   const onPointerMove = useCallback((event: React.PointerEvent) => {
     if (gateRef.current.sealed || (contactRef.current && contactRef.current.pointerId !== event.pointerId)) return;
+    const contact = contactRef.current;
+    if (contact) contact.maxDistance = Math.max(contact.maxDistance, Math.hypot(event.clientX - contact.startX, event.clientY - contact.startY));
     insideRef.current = true;
     rawPointRef.current = {
       clientX: event.clientX,
@@ -225,6 +229,7 @@ export function useTouchNervousSystem(
         startAt: now,
         startX: event.clientX,
         startY: event.clientY,
+        maxDistance: 0,
         pointerId: event.pointerId,
         pointerType: (event.pointerType as PointerKind) || "unknown",
       };
@@ -251,15 +256,15 @@ export function useTouchNervousSystem(
           contact: false,
           released: true,
         });
-        if (window.isTap) {
-          const count = now - tapRef.current.at <= 390 ? tapRef.current.count + 1 : 1;
-          tapRef.current = { at: now, count };
+        if (window.isTap && contact.maxDistance <= GESTURE_THRESHOLDS.tapMaxDistancePx) {
+          const count = event.timeStamp - tapRef.current.at <= 390 ? tapRef.current.count % 3 + 1 : 1;
+          tapRef.current = { at: event.timeStamp, count };
           onGesture?.("tap");
           const bounds = stageRef.current?.getBoundingClientRect();
           const relativeX = bounds?.width ? (event.clientX - bounds.left) / bounds.width : .5;
           const greetingSide = relativeX < .4 ? -1 : relativeX > .6 ? 1 : 0;
           onPerformanceGesture?.({ kind: count === 1 ? "tap" : count === 2 ? "double-tap" : "rhythm",
-            intensity: Math.min(.85, .25 + count * .14), direction: count % 2 ? 1 : -1, greetingSide });
+            intensity: Math.min(.85, .25 + count * .14), direction: count % 2 ? 1 : -1, greetingSide, tapAt: event.timeStamp });
           dispatch("gesture-tap", now);
         } else if (!runFiredRef.current.swipe && window.isFastSwipe) {
           onGesture?.("swipe");
@@ -271,6 +276,7 @@ export function useTouchNervousSystem(
       const target = event.currentTarget as Element;
       if (target.hasPointerCapture?.(event.pointerId) !== false) target.releasePointerCapture?.(event.pointerId);
       contactRef.current = null;
+      if (!released) tapRef.current = { at: -Infinity, count: 0 };
       if (!released || contact.pointerType !== "mouse") insideRef.current = false;
       dispatch("contact-end", now);
     },

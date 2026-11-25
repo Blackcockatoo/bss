@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useFigureEight } from "./useFigureEight";
 import { MoonlitGarden } from "./MoonlitGarden";
 import { OLD_VIC_MANTLE_ID } from "@/lib/addons/oldVicMantle";
 import { useWardrobeStore } from "@/lib/addons/wardrobeStore";
@@ -15,7 +16,7 @@ import { readGreetingHabit, rememberedGreetingSide, updateGreetingHabit, writeGr
 import { weightedFrame } from "@/lib/expressions/take";
 
 const Context = createContext<Director | null>(null);
-const SceneContext = createContext<{ garden: boolean; toggleGarden: () => void } | null>(null);
+const SceneContext = createContext<{ garden: boolean; toggleGarden: () => void; setRhythmStatus: (status: string) => void } | null>(null);
 export const useAliveScene = () => useContext(SceneContext);
 
 const HabitContext = createContext<{ enabled: boolean; setEnabled: (value: boolean) => boolean; reset: () => boolean } | null>(null);
@@ -48,6 +49,8 @@ export function AliveProvider({ record, form, editing, children, controls }: {
   const [habitEnabled, setHabitEnabled] = useState(false);
   const [garden, setGarden] = useState(false);
   const [stageVisible, setStageVisible] = useState(false);
+  const [drawing, setDrawing] = useState(false);
+  const [stageStatus, setStageStatus] = useState("");
   const visible = useRef(true);
   useEffect(() => {
     habit.current = readGreetingHabit(record.petId);
@@ -80,6 +83,15 @@ export function AliveProvider({ record, form, editing, children, controls }: {
       }
     },
   }));
+  const trace = useFigureEight(matched => {
+    if (!matched) {
+      setStageStatus("Draw two sideways eights in one stroke, starting near the centre.");
+      return;
+    }
+    const played = director.play("mirror-eight", { source: "touch", intensity: .68 });
+    setStageStatus(played ? "Your companion echoed the figure eight." : "Figure eight recognised. Your companion is resting.");
+    setDrawing(false);
+  }, drawing && !editing);
   const reduced = useReducedMotion();
   useEffect(() => useWardrobeStore.subscribe((state, previous) => {
     if (state.previewForm !== form && previous.previewForm !== form) return;
@@ -160,14 +172,36 @@ export function AliveProvider({ record, form, editing, children, controls }: {
     };
   }, [director, reduced, welcome]);
   return <Context.Provider value={director}>
-    <SceneContext.Provider value={{ garden, toggleGarden: () => setGarden(open => !open) }}>
+    <SceneContext.Provider value={{ garden, toggleGarden: () => setGarden(open => !open), setRhythmStatus: setStageStatus }}>
       <HabitContext.Provider value={{
         enabled: habitEnabled,
         setEnabled: enabled => setHabit(enabled),
         reset: () => setHabit(habitEnabled),
       }}>
         <div className="min-w-0" data-alive-stage={form}>
-          <div ref={stage} className="relative">
+          <div className="flex flex-wrap items-center gap-x-3 px-3 text-sm text-slate-200">
+            <span>{drawing ? "Draw two sideways eights on the pet." : "Tap your pet three times for a rhythm reply."}</span>
+            <button type="button" aria-pressed={drawing} disabled={editing}
+              className="min-h-11 rounded-lg px-2 underline underline-offset-4 focus-visible:outline focus-visible:outline-2"
+              onClick={() => {
+                director.clearStageTaps();
+                setStageStatus("");
+                setDrawing(!drawing);
+              }}>{drawing ? "Cancel drawing" : "Draw on pet"}</button>
+            <span role="status" data-stage-gesture-status>{stageStatus}</span>
+          </div>
+          <div ref={stage} className="relative" style={drawing && !editing ? { touchAction: "none" } : undefined}
+            onPointerDownCapture={event => {
+              if (!drawing || editing || !(event.target instanceof Element)) return;
+              const surface = event.target.closest("[data-alive-touch]");
+              if (!surface || event.target.closest("button, a, input, select, [data-alive-interactive]")) return;
+              event.stopPropagation();
+              trace.start(event, surface);
+            }}
+            onPointerMoveCapture={trace.move}
+            onPointerUpCapture={trace.end}
+            onPointerCancel={trace.cancel}
+            onLostPointerCapture={trace.cancel}>
             {children}
             {garden && stageVisible && <MoonlitGarden director={director} />}
           </div>
