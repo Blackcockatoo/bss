@@ -10,6 +10,8 @@ import { getGenomeVisualFingerprint } from "@/visual-dna/bodyForgeAdapter";
 import { DEFAULT_BODY_SPEC } from "@/components/body-forge/PetBodyRenderer";
 import { getWardrobeItemById } from "@/lib/wardrobe/catalog";
 import { DEFAULT_CAPTION, DEFAULT_SCENE, ExpressionArt, bodyFit } from "./ExpressionArt";
+import { OLD_VIC_MANTLE } from "@/lib/addons/oldVicMantle";
+import type { Addon } from "@/lib/addons/types";
 
 async function representativePet(offset: number) {
   const hmacKey = await crypto.subtle.generateKey({ name: "HMAC", hash: "SHA-256" }, false, ["sign", "verify"]);
@@ -137,5 +139,31 @@ describe("bodyFit with Geometry aura rings", () => {
     const ring = (148 + 2 * 17 + 6) * 356 / 400 + 1;
     expect(fit).toBeLessThan(1);
     expect(247 + frame.y - ring * (1 - frame.squash) * fit).toBeGreaterThanOrEqual(8 - 1e-6);
+  });
+});
+
+describe("Geometry wardrobe", () => {
+  it("draws the equipped Old Vic State Mantle behind the core, and only when equipped", async () => {
+    const record = await representativePet(1);
+    const appearance = (addons: Addon[]) => ({
+      guardian: { energy: 50, health: 80, bond: 50, curiosity: 50, dreamCount: 0, activatedCount: 0, reduceMotion: false },
+      forged: null, addons, positions: {}, cosmetics: [],
+    });
+    const expression = getExpression("happy")!;
+    const draw = (addons: Addon[]) => {
+      const pet = makeCreatureSnapshot(record, appearance(addons));
+      const frame = sampleExpression(expression, expression.staticFrame, DEFAULT_SETTINGS, pet.personality, pet.seed);
+      return render(<ExpressionArt pet={pet} frame={frame} expression={expression} form="geometry"
+        caption={DEFAULT_CAPTION} scene={DEFAULT_SCENE} />);
+    };
+    const worn = draw([OLD_VIC_MANTLE as Addon]);
+    const mantle = worn.container.querySelector("[data-geometry-mantle]");
+    expect(mantle?.querySelector("path")?.getAttribute("d")).toBe(OLD_VIC_MANTLE.visual.svgPath);
+    // Behind the body: the mantle precedes the geometry lattice inside the same group.
+    expect(mantle!.compareDocumentPosition(worn.container.querySelector("[data-expression-lattice]")!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    worn.unmount();
+    const bare = draw([]);
+    expect(bare.container.querySelector("[data-geometry-mantle]")).toBeNull();
+    bare.unmount();
   });
 });

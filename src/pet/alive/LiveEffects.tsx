@@ -1,7 +1,6 @@
 "use client";
 
-import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { useAliveFrame, useAlivePaused, weightedFrame } from "./AliveContext";
+import { useAliveFrame, useAlivePaused, useAliveReducedMotion, weightedFrame } from "./AliveContext";
 import { useAddonStore } from "@/lib/addons/store";
 import { useWardrobeStore } from "@/lib/addons/wardrobeStore";
 import { OLD_VIC_MANTLE } from "@/lib/addons/oldVicMantle";
@@ -10,7 +9,7 @@ import type { ReactNode } from "react";
 
 export function AliveSvgMotion({ children, reduced = false }: { children: ReactNode; reduced?: boolean }) {
   const sample = useAliveFrame();
-  const deviceReduced = useReducedMotion();
+  const deviceReduced = useAliveReducedMotion();
   const frame = sample && weightedFrame(sample);
   const transform = frame && !reduced && !deviceReduced
     ? `translate(${200 + frame.x * .52} ${185 + frame.y * .52}) rotate(${clamp(frame.angle, -35, 35)}) scale(${1 + frame.squash} ${1 - frame.squash}) translate(-200 -185)`
@@ -30,7 +29,7 @@ export function AliveSvgMotion({ children, reduced = false }: { children: ReactN
 
 export function AliveGeometryMotion({ children, gaze }: { children: ReactNode; gaze: { x: number; y: number } }) {
   const sample = useAliveFrame();
-  const reduced = useReducedMotion();
+  const reduced = useAliveReducedMotion();
   const paused = useAlivePaused();
   const frame = sample && weightedFrame(sample);
   const previewId = useWardrobeStore(state => state.previewForm === "geometry" ? state.previewAddon?.id : undefined);

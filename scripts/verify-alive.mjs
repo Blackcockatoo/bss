@@ -193,6 +193,56 @@ try {
   assert.equal(await phone.evaluate(key => localStorage.getItem(key), habitKey), null);
   console.log("Verified mobile reduced-motion beat reply and local greeting controls.");
   assert.deepEqual(await identity(phone), before);
+
+  // MetaPet's in-app Reduce Motion switch (not only the OS setting) stills the living performance.
+  const calm = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const quiet = await calm.newPage();
+  quiet.setDefaultTimeout(20_000);
+  quiet.on("pageerror", error => problems.push(error.message));
+  async function distinctFrames(form) {
+    await touch(quiet, form).click();
+    await quiet.locator("[data-alive-cue]").first().waitFor();
+    const frames = new Set();
+    for (let index = 0; index < 4; index++) {
+      // Sample only the layers the performance director owns: Auralia's SVG motion group (transform,
+      // aura and particles) and Geometry's motion wrapper (transform and aura ring). Touch ripples and
+      // the locked Geometry renderer's own OS-governed idle are not part of the director's policy.
+      frames.add(await touch(quiet, form).evaluate(node => {
+        const stage = node.closest("[data-alive-stage]");
+        return [...stage.querySelectorAll("[data-alive-cue]")].map(layer => {
+          const own = [...layer.children].filter(child => child.matches("[aria-hidden], g[pointer-events]"));
+          return `${layer.getAttribute("transform") ?? ""}|${layer.getAttribute("style") ?? ""}|${own.map(child => child.outerHTML).join()}`;
+        }).join();
+      }));
+      await quiet.waitForTimeout(140);
+    }
+    await quiet.locator("[data-alive-cue]").first().waitFor({ state: "detached" });
+    return frames.size;
+  }
+  await quiet.goto(origin + "/pet");
+  await touch(quiet, "auralia").waitFor();
+  await dismissTutorial(quiet);
+  assert.ok(await distinctFrames("auralia") > 1, "the performance should move before the switch is on");
+  await quiet.getByRole("button", { name: /Advanced \/ Mechanics Lab/ }).click();
+  const reduceSwitch = quiet.getByRole("switch", { name: "Toggle reduce motion" });
+  await reduceSwitch.click();
+  assert.equal(await reduceSwitch.getAttribute("aria-checked"), "true");
+  assert.equal(await distinctFrames("auralia"), 1);
+  // The saved switch also applies to forms without a switch of their own.
+  await quiet.evaluate(key => localStorage.setItem(key, "geometry"), settings);
+  await quiet.evaluate(() => localStorage.removeItem("auralia_guardian_state"));
+  await quiet.reload();
+  await touch(quiet, "geometry").waitFor();
+  assert.ok(await distinctFrames("geometry") > 1, "Geometry's performance should move without the saved switch");
+  await quiet.evaluate(key => {
+    localStorage.setItem(key, "geometry");
+    localStorage.setItem("auralia_guardian_state", JSON.stringify({ accessibility: { reduceMotion: true, highContrast: false, audioOffByDefault: true } }));
+  }, settings);
+  await quiet.reload();
+  await touch(quiet, "geometry").waitFor();
+  assert.equal(await distinctFrames("geometry"), 1);
+  await calm.close();
+  console.log("Verified the in-app Reduce Motion switch stills Auralia live and Geometry from the saved setting.");
   assert.deepEqual(problems, []);
   console.log("Verified 360px touch, vertical scrolling policy, reduced-motion recovery and identity preservation.");
 } finally {

@@ -2,7 +2,7 @@
 
 import { useAddonStore } from "@/lib/addons";
 import { useStore } from "@/lib/store";
-import { useAlive, useAlivePaused } from "@/pet/alive/AliveContext";
+import { useAlive, useAliveMotionPreference, useAlivePaused } from "@/pet/alive/AliveContext";
 import { AliveSvgMotion } from "@/pet/alive/LiveEffects";
 import { useTouchNervousSystem } from "@/pet/interaction";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -592,6 +592,18 @@ const AuraliaMetaPet: React.FC<AuraliaMetaPetProps> = ({
     }, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  // MetaPet's own Reduce Motion switch also stills the living performance director.
+  // The director starts from the saved switch, so skip the pre-load default.
+  const setGuardianReduced = useAliveMotionPreference();
+  const motionSynced = useRef(false);
+  useEffect(() => {
+    if (!motionSynced.current) {
+      motionSynced.current = true;
+      return;
+    }
+    setGuardianReduced?.(localReduceMotion);
+  }, [localReduceMotion, setGuardianReduced]);
 
   // Check for system reduce motion preference
   useEffect(() => {
