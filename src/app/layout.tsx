@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { connection } from "next/server";
 import type { CSSProperties } from "react";
 import "./globals.css";
 import { findSiteUrl, findSiteUrlObject } from "@/lib/env/siteUrl";
@@ -70,11 +71,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // The proxy sends a fresh CSP script nonce with every request, and Next.js
+  // can only stamp it on its inline scripts at request time. Waiting for the
+  // connection opts every page into dynamic rendering; a page prerendered at
+  // build time would carry no nonce and its scripts would be blocked.
+  await connection();
   const currentYear = getLegalNoticeYear();
   const legalMetaContent = IS_SCHOOLS_PROFILE
     ? `MetaPet Schools educational pilot by Blue Snake Studios. © ${currentYear}. ${LEGAL_NOTICE_TEXT}`
