@@ -1,0 +1,38 @@
+# Dependabot version updates for the MetaPet / Blue Snake Studios app.
+#
+# This file only controls version-update pull requests. Dependabot *alerts*
+# and *security updates* are separate switches in the repository settings
+# (Settings -> Code security) and must be turned on there by a repo admin.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      timezone: "Australia/Melbourne"
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "deps"
+    groups:
+      # One PR per week for all low-risk bumps instead of one PR per package.
+      npm-minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    # Major versions still arrive as individual PRs so each can be reviewed
+    # and tested on its own.
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      timezone: "Australia/Melbourne"
+    commit-message:
+      prefix: "ci"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
