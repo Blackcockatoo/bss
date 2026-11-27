@@ -378,7 +378,7 @@ try {
   await page.getByRole("button", { name: "Move earlier" }).click();
   await page.getByRole("button", { name: "Save comic" }).click();
   const comic = await download(page, "Download comic");
-  assert.equal((await imageMetrics(page, comic.bytes, "image/png")).width, 1054);
+  assert.equal((await imageMetrics(page, comic.bytes, "image/png")).width, 1576); // three panels read as one 3×1 strip
   await page.reload();
   await page.getByRole("button", { name: "Comics", exact: true }).click();
   assert.equal(await page.getByRole("textbox", { name: "Panel text", exact: true }).inputValue(), "Keep exploring");

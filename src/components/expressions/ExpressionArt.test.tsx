@@ -130,6 +130,13 @@ describe("bodyFit", () => {
     // The body's former bottom (185 below the pivot) now points up; it must clear the top margin.
     expect(247 + frame.y - 185 * (1 - frame.squash) * fit).toBeGreaterThanOrEqual(8 - 1e-6);
   });
+  it("keeps a maxed Lab stretch on Evolved (horns and all) inside the stage, and leaves resting Evolved alone", () => {
+    expect(bodyFit("evolved", still)).toBe(1);
+    const frame = { ...still, y: -40, squash: -.3, scale: 1.25 };
+    const fit = bodyFit("evolved", frame);
+    expect(fit).toBeLessThan(1);
+    expect(247 + frame.y - 140 * frame.scale * (1 - frame.squash) * fit).toBeGreaterThanOrEqual(8 - 1e-6);
+  });
 });
 
 describe("bodyFit with Geometry aura rings", () => {

@@ -11,7 +11,7 @@ import {
   type Expression, type Recipe, type Settings,
 } from "@/lib/expressions/studio";
 import {
-  ASPECTS, BACKGROUNDS, DEFAULT_CAPTION, DEFAULT_SCENE, FORM_LABELS, PROPS,
+  ASPECTS, BACKGROUNDS, DEFAULT_CAPTION, DEFAULT_SCENE, FORM_LABELS, PROPS, captionLayout,
   type Aspect, type Caption, type Scene,
 } from "./ExpressionArt";
 import { StickerCatalogue } from "./StickerCatalogue";
@@ -475,6 +475,8 @@ export function ExpressionStudio({ id, pet, initialForm, initialTake = null }: {
             </div>
             <Slider label="Font size" value={meme.size} min={18} max={42} step={1} onChange={value => setMeme({ ...meme, size: value })} />
             <Toggle checked={meme.outline} onChange={value => setMeme({ ...meme, outline: value })}>Text outline</Toggle>
+            {captionLayout(meme, ASPECTS[aspect][0], ASPECTS[aspect][1]).truncated &&
+              <p className="text-sm text-amber-200" data-caption-notice="">Some text is shortened to fit. Try fewer words or a smaller font size.</p>}
             <button type="button" className={button} onClick={() => { persist({ ...creative, meme }); setMessage("Meme template saved on this device."); }}>Save template</button>
           </>}
           {mode === "Director" && <>
@@ -505,6 +507,8 @@ export function ExpressionStudio({ id, pet, initialForm, initialTake = null }: {
             <label className="block space-y-1 text-sm">Panel text<input className={input} maxLength={MAX_CAPTION} value={panel.bubble}
               onChange={event => changePanel({ bubble: event.target.value })} /></label>
             <Select label="Panel text style" value={panel.style} onChange={value => changePanel({ style: value as Caption["style"] })}><BubbleOptions /></Select>
+            {captionLayout({ ...DEFAULT_CAPTION, bubble: panel.bubble, style: panel.style }, 512, 512).truncated &&
+              <p className="text-sm text-amber-200" data-caption-notice="">This panel's text is shortened to fit. Try fewer words.</p>}
             <div className="flex flex-wrap gap-2">
               <button type="button" className={button} disabled={activePanel === 0} onClick={() => movePanel(-1)}>Move earlier</button>
               <button type="button" className={button} disabled={activePanel === panels.length - 1} onClick={() => movePanel(1)}>Move later</button>

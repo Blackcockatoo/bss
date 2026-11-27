@@ -217,7 +217,7 @@ export function QuickNav() {
                   >
                     <Icon className="h-5 w-5" />
                     <span
-                      className={`text-[11px] font-medium sm:text-xs ${isActive ? "opacity-100" : "opacity-70"}`}
+                      className={`text-[11px] font-medium sm:text-xs ${isActive ? "opacity-100" : "opacity-90"}`}
                     >
                       {effectiveSchoolsMode
                         ? item.label

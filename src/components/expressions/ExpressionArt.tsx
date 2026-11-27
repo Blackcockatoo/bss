@@ -175,13 +175,28 @@ function SceneBackground({ scene, width, height }: { scene: Scene; width: number
   );
 }
 
+/**
+ * Where a prop sits for a Prop position of -55..55. The creature owns the middle of the stage
+ * (Geometry's portrait disc fills most of it), so the moon slides along the sky above its head
+ * and the crystal stands at either side of it, never behind it.
+ */
+export function propPlacement(prop: Prop, propX: number) {
+  const p = Math.max(-55, Math.min(55, propX));
+  if (prop === "moon") return { x: 256 + p * 3.6, y: 46, scale: .75 };
+  if (prop === "crystal") return { x: p <= 0 ? 112 + p * 62 / 55 : 400 + p * 62 / 55, y: 328, scale: 1 };
+  return { x: 256 + p, y: 388, scale: 1 };
+}
+
 function SceneProp({ scene }: { scene: Scene }) {
   if (scene.prop === "none") return null;
+  const { x, y, scale } = propPlacement(scene.prop, scene.propX);
   return (
-    <g transform={`translate(${scene.propX} 0)`}>
-      {scene.prop === "platform" && <ellipse cx="256" cy="388" rx="131" ry="23" fill="#354e63" stroke="#91c1d0" strokeWidth="3" />}
-      {scene.prop === "moon" && <path d="M370 139a43 43 0 1 1-48-60 47 47 0 0 0 48 60Z" fill="#eac978" opacity=".83" />}
-      {scene.prop === "crystal" && <path d="m112 284 23 59-26 30-23-31Z m-2 89 2-89" fill="#236b7e" stroke="#98dfed" strokeWidth="2" />}
+    <g data-scene-prop={scene.prop}>
+      {scene.prop === "platform" && <ellipse cx={x} cy={y} rx="131" ry="23" fill="#354e63" stroke="#91c1d0" strokeWidth="3" />}
+      {scene.prop === "moon" && <path transform={`translate(${x} ${y}) scale(${scale}) translate(-329 -121)`}
+        d="M370 139a43 43 0 1 1-48-60 47 47 0 0 0 48 60Z" fill="#eac978" opacity=".83" />}
+      {scene.prop === "crystal" && <path transform={`translate(${x - 110} ${y - 328})`}
+        d="m112 284 23 59-26 30-23-31Z m-2 89 2-89" fill="#236b7e" stroke="#98dfed" strokeWidth="2" />}
     </g>
   );
 }
@@ -221,52 +236,112 @@ function Effects({ expression, frame, form }: AdapterProps & { form: PetForm }) 
   );
 }
 
-function wrappedLines(value: string, max: number) {
-  const groups: string[] = [];
+/**
+ * Conservative advance of one bold system-ui glyph, in em (DejaVu Sans Bold, the widest
+ * fallback we ship to, is the reference). Counting characters alone let runs of W and M
+ * spill out of the artwork.
+ */
+function glyphEm(char: string) {
+  if (char === " ") return .35;
+  if ("il.,:;'!|`".includes(char)) return .36;
+  if ("fjrtI()[]{}\"-/".includes(char)) return .5;
+  if ("mwMW@%&".includes(char)) return 1.06;
+  if (/[A-Z0-9#?$]/.test(char)) return .8;
+  if (/[a-z]/.test(char)) return .7;
+  return char.codePointAt(0)! > 0x2e7f ? 1.15 : .8;
+}
+export const textEm = (value: string) => Array.from(value).reduce((sum, char) => sum + glyphEm(char), 0);
+
+/** Greedy word wrap to a width in em; words longer than a line are split. */
+function wrappedLines(value: string, maxEm: number) {
+  const lines: string[] = [];
   for (const word of value.trim().split(/\s+/)) {
-    const parts = Array.from(word);
-    while (parts.length > max) groups.push(parts.splice(0, max).join(""));
-    const last = groups.at(-1);
-    const segment = parts.join("");
-    if (last && Array.from(last + " " + segment).length <= max) groups[groups.length - 1] = last + " " + segment;
-    else if (segment) groups.push(segment);
+    let rest = Array.from(word);
+    while (textEm(rest.join("")) > maxEm) {
+      let take = 1;
+      while (take < rest.length && textEm(rest.slice(0, take + 1).join("")) <= maxEm) take++;
+      lines.push(rest.slice(0, take).join(""));
+      rest = rest.slice(take);
+    }
+    const segment = rest.join("");
+    const last = lines.at(-1);
+    if (last && textEm(last + " " + segment) <= maxEm) lines[lines.length - 1] = last + " " + segment;
+    else if (segment) lines.push(segment);
   }
-  return groups;
+  return lines;
+}
+
+const CAPTION_PADDING = 20;
+const MIN_CAPTION_SIZE = 18;
+const MIN_BUBBLE_SIZE = 16;
+
+/**
+ * Wraps text to a width, shrinking the font before dropping anything. Only when the text still
+ * does not fit at the minimum size is the last line cut with an ellipsis, and that is reported.
+ */
+export function fitText(value: string, width: number, size: number, minSize: number, maxLines: number) {
+  const text = value.trim();
+  if (!text) return { lines: [] as string[], size, truncated: false };
+  for (let current = size; current >= minSize; current -= 2) {
+    const lines = wrappedLines(text, width / current);
+    if (lines.length <= maxLines) return { lines, size: current, truncated: false };
+  }
+  const smallest = size - 2 * Math.max(0, Math.floor((size - minSize) / 2));
+  const maxEm = width / smallest;
+  const lines = wrappedLines(text, maxEm).slice(0, maxLines);
+  let last = Array.from(lines[maxLines - 1]);
+  while (last.length > 1 && textEm(last.join("").trimEnd() + "…") > maxEm) last = last.slice(0, -1);
+  lines[maxLines - 1] = last.join("").trimEnd() + "…";
+  return { lines, size: smallest, truncated: true };
+}
+
+/** Where captions and the bubble go; top text, bubble and bottom text never overlap. */
+export function captionLayout(caption: Caption, width: number, height: number) {
+  const band = (value: string) => fitText(value, width - 2 * CAPTION_PADDING, caption.size, MIN_CAPTION_SIZE, 3);
+  const top = band(caption.top);
+  const bottom = band(caption.bottom);
+  const bubble = fitText(caption.bubble, width - 125, Math.min(caption.size, 26), MIN_BUBBLE_SIZE, 3);
+  const spacing = (size: number) => size * 1.06;
+  const topY = CAPTION_PADDING + top.size * .8;
+  const topEnd = top.lines.length ? topY + (top.lines.length - 1) * spacing(top.size) + top.size * .3 : 0;
+  const bottomY = height - CAPTION_PADDING - (bottom.lines.length - 1) * spacing(bottom.size);
+  const bubbleY = top.lines.length ? Math.round(topEnd + 12) : 23;
+  const bubbleHeight = bubble.lines.length * (bubble.size + 4) + 18;
+  return {
+    top: { ...top, y: topY, spacing: spacing(top.size) },
+    bottom: { ...bottom, y: bottomY, spacing: spacing(bottom.size) },
+    bubble: { ...bubble, y: bubbleY, height: bubbleHeight },
+    truncated: top.truncated || bottom.truncated || bubble.truncated,
+  };
 }
 
 function CaptionLayer({ caption, width, height }: { caption: Caption; width: number; height: number }) {
-  const padding = 20;
-  const bubbleFont = Math.min(caption.size, 26);
-  const bubbleLines = wrappedLines(caption.bubble, Math.floor((width - 125) / bubbleFont * 1.6)).slice(0, 3);
-  const bubbleY = caption.top ? 118 : 23;
-  const bubbleHeight = bubbleLines.length * (bubbleFont + 4) + 18;
-  const x = caption.align === "left" ? padding : caption.align === "right" ? width - padding : width / 2;
+  const layout = captionLayout(caption, width, height);
+  const x = caption.align === "left" ? CAPTION_PADDING : caption.align === "right" ? width - CAPTION_PADDING : width / 2;
   const anchor = caption.align === "left" ? "start" : caption.align === "right" ? "end" : "middle";
-  const bands: ReactNode[] = [];
-  for (const [key, value] of [["top", caption.top], ["bottom", caption.bottom]]) {
-    if (!value) continue;
-    const lines = wrappedLines(value, Math.floor((width - 2 * padding) / caption.size * 1.6)).slice(0, 3);
-    const spacing = caption.size * 1.06;
-    const y = key === "top" ? padding + caption.size * .8 : height - padding - (lines.length - 1) * spacing;
-    bands.push(
-      <text key={key} x={x} y={y} textAnchor={anchor} fill="#fff6dd"
-        fontFamily="system-ui, sans-serif" fontWeight="800" fontSize={caption.size}
-        paintOrder="stroke" stroke={caption.outline ? "#0b1324" : "none"} strokeWidth={5} strokeLinejoin="round">
-        {lines.map((line, i) => <tspan key={i} x={x} dy={i === 0 ? 0 : spacing}>{line}</tspan>)}
-      </text>,
-    );
-  }
+  const { bubble } = layout;
   return (
     <>
-      {bands}
-      {bubbleLines.length > 0 && (
-        <g>
-          <rect x="52" y={bubbleY} width={width - 104} height={bubbleHeight} rx={caption.style === "thought" ? 28 : 11} fill="#fff4d9" />
-          {caption.style === "speech" && <path d={`M${width / 2 - 18} ${bubbleY + bubbleHeight - 1}l35 0-27 18Z`} fill="#fff4d9" />}
-          {caption.style === "thought" && <g fill="#fff4d9"><circle cx={width / 2 - 14} cy={bubbleY + bubbleHeight + 8} r="6" /><circle cx={width / 2 - 6} cy={bubbleY + bubbleHeight + 19} r="3" /></g>}
-          <text x={width / 2} y={bubbleY + bubbleFont + 4} textAnchor="middle" fill="#10182c" fontSize={bubbleFont}
-            fontWeight="700" fontFamily="system-ui, sans-serif">
-            {bubbleLines.map((line, i) => <tspan key={i} x={width / 2} dy={i === 0 ? 0 : bubbleFont + 4}>{line}</tspan>)}
+      {(["top", "bottom"] as const).map(key => {
+        const band = layout[key];
+        if (!band.lines.length) return null;
+        return (
+          <text key={key} x={x} y={band.y} textAnchor={anchor} fill="#fff6dd" data-caption={key}
+            fontFamily="system-ui, sans-serif" fontWeight="800" fontSize={band.size}
+            paintOrder="stroke" stroke={caption.outline ? "#0b1324" : "none"} strokeWidth={5} strokeLinejoin="round">
+            {band.lines.map((line, i) => <tspan key={i} x={x} dy={i === 0 ? 0 : band.spacing}>{line}</tspan>)}
+          </text>
+        );
+      })}
+      {bubble.lines.length > 0 && (
+        <g data-caption="bubble">
+          <rect x="52" y={bubble.y} width={width - 104} height={bubble.height} rx={caption.style === "thought" ? 28 : 11} fill="#fff4d9"
+            stroke={caption.style === "narration" ? "#10182c" : "none"} strokeWidth={caption.style === "narration" ? 2 : 0} />
+          {caption.style === "speech" && <path d={`M${width / 2 - 18} ${bubble.y + bubble.height - 1}l35 0-27 18Z`} fill="#fff4d9" />}
+          {caption.style === "thought" && <g fill="#fff4d9"><circle cx={width / 2 - 14} cy={bubble.y + bubble.height + 8} r="6" /><circle cx={width / 2 - 6} cy={bubble.y + bubble.height + 19} r="3" /></g>}
+          <text x={width / 2} y={bubble.y + bubble.size + 4} textAnchor="middle" fill="#10182c" fontSize={bubble.size}
+            fontWeight="700" fontFamily="system-ui, sans-serif" fontStyle={caption.style === "narration" ? "italic" : undefined}>
+            {bubble.lines.map((line, i) => <tspan key={i} x={width / 2} dy={i === 0 ? 0 : bubble.size + 4}>{line}</tspan>)}
           </text>
         </g>
       )}
@@ -276,12 +351,14 @@ function CaptionLayer({ caption, width, height }: { caption: Caption; width: num
 
 /**
  * Conservative extent of each form's body around the stage pivot (256, 247),
- * as [left, right, top, bottom]. Only Geometry is tall enough to leave the
- * frame when a spin turns it upside down while stretched; the others never
- * reach the edge, so they are left untouched.
+ * as [left, right, top, bottom]. Geometry and Evolved are tall enough to leave
+ * the frame when a spin or a maxed Lab stretch pushes them; Auralia never
+ * reaches the edge, so it is left untouched.
  */
 const BODY_EXTENTS: Partial<Record<PetForm, readonly [number, number, number, number]>> = {
   geometry: [130, 130, 130, 185],
+  // Measured in the browser across six random Evolved pets with wardrobe (max 124/124/127/142), plus headroom.
+  evolved: [132, 132, 140, 152],
 };
 const STAGE_MARGIN = 8;
 const fitTransform = (form: PetForm, frame: ExpressionFrame) => {
@@ -328,7 +405,7 @@ export function ExpressionArt({ pet, frame, expression, form, caption, scene, as
         {scene.light > 0 && <ellipse cx="256" cy="234" rx="153" ry="148" fill="#efc477" opacity={scene.light * .15} />}
         <SceneProp scene={scene} />
         <Effects pet={pet} form={form} frame={frame} expression={expression} />
-        <g transform={`translate(${256 + frame.x} ${247 + frame.y}) rotate(${frame.angle})${fitTransform(form, frame)} scale(${frame.scale * (1 + frame.squash)} ${frame.scale * (1 - frame.squash)}) translate(-256 -247)`}>
+        <g data-creature-body="" transform={`translate(${256 + frame.x} ${247 + frame.y}) rotate(${frame.angle})${fitTransform(form, frame)} scale(${frame.scale * (1 + frame.squash)} ${frame.scale * (1 - frame.squash)}) translate(-256 -247)`}>
           <Renderer pet={pet} frame={frame} expression={expression} />
         </g>
         {/* Props ride with the body but stop short of the top edge at the peak of a jump. */}

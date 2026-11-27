@@ -7,6 +7,7 @@ import type { GifCommand } from "@/lib/expressions/gif.worker";
 import type { ZipCommand } from "@/lib/expressions/zip.worker";
 import { MAX_PACK_BYTES, MAX_PACK_STICKERS, startWorker, workerRequest } from "@/lib/expressions/exportPlan";
 import { ASPECTS, ExpressionArt } from "./ExpressionArt";
+import { comicColumns } from "./projects";
 
 export type { Artwork } from "./artwork";
 export type PanelArtwork = Artwork;
@@ -213,7 +214,7 @@ export async function exportPack(art: Artwork[], signal: AbortSignal, update: Pr
 
 export async function exportSheet(panels: PanelArtwork[], signal: AbortSignal, update: Progress, kind: "comic" | "stickers") {
   const sheet = kind === "stickers";
-  const cols = sheet ? (panels.length > 9 ? 4 : 3) : 2;
+  const cols = sheet ? (panels.length > 9 ? 4 : 3) : comicColumns(panels.length);
   const rows = Math.ceil(panels.length / cols);
   const tile = sheet ? 320 : 512;
   const gap = sheet ? 14 : 10;
