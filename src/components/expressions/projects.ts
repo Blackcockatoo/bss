@@ -7,6 +7,10 @@ const keyFor = (petId: string) => `${CREATIVE_STORAGE}:${petId}`;
 const LEGACY_STORAGE = "metapet:expressions:v1";
 export const MAX_CAPTION = 140;
 export const PANEL_COUNTS = [2, 3, 4, 6] as const;
+/** Comic strips read left to right: 2 and 3 panels in one row, 4 as 2×2, 6 as 3×2. */
+export function comicColumns(count: number) {
+  return count === 3 || count === 6 ? 3 : 2;
+}
 export type Panel = { form: PetForm; expressionId: string; background: Scene["background"]; bubble: string; style: Caption["style"] };
 export type CreativeData = { favorites: string[]; recent: string[]; recipe: Recipe | null; comic: Panel[]; meme: Caption | null };
 export const emptyCreativeData = (): CreativeData => ({ favorites: [], recent: [], recipe: null, comic: [], meme: null });

@@ -59,6 +59,7 @@
     "@vitejs/plugin-react": "^5.1.0",
     "@vitest/coverage-v8": "^4.0.16",
     "@vitest/ui": "^4.0.16",
+    "axe-core": "^4.11.0",
     "docx": "^9.6.1",
     "eslint": "^9.27.0",
     "eslint-config-next": "^16.1.1",
