@@ -5,6 +5,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { secureRandomHex } from '@/lib/security/secureRandom';
 import type {
   QRMessagingStore,
   QRMessagingState,
@@ -80,7 +81,8 @@ async function createHandshakeState(identity: string, cryptoMode: CryptoMode): P
     };
   }
 
-  const seed = `${identity}-${Date.now()}-${Math.random()}`;
+  // Key material must come from a secure source, not Math.random().
+  const seed = `${identity}-${secureRandomHex(32)}`;
   const keyPair = generateKeyPairCrypto(seed);
 
   return {
@@ -114,7 +116,7 @@ export const useQRMessagingStore = create<QRMessagingStore>()(
           return;
         }
 
-        const seed = `${localIdentity}-${Date.now()}-${Math.random()}`;
+        const seed = `${localIdentity}-${secureRandomHex(32)}`;
         const keyPair = generateKeyPairCrypto(seed);
         set({ localKeyPair: keyPair });
       },

@@ -1,6 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { GURU_SYSTEM_PROMPT } from "@/lib/guru-system-prompt";
 
+const MAX_MESSAGES = 20;
+
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
@@ -25,13 +27,23 @@ export async function POST(request: Request): Promise<Response> {
     });
   }
 
-  // Sanitize: only user/assistant, truncate long content
+  // Sanitize: only user/assistant, truncate long content, and keep only the
+  // most recent turns. This endpoint is unauthenticated and calls a paid API,
+  // so request size is bounded.
   const sanitized = messages
     .filter((m) => m.role === "user" || m.role === "assistant")
     .map((m) => ({
       role: m.role as "user" | "assistant",
       content: String(m.content).slice(0, 4000),
     }));
+
+  // Keep the most recent turns only, starting on a user turn.
+  if (sanitized.length > MAX_MESSAGES) {
+    sanitized.splice(0, sanitized.length - MAX_MESSAGES);
+    while (sanitized.length > 0 && sanitized[0].role !== "user") {
+      sanitized.shift();
+    }
+  }
 
   // Must start with user message
   if (sanitized[0]?.role !== "user") {
@@ -63,10 +75,11 @@ export async function POST(request: Request): Promise<Response> {
           }
         }
       } catch (error) {
-        const msg =
-          error instanceof Error ? error.message : "Guru unavailable";
+        // Log the detail server-side; never echo upstream error text (which
+        // can include provider or key details) back to the browser.
+        console.error("[guru] upstream error", error);
         controller.enqueue(
-          new TextEncoder().encode(`\n\n[Error: ${msg}]`)
+          new TextEncoder().encode("\n\n[Error: Guru unavailable]")
         );
       } finally {
         controller.close();
@@ -83,13 +96,6 @@ export async function POST(request: Request): Promise<Response> {
   });
 }
 
-export async function OPTIONS(): Promise<Response> {
-  return new Response(null, {
-    status: 204,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
-  });
-}
+// No OPTIONS/CORS handler: the guru is only called same-origin by this app.
+// A wildcard Access-Control-Allow-Origin previously let any website drive
+// this paid, unauthenticated endpoint from a visitor's browser.

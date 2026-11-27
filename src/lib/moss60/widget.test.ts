@@ -58,4 +58,24 @@ describe('moss60 widget', () => {
     expect(result.verified).toBe(false);
     expect(mount.textContent).toContain('Unverified');
   });
+
+  it('escapes crafted metadata instead of rendering it as markup', () => {
+    const mount = document.createElement('div');
+    const payload = createMoss60VerifiablePayload({
+      id: '<img src=x onerror="window.__pwned=1">',
+      seed: '<script>window.__pwned=1</script>',
+      scheme: '<b>bold</b>',
+      variant: 'Pulse',
+      projection: 'Linear',
+      timestamp: 1767225600000,
+      source: 'moss60-studio',
+    });
+
+    renderMoss60Widget(mount, payload);
+
+    expect(mount.querySelector('img')).toBeNull();
+    expect(mount.querySelector('script')).toBeNull();
+    expect(mount.querySelector('dd b')).toBeNull();
+    expect(mount.textContent).toContain('<img src=x onerror="window.__pwned=1">');
+  });
 });

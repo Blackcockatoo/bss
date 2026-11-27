@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
 import { schoolPackageDocs } from "@/app/schools/content";
+import { renderMarkdownLine } from "@/lib/schools/renderMarkdownLine";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -13,13 +14,6 @@ interface PageProps {
 
 function resolveDocFilePath(href: string): string {
   return join(process.cwd(), "public", href);
-}
-
-function renderMarkdownLine(line: string): string {
-  return line
-    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-    .replace(/\*(.+?)\*/g, "<em>$1</em>")
-    .replace(/`(.+?)`/g, '<code class="rounded bg-slate-800 px-1 py-0.5 text-amber-200">$1</code>');
 }
 
 export async function generateStaticParams() {
