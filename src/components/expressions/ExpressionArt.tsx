@@ -11,6 +11,7 @@ import { DEFAULT_VITALS } from "@metapet/core/vitals";
 import type { PetForm } from "@/lib/petForms";
 import type { CreatureSnapshot } from "@/lib/expressions/snapshot";
 import { clamp, type Expression, type ExpressionFrame } from "@/lib/expressions/studio";
+import { OLD_VIC_MANTLE, OLD_VIC_MANTLE_ID } from "@/lib/addons/oldVicMantle";
 import { expressionBody, expressionEyes } from "@/pet/alive/presentation";
 import type { Effect } from "@/lib/expressions/contract";
 import { PROP_ANCHORS, PropLayer } from "./PropLayer";
@@ -107,6 +108,23 @@ const GeometryCore = memo(function GeometryCore({ pet }: { pet: CreatureSnapshot
  * engine is rendered unchanged; resonance, rotation and harmonic rings are
  * transforms and overlays around it.
  */
+/** The Old Vic State Mantle is the one wardrobe piece Geometry wears on /pet (see AliveGeometryMotion). */
+function wearsMantle(pet: CreatureSnapshot) {
+  return pet.addons.some(addon => addon.id === OLD_VIC_MANTLE_ID);
+}
+
+/** Same placement as /pet: behind the core, inset 13% of the stage, trailing the body's follow-through. */
+function GeometryMantle({ frame }: { frame: ExpressionFrame }) {
+  const { svgPath, colors } = OLD_VIC_MANTLE.visual;
+  return (
+    <g data-geometry-mantle="" transform={`translate(${frame.lag.x * .5} ${frame.lag.y * .5}) rotate(${frame.lag.angle * .28} 200 126)`}>
+      <svg x="52" y="52" width="296" height="296" viewBox="0 0 100 100" overflow="visible">
+        <path d={svgPath} fill={colors.primary} stroke={colors.secondary} strokeWidth="1.7" />
+      </svg>
+    </g>
+  );
+}
+
 const geometryRings = (frame: ExpressionFrame) => frame.aura > .2 ? (frame.aura > .7 ? 3 : 2) : 0;
 /** Outer aura ring radius in stage units (the Geometry svg maps 400 to 356), plus half its stroke. */
 function geometryRingRadius(frame: ExpressionFrame) {
@@ -128,6 +146,7 @@ function GeometryExpression({ pet, frame, expression }: AdapterProps) {
       ))}
       <g opacity={frame.lid < .3 ? .78 : 1}
         transform={`rotate(${resonance} 200 200) translate(200 200) scale(${pulse}) translate(-200 -200)`}>
+        {wearsMantle(pet) && <GeometryMantle frame={frame} />}
         <GeometryCore pet={pet} />
       </g>
     </svg>

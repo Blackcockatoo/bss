@@ -14,6 +14,7 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { CUE_PRIORITY, createDirector, idleDelayMs, idleExpression, type Director } from "./director";
 import { readGreetingHabit, rememberedGreetingSide, updateGreetingHabit, writeGreetingHabit } from "./greetingHabit";
 import { weightedFrame } from "@/lib/expressions/take";
+import { loadGuardianState } from "@/auralia/persistence";
 
 const Context = createContext<Director | null>(null);
 const SceneContext = createContext<{ garden: boolean; toggleGarden: () => void; setRhythmStatus: (status: string) => void } | null>(null);
@@ -24,6 +25,19 @@ export const useGreetingHabit = () => useContext(HabitContext);
 const empty = () => null;
 const off = () => false;
 const noSubscription = () => () => {};
+const MotionContext = createContext<{ guardianReduced: boolean; setGuardianReduced: (reduced: boolean) => void } | null>(null);
+/** Lets MetaPet's own Reduce Motion switch (the guardian setting) govern the living performance. */
+export const useAliveMotionPreference = () => useContext(MotionContext)?.setGuardianReduced ?? null;
+/** True when either the device or MetaPet's in-app Reduce Motion switch asks for stillness. */
+export function useAliveReducedMotion() {
+  const device = useReducedMotion();
+  const guardian = useContext(MotionContext)?.guardianReduced ?? false;
+  return device || guardian;
+}
+/** The saved in-app switch, so it also applies to forms that have no switch of their own. */
+export function savedGuardianReduceMotion() {
+  return loadGuardianState()?.accessibility?.reduceMotion === true;
+}
 export const useAlive = () => useContext(Context);
 export function useAlivePaused() {
   const director = useAlive();
@@ -52,6 +66,9 @@ export function AliveProvider({ record, form, editing, children, controls }: {
   const [drawing, setDrawing] = useState(false);
   const [stageStatus, setStageStatus] = useState("");
   const visible = useRef(true);
+  const [guardianReduced, setGuardianReduced] = useState(savedGuardianReduceMotion);
+  const guardian = useRef(guardianReduced);
+  useEffect(() => { guardian.current = guardianReduced; }, [guardianReduced]);
   useEffect(() => {
     habit.current = readGreetingHabit(record.petId);
     setHabitEnabled(habit.current !== null);
@@ -72,7 +89,7 @@ export function AliveProvider({ record, form, editing, children, controls }: {
         state.vitals.isSick || state.vitals.hunger >= 90 || state.vitals.energy <= 8 ||
         now < clock.current.ceremonyUntil || (!!state.lastAction && now - state.lastActionAt < 2700);
     },
-    reduced: () => matchMedia("(prefers-reduced-motion: reduce)").matches,
+    reduced: () => guardian.current || matchMedia("(prefers-reduced-motion: reduce)").matches,
     onGreeting: side => {
       const score = habit.current;
       if (score === null) return;
@@ -92,7 +109,7 @@ export function AliveProvider({ record, form, editing, children, controls }: {
     setStageStatus(played ? "Your companion echoed the figure eight." : "Figure eight recognised. Your companion is resting.");
     setDrawing(false);
   }, drawing && !editing);
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotion() || guardianReduced;
   useEffect(() => useWardrobeStore.subscribe((state, previous) => {
     if (state.previewForm !== form && previous.previewForm !== form) return;
     if (state.previewAddon === previous.previewAddon &&
@@ -172,6 +189,7 @@ export function AliveProvider({ record, form, editing, children, controls }: {
     };
   }, [director, reduced, welcome]);
   return <Context.Provider value={director}>
+    <MotionContext.Provider value={{ guardianReduced, setGuardianReduced }}>
     <SceneContext.Provider value={{ garden, toggleGarden: () => setGarden(open => !open), setRhythmStatus: setStageStatus }}>
       <HabitContext.Provider value={{
         enabled: habitEnabled,
@@ -209,5 +227,6 @@ export function AliveProvider({ record, form, editing, children, controls }: {
         </div>
       </HabitContext.Provider>
     </SceneContext.Provider>
+    </MotionContext.Provider>
   </Context.Provider>;
 }
