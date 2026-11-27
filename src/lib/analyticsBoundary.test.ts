@@ -95,6 +95,7 @@ describe("analytics boundary", () => {
       "/share/demo",
       "/legal",
       "/legal/terms",
+      "/legal/family-privacy",
       "/a-route-added-next-month",
     ]) {
       expect(isAnalyticsAllowedPathname(pathname), pathname).toBe(false);
