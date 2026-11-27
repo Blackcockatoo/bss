@@ -494,3 +494,50 @@ it("preserves the public port when a Field redirect replaces the internal hostna
   const response = proxy(request);
   expect(response.headers.get("location")).toBe("http://127.0.0.1:3001/schools/field");
 });
+
+describe("content security policy header", () => {
+  it("sets a nonce CSP on app routes and forwards the nonce to rendering", async () => {
+    const { proxy } = await loadProxy("core");
+    const { NextRequest: RuntimeNextRequest } = await import("next/server");
+    const response = proxy(new RuntimeNextRequest("https://www.bluesnakestudios.com/pet"));
+    const csp = response.headers.get("content-security-policy") ?? "";
+    const nonce = /'nonce-([^']+)'/.exec(csp)?.[1];
+    expect(nonce).toBeTruthy();
+    expect(csp).not.toMatch(/script-src[^;]*'unsafe-inline'/);
+    expect(csp).not.toContain("cdnjs");
+    // NextResponse.next({ request: { headers } }) exposes overridden request
+    // headers to the renderer through x-middleware-request-* headers.
+    expect(response.headers.get("x-middleware-request-x-nonce")).toBe(nonce);
+    expect(response.headers.get("x-middleware-request-content-security-policy")).toBe(csp);
+  });
+
+  it("uses a fresh nonce per request", async () => {
+    const { proxy } = await loadProxy("core");
+    const { NextRequest: RuntimeNextRequest } = await import("next/server");
+    const a = proxy(new RuntimeNextRequest("https://www.bluesnakestudios.com/"));
+    const b = proxy(new RuntimeNextRequest("https://www.bluesnakestudios.com/"));
+    expect(a.headers.get("content-security-policy")).not.toBe(
+      b.headers.get("content-security-policy"),
+    );
+  });
+
+  it("keeps the legacy inline policy for static HTML toys", async () => {
+    const { proxy } = await loadProxy("core");
+    const { NextRequest: RuntimeNextRequest } = await import("next/server");
+    const response = proxy(
+      new RuntimeNextRequest("https://www.bluesnakestudios.com/geometry-sound.html"),
+    );
+    const csp = response.headers.get("content-security-policy") ?? "";
+    expect(csp).toMatch(/script-src 'self' 'unsafe-inline'/);
+    expect(csp).not.toContain("nonce-");
+    expect(csp).not.toContain("cdnjs");
+  });
+
+  it("also sets CSP on redirects and on school-host responses", async () => {
+    const { proxy } = await loadProxy("core");
+    const { NextRequest: RuntimeNextRequest } = await import("next/server");
+    const response = proxy(new RuntimeNextRequest("https://www.metapet.school/"));
+    expect(response.status).toBe(308);
+    expect(response.headers.get("content-security-policy")).toContain("default-src 'self'");
+  });
+});

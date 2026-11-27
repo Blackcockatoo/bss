@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
+import { headers } from "next/headers";
+import { CSP_NONCE_HEADER } from "@/lib/security/csp";
 
 import { FieldModeNav } from "@/components/field-mode/FieldModeNav";
 import { FieldOfflineBadge } from "@/components/field-mode/FieldOfflineBadge";
@@ -83,13 +85,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function FieldModeLayout({ children }: { children: React.ReactNode }) {
+export default async function FieldModeLayout({ children }: { children: React.ReactNode }) {
+  const nonce = (await headers()).get(CSP_NONCE_HEADER) ?? undefined;
   return (
     // `field-surface` pins the light design tokens on. The shared shell adds
     // `dark` to <html> on the Blue Snake Studios build, and the classroom
     // pages are light in every deployment.
     <div className="field-surface">
-      <Script id="classroom-document-attributes" strategy="beforeInteractive">
+      <Script id="classroom-document-attributes" strategy="beforeInteractive" nonce={nonce}>
         {`document.documentElement.lang="en-AU";document.documentElement.classList.remove("dark");document.documentElement.classList.add("schools-theme");`}
       </Script>
       <FieldStorageGuard />

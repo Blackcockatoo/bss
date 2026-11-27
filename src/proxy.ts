@@ -20,6 +20,10 @@ import {
   ENFORCE_CHILD_SAFE_BOUNDARY,
 } from "@/lib/env/features";
 import { fieldPrintAliasTarget } from "@/lib/schools/printAliases";
+import {
+  CSP_NONCE_HEADER,
+  contentSecurityPolicyForPath,
+} from "@/lib/security/csp";
 
 const DEFAULT_CANONICAL_ORIGIN = "https://www.bluesnakestudios.com";
 const CORE_HOST_ALIASES = new Set([
@@ -247,7 +251,10 @@ function activateFieldCookie(
   return response;
 }
 
-export function proxy(request: NextRequest) {
+function routeRequest(
+  request: NextRequest,
+  next: () => NextResponse,
+): NextResponse {
   if (shouldRedirectToCanonicalOrigin(request)) {
     return redirectToCanonicalOrigin(request);
   }
@@ -273,19 +280,19 @@ export function proxy(request: NextRequest) {
     isMetaPetSchoolHost(request) &&
     METAPET_SCHOOL_DISCOVERY_PATHS.has(pathname)
   ) {
-    return NextResponse.next();
+    return next();
   }
 
   const policyId = activePolicyId(request);
 
-  if (!policyId) return NextResponse.next();
+  if (!policyId) return next();
 
   if (policyId === "schools" && pathname === "/") {
     return NextResponse.redirect(sameHostUrl(request, "/schools"));
   }
 
   if (isPathnameAllowedByPolicy(pathname, policyId)) {
-    return activateFieldCookie(NextResponse.next(), request);
+    return activateFieldCookie(next(), request);
   }
 
   // Fetch callers must receive a real denial, not a redirect that resolves to
@@ -297,6 +304,28 @@ export function proxy(request: NextRequest) {
   return NextResponse.redirect(
     sameHostUrl(request, getPolicyFallbackPathname(policyId)),
   );
+}
+
+/**
+ * Every response gets a Content-Security-Policy. For app routes the proxy
+ * mints a fresh nonce and passes it to rendering through the request headers;
+ * Next.js reads the nonce from the request's CSP header and stamps it on its
+ * own inline scripts (see src/lib/security/csp.ts and the root layout, which
+ * opts every page into dynamic rendering so the nonce is per request).
+ */
+export function proxy(request: NextRequest) {
+  const csp = contentSecurityPolicyForPath(request.nextUrl.pathname);
+  const requestHeaders = new Headers(request.headers);
+  if (csp.nonce) {
+    requestHeaders.set(CSP_NONCE_HEADER, csp.nonce);
+    requestHeaders.set("Content-Security-Policy", csp.header);
+  }
+
+  const response = routeRequest(request, () =>
+    NextResponse.next({ request: { headers: requestHeaders } }),
+  );
+  response.headers.set("Content-Security-Policy", csp.header);
+  return response;
 }
 
 export const config = {
