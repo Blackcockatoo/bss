@@ -1,5 +1,6 @@
 import type { Moss60VerifiablePayload } from '@/lib/moss60/share';
 import { verifyMoss60Payload } from '@/lib/moss60/share';
+import { escapeHtml } from '@/lib/security/escape';
 
 export interface Moss60WidgetRenderResult {
   verified: boolean;
@@ -32,6 +33,8 @@ export function renderMoss60Widget(mount: HTMLElement, payload: Moss60Verifiable
   wrapper.style.borderRadius = '14px';
   wrapper.style.padding = '14px';
 
+  // Every metadata field comes from a share token, which anyone can craft, so
+  // each one is HTML-escaped before it is placed in the markup.
   wrapper.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
       <strong style="font-size:14px;">MOSS60 Studio Share</strong>
@@ -40,12 +43,12 @@ export function renderMoss60Widget(mount: HTMLElement, payload: Moss60Verifiable
       </span>
     </div>
     <dl style="margin-top:10px;display:grid;grid-template-columns:auto 1fr;gap:6px 10px;font-size:12px;">
-      <dt style="color:#a1a1aa;">ID</dt><dd>${id}</dd>
-      <dt style="color:#a1a1aa;">Seed</dt><dd>${seed || '—'}</dd>
-      <dt style="color:#a1a1aa;">Scheme</dt><dd>${scheme}</dd>
-      <dt style="color:#a1a1aa;">Variant</dt><dd>${variant}</dd>
-      <dt style="color:#a1a1aa;">Projection</dt><dd>${projection}</dd>
-      <dt style="color:#a1a1aa;">Shared</dt><dd>${new Date(timestamp).toLocaleString()}</dd>
+      <dt style="color:#a1a1aa;">ID</dt><dd>${escapeHtml(id)}</dd>
+      <dt style="color:#a1a1aa;">Seed</dt><dd>${seed ? escapeHtml(seed) : '—'}</dd>
+      <dt style="color:#a1a1aa;">Scheme</dt><dd>${escapeHtml(scheme)}</dd>
+      <dt style="color:#a1a1aa;">Variant</dt><dd>${escapeHtml(variant)}</dd>
+      <dt style="color:#a1a1aa;">Projection</dt><dd>${escapeHtml(projection)}</dd>
+      <dt style="color:#a1a1aa;">Shared</dt><dd>${escapeHtml(new Date(timestamp).toLocaleString())}</dd>
     </dl>
     <p style="margin-top:10px;color:#a1a1aa;font-size:11px;">Read-only widget · renderer + verifier bundle</p>
   `;

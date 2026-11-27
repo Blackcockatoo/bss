@@ -1,5 +1,6 @@
 import { enforceChildSafeServerRoute } from "@/lib/childSafeRoute.server";
 import { decodeMoss60Payload, verifyMoss60Payload } from "@/lib/moss60/share";
+import { serializeJsonForScript } from "@/lib/security/escape";
 import type { Metadata } from "next";
 import { ShareInstrumentation } from "./ShareInstrumentation";
 
@@ -93,7 +94,7 @@ export default async function Moss60SharePage({ params }: SharePageProps) {
         <script
           id="moss60-verifiable-payload"
           type="application/json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(payload) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonForScript(payload) }}
         />
 
         <pre className="text-xs bg-zinc-950 border border-zinc-800 rounded-lg p-3 overflow-x-auto">

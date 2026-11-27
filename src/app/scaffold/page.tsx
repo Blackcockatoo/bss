@@ -27,6 +27,7 @@ import type {
   PrivacyPreset
 } from '@/lib/identity/types';
 import type { MirrorOutcome } from '@/lib/store';
+import { secureRandomInt } from '@/lib/security/secureRandom';
 import { Play, Volume2, VolumeX, RefreshCw, Shield, Info, Sparkles, Clock3, HeartHandshake, Hash } from 'lucide-react';
 
 /**
@@ -154,7 +155,7 @@ export default function ScaffoldPage() {
         rotation: crest.rotation,
         tail: crest.tail,
         epoch13: Math.floor((Date.now() / 60000) % 8192), // minutes mod 8192
-        nonce14: Math.floor(Math.random() * 16384), // 14-bit random
+        nonce14: secureRandomInt(16384), // 14-bit, from Web Crypto
       };
 
       const digits = await heptaEncode42(payload, key);

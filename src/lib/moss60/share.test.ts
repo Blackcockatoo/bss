@@ -54,6 +54,19 @@ describe('moss60 share payloads', () => {
     expect(decodeMoss60Payload(incomplete)).toBeNull();
   });
 
+  it('rejects oversized or mistyped payload tokens', () => {
+    const tooLong = createMoss60VerifiablePayload(buildMetadata({ id: 'x'.repeat(500) }));
+    expect(decodeMoss60Payload(encodeMoss60Payload(tooLong))).toBeNull();
+
+    const wrongType = Buffer.from(
+      JSON.stringify({ metadata: { ...buildMetadata(), timestamp: 'soon' }, digest: 'abc' }),
+      'utf-8',
+    ).toString('base64url');
+    expect(decodeMoss60Payload(wrongType)).toBeNull();
+
+    expect(decodeMoss60Payload('a'.repeat(5000))).toBeNull();
+  });
+
   it('creates share urls with encoded payload token', () => {
     const payload = createMoss60VerifiablePayload(buildMetadata());
 

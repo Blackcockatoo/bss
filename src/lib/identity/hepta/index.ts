@@ -7,6 +7,7 @@ import type {
 import { packPayload, unpackPayload } from "./codec";
 import { eccEncode, eccDecode, isValidHeptaCode, ECC_CONSTANTS } from "./ecc";
 import { eccEncodeV2, eccDecodeV2, ECC_V2_CONSTANTS } from "./eccV2";
+import { secureRandomInt } from "@/lib/security/secureRandom";
 
 /**
  * Encode HeptaPayload → 42 base-7 digits (with ECC)
@@ -45,7 +46,12 @@ export function createHeptaPayload(
   options: { now?: number; random?: () => number } = {},
 ): HeptaPayload {
   const minutes = Math.floor((options.now ?? Date.now()) / 60000) % 8192;
-  const nonce = Math.floor((options.random ?? Math.random)() * 16384);
+  // The nonce makes each code unique; it must not be predictable, so the
+  // default source is the Web Crypto API. `options.random` stays available
+  // for deterministic tests.
+  const nonce = options.random
+    ? Math.floor(options.random() * 16384)
+    : secureRandomInt(16384);
 
   return {
     version: 1,

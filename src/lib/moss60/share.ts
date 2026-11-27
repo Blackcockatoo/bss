@@ -1,4 +1,22 @@
+import { z } from 'zod';
 import { moss60Hash } from '@/lib/qr-messaging/crypto';
+
+/** Share tokens arrive in the URL, so anyone can craft one. */
+const MAX_SHARE_TOKEN_LENGTH = 4096;
+const shareField = z.string().max(200);
+
+const moss60VerifiablePayloadSchema = z.object({
+  metadata: z.object({
+    id: shareField,
+    seed: shareField,
+    scheme: shareField,
+    variant: shareField,
+    projection: shareField,
+    timestamp: z.number(),
+    source: z.literal('moss60-studio'),
+  }),
+  digest: z.string().max(256),
+});
 
 export interface Moss60ShareMetadata {
   id: string;
@@ -50,12 +68,17 @@ export function encodeMoss60Payload(payload: Moss60VerifiablePayload): string {
 }
 
 export function decodeMoss60Payload(token: string): Moss60VerifiablePayload | null {
+  if (typeof token !== 'string' || token.length === 0 || token.length > MAX_SHARE_TOKEN_LENGTH) {
+    return null;
+  }
   try {
-    const parsed = JSON.parse(fromBase64Url(token)) as Moss60VerifiablePayload;
-    if (!parsed?.metadata || typeof parsed.digest !== 'string') {
+    const parsed: unknown = JSON.parse(fromBase64Url(token));
+    // Validate shape and sizes, but return the original object so the digest
+    // check still sees exactly what was signed (key order included).
+    if (!moss60VerifiablePayloadSchema.safeParse(parsed).success) {
       return null;
     }
-    return parsed;
+    return parsed as Moss60VerifiablePayload;
   } catch {
     return null;
   }
