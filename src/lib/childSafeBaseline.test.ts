@@ -127,6 +127,12 @@ describe("declarative Field Mode route policy", () => {
     }
   });
 
+  it("serves the family privacy notice on the consumer site only", () => {
+    expect(isPathnameAllowedByPolicy("/legal/family-privacy", "core")).toBe(true);
+    expect(isPathnameAllowedByPolicy("/legal/family-privacy", "schools")).toBe(false);
+    expect(isPathnameAllowedByPolicy("/legal/family-privacy", "field")).toBe(false);
+  });
+
   it("keeps consumer pricing out of both school policies", () => {
     expect(isPathnameAllowedByPolicy("/pricing", "field")).toBe(false);
     expect(isPathnameAllowedByPolicy("/pricing", "schools")).toBe(false);

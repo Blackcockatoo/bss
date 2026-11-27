@@ -80,8 +80,11 @@ export default function LegalPage() {
         Meta-Pet experience.
       </p>
       <nav aria-label="Legal documents" className="flex flex-wrap gap-4 text-sm">
+        <Link href="/legal/family-privacy" className="text-emerald-200 underline underline-offset-4">
+          Privacy for kids and families (draft)
+        </Link>
         <Link href="/legal/privacy" className="text-emerald-200 underline underline-offset-4">
-          Privacy
+          School privacy materials
         </Link>
         <Link href="/legal/terms" className="text-emerald-200 underline underline-offset-4">
           Terms of use (draft)

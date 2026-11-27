@@ -105,6 +105,9 @@ export const CHILD_SAFE_ROUTE_POLICIES: Record<
       // bounce to the fallback on a child-safe consumer deployment.
       "/legal/privacy",
       "/legal/terms",
+      // Consumer (family) privacy notice; main site only, not in the school
+      // or Field policies.
+      "/legal/family-privacy",
       "/docs",
       ...REQUIRED_STATIC_ROUTES,
     ]),
